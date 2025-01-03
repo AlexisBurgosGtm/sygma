@@ -5,7 +5,7 @@ function get_conf_token(token){
 		//token = empresa que manda la solicitud (puede cambiarse entre empresas)
 		//let config = [];
 
-		let configx = {
+		let config = {
 			user: 'db_a6478c_fsya_admin',
 			password: 'razors1805',
 			server: 'sql5112.site4now.net',
@@ -14,7 +14,7 @@ function get_conf_token(token){
 		};
 		
 		
-		let config = {
+		let configz = {
 			user: 'iEx',
 			password: 'iEx',
 			server: 'DESKTOP-3L7R1E4\\SQL22',
