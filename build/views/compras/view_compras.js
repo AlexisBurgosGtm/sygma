@@ -418,8 +418,8 @@ function getView(){
                                         <div class="form-group">
                                             <label class="text-secondary">No. orden de Compra</label>
                                             <div class="input-group">
-                                                <input type="text" class="form-control text-base negrita" id="txtCoddocOrigen" placeholder="Serie Orden" disabled="true">
-                                                <input type="text" class="form-control text-base negrita" id="txtCorrelativoOrigen" placeholder="Número Orden" disabled="true">
+                                                <input type="text" class="form-control text-base negrita" id="txtCoddocOrigen" placeholder="Serie Orden">
+                                                <input type="text" class="form-control text-base negrita" id="txtCorrelativoOrigen" placeholder="Número Orden">
                                             </div>
                                         </div>
                                 </div>

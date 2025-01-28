@@ -1,4 +1,7 @@
 
+process.loadEnvFile() //process.loadEnvFile(['./dev.env','./dev2.env'])
+
+
 var express = require("express");
 var axios = require('axios');
 var app = express();

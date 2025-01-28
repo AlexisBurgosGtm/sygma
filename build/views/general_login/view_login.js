@@ -111,7 +111,7 @@ function addListeners(){
         btnIniciar.addEventListener('click',()=>{
             
             GlobalEmpnit = cmbEmpresa.value;
-            GlobalNivelUsuario = 1;
+            GlobalNivelUsuario = 3;
            
 
             GF.get_data_empresa_config(GlobalEmpnit)

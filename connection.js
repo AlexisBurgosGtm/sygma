@@ -5,7 +5,7 @@ function get_conf_token(token){
 		//token = empresa que manda la solicitud (puede cambiarse entre empresas)
 		//let config = [];
 
-		let config = {
+		let configXX = {
 			user: 'db_a6478c_fsya_admin',
 			password: 'razors1805',
 			server: 'sql5112.site4now.net',
@@ -13,16 +13,21 @@ function get_conf_token(token){
 			pool: {	max: 100,	min: 0,	idleTimeoutMillis: 30000}
 		};
 		
+
 		
-		let configz = {
-			user: 'iEx',
-			password: 'iEx',
-			server: 'DESKTOP-3L7R1E4\\SQL22',
-			database: 'fsya',
-			pool: {	max: 100,	min: 0,	idleTimeoutMillis: 30000}
+		let config = {
+			user: process.env.DB_USER,
+			password: process.env.DB_PWD,
+			server: process.env.DB_HOST, 
+			database: process.env.DB_DB,
+			pool: {	max: 100,	min: 0,	idleTimeoutMillis: 30000},
+			options: {
+    			encrypt: false, // for azure
+    			trustServerCertificate: true // change to true for local dev / self-signed certs
+  			}
 		};
 
-
+	
 
 		return config;
 		

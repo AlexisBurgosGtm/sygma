@@ -35,7 +35,8 @@ let Navegar = {
                 break;
             case 3:
                 rootMenu.innerHTML = Navegar.get_menu(3);
-                Navegar.inicio_ventas();
+                //Navegar.inicio_ventas();
+                Navegar.inicio_vendedor();
                 break;
             case 4:
                 rootMenu.innerHTML = Navegar.get_menu(4);
@@ -71,12 +72,35 @@ let Navegar = {
                     </div>
                     <br>
 
-                    <div class="card col-12 card-rounded shadow hand" onclick="Menu.archivo()">
+                    <div class="card col-12 card-rounded shadow hand" onclick="Menu.bodega_movinv('ENT')">
                         <div class="card-body p-4">
-                            <h4 class="negrita text-base">Archivo</h4>
+                            <h4 class="negrita text-base">Entrada Inventario</h4>
                         </div>
                     </div>
                     <br>
+
+                    <div class="card col-12 card-rounded shadow hand" onclick="Menu.bodega_movinv('SAL')">
+                        <div class="card-body p-4">
+                            <h4 class="negrita text-base">Salida Inventario</h4>
+                        </div>
+                    </div>
+                    <br>
+
+                    <div class="card col-12 card-rounded shadow hand" onclick="Menu.documentos()">
+                        <div class="card-body p-4">
+                            <h4 class="negrita text-base">Documentos</h4>
+                        </div>
+                    </div>
+                    <br>
+
+                    <div class="card col-12 card-rounded shadow hand" onclick="Menu.config_tipodocumentos()">
+                        <div class="card-body p-4">
+                            <h4 class="negrita text-base">Tipo Documentos</h4>
+                        </div>
+                    </div>
+                    <br>
+
+                    
 
 
                 </div>
@@ -96,6 +120,7 @@ let Navegar = {
                         </div>
                         <br>
 
+                     
                 </div>
             </div>
             `        
@@ -315,6 +340,13 @@ let Navegar = {
     inicio_ventas:()=>{
         if(Number(GlobalNivelUsuario)==0){return;}
         F.loadScript('../views/menu/inicio_ventas.js','root')
+        .then(async()=>{
+            initView();
+        })
+    },
+    inicio_vendedor:()=>{
+        if(Number(GlobalNivelUsuario)==0){return;}
+        F.loadScript('../views/ventas_censo/view_censo.js','root')
         .then(async()=>{
             initView();
         })
