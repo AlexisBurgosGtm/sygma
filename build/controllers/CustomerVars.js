@@ -22,6 +22,15 @@ let tipo_clasificacion =[
             ];
 
 
+let tipo_negocios = [
+    { tipo: 'OTROS', descripcion: 'OTROS'},
+    { tipo: 'TIENDA', descripcion: 'TIENDA'},
+    { tipo: 'ABARROTERIA', descripcion: 'ABARROTERIA'},
+    { tipo: 'DEPOSITO', descripcion: 'DEPOSITO'},
+    { tipo: 'RESTAURANTE', descripcion: 'RESTAURANTE'},
+    { tipo: 'ESCUELA', descripcion: 'ESCUELA'},
+    { tipo: 'HOTEL', descripcion: 'HOTEL'}
+]
 
 function get_tipo_precios(){
 

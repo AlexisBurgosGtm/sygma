@@ -1074,7 +1074,8 @@ let F = {
       ComboSemana :(letnum)=>{
         let str = '';
         if(letnum=="LETRAS"){
-          str =  `<option value="LUNES">LUNES</option>
+          str =  `
+                  <option value="LUNES">LUNES</option>
                   <option value="MARTES">MARTES</option>
                   <option value="MIERCOLES">MIERCOLES</option>
                   <option value="JUEVES">JUEVES</option>
@@ -1172,6 +1173,19 @@ let F = {
                 <option value='2044'>2044</option>
                 <option value='2045'>2045</option>`
       return str;
+      },
+      getComboTipoClientes : ()=>{
+        let str = '';
+
+        tipo_negocios.map((r)=>{
+          str += `
+                  <option value='${r.tipo}'>${r.descripcion}</option>
+                `
+
+        })
+       
+        return str;
+
       },
       getFecha(){
         let fecha
