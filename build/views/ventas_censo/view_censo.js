@@ -240,7 +240,9 @@ async function addListeners(){
     //inicializa la animación en las tabs
     F.slideAnimationTabs();
 
-
+    document.getElementById('cmbVendedor').disabled = true;
+    document.getElementById('cmbVendedorCliente').disabled = true;
+    
     
     let cmbVisita = document.getElementById('cmbVisita');
     cmbVisita.innerHTML = '<option value="TODOS">TODOS</option>' + F.ComboSemana("LETRAS");
@@ -254,8 +256,6 @@ async function addListeners(){
         
     let cmbVisitaCliente = document.getElementById('cmbVisitaCliente');
     cmbVisitaCliente.innerHTML = F.ComboSemana("LETRAS");
-
-   
 
     let cmbTipoNegocio = document.getElementById('cmbTipoNegocio')
     cmbTipoNegocio.innerHTML = F.getComboTipoClientes();
@@ -522,12 +522,19 @@ function get_empleados(){
         document.getElementById('cmbVendedor').innerHTML = str;
         document.getElementById('cmbVendedorCliente').innerHTML = str;
 
+        document.getElementById('cmbVendedor').value = GlobalCodUsuario;
+        document.getElementById('cmbVendedorCliente').value = GlobalCodUsuario;
+
         //carga la lista de clientes luego de tener al primer vendedor
         tbl_clientes();
+
+
     })
     .catch(()=>{
+
         document.getElementById('cmbVendedor').innerHTML = '';
         document.getElementById('cmbVendedorCliente').innerHTML = '';
+
     })
 
 

@@ -110,21 +110,53 @@ function addListeners(){
         let btnIniciar = document.getElementById('btnIniciar');
         btnIniciar.addEventListener('click',()=>{
             
-            GlobalEmpnit = cmbEmpresa.value;
-            GlobalNivelUsuario = 3;
-           
+            let usuario = document.getElementById('txtUser').value || '';
+            let clave = document.getElementById('txtPass').value || '';
 
-            GF.get_data_empresa_config(GlobalEmpnit)
+
+            btnIniciar.disabled = true;
+            btnIniciar.innerHTML = `<i class="fal fa-unlock fa-spin"></i>`;
+
+            GF.login_empleado(cmbEmpresa.value,usuario,clave)
             .then((data)=>{
                 
-                data_empresa_config = data.recordset[0];
-                Navegar.inicio();
+                GlobalEmpnit = cmbEmpresa.value;
+                
+
+                data.recordset.map((r)=>{
+                    GlobalUsuario = r.NOMBRE;
+                    GlobalNivelUsuario = Number(r.NIVEL);
+                    GlobalCodUsuario = Number(r.CODIGO);
+                })
+                
+                GF.get_data_empresa_config(GlobalEmpnit)
+                .then((data)=>{
+                    
+                    btnIniciar.disabled = false;
+                    btnIniciar.innerHTML = `<i class="fal fa-lock"></i>`;
+
+                    data_empresa_config = data.recordset[0];
+                    Navegar.inicio();
+    
+                })
+                .catch(()=>{
+                    F.AvisoError('No se pudieron cargar los datos de la empresa');
+                    btnIniciar.disabled = false;
+                    btnIniciar.innerHTML = `<i class="fal fa-lock"></i>`;
+                })
 
             })
             .catch(()=>{
-                F.AvisoError('No se pudieron cargar los datos de la empresa');
+                
+                F.AvisoError('Usuario o clave incorrecto');
 
+                btnIniciar.disabled = false;
+                btnIniciar.innerHTML = `<i class="fal fa-lock"></i>`;
             })
+
+
+
+            
 
             
             return;
