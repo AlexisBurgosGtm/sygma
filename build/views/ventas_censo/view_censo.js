@@ -66,7 +66,8 @@ function getView(){
                             <table class="table h-full col-12 table-striped" id="tblClientes">
                                 <thead class="bg-secondary text-white negrita">
                                     <tr>
-                                        <td>VENDEDOR</td>
+                                        <td>NIT / CODIGO</td>
+                                        <td>NEGOCIO</td>
                                         <td>CLIENTE / DIRECCION</td>
                                         <td>MUNICIPIO</td>
                                         <td>CREADO</td>
@@ -115,9 +116,18 @@ function getView(){
                                 </div>
                                 <br>
                                 
+
                                 <div class="form-group">
-                                    <label class="negrita text-secondary">Giro de Negocio:</label>
-                                    <select id="cmbTipoNegocio" class="form-control"></select>    
+                                    <label class="negrita text-secondary">Giro de Negocio  /  Tipo (Categoria):</label>
+                                    <div class="input-group">
+                                        <select id="cmbTipoNegocio" class="form-control negrita"></select>
+                                        <select id="cmbCategoria" class="form-control">
+                                            <option value='A'>A</option>
+                                            <option value='B'>B</option>
+                                            <option value='C'>C</option>
+                                            <option value='D'>D</option>
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <div class="form-group">
@@ -455,7 +465,7 @@ function fcnGuardarCliente(){
         let txtLatitud = document.getElementById('txtLatitud');
         let txtLongitud = document.getElementById('txtLongitud');
         let codruta = 1;
-
+        let categoria = document.getElementById('cmbCategoria').value;
 
         if(nomclie==''){F.AvisoError('Escriba un nombre de cliente');return;}
        
@@ -465,6 +475,7 @@ function fcnGuardarCliente(){
             codven:cmbVendedor.value,
             codruta:codruta,
             sector: cmbSector.value,
+            categoria:categoria,
             fecha:F.getFecha(),
             tiponegocio:cmbTipoNegocio.value,
             nitclie:txtNit.value,
@@ -797,8 +808,14 @@ function tbl_clientes(){
                 str += `
                         <tr>
                             <td>${r.NIT}
-                            <br>
+                                <br>
+                                <small class='negrita text-danger'>COD: ${r.EMPNIT}-${r.CODCLIENTE}</small>
+                                <br>
                                 <small class='negrita'>${r.VISITA}</small>
+                            </td>
+                            <td>${r.TIPONEGOCIO} Cat: ${r.CATEGORIA}
+                                <br>
+                                <small>${r.NEGOCIO}</small>
                             </td>
                             <td>${r.NOMBRE}
                                 <br>

@@ -14,8 +14,10 @@ router.post("/censo_lista_clientes", async(req,res)=>{
 
     if(visita=='TODOS'){
         qry = `
-        SELECT CLIENTES.CODCLIENTE, CLIENTES.NIT, 
+        SELECT CLIENTES.EMPNIT,CLIENTES.CODCLIENTE, CLIENTES.NIT, 
         CLIENTES.NOMBRE, 
+        CLIENTES.TIPONEGOCIO, CLIENTES.NEGOCIO,
+        CLIENTES.CATEGORIA,
         CLIENTES.DIRECCION, 
         CLIENTES.CODMUN, MUNICIPIOS.DESMUN, 
         CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
@@ -23,7 +25,8 @@ router.post("/censo_lista_clientes", async(req,res)=>{
                CLIENTES.LATITUD, CLIENTES.LONGITUD, 
                CLIENTES.SALDO, CLIENTES.HABILITADO, 
                CLIENTES.LASTSALE, CLIENTES.DIASCREDITO, 
-               CLIENTES.REFERENCIA, EMPLEADOS.NOMEMPLEADO
+               CLIENTES.REFERENCIA, EMPLEADOS.NOMEMPLEADO,
+               CLIENTES.DIAVISITA AS VISITA
          FROM     CLIENTES LEFT OUTER JOIN
                EMPLEADOS ON CLIENTES.CODEMPLEADO = EMPLEADOS.CODEMPLEADO LEFT OUTER JOIN
                SECTORES ON CLIENTES.CODSECTOR = SECTORES.CODSECTOR LEFT OUTER JOIN
@@ -36,8 +39,10 @@ router.post("/censo_lista_clientes", async(req,res)=>{
 
     }else{
         qry = `
-        SELECT CLIENTES.CODCLIENTE, CLIENTES.NIT, 
+        SELECT CLIENTES.EMPNIT,CLIENTES.CODCLIENTE, CLIENTES.NIT, 
         CLIENTES.NOMBRE, 
+        CLIENTES.TIPONEGOCIO, CLIENTES.NEGOCIO,
+        CLIENTES.CATEGORIA,
         CLIENTES.DIRECCION, 
         CLIENTES.CODMUN, MUNICIPIOS.DESMUN, 
         CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
@@ -71,16 +76,16 @@ router.post("/censo_lista_clientes", async(req,res)=>{
 
 router.post("/censo_insert", async(req,res)=>{
 
-    const{sucursal,codven,fecha,nitclie,tiponegocio,negocio,nomclie,dirclie,codmun,coddepto,referencia,obs,telefono,visita,lat,long,sector} = req.body;
+    const{sucursal,codven,fecha,nitclie,tiponegocio,negocio,categoria,nomclie,dirclie,codmun,coddepto,referencia,obs,telefono,visita,lat,long,sector} = req.body;
 
     let qry = `
-        INSERT INTO CLIENTES (EMPNIT,CODEMPLEADO,DIAVISITA,DPI,NIT,NOMBRE,DIRECCION,REFERENCIA,CODMUN,CODDEPTO,CODSECTOR,TELEFONO,
+        INSERT INTO CLIENTES (EMPNIT,CODEMPLEADO,DIAVISITA,DPI,NIT,TIPONEGOCIO,NEGOCIO,NOMBRE,DIRECCION,REFERENCIA,CODMUN,CODDEPTO,CODSECTOR,TELEFONO,
                     EMAIL,FECHANACIMIENTO,LATITUD,LONGITUD,CATEGORIA,CODRUTA,SALDO,FECHAINICIO,HABILITADO,LIMITECREDITO,DIASCREDITO,LASTSALE)
         SELECT '${sucursal}' AS EMPNIT,${codven} AS CODEMPLEADO,'${visita}' AS DIAVISITA,
-                '' AS DPI, '${nitclie}' AS NIT, '${nomclie}' AS NOMBRE,'${dirclie}' AS DIRECCION,
+                '' AS DPI, '${nitclie}' AS NIT, '${tiponegocio}' AS TIPONEGOCIO, '${negocio}' AS NEGOCIO, '${nomclie}' AS NOMBRE,'${dirclie}' AS DIRECCION,
                 '${referencia}' AS REFERENCIA, ${codmun} AS CODMUN, ${coddepto} AS CODDEPTO, ${sector} AS CODSECTOR,
                 '${telefono}' AS TELEFONO, '' AS EMAIL, '${fecha}' AS FECHANACIMIENTO,
-                '${lat}' AS LATITUD, '${long}' AS LONGITUD, 'A' AS CATEGORIA, 0 AS CODRUTA, 0 AS SALDO,
+                '${lat}' AS LATITUD, '${long}' AS LONGITUD, '${categoria}' AS CATEGORIA, 0 AS CODRUTA, 0 AS SALDO,
                 '${fecha}' AS FECHAINICIO, 'NA' AS HABILITADO, 0 AS LIMITECREDITO, 0 AS DIASCREDITO,
                 '${fecha}' AS LASTSALE
             `
