@@ -363,14 +363,10 @@ let botones_menu = {
                                     </li>
                                     <li>
                                         <a href="#" title="Introduction" data-filter-tags="application intel introduction"  onclick="Menu.compras_gestion_precios()">
-                                            <span class="nav-link-text" data-i18n="nav.application_intel_introduction">GESTIÓN DE PRECIOS E IPs</span>
+                                            <span class="nav-link-text" data-i18n="nav.application_intel_introduction">GESTIÓN DE PRECIOS Y BONOS</span>
                                         </a>
                                     </li>
-                                    <li>
-                                        <a href="#" title="Introduction" data-filter-tags="application intel introduction"  onclick="Menu.pendiente()">
-                                            <span class="nav-link-text" data-i18n="nav.application_intel_introduction">GESTIÓN DE PRECIOS MAYORISTAS</span>
-                                        </a>
-                                    </li>
+                                 
                                     <li>
                                         <a href="#" title="Introduction" data-filter-tags="application intel introduction"  onclick="Menu.compras_gestion_minmax()">
                                             <span class="nav-link-text" data-i18n="nav.application_intel_introduction">MINIMOS Y MÁXIMOS</span>

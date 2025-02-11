@@ -254,5 +254,16 @@ let Menu = {
         }else{
             F.AvisoError('No tiene permitido entrar a esta sección');
         }
+    },
+    ventas_pedidos:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/ventas_pedidos/view_pedidos.js','root')
+            .then(async()=>{
+                    initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        }
     }
 }
