@@ -234,10 +234,10 @@ function getView(){
                                         <label class="negrita text-base">Descripción</label>
                                         <input type="text" class="form-control" id="txtDesprod" maxlength="255">
                                     <br>
-                                        <label class="negrita text-base">Componente</label>
+                                        <label class="negrita text-base">Descripción 2</label>
                                         <input type="text" class="form-control" id="txtDesprod2" maxlength="255">
                                     <br>
-                                        <label class="negrita text-base">Uso / Dosis</label>
+                                        <label class="negrita text-base">Descripción 3</label>
                                         <input type="text" class="form-control" id="txtDesprod3" maxlength="255">
                                     <br>
                                      
@@ -315,7 +315,7 @@ function getView(){
                     </div>
 
                     <br>
-                    <label class="negrita text-base">Tipo Laboratorio</label>
+                    <label class="negrita text-base">Clasificación 2</label>
                     <div class="input-group">
                         <select class="form-control" id="cmbTipoLaboratorio">
                         </select>
@@ -325,7 +325,7 @@ function getView(){
                     </div>
                                         
                     <br>
-                    <label class="negrita text-base">Tipo Impulso</label>
+                    <label class="negrita text-base">Clasificación 3</label>
                     <div class="input-group">
                         <select class="form-control" id="cmbTipoImpulso">
                         </select>    
@@ -335,7 +335,7 @@ function getView(){
                     </div>
                                         
                     <br>
-                    <label class="negrita text-base">Tipo Programa Salud</label>
+                    <label class="negrita text-base">Clasificación 4</label>
                     <div class="input-group">
                         <select class="form-control" id="cmbTipoProgramaSalud">
                         </select>
@@ -345,7 +345,7 @@ function getView(){
                     </div>
 
                     <br>
-                    <label class="negrita text-base">Tipo RM MR</label>
+                    <label class="negrita text-base">Clasificación 5</label>
                     <div class="input-group">
                         <select class="form-control" id="cmbTipoRMMR">
                         </select>

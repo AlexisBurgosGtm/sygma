@@ -1,0 +1,70 @@
+
+CREATE TABLE [dbo].[DOCUMENTOS_TEMPORALES](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[EMPNIT] [varchar](50) NULL,
+	[ANIO] [int] NULL,
+	[MES] [int] NULL,
+	[FECHA] [date] NULL,
+	[HORA] [varchar](5) NULL,
+	[CODDOC] [varchar](50) NULL,
+	[CORRELATIVO] [numeric](20, 0) NULL,
+	[CODCLIENTE] [int] NULL,
+	[DOC_NIT] [varchar](50) NULL,
+	[DOC_NOMCLIE] [varchar](255) NULL,
+	[DOC_DIRCLIE] [varchar](255) NULL,
+	[TOTALCOSTO] [float] NULL,
+	[TOTALVENTA] [float] NULL,
+	[TOTALDESCUENTO] [float] NULL,
+	[RECARGOTARJETA] [float] NULL,
+	[TOTALPRECIO] [float] NULL,
+	[PAGO] [float] NULL,
+	[VUELTO] [float] NULL,
+	[STATUS] [varchar](1) NULL,
+	[TOTAL_EFECTIVO] [float] NULL,
+	[TOTAL_TARJETA] [float] NULL,
+	[TOTAL_DEPOSITOS] [float] NULL,
+	[TOTAL_CHEQUES] [float] NULL,
+	[USUARIO] [varchar](100) NULL,
+	[CONCRE] [varchar](3) NULL,
+	[CODCAJA] [int] NULL,
+	[NOCORTE] [float] NULL,
+	[SERIEFAC] [varchar](100) NULL,
+	[NOFAC] [varchar](100) NULL,
+	[CODEMP] [int] NULL,
+	[OBS] [varchar](255) NULL,
+	[DOC_SALDO] [float] NULL,
+	[DOC_ABONOS] [float] NULL,
+	[DIRENTREGA] [varchar](255) NULL,
+	[TOTALEXENTO] [float] NULL,
+	[LAT] [float] NULL,
+	[LONG] [float] NULL,
+	[VENCIMIENTO] [date] NULL,
+	[FEL_UUDI] [varchar](200) NULL,
+	[FEL_SERIE] [varchar](200) NULL,
+	[FEL_NUMERO] [varchar](200) NULL,
+	[FEL_FECHA] [varchar](200) NULL,
+	[ENTREGADO] [varchar](2) NULL,
+	[POR_IVA] [float] NULL,
+	[TIPO_VENTA] [varchar](15) NULL,
+	[ETIQUETA] [varchar](50) NULL,
+	[EMPNIT_DESTINO] [varchar](50) NULL,
+	[CODDOC_ORIGEN] [varchar](50) NULL,
+	[CORRELATIVO_ORIGEN] [float] NULL,
+	[JSONDOCPRODUCTOS] [varchar](max) NULL,
+ CONSTRAINT [PK_DOCUMENTOS_TEMPORALES] PRIMARY KEY NONCLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+
+CREATE UNIQUE CLUSTERED INDEX [empnit_coddoc_correlativo] ON [dbo].[DOCUMENTOS_TEMPORALES]
+(
+	[EMPNIT] ASC,
+	[CODDOC] ASC,
+	[CORRELATIVO] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+
+
+
+-----------------------------------------------------------------------------

@@ -1,12 +1,3 @@
-//PLANTILLA
-
-<div class="card card-rounded col-12 border-primary">
-    <div class="card-body p-4">                    
-    </div>
-</div>
-
-<br>
-
 
 function getView(){
     let view = {
@@ -15,7 +6,7 @@ function getView(){
                 <div class="col-12 p-0 bg-white">
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
-                            ${view.vista_listado()}
+                            ${view.panel()}
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
                            
@@ -44,25 +35,23 @@ function getView(){
                
             `
         },
-        vista_listado:()=>{
+        panel:()=>{
             return `
-            <div class="card card-rounded shadow">
+            <div class="card card-rounded shadow col-12">
+                <div class="card-body p-4 text-center">
+                
+                    <h1 class="text-base negrita">Inicio Digitador</h1>
+
+                </div>
+            </div>
+
+            <div class="card card-rounded shadow col-12">
                 <div class="card-body p-2">
-                    <div class="table-responsive col-12">
-                        <table class="table table-responsive table-hover col-12">
-                            <thead class="bg-base text-white">
-                                <tr>
-                                    <td>PEDIDO</td>
-                                    <td>VENDEDOR</td>
-                                    <td>CLIENTE</td>
-                                    <td>IMPORTE</td>
-                                    <td></td>
-                                </tr>
-                            </thead>
-                            <tbody id="tblPedidos">
-                            </tbody>
-                        </table>
-                    </div>
+                
+                <h1>LISTADO DE PEDIDOS PENDIENTES</h1>
+                <h1>RELLENO - MINIMOS DE INVENTARIO</h1>
+                <h1></h1>
+
                 </div>
             </div>
             `

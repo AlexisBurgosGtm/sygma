@@ -41,13 +41,5 @@ Mousetrap.bind(['command+e', 'ctrl+e'], function(e) {
 Navegar.login();
 
 
-let btnMenu = document.getElementById('btnMenu');
-btnMenu.addEventListener('click',()=>{
-  console.log('abriendo menu...')
-  $("#modal_menu").modal('show');
-})
 
-
-Mousetrap.bind(['command+m', 'ctrl+m'], function(e) { btnMenu.click(); });
- 
 

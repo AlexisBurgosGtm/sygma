@@ -1,4 +1,4 @@
-let versionapp = "M.05.02.2025:13.39"
+let versionapp = "M.11.02.2025:0"
 
 
 let map; //mapa de leaflet
@@ -37,7 +37,7 @@ let rootErrores = document.getElementById('rootErrores');
 let navmenu = document.getElementById('js-nav-menu');
 
 
-let GlobalLoader = `<b class="negrita text-base">Cargando... </b> ${special_loader}`;
+let GlobalLoader = `<b class="negrita text-base">Cargando... </b> ${special_loader_puntos}`;
 
 
 let GlobalLoaderX = `

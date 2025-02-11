@@ -13,13 +13,7 @@ let tipo_precios =[
             ];
 
 
-let tipo_clasificacion =[
-                {tipo:"LABORATORIO",nombre:"LABORATORIO"},
-                {tipo:"IMPULSO",nombre:"IMPULSO"},
-                {tipo:"PROGRAMA_SALUD",nombre:"PROGRAMA_SALUD"},
-                {tipo:"RM_MR",nombre:"RM_MR"},
-                {tipo:"RELLENO",nombre:"RELLENO"}
-            ];
+
 
 
 let tipo_negocios = [
@@ -29,7 +23,8 @@ let tipo_negocios = [
     { tipo: 'DEPOSITO', descripcion: 'DEPOSITO'},
     { tipo: 'RESTAURANTE', descripcion: 'RESTAURANTE'},
     { tipo: 'ESCUELA', descripcion: 'ESCUELA'},
-    { tipo: 'HOTEL', descripcion: 'HOTEL'}
+    { tipo: 'HOTEL', descripcion: 'HOTEL'},
+    { tipo: 'FARMACIA', descripcion: 'FARMACIA'}
 ]
 
 function get_tipo_precios(){

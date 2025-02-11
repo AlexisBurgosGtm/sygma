@@ -2,6 +2,39 @@ let GF = {
     modo_sat:()=>{
         socket.emit('MODO_SAT')
     },
+    fcn_load_navbar: (menu,idNavbar,idContainer)=>{
+
+        
+        let container = document.getElementById(idContainer);
+        container.style = "visibility:visible";
+        
+        let strMenu = ''
+        
+        switch (menu) {
+            case 'DIGITADOR':
+               strMenu = botones_menu.inicio_digitador();
+                break;
+            case 'VENDEDOR':
+                strMenu = botones_menu.inicio_vendedor();
+                break;
+            default:
+                strMenu = '';
+                break;
+        }
+
+        container.innerHTML = strMenu;
+        
+
+        $('#' + idNavbar).navigation({ 
+            accordion: true,
+            animate: 'easeOutExpo',
+            speed: 200,
+            closedSign: '+',
+            openedSign: '-',
+            initClass: 'js-nav-built'
+        });
+
+    },
     print_orden_soporte:(noorden)=>{
         return new Promise((resolve,reject)=>{
 

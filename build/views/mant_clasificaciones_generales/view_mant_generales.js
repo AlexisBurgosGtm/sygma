@@ -49,11 +49,11 @@ function getView(){
                                 <select class="form-control negrita text-verde" id="cmbTipo">
                                     <option value="BI">TIPO DE RENTABILIDAD</option>
                                     <option value="TIPO">TIPO PRODUCTO</option>
-                                    <option value="LABORATORIO">TIPO DE LABORATORIO</option>
-                                    <option value="IMPULSO">TIPO DE IMPULSO</option>
-                                    <option value="PROGRAMA_SALUD">PROGRAMA DE SALUD</option>
-                                    <option value="RM_MR">MEDIA RENTABILIDAD Y ROTACIÓN</option>
-                                    <option value="RELLENO">PRODUCTOS DE RELLENO</option>
+                                    <option value="LABORATORIO">CLASIFICACION 2</option>
+                                    <option value="IMPULSO">CLASIFICACION 3</option>
+                                    <option value="PROGRAMA_SALUD">CLASIFICACION 4</option>
+                                    <option value="RM_MR">CLASIFICACION 5</option>
+                                    <option value="RELLENO">TIPO DE RELLENO</option>
                                 </select>
                             </div>
                         </div>

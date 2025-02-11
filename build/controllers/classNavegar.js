@@ -16,33 +16,42 @@ let Navegar = {
     
         F.loadScript('../views/general_login/view_login.js','root')
         .then(async()=>{
-            //btnMenu.style = "visibility:hidden";
+            document.getElementById('js-primary-nav').style = "visibility:hidden";
             initView();
         })
     },
     inicio:()=>{
       
-        let rootMenu = document.getElementById('rootMenu');
+        //let rootMenu = document.getElementById('rootMenu');
 
         switch (Number(GlobalNivelUsuario)) {
-            case 1:
-                rootMenu.innerHTML = Navegar.get_menu(1);
+            case 1: //GERENTE
+                document.getElementById('js-primary-nav').style = "visibility:visible";
                 Navegar.inicio_gerencia();
                 break;
-            case 2:
-                rootMenu.innerHTML = Navegar.get_menu(2);
+            case 2: //SUPERVISOR
+                //document.getElementById('js-nav-menu').style = "visibility:visible";
                 Navegar.inicio_compras();
                 break;
-            case 3:
-                rootMenu.innerHTML = Navegar.get_menu(3);
-                //Navegar.inicio_ventas();
+            case 3: //VENDEDOR
+                
+                GF.fcn_load_navbar('VENDEDOR','js-nav-menu_vendedor','js-primary-nav')
+                
                 Navegar.inicio_vendedor();
                 break;
-            case 4:
-                rootMenu.innerHTML = Navegar.get_menu(4);
+            case 4: //REPARTIDOR
+                
                 Navegar.inicio_despacho();
                 break;
-            case 5:
+            case 5: //DIGITADOR
+                
+                GF.fcn_load_navbar('DIGITADOR','js-nav-menu_digitador','js-primary-nav')
+                
+                Navegar.inicio_digitador();
+
+
+                break;
+            case 6: //BODEGA
                 
                 break;
         }
@@ -347,6 +356,13 @@ let Navegar = {
     inicio_vendedor:()=>{
         if(Number(GlobalNivelUsuario)==0){return;}
         F.loadScript('../views/ventas_censo/view_censo.js','root')
+        .then(async()=>{
+            initView();
+        })
+    },
+    inicio_digitador:()=>{
+        if(Number(GlobalNivelUsuario)==0){return;}
+        F.loadScript('../views/menu/inicio_digitador.js','root')
         .then(async()=>{
             initView();
         })

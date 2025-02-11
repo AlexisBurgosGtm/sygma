@@ -1051,26 +1051,6 @@ let F = {
           
       
       },
-      XLmap: (lat,long)=>{
-        //INICIALIZACION DEL MAPA            
-          var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-          osmAttrib = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-          osm = L.tileLayer(osmUrl, {center: [lat, long],maxZoom: 20, attribution: osmAttrib});    
-          map = L.map('mapcontainer').setView([lat, long], 7).addLayer(osm);
-    
-          var userIcon = L.icon({
-            iconUrl: '../img/userIcon.png',
-            shadowUrl: '../img/marker-shadow.png',
-        
-            iconSize:     [30, 45], // size of the icon
-            shadowSize:   [50, 64], // size of the shadow
-            iconAnchor:   [22, 94], // point of the icon which will correspond to marker's location
-            shadowAnchor: [4, 62],  // the same for the shadow
-            popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
-          })
-          console.log('carga del mapa...')
-      
-      },
       ComboSemana :(letnum)=>{
         let str = '';
         if(letnum=="LETRAS"){
