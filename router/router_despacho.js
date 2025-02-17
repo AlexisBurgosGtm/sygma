@@ -3,6 +3,45 @@ const express = require('express');
 const router = express.Router();
 
 
+
+router.post("/pedidos_pendientes_vendedores", async(req,res)=>{
+   
+    const { token, sucursal } = req.body;
+
+    let qry = `
+        SELECT DOCUMENTOS_TEMPORALES.FECHA, 
+                DOCUMENTOS_TEMPORALES.HORA, 
+                DOCUMENTOS_TEMPORALES.CODDOC, 
+                DOCUMENTOS_TEMPORALES.CORRELATIVO, 
+                DOCUMENTOS_TEMPORALES.DOC_NIT AS NIT, 
+                DOCUMENTOS_TEMPORALES.DOC_NOMCLIE AS NOMCLIE, 
+                DOCUMENTOS_TEMPORALES.DOC_DIRCLIE AS DIRCLIE, 
+                DOCUMENTOS_TEMPORALES.TOTALPRECIO AS IMPORTE, 
+                DOCUMENTOS_TEMPORALES.STATUS, 
+                DOCUMENTOS_TEMPORALES.DIRENTREGA, 
+                DOCUMENTOS_TEMPORALES.LAT, 
+                DOCUMENTOS_TEMPORALES.LONG, 
+                EMPLEADOS.NOMEMPLEADO
+        FROM DOCUMENTOS_TEMPORALES LEFT OUTER JOIN
+                EMPLEADOS ON DOCUMENTOS_TEMPORALES.EMPNIT = EMPLEADOS.EMPNIT 
+                AND DOCUMENTOS_TEMPORALES.CODEMP = EMPLEADOS.CODEMPLEADO 
+                LEFT OUTER JOIN
+                TIPODOCUMENTOS ON DOCUMENTOS_TEMPORALES.CODDOC = TIPODOCUMENTOS.CODDOC 
+                AND DOCUMENTOS_TEMPORALES.EMPNIT = TIPODOCUMENTOS.EMPNIT
+        WHERE  (DOCUMENTOS_TEMPORALES.EMPNIT = '${sucursal}') 
+                AND (DOCUMENTOS_TEMPORALES.NOCORTE = 0) 
+                AND (TIPODOCUMENTOS.TIPODOC = 'ENV')
+            `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+
+
+
 router.post("/pedidos_pendientes", async(req,res)=>{
    
     const { token, sucursal } = req.body;

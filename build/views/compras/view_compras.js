@@ -1213,7 +1213,7 @@ function initView(){
 };
 
 function get_vendedores(){
-    GF.get_data_empleados_tipo(2)
+    GF.get_data_empleados_tipo(5)
     .then((data)=>{
         let str = '';
         data.recordset.map((r)=>{
@@ -1920,7 +1920,7 @@ function finalizar_pedido(){
     let numero_fac = document.getElementById('txtNumeroFac').value || '';
 
     let coddoc_origen = document.getElementById('txtCoddocOrigen').value || '';
-    let correlativo_origen = document.getElementById('txtCorrelativoOrigen').value || '';
+    let correlativo_origen = document.getElementById('txtCorrelativoOrigen').value || '0';
    
 
 

@@ -1762,7 +1762,7 @@ function finalizar_pedido(){
 
         gettempDocproductos_pos(GlobalUsuario)
         .then((response)=>{
-            axios.post('/pos/insertventa', {
+            axios.post('/pos/insertventa_pedido', {
                 jsondocproductos:JSON.stringify(response),
                 sucursal:GlobalEmpnit,
                 coddoc:coddoc,
@@ -1895,7 +1895,7 @@ function tbl_lista_documentos(){
     let strdata = '';
     let totalpedidos = 0;
     
-    axios.post('/pos/lista_documentos', {
+    axios.post('/pos/lista_documentos_temporales', {
         sucursal: GlobalEmpnit,
         tipo:tipo,
         fecha:fecha,

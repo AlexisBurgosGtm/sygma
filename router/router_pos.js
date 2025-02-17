@@ -3,6 +3,39 @@ const express = require('express');
 const router = express.Router();
 
 
+router.post("/insertventa_pedido", async(req,res)=>{
+   
+
+    const { token,jsondocproductos,sucursal,
+            coddoc,correlativo,anio,mes,fecha,fechaentrega,formaentrega,
+            codbodega,codcliente,nomclie,totalcosto,totalprecio,totaldescuento,
+            nitclie, dirclie, obs, direntrega, usuario,
+            codven, lat, long, hora, tipo_pago, tipo_doc,
+            entrega_contacto, entrega_telefono, entrega_direccion,
+            entrega_referencia, entrega_lat, entrega_long,
+            codcaja, iva, etiqueta } = req.body;
+
+    let qryDocumentos = str_qry_documentos_temporal(jsondocproductos,sucursal,
+        coddoc,correlativo,anio,mes,fecha,fechaentrega,formaentrega,
+        codbodega,codcliente,nomclie,totalcosto,totalprecio,totaldescuento,
+        nitclie, dirclie, obs, direntrega, usuario,
+        codven, lat, long, hora, tipo_pago, tipo_doc,
+        entrega_contacto, entrega_telefono, entrega_direccion,
+        entrega_referencia, entrega_lat, entrega_long,
+        codcaja, iva,etiqueta);
+
+    let qryDocproductos = ''; //str_qry_docproductos_temporal(sucursal,coddoc,correlativo,anio,mes,iva,codbodega,fecha,jsondocproductos);
+   
+    let nuevoCorrelativo = Number(correlativo) + 1;
+    let qryTipodocumentos = `UPDATE TIPODOCUMENTOS SET CORRELATIVO=${nuevoCorrelativo} WHERE EMPNIT='${sucursal}' AND CODDOC='${coddoc}';`;
+    
+    let qry = qryDocumentos + qryDocproductos + qryTipodocumentos;
+
+    
+    execute.QueryToken(res,qry,token);
+     
+});
+
 router.post("/insertventa", async(req,res)=>{
    
 
@@ -261,6 +294,110 @@ function str_qry_docproductos(sucursal,coddoc,correlativo,anio,mes,iva,codbodega
 };
 
 
+function str_qry_documentos_temporal(jsondocproductos,sucursal,
+    coddoc,correlativo,anio,mes,fecha,fechaentrega,formaentrega,
+    codbodega,codcliente,nomclie,totalcosto,totalprecio,totaldescuento,
+    nitclie, dirclie, obs, direntrega, usuario,
+    codven, lat, long, hora, tipo_pago, tipo_doc,
+    entrega_contacto, entrega_telefono, entrega_direccion,
+    entrega_referencia, entrega_lat, entrega_long,
+    codcaja, iva, etiqueta){
+
+    let qry = `INSERT INTO DOCUMENTOS_TEMPORALES (
+            EMPNIT,
+            ANIO,
+            MES,
+            FECHA,
+            HORA,
+            CODDOC,
+            CORRELATIVO,
+            CODCLIENTE,
+            DOC_NIT,
+            DOC_NOMCLIE,
+            DOC_DIRCLIE,
+            TOTALCOSTO,
+            TOTALVENTA,
+            TOTALDESCUENTO,
+            RECARGOTARJETA,
+            TOTALPRECIO,
+            PAGO,
+            VUELTO,
+            STATUS,
+            TOTAL_EFECTIVO,
+            TOTAL_TARJETA,
+            TOTAL_DEPOSITOS,
+            TOTAL_CHEQUES,
+            USUARIO,
+            CONCRE,
+            CODCAJA,
+            NOCORTE,
+            SERIEFAC,
+            NOFAC,
+            CODEMP,
+            OBS,
+            DOC_SALDO,
+            DOC_ABONOS,
+            DIRENTREGA,
+            TOTALEXENTO,
+            LAT,LONG,
+            VENCIMIENTO,
+            ENTREGADO,
+            POR_IVA,
+            TIPO_VENTA,
+            ETIQUETA,
+            JSONDOCPRODUCTOS)
+        SELECT
+            '${sucursal}' AS EMPNIT,
+            ${anio} AS ANIO, 
+            ${mes} AS MES,
+            '${fecha}' AS FECHA, 
+            '${hora}' AS HORA,
+            '${coddoc}' AS CODDOC, 
+            ${correlativo} AS CORRELATIVO,
+            ${codcliente} AS CODCLIENTE, 
+            '${nitclie}' AS DOC_NIT,
+            '${nomclie}' AS DOC_NOMCLIE, 
+            '${dirclie}' AS DOC_DIRCLIE,
+            ${totalcosto} AS TOTALCOSTO, 
+            ${totalprecio} AS TOTALVENTA,
+            ${totaldescuento} AS TOTALDESCUENTO, 
+            0 AS RECARGOTARJETA,
+            ${(Number(totalprecio)-Number(totaldescuento))} AS TOTALPRECIO, 
+            0 AS PAGO, 
+            0 AS VUELTO,
+            'O' AS STATUS,
+            0 AS TOTAL_EFECTIVO, 
+            0 AS TOTAL_TARJETA, 
+            0 AS TOTAL_DEPOSITOS,
+            0 AS TOTAL_CHEQUES,
+            '${usuario}' AS USUARIO, 
+            '${tipo_pago}' AS CONCRE,
+            ${codcaja} AS CODCAJA, 
+            0 AS NOCORTE, 
+            '${coddoc}' AS SERIEFAC,
+            '${correlativo}' AS NOFAC, 
+            ${codven} AS CODEMP,
+            '${obs}' AS OBS,
+            0 AS DOC_SALDO, 
+            0 AS DOC_ABONOS, 
+            '${direntrega}' AS DIRENTREGA,
+            0 AS TOTALEXENTO, 
+            ${lat} AS LAT, 
+            ${long} AS LONG,
+            '${fecha}' AS VENCIMIENTO,
+            'NO' AS ENTREGADO, 
+            ${iva} POR_IVA,
+            '${tipo_doc}' AS TIPO_VENTA,
+            '${etiqueta}' AS ETIQUETA,            
+            '${jsondocproductos}' AS JSONDOCPRODUCTOS;
+        `
+
+    return qry;
+
+};
+
+
+
 router.post("/listado_colores", async(req,res)=>{
    
     const { token, sucursal} = req.body;
@@ -358,6 +495,41 @@ router.post("/lista_documentos", async(req,res)=>{
 FROM            DOCUMENTOS LEFT OUTER JOIN
                          TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
 WHERE        (DOCUMENTOS.EMPNIT = '${sucursal}') AND (DOCUMENTOS.FECHA = '${fecha}') AND (TIPODOCUMENTOS.TIPODOC = '${tipo}')`
+    
+   
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+router.post("/lista_documentos_temporales", async(req,res)=>{
+   
+    const { token, sucursal, tipo, fecha } = req.body;
+
+    let qry = `SELECT  
+            DOCUMENTOS_TEMPORALES.EMPNIT, 
+            TIPODOCUMENTOS.TIPODOC, 
+            DOCUMENTOS_TEMPORALES.FECHA, 
+            DOCUMENTOS_TEMPORALES.CODDOC, 
+            DOCUMENTOS_TEMPORALES.CORRELATIVO, 
+            DOCUMENTOS_TEMPORALES.HORA, 
+            DOCUMENTOS_TEMPORALES.CODCLIENTE, 
+            DOCUMENTOS_TEMPORALES.DOC_NIT, 
+            DOCUMENTOS_TEMPORALES.DOC_NOMCLIE AS NOMCLIE, 
+            DOCUMENTOS_TEMPORALES.DOC_DIRCLIE AS DIRCLIE, 
+            DOCUMENTOS_TEMPORALES.STATUS AS ST, 
+            ISNULL(DOCUMENTOS_TEMPORALES.FEL_UUDI,'') AS FEL_UUDI, 
+            DOCUMENTOS_TEMPORALES.ENTREGADO, 
+            DOCUMENTOS_TEMPORALES.TOTALVENTA, 
+            DOCUMENTOS_TEMPORALES.TOTALDESCUENTO, 
+            DOCUMENTOS_TEMPORALES.TOTALPRECIO
+        FROM DOCUMENTOS_TEMPORALES LEFT OUTER JOIN
+            TIPODOCUMENTOS ON DOCUMENTOS_TEMPORALES.CODDOC = TIPODOCUMENTOS.CODDOC 
+            AND DOCUMENTOS_TEMPORALES.EMPNIT = TIPODOCUMENTOS.EMPNIT
+        WHERE (DOCUMENTOS_TEMPORALES.EMPNIT = '${sucursal}') 
+        AND (DOCUMENTOS_TEMPORALES.FECHA = '${fecha}') 
+        AND (TIPODOCUMENTOS.TIPODOC = '${tipo}')`
     
    
 

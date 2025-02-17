@@ -1074,7 +1074,8 @@ function initView(){
 };
 
 function get_vendedores(){
-    GF.get_data_empleados_tipo(2)
+    
+    GF.get_data_empleados_tipo(5)
     .then((data)=>{
         let str = '';
         data.recordset.map((r)=>{

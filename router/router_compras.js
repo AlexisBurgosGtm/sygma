@@ -33,6 +33,7 @@ router.post("/insertcompra", async(req,res)=>{
 
     let qry = qryDocumentos + qryDocproductos + qryStatusDocCot + qryTipodocumentos;
 
+ console.log(qry)
  
     
     execute.QueryToken(res,qry,token);
