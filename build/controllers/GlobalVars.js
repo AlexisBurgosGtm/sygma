@@ -96,6 +96,11 @@ let GlobalTotalCostoDocumento = 0;
 let GlobalTotalDescuento = 0;
 let GlobalTotalItems = 0;
 
+let Selected_coddoc_env = '';
+let Selected_coddoc_cot = '';
+
+
+
 function getRandomColor() {
     var letters = '0123456789ABCDEF'.split('');
     var color = '#';

@@ -1,54 +1,9 @@
+
 function getView(){
     let view = {
         body:()=>{
             return `
-                <div class="col-12 p-0">
-                    <div class="tab-content" id="myTabHomeContent">
-                        <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="dias-tab">
-                        
-                            ${view.modal_lista_clientes()}
-                        
-                        </div> 
-                        <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="clientes-tab">
-                        
-                            ${view.pedido() + view.modal_cantidad() + view.modal_editar_cantidad() + view.modal_lista_precios() }
-
-                        </div>
-
-                        <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
-                            ${view.documento()}
-                        </div>
-
-                        <div class="tab-pane fade" id="cuatro" role="tabpanel" aria-labelledby="clientes-tab">
-                            ${view.modal_lista_documentos()}
-                        </div>
-
-                    </div>
-
-                    <ul class="nav nav-tabs hidden" id="myTabHome" role="tablist">
-                        <li class="nav-item">
-                            <a class="nav-link active negrita text-success" id="tab-uno" data-toggle="tab" href="#uno" role="tab" aria-controls="profile" aria-selected="false">
-                                <i class="fal fa-list"></i></a>Pedido
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link negrita text-danger" id="tab-dos" data-toggle="tab" href="#dos" role="tab" aria-controls="home" aria-selected="true">
-                                <i class="fal fa-comments"></i></a>Precios
-                        </li> 
-                        <li class="nav-item">
-                            <a class="nav-link negrita text-info" id="tab-tres" data-toggle="tab" href="#tres" role="tab" aria-controls="home" aria-selected="true">
-                                <i class="fal fa-edit"></i></a>Finalizar
-                        </li> 
-                        <li class="nav-item">
-                            <a class="nav-link negrita text-info" id="tab-cuatro" data-toggle="tab" href="#cuatro" role="tab" aria-controls="home" aria-selected="true">
-                                <i class="fal fa-edit"></i></a>Finalizar
-                        </li>                           
-                    </ul>
-                </div>
-            `
-        },
-        pedido:()=>{
-            return `
-            <div class="row">
+                <div class="row">
                     <div class="col-1 text-left">
                             <img src="./favicon.png" width="80px" height="80px">
                     </div>
@@ -69,8 +24,41 @@ function getView(){
                             </div>
                         
                     </div>
-            </div>
-           
+                </div>
+                <br>
+                <div class="col-12 p-0">
+                    <div class="tab-content" id="myTabHomeContent">
+                        <div class="tab-pane fade show active" id="pedido" role="tabpanel" aria-labelledby="dias-tab">
+                            ${view.pedido() + view.modal_cantidad() + view.modal_editar_cantidad() + view.modal_lista_precios() + view.modal_lista_documentos() }
+                        </div> 
+                        <div class="tab-pane fade" id="precios" role="tabpanel" aria-labelledby="clientes-tab">
+                          
+                        </div>
+
+                        <div class="tab-pane fade" id="documento" role="tabpanel" aria-labelledby="home-tab">
+                            ${view.documento() + view.modal_lista_clientes()}
+                        </div>
+                    </div>
+
+                    <ul class="nav nav-tabs hidden" id="myTabHome" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active negrita text-success" id="tab-pedido" data-toggle="tab" href="#pedido" role="tab" aria-controls="profile" aria-selected="false">
+                                <i class="fal fa-list"></i></a>Pedido
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-precios" data-toggle="tab" href="#precios" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>Precios
+                        </li> 
+                        <li class="nav-item">
+                            <a class="nav-link negrita text-info" id="tab-documento" data-toggle="tab" href="#documento" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-edit"></i></a>Finalizar
+                        </li>                           
+                    </ul>
+                </div>
+            `
+        },
+        pedido:()=>{
+            return `
             <div class="row">
 
                 <div class="col-12">
@@ -88,7 +76,7 @@ function getView(){
                                     <div class="form-group">
                                         <div class="input-group">
                                            
-                                            <input type="text" autocomplete="off" class="form-control border-base negrita col-12" placeholder='Escriba para buscar...' id="txtPosCodprod">
+                                            <input type="text" autocomplete="off" class="form-control border-base negrita col-7" placeholder='Escriba para buscar...' id="txtPosCodprod">
                                             <button class="btn btn-base hand col-1" id="btnBuscarProd">
                                                 <i class="fal fa-search"></i>
                                             </button>
@@ -131,9 +119,8 @@ function getView(){
 
             </div>
 
-            
-            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
-                <i class="fal fa-arrow-left"></i>
+            <button class="btn btn-warning btn-xl btn-bottom-l btn-circle shadow hand" id="btnListadoDocumentos">
+                <i class="fal fa-folder"></i>  
             </button>
             
             <button class="btn btn-verde btn-xl btn-bottom-r btn-circle shadow hand" id="btnPosCobro">
@@ -332,9 +319,9 @@ function getView(){
                             <div class="row">
                                 <div class="form-group">
                                     <label class="text-secondary">Tipo de Documento</label>
-                                    <select class="form-control col-12 negrita text-danger" id="cmbTipoDocumento">
-                                        <option value="ENV">PEDIDOS</option> 
-                                        <option value="COT">COTIZACIONES</option>
+                                    <select class="form-control col-12" id="cmbTipoDocumento">
+                                        <option value="ENV">PEDIDOS</option>    
+                                        <option value="COT">COTIZACIÓN</option>
                                     </select>   
                                 </div>
                                 <div class="form-group text-left">
@@ -351,15 +338,21 @@ function getView(){
                             <div class="row">
                                 <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                                     <div class="form-group text-left">
-                                        <label class="text-secondary">Fecha</label>
+                                        <label class="text-secondary">Caja</label>
                                         <div class="input-group">
+                                            <select class="form-control col-12" id="cmbCaja">
+                                            </select>
                                             <input type="date" id="txtFecha" class="form-control text-base negrita border-base">
                                         </div>
                                     </div>
                                     
-                                 
+                                    <div class="form-group text-left">
+                                        <label class="text-secondary">Vendedor</label>
+                                        <select class="form-control col-12" id="cmbVendedor">
+                                        </select>   
+                                    </div>
 
-                                    <div class="hidden">
+                                    <div class="">
                                         
                                         <div class="form-check form-check-inline">
                                             <input class="form-check-input hand" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="mostrador" checked>
@@ -405,48 +398,44 @@ function getView(){
             <div class="card card-rounded shadow border-base p-4"  style="font-size:80%">
                 <div class="card-body">
                             
-
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="form-group">
-                                        <label class="negrita text-base">CÓDIGO CLIE</label>
-                                        <input disabled type="text" class="form-control form-control-md border-base negrita text-verde" id="txtPosCobroNitclie" autocomplete="off">                            
-                                    </div>
+                            <div class="form-group">
+                                <label class="negrita text-base">NIT / DPI</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control form-control-md border-base negrita text-verde" id="txtPosCobroNit">
+                                    <button class="btn btn-base text-white hand" id="btnBuscarCliente">
+                                        <i class="fal fa-search"></i>
+                                    </button>
                                 </div>
-                                <div class="col-6">
-                                   <div class="form-group">
-                                        <label class="negrita text-base">NIT / DPI</label>
-                                        <div class="input-group">
-                                            <input type="text" class="form-control form-control-md border-base negrita text-verde" id="txtPosCobroNit"  disabled="true">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                                
                             
-                            <br>
+                            </div>
+
                         
                             <div class="form-group">
                                 <label class="negrita text-base">CLIENTE</label>
-                                <input type="text" class="form-control form-control-md border-base negrita text-verde" id="txtPosCobroNombre" disabled="true">
+                                <input type="text" class="form-control form-control-md border-base negrita text-verde" id="txtPosCobroNombre">
                             </div>
                             
                             <div class="form-group">
                                 <label class="negrita text-base">DIRECCIÓN</label>
-                                <input type="text" class="form-control form-control-md border-base negrita text-verde" id="txtPosCobroDireccion" disabled="true">
+                                <input type="text" class="form-control form-control-md border-base negrita text-verde" id="txtPosCobroDireccion">
                             </div>
 
                             <div class="form-group">
                                 <label class="negrita text-base">TELÉFONO/S</label>
-                                <input type="text" class="form-control form-control-md border-base negrita text-verde" id="txtPosCobroTelefono" disabled="true">
+                                <input type="text" class="form-control form-control-md border-base negrita text-verde" id="txtPosCobroTelefono">
                             </div>
 
-                            <div class="text-right hidden">
+                            <div class="text-right">
                                 <button class="btn btn-verde hand text-white" id="btnNuevoCliente">
                                     <i class="fal fa-plus"></i> Crear Nuevo cliente
                                 </button>
                             </div>
 
-                            
+                            <div class="form-group hidden">
+                                <label class="negrita text-base">CÓDIGO CLIENTE</label>
+                                <input disabled type="text" class="form-control form-control-md border-base negrita text-verde" id="txtPosCobroNitclie" autocomplete="off">                            
+                            </div>
 
                           
 
@@ -459,13 +448,19 @@ function getView(){
         },
         modal_lista_clientes:()=>{
             return `
-                    <div class="card card-rounded col-12 shadow">            
-                        <div class="card-body p-4">
+            <div class="modal" id="modal_lista_clientes" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-left" role="document">
+                    <div class="modal-content">
+                    
+                        <div class="modal-header bg-base">
+                        </div>
+                        
+                        <div class="modal-body p-4">
                             <div class="row">
                                 <div class="form-group col-12">
-                                    <label class="negrita text-secondary">Búsqueda de Clientes</label>
+                                    <label>Búsqueda de Clientes</label>
                                     <div class="input-group">
-                                        <input type="search" autocomplete="off" class="form-control border-base negrita col-12" id="txtBuscarClie">
+                                        <input type="search" autocomplete="off" class="form-control border-base negrita" id="txtBuscarClie">
                                         <button class="btn btn-base hand text-white" id="btnBuscarClie">
                                             <i class="fal fa-search"></i>
                                         </button>
@@ -489,19 +484,16 @@ function getView(){
                           
                         </div>
                     </div>
-
-                <button class="btn btn-warning btn-xl btn-bottom-l btn-circle shadow hand" id="btnListadoDocumentos">
-                    <i class="fal fa-folder"></i>  
-                </button>
-
-                    `
+                </div>
+            </div>`
         },
         modal_lista_documentos:()=>{
             return `
-                    <div class="card card-rounded col-12 shadow">
+            <div class="modal fade" id="modal_lista_documentos" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-right" role="document">
+                    <div class="modal-content">
                     
-                        <div class="card-body p-4">
-
+                        <div class="modal-body p-4">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="form-group">
@@ -509,8 +501,9 @@ function getView(){
                                         <div class="input-group">
                                             <input type="date" class="negrita form-control" id="txtFechaDoc">
                                             <select class="form-control negrita" id="cmbTipoDoc">
-                                                <option value="ENV">PEDIDOS</option>
-                                                <option value="COT">COTIZACIONES</option>
+                                                <option value="FAC">FACTURAS NORMALES</option>
+                                                <option value="FEF">FACTURAS IVA (CONTADO)</option>
+                                                <option value="FEC">FACTURAS CAMBIARIAS IVA (CREDITO)</option>
                                             </select>
                                         </div>
                                         
@@ -522,13 +515,10 @@ function getView(){
 
                                 
                             </div>
-                            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
-                                <i class="fal fa-arrow-left"></i>
-                            </button>
                         </div>
-
                     </div>
-                `
+                </div>
+            </div>`
         }
     }
 
@@ -539,8 +529,6 @@ function getView(){
 function addListeners(){
 
     document.title = "Ventas";
-
-    document.getElementById('tab-uno').click();
 
     F.slideAnimationTabs();
 
@@ -568,8 +556,12 @@ function addListeners(){
     
    
     
+    //carga el código vendedor
+    get_vendedores();
 
 
+    //carga las cajas
+    get_cajas();
     
     listener_coddoc();
 
@@ -593,7 +585,7 @@ function addListeners(){
     });
 
 
-    
+    document.getElementById('txtPosCodprod').focus();
 
 };
 
@@ -610,30 +602,32 @@ function listener_coddoc(){
         let container = document.getElementById('cmbCoddoc');
         container.innerHTML = '';
 
-        let coddoc = ''
-                
-                if(tipo=='ENV'){coddoc = `<option value="${Selected_coddoc_env}">${Selected_coddoc_env}</option>`};
-                if(tipo=='COT'){coddoc = `<option value="${Selected_coddoc_cot}">${Selected_coddoc_cot}</option>`};
-
-                       
+        axios.post('/tipodocumentos/coddoc',{
+            sucursal:GlobalEmpnit,
+            tipo:tipo,
+            token:TOKEN
+        })
+        .then((response) => {
+            let data = response.data;
+            if(Number(data.rowsAffected[0])>0){
+                let coddoc = ''
+                data.recordset.map((r)=>{
+                    coddoc += `<option value="${r.CODDOC}">${r.CODDOC}</option>`
+                })        
                 container.innerHTML = coddoc;
- 
                 get_correlativo(container.value)
                 .then((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
-                .catch((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
-                
+                .catch((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})  
+            }else{
+                container.innerHTML = '';
+            }                     
+        }, (error) => {
+            container.innerHTML = '';
+        });
     };
 
     let cmbCoddoc = document.getElementById('cmbCoddoc');
     cmbCoddoc.addEventListener('change',()=>{
-        
-        let tipo = document.getElementById('cmbTipoDocumento').value;
-        let coddoc = ''
-                
-        if(tipo=='ENV'){coddoc = `<option value="${Selected_coddoc_env}">${Selected_coddoc_env}</option>`};
-        if(tipo=='COT'){coddoc = `<option value="${Selected_coddoc_cot}">${Selected_coddoc_cot}</option>`};
-        cmbCoddoc.innerHTML = coddoc;
-
         get_correlativo(cmbCoddoc.value)
         .then((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
         .catch((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
@@ -693,7 +687,12 @@ function listener_teclado(){
     });
 
     
-    
+    Mousetrap.bind('f3', function(e) { 
+        e.preventDefault(); 
+        document.getElementById('btnPosCobro').click();
+        document.getElementById('btnBuscarCliente').click();
+
+    });
 
     Mousetrap.bind('f7', function(e) {
         e.preventDefault(); 
@@ -896,11 +895,11 @@ function listener_vista_cobro(){
     document.getElementById('txtPosCobroDireccion').value = "CIUDAD";
 
     document.getElementById('btnPosCobro').addEventListener('click',()=>{
-        document.getElementById('tab-tres').click();
+        document.getElementById('tab-documento').click();
     });
 
     document.getElementById('btnPosDocumentoAtras').addEventListener('click',()=>{
-        document.getElementById('tab-dos').click();
+        document.getElementById('tab-pedido').click();
     });
 
     document.getElementById('txtPosCobroNit').addEventListener('keyup',(e)=>{
@@ -946,6 +945,16 @@ function listener_vista_cobro(){
 
 
 
+    //busqueda de cliente
+    document.getElementById('btnBuscarCliente').addEventListener('click',()=>{
+        
+        $("#modal_lista_clientes").modal('show');
+        
+        document.getElementById('tblDataClientes').innerHTML = '';
+        document.getElementById('txtBuscarClie').value = '';
+        document.getElementById('txtBuscarClie').focus();
+
+    });
 
     document.getElementById('txtBuscarClie').addEventListener('keyup',(e)=>{
         if (e.code === 'Enter') { 
@@ -1017,12 +1026,8 @@ function listener_listado_documentos(){
 
     let btnListadoDocumentos = document.getElementById('btnListadoDocumentos');
     btnListadoDocumentos.addEventListener('click',()=>{
-        //$("#modal_lista_documentos").modal('show');
-        
-        document.getElementById('tab-cuatro').click();
-
-        tbl_lista_documentos('ENV');
-
+        $("#modal_lista_documentos").modal('show');
+        tbl_lista_documentos('PED');
     });
 
     document.getElementById('txtFechaDoc').addEventListener('change',()=>{
@@ -1041,7 +1046,37 @@ function initView(){
 
 };
 
+function get_vendedores(){
+    GF.get_data_empleados_tipo(3)
+    .then((data)=>{
+        let str = '';
+        data.recordset.map((r)=>{
+            str += `<option value="${r.CODEMPLEADO}">${r.NOMEMPLEADO}</option>`
+        });
+        document.getElementById('cmbVendedor').innerHTML = str;
+    })
+    .catch(()=>{
+        F.AvisoError('No se cargaron los vendedores');
+        document.getElementById('cmbVendedor').innerHTML ='<option value="1">SIN VENDEDOR</option>';
+    })
+};
 
+function get_cajas(){
+
+    GF.get_data_cajas()
+    .then((data)=>{
+        let str = '';
+        data.recordset.map((r)=>{
+            str += `<option value="${r.CODCAJA}">${r.DESCAJA}</option>`
+        });
+        document.getElementById('cmbCaja').innerHTML = str;
+    })
+    .catch(()=>{
+        F.AvisoError('No se cargaron las cajas');
+        document.getElementById('cmbCaja').innerHTML ='<option value="1">SIN CAJA</option>';
+    })
+
+};
 
 
 function tbl_clientes(filtro){
@@ -1058,11 +1093,10 @@ function tbl_clientes(filtro){
 
     let str = '';
 
-    axios.post('/clientes/buscar_cliente_vendedor', {
+    axios.post('/clientes/buscar_cliente', {
         token:TOKEN,
         sucursal: GlobalEmpnit,
-        filtro:filtro,
-        codven:GlobalCodUsuario
+        filtro:filtro
     })
     .then((response) => {        
         if(response.data=='error'){
@@ -1075,23 +1109,14 @@ function tbl_clientes(filtro){
                 <tr class="hand" onclick="get_datos_cliente('${r.CODCLIENTE}','${r.NIT}','${r.NOMBRE}','${r.DIRECCION}','${r.TELEFONO}')">    
                     <td>
                         ${r.NIT} / ${r.CODCLIENTE}
-                        <br>
-                        <button class="btn btn-sm btn-info hand shadow" onclick="F.gotoGoogleMaps('${r.LATITUD}','${r.LONGITUD}')">
-                            <i class="fal fa-globe"></i> Ver mapa
-                        </button>
                     </td>
                     <td>
                         ${r.NOMBRE}
                         <br>
                         <small>${r.DIRECCION}</small>
-                        <br>
-                        <small>Ref: ${r.REFERENCIA}</small>
                     </td>
                      <td>${r.TELEFONO}</td>
-                    <td>${F.setMoneda(r.SALDO,'Q')}
-                        <br>
-                        <small class="text-danger negrita">${r.VISITA}</small>
-                    </td>
+                    <td>${F.setMoneda(r.SALDO,'Q')}</td>
                 </tr>
                 `
             })
@@ -1180,7 +1205,7 @@ function fcn_buscar_cliente(nit){
 
 function get_datos_cliente(nitclie,nit,nomclie,dirclie,telefono){
 
-    //$("#modal_lista_clientes").modal('hide');
+    $("#modal_lista_clientes").modal('hide');
 
     document.getElementById('txtPosCobroNit').value = nit;
     document.getElementById('txtPosCobroNitclie').value = nitclie;
@@ -1188,11 +1213,6 @@ function get_datos_cliente(nitclie,nit,nomclie,dirclie,telefono){
     document.getElementById('txtPosCobroDireccion').value = dirclie;
     document.getElementById('txtPosCobroTelefono').value = telefono;
     
-    
-    document.getElementById('tab-dos').click();
-
-    document.getElementById('txtPosCodprod').focus();
-
 
 };
 
@@ -1728,7 +1748,9 @@ function finalizar_pedido(){
     let coddoc = document.getElementById('cmbCoddoc').value;
     let correlativoDoc = document.getElementById('txtCorrelativo').value;
 
-   
+    let cmbCaja = document.getElementById('cmbCaja');
+    let cmbVendedor = document.getElementById('cmbVendedor');
+
     let latdoc = '0';
     let longdoc = '0';
 
@@ -1773,7 +1795,7 @@ function finalizar_pedido(){
                 fechaentrega:fecha,
                 formaentrega:cmbTipoEntrega,
                 codbodega:codbodega,
-                codcaja: 0, //cmbCaja.value,
+                codcaja:cmbCaja.value,
                 codcliente: codcliente, //x
                 nomclie:ClienteNombre,
                 totalcosto:GlobalTotalCostoDocumento,
@@ -1784,7 +1806,7 @@ function finalizar_pedido(){
                 obs:entrega_referencia,
                 direntrega:direntrega,
                 usuario:GlobalUsuario,
-                codven: GlobalCodUsuario, //cmbVendedor.value,
+                codven:cmbVendedor.value,
                 lat:latdoc,
                 long:longdoc,
                 hora:hora,
@@ -1846,9 +1868,7 @@ function fcnNuevoPedido(){
         document.getElementById('txtPosCobroNombre').value = 'CONSUMIDOR FINAL';
         document.getElementById('txtPosCobroDireccion').value = 'CIUDAD';
        
-        //document.getElementById('btnPosDocumentoAtras').click();
-
-
+        document.getElementById('btnPosDocumentoAtras').click();
         get_tbl_pedido();
 
         let cmbCoddoc = document.getElementById('cmbCoddoc');
@@ -1856,7 +1876,6 @@ function fcnNuevoPedido(){
         .then((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
         .catch((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
     
-        document.getElementById('tab-uno').click();
 
 };
 

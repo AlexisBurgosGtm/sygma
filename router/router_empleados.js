@@ -8,7 +8,9 @@ router.post("/empleados_login", async(req,res)=>{
     const { token, sucursal, u, p } = req.body;
 
     let qry = `SELECT CODEMPLEADO AS CODIGO, CODPUESTO AS NIVEL, 
-        NOMEMPLEADO AS NOMBRE
+        NOMEMPLEADO AS NOMBRE, 
+        ISNULL(CODDOC_ENV,'') AS CODDOC_ENV,
+        ISNULL(CODDOC_COT,'') AS CODDOC_COT
          FROM EMPLEADOS 
         WHERE EMPNIT='${sucursal}' AND USUARIO='${u}' AND CLAVE='${p}';`
     

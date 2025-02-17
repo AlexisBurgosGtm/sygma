@@ -127,6 +127,8 @@ function addListeners(){
                     GlobalUsuario = r.NOMBRE;
                     GlobalNivelUsuario = Number(r.NIVEL);
                     GlobalCodUsuario = Number(r.CODIGO);
+                    Selected_coddoc_env = r.CODDOC_ENV;
+                    Selected_coddoc_cot = r.CODDOC_COT;
                 })
                 
                 GF.get_data_empresa_config(GlobalEmpnit)

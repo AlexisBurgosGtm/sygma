@@ -154,7 +154,8 @@ router.post("/buscar_cliente", async(req,res)=>{
             CLIENTES.TELEFONO, CLIENTES.LATITUD, 
             CLIENTES.LONGITUD, CLIENTES.SALDO, 
             CLIENTES.HABILITADO, CLIENTES.LASTSALE, 
-            CLIENTES.DIASCREDITO, CLIENTES.REFERENCIA
+            CLIENTES.DIASCREDITO, CLIENTES.REFERENCIA,
+            CLIENTES.DIAVISITA AS VISITA
         FROM CLIENTES LEFT OUTER JOIN
             DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO LEFT OUTER JOIN
             MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
@@ -167,6 +168,40 @@ router.post("/buscar_cliente", async(req,res)=>{
      
 });
 
+router.post("/buscar_cliente_vendedor", async(req,res)=>{
+   
+    const { token, sucursal, filtro, codven} = req.body;
+
+    let qry = `
+        SELECT CLIENTES.CODCLIENTE, CLIENTES.NIT, 
+            CLIENTES.NOMBRE, CLIENTES.DIRECCION, 
+            CLIENTES.CODMUN, MUNICIPIOS.DESMUN, 
+            CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
+            CLIENTES.TELEFONO, CLIENTES.LATITUD, 
+            CLIENTES.LONGITUD, CLIENTES.SALDO, 
+            CLIENTES.HABILITADO, CLIENTES.LASTSALE, 
+            CLIENTES.DIASCREDITO, CLIENTES.REFERENCIA,
+            CLIENTES.DIAVISITA AS VISITA
+        FROM CLIENTES LEFT OUTER JOIN
+            DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO LEFT OUTER JOIN
+            MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+        WHERE
+            (CLIENTES.EMPNIT='${sucursal}') AND 
+            (CLIENTES.NOMBRE LIKE '%${filtro}%') AND
+            (CLIENTES.CODEMPLEADO=${codven})
+
+        OR 
+            (CLIENTES.EMPNIT='${sucursal}') AND 
+            (CLIENTES.NIT='${filtro}') AND
+            (CLIENTES.CODEMPLEADO=${codven})
+            
+    `
+    
+ 
+
+    execute.QueryToken(res,qry,token);
+     
+});
 
 
 

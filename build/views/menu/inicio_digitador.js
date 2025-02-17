@@ -31,12 +31,14 @@ function getView(){
                                 <i class="fal fa-comments"></i></a>
                         </li>         
                     </ul>
+
                 </div>
                
             `
         },
         panel:()=>{
             return `
+            
             <div class="card card-rounded shadow col-12">
                 <div class="card-body p-4 text-center">
                 
@@ -45,15 +47,65 @@ function getView(){
                 </div>
             </div>
 
-            <div class="card card-rounded shadow col-12">
-                <div class="card-body p-2">
-                
-                <h1>LISTADO DE PEDIDOS PENDIENTES</h1>
-                <h1>RELLENO - MINIMOS DE INVENTARIO</h1>
-                <h1></h1>
+            <br>
+
+            <div class="row">
+                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
+
+                    <div class="card card-rounded shadow col-12">
+                        <div class="card-body p-2">
+                        
+                            <h4>LISTADO DE PEDIDOS PENDIENTES</h4>
+
+                            <table class="table h-full table-bordered col-12">
+                                <thead class="bg-base text-white negrita">
+                                    <tr>
+                                        <td>VENDEDOR</td>
+                                        <td>FECHA</td>
+                                        <td>CLIENTE</td>
+                                        <td>IMPORTE</td>
+                                        <td></td>
+                                    </tr>
+                                </thead>
+                                <tbody id="tblDataPedidos"></tbody>
+
+                            </table>
+                        
+
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
+
+                    <div class="card card-rounded shadow col-12">
+                        <div class="card-body p-2">
+                        
+                            <h4>RELLENO - MINIMOS DE INVENTARIO</h4>
+
+                             <table class="table h-full table-bordered col-12">
+                                <thead class="bg-warning text-white negrita">
+                                    <tr>
+                                        <td>CODIGO</td>
+                                        <td>PRODUCTO</td>
+                                        <td>MINIMO</td>
+                                        <td>MAXIMO</td>
+                                        <td>EXISTENCIA</td>
+                                        <td>RELLENO</td>
+                                    </tr>
+                                </thead>
+                                <tbody id="tblDataPedidos"></tbody>
+
+                            </table>
+                        
+                        </div>
+                    </div>
 
                 </div>
             </div>
+
+
+            
             `
         },
         vista_nuevo:()=>{

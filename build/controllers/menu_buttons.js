@@ -483,40 +483,26 @@ let botones_menu = {
     },
     inicio_vendedor: ()=>{
         return `
-        <ul id="js-nav-menu_vendedor" class="nav-menu">
+                        <ul id="js-nav-menu_vendedor" class="nav-menu">
                             <li>
                                 <a href="#"  class="text-base"  data-filter-tags="application intel"  onclick="Navegar.inicio();">
                                     <i class="fal fa-home"></i>
                                     <span class="nav-link-text" data-i18n="nav.application_intel">INICIO</span>
                                 </a>
                             </li>
-
-                            
-                             <li>
-                                <a href="#" title="Application Intel" data-filter-tags="application intel">
-                                    <i class="fal fa-chart-pie"></i>
-                                    <span class="nav-link-text" data-i18n="nav.application_intel">OPERACIONES</span>
+                            <li>
+                                <a href="#"  class="text-base"  data-filter-tags="application intel"  onclick="Menu.ventas_pedidos()">
+                                    <i class="fal fa-shopping-cart"></i>
+                                    <span class="nav-link-text" data-i18n="nav.application_intel">PEDIDOS</span>
                                 </a>
-                                
-                                <ul>
-                                    <li>
-                                        <a href="#" title="Analytics Dashboard" data-filter-tags="application intel analytics dashboard" onclick="Menu.ventas_pedidos()">
-                                            <span class="nav-link-text" data-i18n="nav.application_intel_analytics_dashboard">PEDIDOS</span>
-                                        </a>
-                                    </li>
-                                   
-                                    <li>
-                                        <a href="#" title="Introduction" data-filter-tags="application intel introduction"  onclick="Menu.ventas_censo()">
-                                            <span class="nav-link-text" data-i18n="nav.application_intel_introduction">CENSO</span>
-                                        </a>
-                                    </li>  
-                                    
-                                    
-                                </ul>
                             </li>
-                            
-                            
-        </ul>
+                            <li>
+                                <a href="#"  class="text-base"  data-filter-tags="application intel"  onclick="Menu.ventas_censo();">
+                                    <i class="fal fa-users"></i>
+                                    <span class="nav-link-text" data-i18n="nav.application_intel">CENSAR</span>
+                                </a>
+                            </li>                            
+                        </ul>
                 
         `
     },

@@ -28,6 +28,19 @@ router.post("/data_empresa_config", async(req,res)=>{
 
 });
 
+router.post("/data_empleado_config", async(req,res)=>{
+
+    const {token,sucursal,codven} = req.body;
+
+    let qry = `
+    
+        WHERE EMPNIT='${sucursal}';
+        `     
+  
+    execute.QueryToken(res,qry,token)
+
+});
+
 
 
 router.post("/sucursales_precio", async(req,res)=>{
