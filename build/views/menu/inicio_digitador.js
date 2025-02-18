@@ -9,10 +9,16 @@ function getView(){
                             ${view.panel()}
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
-                           
-                            
+                            ${view.vista_pedidos_pendientes()}
+
                         </div>
                         <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
+                            ${view.vista_relleno()}
+                        </div>
+                        <div class="tab-pane fade" id="cuatro" role="tabpanel" aria-labelledby="home-tab">
+                            
+                        </div>
+                        <div class="tab-pane fade" id="cinco" role="tabpanel" aria-labelledby="home-tab">
                             
                         </div>    
                     </div>
@@ -28,6 +34,14 @@ function getView(){
                         </li>  
                         <li class="nav-item">
                             <a class="nav-link negrita text-danger" id="tab-tres" data-toggle="tab" href="#tres" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>
+                        </li>  
+                        <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-cuatro" data-toggle="tab" href="#cuatro" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>
+                        </li>  
+                        <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-cinco" data-toggle="tab" href="#cinco" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
                         </li>         
                     </ul>
@@ -51,15 +65,57 @@ function getView(){
 
             <div class="row">
                 <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
-
-                    <div class="card card-rounded shadow col-12">
+                    
+                    <div class="card card-rounded shadow col-12 hand"  onclick="document.getElementById('tab-dos').click()">
                         <div class="card-body p-4">
+                            
+                            <h4>PEDIDOS PENDIENTES</h4>
+                            <h1 class="negrita text-danger" id="lbTotalMP"></h1>
+                            
+                        </div>
+                    </div>
+                    
+
+                </div>
+                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6" >
+                    
+                    <div class="card card-rounded shadow col-12 hand"  onclick="document.getElementById('tab-tres').click()">
+                        <div class="card-body p-4">
+
+                            <h4>RELLENO DE INVENTARIO</h4>
+                            <h1 class="negrita text-danger" id="lbTotalMR"></h1>
+
+                        </div>
+                    </div>
+                    
+
+                </div>
+            </div>
+
+
+            
+            `
+        },
+        vista_pedidos_pendientes:()=>{
+            return `
+                    <div class="card card-rounded shadow col-12">
+                        <div class="card-body p-4 table-responsive">
                         
-                            <h4>LISTADO DE PEDIDOS PENDIENTES</h4>
+                            
+                            <div class="row">
+                                <div class="col-6">
+                                    <h4>LISTADO DE PEDIDOS PENDIENTES</h4>
+                                </div>
+                                <div class="col-6">
+                                    <label class="negrita text-danger" id="lbTotalP"></label>
+                                </div>
+                            </div>
+                            
 
                             <table class="table h-full table-bordered col-12">
                                 <thead class="bg-base text-white negrita">
                                     <tr>
+                                        <td>EMBARQUE</td>
                                         <td>VENDEDOR</td>
                                         <td>FECHA</td>
                                         <td>CLIENTE</td>
@@ -75,13 +131,25 @@ function getView(){
                         </div>
                     </div>
 
-                </div>
-                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
-
+                    <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
+                        <i class="fal fa-arrow-left"></i>
+                    </button>
+            `
+        },
+        vista_relleno:()=>{
+            return `
                     <div class="card card-rounded shadow col-12">
-                        <div class="card-body p-4">
+                        <div class="card-body p-4 table-responsive">
                         
-                            <h4>RELLENO - MINIMOS DE INVENTARIO</h4>
+                            <div class="row">
+                                <div class="col-6">
+                                    <h4>RELLENO DE INVENTARIO</h4>
+                                </div>
+                                <div class="col-6">
+                                    <label class="negrita text-danger" id="lbTotal"></label>
+                                </div>
+                            </div>
+                            
 
                              <table class="table h-full table-bordered col-12">
                                 <thead class="bg-warning text-white negrita">
@@ -94,22 +162,17 @@ function getView(){
                                         <td>RELLENO</td>
                                     </tr>
                                 </thead>
-                                <tbody id="tblDataPedidos"></tbody>
+                                <tbody id="tblDataRelleno"></tbody>
 
                             </table>
                         
                         </div>
                     </div>
 
-                </div>
-            </div>
-
-
-            
+                    <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
+                        <i class="fal fa-arrow-left"></i>
+                    </button>
             `
-        },
-        vista_nuevo:()=>{
-
         }
     }
 
@@ -120,11 +183,11 @@ function getView(){
 function addListeners(){
 
 
-
+    F.slideAnimationTabs();
 
     tbl_pedidos_pendientes('tblDataPedidos');
 
-    tbl_relleno_inventario('tblDataPedidos');
+    tbl_relleno_inventario('tblDataRelleno');
 
 };
 
@@ -142,6 +205,7 @@ function tbl_pedidos_pendientes(idContainer){
     let container = document.getElementById(idContainer);
 
     container.innerHTML = GlobalLoader;
+    let contador = 0;
 
     GF.get_data_pedidos_pendientes_vendedores()
     .then((data)=>{
@@ -149,8 +213,10 @@ function tbl_pedidos_pendientes(idContainer){
         let str = '';
 
         data.recordset.map((r)=>{
+            contador +=1;
             str += `
                 <tr>
+                    <td>${r.CODEMBARQUE}</td>
                     <td>${r.NOMEMPLEADO}
                         <br>
                         <button class="btn btn-info btn-sm hand shadow"
@@ -174,10 +240,13 @@ function tbl_pedidos_pendientes(idContainer){
             `
         })
         container.innerHTML = str;
-
+        document.getElementById('lbTotalP').innerText = `Pedidos pendientes: ${contador}`
+        document.getElementById('lbTotalMP').innerText =`${contador} pedidos`
     })
     .catch((error)=>{
         container.innerHTML = 'No se cargaron datos....'
+        document.getElementById('lbTotalP').innerText = '---'
+        document.getElementById('lbTotalMP').innerText = '---'
     })
 
 
@@ -190,9 +259,10 @@ function tbl_relleno_inventario(idContainer){
     let container = document.getElementById(idContainer);
 
     container.innerHTML = GlobalLoader;
+    let lbTotal = document.getElementById('lbTotal');
+    let contador = 0;
 
-
-    get_data_surtido(empnit)
+    GF.get_data_surtido(GlobalEmpnit)
     .then((data)=>{
         
         let str = '';
@@ -215,10 +285,14 @@ function tbl_relleno_inventario(idContainer){
         })
         container.innerHTML = str;
         lbTotal.innerText = `Pendientes surtir ${contador}`;
+        document.getElementById('lbTotalMR').innerText = `${contador} productos`;
+        
     })
-    .catch(()=>{
+    .catch((error)=>{
+        console.log(error)
         container.innerHTML = 'No se cargaron datos...'
         lbTotal.innerText = '---'
+        document.getElementById('lbTotalMR').innerText = '---'
     })
 
 

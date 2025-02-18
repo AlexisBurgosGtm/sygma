@@ -11,7 +11,7 @@ function getView(){
                         
                             <div class="row">
                                 <div class="col-4 text-left">   
-                                    <label class="text-verde negrita h5" style="font-size:120%">Ingreso de Compras</label>
+                                    <label class="text-base negrita h5" style="font-size:120%">Punto de Venta</label>
                                     <br>
                                     <label class="text-base negrita h5" style="font-size:120%" id="lbTotalItems">0 items</label>
                                 </div>
@@ -28,29 +28,42 @@ function getView(){
                 <br>
                 <div class="col-12 p-0">
                     <div class="tab-content" id="myTabHomeContent">
-                        <div class="tab-pane fade show active" id="pedido" role="tabpanel" aria-labelledby="dias-tab">
-                            ${view.pedido() + view.modal_cantidad() + view.modal_editar_cantidad() + view.modal_lista_precios() + view.modal_lista_documentos() }
+                        <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="dias-tab">
+                        
+                            ${view.modal_lista_clientes()}
+                        
                         </div> 
-                        <div class="tab-pane fade" id="precios" role="tabpanel" aria-labelledby="clientes-tab">
-                          
+                        <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="clientes-tab">
+                        
+                            ${view.pedido() + view.modal_cantidad() + view.modal_editar_cantidad() + view.modal_lista_precios() }
+
                         </div>
 
-                        <div class="tab-pane fade" id="documento" role="tabpanel" aria-labelledby="home-tab">
-                            ${view.documento() + view.modal_lista_clientes()}
+                        <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
+                            ${view.documento()}
                         </div>
+
+                        <div class="tab-pane fade" id="cuatro" role="tabpanel" aria-labelledby="clientes-tab">
+                            ${view.modal_lista_documentos()}
+                        </div>
+
                     </div>
 
                     <ul class="nav nav-tabs hidden" id="myTabHome" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active negrita text-success" id="tab-pedido" data-toggle="tab" href="#pedido" role="tab" aria-controls="profile" aria-selected="false">
+                            <a class="nav-link active negrita text-success" id="tab-uno" data-toggle="tab" href="#uno" role="tab" aria-controls="profile" aria-selected="false">
                                 <i class="fal fa-list"></i></a>Pedido
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link negrita text-danger" id="tab-precios" data-toggle="tab" href="#precios" role="tab" aria-controls="home" aria-selected="true">
+                            <a class="nav-link negrita text-danger" id="tab-dos" data-toggle="tab" href="#dos" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>Precios
                         </li> 
                         <li class="nav-item">
-                            <a class="nav-link negrita text-info" id="tab-documento" data-toggle="tab" href="#documento" role="tab" aria-controls="home" aria-selected="true">
+                            <a class="nav-link negrita text-info" id="tab-tres" data-toggle="tab" href="#tres" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-edit"></i></a>Finalizar
+                        </li> 
+                        <li class="nav-item">
+                            <a class="nav-link negrita text-info" id="tab-cuatro" data-toggle="tab" href="#cuatro" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-edit"></i></a>Finalizar
                         </li>                           
                     </ul>
@@ -96,7 +109,7 @@ function getView(){
                                                 <td>PRODUCTO</td>
                                                 <td>MEDIDA</td>
                                                 <td>CANTIDAD</td>
-                                                <td>COSTO</td>
+                                                <td>PRECIO</td>
                                                 <td>SUBTOTAL</td>
                                                 <td>DESCUENTO</td>
                                                 <td>IMPORTE</td>
@@ -143,8 +156,9 @@ function getView(){
                                                 <td>MARCA</td>
                                                 <td>PRODUCTO</td>
                                                 <td>MEDIDA</td>
-                                                <td>COSTO</td>
+                                                <td>PRECIO</td>
                                                 <td>EXISTENCIA</td>
+                                                <td>IPs</td>
                                                 <td>TIPO</td>
                                             </tr>
                                         </thead>
@@ -191,7 +205,7 @@ function getView(){
                                     </div>   
                                     
                                     <div class="form-group">
-                                        <label class="negrita text-secondary">Costo ${GlobalSignoMoneda}:</label>
+                                        <label class="negrita text-secondary">Precio ${GlobalSignoMoneda}:</label>
                                         <input type="number" style="font-size:140%" class="form-control negrita text-info border-base shadow col-10" id="txtMCPrecio">
                                     </div>
                                     
@@ -258,7 +272,7 @@ function getView(){
                                     </div>   
                                     
                                     <div class="form-group">
-                                        <label class="negrita text-secondary">Costo ${GlobalSignoMoneda}:</label>
+                                        <label class="negrita text-secondary">Precio ${GlobalSignoMoneda}:</label>
                                         <input type="number" style="font-size:140%" class="form-control negrita text-info border-base shadow col-10" id="txtMCPrecioE">
                                     </div>
                                     
@@ -319,8 +333,9 @@ function getView(){
                                 <div class="form-group">
                                     <label class="text-secondary">Tipo de Documento</label>
                                     <select class="form-control col-12" id="cmbTipoDocumento">
-                                        <option value="COM">COMPRAS IVA</option>
-                                        <option value="COP">COMPRAS PEQ CONTRE</option>
+                                        <option value="FEL">MODO A</option>    
+                                        <option value="FAC">MODO B</option>
+                                        <option value="COT">COTIZACIÓN</option>
                                     </select>   
                                 </div>
                                 <div class="form-group text-left">
@@ -332,7 +347,7 @@ function getView(){
                                     </div>    
                                 </div>
                             </div>
-                            
+                            <br>
 
                             <div class="row">
                                 <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
@@ -346,45 +361,32 @@ function getView(){
                                     </div>
                                     
                                     <div class="form-group text-left">
-                                        <label class="text-secondary">Empleado</label>
+                                        <label class="text-secondary">Vendedor</label>
                                         <select class="form-control col-12" id="cmbVendedor">
                                         </select>   
                                     </div>
 
-                                    <div class="row">
+                                    <div class="">
                                         
-                                        <div class="form-group">
-                                            <label class="text-secondary">Forma de Pago</label>
-                                            <div class="input-group">
-                                                <select class="form-control negrita text-base" id="cmbConCre">
-                                                    <option value="CON">CONTADO</option>
-                                                    <option value="CRE">CREDITO</option>
-                                                </select>
-                                                <input type="date" class="form-control negrita" id="txtFechaPago">
-                                            </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input hand" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="mostrador" checked>
+                                            <label class="form-check-label negrita text-base hand" for="inlineRadio1">Mostrador  </label>
                                         </div>
-                                        
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input hand" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="domicilio">
+                                            <label class="form-check-label negrita text-base hand" for="inlineRadio2">Domicilio  </label>
+                                        </div>
+                                         <div class="form-check form-check-inline">
+                                            <input class="form-check-input hand" type="radio" name="inlineRadioOptions" id="inlineRadio3" value="callcenter">
+                                            <label class="form-check-label negrita text-base hand" for="inlineRadio3">Call Center</label>
+                                        </div>
+
                                     </div>
 
-                                    <br>
-                                    <div class="row">
-                                        
-                                        <div class="form-group">
-                                            <label class="text-secondary">Serie y Número Factura Proveedor</label>
-                                            <div class="input-group">
-                                                <input type="text" class="form-control text-base negrita" id="txtSerieFac" placeholder="Serie Factura">
-                                                <input type="text" class="form-control text-base negrita" id="txtNumeroFac" placeholder="Número Factura">
-                                            </div>
-                                        </div>
-                                        
-                                    </div>
-
-                                </div>
-                                
-                                
+                                </div>    
                                 <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                                     <div class="form-group text-right">
-                                        <label class="negrita text-secondary h4">Total Compra</label>
+                                        <label class="negrita text-secondary h4">Total a Pagar</label>
                                         <h2 class="negrita text-danger" style="font-size:280%" id="lbPosCobroTotalPagar">Q 0.00</h2>
                                     </div>
                                 </div>
@@ -409,9 +411,9 @@ function getView(){
             return `
             <div class="card card-rounded shadow border-base p-4"  style="font-size:80%">
                 <div class="card-body">
-                            <h3 class="negrita text-base">Selecciona al Proveedor</h3>
+                            
                             <div class="form-group">
-                                <label class="negrita text-base">NIT</label>
+                                <label class="negrita text-base">NIT / DPI</label>
                                 <div class="input-group">
                                     <input type="text" class="form-control form-control-md border-base negrita text-verde" id="txtPosCobroNit">
                                     <button class="btn btn-base text-white hand" id="btnBuscarCliente">
@@ -424,7 +426,7 @@ function getView(){
 
                         
                             <div class="form-group">
-                                <label class="negrita text-base">PROVEEDOR</label>
+                                <label class="negrita text-base">CLIENTE</label>
                                 <input type="text" class="form-control form-control-md border-base negrita text-verde" id="txtPosCobroNombre">
                             </div>
                             
@@ -440,7 +442,7 @@ function getView(){
 
                             <div class="text-right">
                                 <button class="btn btn-verde hand text-white" id="btnNuevoCliente">
-                                    <i class="fal fa-plus"></i> Crear Nuevo Proveedor
+                                    <i class="fal fa-plus"></i> Crear Nuevo cliente
                                 </button>
                             </div>
 
@@ -460,17 +462,11 @@ function getView(){
         },
         modal_lista_clientes:()=>{
             return `
-            <div class="modal" id="modal_lista_clientes" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg modal-dialog-left" role="document">
-                    <div class="modal-content">
-                    
-                        <div class="modal-header bg-base">
-                        </div>
-                        
-                        <div class="modal-body p-4">
+                    <div class="card card-rounded col-12 shadow">            
+                        <div class="card-body p-4">
                             <div class="row">
                                 <div class="form-group col-12">
-                                    <label>Búsqueda de Proveedores</label>
+                                    <label>Búsqueda de Clientes</label>
                                     <div class="input-group">
                                         <input type="search" autocomplete="off" class="form-control border-base negrita" id="txtBuscarClie">
                                         <button class="btn btn-base hand text-white" id="btnBuscarClie">
@@ -485,7 +481,7 @@ function getView(){
                                     <thead class="bg-base text-white">
                                         <tr>
                                             <td>NIT / CÓDIGO</td>
-                                            <td>PROVEEDOR</td>
+                                            <td>CLIENTE</td>
                                             <td>TELÉFONO</td>
                                             <td>SALDO</td>
                                         </tr>
@@ -496,8 +492,7 @@ function getView(){
                           
                         </div>
                     </div>
-                </div>
-            </div>`
+                    `
         },
         modal_lista_documentos:()=>{
             return `
@@ -513,8 +508,8 @@ function getView(){
                                         <div class="input-group">
                                             <input type="date" class="negrita form-control" id="txtFechaDoc">
                                             <select class="form-control negrita" id="cmbTipoDoc">
-                                                <option value="COM">COMPRAS IVA</option>
-                                                <option value="COP">COMPRAS PEQ CONTR</option>
+                                                <option value="ENV">PEDIDOS</option>
+                                                <option value="COT">COTIZACIONES</option>
                                             </select>
                                         </div>
                                         
@@ -526,6 +521,9 @@ function getView(){
 
                                 
                             </div>
+                            <button class="btn btn-secondary btn-circle hand shadow btn-bottom-l" data-dismiss="modal">
+                                <i class="fal fa-arrow-left"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -539,7 +537,7 @@ function getView(){
 
 function addListeners(){
 
-    document.title = "Compras";
+    document.title = "Ventas";
 
     F.slideAnimationTabs();
 
@@ -564,7 +562,6 @@ function addListeners(){
 
 
     document.getElementById('txtFecha').value = F.getFecha();
-    document.getElementById('txtFechaPago').value = F.getFecha();
     
    
     
@@ -578,7 +575,6 @@ function addListeners(){
     listener_coddoc();
 
    
-    
 
     let btnGuardarFactura = document.getElementById('btnGuardarFactura');
     btnGuardarFactura.addEventListener('click',()=>{
@@ -610,8 +606,6 @@ function listener_coddoc(){
     cmbTipoDocumento.addEventListener('change',()=>{
         get_coddoc(cmbTipoDocumento.value);
     })
-
-   
 
     function get_coddoc(tipo){
         let container = document.getElementById('cmbCoddoc');
@@ -796,6 +790,9 @@ function listener_vista_pedido(){
 
             F.showToast('Producto agregado ' + Selected_desprod);
             get_tbl_pedido();
+            
+            document.getElementById('txtPosCodprod').focus();
+
         })
         .catch(()=>{
             F.AvisoError('No se pudo agregar');
@@ -853,6 +850,7 @@ function listener_vista_pedido(){
 
             F.showToast('Producto agregado ' + Selected_desprod);
             get_tbl_pedido();
+            document.getElementById('txtPosCodprod').focus();
         })
         .catch(()=>{
             F.AvisoError('No se pudo agregar');
@@ -906,11 +904,11 @@ function listener_vista_cobro(){
     document.getElementById('txtPosCobroDireccion').value = "CIUDAD";
 
     document.getElementById('btnPosCobro').addEventListener('click',()=>{
-        document.getElementById('tab-documento').click();
+        document.getElementById('tab-tres').click();
     });
 
     document.getElementById('btnPosDocumentoAtras').addEventListener('click',()=>{
-        document.getElementById('tab-pedido').click();
+        document.getElementById('tab-uno').click();
     });
 
     document.getElementById('txtPosCobroNit').addEventListener('keyup',(e)=>{
@@ -959,7 +957,8 @@ function listener_vista_cobro(){
     //busqueda de cliente
     document.getElementById('btnBuscarCliente').addEventListener('click',()=>{
         
-        $("#modal_lista_clientes").modal('show');
+        //$("#modal_lista_clientes").modal('show');
+        
         
         document.getElementById('tblDataClientes').innerHTML = '';
         document.getElementById('txtBuscarClie').value = '';
@@ -1058,7 +1057,7 @@ function initView(){
 };
 
 function get_vendedores(){
-    GF.get_data_empleados_tipo(2)
+    GF.get_data_empleados_tipo(3)
     .then((data)=>{
         let str = '';
         data.recordset.map((r)=>{
@@ -1104,7 +1103,7 @@ function tbl_clientes(filtro){
 
     let str = '';
 
-    axios.post('/proveedores/buscar_proveedor', {
+    axios.post('/clientes/buscar_cliente', {
         token:TOKEN,
         sucursal: GlobalEmpnit,
         filtro:filtro
@@ -1181,10 +1180,9 @@ function fcn_buscar_cliente(nit){
             return;
         };
     
-        axios.post('/proveedores/buscar_proveedor_nit', {
+        axios.post('/pos/buscar_cliente_nit', {
             sucursal: GlobalEmpnit,
-            nit:nit,
-            token:TOKEN
+            nit:nit
         })
         .then((response) => {        
             if(response=='error'){
@@ -1198,9 +1196,9 @@ function fcn_buscar_cliente(nit){
                 }
                 data.map((r)=>{
                     document.getElementById('txtPosCobroNit').value = r.NIT;
-                    document.getElementById('txtPosCobroNitclie').value = r.CODCLIENTE;
-                    document.getElementById('txtPosCobroNombre').value = r.NOMBRE;
-                    document.getElementById('txtPosCobroDireccion').value = r.DIRECCION;
+                    document.getElementById('txtPosCobroNitclie').value = r.NITCLIE;
+                    document.getElementById('txtPosCobroNombre').value = r.NOMCLIE;
+                    document.getElementById('txtPosCobroDireccion').value = r.DIRCLIE;
                 })
                 resolve();
             }
@@ -1217,7 +1215,7 @@ function fcn_buscar_cliente(nit){
 
 function get_datos_cliente(nitclie,nit,nomclie,dirclie,telefono){
 
-    $("#modal_lista_clientes").modal('hide');
+    //$("#modal_lista_clientes").modal('hide');
 
     document.getElementById('txtPosCobroNit').value = nit;
     document.getElementById('txtPosCobroNitclie').value = nitclie;
@@ -1225,6 +1223,9 @@ function get_datos_cliente(nitclie,nit,nomclie,dirclie,telefono){
     document.getElementById('txtPosCobroDireccion').value = dirclie;
     document.getElementById('txtPosCobroTelefono').value = telefono;
     
+    
+    document.getElementById('tab-dos').click();
+
 
 };
 
@@ -1274,21 +1275,23 @@ function get_buscar_producto(filtro){
         }else{
             const data = response.data.recordset;
             data.map((r)=>{
-                
+                let strClassIps = '';
+                if(r.BONO.toString()=='0'){}else{}strClassIps = 'negrita text-base'
                 let strClassExistencia = '';
                 let existencia = Number(r.EXISTENCIA);
                 if(existencia<=0){strClassExistencia='bg-danger text-white'};
 
                 str += `
-                    <tr class="hand" onclick="get_producto('${r.CODPROD}','${r.DESPROD}','${r.CODMEDIDA}','${r.EQUIVALE}','${r.COSTO}','${r.COSTO}','${r.TIPOPROD}','${r.EXENTO}','${r.EXISTENCIA}','${r.BONO}')">
+                    <tr class="hand" onclick="get_producto('${r.CODPROD}','${r.DESPROD}','${r.CODMEDIDA}','${r.EQUIVALE}','${r.COSTO}','${r.PRECIO}','${r.TIPOPROD}','${r.EXENTO}','${r.EXISTENCIA}','${r.BONO}')">
                         <td>${r.DESMARCA}</td>
                         <td><b style="color:${r.COLOR}">${r.DESPROD}</b>
                             <br>
                             <small class="negrita text-danger">Cód:${r.CODPROD}</small>
                         </td>
                         <td>${r.CODMEDIDA} (Eq:${r.EQUIVALE})</td>
-                        <td>${F.setMoneda(r.COSTO,'Q')}</td>
+                        <td>${F.setMoneda(r.PRECIO,'Q')}</td>
                         <td class="${strClassExistencia}">${r.EXISTENCIA}</td>
+                        <td class='${strClassIps}'>${F.setMoneda(r.BONO,'Q')}</td>
                         <td>${r.TIPOPROD}</td>
                     </tr>
                 `
@@ -1753,16 +1756,10 @@ function finalizar_pedido(){
     let dia = txtFecha.getUTCDate() 
     let fecha = F.devuelveFecha('txtFecha'); //F.getFecha() //anio + '-' + mes + '-' + d; 
     
-    let fechapago =F.devuelveFecha('txtFechaPago');
-
-
     let hora = F.getHora();
 
     let coddoc = document.getElementById('cmbCoddoc').value;
     let correlativoDoc = document.getElementById('txtCorrelativo').value;
-
-    let serie_fac = document.getElementById('txtSerieFac').value || '';
-    let numero_fac = document.getElementById('txtNumeroFac').value || '';
 
     let cmbCaja = document.getElementById('cmbCaja');
     let cmbVendedor = document.getElementById('cmbVendedor');
@@ -1770,10 +1767,17 @@ function finalizar_pedido(){
     let latdoc = '0';
     let longdoc = '0';
 
-    let tipo_pago = document.getElementById('cmbConCre').value; 
-    let tipo_doc = 'COMPRA';
+    let tipo_pago = 'CON'; 
+    let tipo_doc = '';
     
-  
+    let var_mostrador = document.getElementById('inlineRadio1').checked.toString();
+    let var_domicilio = document.getElementById('inlineRadio2').checked.toString();
+    let var_callcenter = document.getElementById('inlineRadio3').checked.toString();
+    if(var_mostrador=="true"){tipo_doc='MOSTRADOR'};
+    if(var_domicilio=="true"){tipo_doc='DOMICILIO'};
+    if(var_callcenter=="true"){tipo_doc='CALLCENTER'};
+
+
     let entrega_contacto = ClienteNombre;
     let entrega_telefono = ''; 
     let entrega_direccion = ''; 
@@ -1793,17 +1797,15 @@ function finalizar_pedido(){
 
         gettempDocproductos_pos(GlobalUsuario)
         .then((response)=>{
-            axios.post('/compras/insertventa', {
+            axios.post('/pos/insertventa', {
                 jsondocproductos:JSON.stringify(response),
                 sucursal:GlobalEmpnit,
                 coddoc:coddoc,
                 correlativo: correlativoDoc,
-                serie_fac:serie_fac,
-                numero_fac:numero_fac,
                 anio:anio,
                 mes:mes,
                 fecha:fecha,
-                fechaentrega:fechapago,
+                fechaentrega:fecha,
                 formaentrega:cmbTipoEntrega,
                 codbodega:codbodega,
                 codcaja:cmbCaja.value,
@@ -1872,11 +1874,11 @@ function fcnNuevoPedido(){
         GlobalTotalCostoDocumento=0;
         
         
-        document.getElementById('txtFechaPago').value = F.getFecha();
-    
+        document.getElementById('inlineRadio1').checked = true;
+
         document.getElementById('txtPosCobroNit').value = 'CF';
         document.getElementById('txtPosCobroNitclie').value = 0;
-        document.getElementById('txtPosCobroNombre').value = 'PROVEEDORES VARIOS';
+        document.getElementById('txtPosCobroNombre').value = 'CONSUMIDOR FINAL';
         document.getElementById('txtPosCobroDireccion').value = 'CIUDAD';
        
         document.getElementById('btnPosDocumentoAtras').click();

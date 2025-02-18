@@ -70,11 +70,11 @@ router.post("/insert_producto", async(req,res)=>{
         ENTRADAS, SALIDAS,
         EXISTENCIA, FISICO,
         CODBODEGA, NOLOTE,
-        MINIMO, MAXIMO) SELECT EMPNIT, '${codprod}' AS CODPROD,
+        MINIMO, MAXIMO,HABILITADO) SELECT EMPNIT, '${codprod}' AS CODPROD,
 	    0 AS ENTRADAS, 0 AS SALIDAS,
 	    0 AS EXISTENCIA, 0 AS FISICO,
 	    1 AS CODBODEGA, '' AS NOLOTE,
-	    0 AS MINIMO, 0 AS MAXIMO
+	    0 AS MINIMO, 0 AS MAXIMO, 'SI' AS HABILITADO
     FROM EMPRESAS; 
     `
 

@@ -28,42 +28,29 @@ function getView(){
                 <br>
                 <div class="col-12 p-0">
                     <div class="tab-content" id="myTabHomeContent">
-                        <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="dias-tab">
-                        
-                            ${view.modal_lista_clientes()}
-                        
+                        <div class="tab-pane fade show active" id="pedido" role="tabpanel" aria-labelledby="dias-tab">
+                            ${view.pedido() + view.modal_cantidad() + view.modal_editar_cantidad() + view.modal_lista_precios() + view.modal_lista_documentos() }
                         </div> 
-                        <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="clientes-tab">
-                        
-                            ${view.pedido() + view.modal_cantidad() + view.modal_editar_cantidad() + view.modal_lista_precios() }
-
+                        <div class="tab-pane fade" id="precios" role="tabpanel" aria-labelledby="clientes-tab">
+                          
                         </div>
 
-                        <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
-                            ${view.documento()}
+                        <div class="tab-pane fade" id="documento" role="tabpanel" aria-labelledby="home-tab">
+                            ${view.documento() + view.modal_lista_clientes()}
                         </div>
-
-                        <div class="tab-pane fade" id="cuatro" role="tabpanel" aria-labelledby="clientes-tab">
-                            ${view.modal_lista_documentos()}
-                        </div>
-
                     </div>
 
                     <ul class="nav nav-tabs hidden" id="myTabHome" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active negrita text-success" id="tab-uno" data-toggle="tab" href="#uno" role="tab" aria-controls="profile" aria-selected="false">
+                            <a class="nav-link active negrita text-success" id="tab-pedido" data-toggle="tab" href="#pedido" role="tab" aria-controls="profile" aria-selected="false">
                                 <i class="fal fa-list"></i></a>Pedido
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link negrita text-danger" id="tab-dos" data-toggle="tab" href="#dos" role="tab" aria-controls="home" aria-selected="true">
+                            <a class="nav-link negrita text-danger" id="tab-precios" data-toggle="tab" href="#precios" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>Precios
                         </li> 
                         <li class="nav-item">
-                            <a class="nav-link negrita text-info" id="tab-tres" data-toggle="tab" href="#tres" role="tab" aria-controls="home" aria-selected="true">
-                                <i class="fal fa-edit"></i></a>Finalizar
-                        </li> 
-                        <li class="nav-item">
-                            <a class="nav-link negrita text-info" id="tab-cuatro" data-toggle="tab" href="#cuatro" role="tab" aria-controls="home" aria-selected="true">
+                            <a class="nav-link negrita text-info" id="tab-documento" data-toggle="tab" href="#documento" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-edit"></i></a>Finalizar
                         </li>                           
                     </ul>
@@ -333,9 +320,9 @@ function getView(){
                                 <div class="form-group">
                                     <label class="text-secondary">Tipo de Documento</label>
                                     <select class="form-control col-12" id="cmbTipoDocumento">
-                                        <option value="FEL">MODO A</option>    
-                                        <option value="FAC">MODO B</option>
-                                        <option value="COT">COTIZACIÓN</option>
+                                            <option value="FAC">FACTURAS NORMALES</option>
+                                            <option value="FEF">FACTURAS IVA (CONTADO)</option>
+                                            <option value="FEC">FACTURAS CAMBIARIAS IVA (CREDITO)</option>
                                     </select>   
                                 </div>
                                 <div class="form-group text-left">
@@ -462,8 +449,14 @@ function getView(){
         },
         modal_lista_clientes:()=>{
             return `
-                    <div class="card card-rounded col-12 shadow">            
-                        <div class="card-body p-4">
+            <div class="modal" id="modal_lista_clientes" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-left" role="document">
+                    <div class="modal-content">
+                    
+                        <div class="modal-header bg-base">
+                        </div>
+                        
+                        <div class="modal-body p-4">
                             <div class="row">
                                 <div class="form-group col-12">
                                     <label>Búsqueda de Clientes</label>
@@ -492,7 +485,8 @@ function getView(){
                           
                         </div>
                     </div>
-                    `
+                </div>
+            </div>`
         },
         modal_lista_documentos:()=>{
             return `
@@ -508,8 +502,9 @@ function getView(){
                                         <div class="input-group">
                                             <input type="date" class="negrita form-control" id="txtFechaDoc">
                                             <select class="form-control negrita" id="cmbTipoDoc">
-                                                <option value="ENV">PEDIDOS</option>
-                                                <option value="COT">COTIZACIONES</option>
+                                                <option value="FAC">FACTURAS NORMALES</option>
+                                                <option value="FEF">FACTURAS IVA (CONTADO)</option>
+                                                <option value="FEC">FACTURAS CAMBIARIAS IVA (CREDITO)</option>
                                             </select>
                                         </div>
                                         
@@ -521,9 +516,6 @@ function getView(){
 
                                 
                             </div>
-                            <button class="btn btn-secondary btn-circle hand shadow btn-bottom-l" data-dismiss="modal">
-                                <i class="fal fa-arrow-left"></i>
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -904,11 +896,11 @@ function listener_vista_cobro(){
     document.getElementById('txtPosCobroDireccion').value = "CIUDAD";
 
     document.getElementById('btnPosCobro').addEventListener('click',()=>{
-        document.getElementById('tab-tres').click();
+        document.getElementById('tab-documento').click();
     });
 
     document.getElementById('btnPosDocumentoAtras').addEventListener('click',()=>{
-        document.getElementById('tab-uno').click();
+        document.getElementById('tab-pedido').click();
     });
 
     document.getElementById('txtPosCobroNit').addEventListener('keyup',(e)=>{
@@ -957,8 +949,7 @@ function listener_vista_cobro(){
     //busqueda de cliente
     document.getElementById('btnBuscarCliente').addEventListener('click',()=>{
         
-        //$("#modal_lista_clientes").modal('show');
-        
+        $("#modal_lista_clientes").modal('show');
         
         document.getElementById('tblDataClientes').innerHTML = '';
         document.getElementById('txtBuscarClie').value = '';
@@ -1215,7 +1206,7 @@ function fcn_buscar_cliente(nit){
 
 function get_datos_cliente(nitclie,nit,nomclie,dirclie,telefono){
 
-    //$("#modal_lista_clientes").modal('hide');
+    $("#modal_lista_clientes").modal('hide');
 
     document.getElementById('txtPosCobroNit').value = nit;
     document.getElementById('txtPosCobroNitclie').value = nitclie;
@@ -1223,9 +1214,6 @@ function get_datos_cliente(nitclie,nit,nomclie,dirclie,telefono){
     document.getElementById('txtPosCobroDireccion').value = dirclie;
     document.getElementById('txtPosCobroTelefono').value = telefono;
     
-    
-    document.getElementById('tab-dos').click();
-
 
 };
 
