@@ -1154,6 +1154,30 @@ let F = {
                 <option value='2045'>2045</option>`
       return str;
       },
+      get_mes_curso:()=>{
+        
+        let mes = 0;
+        let f = new Date();
+        mes = f.getUTCMonth()+1;
+        return mes;
+
+      },
+      get_anio_curso:()=>{
+        
+        let anio = 0;
+        let f = new Date();
+        anio = f.getFullYear();
+        return anio;
+
+      },
+      get_mes_anio_fecha:(idFecha)=>{
+        
+          let txtFecha = new Date(document.getElementById(idFecha).value);
+          let anio = txtFecha.getFullYear();
+          let mes = txtFecha.getUTCMonth()+1
+
+          return [mes,anio]
+      },
       getComboTipoClientes : ()=>{
         let str = '';
 

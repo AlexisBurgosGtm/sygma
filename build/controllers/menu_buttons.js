@@ -299,11 +299,6 @@ let botones_menu = {
                                 </a>
                                 
                                 <ul>
-                                    <li>
-                                        <a href="#" title="Analytics Dashboard" data-filter-tags="application intel analytics dashboard" onclick="Menu.">
-                                            <span class="nav-link-text" data-i18n="nav.application_intel_analytics_dashboard">EMBARQUES</span>
-                                        </a>
-                                    </li>
                                    
                                     <li>
                                         <a href="#" title="Introduction" data-filter-tags="application intel introduction"  onclick="Menu.pos()">

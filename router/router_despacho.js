@@ -3,7 +3,6 @@ const express = require('express');
 const router = express.Router();
 
 
-
 router.post("/pedidos_pendientes_vendedores", async(req,res)=>{
    
     const { token, sucursal } = req.body;
@@ -38,6 +37,104 @@ router.post("/pedidos_pendientes_vendedores", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+
+
+
+router.post("/embarques_lista", async(req,res)=>{
+   
+    const { token, sucursal, status, mes, anio } = req.body;
+
+    let qry = `
+            SELECT EMBARQUES.ID,
+                EMBARQUES.FECHA, 
+                EMBARQUES.CODEMBARQUE, 
+                EMBARQUES.DESCRIPCION, 
+                EMBARQUES.RUTEO, 
+                EMBARQUES.CODEMPLEADO, 
+                EMPLEADOS.NOMEMPLEADO, 
+                EMBARQUES.F_TOTALCOSTO, 
+                EMBARQUES.F_TOTALPRECIO, 
+                EMBARQUES.F_DEVOLUCIONES, 
+                EMBARQUES.F_REPORTADO
+            FROM EMBARQUES LEFT OUTER JOIN
+                EMPLEADOS ON EMBARQUES.EMPNIT = EMPLEADOS.EMPNIT 
+                AND EMBARQUES.CODEMPLEADO = EMPLEADOS.CODEMPLEADO
+            WHERE  (EMBARQUES.FINALIZADO = '${status}') 
+            AND (EMBARQUES.EMPNIT = '${sucursal}') 
+            AND (EMBARQUES.MES=${mes}) 
+            AND (EMBARQUES.ANIO=${anio})    
+            `;
+    
+          
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/embarques_insert", async(req,res)=>{
+   
+    const {  token,sucursal,fecha,mes,anio,codembarque,descripcion,ruteo,codempleado} = req.body;
+
+    let qry = `
+            INSERT INTO EMBARQUES (EMPNIT,FECHA,MES,ANIO,
+                        CODEMBARQUE,DESCRIPCION,RUTEO,
+                        CODEMPLEADO,FINALIZADO,F_TOTALCOSTO,
+                        F_TOTALPRECIO,F_DEVOLUCIONES,F_REPORTADO)
+            SELECT '${sucursal}' AS EMPNIT,
+                    '${fecha}' AS FECHA,
+                    ${mes} AS MES,
+                    ${anio} AS ANIO,
+                    '${codembarque}' AS CODEMBARQUE,
+                    '${descripcion}' AS DESCRIPCION,
+                    '${ruteo}' AS RUTEO,
+                    ${codempleado} AS CODEMPLEADO,
+                    'NO' AS FINALIZADO,
+                    0 AS F_TOTALCOSTO,
+                    0 AS F_TOTALPRECIO,
+                    0 AS F_DEVOLUCIONES,
+                    0 AS F_REPORTADO
+            `;
+    
+            
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/embarques_edit", async(req,res)=>{
+   
+    const {  token,sucursal,fecha,codembarque,descripcion,ruteo,codempleado} = req.body;
+
+    let qry = `
+            UPDATE EMBARQUES SET
+                FECHA='${fecha}',
+                DESCRIPCION='${descripcion}',
+                RUTEO='${ruteo}',
+                CODEMPLEADO=${codempleado}
+            WHERE EMPNIT='${sucursal}' AND CODEMBARQUE='${codembarque}'
+            `;
+    
+            
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/embarques_deletre", async(req,res)=>{
+   
+    const {  token,sucursal,codembarque} = req.body;
+
+    let qry = `
+            DELETE FROM EMBARQUES WHERE EMPNIT='${sucursal}' AND CODEMBARQUE='${codembarque}';
+            `;
+    
+            
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+
+
+
 
 
 
