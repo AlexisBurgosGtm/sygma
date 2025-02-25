@@ -7,8 +7,8 @@ let map; //mapa de leaflet
 let GlobalUrlCalls = '';
 let GlobalUrlServicioLocal = 'http://192.168.1.16:8080'
 let GlobalUrlPrinter = 'http://192.168.0.250:9000'
-let TOKEN = 'FSYA';
-let GlobalEmpnitBodega = 'FSYA000';
+let TOKEN = '';
+let GlobalEmpnitBodega = '';
 let GlobalEmpnit ='';
 
 let GlobalUsuario = '';
@@ -37,7 +37,7 @@ let rootErrores = document.getElementById('rootErrores');
 let navmenu = document.getElementById('js-nav-menu');
 
 
-let GlobalLoader = `<b class="negrita text-base">Cargando... </b> ${special_loader_puntos}`;
+let GlobalLoader = special_loader_puntos_saltando; //`<b class="negrita text-base">Cargando... </b> ${special_loader_puntos}`;
 
 
 let GlobalLoaderX = `
@@ -98,6 +98,13 @@ let GlobalTotalItems = 0;
 
 let Selected_coddoc_env = '';
 let Selected_coddoc_cot = '';
+
+
+let selected_ped_coddoc = '';
+let selected_ped_correlativo = '';
+let selected_ped_codembarque = '';
+
+let selected_id_element = '';
 
 
 

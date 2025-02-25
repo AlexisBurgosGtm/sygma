@@ -212,7 +212,16 @@ let special_switch = `
       </div>
     </label>
 `
-
+let special_loader_puntos_saltando = `
+<div class="wrapper4">
+    <div class="circle4"></div>
+    <div class="circle4"></div>
+    <div class="circle4"></div>
+    <div class="shadow4"></div>
+    <div class="shadow4"></div>
+    <div class="shadow4"></div>
+</div>
+`
 let special_toggle = `
     <div class="toggle-border">
       <input id="one" type="checkbox">

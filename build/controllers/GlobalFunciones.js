@@ -804,6 +804,38 @@ let GF = {
         }) 
     
     },
+    get_data_pedidos_update_embarque: (empnit,coddoc,correlativo,codembarque)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                codembarque:codembarque,
+                coddoc:coddoc,
+                correlativo:correlativo
+            };
+    
+            axios.post(`/despacho/pedido_update_embarque`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
     get_data_surtido: (empnit)=>{
         return new Promise((resolve, reject)=>{
             
@@ -846,6 +878,35 @@ let GF = {
             };
     
             axios.post(`/despacho/embarques_lista`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
+    get_data_embarques_listado_activos: (empnit)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:empnit
+            };
+    
+            axios.post(`/despacho/embarques_lista_activos`, data)
             .then(res => {
                 
                 if(res.status.toString()=='200'){
@@ -918,6 +979,67 @@ let GF = {
             };
     
             axios.post(`/despacho/embarques_edit`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
+    get_data_embarques_delete: (codembarque,empnit)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                codembarque:codembarque
+            };
+    
+            axios.post(`/despacho/embarques_delete`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
+    get_data_embarques_finalizar: (codembarque,empnit,status)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                codembarque:codembarque,
+                status:status
+            };
+    
+            axios.post(`/despacho/embarques_status`, data)
             .then(res => {
                 
                 if(res.status.toString()=='200'){
