@@ -48,6 +48,23 @@ router.post("/detalle_documento", async(req,res)=>{
 });
 
 
+router.post("/detalle_documento_json", async(req,res)=>{
+   
+    const { token, sucursal, coddoc,correlativo} = req.body;
+
+    let qry = `
+        SELECT ISNULL(OBS,'') AS OBS, JSONDOCPRODUCTOS 
+        FROM DOCUMENTOS_TEMPORALES
+        WHERE (EMPNIT = '${sucursal}') 
+        AND (CODDOC = '${coddoc}') 
+        AND (CORRELATIVO = ${correlativo})
+    `
+    
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
 
 router.post("/anular_documento", async(req,res)=>{
    

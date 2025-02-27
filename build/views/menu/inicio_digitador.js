@@ -9,7 +9,8 @@ function getView(){
                             ${view.panel()}
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
-                            ${view.vista_pedidos_pendientes() + view.vista_pedidos_modal_embarques()}
+
+                            ${view.vista_pedidos_pendientes() + view.vista_pedidos_modal_embarques() + view.modal_detalle_documento()}
 
                         </div>
                         <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
@@ -22,6 +23,9 @@ function getView(){
                             ${view.vista_revision_inventario_embarque()}
                         </div>
                         <div class="tab-pane fade" id="seis" role="tabpanel" aria-labelledby="home-tab">
+                            ${view.vista_facturacion()}
+                        </div>
+                        <div class="tab-pane fade" id="siete" role="tabpanel" aria-labelledby="home-tab">
                             
                         </div>    
                     </div>
@@ -49,6 +53,10 @@ function getView(){
                         </li>  
                         <li class="nav-item">
                             <a class="nav-link negrita text-danger" id="tab-seis" data-toggle="tab" href="#seis" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-siete" data-toggle="tab" href="#siete" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
                         </li>         
                     </ul>
@@ -143,11 +151,11 @@ function getView(){
                 </div>
                 <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6" >
                     
-                    <div class="card card-rounded shadow hand col-12" onclick="document.getElementById('tab-cinco').click()">
+                    <div class="card card-rounded shadow hand col-12"  id="btnMenuFacturacion">
                         <div class="card-body p-4">
                             
-                            <h4>REVISION DE EXISTENCIA EN EMBARQUES</h4>
-                            <h1 class="negrita text-danger" id="">Ajuste de inventario</h1>
+                            <h4>FACTURAR PEDIDOS EMBARQUES</h4>
+                            <h1 class="negrita text-danger" id="">Gestión de Pedidos</h1>
                             
                             <div class="row">
                                 <div class="col-6">
@@ -207,6 +215,65 @@ function getView(){
                     <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
                         <i class="fal fa-arrow-left"></i>
                     </button>
+            `
+        },
+        modal_detalle_documento:()=>{
+            return `
+            <div id="modal_detalle_pedido" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-right modal-xl">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-base d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white" id="">
+                                Detalle del Documento
+                            </h4>
+                        </div>
+                        <div class="modal-body p-4">
+                            
+                            <div class="card card-rounded">
+                                <div class="card-body p-2">
+
+                                        <h4 class="negrita text-base" id="lbDetalleTomarDatosNombre"></h4>
+                                        <br>
+
+                                        <div class="table-responsive col-12">
+                                            <table class="table table-responsive table-bordered table-hover">
+                                                <thead class="bg-verde text-white">
+                                                    <tr>
+                                                        <td>CODIGO</td>
+                                                        <td>PRODUCTO</td>
+                                                        <td>TIPOP</td>
+                                                        <td>MEDIDA</td>
+                                                        <td>CANTIDAD</td>
+                                                        <td>PRECIO</td>
+                                                        <td>IMPORTE</td>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tblDataDetallePedido"></tbody>
+                                            </table>
+
+                                            <div class="form-group">
+                                                <label class="negrita text-base">Observaciones</label>
+                                                <textarea class="form-control negrita" id="txtDetallePedidoObs" rows="4"></textarea>
+                                            </div>
+
+                                        
+                                        </div>
+
+                                </div>
+                            </div>
+
+                                
+                            <div class="row">
+                                <button class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
+                                    <i class="fal fa-arrow-left"></i>
+                                </button>
+                            </div>
+
+                        </div>
+                    
+                    </div>
+                </div>
+            </div>
             `
         },
         vista_pedidos_modal_embarques:()=>{
@@ -507,6 +574,100 @@ function getView(){
                         <i class="fal fa-arrow-left"></i>
                     </button>
             `
+        },
+        vista_facturacion:()=>{
+            return `
+             <div class="card card-rounded shadow col-12">
+                <div class="card-body p-4">
+                        
+                    <div class="form-group">
+                        <label class="negrita text-secondary">Pedidos asignados al Embarque</label>
+                        <div class="input-group">
+                            <select class="form-control negrita text-danger" id="cmbFEmbarques">
+                        
+                            </select>
+                            <input type="date" class="form-control negrita text-danger" id="txtFFecha">
+                        </div>
+                    </div>
+
+                </div>
+             </div>
+             <div class="col-12 p-0">
+                    <div class="tab-content" id="myTabHomeContent2">
+                        <div class="tab-pane fade show active" id="Funo" role="tabpanel" aria-labelledby="receta-tab">
+                            ${view.facturacion_crear_facturas()}
+                        </div>
+                        <div class="tab-pane fade" id="Fdos" role="tabpanel" aria-labelledby="home-tab">
+
+                     
+                        </div>
+                        <div class="tab-pane fade" id="Ftres" role="tabpanel" aria-labelledby="home-tab">
+                     
+                        </div>
+                        <div class="tab-pane fade" id="Fcuatro" role="tabpanel" aria-labelledby="home-tab">
+                     
+                        </div>    
+                    </div>
+
+                    <ul class="nav nav-tabs hidden" id="myTabHome" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active negrita text-success" id="tab-Funo" data-toggle="tab" href="#Funo" role="tab" aria-controls="profile" aria-selected="false">
+                                <i class="fal fa-list"></i></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-Fdos" data-toggle="tab" href="#Fdos" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>
+                        </li>  
+                        <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-Ftres" data-toggle="tab" href="#Ftres" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>
+                        </li>  
+                        <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-Fcuatro" data-toggle="tab" href="#Fcuatro" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>
+                        </li>           
+                    </ul>
+
+                </div>
+            
+            `
+        },
+        facturacion_crear_facturas:()=>{
+            return `
+            <br>
+            <div class="card card-rounded shadow col-12">
+                <div class="card-body p-4">
+
+                    <div class="table-responsive">
+
+                         <table class="table h-full table-bordered col-12" id="tblFPedidos">
+                                <thead class="bg-base text-white negrita">
+                                    <tr>
+                                        <td>EMBARQUE</td>
+                                        <td>VENDEDOR</td>
+                                        <td>FECHA</td>
+                                        <td>CLIENTE</td>
+                                        <td>MUNICIPIO</td>
+                                        <td>IMPORTE</td>
+                                        <td></td>
+                                    </tr>
+                                </thead>
+                                <tbody id="tblDataFPedidos"></tbody>
+
+                            </table>
+
+                    </div>
+                    
+                </div>
+            </div>
+
+
+
+            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
+                <i class="fal fa-arrow-left"></i>
+            </button>
+
+            `
         }
     }
 
@@ -557,6 +718,30 @@ function listeners_pedidos_pendientes(){
     selected_ped_codembarque = '';
 
 
+    document.getElementById('btnMenuFacturacion').addEventListener('click',()=>{
+
+        document.getElementById('tab-seis').click();
+        
+        get_combo_embarques();
+        
+        document.getElementById('tab-Funo').click();
+    
+    });
+
+    document.getElementById('txtFFecha').value = F.getFecha();
+
+    document.getElementById('txtFFecha').addEventListener('change',()=>{
+        get_combo_embarques();
+    });
+
+    document.getElementById('cmbFEmbarques').addEventListener('change',()=>{
+
+        let codembarque = document.getElementById('cmbFEmbarques').value;
+        tbl_pedidos_embarque_facturar(codembarque);
+
+    });
+    
+
 };
 
 function tbl_pedidos_pendientes(idContainer){
@@ -577,17 +762,12 @@ function tbl_pedidos_pendientes(idContainer){
             str += `
                 <tr>
                     <td class="text-left">
-                    
                         <button class="btn btn-info btn-md btn-circle hand shadow"
                             onclick="get_embarques_pedido('${r.CODDOC}','${r.CORRELATIVO}','${idRowPedido}')">
                                 <i class="fal fa-plus"></i>
                         </button>
                         
                         <b class="text-danger" id="${idRowPedido}">${r.CODEMBARQUE}</b>
- 
-                           
-                    
-                        
                     </td>
                     <td>${r.NOMEMPLEADO}
                         <button class="btn btn-info btn-circle btn-sm hand shadow"
@@ -610,7 +790,10 @@ function tbl_pedidos_pendientes(idContainer){
                     </td>
                     <td class="negrita text-danger text-right">${F.setMoneda(r.IMPORTE,'Q')}</td>
                     <td>
-                    
+                        <button class="btn btn-warning btn-md btn-circle hand shadow"
+                            onclick="get_detalle_pedido('${r.CODDOC}','${r.CORRELATIVO}')">
+                                <i class="fal fa-list"></i>
+                        </button>
                     </td>
                 </tr>
             `
@@ -725,6 +908,145 @@ function seleccionar_embarque(codembarque){
         F.AvisoError('No se pudo actualizar el Embarque en el pedido')
         valor.innerHTML = valorAnterior;
     })
+
+
+};
+
+function get_detalle_pedido(coddoc,correlativo){
+
+
+    $("#modal_detalle_pedido").modal('show');
+
+
+    let container = document.getElementById('tblDataDetallePedido');
+    container.innerHTML = GlobalLoader;
+
+
+    GF.get_data_detalle_documento_json(GlobalEmpnit,coddoc,correlativo)
+    .then((data)=>{
+        let str = "";
+        
+        
+        let json = JSON.parse(data.recordset[0].JSONDOCPRODUCTOS);
+        let obs = data.recordset[0].OBS;
+
+
+
+        
+        json.map((r)=>{
+            str += `
+            <tr>
+                <td>${r.CODPROD}</td>
+                <td>${r.DESPROD}</td>
+                <td>${r.TIPOPRECIO}</td>
+                <td>${r.CODMEDIDA}</td>
+                <td>${r.CANTIDAD}</td>
+                <td>${F.setMoneda(r.PRECIO,'Q')}</td>
+                <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
+        document.getElementById('txtDetallePedidoObs').value = obs;
+
+    })
+    .catch(()=>{
+        container.innerHTML = 'No hay datos...';
+        document.getElementById('txtDetallePedidoObs').value = '';
+
+    })
+
+
+
+
+};
+
+
+function get_combo_embarques(){
+
+    let container = document.getElementById('cmbFEmbarques');
+    let fecha = F.devuelveFecha('txtFFecha');
+
+    let str = `<option value='TODOS'>TODOS</option>`;
+
+    GF.get_data_embarques_listado_activos_fecha(GlobalEmpnit, fecha)
+    .then((data)=>{
+
+        data.recordset.map((r)=>{
+            str += `
+                <option value='${r.CODEMBARQUE}'>${r.DESCRIPCION}<small>(${r.NOMEMPLEADO})<small></option>
+            `
+        })
+        container.innerHTML = str;
+    })
+    .catch((error)=>{
+        
+        console.log(error);
+
+        container.innerHTML = `<option value=''>NO HAY EMBARQUES CON ESA FECHA</option>`;
+
+    })
+
+
+
+};
+
+function tbl_pedidos_embarque_facturar(codembarque){
+
+        let container = document.getElementById('tblDataFPedidos');
+
+        container.innerHTML = GlobalLoader;
+        let contador = 0;
+
+        GF.get_data_pedidos_pendientes_vendedores_embarque(codembarque)
+        .then((data)=>{
+
+            let str = '';
+
+            data.recordset.map((r)=>{
+                let idRowPedido = `idRowPedidoF${r.CODDOC}-${r.CORRELATIVO}`;
+                contador +=1;
+                str += `
+                    <tr>
+                        <td class="text-left">
+                          
+                            <b class="text-danger" id="${idRowPedido}">${r.CODEMBARQUE}</b>
+                        </td>
+                        <td>${r.NOMEMPLEADO}
+                            <br>
+                            <small class="negrita">${r.CODDOC}-${r.CORRELATIVO}</small>
+                        </td>
+                        <td>${F.convertDateNormal(r.FECHA)}
+                            <br>
+                            <small>Hora:${r.HORA}</small>
+                        </td>
+                        <td>${r.NOMCLIE}
+                            <br>
+                            <small>${r.DIRCLIE}</small>
+                        </td>
+                        <td>
+                            ${r.DESMUN}
+                        </td>
+                        <td class="negrita text-danger text-right">${F.setMoneda(r.IMPORTE,'Q')}</td>
+                        <td>
+                            <button class="btn btn-success btn-md btn-circle hand shadow">
+                                    <i class="fal fa-list"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `
+            })
+            container.innerHTML = str;
+            //document.getElementById('lbTotalP').innerText = `Pedidos pendientes: ${contador}`
+            ///document.getElementById('lbTotalMP').innerText =`${contador} pedidos`
+
+        })
+        .catch((error)=>{
+            container.innerHTML = 'No se cargaron datos....'
+            //document.getElementById('lbTotalP').innerText = '---'
+            //document.getElementById('lbTotalMP').innerText = '---'
+        })
+
 
 
 };
@@ -857,6 +1179,7 @@ function listeners_embarques(){
         let ruteo  = F.limpiarTexto(document.getElementById('txtEmbarqueRuteo').value) || '';
         let codempleado = document.getElementById('cmbEmbarqueEmpleado').value; 
 
+        let statusEmbarque = document.getElementById('cmbStatus').value;
 
             //let boleditar = document.getElementById('txtEmbarqueCodigo').disabled 
             //if(boleditar.toString() == 'false'){
@@ -885,7 +1208,10 @@ function listeners_embarques(){
                             tbl_embarques('tblDatalEmbarques',statusEmbarque,mes,anio);
 
                         })
-                        .catch(()=>{
+                        .catch((error)=>{
+                            console.log('error al crear embarque')
+                            console.log(error);
+
                             F.AvisoError('No se pudo Guardar')
                             btnEmbarqueGuardar.disabled=false;
                             btnEmbarqueGuardar.innerHTML = `<i class="fal fa-save"></i>`;
@@ -1036,10 +1362,17 @@ function tbl_embarques(idContainer,status,mes,anio){
 
         container.innerHTML = str;
         if(status=='NO'){document.getElementById('lbTotalEmb').innerText = `Pendientes ${conteo}`;};
-        new DataTable('#tblEmbarques', {
-            paging: false,
-            scrollCollapse: true
-        });
+        
+        try {
+            new DataTable('#tblEmbarques', {
+                paging: false,
+                scrollCollapse: true
+            });    
+        } catch (error) {
+            
+        }
+
+        
     })
     .catch(()=>{
         document.getElementById('lbTotalEmb').innerText = '---'

@@ -26,6 +26,35 @@ WHERE  (DOCUMENTOS_TEMPORALES.EMPNIT = '${sucursal}') AND (DOCUMENTOS_TEMPORALES
      
 });
 
+
+router.post("/pedidos_pendientes_vendedores_embarque", async(req,res)=>{
+   
+    const { token, sucursal, codembarque } = req.body;
+
+    let qry = `
+    SELECT DOCUMENTOS_TEMPORALES.FECHA, DOCUMENTOS_TEMPORALES.HORA, DOCUMENTOS_TEMPORALES.CODDOC, 
+        DOCUMENTOS_TEMPORALES.CORRELATIVO, DOCUMENTOS_TEMPORALES.DOC_NIT AS NIT, 
+        DOCUMENTOS_TEMPORALES.DOC_NOMCLIE AS NOMCLIE, DOCUMENTOS_TEMPORALES.DOC_DIRCLIE AS DIRCLIE, 
+        DOCUMENTOS_TEMPORALES.TOTALPRECIO AS IMPORTE, DOCUMENTOS_TEMPORALES.STATUS, 
+        DOCUMENTOS_TEMPORALES.DIRENTREGA, DOCUMENTOS_TEMPORALES.LAT, DOCUMENTOS_TEMPORALES.LONG, 
+        EMPLEADOS.NOMEMPLEADO, ISNULL(DOCUMENTOS_TEMPORALES.CODEMBARQUE, '') AS CODEMBARQUE, 
+        MUNICIPIOS.DESMUN, DEPARTAMENTOS.DESDEPTO
+    FROM  MUNICIPIOS RIGHT OUTER JOIN
+        CLIENTES ON MUNICIPIOS.CODMUN = CLIENTES.CODMUN LEFT OUTER JOIN
+        DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO RIGHT OUTER JOIN
+        DOCUMENTOS_TEMPORALES ON CLIENTES.CODCLIENTE = DOCUMENTOS_TEMPORALES.CODCLIENTE LEFT OUTER JOIN
+        EMPLEADOS ON DOCUMENTOS_TEMPORALES.EMPNIT = EMPLEADOS.EMPNIT AND DOCUMENTOS_TEMPORALES.CODEMP = EMPLEADOS.CODEMPLEADO LEFT OUTER JOIN
+        TIPODOCUMENTOS ON DOCUMENTOS_TEMPORALES.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS_TEMPORALES.EMPNIT = TIPODOCUMENTOS.EMPNIT
+    WHERE (DOCUMENTOS_TEMPORALES.EMPNIT = '${sucursal}')  
+        AND (DOCUMENTOS_TEMPORALES.CODEMBARQUE = '${codembarque}')    
+    `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
 router.post("/pedido_update_embarque", async(req,res)=>{
    
     const {  token,sucursal,codembarque,coddoc,correlativo} = req.body;
@@ -72,6 +101,36 @@ router.post("/embarques_lista_activos", async(req,res)=>{
             WHERE  (EMBARQUES.FINALIZADO = 'NO') 
             AND (EMBARQUES.EMPNIT = '${sucursal}');
 
+            `;
+    
+          
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/embarques_lista_activos_fecha", async(req,res)=>{
+   
+    const { token, sucursal, fecha } = req.body;
+
+    let qry = `
+            SELECT EMBARQUES.ID,
+                EMBARQUES.FECHA, 
+                EMBARQUES.CODEMBARQUE, 
+                EMBARQUES.DESCRIPCION, 
+                EMBARQUES.RUTEO, 
+                EMBARQUES.CODEMPLEADO, 
+                EMPLEADOS.NOMEMPLEADO, 
+                EMBARQUES.F_TOTALCOSTO, 
+                EMBARQUES.F_TOTALPRECIO, 
+                EMBARQUES.F_DEVOLUCIONES, 
+                EMBARQUES.F_REPORTADO
+            FROM EMBARQUES LEFT OUTER JOIN
+                EMPLEADOS ON EMBARQUES.EMPNIT = EMPLEADOS.EMPNIT 
+                AND EMBARQUES.CODEMPLEADO = EMPLEADOS.CODEMPLEADO
+            WHERE  (EMBARQUES.FINALIZADO = 'NO') 
+            AND (EMBARQUES.EMPNIT = '${sucursal}')
+            AND (EMBARQUES.FECHA='${fecha}');
             `;
     
           

@@ -614,6 +614,39 @@ let GF = {
     
         })
     },
+    get_data_detalle_documento_json: (empnit,coddoc,correlativo)=>{
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                sucursal:empnit,
+                token:TOKEN,
+                coddoc:coddoc,
+                correlativo:correlativo
+            };
+    
+            axios.post(`/documentos/detalle_documento_json`, data)
+            .then(response => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }       
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
     get_data_empresa_config(sucursal){
     
   
@@ -804,6 +837,34 @@ let GF = {
         }) 
     
     },
+    get_data_pedidos_pendientes_vendedores_embarque:(codembarque)=>{
+        
+        return new Promise((resolve,reject)=>{
+
+            let data = {sucursal:GlobalEmpnit,codembarque:codembarque}
+
+            axios.post(GlobalUrlCalls + '/despacho/pedidos_pendientes_vendedores_embarque', data)
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        }) 
+    
+    },
     get_data_pedidos_update_embarque: (empnit,coddoc,correlativo,codembarque)=>{
         
         return new Promise((resolve, reject)=>{
@@ -907,6 +968,36 @@ let GF = {
             };
     
             axios.post(`/despacho/embarques_lista_activos`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
+    get_data_embarques_listado_activos_fecha: (empnit,fecha)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                fecha:fecha
+            };
+    
+            axios.post(`/despacho/embarques_lista_activos_fecha`, data)
             .then(res => {
                 
                 if(res.status.toString()=='200'){
