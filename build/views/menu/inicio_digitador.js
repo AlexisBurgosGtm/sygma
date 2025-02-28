@@ -581,12 +581,18 @@ function getView(){
                 <div class="card-body p-4">
                         
                     <div class="form-group">
-                        <label class="negrita text-secondary">Pedidos asignados al Embarque</label>
+                        <label class="negrita text-base">Pedidos asignados al Embarque</label>
                         <div class="input-group">
-                            <select class="form-control negrita text-danger" id="cmbFEmbarques">
+                            <select class="form-control negrita text-secondary" id="cmbFEmbarques">
                         
                             </select>
-                            <input type="date" class="form-control negrita text-danger" id="txtFFecha">
+                            <input type="date" class="form-control negrita text-secondary" id="txtFFecha">
+                            
+                            <select class="form-control border-danger negrita text-danger" id="cmbFTipo">
+                                <option value='PENDIENTES'>FACTURAR PEDIDOS</option>
+                                <option value='FACTURAS'>FACTURAS EMBARQUE</option>
+                                <option value='PRODUCTOS'>PRODUCTOS EMBARQUE</option>
+                            </select>
                         </div>
                     </div>
 
@@ -598,11 +604,11 @@ function getView(){
                             ${view.facturacion_crear_facturas()}
                         </div>
                         <div class="tab-pane fade" id="Fdos" role="tabpanel" aria-labelledby="home-tab">
-
+                            ${view.facturacion_embarque_facturas()}
                      
                         </div>
                         <div class="tab-pane fade" id="Ftres" role="tabpanel" aria-labelledby="home-tab">
-                     
+                            ${view.facturacion_embarque_productos()}
                         </div>
                         <div class="tab-pane fade" id="Fcuatro" role="tabpanel" aria-labelledby="home-tab">
                      
@@ -629,14 +635,22 @@ function getView(){
                     </ul>
 
                 </div>
+
+                <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
+                    <i class="fal fa-arrow-left"></i>
+                </button>
             
             `
         },
         facturacion_crear_facturas:()=>{
             return `
             <br>
+            
             <div class="card card-rounded shadow col-12">
                 <div class="card-body p-4">
+
+                    <h1 class="negrita text-base text-center">Facturar Pedidos Pendientes</h1>
+
 
                     <div class="table-responsive">
 
@@ -663,10 +677,80 @@ function getView(){
 
 
 
-            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
-                <i class="fal fa-arrow-left"></i>
-            </button>
+           
 
+            `
+        },
+        facturacion_embarque_facturas:()=>{
+            return `
+            <br>
+            
+            <div class="card card-rounded shadow col-12">
+                <div class="card-body p-4">
+
+                    <h1 class="negrita text-secondary text-center">Facturas del Embarque</h1>
+
+
+                    <div class="table-responsive">
+
+                         <table class="table h-full table-bordered col-12" id="tblFFacturas">
+                                <thead class="bg-secondary text-white negrita">
+                                    <tr>
+                                        <td>EMBARQUE</td>
+                                        <td>VENDEDOR</td>
+                                        <td>FECHA</td>
+                                        <td>CLIENTE</td>
+                                        <td>MUNICIPIO</td>
+                                        <td>IMPORTE</td>
+                                        <td></td>
+                                    </tr>
+                                </thead>
+                                <tbody id="tblDataFFacturas"></tbody>
+
+                            </table>
+
+                    </div>
+                    
+                </div>
+            </div>
+
+
+
+           
+
+            `
+        },
+        facturacion_embarque_productos:()=>{
+            return `
+            <div class="card card-rounded shadow col-12">
+                <div class="card-body p-4">
+            
+                    <h1 class="negrita text-info text-center">Productos del Embarque</h1>
+
+
+                    <div class="table-responsive">
+
+                         <table class="table h-full table-bordered col-12" id="tblFFacturas">
+                                <thead class="bg-secondary text-white negrita">
+                                    <tr>
+                                        <td>CODIGO</td>
+                                        <td>PRODUCTO</td>
+                                        <td>FECHA</td>
+                                        <td>CLIENTE</td>
+                                        <td>MUNICIPIO</td>
+                                        <td>IMPORTE</td>
+                                        <td></td>
+                                    </tr>
+                                </thead>
+                                <tbody id="tblDataFFacturas"></tbody>
+
+                            </table>
+
+                    </div>
+            
+
+                </div>
+            </div>
             `
         }
     }
@@ -740,7 +824,33 @@ function listeners_pedidos_pendientes(){
         tbl_pedidos_embarque_facturar(codembarque);
 
     });
+
+
+
+    document.getElementById('cmbFTipo').addEventListener('click',()=>{
+        
+        let tipo = document.getElementById('cmbFTipo').value;
+
+        switch (tipo) {
+            case 'PENDIENTES':
+                document.getElementById('tab-Funo').click();
+                break;
+
+            case 'FACTURAS':
+                document.getElementById('tab-Fdos').click();
+                break;
+        
+            case 'PRODUCTOS':
+                document.getElementById('tab-Ftres').click();
+                break;
+        
+        }
+
+    });
+
     
+
+
 
 };
 
