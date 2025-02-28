@@ -897,6 +897,69 @@ let GF = {
     
         })
     },
+    get_data_pedidos_anular: (empnit,coddoc,correlativo,new_status)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                coddoc:coddoc,
+                correlativo:correlativo,
+                st:new_status
+            };
+    
+            axios.post(`/despacho/pedidos_pendientes_anular`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
+    get_data_pedidos_facturar: (empnit,coddoc,correlativo,coddoc_fac,fecha_fac)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                coddoc:coddoc,
+                correlativo:correlativo
+            };
+    
+            axios.post(`/despacho/pedidos_pendientes_facturar`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
     get_data_surtido: (empnit)=>{
         return new Promise((resolve, reject)=>{
             

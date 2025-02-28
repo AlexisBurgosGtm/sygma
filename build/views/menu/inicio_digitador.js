@@ -201,6 +201,7 @@ function getView(){
                                         <td>CLIENTE</td>
                                         <td>MUNICIPIO</td>
                                         <td>IMPORTE</td>
+                                        <td>ST</td>
                                         <td></td>
                                     </tr>
                                 </thead>
@@ -649,8 +650,18 @@ function getView(){
             <div class="card card-rounded shadow col-12">
                 <div class="card-body p-4">
 
-                    <h1 class="negrita text-base text-center">Facturar Pedidos Pendientes</h1>
 
+                    <div class="row">
+                        <div class="col-6">
+                            <h4 class="negrita text-base">Facturar Pedidos Pendientes</h4>
+                        </div>
+                        <div class="col-6">
+                            <label class="negrita text-info" id="lbFTotalPedidos">Pedidos:</label>
+                            <br>
+                            <label class="negrita text-danger" id="lbFTotalImporte">Importe:</label>
+                        </div>
+                    </div>
+                    
 
                     <div class="table-responsive">
 
@@ -688,13 +699,13 @@ function getView(){
             <div class="card card-rounded shadow col-12">
                 <div class="card-body p-4">
 
-                    <h1 class="negrita text-secondary text-center">Facturas del Embarque</h1>
+                    <h1 class="negrita text-success text-center">Facturas del Embarque</h1>
 
 
                     <div class="table-responsive">
 
                          <table class="table h-full table-bordered col-12" id="tblFFacturas">
-                                <thead class="bg-secondary text-white negrita">
+                                <thead class="bg-success text-white negrita">
                                     <tr>
                                         <td>EMBARQUE</td>
                                         <td>VENDEDOR</td>
@@ -725,24 +736,24 @@ function getView(){
             <div class="card card-rounded shadow col-12">
                 <div class="card-body p-4">
             
-                    <h1 class="negrita text-info text-center">Productos del Embarque</h1>
+                    <h1 class="negrita text-secondary text-center">Productos del Embarque</h1>
 
 
                     <div class="table-responsive">
 
-                         <table class="table h-full table-bordered col-12" id="tblFFacturas">
+                         <table class="table h-full table-bordered col-12" id="tblFProductos">
                                 <thead class="bg-secondary text-white negrita">
                                     <tr>
                                         <td>CODIGO</td>
                                         <td>PRODUCTO</td>
-                                        <td>FECHA</td>
-                                        <td>CLIENTE</td>
-                                        <td>MUNICIPIO</td>
+                                        <td>UXC</td>
+                                        <td>CAJAS</td>
+                                        <td>UNIDADES</td>
                                         <td>IMPORTE</td>
                                         <td></td>
                                     </tr>
                                 </thead>
-                                <tbody id="tblDataFFacturas"></tbody>
+                                <tbody id="tblDataFProductos"></tbody>
 
                             </table>
 
@@ -869,6 +880,8 @@ function tbl_pedidos_pendientes(idContainer){
         data.recordset.map((r)=>{
             let idRowPedido = `idRowPedido${r.CODDOC}-${r.CORRELATIVO}`;
             contador +=1;
+            let strClassSt = 'info'; if(r.STATUS.toString()=='A'){strClassSt='danger'};
+            let idbtnAnular = `btnAnular${r.CODDOC}-${r.CORRELATIVO}`
             str += `
                 <tr>
                     <td class="text-left">
@@ -900,6 +913,13 @@ function tbl_pedidos_pendientes(idContainer){
                     </td>
                     <td class="negrita text-danger text-right">${F.setMoneda(r.IMPORTE,'Q')}</td>
                     <td>
+                        <button class="btn btn-${strClassSt} btn-md btn-circle hand shadow" id="${idbtnAnular}"
+                            onclick="anular_pedido('${r.CODDOC}','${r.CORRELATIVO}','${r.STATUS}','${idbtnAnular}')">
+                            ${r.STATUS}        
+                        </button>
+                        
+                    </td>                    
+                    <td>
                         <button class="btn btn-warning btn-md btn-circle hand shadow"
                             onclick="get_detalle_pedido('${r.CODDOC}','${r.CORRELATIVO}')">
                                 <i class="fal fa-list"></i>
@@ -925,6 +945,48 @@ function tbl_pedidos_pendientes(idContainer){
 
 
 
+
+};
+
+function anular_pedido(coddoc,correlativo,statusActual,idbtn){
+
+
+    let btn = document.getElementById(idbtn);
+
+    let newst = '';
+    let msn = '';
+
+    if(statusActual=='A'){
+        newst = 'O';
+        msn = 'RE-ACTIVAR';
+    }else{
+        newst = 'A';
+        msn = 'ANULAR';
+    }
+
+
+    F.Confirmacion(`¿Está seguro que desea ${msn} este pedido?`)
+    .then((value)=>{
+        if(value==true){
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fal fa-spin"></i>${statusActual}`;
+
+            GF.get_data_pedidos_anular(GlobalEmpnit,coddoc,correlativo,newst)
+            .then(()=>{
+                
+                tbl_pedidos_pendientes('tblDataPedidos');
+                
+            })
+            .catch(()=>{
+                F.AvisoError('No se pudo actualizar');
+                btn.disabled = false;
+                btn.innerHTML = statusActual;
+            })
+
+
+        }
+    })
 
 };
 
@@ -1107,6 +1169,7 @@ function tbl_pedidos_embarque_facturar(codembarque){
 
         container.innerHTML = GlobalLoader;
         let contador = 0;
+        let varTotal = 0;
 
         GF.get_data_pedidos_pendientes_vendedores_embarque(codembarque)
         .then((data)=>{
@@ -1115,7 +1178,9 @@ function tbl_pedidos_embarque_facturar(codembarque){
 
             data.recordset.map((r)=>{
                 let idRowPedido = `idRowPedidoF${r.CODDOC}-${r.CORRELATIVO}`;
+                let idbtnFacturar = `btnFacturar${r.CODDOC}-${r.CORRELATIVO}`;
                 contador +=1;
+                varTotal += Number(r.IMPORTE);
                 str += `
                     <tr>
                         <td class="text-left">
@@ -1139,28 +1204,69 @@ function tbl_pedidos_embarque_facturar(codembarque){
                         </td>
                         <td class="negrita text-danger text-right">${F.setMoneda(r.IMPORTE,'Q')}</td>
                         <td>
-                            <button class="btn btn-success btn-md btn-circle hand shadow">
-                                    <i class="fal fa-list"></i>
+                            <button class="btn btn-base btn-md hand shadow" id="${idbtnFacturar}"
+                            onclick="facturar_pedido('${r.CODDOC}','${r.CORRELATIVO}','${idbtnFacturar}')">
+                                    <i class="fal fa-dollar-sign"></i>&nbsp FACTURAR
                             </button>
                         </td>
                     </tr>
                 `
             })
             container.innerHTML = str;
-            //document.getElementById('lbTotalP').innerText = `Pedidos pendientes: ${contador}`
-            ///document.getElementById('lbTotalMP').innerText =`${contador} pedidos`
+            document.getElementById('lbFTotalPedidos').innerText = `Pedidos: ${contador}`;
+            document.getElementById('lbFTotalImporte').innerText =`Total: ${F.setMoneda(varTotal,'Q')}`;
 
         })
         .catch((error)=>{
-            container.innerHTML = 'No se cargaron datos....'
-            //document.getElementById('lbTotalP').innerText = '---'
-            //document.getElementById('lbTotalMP').innerText = '---'
+            container.innerHTML = 'No se cargaron datos....';
+            document.getElementById('lbFTotalPedidos').innerText = '';
+            document.getElementById('lbFTotalImporte').innerText = '';
         })
 
 
 
 };
 
+function facturar_pedido(coddoc,correlativo,idbtn){
+
+
+    let btn = document.getElementById(idbtn);
+
+
+    F.Confirmacion('¿Está seguro que desea FACTURAR este pedido?')
+    .then((value)=>{
+        if(value==true){
+
+            btn.disabled = true;
+            btn.innerHTML = `Cargando...`;
+
+
+            GF.get_data_pedidos_facturar(GlobalEmpnit,coddoc,correlativo,coddoc_fac,fecha_fac)
+            .then(()=>{
+
+                let codembarque = document.getElementById('cmbFEmbarques').value;
+                tbl_pedidos_embarque_facturar(codembarque);
+            
+            })
+            .catch(()=>{
+              
+                F.AvisoError('No se pudo generar la Factura');
+                
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fal fa-dollar-sign"></i>&nbsp FACTURAR`;
+                
+            })
+
+
+
+
+
+
+        }
+    })
+
+
+};
 
 //------------------------
 // PEDIDOS PENDIENTES

@@ -38,6 +38,9 @@ Mousetrap.bind(['command+e', 'ctrl+e'], function(e) {
 });
 
 
+//quita los alert de error en el plugin de las datatables
+$.fn.dataTable.ext.errMode = 'none';
+
 Navegar.login();
 
 
