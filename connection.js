@@ -87,6 +87,53 @@ let execute = {
 		  sql.close();
 		}
 	},
+	QueryJsonDocproductos : (token,sucursal,coddoc,correlativo)=>{	
+
+		return new Promise((resolve,reject)=>{
+
+				let config = get_conf_token(token);
+
+
+				let sqlqry = `
+				SELECT JSONDOCPRODUCTOS 
+					FROM DOCUMENTOS_TEMPORALES
+					WHERE EMPNIT='${sucursal}' 
+						AND CODDOC='${coddoc}' 
+						AND CORRELATIVO=${correlativo};
+				`
+
+			
+				try {
+				const pool1 = new sql.ConnectionPool(config, err => {
+					new sql.Request(pool1)
+					.query(sqlqry, (err, result) => {
+						if(err){
+							console.log(err.message);
+							reject('error');
+						}else{
+							//console.log('pedido')
+							//console.log(result.recordset[0].JSONDOCPRODUCTOS);
+
+							resolve(result.recordset[0].JSONDOCPRODUCTOS);
+						}					
+					})
+					sql.close();  
+				})
+				pool1.on('error', err => {
+					console.log('error sql = ' + err);
+					sql.close();
+					reject('error');
+				})
+				} catch (error) {
+					console.log(error);
+					reject('error');   
+				sql.close();
+				}
+
+		})
+
+		
+	},
 	Query_system : (sqlqry,token)=>{	
 		
 		let config = get_conf_token(token);

@@ -578,7 +578,7 @@ function getView(){
         },
         vista_facturacion:()=>{
             return `
-             <div class="card card-rounded shadow col-12">
+             <div class="card card-rounded shadow col-12 oculto-impresion">
                 <div class="card-body p-4">
                         
                     <div class="form-group">
@@ -594,6 +594,7 @@ function getView(){
                                 <option value='FACTURAS'>FACTURAS EMBARQUE</option>
                                 <option value='PRODUCTOS'>PRODUCTOS EMBARQUE</option>
                             </select>
+
                         </div>
                     </div>
 
@@ -654,6 +655,16 @@ function getView(){
                     <div class="row">
                         <div class="col-6">
                             <h4 class="negrita text-base">Facturar Pedidos Pendientes</h4>
+                            
+                            <div class="form-group">
+                                <label class="negrita">Serie y Fecha de la Factura</label>
+                                <div class="input-group">
+                                    <select class="negrita text-info form-control" id="cmbFacCoddoc">
+                                    </select>
+                                    <input class="form-control negrita text-info" type="date" id="txtFacFecha">
+                                </div>    
+                            </div>
+                            <br>
                         </div>
                         <div class="col-6">
                             <label class="negrita text-info" id="lbFTotalPedidos">Pedidos:</label>
@@ -696,18 +707,28 @@ function getView(){
             return `
             <br>
             
-            <div class="card card-rounded shadow col-12">
+            <div class="card card-rounded shadow col-12" id="rpt_facturas_embarque">
                 <div class="card-body p-4">
 
-                    <h1 class="negrita text-success text-center">Facturas del Embarque</h1>
-
+                    <div class="row">
+                        <div class="col-6">
+                            <h4 class="negrita text-base">Facturas del Embarque</h4>
+                            <h5 id="lbFacCodembarque"></h5>
+                            <br>
+                        </div>
+                        <div class="col-6">
+                            <label class="negrita text-info" id="lbFacTotalPedidos">Pedidos:</label>
+                            <br>
+                            <label class="negrita text-danger" id="lbFacTotalImporte">Importe:</label>
+                        </div>
+                    </div>
+                    
 
                     <div class="table-responsive">
 
                          <table class="table h-full table-bordered col-12" id="tblFFacturas">
                                 <thead class="bg-success text-white negrita">
                                     <tr>
-                                        <td>EMBARQUE</td>
                                         <td>VENDEDOR</td>
                                         <td>FECHA</td>
                                         <td>CLIENTE</td>
@@ -726,6 +747,9 @@ function getView(){
             </div>
 
 
+            <button class="btn btn-info btn-xl btn-circle hand shadow btn-bottom-r" onclick="F.imprimirSelec('rpt_facturas_embarque')">
+                <i class="fal fa-print"></i>
+            </button>
 
            
 
@@ -733,11 +757,23 @@ function getView(){
         },
         facturacion_embarque_productos:()=>{
             return `
-            <div class="card card-rounded shadow col-12">
+            <br>
+
+            <div class="card card-rounded shadow col-12" id="rpt_productos_embarque">
                 <div class="card-body p-4">
             
-                    <h1 class="negrita text-secondary text-center">Productos del Embarque</h1>
-
+                    <div class="row">
+                        <div class="col-6">
+                            <h4 class="negrita text-base">Productos del Embarque</h4>
+                            <h5 id="lbProdCodembarque"></h5>
+                            <br>
+                        </div>
+                        <div class="col-6">
+                            <label class="negrita text-info" id="lbProdTotalPedidos">Pedidos:</label>
+                            <br>
+                            <label class="negrita text-danger" id="lbProdTotalImporte">Importe:</label>
+                        </div>
+                    </div>
 
                     <div class="table-responsive">
 
@@ -762,6 +798,10 @@ function getView(){
 
                 </div>
             </div>
+
+            <button class="btn btn-info btn-xl btn-circle hand shadow btn-bottom-r" onclick="F.imprimirSelec('rpt_productos_embarque')">
+                <i class="fal fa-print"></i>
+            </button>
             `
         }
     }
@@ -834,6 +874,8 @@ function listeners_pedidos_pendientes(){
         let codembarque = document.getElementById('cmbFEmbarques').value;
         tbl_pedidos_embarque_facturar(codembarque);
 
+        
+
     });
 
 
@@ -842,6 +884,8 @@ function listeners_pedidos_pendientes(){
         
         let tipo = document.getElementById('cmbFTipo').value;
 
+        let codembarque = document.getElementById('cmbFEmbarques').value;
+
         switch (tipo) {
             case 'PENDIENTES':
                 document.getElementById('tab-Funo').click();
@@ -849,15 +893,48 @@ function listeners_pedidos_pendientes(){
 
             case 'FACTURAS':
                 document.getElementById('tab-Fdos').click();
+
+                tbl_facturas_embarque(codembarque);
+                document.getElementById('lbFacCodembarque').innerText = codembarque;
+
                 break;
         
             case 'PRODUCTOS':
                 document.getElementById('tab-Ftres').click();
+
+                tbl_productos_embarque(codembarque);
+                document.getElementById('lbProdCodembarque').innerText = codembarque;
+
+
                 break;
         
         }
 
     });
+
+    
+
+    
+        document.getElementById('txtFacFecha').value = F.getFecha();
+
+        let cmbFacCoddoc = document.getElementById('cmbFacCoddoc');
+        
+        GF.get_data_tipodoc_coddoc('FACTURAS')
+        .then((data)=>{
+
+            let str = '';
+            data.recordset.map((r)=>{
+                str += `<option value="${r.CODDOC}">${r.CODDOC}</option>`
+            })
+            cmbFacCoddoc.innerHTML = str;
+
+        })
+        .catch(()=>{
+            cmbFacCoddoc.innerHTML = '<option value="SN">No se cargo...</Option>';
+        })
+
+
+
 
     
 
@@ -1232,30 +1309,63 @@ function facturar_pedido(coddoc,correlativo,idbtn){
 
     let btn = document.getElementById(idbtn);
 
+    let coddoc_fac = document.getElementById('cmbFacCoddoc').value;
+    if(coddoc_fac=='SN'){F.AvisoError('No se cargaron las series de facturacion');return;}
+    let correlativo_fac = '0';    
+
+    let fecha_fac = new Date(document.getElementById('txtFacFecha').value);
+
+    let fFAC = new Date(fecha_fac);
+
+    let mes_fac = fFAC.getUTCMonth()+1;
+    let anio_fac = fFAC.getUTCFullYear();
+
 
     F.Confirmacion('¿Está seguro que desea FACTURAR este pedido?')
     .then((value)=>{
         if(value==true){
 
             btn.disabled = true;
-            btn.innerHTML = `Cargando...`;
+            btn.innerHTML = `Cargando Correlativo ...`;
+
+            GF.get_data_coddoc_correlativo(coddoc_fac)
+            .then((correlativoFac)=>{
+              
+                    correlativo_fac = correlativoFac;
+
+                    btn.disabled = true;
+                    btn.innerHTML = `Facturando ...`;
+        
 
 
-            GF.get_data_pedidos_facturar(GlobalEmpnit,coddoc,correlativo,coddoc_fac,fecha_fac)
-            .then(()=>{
+                    GF.get_data_pedidos_facturar_pedido(GlobalEmpnit,coddoc,correlativo,coddoc_fac,correlativo_fac,fecha_fac,mes_fac,anio_fac)
+                    .then(()=>{
+                        
+                        F.Aviso('Pedido Facturado Exitosamente!!');
 
-                let codembarque = document.getElementById('cmbFEmbarques').value;
-                tbl_pedidos_embarque_facturar(codembarque);
-            
+                        let codembarque = document.getElementById('cmbFEmbarques').value;
+                        tbl_pedidos_embarque_facturar(codembarque);
+                    
+                    })
+                    .catch(()=>{
+                    
+                        F.AvisoError('No se pudo generar la Factura');
+                        
+                        btn.disabled = false;
+                        btn.innerHTML = `<i class="fal fa-dollar-sign"></i>&nbsp FACTURAR`;
+                        
+                    })
             })
             .catch(()=>{
-              
-                F.AvisoError('No se pudo generar la Factura');
-                
+
+                F.AvisoError('No se pudo obtener el correlativo de la factura a crear, intentelo de nuevo');
                 btn.disabled = false;
                 btn.innerHTML = `<i class="fal fa-dollar-sign"></i>&nbsp FACTURAR`;
-                
+
             })
+
+
+           
 
 
 
@@ -1263,6 +1373,114 @@ function facturar_pedido(coddoc,correlativo,idbtn){
 
 
         }
+    })
+
+
+};
+
+
+function tbl_facturas_embarque(codembarque){
+
+    let container = document.getElementById('tblDataFFacturas');
+
+    container.innerHTML = GlobalLoader;
+    let contador = 0;
+    let varTotal = 0;
+
+    GF.get_data_embarque_facturas(GlobalEmpnit,codembarque)
+    .then((data)=>{
+
+        let str = '';
+
+        data.recordset.map((r)=>{
+         
+            contador +=1;
+            varTotal += Number(r.IMPORTE);
+            str += `
+                <tr>
+                    <td>${r.NOMEMPLEADO}
+                        <br>
+                        <small class="negrita">${r.CODDOC}-${r.CORRELATIVO}</small>
+                    </td>
+                    <td>${F.convertDateNormal(r.FECHA)}
+                        <br>
+                        <small>Hora:${r.HORA}</small>
+                    </td>
+                    <td>${r.NOMCLIE}
+                        <br>
+                        <small>${r.DIRCLIE}</small>
+                    </td>
+                    <td>
+                        ${r.DESMUN}
+                    </td>
+                    <td class="negrita text-danger text-right">${F.setMoneda(r.IMPORTE,'Q')}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-md btn-circle hand shadow"
+                        onclick="">
+                                <i class="fal fa-list"></i>
+                        </button>
+                    </td>
+                </tr>
+            `
+        })
+        container.innerHTML = str;
+        document.getElementById('lbFacTotalPedidos').innerText = `Pedidos: ${contador}`;
+        document.getElementById('lbFacTotalImporte').innerText =`Total: ${F.setMoneda(varTotal,'Q')}`;
+
+    })
+    .catch((error)=>{
+        container.innerHTML = 'No se cargaron datos....';
+        document.getElementById('lbFacTotalPedidos').innerText = '';
+        document.getElementById('lbFacTotalImporte').innerText = '';
+    })
+
+
+};
+
+function tbl_productos_embarque(codembarque){
+
+    let container = document.getElementById('tblDataFProductos');
+
+    container.innerHTML = GlobalLoader;
+    let contador = 0;
+    let varTotal = 0;
+
+    GF.get_data_embarque_productos(GlobalEmpnit,codembarque)
+    .then((data)=>{
+
+        let str = '';
+
+        data.recordset.map((r)=>{
+         
+            contador +=1;
+            varTotal += Number(r.IMPORTE);
+            str += `
+                <tr>
+                    <td>${r.CODPROD}
+                    <br>
+                        <small>${r.TOTALUNIDADES}</small>
+                    </td>
+                    <td>${r.DESPROD}
+                        <br>
+                        <small>${r.DESMARCA}</small>
+                    </td>
+                    <td>${r.UXC}</td>
+                    <td>${r.CAJAS}</td>
+                    <td>${r.UNIDADES}</td>
+                    <td>${F.setMoneda(r.IMPORTE,'Q')}</td>
+                    <td></td>
+                </tr>
+                `
+        })
+        container.innerHTML = str;
+        document.getElementById('lbProdTotalPedidos').innerText = `Pedidos: ${contador}`;
+        document.getElementById('lbProdTotalImporte').innerText =`Total: ${F.setMoneda(varTotal,'Q')}`;
+
+    })
+    .catch((error)=>{
+        container.innerHTML = 'No se cargaron datos....';
+        document.getElementById('lbProdTotalPedidos').innerText = '';
+        document.getElementById('lbProdTotalImporte').innerText = '';
     })
 
 

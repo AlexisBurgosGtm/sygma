@@ -116,6 +116,8 @@ router.post("/update_status", async(req,res)=>{
      
 });
 
+
+
 router.post("/coddoc", async(req,res)=>{
    
     const { token, sucursal, tipo } = req.body;
@@ -125,14 +127,34 @@ router.post("/coddoc", async(req,res)=>{
     
     switch (tipo.toString()) {
         case 'FAC':
-            qry = `SELECT CODDOC FROM TIPODOCUMENTOS WHERE EMPNIT='${sucursal}' AND TIPODOC='FAC' AND HABILITADO='SI';`
+            qry = `SELECT CODDOC 
+                    FROM TIPODOCUMENTOS 
+                    WHERE EMPNIT='${sucursal}' 
+                        AND TIPODOC='FAC' 
+                        AND HABILITADO='SI';`
             break;
         case 'FEL':
-            qry = `SELECT CODDOC FROM TIPODOCUMENTOS WHERE EMPNIT='${sucursal}' AND TIPODOC IN('FEF','FEC') AND HABILITADO='SI';`
+            qry = `SELECT CODDOC 
+                    FROM TIPODOCUMENTOS 
+                    WHERE EMPNIT='${sucursal}' 
+                        AND TIPODOC IN('FEF','FEC','FCP','FES','FPC') 
+                        AND HABILITADO='SI';`
+            break;
+        
+        case 'FACTURAS':
+            qry = `SELECT CODDOC 
+                    FROM TIPODOCUMENTOS 
+                    WHERE EMPNIT='${sucursal}' 
+                        AND TIPODOC IN('FAC','FEF','FEC','FCP','FES','FPC') 
+                        AND HABILITADO='SI';`
             break;
 
         default:
-            qry = `SELECT CODDOC FROM TIPODOCUMENTOS WHERE EMPNIT='${sucursal}' AND TIPODOC='${tipo}' AND HABILITADO='SI';`
+            qry = `SELECT CODDOC 
+                        FROM TIPODOCUMENTOS 
+                        WHERE EMPNIT='${sucursal}' 
+                            AND TIPODOC='${tipo}' 
+                            AND HABILITADO='SI';`
             break;
     }
 

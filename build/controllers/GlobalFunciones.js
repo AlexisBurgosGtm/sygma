@@ -392,6 +392,50 @@ let GF = {
             });
         })     
     },
+    get_data_tipodoc_coddoc:(tipodoc)=>{
+
+        return new Promise((resolve, reject)=>{
+            axios.post('/tipodocumentos/coddoc', {
+                sucursal: GlobalEmpnit,
+                tipo:tipodoc
+            })
+            .then((response) => {
+                if(response=='error'){
+                    reject();
+                }else{
+                    const data = response.data;
+                    resolve(data);
+                }
+            }, (error) => {
+                reject();
+            });
+        })
+   
+    },
+    get_data_coddoc_correlativo:(coddoc)=>{
+
+        return new Promise((resolve, reject)=>{
+            axios.post('/tipodocumentos/correlativo', {
+                sucursal: GlobalEmpnit,
+                coddoc:coddoc
+            })
+            .then((response) => {
+                if(response=='error'){
+                    reject('0');
+                }else{
+                    
+                    const data = response.data;
+                    let correlativo =data.recordset[0].CORRELATIVO;
+                    resolve(correlativo);
+
+                }
+            }, (error) => {
+                console.log(error)
+                reject('0');
+            });
+        })
+   
+    },
     get_productos_totales:(habilitado)=>{
         return new Promise((resolve,reject)=>{
     
@@ -929,7 +973,7 @@ let GF = {
     
         })
     },
-    get_data_pedidos_facturar: (empnit,coddoc,correlativo,coddoc_fac,fecha_fac)=>{
+    get_data_pedidos_facturar_pedido: (empnit,coddoc,correlativo,coddoc_fac,correlativo_fac,fecha_fac,mes_fac,anio_fac)=>{
         
         return new Promise((resolve, reject)=>{
             
@@ -937,10 +981,75 @@ let GF = {
                 token:TOKEN,
                 sucursal:empnit,
                 coddoc:coddoc,
-                correlativo:correlativo
+                correlativo:correlativo,
+                coddoc_fac: coddoc_fac,
+                correlativo_fac:correlativo_fac,
+                fecha_fac: fecha_fac,
+                mes_fac:mes_fac,
+                anio_fac:anio_fac
             };
     
-            axios.post(`/despacho/pedidos_pendientes_facturar`, data)
+            axios.post(`/despacho/pedidos_pendientes_facturar_pedido`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
+    get_data_embarque_facturas: (empnit,codembarque)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                codembarque:codembarque
+            };
+    
+            axios.post(`/despacho/pedidos_pendientes_embarque_documentos`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
+    get_data_embarque_productos: (empnit,codembarque)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                codembarque:codembarque
+            };
+    
+            axios.post(`/despacho/pedidos_pendientes_embarque_productos`, data)
             .then(res => {
                 
                 if(res.status.toString()=='200'){
