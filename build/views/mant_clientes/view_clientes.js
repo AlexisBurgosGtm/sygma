@@ -75,6 +75,7 @@ function getView(){
                         <table class="table table-bordered table-hover col-12" id="tblClientes">
                             <thead class="bg-base text-white">
                                 <tr>
+                                    <td>VENDEDOR</td>
                                     <td>NIT / CODIGO</td>
                                     <td>NEGOCIO</td>
                                     <td>NOMBRE</td>
@@ -174,6 +175,7 @@ function tbl_clientes(){
             contador +=1;
             str += `
             <tr>
+                <td>${r.NOMEMPLEADO}</td>
                 <td>${r.NIT}
                     <br>
                     <small>Cod: ${r.CODCLIENTE}</small>
