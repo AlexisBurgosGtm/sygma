@@ -64,6 +64,33 @@ let GF = {
         }) 
     
     },
+    get_data_config:()=>{
+
+            return new Promise((resolve,reject)=>{
+
+                axios.post(GlobalUrlCalls + '/config/config_generales')
+                .then((response) => {
+                    if(response.status.toString()=='200'){
+                        let data = response.data;
+                        if(data.toString()=="error"){
+                            reject();
+                        }else{
+                            if(Number(data.rowsAffected[0])>0){
+                                resolve(data);             
+                            }else{
+                                reject();
+                            } 
+                        }       
+                    }else{
+                        reject();
+                    }                   
+                }, (error) => {
+                    reject();
+                });
+            }) 
+    
+
+    },
     login_empleado:(sucursal,u,p)=>{
     
         return new Promise((resolve,reject)=>{
@@ -1303,6 +1330,70 @@ let GF = {
             };
     
             axios.post(`/despacho/embarques_status`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
+    get_data_clientes_listado:(empnit,st)=>{
+
+        return new Promise((resolve,reject)=>{
+
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                st:st
+            }
+
+            axios.post(GlobalUrlCalls + '/clientes/lista_clientes_general', data)
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        }) 
+
+
+    },
+    get_data_clientes_update_st: (empnit,codclie,st)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                codclie:codclie,
+                st:st
+            };
+    
+            axios.post(`/clientes/update_status_cliente`, data)
             .then(res => {
                 
                 if(res.status.toString()=='200'){

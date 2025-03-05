@@ -87,18 +87,14 @@ function str_qry_docproductos(sucursal,coddoc,correlativo,anio,mes,iva,codbodega
 
     let qry = '';    
 
-    console.log('por aqui...')
-    console.log(jsondocproductos);
-
+   
     
     let data = JSON.parse(jsondocproductos);
     
     let json = []; json = data;
     let datos = JSON.parse(json);
 
-    console.log('converitdos...')
-    console.log(json)
-
+   
     datos.map((r)=>{
         qry += `
         INSERT INTO DOCPRODUCTOS (
@@ -533,8 +529,6 @@ router.post("/embarques_delete", async(req,res)=>{
             AND CODEMBARQUE='${codembarque}';
             `;
 
-            console.log(qry)
-    
             
     execute.QueryToken(res,qry,token);
      

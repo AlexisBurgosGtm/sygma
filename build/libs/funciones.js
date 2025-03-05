@@ -841,6 +841,8 @@ let F = {
       },
       limpiarTexto: (texto) =>{
 
+          let resultado = '';
+
           var ignorarMayMin = true;
           var reemplazarCon = "";
           var reemplazarQue = '"';
@@ -848,7 +850,13 @@ let F = {
           reemplazarCon = reemplazarCon.replace(/\$(?=[$&`"'\d])/g, "$$$$"),
           modif = "g" + (ignorarMayMin ? "i" : ""),
           regex = new RegExp(reemplazarQue, modif);
-          return texto.replace(regex,reemplazarCon).replace('´','');
+          resultado = texto.replace(regex,reemplazarCon);
+          resultado = resultado.replace('´','');
+          resultado = resultado.replace("'","");
+          resultado = resultado.replace(/(\r\n|\n|\r)/gm, ""); //quita el enter o salto de linea
+
+          
+          return resultado;
 
       },
       devuelveFecha: (idInputFecha)=>{
@@ -1001,7 +1009,7 @@ let F = {
         window.print();
         //document.body.innerHTML = contenidoOriginal;
       
-    },
+      },
       converFileBase64:(file)=>{
           return new Promise((resolve, reject)=>{
               var reader = new FileReader();
@@ -1060,7 +1068,17 @@ let F = {
 
           return bg;
 
-      }
+      },
+      detectarPc:()=>{
+          let navegador = navigator.userAgent;
+          if (navigator.userAgent.match(/Android/i) || navigator.userAgent.match(/webOS/i) || navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPad/i) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/BlackBerry/i) || navigator.userAgent.match(/Windows Phone/i)) {
+              //console.log("Estás usando un dispositivo móvil!!");
+            return 'tel';
+          } else {
+              //console.log("No estás usando un móvil");
+            return 'pc';
+          }
+      },
 };
 
 //export default funciones;

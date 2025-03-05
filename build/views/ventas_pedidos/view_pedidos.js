@@ -206,7 +206,7 @@ function getView(){
                                     
                                     <div class="form-group">
                                         <label class="negrita text-secondary">Precio ${GlobalSignoMoneda}:</label>
-                                        <input type="number" style="font-size:140%" class="form-control negrita text-info border-base shadow col-10" id="txtMCPrecio">
+                                        <input disabled="true" type="number" style="font-size:140%" class="form-control negrita text-info border-base shadow col-10" id="txtMCPrecio">
                                     </div>
                                     
                                     <div class="form-group">
@@ -214,12 +214,12 @@ function getView(){
                                         <input type="number" style="font-size:150%" class="form-control negrita text-danger border-base shadow col-10" id="txtMCTotalPrecio" disabled>
                                     </div>
 
-                                    <div class="form-group">
+                                    <div class="form-group hidden">
                                         <label class="negrita text-secondary">Descuento ${GlobalSignoMoneda}:</label>
                                         <input type="number" style="font-size:140%" class="form-control negrita text-info border-base shadow col-10" id="txtMCDescuento" oninput="calcular_descuento('txtMCDescuento','txtMCTotalPrecio','txtMCTotalPrecioDescuento')">
                                     </div>
                                     
-                                    <div class="form-group">
+                                    <div class="form-group hidden">
                                         <label class="negrita text-secondary">Importe ${GlobalSignoMoneda}:</label>
                                         <input type="number" style="font-size:150%" class="form-control negrita text-danger border-base shadow col-10" id="txtMCTotalPrecioDescuento" disabled>
                                     </div>
@@ -273,7 +273,7 @@ function getView(){
                                     
                                     <div class="form-group">
                                         <label class="negrita text-secondary">Precio ${GlobalSignoMoneda}:</label>
-                                        <input type="number" style="font-size:140%" class="form-control negrita text-info border-base shadow col-10" id="txtMCPrecioE">
+                                        <input disabled="true" type="number" style="font-size:140%" class="form-control negrita text-info border-base shadow col-10" id="txtMCPrecioE">
                                     </div>
                                     
                                     <div class="form-group">
@@ -282,12 +282,12 @@ function getView(){
                                     </div>
 
 
-                                    <div class="form-group">
+                                    <div class="form-group hidden">
                                         <label class="negrita text-secondary">Descuento ${GlobalSignoMoneda}:</label>
                                         <input type="number" style="font-size:140%" class="form-control negrita text-info border-base shadow col-10" id="txtMCDescuentoE" oninput="calcular_descuento('txtMCDescuentoE','txtMCTotalPrecioE','txtMCTotalPrecioDescuentoE')">
                                     </div>
                                     
-                                    <div class="form-group">
+                                    <div class="form-group hidden">
                                         <label class="negrita text-secondary">Importe ${GlobalSignoMoneda}:</label>
                                         <input type="number" style="font-size:150%" class="form-control negrita text-danger border-base shadow col-10" id="txtMCTotalPrecioDescuentoE" disabled>
                                     </div>
@@ -355,6 +355,11 @@ function getView(){
                                         <div class="input-group">
                                             <input type="date" id="txtFecha" class="form-control text-base negrita border-base">
                                         </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="text-secondary">Observaciones</label>
+                                        <textarea class="form-control negrita" rows="3" id="txtObs"></textarea>
                                     </div>
                                     
                                  
@@ -466,11 +471,22 @@ function getView(){
                                     <label class="negrita text-secondary">Búsqueda de Clientes</label>
                                     <div class="input-group">
                                         <input type="search" autocomplete="off" class="form-control border-base negrita col-12" id="txtBuscarClie">
+                                       
                                         <button class="btn btn-base hand text-white" id="btnBuscarClie">
                                             <i class="fal fa-search"></i>
                                         </button>
                                     </div>
                                 </div>
+                                <select class="form-control negrita text-danger border-danger" id="cmbDiaCliente">
+                                            <option value="LUNES">LUNES</option>
+                                            <option value="MARTES">MARTES</option>
+                                            <option value="MIERCOLES">MIERCOLES</option>
+                                            <option value="JUEVES">JUEVES</option>
+                                            <option value="VIERNES">VIERNES</option>
+                                            <option value="SABADO">SABADO</option>
+                                            <option value="DOMINGO">DOMINGO</option>
+                                            <option value="OTROS">OTROS</option>
+                                </select>
                             </div>
                             <br>
                             <div class="row">
@@ -481,6 +497,7 @@ function getView(){
                                             <td>CLIENTE</td>
                                             <td>TELÉFONO</td>
                                             <td>SALDO</td>
+                                            <td>PEDIDO</td>
                                         </tr>
                                     </thead>
                                     <tbody id="tblDataClientes"></tbody>
@@ -565,8 +582,6 @@ function addListeners(){
 
 
     document.getElementById('txtFecha').value = F.getFecha();
-    
-   
     
 
 
@@ -1046,11 +1061,13 @@ function initView(){
 
 function tbl_clientes(filtro){
    
+    /*
     if(filtro==''){
         F.AvisoError('Escriba un nombre o nit válidos');
         document.getElementById('txtBuscarClie').focus(); 
         return;
     };
+    */
 
 
     let container = document.getElementById('tblDataClientes');
@@ -1058,11 +1075,14 @@ function tbl_clientes(filtro){
 
     let str = '';
 
+    let dia = document.getElementById('cmbDiaCliente').value;
+
     axios.post('/clientes/buscar_cliente_vendedor', {
         token:TOKEN,
         sucursal: GlobalEmpnit,
         filtro:filtro,
-        codven:GlobalCodUsuario
+        codven:GlobalCodUsuario,
+        dia:dia
     })
     .then((response) => {        
         if(response.data=='error'){
@@ -1072,12 +1092,12 @@ function tbl_clientes(filtro){
             const data = response.data.recordset;
             data.map((r)=>{
                 str += `
-                <tr class="hand" onclick="get_datos_cliente('${r.CODCLIENTE}','${r.NIT}','${r.NOMBRE}','${r.DIRECCION}','${r.TELEFONO}')">    
+                <tr class="hand">    
                     <td>
                         ${r.NIT} / ${r.CODCLIENTE}
                         <br>
-                        <button class="btn btn-sm btn-info hand shadow" onclick="F.gotoGoogleMaps('${r.LATITUD}','${r.LONGITUD}')">
-                            <i class="fal fa-globe"></i> Ver mapa
+                        <button class="btn btn-md btn-circle btn-info hand shadow" onclick="F.gotoGoogleMaps('${r.LATITUD}','${r.LONGITUD}')">
+                            <i class="fal fa-globe"></i>
                         </button>
                     </td>
                     <td>
@@ -1091,6 +1111,12 @@ function tbl_clientes(filtro){
                     <td>${F.setMoneda(r.SALDO,'Q')}
                         <br>
                         <small class="text-danger negrita">${r.VISITA}</small>
+                    </td>
+                    <td>
+                        <button class="btn btn-circle btn-md btn-success hand shadow" 
+                        onclick="get_datos_cliente('${r.CODCLIENTE}','${r.NIT}','${r.NOMBRE}','${r.DIRECCION}','${r.TELEFONO}')">
+                            <i class="fal fa-shopping-cart"></i>
+                        </button>
                     </td>
                 </tr>
                 `
@@ -1712,7 +1738,7 @@ function finalizar_pedido(){
     GlobalSelectedNomCliente = ClienteNombre;
     let dirclie = document.getElementById('txtPosCobroDireccion').value;
     GlobalSelectedDirCliente = dirclie;
-    let obs = 'SN';  
+    let obs = F.limpiarTexto(document.getElementById('txtObs').value) || '';  
     let direntrega = "SN"; 
     let codbodega = GlobalCodBodega;
     let cmbTipoEntrega = ''; 
@@ -1781,7 +1807,7 @@ function finalizar_pedido(){
                 totaldescuento:GlobalTotalDescuento,
                 nitclie:nit,
                 dirclie:dirclie,
-                obs:entrega_referencia,
+                obs:obs,
                 direntrega:direntrega,
                 usuario:GlobalUsuario,
                 codven: GlobalCodUsuario, //cmbVendedor.value,

@@ -233,6 +233,17 @@ let Menu = {
             F.AvisoError('No tiene permitido entrar a esta sección');
         }
     },
+    clientes:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/mant_clientes/view_clientes.js','root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        } 
+    },
     bi_notificaciones:()=>{
         if(Menu.verify()==true){
             Menu.salidaMenu();

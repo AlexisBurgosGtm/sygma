@@ -3,9 +3,138 @@ const express = require('express');
 const router = express.Router();
 
 
+router.post("/lista_clientes_general", async(req,res)=>{
+   
+    const { token, sucursal, st} = req.body;
+
+    let qry = '';
+
+
+        qry = `
+        SELECT CLIENTES.EMPNIT,CLIENTES.CODCLIENTE, CLIENTES.NIT, 
+        CLIENTES.NOMBRE, 
+        CLIENTES.TIPONEGOCIO, CLIENTES.NEGOCIO,
+        CLIENTES.CATEGORIA,
+        CLIENTES.DIRECCION, 
+        CLIENTES.CODMUN, MUNICIPIOS.DESMUN, 
+        CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
+        SECTORES.DESSECTOR, CLIENTES.TELEFONO, 
+               CLIENTES.LATITUD, CLIENTES.LONGITUD, 
+               CLIENTES.SALDO, CLIENTES.HABILITADO, 
+               CLIENTES.LASTSALE, CLIENTES.DIASCREDITO, 
+               CLIENTES.REFERENCIA, EMPLEADOS.NOMEMPLEADO,
+               CLIENTES.DIAVISITA AS VISITA
+         FROM     CLIENTES LEFT OUTER JOIN
+               EMPLEADOS ON CLIENTES.CODEMPLEADO = EMPLEADOS.CODEMPLEADO LEFT OUTER JOIN
+               SECTORES ON CLIENTES.CODSECTOR = SECTORES.CODSECTOR LEFT OUTER JOIN
+               DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO LEFT OUTER JOIN
+               MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+         WHERE (CLIENTES.EMPNIT = '${sucursal}')       
+         AND (CLIENTES.HABILITADO='${st}')
+        `
+
+ 
+
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+router.post("/update_status_cliente", async(req,res)=>{
+   
+    const { token, sucursal, codclie, st} = req.body;
+
+    let qry = '';
+
+
+        qry = `
+            UPDATE CLIENTES SET 
+                HABILITADO='${st}'
+            WHERE CODCLIENTE=${codclie} AND EMPNIT='${sucursal}'
+        
+        `
+
+ 
+
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
 
 
 router.post("/censo_lista_clientes", async(req,res)=>{
+   
+    const { token, sucursal,visita, codven} = req.body;
+
+    let qry = '';
+
+
+    if(visita=='TODOS'){
+        qry = `
+        SELECT CLIENTES.EMPNIT,CLIENTES.CODCLIENTE, CLIENTES.NIT, 
+        CLIENTES.NOMBRE, 
+        CLIENTES.TIPONEGOCIO, CLIENTES.NEGOCIO,
+        CLIENTES.CATEGORIA,
+        CLIENTES.DIRECCION, 
+        CLIENTES.CODMUN, MUNICIPIOS.DESMUN, 
+        CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
+        SECTORES.DESSECTOR, CLIENTES.TELEFONO, 
+               CLIENTES.LATITUD, CLIENTES.LONGITUD, 
+               CLIENTES.SALDO, CLIENTES.HABILITADO, 
+               CLIENTES.LASTSALE, CLIENTES.DIASCREDITO, 
+               CLIENTES.REFERENCIA, EMPLEADOS.NOMEMPLEADO,
+               CLIENTES.DIAVISITA AS VISITA
+         FROM     CLIENTES LEFT OUTER JOIN
+               EMPLEADOS ON CLIENTES.CODEMPLEADO = EMPLEADOS.CODEMPLEADO LEFT OUTER JOIN
+               SECTORES ON CLIENTES.CODSECTOR = SECTORES.CODSECTOR LEFT OUTER JOIN
+               DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO LEFT OUTER JOIN
+               MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+         WHERE (CLIENTES.EMPNIT = '${sucursal}')        
+         AND (CLIENTES.CODEMPLEADO = ${codven})
+         AND (CLIENTES.HABILITADO='NA')
+        `
+
+    }else{
+        qry = `
+        SELECT CLIENTES.EMPNIT,CLIENTES.CODCLIENTE, CLIENTES.NIT, 
+        CLIENTES.NOMBRE, 
+        CLIENTES.TIPONEGOCIO, CLIENTES.NEGOCIO,
+        CLIENTES.CATEGORIA,
+        CLIENTES.DIRECCION, 
+        CLIENTES.CODMUN, MUNICIPIOS.DESMUN, 
+        CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
+        SECTORES.DESSECTOR, CLIENTES.TELEFONO, 
+               CLIENTES.LATITUD, CLIENTES.LONGITUD, 
+               CLIENTES.SALDO, CLIENTES.HABILITADO, 
+               CLIENTES.LASTSALE, CLIENTES.DIASCREDITO, 
+               CLIENTES.REFERENCIA, EMPLEADOS.NOMEMPLEADO,
+               CLIENTES.DIAVISITA AS VISITA
+         FROM     CLIENTES LEFT OUTER JOIN
+               EMPLEADOS ON CLIENTES.CODEMPLEADO = EMPLEADOS.CODEMPLEADO LEFT OUTER JOIN
+               SECTORES ON CLIENTES.CODSECTOR = SECTORES.CODSECTOR LEFT OUTER JOIN
+               DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO LEFT OUTER JOIN
+               MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+         WHERE (CLIENTES.EMPNIT = '${sucursal}')  
+         AND (CLIENTES.DIAVISITA = '${visita}') 
+         AND (CLIENTES.CODEMPLEADO = ${codven})
+         AND (CLIENTES.HABILITADO='NA')
+        `
+
+    }
+
+
+ 
+
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+
+router.post("/BACKUP_censo_lista_clientes", async(req,res)=>{
    
     const { token, sucursal,visita, codven} = req.body;
 
@@ -159,7 +288,12 @@ router.post("/buscar_cliente", async(req,res)=>{
         FROM CLIENTES LEFT OUTER JOIN
             DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO LEFT OUTER JOIN
             MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
-        WHERE (CLIENTES.NOMBRE LIKE '%${filtro}%') OR (CLIENTES.NIT='${filtro}')
+        WHERE 
+            (CLIENTES.NOMBRE LIKE '%${filtro}%') AND
+            (CLIENTES.HABILITADO='SI') 
+        OR 
+            (CLIENTES.NIT='${filtro}') AND
+            (CLIENTES.HABILITADO='SI')
     `
     
  
@@ -168,9 +302,11 @@ router.post("/buscar_cliente", async(req,res)=>{
      
 });
 
+
+
 router.post("/buscar_cliente_vendedor", async(req,res)=>{
    
-    const { token, sucursal, filtro, codven} = req.body;
+    const { token, sucursal, filtro, codven, dia} = req.body;
 
     let qry = `
         SELECT CLIENTES.CODCLIENTE, CLIENTES.NIT, 
@@ -188,16 +324,21 @@ router.post("/buscar_cliente_vendedor", async(req,res)=>{
         WHERE
             (CLIENTES.EMPNIT='${sucursal}') AND 
             (CLIENTES.NOMBRE LIKE '%${filtro}%') AND
-            (CLIENTES.CODEMPLEADO=${codven})
+            (CLIENTES.CODEMPLEADO=${codven}) AND
+            (CLIENTES.DIAVISITA='${dia}') AND
+            (CLIENTES.HABILITADO='SI')
 
         OR 
             (CLIENTES.EMPNIT='${sucursal}') AND 
             (CLIENTES.NIT='${filtro}') AND
-            (CLIENTES.CODEMPLEADO=${codven})
-            
-    `
+            (CLIENTES.CODEMPLEADO=${codven}) AND
+            (CLIENTES.DIAVISITA='${dia}') AND
+            (CLIENTES.HABILITADO='SI')
+        `
     
  
+        console.log(qry);
+        
 
     execute.QueryToken(res,qry,token);
      

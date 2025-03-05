@@ -1,4 +1,4 @@
-let versionapp = "M.28.02.2025:0"
+let versionapp = "M.05.03.2025:0"
 // &nbsp
 
 let map; //mapa de leaflet
@@ -19,6 +19,7 @@ let GlobalCodUsuario = 0;
 let GlobalBolEditando = false;
 let GlobalSignoMoneda = 'Q'
 
+let data_config_general = [];
 let data_empresa_config = [];
 let data_usuario_config = [];
 

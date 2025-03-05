@@ -13,7 +13,7 @@ var nodemailer = require('nodemailer');
 
 const execute = require('./connection');
 
-
+var router_config = require('./router/router_config.js');
 var router_contabilidad = require('./router/router_conta.js');
 var router_general = require('./router/router_general');
 var router_sucursales = require('./router/router_sucursales');
@@ -166,6 +166,7 @@ app.get("/despacho_finalizado",function(req,res){
 
 
 //Router 
+app.use('/config', router_config);
 app.use('/general', router_general);
 app.use('/conta', router_contabilidad);
 app.use('/sucursales', router_sucursales);

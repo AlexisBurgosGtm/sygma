@@ -355,7 +355,7 @@ let Navegar = {
     },
     inicio_vendedor:()=>{
         if(Number(GlobalNivelUsuario)==0){return;}
-        F.loadScript('../views/ventas_censo/view_censo.js','root')
+        F.loadScript('../views/menu/inicio_ventas.js','root')
         .then(async()=>{
             initView();
         })

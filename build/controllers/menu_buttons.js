@@ -419,7 +419,7 @@ let botones_menu = {
                                     
                                     <li>
                                         <a href="#" title="How it works" data-filter-tags="theme settings how it works"  onclick="Menu.clientes()">
-                                            <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">CLIENTES</span>
+                                            <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">CLIENTES (CENSO)</span>
                                         </a>
                                     </li>
                                     <li>
@@ -492,9 +492,9 @@ let botones_menu = {
                                 </a>
                             </li>
                             <li>
-                                <a href="#"  class="text-base"  data-filter-tags="application intel"  onclick="Menu.ventas_censo();">
+                                <a href="#"  class="text-base"  data-filter-tags="application intel"  onclick="Menu.ventas_censo()">
                                     <i class="fal fa-users"></i>
-                                    <span class="nav-link-text" data-i18n="nav.application_intel">CENSAR</span>
+                                    <span class="nav-link-text" data-i18n="nav.application_intel">CENSO</span>
                                 </a>
                             </li>                            
                         </ul>
