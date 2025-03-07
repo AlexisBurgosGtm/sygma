@@ -422,6 +422,11 @@ let botones_menu = {
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">CLIENTES (CENSO)</span>
                                         </a>
                                     </li>
+                                     <li>
+                                        <a href="#" title="Layout Options" data-filter-tags="theme settings layout options"  onclick="Menu.empleados()">
+                                            <span class="nav-link-text" data-i18n="nav.theme_settings_layout_options">EMPLEADOS</span>
+                                        </a>
+                                    </li>
                                     <li>
                                         <a href="#" title="Layout Options" data-filter-tags="theme settings layout options"  onclick="Menu.proveedores()">
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_layout_options">PROVEEDORES</span>

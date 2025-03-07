@@ -244,6 +244,17 @@ let Menu = {
             F.AvisoError('No tiene permitido entrar a esta sección');
         } 
     },
+    empleados:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/mant_empleados/view_empleados.js','root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        } 
+    },
     bi_notificaciones:()=>{
         if(Menu.verify()==true){
             Menu.salidaMenu();

@@ -1,4 +1,7 @@
 ﻿
+//inicia las view transition
+document.startViewTransition(() => updateDOM());
+
 
 
 
