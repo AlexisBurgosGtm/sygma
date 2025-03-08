@@ -3,6 +3,55 @@ const express = require('express');
 const router = express.Router();
 
 
+router.post("/empleados_edit", async(req,res)=>{
+   
+    const { token, sucursal, codemp,codpuesto, nomemp, direccion, telefono, clave,usuario,coddoc_env, coddoc_cot } = req.body;
+
+    let qry = `
+        UPDATE EMPLEADOS SET
+            (EMPNIT,CODPUESTO,NOMEMPLEADO,DPI,IGSS,DIRECCION,TELEFONO,CLAVE,ACTIVO,USUARIO,CODDOC_ENV,CODDOC_COT)
+        SELECT '${sucursal}' AS EMPNIT, 
+                ${codpuesto} AS CODPUESTO,
+                '${nomemp}' AS NOMEMPLEADO,
+                '' AS DPI,'' AS IGSS,
+                '${direccion}' AS DIRECCION,
+                '${telefono}' AS TELEFONO,
+                '${clave}' AS CLAVE,
+                'SI' AS ACTIVO,
+                '${usuario}' AS USUARIO,
+                '${coddoc_env}' AS CODDOC_ENV,
+                '${coddoc_cot}' AS CODDOC_COT;
+            `
+    
+    execute.QueryToken(res,qry,token); 
+     
+});
+
+
+router.post("/empleados_insert", async(req,res)=>{
+   
+    const { token, sucursal, codpuesto, nomemp, direccion, telefono, clave,usuario,coddoc_env, coddoc_cot } = req.body;
+
+    let qry = `
+        INSERT INTO EMPLEADOS 
+            (EMPNIT,CODPUESTO,NOMEMPLEADO,DPI,IGSS,DIRECCION,TELEFONO,CLAVE,ACTIVO,USUARIO,CODDOC_ENV,CODDOC_COT)
+        SELECT '${sucursal}' AS EMPNIT, 
+                ${codpuesto} AS CODPUESTO,
+                '${nomemp}' AS NOMEMPLEADO,
+                '' AS DPI,'' AS IGSS,
+                '${direccion}' AS DIRECCION,
+                '${telefono}' AS TELEFONO,
+                '${clave}' AS CLAVE,
+                'SI' AS ACTIVO,
+                '${usuario}' AS USUARIO,
+                '${coddoc_env}' AS CODDOC_ENV,
+                '${coddoc_cot}' AS CODDOC_COT;
+            `
+    
+    execute.QueryToken(res,qry,token); 
+     
+});
+
 
 router.post("/empleados_listado", async(req,res)=>{
    

@@ -12,6 +12,14 @@ let tipo_precios =[
                 {tipo:"PRECIO_F",nombre:"PRECIO F"}
             ];
 
+let tipo_empleados = [
+    {codigo:1,descripcion:"GERENCIA"},
+    {codigo:2,descripcion:"SUPERVISION"},
+    {codigo:3,descripcion:"VENDEDOR RUTERO"},
+    {codigo:4,descripcion:"REPARTIDOR"},
+    {codigo:5,descripcion:"DIGITADOR"},
+    {codigo:6,descripcion:"BODEGA"}
+]
 
 
 

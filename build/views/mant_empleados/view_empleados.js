@@ -6,7 +6,7 @@ function getView(){
                 <div class="col-12 p-0 bg-white">
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
-                            ${view.vista_listado()}
+                            ${view.vista_listado() + view.modal_datos_empleado()}
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
                            
@@ -90,7 +90,7 @@ function getView(){
             </button>
             `
         },
-        modal:()=>{
+        modal_datos_empleado:()=>{
             return `
               <div id="modal_empleado" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-right modal-xl">
@@ -103,25 +103,92 @@ function getView(){
                         <div class="modal-body p-4">
                             
                             <div class="card card-rounded">
-                                <div class="card-body p-2">
+                                <div class="card-body p-4">
+
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary">Puesto (Tipo Empleado)</label>
+                                        <select class="form-control negrita" id="cmbPuesto">
+                                        
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary">Nombre Completo</label>
+                                        <input type="text" class="form-control negrita" id="txtNombre">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary">Dirección</label>
+                                        <input type="text" class="form-control negrita" id="txtDireccion">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary">Teléfono</label>
+                                       <input type="text" class="form-control negrita" id="txtTelefono">
+                                    </div>
+
+                                    <div class="card card-rounded col-12">
+                                        <div class="card-body p-4">
+                                            <h5 class="negrita text-danger">Acceso a la Plataforma</h5>
+                                            <div class="row">
+                                                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
+                                                    <div class="form-group">
+                                                        <label class="negrita text-secondary">Usuario</label>
+                                                        <input type="text" class="form-control negrita" id="txtUsuario">
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
+                                                    <div class="form-group">
+                                                        <label class="negrita text-secondary">Clave</label>
+                                                        <input type="text" class="form-control negrita" id="txtClave">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        
+                                        </div>
+                                    </div>
+                                    
+                                    <br>
+
+                                    <div class="row">
+                                        <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
+                                            <div class="form-group">
+                                                <label class="negrita text-secondary">Serie Pedidos</label>
+                                                <select class="form-control negrita" id="cmbCoddocEnv">
+                                                
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
+                                            <div class="form-group">
+                                                <label class="negrita text-secondary">Serie Cotizaciones</label>
+                                                <select class="form-control negrita" id="cmbCoddocCot">
+                                                
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                   
 
 
 
                                 </div>
                             </div>
 
+                            <br>
                                 
                             <div class="row">
                                 <div class="col-6">
                                     <button class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
                                         <i class="fal fa-arrow-left"></i>
                                     </button>
-                                </di>
+                                </div>
                                 <div class="col-6">
-                                    <button class="btn btn-info btn-circle btn-xl hand shadow" id="btnGuardarEmpleado">
+                                    <button class="btn btn-base btn-circle btn-xl hand shadow" id="btnGuardarEmpleado">
                                         <i class="fal fa-save"></i>
                                     </button>
-                                </di>
+                                </div>
                                 
                             </div>
 
@@ -146,6 +213,10 @@ function addListeners(){
         tbl_empleados();    
     });
 
+    document.getElementById('btnNuevo').addEventListener('click',()=>{
+        $("#modal_empleado").modal('show');
+        clean_data();
+    })
 
 
     tbl_empleados();
@@ -162,7 +233,9 @@ function initView(){
 
 };
 
+function clean_data(){
 
+};
 
 function tbl_empleados(){
 
@@ -177,6 +250,8 @@ function tbl_empleados(){
     .then((data)=>{
 
         data.recordset.map((r)=>{
+            let btnAct = `btnAct${r.CODEMPLEADO}`;
+
             str += `
                 <tr>
                     <td>${r.NOMPUESTO}</td>
@@ -187,9 +262,9 @@ function tbl_empleados(){
                         <small class="negrita text-danger">Clave: ${r.CLAVE}</small>
                     </td>
                     <td>
-                        <small class="negrita text-info">Clave: ${r.CODDOC_ENV}</small>
+                        <small class="negrita text-info">Ped: ${r.CODDOC_ENV}</small>
                         <br>
-                        <small class="negrita text-base">Clave: ${r.CODDOC_COT}</small>
+                        <small class="negrita text-base">Cot: ${r.CODDOC_COT}</small>
                     </td>
                     <td>
                         <button class="btn btn-md btn-circle btn-info hand shadow"
@@ -198,14 +273,14 @@ function tbl_empleados(){
                         </button>
                     </td>
                     <td>
-                        <button class="btn btn-md btn-circle btn-success hand shadow"
-                        onclick="">
+                        <button id='${btnAct}' class="btn btn-md btn-circle btn-outline-info hand shadow"
+                        onclick="update_status_empleado('${r.CODEMPLEADO}','${r.ACTIVO}','${btnAct}')">
                             <i class="fal fa-sync"></i>
                         </button>
                     </td>
                     <td>
                         <button class="btn btn-md btn-circle btn-danger hand shadow"
-                        onclick="">
+                        onclick="F.AvisoError('No disponible')">
                             <i class="fal fa-trash"></i>
                         </button>
                     </td>
@@ -223,3 +298,52 @@ function tbl_empleados(){
 
 
 };
+
+function update_status_empleado(codempleado,stActual,idbtn){
+
+        let btn = document.getElementById(idbtn);
+
+        let newSt = '';
+        let msn = '';
+
+        if(stActual=='SI'){
+            msn = '¿Está seguro que desea DESACTIVAR este empleado?';
+            newSt = 'NO';
+        }else{
+            msn = '¿Está seguro que desea ACTIVAR este empleado?'
+            newSt='SI';
+        };
+
+        
+        F.Confirmacion(msn)
+        .then((value)=>{
+            if(value==true){
+
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fal fa-sync fa-spin"></i>`;
+
+                GF.get_data_empleados_update_st(GlobalEmpnit,codempleado,newSt)
+                .then(()=>{
+
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fal fa-sync"></i>`;
+    
+                    tbl_empleados();
+
+                })
+                .catch(()=>{
+
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fal fa-sync"></i>`;
+    
+                })
+
+
+            }
+        })
+
+
+
+
+
+}
