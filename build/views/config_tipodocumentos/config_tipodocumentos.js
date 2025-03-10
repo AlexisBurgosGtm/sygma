@@ -239,6 +239,8 @@ function addListeners(){
                     .then((value)=>{
                         if(value==true){
 
+
+
                             let cmbTipodocumento = document.getElementById('cmbTipodocumento').value;
                             let txtCoddoc = document.getElementById('txtCoddoc').value || '';
                             let txtCorrelativo = document.getElementById('txtCorrelativo').value || '1';
@@ -248,17 +250,25 @@ function addListeners(){
 
                             if(txtCoddoc==''){F.AvisoError("Escriba una serie válida");return;}
                             
-
+                            btnGuardar.disabled = true;
+                            btnGuardar.innerHTML = `<i class="fal fa-save fa-spin"></i>`;
+    
                             classTipodocumentos.insert_tipodocumento(cmbTipodocumento,txtCoddoc,txtCorrelativo,txtDescripcion,cmbFContaCon,cmbFContaCre)
                             .then(()=>{
                                 
                                 F.Aviso("Documento generado exitosamente!!");
                                 $("#modal_nuevo").modal("hide");
 
+                                btnGuardar.disabled = false;
+                                btnGuardar.innerHTML = `<i class="fal fa-save"></i>`;
+
                                 get_tbl_documentos();
                             })
                             .catch(()=>{
                                 F.AvisoError("No se pudo guardar");
+
+                                btnGuardar.disabled = false;
+                                btnGuardar.innerHTML = `<i class="fal fa-save"></i>`;
                             })
 
                         }

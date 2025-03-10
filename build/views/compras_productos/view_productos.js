@@ -220,13 +220,17 @@ function getView(){
                             <div class="card-body p-4" style="font-size:80%">
 
                                     <div class="row">
-                                        <div class="col-6">
+                                        <div class="col-4">
                                             <label class="negrita text-base">Código Interno</label>
                                             <input type="text" class="form-control" id="txtCodprod" maxlength="50">
                                         </div>
-                                        <div class="col-6">
+                                        <div class="col-4">
                                            <label class="negrita text-base">Código Alterno (Barras)</label>
                                             <input type="text" class="form-control" id="txtCodprod2" maxlength="50">
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="negrita text-base">Codigo 3</label>
+                                            <input type="text" class="form-control" id="txtDesprod3" maxlength="255">
                                         </div>
                                     </div>
                                                                        
@@ -236,9 +240,7 @@ function getView(){
                                     <br>
                                         <label class="negrita text-base">Descripción 2</label>
                                         <input type="text" class="form-control" id="txtDesprod2" maxlength="255">
-                                    <br>
-                                        <label class="negrita text-base">Descripción 3</label>
-                                        <input type="text" class="form-control" id="txtDesprod3" maxlength="255">
+                                    
                                     <br>
                                      
                             </div>                   
