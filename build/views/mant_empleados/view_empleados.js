@@ -513,7 +513,7 @@ function eliminar_empleado(codigo,nombre,idbtn){
 
 
             btn.disabled = true;
-            btn.innerHTML `<i class="fal fa-trash fa-spin"></i>`;
+            btn.innerHTML = `<i class="fal fa-trash fa-spin"></i>`;
 
             GF.get_data_empleados_delete(GlobalEmpnit,codigo)
             .then(()=>{
@@ -524,7 +524,7 @@ function eliminar_empleado(codigo,nombre,idbtn){
             .catch(()=>{
 
                 btn.disabled = false;
-                btn.innerHTML `<i class="fal fa-trash"></i>`;
+                btn.innerHTML = `<i class="fal fa-trash"></i>`;
       
             })
 
