@@ -173,7 +173,7 @@ function getView(){
                                 </div>
                             </div>
 
-                            <br><input type="text" id="txtCodEmp" class="">
+                            <br><input type="text" id="txtCodEmp" class="hidden" disabled>
                                 
                             <div class="row">
                                 <div class="col-6">
