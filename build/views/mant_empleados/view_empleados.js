@@ -169,14 +169,11 @@ function getView(){
                                         </div>
                                     </div>
 
-                                   
-
-
 
                                 </div>
                             </div>
 
-                            <br>
+                            <br><input type="text" id="txtCodEmp" class="">
                                 
                             <div class="row">
                                 <div class="col-6">
@@ -208,6 +205,34 @@ function getView(){
 function addListeners(){
 
 
+    //CARGA LOS TIPOS
+    document.getElementById('cmbPuesto').innerHTML = tipo_empleados.map((r)=>{return `<option value='${r.codigo}'>${r.descripcion}</option>`}).join();
+
+
+        GF.get_data_tipodoc_coddoc('ENV')
+        .then((data)=>{
+                    let coddoc = '<option value="">NO ASIGNADO</option>'
+                    data.recordset.map((r)=>{
+                        coddoc += `<option value="${r.CODDOC}">${r.CODDOC}</option>`
+                    })        
+                    document.getElementById('cmbCoddocEnv').innerHTML = coddoc;
+        })
+        .catch(()=>{
+            document.getElementById('cmbCoddocEnv').innerHTML = `<option value="">NO SE CARGO...</option>`;
+        })
+
+        GF.get_data_tipodoc_coddoc('COT')
+        .then((data)=>{
+            let coddoc = '<option value="">NO ASIGNADO</option>'
+            data.recordset.map((r)=>{
+                coddoc += `<option value="${r.CODDOC}">${r.CODDOC}</option>`
+            })        
+            document.getElementById('cmbCoddocCot').innerHTML = coddoc;
+        })
+        .catch(()=>{
+            document.getElementById('cmbCoddocCot').innerHTML = `<option value="">NO SE CARGO...</option>`;
+        })
+
 
     document.getElementById('cmbStatus').addEventListener('change',()=>{
         tbl_empleados();    
@@ -215,11 +240,108 @@ function addListeners(){
 
     document.getElementById('btnNuevo').addEventListener('click',()=>{
         $("#modal_empleado").modal('show');
+        document.getElementById('txtCodEmp').disabled = false;
         clean_data();
     })
 
 
     tbl_empleados();
+
+
+
+
+
+    //GUARDAR
+    let btnGuardarEmpleado = document.getElementById('btnGuardarEmpleado');
+    btnGuardarEmpleado.addEventListener('click',()=>{
+
+
+        let codigo = document.getElementById('txtCodEmp').value || '';
+
+        let codtipo = document.getElementById('cmbPuesto').value;
+        let nombre = document.getElementById('txtNombre').value || '';
+        let direccion = document.getElementById('txtDireccion').value || 'CIUDAD';
+        let telefono = document.getElementById('txtTelefono').value || '';
+        let usuario = document.getElementById('txtUsuario').value || '.';
+        let clave = document.getElementById('txtClave').value || '.';
+        let coddoc_env = document.getElementById('cmbCoddocEnv').value;
+        let coddoc_cot = document.getElementById('cmbCoddocCot').value;
+
+
+        if(nombre==''){F.AvisoError('Escriba un nombre de Empleado');return;}
+        if(direccion==''){F.AvisoError('Escriba un nombre de Empleado');return;}
+
+
+
+        if(codigo==''){
+            //EMPLEADO NUEVO
+            F.Confirmacion('¿Está seguro que desea GUARDAR este nuevo Empleado?')
+            .then((value)=>{
+                if(value==true){
+
+                    btnGuardarEmpleado.disabled = true;
+                    btnGuardarEmpleado.innerHTML = `<i class="fal fa-save fa-spin"></i>;`
+
+                    GF.get_data_empleados_insert(GlobalEmpnit,codtipo,nombre,direccion,telefono,usuario,clave,coddoc_env,coddoc_cot)
+                    .then(()=>{
+                        F.Aviso('Empleado creado exitosamente!!');
+                        
+                        btnGuardarEmpleado.disabled = false;
+                        btnGuardarEmpleado.innerHTML = `<i class="fal fa-save"></i>`;
+        
+                        $("#modal_empleado").modal('hide');
+        
+                        tbl_empleados();
+                    })
+                    .catch(()=>{
+                        F.AvisoError('No se pudo crear el Empleado');
+                        btnGuardarEmpleado.disabled = false;
+                        btnGuardarEmpleado.innerHTML = `<i class="fal fa-save"></i>`;
+        
+                    })
+
+                }
+            })
+
+           
+
+        }else{
+            //EDICION DE EMPLEADO
+            F.Confirmacion('¿Está seguro que desea EDITAR a este Empleado?')
+            .then((value)=>{
+                if(value==true){
+
+                        btnGuardarEmpleado.disabled = true;
+                        btnGuardarEmpleado.innerHTML = `<i class="fal fa-save fa-spin"></i>;`
+                        
+                        GF.get_data_empleados_edit(GlobalEmpnit,codigo,codtipo,nombre,direccion,telefono,usuario,clave,coddoc_env,coddoc_cot)
+                        .then(()=>{
+                            F.Aviso('Empleado actualizado exitosamente!!');
+                            btnGuardarEmpleado.disabled = false;
+                            btnGuardarEmpleado.innerHTML = `<i class="fal fa-save"></i>`;
+            
+                            $("#modal_empleado").modal('hide');
+                            
+                            tbl_empleados();
+                        })
+                        .catch(()=>{
+                            F.AvisoError('No se pudo actualizar el Empleado');
+                            btnGuardarEmpleado.disabled = false;
+                            btnGuardarEmpleado.innerHTML = `<i class="fal fa-save"></i>`;
+        
+                        })
+                    
+                }
+            })
+
+            
+
+        }
+
+       
+        
+
+    });
 
 
 
@@ -235,7 +357,16 @@ function initView(){
 
 function clean_data(){
 
+    document.getElementById('txtCodEmp').value = '';
+    document.getElementById('txtNombre').value = '';
+    document.getElementById('txtDireccion').value = '';
+    document.getElementById('txtTelefono').value = '';
+    document.getElementById('txtUsuario').value = '';
+    document.getElementById('txtClave').value = '';
+    
 };
+
+
 
 function tbl_empleados(){
 
@@ -268,7 +399,7 @@ function tbl_empleados(){
                     </td>
                     <td>
                         <button class="btn btn-md btn-circle btn-info hand shadow"
-                        onclick="">
+                        onclick="datos_empleado('${r.CODEMPLEADO}','${r.CODPUESTO}','${r.NOMEMPLEADO}','${r.DIRECCION}','${r.TELEFONO}','${r.USUARIO}','${r.CLAVE}','${r.CODDOC_ENV}','${r.CODDOC_COT}')">
                             <i class="fal fa-edit"></i>
                         </button>
                     </td>
@@ -298,6 +429,8 @@ function tbl_empleados(){
 
 
 };
+
+
 
 function update_status_empleado(codempleado,stActual,idbtn){
 
@@ -346,4 +479,27 @@ function update_status_empleado(codempleado,stActual,idbtn){
 
 
 
-}
+};
+
+function datos_empleado(codigo,codtipo,nombre,direccion,telefono,usuario,clave,coddocenv,coddoccot){
+
+
+    $("#modal_empleado").modal('show');
+
+
+    document.getElementById('txtCodEmp').value = codigo;
+
+    document.getElementById('cmbPuesto').value = codtipo;
+    document.getElementById('txtNombre').value = nombre;
+    document.getElementById('txtDireccion').value = direccion;
+    document.getElementById('txtTelefono').value = telefono;
+    document.getElementById('txtUsuario').value = usuario;
+    document.getElementById('txtClave').value = clave;
+    document.getElementById('cmbCoddocEnv').value = coddocenv;
+    document.getElementById('cmbCoddocCot').value = coddoccot;
+    
+
+
+
+};
+

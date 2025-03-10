@@ -1477,5 +1477,110 @@ let GF = {
     
         })
     },
+    get_data_empleados_insert: (empnit,codtipo,nombre,direccion,telefono,usuario,clave,coddoc_env,coddoc_cot)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                codpuesto:codtipo,
+                nombre:nombre,
+                direccion:direccion,
+                telefono:telefono,
+                usuario:usuario,
+                clave:clave,
+                coddoc_env:coddoc_env,
+                coddoc_cot:coddoc_cot
+            };
+    
+            axios.post(`/empleados/empleados_insert`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
+    get_data_empleados_edit: (empnit,codigo,codtipo,nombre,direccion,telefono,usuario,clave,coddoc_env,coddoc_cot)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                codemp:codigo,
+                codpuesto:codtipo,
+                nombre:nombre,
+                direccion:direccion,
+                telefono:telefono,
+                usuario:usuario,
+                clave:clave,
+                coddoc_env:coddoc_env,
+                coddoc_cot:coddoc_cot
+            };
+    
+            axios.post(`/empleados/empleados_edit`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
+    get_data_empleados_delete: (empnit,codigo)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                codigo:codigo
+            };
+    
+            axios.post(`/empleados/empleados_delete`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
 };
 

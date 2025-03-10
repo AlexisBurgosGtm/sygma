@@ -5,22 +5,20 @@ const router = express.Router();
 
 router.post("/empleados_edit", async(req,res)=>{
    
-    const { token, sucursal, codemp,codpuesto, nomemp, direccion, telefono, clave,usuario,coddoc_env, coddoc_cot } = req.body;
+    const { token, sucursal, codemp,codpuesto, nombre, direccion, telefono, clave,usuario,coddoc_env, coddoc_cot } = req.body;
 
     let qry = `
         UPDATE EMPLEADOS SET
-            (EMPNIT,CODPUESTO,NOMEMPLEADO,DPI,IGSS,DIRECCION,TELEFONO,CLAVE,ACTIVO,USUARIO,CODDOC_ENV,CODDOC_COT)
-        SELECT '${sucursal}' AS EMPNIT, 
-                ${codpuesto} AS CODPUESTO,
-                '${nomemp}' AS NOMEMPLEADO,
-                '' AS DPI,'' AS IGSS,
-                '${direccion}' AS DIRECCION,
-                '${telefono}' AS TELEFONO,
-                '${clave}' AS CLAVE,
-                'SI' AS ACTIVO,
-                '${usuario}' AS USUARIO,
-                '${coddoc_env}' AS CODDOC_ENV,
-                '${coddoc_cot}' AS CODDOC_COT;
+            CODPUESTO=${codpuesto},
+            NOMEMPLEADO='${nombre}',
+            DIRECCION='${direccion}',
+            TELEFONO='${telefono}',
+            CLAVE='${clave}',
+            USUARIO='${usuario}',
+            CODDOC_ENV='${coddoc_env}',
+            CODDOC_COT='${coddoc_cot}'
+        WHERE EMPNIT='${sucursal}' 
+            AND CODEMPLEADO=${codemp};
             `
     
     execute.QueryToken(res,qry,token); 
@@ -30,14 +28,14 @@ router.post("/empleados_edit", async(req,res)=>{
 
 router.post("/empleados_insert", async(req,res)=>{
    
-    const { token, sucursal, codpuesto, nomemp, direccion, telefono, clave,usuario,coddoc_env, coddoc_cot } = req.body;
+    const { token, sucursal, codpuesto, nombre, direccion, telefono, clave,usuario,coddoc_env, coddoc_cot } = req.body;
 
     let qry = `
         INSERT INTO EMPLEADOS 
             (EMPNIT,CODPUESTO,NOMEMPLEADO,DPI,IGSS,DIRECCION,TELEFONO,CLAVE,ACTIVO,USUARIO,CODDOC_ENV,CODDOC_COT)
         SELECT '${sucursal}' AS EMPNIT, 
                 ${codpuesto} AS CODPUESTO,
-                '${nomemp}' AS NOMEMPLEADO,
+                '${nombre}' AS NOMEMPLEADO,
                 '' AS DPI,'' AS IGSS,
                 '${direccion}' AS DIRECCION,
                 '${telefono}' AS TELEFONO,
@@ -88,6 +86,20 @@ router.post("/empleados_update_st", async(req,res)=>{
 
     let qry = `
         UPDATE EMPLEADOS SET ACTIVO='${st}'
+        WHERE EMPNIT='${sucursal}' 
+        AND CODEMPLEADO=${codigo};
+            `
+    
+    execute.QueryToken(res,qry,token); 
+     
+});
+
+router.post("/empleados_delete", async(req,res)=>{
+   
+    const { token, sucursal,codigo } = req.body;
+
+    let qry = `
+        DELETE FROM EMPLEADOS
         WHERE EMPNIT='${sucursal}' 
         AND CODEMPLEADO=${codigo};
             `
