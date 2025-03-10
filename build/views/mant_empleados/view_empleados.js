@@ -382,7 +382,7 @@ function tbl_empleados(){
 
         data.recordset.map((r)=>{
             let btnAct = `btnAct${r.CODEMPLEADO}`;
-
+            let btnE = `btnE${r.CODEMPLEADO}`;
             str += `
                 <tr>
                     <td>${r.NOMPUESTO}</td>
@@ -410,8 +410,8 @@ function tbl_empleados(){
                         </button>
                     </td>
                     <td>
-                        <button class="btn btn-md btn-circle btn-danger hand shadow"
-                        onclick="F.AvisoError('No disponible')">
+                        <button class="btn btn-md btn-circle btn-danger hand shadow" id="${btnE}"
+                        onclick="eliminar_empleado('${r.CODEMPLEADO}','${r.NOMEMPLEADO}','${btnE}')">
                             <i class="fal fa-trash"></i>
                         </button>
                     </td>
@@ -503,3 +503,33 @@ function datos_empleado(codigo,codtipo,nombre,direccion,telefono,usuario,clave,c
 
 };
 
+function eliminar_empleado(codigo,nombre,idbtn){
+
+    let btn = document.getElementById(idbtn);
+
+    F.Confirmacion(`¿Está seguro que desea ELIMINAR al empleado ${nombre} ?`)
+    .then((value)=>{
+        if(value==true){
+
+
+            btn.disabled = true;
+            btn.innerHTML `<i class="fal fa-trash fa-spin"></i>`;
+
+            GF.get_data_empleados_delete(GlobalEmpnit,codigo)
+            .then(()=>{
+
+                F.Aviso('Empleado eliminado exitosamente!!');
+                tbl_empleados();
+            })
+            .catch(()=>{
+
+                btn.disabled = false;
+                btn.innerHTML `<i class="fal fa-trash"></i>`;
+      
+            })
+
+
+        }
+    })
+
+};
