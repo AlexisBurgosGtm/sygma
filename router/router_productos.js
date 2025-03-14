@@ -393,7 +393,7 @@ router.post("/listado", async(req,res)=>{
             OR
             (PRODUCTOS.DESPROD LIKE '%${filtro}%') 
             AND (PRODUCTOS.HABILITADO='${habilitado}')
-        ORDER BY PRODUCTOS.DESPROD
+        ORDER BY PRODUCTOS.CODPROD
     `
   
     

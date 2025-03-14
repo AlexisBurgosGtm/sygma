@@ -1079,6 +1079,23 @@ let F = {
             return 'pc';
           }
       },
+      initit_datatable: (idtbl,bol_busqueda)=>{
+
+          try {
+              new DataTable('#' + idtbl, {
+                  paging: false,
+                  scrollCollapse: true,
+                  searching: bol_busqueda,
+                  dom: 'Bfrtip',
+                  buttons: [
+                    'copy', 'csv', 'excel', 'pdf', 'print'
+                  ]
+              });    
+          } catch (error) {
+              
+          }
+
+      }
 };
 
 //export default funciones;

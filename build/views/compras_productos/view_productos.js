@@ -96,6 +96,7 @@ function getView(){
                             </tr>
                         </thead>
                         <tbody id="tblDataProductos">
+
                         </tbody>
                     </table>
                 
@@ -2548,14 +2549,8 @@ function get_tbl_productos(){
         container.innerHTML = str;
         lbTotalProductos.innerText = '';
 
-        try {
-            new DataTable('#tblProductos', {
-                paging: false,
-                scrollCollapse: true
-            });    
-        } catch (error) {
-            
-        }
+        F.initit_datatable('tblProductos',false);
+        
 
     })
     .catch((err)=>{
