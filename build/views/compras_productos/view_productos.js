@@ -1288,10 +1288,18 @@ function listeners_menu_productos(){
 
                     btnProdMenEliminar.innerHTML = '<i class="fal fa-trash fa-spin"></i>';
                     btnProdMenEliminar.disabled = true;
-
+                
+                    
                     GF.verify_codprod_movimientos(GlobalSelected_Codprod)
                     .then(()=>{
 
+                        F.AvisoError('Este producto tiene movimientos, no se puede ELIMINAR');
+                        btnProdMenEliminar.innerHTML = '<i class="fal fa-trash"></i>';
+                        btnProdMenEliminar.disabled = false;
+                        
+                    })
+                    .catch(()=>{
+                   
                         delete_producto(GlobalSelected_Codprod)
                         .then(()=>{
                             F.Aviso('Producto eliminado exitosamente!!')
@@ -1307,14 +1315,13 @@ function listeners_menu_productos(){
                             btnProdMenEliminar.disabled = false;
                             
                         })
-        
-                    })
-                    .catch(()=>{
-                        F.AvisoError('Este producto ya tiene movimientos, no puede eliminarlo, debe DESACTIVARLO');
-                        btnProdMenEliminar.innerHTML = '<i class="fal fa-trash"></i>';
-                        btnProdMenEliminar.disabled = false;
+                   
                     })
 
+
+                        
+        
+                 
             
 
                 }
@@ -2068,6 +2075,7 @@ function get_lista_fabricantes(){
     });
 
 };
+
 function insert_fabricante(codigo,descripcion){
   
     return new Promise((resolve,reject)=>{
@@ -2256,6 +2264,7 @@ function get_combo_medidas(){
     });
 
 };
+
 function get_lista_medidas(){
 
     let container = document.getElementById('tblDataProdMedidas');
@@ -2451,14 +2460,18 @@ function delete_lista_temp_precios(){
         .then((response) => {
             if(response.status.toString()=='200'){
                 let data = response.data;
-                if(Number(data.rowsAffected[0])>0){
-                    resolve(data);             
-                }else{
+                if(data.toString()=="error"){
                     reject();
-                }            
+                }else{
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    } 
+                }       
             }else{
                 reject();
-            }             
+            }                
         }, (error) => {
             reject();
         });
@@ -2483,14 +2496,18 @@ function data_productos_listado(filtro){
         .then((response) => {
             if(response.status.toString()=='200'){
                 let data = response.data;
-                if(Number(data.rowsAffected[0])>0){
-                    resolve(data);             
-                }else{
+                if(data.toString()=="error"){
                     reject();
-                }            
+                }else{
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    } 
+                }       
             }else{
                 reject();
-            }             
+            }                  
         }, (error) => {
             reject();
         });
@@ -2530,6 +2547,16 @@ function get_tbl_productos(){
         })
         container.innerHTML = str;
         lbTotalProductos.innerText = '';
+
+        try {
+            new DataTable('#tblProductos', {
+                paging: false,
+                scrollCollapse: true
+            });    
+        } catch (error) {
+            
+        }
+
     })
     .catch((err)=>{
         console.log(err)
@@ -2593,19 +2620,19 @@ function insert_producto(codprod,codprod2,desprod,desprod2,desprod3,
             })
         .then((response) => {
             if(response.status.toString()=='200'){
-                if(response.data.toString()=='error'){
+                let data = response.data;
+                if(data.toString()=="error"){
                     reject();
                 }else{
-                    let data = response.data;
                     if(Number(data.rowsAffected[0])>0){
                         resolve(data);             
                     }else{
                         reject();
-                    }
-                }        
+                    } 
+                }       
             }else{
                 reject();
-            }             
+            }               
         }, (error) => {
             reject();
         });
@@ -2647,19 +2674,19 @@ return new Promise((resolve,reject)=>{
         })
     .then((response) => {
         if(response.status.toString()=='200'){
-            if(response.data.toString()=='error'){
+            let data = response.data;
+            if(data.toString()=="error"){
                 reject();
             }else{
-                let data = response.data;
                 if(Number(data.rowsAffected[0])>0){
                     resolve(data);             
                 }else{
                     reject();
-                }
-            }        
+                } 
+            }       
         }else{
             reject();
-        }             
+        }                
     }, (error) => {
         reject();
     });
@@ -2680,14 +2707,18 @@ function get_detalle_producto_selecionado(codprod){
         .then((response) => {
             if(response.status.toString()=='200'){
                 let data = response.data;
-                if(Number(data.rowsAffected[0])>0){
-                    resolve(data);             
-                }else{
+                if(data.toString()=="error"){
                     reject();
-                }            
+                }else{
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    } 
+                }       
             }else{
                 reject();
-            }             
+            }                
         }, (error) => {
             reject();
         });
@@ -2800,14 +2831,18 @@ function insert_precio(codprod,codmedida,equivale,peso,costo,preciop,precioa,pre
         .then((response) => {
             if(response.status.toString()=='200'){
                 let data = response.data;
-                if(Number(data.rowsAffected[0])>0){
-                    resolve();             
-                }else{
+                if(data.toString()=="error"){
                     reject();
-                }            
+                }else{
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    } 
+                }       
             }else{
                 reject();
-            }             
+            }                
         }, (error) => {
             reject();
         });
@@ -2876,16 +2911,21 @@ function delete_producto(codprod){
                 codprod:codprod
             })
         .then((response) => {
-            if(response.status.toString()=='200'){
-                let data = response.data;
-                if(Number(data.rowsAffected[0])>0){
-                    resolve(data);             
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
                 }else{
                     reject();
-                }            
-            }else{
-                reject();
-            }             
+                }                  
+                   
         }, (error) => {
             reject();
         });

@@ -1,5 +1,11 @@
 
-process.loadEnvFile() //process.loadEnvFile(['./dev.env','./dev2.env'])
+try {
+  process.loadEnvFile() //process.loadEnvFile(['./dev.env','./dev2.env'])
+  
+} catch (error) {
+  
+}
+
 
 
 var express = require("express");

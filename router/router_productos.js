@@ -3,6 +3,27 @@ const express = require('express');
 const router = express.Router();
 
 
+
+
+router.post("/update_codprod", async(req,res)=>{
+   
+    const {token,sucursal,codprod_old, codprod_new} = req.body;
+
+   
+    let qry = `
+            UPDATE DOCPRODUCTOS SET CODPROD='${codprod_new}' WHERE CODPROD='${codprod_old}';
+            UPDATE PRECIOS SET CODPROD='${codprod_new}' WHERE CODPROD='${codprod_old}';
+            UPDATE INVSALDO SET CODPROD='${codprod_new}' WHERE CODPROD='${codprod_old}';
+            UPDATE PRODUCTOS SET CODPROD='${codprod_new}' WHERE CODPROD='${codprod_old}';
+    `
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+
+
 router.post("/movimientos_kardex", async(req,res)=>{
    
     const {token,sucursal,codprod} = req.body;
