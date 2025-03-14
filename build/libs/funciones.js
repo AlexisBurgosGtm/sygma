@@ -1081,11 +1081,14 @@ let F = {
       },
       initit_datatable: (idtbl,bol_busqueda)=>{
 
+          let bol = false;
+          if(bol_busqueda==true){bol=true}else{bol=false}
+
           try {
               new DataTable('#' + idtbl, {
                   paging: false,
                   scrollCollapse: true,
-                  searching: bol_busqueda,
+                  searching: bol,
                   dom: 'Bfrtip',
                   buttons: [
                     'copy', 'csv', 'excel', 'pdf', 'print'
