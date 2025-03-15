@@ -153,7 +153,7 @@ function getView(){
                                     <div class="row">
                                         <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
                                             <div class="form-group">
-                                                <label class="negrita text-secondary">Serie Pedidos</label>
+                                                <label class="negrita text-secondary">Serie Facturas</label>
                                                 <select class="form-control negrita" id="cmbCoddocEnv">
                                                 
                                                 </select>
@@ -209,7 +209,7 @@ function addListeners(){
     document.getElementById('cmbPuesto').innerHTML = tipo_empleados.map((r)=>{return `<option value='${r.codigo}'>${r.descripcion}</option>`}).join();
 
 
-        GF.get_data_tipodoc_coddoc('ENV')
+        GF.get_data_tipodoc_coddoc('FAC')
         .then((data)=>{
                     let coddoc = '<option value="">NO ASIGNADO</option>'
                     data.recordset.map((r)=>{

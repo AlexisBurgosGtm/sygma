@@ -184,7 +184,7 @@ function getView(){
                             
                             <div class="row">
                                 <div class="col-6">
-                                    <h4>LISTADO DE PEDIDOS PENDIENTES</h4>
+                                    <h4>LISTADO DE FACTURAS / PEDIDOS PENDIENTES</h4>
                                 </div>
                                 <div class="col-6">
                                     <label class="negrita text-danger" id="lbTotalP"></label>
@@ -1006,13 +1006,12 @@ function tbl_pedidos_pendientes(idContainer){
             `
         })
         container.innerHTML = str;
-        document.getElementById('lbTotalP').innerText = `Pedidos pendientes: ${contador}`
+        document.getElementById('lbTotalP').innerText = `Pendientes: ${contador}`
         document.getElementById('lbTotalMP').innerText =`${contador} pedidos`
 
-        new DataTable('#tblPedidos', {
-            paging: false,
-            scrollCollapse: true
-        });
+
+        F.initit_datatable('tblPedidos',true);
+
     })
     .catch((error)=>{
         container.innerHTML = 'No se cargaron datos....'
@@ -1797,14 +1796,9 @@ function tbl_embarques(idContainer,status,mes,anio){
         container.innerHTML = str;
         if(status=='NO'){document.getElementById('lbTotalEmb').innerText = `Pendientes ${conteo}`;};
         
-        try {
-            new DataTable('#tblEmbarques', {
-                paging: false,
-                scrollCollapse: true
-            });    
-        } catch (error) {
-            
-        }
+
+        F.initit_datatable('tblEmbarques',true);
+
 
         
     })

@@ -149,6 +149,14 @@ router.post("/coddoc", async(req,res)=>{
                         AND HABILITADO='SI';`
             break;
 
+        case 'FAC-PED':
+                qry = `SELECT CODDOC 
+                        FROM TIPODOCUMENTOS 
+                        WHERE EMPNIT='${sucursal}' 
+                            AND TIPODOC IN('FAC','FEF','FEC','FCP','FES','FPC','ENV') 
+                            AND HABILITADO='SI';`
+                break;
+
         default:
             qry = `SELECT CODDOC 
                         FROM TIPODOCUMENTOS 

@@ -333,8 +333,8 @@ function getView(){
                                 <div class="form-group">
                                     <label class="text-secondary">Tipo de Documento</label>
                                     <select class="form-control col-12 negrita text-danger" id="cmbTipoDocumento">
-                                        <option value="FAC">FACTURAS NORMALES</option> 
-                                
+                                        <option value="ENV">PEDIDOS</option> 
+                                        <option value="COT">COTIZACIONES</option>
                                     </select>   
                                 </div>
                                 <div class="form-group text-left">
@@ -353,7 +353,7 @@ function getView(){
                                     <div class="form-group text-left">
                                         <label class="text-secondary">Fecha</label>
                                         <div class="input-group">
-                                            <input type="date" id="txtFecha" class="form-control text-base negrita border-base" disabled>
+                                            <input type="date" id="txtFecha" class="form-control text-base negrita border-base">
                                         </div>
                                     </div>
 
@@ -627,7 +627,6 @@ function listener_coddoc(){
 
         let coddoc = ''
                 
-                if(tipo=='FAC'){coddoc = `<option value="${Selected_coddoc_env}">${Selected_coddoc_env}</option>`};
                 if(tipo=='ENV'){coddoc = `<option value="${Selected_coddoc_env}">${Selected_coddoc_env}</option>`};
                 if(tipo=='COT'){coddoc = `<option value="${Selected_coddoc_cot}">${Selected_coddoc_cot}</option>`};
 
@@ -1516,19 +1515,6 @@ function calcular_descuento(idDescuento,idTotalPrecio,idTotalPrecioDescuento){
 
 function insert_producto_pedido(codprod,desprod,codmedida,equivale,costo,precio,cantidad,exento,tipoprod,tipoprecio,existencia,bono,descuento){
     
-
-    //RUTINA QUE COMPARA EXISTENCIA CON CANTIDAD
-    let PVSE ='';
-    data_config_general.map((r)=>{
-        if(r.DESCRIPCION=='PERMITE_VENTA_SIN_EXISTENCIA'){ PVSE = r.VALOR; }
-    })
-
-
-    if(PVSE=='NO'){
-        let varTotalUnidades = Number(cantidad * equivale);
-        if(varTotalUnidades<=Number(existencia)){F.AvisoError('Existencia menor a la cantidad pedida');return;}
-    }
-
     let datos = 
         {
             CODSUCURSAL:GlobalEmpnit.toString(),
@@ -1802,7 +1788,7 @@ function finalizar_pedido(){
 
         gettempDocproductos_pos(GlobalUsuario)
         .then((response)=>{
-            axios.post('/pos/insertventa_factura', {
+            axios.post('/pos/insertventa_pedido', {
                 jsondocproductos:JSON.stringify(response),
                 sucursal:GlobalEmpnit,
                 coddoc:coddoc,
