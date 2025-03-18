@@ -366,6 +366,26 @@ router.post("/pedidos_pendientes_anular", async(req,res)=>{
 
     let qry = `
 
+            UPDATE DOCUMENTOS 
+            SET STATUS='${st}'
+            WHERE EMPNIT='${sucursal}' 
+            AND CODDOC='${coddoc}'
+            AND CORRELATIVO=${correlativo};
+            `;
+
+       
+            
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+router.post("/BACKUP_pedidos_pendientes_anular", async(req,res)=>{
+   
+    const {  token,sucursal,coddoc,correlativo,st} = req.body;
+
+    let qry = `
+
             UPDATE DOCUMENTOS_TEMPORALES 
             SET STATUS='${st}'
             WHERE EMPNIT='${sucursal}' 
@@ -386,6 +406,25 @@ router.post("/pedido_update_embarque", async(req,res)=>{
 
     let qry = `
 
+            UPDATE DOCUMENTOS 
+            SET CODEMBARQUE='${codembarque}'
+            WHERE EMPNIT='${sucursal}' 
+            AND CODDOC='${coddoc}'
+            AND CORRELATIVO=${correlativo};
+            `;
+
+       
+            
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/BACKUP_pedido_update_embarque", async(req,res)=>{
+   
+    const {  token,sucursal,codembarque,coddoc,correlativo} = req.body;
+
+    let qry = `
+
             UPDATE DOCUMENTOS_TEMPORALES 
             SET CODEMBARQUE='${codembarque}'
             WHERE EMPNIT='${sucursal}' 
@@ -398,6 +437,7 @@ router.post("/pedido_update_embarque", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+
 
 
 

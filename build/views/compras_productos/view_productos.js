@@ -2282,9 +2282,17 @@ function get_lista_medidas(){
             if(Number(data.rowsAffected[0])>0){
                 let str = '';
                 data.recordset.map((r)=>{
+                    let btnE = `btnE${r.CODMEDIDA}`;
+
                     str += `<tr>
                                 <td>${r.CODMEDIDA}</td>
-                                <td></td>
+                                <td>
+                                    <button class="btn btn-circle btn-md btn-danger hand shadow"
+                                    onclick="delete_medida('${r.CODMEDIDA}','${btnE}')" id="${btnE}"
+                                    >
+                                        <i class="fal fa-trash"></i>
+                                    </button>
+                                </td>
                             </tr>`
                 })
                 container.innerHTML = str;     
@@ -2310,6 +2318,70 @@ function insert_medida(codigo,descripcion){
                 token:TOKEN,
                 codigo:codigo,
                 descripcion:descripcion
+            })
+        .then((response) => {
+            console.log(response);
+            if(response.status.toString()=='200'){
+                if(response.data.toString()=='error'){
+                    reject();
+                }else{
+                    let data = response.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }
+                }       
+            }else{
+                reject();
+            }             
+        }, (error) => {
+            reject();
+        });
+    })   
+};
+
+function delete_medida(codmedida, idbtn){
+
+    let btn = document.getElementById(idbtn);
+
+    F.Confirmacion('¿Está seguro que desea ELIMINAR esta medida?')
+    .then((value)=>{
+        if(value==true){
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fal fa-trash fa-spin"></i>`;
+
+            data_delete_medida(codmedida)
+            .then(()=>{
+
+                get_lista_medidas();
+                get_combo_medidas();
+
+            })
+            .catch(()=>{
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fal fa-trash"></i>`;
+            })
+
+
+        }
+    })
+
+
+
+};
+
+
+function data_delete_medida(codmedida){
+  
+    return new Promise((resolve,reject)=>{
+
+        axios.post(GlobalUrlCalls + '/productos/delete_medida',
+            {
+                sucursal:GlobalEmpnit,
+                token:TOKEN,
+                codmedida:codmedida
             })
         .then((response) => {
             console.log(response);

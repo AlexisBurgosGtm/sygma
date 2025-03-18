@@ -1518,16 +1518,10 @@ function insert_producto_pedido(codprod,desprod,codmedida,equivale,costo,precio,
     
 
     //RUTINA QUE COMPARA EXISTENCIA CON CANTIDAD
-    let PVSE ='';
-    data_config_general.map((r)=>{
-        if(r.DESCRIPCION=='PERMITE_VENTA_SIN_EXISTENCIA'){ PVSE = r.VALOR; }
-    })
-
-
-    if(PVSE=='NO'){
+   
         let varTotalUnidades = Number(cantidad * equivale);
-        if(varTotalUnidades<=Number(existencia)){F.AvisoError('Existencia menor a la cantidad pedida');return;}
-    }
+        if(varTotalUnidades > Number(existencia)){F.AvisoError('Existencia menor a la cantidad pedida');return;}
+    
 
     let datos = 
         {
@@ -1542,7 +1536,7 @@ function insert_producto_pedido(codprod,desprod,codmedida,equivale,costo,precio,
             TOTALCOSTO:Number(costo)*Number(cantidad),
             PRECIO:Number(precio),
             CANTIDAD:Number(cantidad),
-            TOTALUNIDADES:Number(cantidad * equivale),
+            TOTALUNIDADES: varTotalUnidades, //Number(cantidad * equivale),
             TOTALPRECIO:Number(precio)*Number(cantidad),
             EXENTO:Number(exento),
             TIPOPROD:tipoprod,

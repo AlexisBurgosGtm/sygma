@@ -250,6 +250,17 @@ function getView(){
                                                     </tr>
                                                 </thead>
                                                 <tbody id="tblDataDetallePedido"></tbody>
+                                                <tfoot class="bg-secondary negrita text-white">
+                                                    <tr>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td id="lbFtotalCantidad"></td>
+                                                        <td></td>
+                                                        <td id="lbFtotalImporte"></td>
+                                                    </tr>
+                                                </tfoot>
                                             </table>
 
                                             <div class="form-group">
@@ -590,7 +601,6 @@ function getView(){
                             <input type="date" class="form-control negrita text-secondary" id="txtFFecha">
                             
                             <select class="form-control border-danger negrita text-danger" id="cmbFTipo">
-                                <option value='PENDIENTES'>FACTURAR PEDIDOS</option>
                                 <option value='FACTURAS'>FACTURAS EMBARQUE</option>
                                 <option value='PRODUCTOS'>PRODUCTOS EMBARQUE</option>
                             </select>
@@ -602,10 +612,10 @@ function getView(){
              </div>
              <div class="col-12 p-0">
                     <div class="tab-content" id="myTabHomeContent2">
-                        <div class="tab-pane fade show active" id="Funo" role="tabpanel" aria-labelledby="receta-tab">
+                        <div class="tab-pane fade" id="Funo" role="tabpanel" aria-labelledby="receta-tab">
                             ${view.facturacion_crear_facturas()}
                         </div>
-                        <div class="tab-pane fade" id="Fdos" role="tabpanel" aria-labelledby="home-tab">
+                        <div class="tab-pane fade show active" id="Fdos" role="tabpanel" aria-labelledby="home-tab">
                             ${view.facturacion_embarque_facturas()}
                      
                         </div>
@@ -867,13 +877,36 @@ function listeners_pedidos_pendientes(){
 
     document.getElementById('txtFFecha').addEventListener('change',()=>{
         get_combo_embarques();
+        
+
     });
 
     document.getElementById('cmbFEmbarques').addEventListener('change',()=>{
 
-        let codembarque = document.getElementById('cmbFEmbarques').value;
-        tbl_pedidos_embarque_facturar(codembarque);
+        let tipo = document.getElementById('cmbFTipo').value;
 
+        let codembarque = document.getElementById('cmbFEmbarques').value;
+
+        switch (tipo) {
+            
+            case 'FACTURAS':
+                document.getElementById('tab-Fdos').click();
+
+                tbl_facturas_embarque(codembarque);
+                document.getElementById('lbFacCodembarque').innerText = codembarque;
+
+                break;
+        
+            case 'PRODUCTOS':
+                document.getElementById('tab-Ftres').click();
+
+                tbl_productos_embarque(codembarque);
+                document.getElementById('lbProdCodembarque').innerText = codembarque;
+
+
+                break;
+        
+        }
         
 
     });
@@ -887,10 +920,7 @@ function listeners_pedidos_pendientes(){
         let codembarque = document.getElementById('cmbFEmbarques').value;
 
         switch (tipo) {
-            case 'PENDIENTES':
-                document.getElementById('tab-Funo').click();
-                break;
-
+            
             case 'FACTURAS':
                 document.getElementById('tab-Fdos').click();
 
@@ -1179,9 +1209,12 @@ function get_detalle_pedido(coddoc,correlativo){
         let obs = data.recordset[0].OBS;
 
 
+        let contador = 0; let varImporte = 0;
 
         
         json.map((r)=>{
+            contador += 1;
+            varImporte += Number(r.TOTALPRECIO);
             str += `
             <tr>
                 <td>${r.CODPROD}</td>
@@ -1195,11 +1228,20 @@ function get_detalle_pedido(coddoc,correlativo){
             `
         })
         container.innerHTML = str;
+        document.getElementById('lbFtotalCantidad').innerHTML = contador;
+        document.getElementById('lbFtotalImporte').innerHTML = F.setMoneda(varImporte,'Q');
+       
         document.getElementById('txtDetallePedidoObs').value = obs;
+       
+
 
     })
     .catch(()=>{
         container.innerHTML = 'No hay datos...';
+       
+        document.getElementById('lbFtotalCantidad').innerHTML = '';
+        document.getElementById('lbFtotalImporte').innerHTML = '';
+       
         document.getElementById('txtDetallePedidoObs').value = '';
 
     })

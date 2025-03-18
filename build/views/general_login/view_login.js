@@ -59,6 +59,22 @@ function getView(){
                                     </button>
                                 </div>
                             </div>
+
+                            <div class="row hidden">
+                                
+                                <div class="card col-12">
+                                    <div clas="card-body p-4">
+                                        <button class="btn btn-danger hand" id="btnGuatex">
+                                            Guatex
+                                        </button>
+                                        <div id="root_guatex">
+                                        
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
                            
                         </div>
                     </div>
@@ -82,6 +98,27 @@ function getView(){
 
 function addListeners(){
     
+
+    document.getElementById('btnGuatex').addEventListener('click',()=>{
+
+        let container = document.getElementById('root_guatex');
+        container.innerHTML = GlobalLoader;
+
+
+        SEGURIDAD.guatex()
+        .then((data)=>{
+            container.innerHTML = data;
+        })
+        .catch((error)=>{
+            container.innerHTML = error;
+        })
+
+
+    })
+
+
+
+
     document.title = "Login";
 
     let cmbEmpresa = document.getElementById('cmbEmpresa');

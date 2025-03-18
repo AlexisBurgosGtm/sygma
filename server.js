@@ -169,6 +169,35 @@ app.get("/despacho_finalizado",function(req,res){
 }); 
 
 
+app.post('/guatex', function(req,res){
+
+
+ 
+
+      let data = {
+          usuario:"APIGUATEX",
+          password:"GTXADMINGT",
+          codigoCobro:"CON1289"
+      }
+
+      axios.post('https://guias.guatex.gt/tomarservicio/servicio', {headers: data})
+      .then((response) => {
+        
+        console.log(response);
+
+        res.send(response);
+
+      }, (error) => {
+
+
+        res.send(error);
+      });
+
+
+
+});
+
+
 
 
 //Router 

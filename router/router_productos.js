@@ -475,6 +475,7 @@ router.post("/listado_medidas", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+
 router.post("/insert_medida", async(req,res)=>{
    
     const {token,sucursal,codigo,descripcion} = req.body;
@@ -489,6 +490,20 @@ router.post("/insert_medida", async(req,res)=>{
      
 });
 
+
+router.post("/delete_medida", async(req,res)=>{
+   
+    const {token,sucursal,codmedida} = req.body;
+
+   
+    let qry = `
+    DELETE FROM MEDIDAS 
+    WHERE CODMEDIDA='${codmedida}';
+    `
+
+    execute.QueryToken(res,qry,token);
+     
+});
 
 
 router.post("/listado_marcas", async(req,res)=>{
