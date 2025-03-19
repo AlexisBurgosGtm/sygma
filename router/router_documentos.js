@@ -3,6 +3,38 @@ const express = require('express');
 const router = express.Router();
 
 
+
+router.post("/update_totales_documento", async(req,res)=>{
+   
+    const { token, sucursal, totalcosto,totaldescuento,totalprecio,coddoc,correlativo} = req.body;
+
+    let qry = `
+           UPDATE DOCUMENTOS SET
+                TOTALCOSTO=${totalcosto},
+                TOTALVENTA=${totalprecio},
+                TOTALDESCUENTO=${totaldescuento},
+                TOTALPRECIO=${totalprecio} 
+           WHERE EMPNIT='${sucursal}' AND CODDOC='${coddoc}' AND CORRELATIVO=${correlativo} ;  `
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+router.post("/eliminar_item_documento", async(req,res)=>{
+   
+    const { token, sucursal, id} = req.body;
+
+    let qry = `
+            DELETE FROM DOCPRODUCTOS WHERE ID=${id} AND EMPNIT='${sucursal}';  `
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+
+
 router.post("/documentos_pendientes", async(req,res)=>{
    
     const { token, sucursal, tipodoc} = req.body;
@@ -30,11 +62,27 @@ router.post("/detalle_documento", async(req,res)=>{
     const { token, sucursal, coddoc,correlativo} = req.body;
 
     let qry = `
-        SELECT DOCPRODUCTOS.CODPROD, DOCPRODUCTOS.DESPROD, MARCAS.DESMARCA,
-                DOCPRODUCTOS.CODMEDIDA, DOCPRODUCTOS.CANTIDAD, DOCPRODUCTOS.CANTIDADBONIF, DOCPRODUCTOS.EQUIVALE, DOCPRODUCTOS.TOTALUNIDADES, 
-                DOCPRODUCTOS.TOTALBONIF, DOCPRODUCTOS.COSTO, DOCPRODUCTOS.PRECIO, 
-                DOCPRODUCTOS.TOTALCOSTO, DOCPRODUCTOS.DESCUENTO, DOCPRODUCTOS.TOTALPRECIO, 
-                DOCPRODUCTOS.OBS, DOCPRODUCTOS.EXENTO, DOCPRODUCTOS.TIPOPROD, DOCPRODUCTOS.TIPOPRECIO, DOCPRODUCTOS.EXISTENCIA
+        SELECT 
+            DOCPRODUCTOS.ID, 
+            DOCPRODUCTOS.CODPROD, 
+            DOCPRODUCTOS.DESPROD, 
+            MARCAS.DESMARCA,
+            DOCPRODUCTOS.CODMEDIDA, 
+            DOCPRODUCTOS.CANTIDAD, 
+            DOCPRODUCTOS.CANTIDADBONIF, 
+            DOCPRODUCTOS.EQUIVALE, 
+            DOCPRODUCTOS.TOTALUNIDADES, 
+            DOCPRODUCTOS.TOTALBONIF, 
+            DOCPRODUCTOS.COSTO, 
+            DOCPRODUCTOS.PRECIO, 
+            DOCPRODUCTOS.TOTALCOSTO, 
+            DOCPRODUCTOS.DESCUENTO, 
+            DOCPRODUCTOS.TOTALPRECIO, 
+            DOCPRODUCTOS.OBS, 
+            DOCPRODUCTOS.EXENTO, 
+            DOCPRODUCTOS.TIPOPROD, 
+            DOCPRODUCTOS.TIPOPRECIO, 
+            DOCPRODUCTOS.EXISTENCIA
         FROM PRODUCTOS INNER JOIN
                   MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA RIGHT OUTER JOIN
                   DOCPRODUCTOS ON PRODUCTOS.CODPROD = DOCPRODUCTOS.CODPROD

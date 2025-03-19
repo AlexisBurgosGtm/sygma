@@ -203,6 +203,7 @@ function getView(){
                                         <td>IMPORTE</td>
                                         <td>ST</td>
                                         <td></td>
+                                        <td></td>
                                     </tr>
                                 </thead>
                                 <tbody id="tblDataPedidos"></tbody>
@@ -551,6 +552,7 @@ function getView(){
                                                 <td>CODMEDIDA</td>
                                                 <td>CANTIDAD</td>
                                                 <td>TOTAL UNIDADES</td>
+                                                <td></td>
                                                 <td></td>
                                             </tr>
                                         </thead>
@@ -1032,6 +1034,12 @@ function tbl_pedidos_pendientes(idContainer){
                                 <i class="fal fa-list"></i>
                         </button>
                     </td>
+                    <td>
+                        <button class="btn btn-info btn-md btn-circle hand shadow"
+                            onclick="fcn_editar_factura('${r.CODDOC}','${r.CORRELATIVO}','${r.NOMCLIE}','${r.DIRCLIE}')">
+                                <i class="fal fa-edit"></i>
+                        </button>
+                    </td>
                 </tr>
             `
         })
@@ -1200,19 +1208,19 @@ function get_detalle_pedido(coddoc,correlativo){
     container.innerHTML = GlobalLoader;
 
 
-    GF.get_data_detalle_documento_json(GlobalEmpnit,coddoc,correlativo)
+    GF.get_data_detalle_documento(GlobalEmpnit,coddoc,correlativo)
     .then((data)=>{
         let str = "";
         
         
-        let json = JSON.parse(data.recordset[0].JSONDOCPRODUCTOS);
-        let obs = data.recordset[0].OBS;
+        //let json = JSON.parse(data.recordset[0].JSONDOCPRODUCTOS);
+        let obs = '';//data.recordset[0].OBS;
 
 
         let contador = 0; let varImporte = 0;
 
         
-        json.map((r)=>{
+        data.recordset.map((r)=>{
             contador += 1;
             varImporte += Number(r.TOTALPRECIO);
             str += `

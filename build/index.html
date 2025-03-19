@@ -454,8 +454,8 @@
             </div>
         </div>
 
-          <!-- MODAL EDITAR FACTURA -->
-          <div id="modal_editar_factura" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
+        <!-- MODAL EDITAR FACTURA -->
+        <div id="modal_editar_factura" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-dialog-right modal-xl">
                 <div class="modal-content">
                     <div class="dropdown-header bg-base d-flex justify-content-center align-items-center w-100">
@@ -466,15 +466,48 @@
                     <div class="modal-body p-4">
                         
                         <div class="card card-rounded col-12">
-                            <div class="card-body p-4" id='rootEditFac'>
+                            <div class="card-body p-4">
 
-                             
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <label class="negrita">Cliente</label>
+                                            <input type="text" class="form-control" id="txtEditarFacturaNomclie" disabled>
+                                            <input type="text" class="form-control" id="txtEditarFacturaDirclie" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <label class="negrita">Total Factura</label>
+                                            <h3 class="negrita text-danger" id="lbEditarFacturaTotal"></h3>
+                                            <br>
+                                            <small class="negrita text-danger" id="lbEditarFacturaCoddoc"></small>
+                                        </div>
+                                    </div>
+                                </div>
                                 
+                             
+                                <br>
+                                
+                                <table class="table h-full table-bordered">
+                                    <thead class="bg-base text-white">
+                                        <tr>
+                                            <td>CODIGO</td>
+                                            <td>PRODUCTO</td>
+                                            <td>CODMEDIDA</td>
+                                            <td>CANTIDAD</td>
+                                            <td>PRECIO</td>
+                                            <td>SUBTOTAL</td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDataEditarFactura">
 
+                                    </tbody>
 
-
-
-                            
+                                </table>
+                                                 
                             </div>
                         </div>
 
@@ -488,10 +521,21 @@
                                 
                             </div>
                             <div class="col-6">
-                                
+                                <button class="btn btn-info btn-circle btn-xl hand shadow" id="btnEditarFacturaActualizar">
+                                    <i class="fal fa-sync"></i>
+                                </button>
                             </div>
                         </div>
                         
+                        
+                        <div class="row hidden">
+                            <input type="text" class="form-control" id="txtEditarFacturaCoddoc" disabled>
+                            <input type="number" class="form-control" id="txtEditarFacturaCorrelativo" disabled>
+                            <input type="number" class="form-control" id="txtEditarFacturaTotalCosto" disabled>
+                            <input type="number" class="form-control" id="txtEditarFacturaTotalDescuento" disabled>
+                            <input type="number" class="form-control" id="txtEditarFacturaTotalPrecio" disabled>
+                        </div>
+
 
                     </div>
                   
@@ -499,6 +543,75 @@
                 </div>
             </div>
         </div>
+
+                <!-- MODAL EDITAR CANTIDAD PRODUCTO FACTURA -->
+        <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true" 
+            id="modal_editar_factura_cantidad">
+
+                    <div class="modal-dialog modal-md">
+                        <div class="modal-content">
+                            <div class="dropdown-header bg-danger d-flex justify-content-center align-items-center w-100">
+                                <h4 class="m-0 text-center color-white" id="">
+                                    Cambiar Cantidad del Producto
+                                </h4>
+                            </div>
+                            <div class="modal-body p-4">
+                                
+                                <div class="card card-rounded">
+                                    <div class="card-body p-4">
+                                        
+                                        <h3 class="negrita text-danger" id="lbEditarFacturaDesprod">DESPROD</h3>
+                                        <br>
+
+                                                <div id="form-group">
+                                                    <label class="negrita">Cantidad</label>
+                                                    <input type="number" class="negrita text-danger form-control"  id="txtEditarFacturaCantidad">
+                                                </div>
+                                        
+                                                <div id="form-group">
+                                                    <label class="negrita">Precio Q</label>
+                                                    <input disabled type="number" class="negrita text-info form-control" id="txtEditarFacturaPrecio">
+                                                </div>
+                                        
+                                                <div id="form-group">
+                                                    <label class="negrita">Importe Q</label>
+                                                    <input disabled type="number" class="negrita text-info form-control" id="txtEditarFacturaTotalPrecio">
+                                                </div>
+                                        
+                                        
+                                                <br>
+                                    
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <button class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
+                                                    <i class="fal fa-arrow-left"></i>
+                                                </button>    
+                                            </div>
+                                            <div class="col-6">
+                                                <button class="btn btn-base btn-circle btn-xl hand shadow">
+                                                    <i class="fal fa-save"></i>
+                                                </button>
+                                            </div>
+                                            
+                                        </div>
+                                    
+                                        <div class="row">
+                                            <input type="number" id="txtEditarFacturaCosto">
+                                            <input type="number" id="txtEditarFacturaTotalCosto">
+                                        </div>
+                                    </div>
+                                </div>
+    
+        
+                            </div>
+                            
+                           
+                        </div>
+                    </div>
+        </div>
+        
+
+
 
         <script src="js/vendors.bundle.js"></script>
         <script src="js/app.bundle.js"></script>
@@ -544,6 +657,8 @@
         <script src="./controllers/GlobalFunciones.js"></script>
         <script src="./controllers/menu_handler.js"></script>
         <script src="./controllers/permisos.js"></script>
+        <script src="./controllers/editar_factura.js"></script>
+        
         
 
         <script src="./librerias_aux/confetti.browser.min.js"></script>

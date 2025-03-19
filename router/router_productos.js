@@ -5,6 +5,10 @@ const router = express.Router();
 
 
 
+
+
+
+
 router.post("/update_codprod", async(req,res)=>{
    
     const {token,sucursal,codprod_old, codprod_new} = req.body;

@@ -206,6 +206,17 @@ let Menu = {
             F.AvisoError('No tiene permitido entrar a esta sección');
         }
     },
+    bodega_inv_fisico:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/bodega_inv_fisico/view_inv_fisico.js','root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        }
+    },
     documentos:()=>{
         if(Menu.verify()==true){
             Menu.salidaMenu();

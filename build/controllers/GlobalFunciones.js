@@ -627,6 +627,68 @@ let GF = {
             });
         })     
     },
+    get_documento_eliminar_item:(iditem)=>{
+        return new Promise((resolve,reject)=>{
+    
+            axios.post(GlobalUrlCalls + '/documentos/eliminar_item_documento',
+                {
+                    sucursal:GlobalEmpnit,
+                    token:TOKEN,
+                    id:iditem
+                })
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        })     
+    },
+    get_documento_update_totales:(coddoc, correlativo, totalcosto,totaldescuento,totalprecio)=>{
+        return new Promise((resolve,reject)=>{
+    
+            axios.post(GlobalUrlCalls + '/documentos/update_totales_documento',
+                {
+                    sucursal:GlobalEmpnit,
+                    token:TOKEN,
+                    coddoc:coddoc,
+                    correlativo:correlativo,
+                    totalcosto:totalcosto,
+                    totaldescuento:totaldescuento,
+                    totalprecio:totalprecio
+                })
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        })     
+    },
     get_clasificaciones_listado:(tipo)=>{
         return new Promise((resolve,reject)=>{
 
@@ -1106,6 +1168,35 @@ let GF = {
             };
     
             axios.post(`/compras/surtido_sucursales`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
+    get_data_inventarios_general: (empnit,st)=>{
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                st:st  
+            };
+    
+            axios.post(`/compras/select_inventario_general`, data)
             .then(res => {
                 
                 if(res.status.toString()=='200'){

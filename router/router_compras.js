@@ -3,6 +3,27 @@ const express = require('express');
 const router = express.Router();
 
 
+router.post("/select_inventario_general", async(req,res)=>{
+   
+    const {token,sucursal,st} = req.body;
+
+   
+    let qry = `
+        SELECT view_invsaldo.CODPROD, view_invsaldo.CODPROD2, view_invsaldo.DESPROD3, 
+                view_invsaldo.DESPROD, view_invsaldo.TOTALUNIDADES, view_invsaldo.TOTALCOSTO, view_invsaldo.MINIMO, view_invsaldo.MAXIMO, 
+                view_invsaldo.EXISTENCIA, view_invsaldo.HABILITADO, view_invsaldo.COSTO_ULTIMO, 
+                view_invsaldo.COSTO_ANTERIOR, view_invsaldo.COSTO_PROMEDIO, PRODUCTOS.CODMARCA, MARCAS.DESMARCA
+        FROM  PRODUCTOS RIGHT OUTER JOIN
+                view_invsaldo ON PRODUCTOS.CODPROD = view_invsaldo.CODPROD LEFT OUTER JOIN
+                MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA
+        WHERE (view_invsaldo.EMPNIT = '${sucursal}') AND (view_invsaldo.HABILITADO='${st}')
+        ORDER BY view_invsaldo.CODPROD;
+        `
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
 
 router.post("/insertcompra", async(req,res)=>{
    
