@@ -157,6 +157,137 @@ function fcn_eliminar_producto_factura(idprod,idbtn,coddoc,correlativo){
 
 };
 
+function fcn_get_buscar_producto(filtro){
+
+
+    let container = document.getElementById('tblDataEditarFacturaProductos');
+    container.innerHTML = GlobalLoader;
+
+    
+
+    let str = '';
+
+
+    axios.post('/pos/productos_filtro', {
+        sucursal: GlobalEmpnit,
+        token:TOKEN,
+        filtro:filtro,
+        tipoprecio:data_empresa_config.TIPO_PRECIO
+    })
+    .then((response) => {        
+        if(response=='error'){
+            F.AvisoError('Error en la solicitud');
+            container.innerHTML = 'No day datos....';
+        }else{
+            const data = response.data.recordset;
+            data.map((r)=>{
+                let strClassIps = '';
+                if(r.BONO.toString()=='0'){}else{}strClassIps = 'negrita text-base'
+                let strClassExistencia = '';
+                let existencia = Number(r.EXISTENCIA);
+                if(existencia<=0){strClassExistencia='bg-danger text-white'};
+
+                str += `
+                    <tr class="hand" 
+                    onclick="get_producto('${r.CODPROD}','${r.DESPROD}','${r.CODMEDIDA}','${r.EQUIVALE}','${r.COSTO}','${r.PRECIO}','${r.TIPOPROD}','${r.EXENTO}','${r.EXISTENCIA}','${r.BONO}')"
+                    >
+                        <td>${r.DESMARCA}</td>
+                        <td><b style="color:${r.COLOR}">${r.DESPROD}</b>
+                            <br>
+                            <small class="negrita text-danger">Cód:${r.CODPROD}</small>
+                        </td>
+                        <td>${r.CODMEDIDA} (Eq:${r.EQUIVALE})</td>
+                        <td>${F.setMoneda(r.PRECIO,'Q')}</td>
+                        <td class="${strClassExistencia}">${r.EXISTENCIA}</td>
+                        <td class='${strClassIps}'>${F.setMoneda(r.BONO,'Q')}</td>
+                        <td>${r.TIPOPROD}</td>
+                    </tr>
+                `
+            })
+            container.innerHTML = str;
+           
+
+            //getMoveTable();
+        }
+    }, (error) => {
+        F.AvisoError('Error en la solicitud');
+        container.innerHTML = 'No day datos....';
+       
+    });
+
+
+
+};
+
+
+function get_producto(codprod,desprod,codmedida,equivale,costo,precio,tipoprod,exento,existencia,bono){
+
+    $("#modal_editar_factura_lista_productos").modal('hide');
+
+    $("#modal_editar_factura_cantidad").modal('show');
+
+
+    //let container = document.getElementById('container_precio_');
+    //container.innerHTML = GlobalLoader;
+
+    document.getElementById('txtEditarFacturaCantidad').value = '1';
+    document.getElementById('txtEditarFacturaPrecio').value = precio;
+    document.getElementById('txtEditarFacturaTotalPrecio').value = precio;
+    //document.getElementById('btnMCGuardar').disabled = true;
+
+
+    //fcn_CalcularTotalPrecio();
+
+    Selected_codprod = codprod;
+    Selected_desprod = desprod;
+    Selected_codmedida = codmedida;
+    Selected_equivale = Number(equivale);
+    Selected_costo = Number(costo);
+    Selected_precio = Number(precio);
+    Selected_tipoprod = tipoprod;
+    Selected_exento = Number(exento);
+    Selected_existencia = Number(existencia);
+    Selected_bono = Number(bono);
+
+    document.getElementById('lbEditarFacturaDesprod').innerText = `${desprod} (${codmedida} - Eq: ${equivale})`;
+
+
+    fcn_CalcularTotalPrecio();
+
+    document.getElementById('txtEditarFacturaCantidad').focus();
+
+
+};
+
+function fcn_CalcularTotalPrecio(){
+
+    let cantidad = document.getElementById('txtEditarFacturaCantidad').value || 1;
+    let precio = document.getElementById('txtEditarFacturaPrecio').value;
+    
+    let total = Number(cantidad) * Number(precio)
+
+    console.log('total item: ')
+    console.log(total);
+
+    document.getElementById('txtEditarFacturaTotalPrecio').value = total;
+
+
+};
+
+document.getElementById('txtEditarFacturaCantidad').addEventListener('input',()=>{
+    fcn_CalcularTotalPrecio();  
+});
+
+
+
+
+document.getElementById('btnEditarFacturaAgregar').addEventListener('click',()=>{
+
+    $("#modal_editar_factura_lista_productos").modal('show');
+
+});
+
+
 
 let btnEditarFacturaActualizar = document.getElementById('btnEditarFacturaActualizar');
 btnEditarFacturaActualizar.addEventListener('click',()=>{
@@ -190,3 +321,17 @@ btnEditarFacturaActualizar.addEventListener('click',()=>{
 
 });
 
+
+document.getElementById('txtEditarFacturaBuscarProducto').addEventListener('keyup',(e)=>{
+
+        let filtro = document.getElementById('txtEditarFacturaBuscarProducto').value;
+
+        if (e.code === 'Enter') { 
+            fcn_get_buscar_producto(filtro);
+        };
+        if (e.keyCode === 13 && !e.shiftKey) {
+            fcn_get_buscar_producto(filtro);
+        };  
+
+
+});

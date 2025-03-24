@@ -169,33 +169,251 @@ app.get("/despacho_finalizado",function(req,res){
 }); 
 
 
-app.post('/guatex', function(req,res){
+app.post('/guatex_guia', function(req,res){
+
+  const {
+      nombre_destinatario,telefono_destinatario,direccion_destinatario,codmunicipio,descripcion,recoge_oficina,
+      codigo_cobro,codigo_destino,json_items
+        } = req.body;
 
 
- 
 
+        let items = JSON.parse(json_items);
+        
+        let strItems = ''
+        items.map((r)=>{
+          strItems += `{"piezas":"${r.PIEZAS}","tipoEnvio":"${r.TIPO}","peso":"${r.PESOLBS}"},`
+        })
+
+        strItems = `[${strItems.substring(0, strItems.length - 1)}]`;
+
+       
+
+        let json = JSON.parse(strItems);
+
+        
+   
       let data = {
-          usuario:"APIGUATEX",
-          password:"GTXADMINGT",
-          codigoCobro:"CON1289"
+          usuario: "APIGUATEX",
+          password: "GTXADMINGT",
+          codigoCobro: "CON1289",
+          tipoUsuario: "C",
+          nombreRemitente: "PRUEBA API SUMINISTROS PORCINOS",
+          direccionRemitente: "14 AV 4-11 ZONA 12 GUATEMALA GUATEMALA",
+          telefonoRemitente: "31313131",
+          codigoOrigen: "223",
+          generaZPL: "S",
+          generaPDF: "N",
+          estaListo: "S",
+          guias: [
+              {
+                  llaveCliente: "GBR",
+                  nombreDestinatario: nombre_destinatario,
+                  telefonoDestinatario: telefono_destinatario,
+                  direccionDestinatario: direccion_destinatario,
+                  municipioDestino: codmunicipio,
+                  descripcionEnvio: descripcion,
+                  recogeOficina: recoge_oficina,
+                  codigoCobroGuia: codigo_cobro,
+                  codigoDestino: codigo_destino,
+                  lineasDetalle: json
+              }
+          ]
+      
       }
 
-      axios.post('https://guias.guatex.gt/tomarservicio/servicio', {headers: data})
+    
+
+      axios.post('https://guias.guatex.gt/tomarservicio/servicio', data)
       .then((response) => {
         
-        console.log(response);
+        
+            let zpl = response.data.serviciosGenerados[0].zpl;
+            let noguia = response.data.serviciosGenerados[0].noguia;
 
-        res.send(response);
+            console.log('guia:')
+            console.log(noguia);
+
+
+            get_zpl_pdf(zpl,noguia)
+            .then((data)=>{
+                res.send(data);
+            })
+            .catch(()=>{
+                res.send('error');
+            })
+            
+        //res.send(noguia);
 
       }, (error) => {
+          console.log('error al generar guia')
+          console.log(error);
+            res.send('error');
 
-
-        res.send(error);
       });
 
 
 
 });
+
+
+function get_zpl_pdf(zplcode,noguia){
+
+    return new Promise((resolve,reject)=>{
+
+      var fs = require('fs');
+      var request = require('request');
+
+      var zpl = zplcode; //"^xa^cfa,50^fo100,100^fdHello World^fs^xz";
+
+      var options = {
+          encoding: null,
+          formData: { file: zpl },
+          // omit this line to get PNG images back
+          headers: { 'Accept': 'application/pdf' },
+          // adjust print density (8dpmm), label width (4 inches), label height (6 inches), and label index (0) as necessary
+          url: 'http://api.labelary.com/v1/printers/8dpmm/labels/4x6/0/'
+      };
+
+      request.post(options, function(err, resp, body) {
+          
+            if (err) {
+                console.log(err);
+                reject();
+            }
+
+            var filename = noguia + '.pdf'; // change file name for PNG images
+            fs.writeFile(filename, body, function(err) {
+                if (err) {
+                    console.log(err);
+                    reject();
+                }else{
+                  resolve(filename);
+                };
+                
+
+            });
+            
+      });
+
+    })
+    
+       
+};
+
+
+
+app.post('/guatex_destinos', function(req, res) {
+
+    let qry = `
+      SELECT ID,CODIGO_DESTINO,
+      NOM_DESTINO,MUNICIPIO,DEPARTAMENTO,
+      COD_DEPTO,COD_MUN,DIR_AGENCIA
+        FROM GUATEX_DESTINOS_MUNICIPIOS
+    `
+
+    execute.QueryToken(res,qry,'');
+
+
+});
+
+app.get('/guatex_municipios', function(req, res) {
+
+      let xmls = `
+        <soapenv:Envelope 
+          xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+          xmlns:ser="http://servicio.wsmunicipiosgtx.guatex.com/">
+          <soapenv:Header/>
+          <soapenv:Body>
+            <ser:consultarMunicipios>
+              <xmlCredenciales>
+                <CONSULTA_MUNICIPIOS>
+                  <USUARIO>APIGUATEX</USUARIO>
+                  <PASSWORD>GTXSP24</PASSWORD>
+                  <CODIGO_COBRO>CON1289</CODIGO_COBRO>
+                </CONSULTA_MUNICIPIOS>
+              </xmlCredenciales>
+            </ser:consultarMunicipios>
+          </soapenv:Body>
+        </soapenv:Envelope>
+      `;
+
+      axios.post(
+        'https://jcl.guatex.gt/WSMunicipiosGTXGF/WSMunicipiosGTXGF',
+        xmls,
+        {
+          headers: {
+            'Content-Type': 'text/xml',
+            'SOAPAction': 'http://servicio.wsmunicipiosgtx.guatex.com/consultarMunicipios'
+          }
+        }
+      )
+      .then(response => {
+          
+          console.log(response.data);
+          res.send(response.data);
+
+      })
+      .catch(err => {
+          
+          console.error(err);
+          res.status(500).send(err);
+
+      });
+
+});
+
+app.get('/guatex_tracking', function(req, res) {
+
+  const {noguia} = req.query;
+
+  let xmls = `
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.tracking.guatex.com/">
+      <soapenv:Header/>
+        <soapenv:Body>
+          <ws:consultaws>
+            <!--Optional:-->
+            <noguia>${noguia}</noguia>
+          </ws:consultaws>
+        </soapenv:Body>
+      </soapenv:Envelope>
+    `;
+
+  axios.post(
+    'https://jcl.guatex.gt/WSTracking/WSTracking',
+    xmls,
+    {
+      headers: {
+        'Content-Type': 'text/xml',
+        'SOAPAction': 'http://ws.tracking.guatex.com/'
+      }
+    }
+  )
+  .then(response => {
+      
+      console.log(response.data);
+      res.send(response.data);
+
+  })
+  .catch(err => {
+      
+      console.error(err);
+      res.status(500).send(err);
+
+  });
+
+});
+
+app.get('/guatex_guia_pdf', function(req, res) {
+
+  const {filename} = req.query;
+
+  let rutaarchivo = path + filename;
+  
+  res.download(rutaarchivo);
+
+});
+
 
 
 

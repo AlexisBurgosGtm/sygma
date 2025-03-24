@@ -1,12 +1,38 @@
-[
-    {
-        "CODSUCURSAL":"XELASOL000",
-        "EMPNIT":"XELASOL000",
-        "USUARIO":"","CODPROD":"002",
-        "DESPROD":"H&S FOR MEN SACHET 10ML X24IT",
-        "CODMEDIDA":"UNIDAD","EQUIVALE":1,"COSTO":18,"TOTALCOSTO":54,"PRECIO":26,"CANTIDAD":3,
-        "TOTALUNIDADES":3,"TOTALPRECIO":78,"EXENTO":0,"TIPOPROD":"B","TIPOPRECIO":"PRECIO",
-        "EXISTENCIA":4,"BONO":0,"DESCUENTO":0,"ID":4
-        },
+{
+    "usuario": "APIGUATEX",
+    "password": "GTXADMINGT",
+    "codigoCobro": "CON1289",
+    "tipoUsuario": "C",
+    "nombreRemitente": "PRUEBA API SUMINISTROS PORCINOS",
+    "direccionRemitente": "14 AV 4-11 ZONA 12 GUATEMALA GUATEMALA",
+    "telefonoRemitente": "31313131",
+    "codigoOrigen": "223",
+    "generaZPL" : "S",
+    "generaPDF": "N",
+    "estaListo": "S",
+    "guias": [
         {
-            "CODSUCURSAL":"XELASOL000","EMPNIT":"XELASOL000","USUARIO":"","CODPROD":"003","DESPROD":"DETERGENTE ARIEL 400GRS ","CODMEDIDA":"UNIDAD","EQUIVALE":1,"COSTO":8,"TOTALCOSTO":96,"PRECIO":10.25,"CANTIDAD":12,"TOTALUNIDADES":12,"TOTALPRECIO":123,"EXENTO":0,"TIPOPROD":"B","TIPOPRECIO":"PRECIO","EXISTENCIA":0,"BONO":0,"DESCUENTO":0,"ID":5}]
+            "llaveCliente": "PRUEBA LLAVE",
+            "nombreDestinatario": "PRUEBA API DESTINATARIO",
+            "telefonoDestinatario": "31313131",
+            "direccionDestinatario": "MORALES IZABAL",
+            "municipioDestino": "1",
+            "descripcionEnvio": "PRUEBA DESCRIPCION.",
+            "recogeOficina": "N",
+            "codigoCobroGuia": "CON4087",
+            "codigoDestino": "535",
+            "lineasDetalle": [
+                {
+                    "piezas": "1",
+                    "tipoEnvio": "2",
+                    "peso": "1"
+                },
+                { "piezas": "1",
+                 "tipoEnvio": "1", 
+                 "peso": "1" 
+                 }
+                 
+            ]
+        }
+    ]
+}
