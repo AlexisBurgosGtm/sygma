@@ -1158,6 +1158,38 @@ let GF = {
     
         })
     },
+    get_data_embarque_productos_vendedor: (empnit,fi,ff,codven)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                fi:fi,
+                ff:ff,
+                codven:codven
+            };
+    
+            axios.post(`/despacho/pedidos_pendientes_embarque_productos_vendedor`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
     get_data_surtido: (empnit)=>{
         return new Promise((resolve, reject)=>{
             
