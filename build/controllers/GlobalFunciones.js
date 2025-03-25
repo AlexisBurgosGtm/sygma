@@ -1128,6 +1128,38 @@ let GF = {
     
         })
     },
+    get_data_embarque_facturas_vendedor: (empnit,fi,ff,codven)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                codven:codven,
+                fi:fi,
+                ff:ff
+            };
+    
+            axios.post(`/despacho/pedidos_pendientes_embarque_documentos`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
     get_data_embarque_productos: (empnit,codembarque)=>{
         
         return new Promise((resolve, reject)=>{
