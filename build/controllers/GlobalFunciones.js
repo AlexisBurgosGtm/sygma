@@ -1098,6 +1098,39 @@ let GF = {
     
         })
     },
+    get_data_marcas_vendedor: (empnit,fi,ff,codven)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                codven:codven,
+                fi:fi,
+                ff:ff
+            };
+    
+            axios.post(`/despacho/pedidos_marcas_vendedor`, data)
+            .then(res => {
+               
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch((error)=>{
+              
+                reject();
+            })
+    
+        })
+    },
     get_data_embarque_facturas: (empnit,codembarque)=>{
         
         return new Promise((resolve, reject)=>{
@@ -1140,9 +1173,9 @@ let GF = {
                 ff:ff
             };
     
-            axios.post(`/despacho/pedidos_pendientes_embarque_documentos`, data)
+            axios.post(`/despacho/pedidos_pendientes_embarque_documentos_vendedor`, data)
             .then(res => {
-                
+               
                 if(res.status.toString()=='200'){
                     let data = res.data;
                     if(Number(data.rowsAffected[0])>0){
@@ -1154,7 +1187,8 @@ let GF = {
                     reject();
                 } 
             })
-            .catch(()=>{
+            .catch((error)=>{
+              
                 reject();
             })
     
@@ -1205,10 +1239,11 @@ let GF = {
             axios.post(`/despacho/pedidos_pendientes_embarque_productos_vendedor`, data)
             .then(res => {
                 
+
                 if(res.status.toString()=='200'){
-                    let data = res.data;
+                    let datas = res.data;
                     if(Number(data.rowsAffected[0])>0){
-                        resolve(data);             
+                        resolve(datas);             
                     }else{
                         reject();
                     }            
@@ -1216,7 +1251,9 @@ let GF = {
                     reject();
                 } 
             })
-            .catch(()=>{
+            .catch((error)=>{
+                console.log('api error')
+                console.log(error)
                 reject();
             })
     

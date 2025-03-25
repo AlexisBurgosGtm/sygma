@@ -178,6 +178,32 @@ function str_qry_docproductos(sucursal,coddoc,correlativo,anio,mes,iva,codbodega
 };
 
 
+router.post("/pedidos_marcas_vendedor", async(req,res)=>{
+   
+    const { token, sucursal, codven, fi, ff } = req.body;
+
+    let qry = `
+        SELECT MARCAS.DESMARCA, SUM(DOCPRODUCTOS.TOTALUNIDADES) AS TOTALUNIDADES, SUM(DOCPRODUCTOS.TOTALCOSTO) AS TOTALCOSTO, SUM(DOCPRODUCTOS.TOTALPRECIO) AS TOTALPRECIO
+        FROM     DOCUMENTOS LEFT OUTER JOIN
+                  TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT LEFT OUTER JOIN
+                  DOCPRODUCTOS ON DOCUMENTOS.CORRELATIVO = DOCPRODUCTOS.CORRELATIVO AND DOCUMENTOS.CODDOC = DOCPRODUCTOS.CODDOC AND DOCUMENTOS.EMPNIT = DOCPRODUCTOS.EMPNIT LEFT OUTER JOIN
+                  PRODUCTOS LEFT OUTER JOIN
+                  MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA ON DOCPRODUCTOS.CODPROD = PRODUCTOS.CODPROD
+        WHERE  (DOCUMENTOS.CODEMP = ${codven}) 
+        AND (DOCUMENTOS.EMPNIT = '${sucursal}') 
+        AND (DOCUMENTOS.FECHA BETWEEN '${fi}' AND '${ff}') 
+        AND (DOCUMENTOS.STATUS <> 'A')
+        AND (TIPODOCUMENTOS.TIPODOC IN('FAC','FEF','FEC','FCP','FES','FPC'))
+        GROUP BY MARCAS.DESMARCA
+    `;
+    
+   
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
 
 router.post("/pedidos_pendientes_embarque_documentos", async(req,res)=>{
    
@@ -200,6 +226,7 @@ router.post("/pedidos_pendientes_embarque_documentos", async(req,res)=>{
     WHERE (DOCUMENTOS.EMPNIT = '${sucursal}')  
         AND (DOCUMENTOS.CODEMBARQUE = '${codembarque}')
         AND (DOCUMENTOS.STATUS='O')
+         AND (TIPODOCUMENTOS.TIPODOC IN('FAC','FEF','FEC','FCP','FES','FPC'))
     ORDER BY EMPLEADOS.NOMEMPLEADO, DOCUMENTOS.CODDOC, DOCUMENTOS.CORRELATIVO
 
     `;
@@ -229,11 +256,13 @@ router.post("/pedidos_pendientes_embarque_documentos_vendedor", async(req,res)=>
         TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
     WHERE (DOCUMENTOS.EMPNIT = '${sucursal}')
         AND (DOCUMENTOS.CODEMP=${codven})
-        AND (DOCUMENTOS.FECHA BETWEEN '${fi}' AND '${ff}')  
+        AND (DOCUMENTOS.FECHA BETWEEN '${fi}' AND '${ff}') 
+         AND (TIPODOCUMENTOS.TIPODOC IN('FAC','FEF','FEC','FCP','FES','FPC')) 
     ORDER BY EMPLEADOS.NOMEMPLEADO, DOCUMENTOS.CODDOC, DOCUMENTOS.CORRELATIVO
 
     `;
     
+   
 
     execute.QueryToken(res,qry,token);
      

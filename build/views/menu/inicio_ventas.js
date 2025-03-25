@@ -228,7 +228,49 @@ function getView(){
         rpt_marcas:()=>{
 
             return `
-             <h1>EN CONSTRUCCION</h1>
+                     <div class="row">
+                        <div class="col-6">
+                            <h4 class="negrita text-base">Reporte de Marcas</h4>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <label class="negrita">Fecha inicio</label>
+                                        <input type="date" class="form-control negrita text-danger" id="txtMarcaFechaInicial">
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <label class="negrita">Fecha Final</label>
+                                        <input type="date" class="form-control negrita text-danger" id="txtMarcaFechaFinal">
+                                    </div>
+                                </div>
+
+                            </div>
+                            <br>
+                        </div>
+                        <div class="col-6">
+                         
+                            <label class="negrita text-danger" id="lbMarcaTotalImporte">Importe:</label>
+                        </div>
+                    </div>
+                    
+
+                    <div class="table-responsive">
+
+                         <table class="table h-full table-bordered col-12" id="tblMarcas">
+                                <thead class="bg-success text-white negrita">
+                                    <tr>
+                                        <td>MARCA</td>
+                                        <td>IMPORTE</td>
+                                        <td></td>
+                                    </tr>
+                                </thead>
+                                <tbody id="tblDataMarcas"></tbody>
+
+                            </table>
+
+                    </div>
+
 
 
             <button class="btn btn-secondary btn-circle btn-xl hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
@@ -351,7 +393,15 @@ function addListeners(){
 
         document.getElementById('tab-dos').click();
         rpt_tbl_documentos_embarque();
-})
+    })
+
+    
+    document.getElementById('btnMenuRptMarcas').addEventListener('click',()=>{
+
+        document.getElementById('tab-cuatro').click();
+        rpt_tbl_marcas();
+    })
+
 
 
     document.getElementById('txtProdFechaInicial').value = F.getFecha();
@@ -386,6 +436,19 @@ function addListeners(){
     });
 
 
+    document.getElementById('txtMarcaFechaInicial').value = F.getFecha();
+    document.getElementById('txtMarcaFechaFinal').value = F.getFecha();
+
+
+    document.getElementById('txtMarcaFechaInicial').addEventListener('change',()=>{
+        rpt_tbl_marcas();
+    });
+
+    
+    document.getElementById('txtMarcaFechaFinal').addEventListener('change',()=>{
+        rpt_tbl_marcas();
+    });
+
 
 
 };
@@ -404,27 +467,29 @@ function rpt_tbl_documentos_embarque(){
    
 
         let container = document.getElementById('tblDataFFacturas');
-    
         container.innerHTML = GlobalLoader;
+
         let contador = 0;
         let varTotal = 0;
     
         let fi = F.devuelveFecha('txtDocFechaInicial');
         let ff = F.devuelveFecha('txtDocFechaFinal');
 
-        
+        console.log('aqui 1...')
         GF.get_data_embarque_facturas_vendedor(GlobalEmpnit,fi,ff,GlobalCodUsuario)
         .then((data)=>{
     
+       
             let str = '';
     
             data.recordset.map((r)=>{
-             
+            
                 contador +=1;
                 varTotal += Number(r.IMPORTE);
                 str += `
                     <tr>
                         <td>${r.CODDOC}-${r.CORRELATIVO}
+                            <small>Status: <b>${r.STATUS}</b></small>
                         </td>
                         <td>${F.convertDateNormal(r.FECHA)}
                             <br>
@@ -448,11 +513,14 @@ function rpt_tbl_documentos_embarque(){
                 `
             })
             container.innerHTML = str;
-            document.getElementById('lbFacTotalPedidos').innerText = `Pedidos: ${contador}`;
+            document.getElementById('lbFacTotalPedidos').innerText = `Facturas: ${contador}`;
             document.getElementById('lbFacTotalImporte').innerText =`Total: ${F.setMoneda(varTotal,'Q')}`;
     
         })
-        .catch((error)=>{
+        .catch((err)=>{
+            console.log('error:')
+            console.log(err)
+
             container.innerHTML = 'No se cargaron datos....';
             document.getElementById('lbFacTotalPedidos').innerText = '';
             document.getElementById('lbFacTotalImporte').innerText = '';
@@ -516,6 +584,61 @@ function rpt_tbl_productos_embarque(){
         document.getElementById('lbProdTotalPedidos').innerText = '';
         document.getElementById('lbProdTotalImporte').innerText = '';
     })
+
+
+};
+
+
+function rpt_tbl_marcas(){
+
+    let container = document.getElementById('tblDataMarcas');
+    container.innerHTML = GlobalLoader;
+
+    let contador = 0;
+    let varTotal = 0;
+
+    let fi = F.devuelveFecha('txtMarcaFechaInicial');
+    let ff = F.devuelveFecha('txtMarcaFechaFinal');
+
+ 
+    GF.get_data_marcas_vendedor(GlobalEmpnit,fi,ff,GlobalCodUsuario)
+    .then((data)=>{
+
+   
+        let str = '';
+
+        data.recordset.map((r)=>{
+        
+            contador +=1;
+            varTotal += Number(r.IMPORTE);
+            str += `
+
+                <tr>
+                    <td>${r.DESMARCA}</td>
+                    <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-md btn-circle hand shadow"
+                        onclick="">
+                                <i class="fal fa-list"></i>
+                        </button>
+                    </td>
+                </tr>
+            `
+        })
+        container.innerHTML = str;
+       
+        document.getElementById('lbMarcaTotalImporte').innerText =`Total: ${F.setMoneda(varTotal,'Q')}`;
+
+    })
+    .catch((err)=>{
+        console.log('error:')
+        console.log(err)
+
+        container.innerHTML = 'No se cargaron datos....';
+       
+        document.getElementById('lbMarcaTotalImporte').innerText = '';
+    })
+
 
 
 };
