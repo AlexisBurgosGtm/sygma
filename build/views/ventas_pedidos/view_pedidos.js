@@ -494,10 +494,9 @@ function getView(){
                                     <thead class="bg-base text-white">
                                         <tr>
                                             <td>NIT / CÓDIGO</td>
-                                            <td>CLIENTE</td>
-                                            <td>TELÉFONO</td>
+                                            <td>CLIENTE / TELÉFONO</td>
                                             <td>SALDO</td>
-                                            <td>PEDIDO</td>
+                                            <td></td>
                                         </tr>
                                     </thead>
                                     <tbody id="tblDataClientes"></tbody>
@@ -507,7 +506,7 @@ function getView(){
                         </div>
                     </div>
 
-                <button class="btn btn-warning btn-xl btn-bottom-l btn-circle shadow hand" id="btnListadoDocumentos">
+                <button class="btn btn-warning btn-xl btn-bottom-l btn-circle shadow hand hidden" id="btnListadoDocumentos">
                     <i class="fal fa-folder"></i>  
                 </button>
 
@@ -526,7 +525,7 @@ function getView(){
                                         <div class="input-group">
                                             <input type="date" class="negrita form-control" id="txtFechaDoc">
                                             <select class="form-control negrita" id="cmbTipoDoc">
-                                                <option value="ENV">PEDIDOS</option>
+                                                <option value="FACTURAS">FACTURAS</option>
                                                 <option value="COT">COTIZACIONES</option>
                                             </select>
                                         </div>
@@ -1097,6 +1096,10 @@ function tbl_clientes(filtro){
                     <td>
                         ${r.NIT} / ${r.CODCLIENTE}
                         <br>
+                        
+                        <small class="text-danger negrita">${r.VISITA}</small>
+                        <br>
+
                         <button class="btn btn-md btn-circle btn-info hand shadow" onclick="F.gotoGoogleMaps('${r.LATITUD}','${r.LONGITUD}')">
                             <i class="fal fa-globe"></i>
                         </button>
@@ -1107,14 +1110,13 @@ function tbl_clientes(filtro){
                         <small>${r.DIRECCION}</small>
                         <br>
                         <small>Ref: ${r.REFERENCIA}</small>
-                    </td>
-                     <td>${r.TELEFONO}</td>
-                    <td>${F.setMoneda(r.SALDO,'Q')}
                         <br>
-                        <small class="text-danger negrita">${r.VISITA}</small>
+                        <small>Tel: ${r.TELEFONO}</small>
                     </td>
+                     
+                    <td>${F.setMoneda(r.SALDO,'Q')}</td>
                     <td>
-                        <button class="btn btn-circle btn-md btn-success hand shadow" 
+                        <button class="btn btn-circle btn-md btn-base hand shadow" 
                         onclick="get_datos_cliente('${r.CODCLIENTE}','${r.NIT}','${r.NOMBRE}','${r.DIRECCION}','${r.TELEFONO}')">
                             <i class="fal fa-shopping-cart"></i>
                         </button>

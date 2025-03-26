@@ -1241,9 +1241,9 @@ let GF = {
                 
 
                 if(res.status.toString()=='200'){
-                    let datas = res.data;
+                    let data = res.data;
                     if(Number(data.rowsAffected[0])>0){
-                        resolve(datas);             
+                        resolve(data);             
                     }else{
                         reject();
                     }            
