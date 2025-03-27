@@ -656,6 +656,59 @@ let GF = {
             });
         })     
     },
+    get_documento_insert_item(coddoc,correlativo,codprod,desprod, 
+                codmedida,cantidad,equivale,totalunidades,costo,
+                precio,totalcosto,totalprecio,descuento,tipoprod,
+                tipoprecio,lastupdate, por_iva,existencia,bono,exento){
+    
+  
+        return new Promise((resolve,reject)=>{
+    
+            axios.post(GlobalUrlCalls + '/documentos/insert_item_editar_factura',
+                {
+                    token:TOKEN, 
+                    sucursal:GlobalEmpnit, 
+                    coddoc,
+                    correlativo,
+                    codprod, 
+                    desprod, 
+                    codmedida, 
+                    cantidad, 
+                    equivale,
+                    totalunidades,
+                    costo,
+                    precio,
+                    totalcosto,
+                    totalprecio,
+                    descuento,
+                    tipoprod,
+                    tipoprecio,
+                    lastupdate,
+                    por_iva,existencia,
+                    bono,
+                    exento
+                })
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        })   
+    
+    },
     get_documento_update_totales:(coddoc, correlativo, totalcosto,totaldescuento,totalprecio)=>{
         return new Promise((resolve,reject)=>{
     

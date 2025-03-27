@@ -4,6 +4,97 @@ const router = express.Router();
 
 
 
+
+router.post("/insert_item_editar_factura", async(req,res)=>{
+   
+    const { token, sucursal, coddoc,correlativo,
+        codprod, desprod, codmedida, cantidad, equivale,
+        totalunidades,costo,precio,totalcosto,totalprecio,
+        descuento,tipoprod,tipoprecio,lastupdate,por_iva,existencia,
+        bono,exento
+    } = req.body;
+
+
+    let qry = `
+       INSERT INTO DOCPRODUCTOS (
+            EMPNIT,
+            ANIO,
+            MES,
+            CODDOC,
+            CORRELATIVO,
+            CODPROD,
+            DESPROD,
+            CODMEDIDA,
+            CANTIDAD,
+            CANTIDADBONIF,
+            EQUIVALE,
+            TOTALUNIDADES,
+            TOTALBONIF,
+            COSTO,
+            PRECIO,
+            TOTALCOSTO,
+            DESCUENTO,
+            TOTALPRECIO,
+            ENTREGADOS_TOTALUNIDADES,
+            COSTOANTERIOR,
+            COSTOPROMEDIO,
+            CODBODEGA,
+            NOSERIE,
+            EXENTO,
+            OBS,
+            TIPOPROD,
+            TIPOPRECIO,
+            LASTUPDATE,
+            TOTALUNIDADES_DEVUELTAS,
+            POR_IVA,
+            EXISTENCIA,
+            BONO,
+            TOTALBONO
+            )
+        SELECT 
+            EMPNIT,
+            ANIO,
+            MES,
+            CODDOC,
+            CORRELATIVO,
+            '${codprod}' AS CODPROD,
+            '${desprod}' AS DESPROD,
+            '${codmedida}' AS CODMEDIDA,
+            ${cantidad} AS CANTIDAD,
+            0 AS CANTIDADBONIF,
+            ${equivale} AS EQUIVALE,
+            ${totalunidades} AS TOTALUNIDADES,
+            0 AS TOTALBONIF,
+            ${costo} AS COSTO,
+            ${precio} AS PRECIO,
+            ${totalcosto} AS TOTALCOSTO,
+            ${descuento} AS DESCUENTO,
+            ${totalprecio} AS TOTALPRECIO,
+            0 AS ENTREGADOS_TOTALUNIDADES,
+            ${costo} AS COSTOANTERIOR,
+            ${costo} AS COSTOPROMEDIO,
+            0 AS CODBODEGA,
+            '' AS NOSERIE,
+            ${exento} AS EXENTO,
+            '' AS OBS,
+            '${tipoprod}' AS TIPOPROD,
+            '${tipoprecio}' AS TIPOPRECIO,
+            '${lastupdate}' AS LASTUPDATE,
+            0 AS TOTALUNIDADES_DEVUELTAS,
+            ${por_iva} AS POR_IVA,
+            ${existencia} AS EXISTENCIA,
+            ${bono} AS BONO,
+            ${Number(bono) * Number(bono)} AS TOTALBONO
+        FROM DOCUMENTOS
+        WHERE EMPNIT='${sucursal}' 
+            AND CODDOC='${coddoc}' 
+            AND CORRELATIVO=${correlativo};     
+    `
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
 router.post("/update_totales_documento", async(req,res)=>{
    
     const { token, sucursal, totalcosto,totaldescuento,totalprecio,coddoc,correlativo} = req.body;

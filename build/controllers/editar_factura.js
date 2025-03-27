@@ -8,12 +8,12 @@ function fcn_editar_factura(coddoc,correlativo,nomclie,dirclie){
             
                 $("#modal_editar_factura").modal('show');
 
-                document.getElementById('txtEditarFacturaNomclie').value = nomclie;
-                document.getElementById('txtEditarFacturaDirclie').value = dirclie;
-                document.getElementById('lbEditarFacturaCoddoc').innerText = `${coddoc}-${correlativo}`;
+                document.getElementById('EF_txtEditarFacturaNomclie').value = nomclie;
+                document.getElementById('EF_txtEditarFacturaDirclie').value = dirclie;
+                document.getElementById('EF_lbEditarFacturaCoddoc').innerText = `${coddoc}-${correlativo}`;
 
-                document.getElementById('txtEditarFacturaCoddoc').value = coddoc;
-                document.getElementById('txtEditarFacturaCorrelativo').value = correlativo;
+                document.getElementById('EF_txtEditarFacturaCoddoc').value = coddoc;
+                document.getElementById('EF_txtEditarFacturaCorrelativo').value = correlativo;
                 
 
                 fcn_cargar_grid_factura(coddoc,correlativo);
@@ -30,7 +30,7 @@ function fcn_editar_factura(coddoc,correlativo,nomclie,dirclie){
 
 function fcn_cargar_grid_factura(coddoc,correlativo){
 
-    let container = document.getElementById('tblDataEditarFactura');
+    let container = document.getElementById('EF_tblDataEditarFactura');
                 container.innerHTML = GlobalLoader;
 
                 let varTotal = 0;
@@ -52,14 +52,16 @@ function fcn_cargar_grid_factura(coddoc,correlativo){
 
                         str += `
                         <tr>
-                            <td>${r.CODPROD}</td>
-                            <td>${r.DESPROD}</td>
+                            <td>${r.DESPROD}
+                                <br>
+                                <small class="negrita">${r.CODPROD}</small>
+                            </td>
                             <td>${r.CODMEDIDA}</td>
                             <td>${r.CANTIDAD}</td>
                             <td>${F.setMoneda(r.PRECIO,'Q')}</td>
                             <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
                             <td>
-                                <button class="btn btn-circle btn-info btn-md hand shadow"
+                                <button class="hidden btn btn-circle btn-info btn-md hand shadow"
                                 onclick="fcn_editar_cantidad_producto_factura('${coddoc}','${correlativo}','${r.DESPROD}','${r.ID}','${r.CANTIDAD}','${r.COSTO}','${r.PRECIO}')"
                                 >
                                     <i class="fal fa-edit"></i>
@@ -78,21 +80,24 @@ function fcn_cargar_grid_factura(coddoc,correlativo){
                     })
                     
                     container.innerHTML = str;
-                    document.getElementById('lbEditarFacturaTotal').innerText = F.setMoneda(varTotal,'Q');
+                    document.getElementById('EF_lbEditarFacturaTotal').innerText = F.setMoneda(varTotal,'Q');
 
-                    document.getElementById('txtEditarFacturaTotalCosto').value = varTotalCosto;
-                    document.getElementById('txtEditarFacturaTotalDescuento').value = varTotalDescuento;
-                    document.getElementById('txtEditarFacturaTotalPrecio').value = varTotal;
+                    document.getElementById('EF_txtEditarFacturaTotalCosto').value = varTotalCosto;
+                    document.getElementById('EF_txtEditarFacturaTotalDescuento').value = varTotalDescuento;
+                    document.getElementById('EF_txtEditarFacturaTotalPrecio').value = varTotal;
                     
+    
+                    GF.get_documento_update_totales(coddoc,correlativo,varTotalCosto,varTotalDescuento,varTotal);
+    
                 })
                 .catch(()=>{
 
                     container.innerHTML = 'No se cargaron datos...';
-                    document.getElementById('lbEditarFacturaTotal').innerText = '';
+                    document.getElementById('EF_lbEditarFacturaTotal').innerText = '';
 
-                    document.getElementById('txtEditarFacturaTotalCosto').value = 0;
-                    document.getElementById('txtEditarFacturaTotalDescuento').value = 0;
-                    document.getElementById('txtEditarFacturaTotalPrecio').value = 0;
+                    document.getElementById('EF_txtEditarFacturaTotalCosto').value = 0;
+                    document.getElementById('EF_txtEditarFacturaTotalDescuento').value = 0;
+                    document.getElementById('EF_txtEditarFacturaTotalPrecio').value = 0;
 
                 })
 };
@@ -108,14 +113,14 @@ function fcn_editar_cantidad_producto_factura(coddoc,correlativo,desprod,idprod,
     console.log('total precio:')
     console.log(totalprecio);
 
-    document.getElementById('lbEditarFacturaDesprod').innerText = desprod;
+    document.getElementById('EF_lbEditarFacturaDesprod').innerText = desprod;
 
-    document.getElementById('txtEditarFacturaCantidad').value = cantidad;
-    document.getElementById('txtEditarFacturaPrecio').value = precio;
-    document.getElementById('txtEditarFacturaTotalPrecio').value = totalprecio;
+    document.getElementById('EF_txtEditarFacturaCantidad').value = cantidad;
+    document.getElementById('EF_txtEditarFacturaPrecio').value = precio;
+    document.getElementById('EF_txtEditarFacturaTotalPrecio').value = totalprecio;
 
-    document.getElementById('txtEditarFacturaCosto').value = costo;
-    document.getElementById('txtEditarFacturaTotalCosto').value = totalcosto;
+    document.getElementById('EF_txtEditarFacturaCosto').value = costo;
+    document.getElementById('EF_txtEditarFacturaTotalCosto').value = totalcosto;
 
 
 };
@@ -135,9 +140,9 @@ function fcn_eliminar_producto_factura(idprod,idbtn,coddoc,correlativo){
             .then(()=>{
                 F.Aviso('Item eliminado exitosamente!!');
                 
-                let totalcosto=document.getElementById('txtEditarFacturaTotalCosto').value;
-                let totaldescuento=document.getElementById('txtEditarFacturaTotalDescuento').value;
-                let totalprecio=document.getElementById('txtEditarFacturaTotalPrecio').value;
+                let totalcosto=document.getElementById('EF_txtEditarFacturaTotalCosto').value;
+                let totaldescuento=document.getElementById('EF_txtEditarFacturaTotalDescuento').value;
+                let totalprecio=document.getElementById('EF_txtEditarFacturaTotalPrecio').value;
 
 
                 GF.get_documento_update_totales(coddoc,correlativo,totalcosto,totaldescuento,totalprecio);
@@ -160,7 +165,7 @@ function fcn_eliminar_producto_factura(idprod,idbtn,coddoc,correlativo){
 function fcn_get_buscar_producto(filtro){
 
 
-    let container = document.getElementById('tblDataEditarFacturaProductos');
+    let container = document.getElementById('EF_tblDataEditarFacturaProductos');
     container.innerHTML = GlobalLoader;
 
     
@@ -230,9 +235,9 @@ function get_producto(codprod,desprod,codmedida,equivale,costo,precio,tipoprod,e
     //let container = document.getElementById('container_precio_');
     //container.innerHTML = GlobalLoader;
 
-    document.getElementById('txtEditarFacturaCantidad').value = '1';
-    document.getElementById('txtEditarFacturaPrecio').value = precio;
-    document.getElementById('txtEditarFacturaTotalPrecio').value = precio;
+    document.getElementById('EF_txtEditarFacturaCantidad').value = '1';
+    document.getElementById('EF_txtEditarFacturaPrecio').value = precio;
+    document.getElementById('EF_txtEditarFacturaTotalPrecio').value = precio;
     //document.getElementById('btnMCGuardar').disabled = true;
 
 
@@ -249,89 +254,186 @@ function get_producto(codprod,desprod,codmedida,equivale,costo,precio,tipoprod,e
     Selected_existencia = Number(existencia);
     Selected_bono = Number(bono);
 
-    document.getElementById('lbEditarFacturaDesprod').innerText = `${desprod} (${codmedida} - Eq: ${equivale})`;
+    document.getElementById('EF_lbEditarFacturaDesprod').innerText = `${desprod} (${codmedida} - Eq: ${equivale})`;
 
 
     fcn_CalcularTotalPrecio();
 
-    document.getElementById('txtEditarFacturaCantidad').focus();
+    document.getElementById('EF_txtEditarFacturaCantidad').focus();
 
 
 };
 
 function fcn_CalcularTotalPrecio(){
 
-    let cantidad = document.getElementById('txtEditarFacturaCantidad').value || 1;
-    let precio = document.getElementById('txtEditarFacturaPrecio').value;
+    let cantidad = document.getElementById('EF_txtEditarFacturaCantidad').value || 1;
+    let precio = document.getElementById('EF_txtEditarFacturaPrecio').value;
     
     let total = Number(cantidad) * Number(precio)
 
     console.log('total item: ')
     console.log(total);
 
-    document.getElementById('txtEditarFacturaTotalPrecio').value = total;
+    document.getElementById('EF_txtEditarFacturaETotalPrecio').value = Number(total);
 
 
 };
 
-document.getElementById('txtEditarFacturaCantidad').addEventListener('input',()=>{
-    fcn_CalcularTotalPrecio();  
-});
 
 
-
-
-document.getElementById('btnEditarFacturaAgregar').addEventListener('click',()=>{
-
-    $("#modal_editar_factura_lista_productos").modal('show');
-
-});
-
-
-
-let btnEditarFacturaActualizar = document.getElementById('btnEditarFacturaActualizar');
-btnEditarFacturaActualizar.addEventListener('click',()=>{
-
-    btnEditarFacturaActualizar.disabled = true;
-    btnEditarFacturaActualizar.innerHTML = `<i class="fal fa-sync fa-spin"></i>`;
-
-
-    let coddoc = document.getElementById('txtEditarFacturaCoddoc').value;
-    let correlativo = document.getElementById('txtEditarFacturaCorrelativo').value;
-    
-    let totalcosto=document.getElementById('txtEditarFacturaTotalCosto').value;
-    let totaldescuento=document.getElementById('txtEditarFacturaTotalDescuento').value;
-    let totalprecio=document.getElementById('txtEditarFacturaTotalPrecio').value;
-
-
-    GF.get_documento_update_totales(coddoc,correlativo,totalcosto,totaldescuento,totalprecio)
-    .then(()=>{
-       
-        btnEditarFacturaActualizar.disabled = false;
-        btnEditarFacturaActualizar.innerHTML = `<i class="fal fa-sync"></i>`;
-    
-    })
-    .catch(()=>{
-        btnEditarFacturaActualizar.disabled = false;
-        btnEditarFacturaActualizar.innerHTML = `<i class="fal fa-sync"></i>`;
-    
-    })
+function addListeners_EF_Agregar_item(){
 
     
+    document.getElementById('EF_txtEditarFacturaCantidad').addEventListener('input',()=>{
+        fcn_CalcularTotalPrecio();  
+    });
 
-});
+    document.getElementById('EF_btnEditarFacturaAgregar').addEventListener('click',()=>{
+
+        $("#modal_editar_factura_lista_productos").modal('show');
+
+    });
+
+    let EF_btnEditarFacturaActualizar = document.getElementById('EF_btnEditarFacturaActualizar');
+    EF_btnEditarFacturaActualizar.addEventListener('click',()=>{
+
+        EF_btnEditarFacturaActualizar.disabled = true;
+        EF_btnEditarFacturaActualizar.innerHTML = `<i class="fal fa-sync fa-spin"></i>`;
 
 
-document.getElementById('txtEditarFacturaBuscarProducto').addEventListener('keyup',(e)=>{
-
-        let filtro = document.getElementById('txtEditarFacturaBuscarProducto').value;
-
-        if (e.code === 'Enter') { 
-            fcn_get_buscar_producto(filtro);
-        };
-        if (e.keyCode === 13 && !e.shiftKey) {
-            fcn_get_buscar_producto(filtro);
-        };  
+        let coddoc = document.getElementById('EF_txtEditarFacturaCoddoc').value;
+        let correlativo = document.getElementById('EF_txtEditarFacturaCorrelativo').value;
+        
+        let totalcosto=document.getElementById('EF_txtEditarFacturaTotalCosto').value;
+        let totaldescuento=document.getElementById('EF_txtEditarFacturaTotalDescuento').value;
+        let totalprecio=document.getElementById('EF_txtEditarFacturaTotalPrecio').value;
 
 
-});
+        GF.get_documento_update_totales(coddoc,correlativo,totalcosto,totaldescuento,totalprecio)
+        .then(()=>{
+        
+            EF_btnEditarFacturaActualizar.disabled = false;
+            EF_btnEditarFacturaActualizar.innerHTML = `<i class="fal fa-sync"></i> Actualizar`;
+        
+        })
+        .catch(()=>{
+            EF_btnEditarFacturaActualizar.disabled = false;
+            EF_btnEditarFacturaActualizar.innerHTML = `<i class="fal fa-sync"></i> Actualizar`;
+        
+        })
+
+        
+
+    });
+
+
+    document.getElementById('txtEditarFacturaBuscarProducto').addEventListener('keyup',(e)=>{
+
+            let filtro = document.getElementById('txtEditarFacturaBuscarProducto').value;
+
+            if (e.code === 'Enter') { 
+                fcn_get_buscar_producto(filtro);
+            };
+            if (e.keyCode === 13 && !e.shiftKey) {
+                fcn_get_buscar_producto(filtro);
+            };  
+
+
+    });
+
+
+    
+    
+    let EF_btnAgregarItem = document.getElementById('EF_btnAgregarItem');
+    
+    EF_btnAgregarItem.addEventListener('click',()=>{
+
+
+
+        F.Confirmacion('¿Está seguro que desea AGREGAR este item al documento?')
+        .then((value)=>{
+            if(value==true){
+                
+                
+                
+                let coddoc = document.getElementById('EF_txtEditarFacturaCoddoc').value;;
+                let correlativo = document.getElementById('EF_txtEditarFacturaCorrelativo').value;
+                let codprod = Selected_codprod;
+                let desprod = Selected_desprod;
+                let codmedida = Selected_codmedida;
+                let cantidad = document.getElementById('EF_txtEditarFacturaCantidad').value || '1';
+                let equivale = Selected_equivale;
+                let totalunidades = Number(cantidad) * Number(equivale);
+                let costo = Selected_costo;
+                let precio = Selected_precio;
+                let totalcosto = Number(Selected_costo) * Number(cantidad);
+                let totalprecio = Number(Selected_precio) * Number(cantidad);
+                let descuento = 0;
+                let tipoprod = Selected_tipoprod;
+                let tipoprecio = data_empresa_config.TIPO_PRECIO;
+                let lastupdate = F.getFecha();
+                let por_iva = GlobalConfigIVA;
+                let existencia = Selected_existencia;
+                let bono = Selected_bono;
+                let exento = Selected_exento;
+
+
+                EF_btnAgregarItem.disabled = true;
+                EF_btnAgregarItem.innerHTML = `<i class="fal fa-save fa-spin"></i>`;
+    
+
+                GF.get_documento_insert_item(coddoc,correlativo,codprod,desprod, 
+                    codmedida,cantidad,equivale,totalunidades,costo,
+                    precio,totalcosto,totalprecio,descuento,tipoprod,
+                    tipoprecio,lastupdate, por_iva,existencia,bono,exento)
+                .then(()=>{
+                    F.Aviso('Item agregado exitosamente!!');
+                   
+                    fcn_cargar_grid_factura(coddoc,correlativo);
+    
+
+                    EF_btnAgregarItem.disabled = false;
+                    EF_btnAgregarItem.innerHTML = `<i class="fal fa-save"></i>`;
+    
+                    $("#modal_editar_factura_cantidad").modal('hide');
+    
+                    
+                })
+                .catch(()=>{
+                    
+                    F.AvisoError('No se pudo AGREGAR este item');
+
+                    EF_btnAgregarItem.disabled = false;
+                    EF_btnAgregarItem.innerHTML = `<i class="fal fa-save"></i>`;
+        
+    
+                })
+    
+            
+    
+            }
+        })
+    
+
+
+    });
+
+
+   
+
+
+};
+
+
+
+addListeners_EF_Agregar_item();
+
+
+
+
+
+
+
+
+
+

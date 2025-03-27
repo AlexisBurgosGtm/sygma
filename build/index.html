@@ -479,38 +479,36 @@
                             <div class="card-body p-4">
 
                                 <div class="row">
-                                    <div class="col-6">
+                                    <div class="col-sm-12 col-md-5 col-lg-5 col-xl-5">
                                         <div class="form-group">
                                             <label class="negrita">Cliente</label>
-                                            <input type="text" class="form-control" id="txtEditarFacturaNomclie" disabled>
-                                            <input type="text" class="form-control" id="txtEditarFacturaDirclie" disabled>
+                                            <input type="text" class="form-control" id="EF_txtEditarFacturaNomclie" disabled>
+                                            <input type="text" class="form-control" id="EF_txtEditarFacturaDirclie" disabled>
                                         </div>
                                     </div>
-                                    <div class="col-6">
+                                    <div class="col-sm-12 col-md-5 col-lg-5 col-xl-5">
                                         <div class="form-group">
                                             <label class="negrita">Total Factura</label>
-                                            <h3 class="negrita text-danger" id="lbEditarFacturaTotal"></h3>
+                                            <h3 class="negrita text-danger" id="EF_lbEditarFacturaTotal"></h3>
                                             <br>
-                                            <small class="negrita text-danger" id="lbEditarFacturaCoddoc"></small>
+                                            <small class="negrita text-danger" id="EF_lbEditarFacturaCoddoc"></small>
                                         </div>
                                     </div>
-                                    
+                                    <div class="col-sm-12 col-md-2 col-lg-2 col-xl-2">
+                                        <button class="btn btn-info btn-md hand shadow" id="EF_btnEditarFacturaActualizar">
+                                            <i class="fal fa-sync"></i> Actualizar
+                                        </button>
+                                    </div>
                                 </div>
                                 
                              
                                 <br>
-                                <div class="row">
-                                    <div class="col-6">
-
-                                    </div>
-                                    
-                                </div>
+                             
                                 <div class="table-responsive">
 
                                     <table class="table h-full table-bordered">
                                         <thead class="bg-base text-white">
                                             <tr>
-                                                <td>CODIGO</td>
                                                 <td>PRODUCTO</td>
                                                 <td>CODMEDIDA</td>
                                                 <td>CANTIDAD</td>
@@ -520,7 +518,7 @@
                                                 <td></td>
                                             </tr>
                                         </thead>
-                                        <tbody id="tblDataEditarFactura">
+                                        <tbody id="EF_tblDataEditarFactura">
     
                                         </tbody>
     
@@ -530,7 +528,7 @@
                                 
                                            
 
-                                <button class="btn btn-success btn-xl btn-circle btn-bottom-r hand shadow" id="btnEditarFacturaAgregar">
+                                <button class="btn btn-success btn-xl btn-circle btn-bottom-r hand shadow" id="EF_btnEditarFacturaAgregar">
                                     <i class="fal fa-plus"></i>
                                 </button>
                             
@@ -548,19 +546,17 @@
                                 
                             </div>
                             <div class="col-6">
-                                <button class="btn btn-info btn-circle btn-xl hand shadow" id="btnEditarFacturaActualizar">
-                                    <i class="fal fa-sync"></i>
-                                </button>
+                               
                             </div>
                         </div>
                         
                         
                         <div class="row hidden">
-                            <input type="text" class="form-control" id="txtEditarFacturaCoddoc" disabled>
-                            <input type="number" class="form-control" id="txtEditarFacturaCorrelativo" disabled>
-                            <input type="number" class="form-control" id="txtEditarFacturaTotalCosto" disabled>
-                            <input type="number" class="form-control" id="txtEditarFacturaTotalDescuento" disabled>
-                            <input type="number" class="form-control" id="txtEditarFacturaTotalPrecio" disabled>
+                            <input type="text" class="form-control" id="EF_txtEditarFacturaCoddoc" disabled>
+                            <input type="number" class="form-control" id="EF_txtEditarFacturaCorrelativo" disabled>
+                            <input type="number" class="form-control" id="EF_txtEditarFacturaTotalCosto" disabled>
+                            <input type="number" class="form-control" id="EF_txtEditarFacturaTotalDescuento" disabled>
+                            <input type="number" class="form-control" id="EF_txtEditarFacturaTotalPrecio" disabled>
                         </div>
 
 
@@ -603,7 +599,7 @@
                                             <td>TIPO</td>
                                         </tr>
                                     </thead>
-                                    <tbody id="tblDataEditarFacturaProductos"></tbody>
+                                    <tbody id="EF_tblDataEditarFacturaProductos"></tbody>
                                 </table>
                                
 
@@ -625,7 +621,7 @@
             </div>
         </div>
 
-        <!-- MODAL EDITAR CANTIDAD PRODUCTO FACTURA -->
+        <!-- MODAL AGREGAR  PRODUCTO FACTURA EN EF -->
         <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true" 
             id="modal_editar_factura_cantidad">
 
@@ -641,22 +637,22 @@
                                 <div class="card card-rounded">
                                     <div class="card-body p-4">
                                         
-                                        <h3 class="negrita text-danger" id="lbEditarFacturaDesprod">DESPROD</h3>
+                                        <h3 class="negrita text-danger" id="EF_lbEditarFacturaDesprod">DESPROD</h3>
                                         <br>
 
                                                 <div id="form-group">
                                                     <label class="negrita">Cantidad</label>
-                                                    <input type="number" class="negrita text-danger form-control"  id="txtEditarFacturaCantidad">
+                                                    <input type="number" class="negrita text-danger form-control"  id="EF_txtEditarFacturaCantidad">
                                                 </div>
                                         
                                                 <div id="form-group">
                                                     <label class="negrita">Precio Q</label>
-                                                    <input disabled type="number" class="negrita text-info form-control" id="txtEditarFacturaPrecio">
+                                                    <input disabled type="number" class="negrita text-info form-control" id="EF_txtEditarFacturaPrecio">
                                                 </div>
                                         
                                                 <div id="form-group">
                                                     <label class="negrita">Importe Q</label>
-                                                    <input disabled type="number" class="negrita text-info form-control" id="txtEditarFacturaTotalPrecio">
+                                                    <input disabled type="number" class="negrita text-info form-control" id="EF_txtEditarFacturaETotalPrecio">
                                                 </div>
                                         
                                         
@@ -669,7 +665,7 @@
                                                 </button>    
                                             </div>
                                             <div class="col-6">
-                                                <button class="btn btn-base btn-circle btn-xl hand shadow">
+                                                <button class="btn btn-base btn-circle btn-xl hand shadow" id="EF_btnAgregarItem">
                                                     <i class="fal fa-save"></i>
                                                 </button>
                                             </div>
@@ -677,8 +673,8 @@
                                         </div>
                                     
                                         <div class="row hidden">
-                                            <input type="number" id="txtEditarFacturaCosto">
-                                            <input type="number" id="txtEditarFacturaTotalCosto">
+                                            <input type="number" id="EF_txtEditarFacturaCosto">
+                                            <input type="number" id="EF_txtEditarFacturaTotalCosto">
                                         </div>
                                     </div>
                                 </div>

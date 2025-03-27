@@ -173,7 +173,7 @@ function getView(){
             
             
                     <div class="row">
-                        <div class="col-6">
+                        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                             <h4 class="negrita text-base">Listado de Facturas</h4>
                             <div class="row">
                                 <div class="col-6">
@@ -188,14 +188,19 @@ function getView(){
                                         <input type="date" class="form-control negrita text-danger" id="txtDocFechaFinal">
                                     </div>
                                 </div>
+                               
 
                             </div>
                             <br>
                         </div>
-                        <div class="col-6">
+                        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                             <label class="negrita text-info" id="lbFacTotalPedidos">Pedidos:</label>
                             <br>
-                            <label class="negrita text-danger" id="lbFacTotalImporte">Importe:</label>
+                            <label class="negrita text-danger h1" id="lbFacTotalImporte">Importe:</label>
+                            <br>
+                            <button class="btn btn-outline-secondary btn-md hand shadow" id="btnRecargarListaFacturas">
+                                <i class="fal fa-sync"></i> Recargar Lista
+                            </button>
                         </div>
                     </div>
                     
@@ -203,7 +208,7 @@ function getView(){
                     <div class="table-responsive">
 
                          <table class="table h-full table-bordered col-12" id="tblFFacturas">
-                                <thead class="bg-success text-white negrita">
+                                <thead class="bg-secondary text-white negrita">
                                     <tr>
                                         <td>DOCUMENTO</td>
                                         <td>FECHA</td>
@@ -424,7 +429,9 @@ function addListeners(){
     document.getElementById('txtDocFechaFinal').value = F.getFecha();
 
 
-    
+    document.getElementById('btnRecargarListaFacturas').addEventListener('click',()=>{
+        rpt_tbl_documentos_embarque();
+    });
     
     document.getElementById('txtDocFechaInicial').addEventListener('change',()=>{
         rpt_tbl_documentos_embarque();
@@ -475,7 +482,6 @@ function rpt_tbl_documentos_embarque(){
         let fi = F.devuelveFecha('txtDocFechaInicial');
         let ff = F.devuelveFecha('txtDocFechaFinal');
 
-        console.log('aqui 1...')
         GF.get_data_embarque_facturas_vendedor(GlobalEmpnit,fi,ff,GlobalCodUsuario)
         .then((data)=>{
     
