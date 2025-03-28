@@ -351,6 +351,37 @@ router.post("/buscar_cliente_vendedor", async(req,res)=>{
 });
 
 
+router.post("/buscar_cliente_vendedor_qr", async(req,res)=>{
+   
+    const { token, sucursal, filtro} = req.body;
+
+    let qry = `
+        SELECT CLIENTES.CODCLIENTE, CLIENTES.NIT, 
+            CLIENTES.NOMBRE, CLIENTES.DIRECCION, 
+            CLIENTES.CODMUN, MUNICIPIOS.DESMUN, 
+            CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
+            CLIENTES.TELEFONO, CLIENTES.LATITUD, 
+            CLIENTES.LONGITUD, CLIENTES.SALDO, 
+            CLIENTES.HABILITADO, CLIENTES.LASTSALE, 
+            CLIENTES.DIASCREDITO, CLIENTES.REFERENCIA,
+            CLIENTES.DIAVISITA AS VISITA
+        FROM CLIENTES LEFT OUTER JOIN
+            DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO LEFT OUTER JOIN
+            MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+        WHERE
+            (CLIENTES.EMPNIT='${sucursal}') AND 
+            (CLIENTES.CODCLIENTE = ${filtro})
+        `
+    
+ 
+        console.log(qry);
+        
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
 
 
 router.post("/insert_cliente", async(req,res)=>{

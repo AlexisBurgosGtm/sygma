@@ -49,12 +49,12 @@ function getView(){
         pedido:()=>{
             return `
             <div class="row">
-                    <div class="col-1 text-left">
-                            <img src="./favicon.png" width="80px" height="80px">
-                    </div>
-                    <div class="card border-base card-rounded shadow col-11 p-2">
+         
+                    <div class="col-12">
                         
+                        <div class="card border-base card-rounded shadow p-2 col-12">
                             <div class="row">
+
                                 <div class="col-4 text-left">   
                                     <label class="text-base negrita h5" style="font-size:120%">Punto de Venta</label>
                                     <br>
@@ -67,8 +67,10 @@ function getView(){
                                     <h1 class="text-base negrita" id="lbTotalVentaDescuento">Q 0.00</h1>
                                 </div>
                             </div>
-                        
+                        </div>
+
                     </div>
+                    
             </div>
            
             <div class="row">
@@ -76,9 +78,94 @@ function getView(){
                 <div class="col-12">
 
                                   
-               
-                <hr class="solid">
-                
+                   <div class="row">
+                      
+                        <div class="col-12">
+                            <div class="card card-rounded shadow border-base col-12 p-2">
+                                <div class="card-body">
+                                    
+                                    <div class="form-group">
+                                        <div class="input-group">
+                                           
+                                            <input type="text" autocomplete="off" class="form-control border-base negrita col-12" placeholder='Escriba para buscar...' id="txtPosCodprod">
+                                            <button class="btn btn-base hand col-1" id="btnBuscarProd">
+                                                <i class="fal fa-search"></i>
+                                            </button>
+                                                                                    
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <b class="text-base">Productos agregados a la Factura</b>
+                                        </div>
+                                    </div>
+                                    <table class="table table-responsive  table-hover col-12 h-full">
+                                        <thead class="bg-verde text-white">
+                                            <tr>
+                                                <td>PRODUCTO</td>
+                                                
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblPosPedido"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            
+            <div class="row">
+
+
+            </div>
+
+            
+            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
+                <i class="fal fa-arrow-left"></i>
+            </button>
+            
+            <button class="btn btn-verde btn-xl btn-bottom-r btn-circle shadow hand" id="btnPosCobro">
+                <i class="fal fa-arrow-right"></i>
+            </button>
+            `
+        },
+        BACKUP_pedido:()=>{
+            return `
+            <div class="row">
+         
+                    <div class="col-12">
+                        
+                        <div class="card border-base card-rounded shadow p-2 col-12">
+                            <div class="row">
+
+                                <div class="col-4 text-left">   
+                                    <label class="text-base negrita h5" style="font-size:120%">Punto de Venta</label>
+                                    <br>
+                                    <label class="text-base negrita h5" style="font-size:120%" id="lbTotalItems">0 items</label>
+                                </div>
+                                
+                                <div class="col-8 text-right">
+                                    <h5 class="text-verde negrita" id="lbTotalVenta">Q 0.00</h5>
+                                    <h5 class="text-danger negrita" id="lbTotalDescuento">Q 0.00</h5>
+                                    <h1 class="text-base negrita" id="lbTotalVentaDescuento">Q 0.00</h1>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    
+            </div>
+           
+            <div class="row">
+
+                <div class="col-12">
+
+                                  
                    <div class="row">
                       
                         <div class="col-12">
@@ -467,16 +554,6 @@ function getView(){
                     <div class="card card-rounded col-12 shadow">            
                         <div class="card-body p-4">
                             <div class="row">
-                                <div class="form-group col-12">
-                                    <label class="negrita text-secondary">Búsqueda de Clientes</label>
-                                    <div class="input-group">
-                                        <input type="search" autocomplete="off" class="form-control border-base negrita col-12" id="txtBuscarClie">
-                                       
-                                        <button class="btn btn-base hand text-white" id="btnBuscarClie">
-                                            <i class="fal fa-search"></i>
-                                        </button>
-                                    </div>
-                                </div>
                                 <select class="form-control negrita text-danger border-danger" id="cmbDiaCliente">
                                             <option value="LUNES">LUNES</option>
                                             <option value="MARTES">MARTES</option>
@@ -487,6 +564,17 @@ function getView(){
                                             <option value="DOMINGO">DOMINGO</option>
                                             <option value="OTROS">OTROS</option>
                                 </select>
+                                <div class="form-group col-12">
+                                    <label class="text-secondary">Búsqueda de Clientes</label>
+                                    <div class="input-group">
+                                        <input type="search" autocomplete="off" class="form-control border-base negrita col-12" id="txtBuscarClie">
+                                       
+                                        <button class="btn btn-base hand text-white" id="btnBuscarClie">
+                                            <i class="fal fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                               
                             </div>
                             <br>
                             <div class="row">
@@ -559,6 +647,11 @@ function addListeners(){
     document.getElementById('tab-uno').click();
 
     F.slideAnimationTabs();
+
+
+    let f = new Date();
+    document.getElementById('cmbDiaCliente').value = F.getDiaSemana(f.getDay());
+
 
     //REINICIA EL HANDLE DE LA EMPRESA
     //cmbEmpresa.removeEventListener('change', handle_empresa_change)
@@ -1059,16 +1152,16 @@ function initView(){
 
 
 
-function tbl_clientes(filtro){
+function tbl_clientes(filtro,qr){
    
-    /*
-    if(filtro==''){
-        F.AvisoError('Escriba un nombre o nit válidos');
-        document.getElementById('txtBuscarClie').focus(); 
-        return;
-    };
-    */
+  
+    let url_clientes = '';
 
+    if(qr=='SI'){
+        url_clientes = '/clientes/buscar_cliente_vendedor_qr'
+    }else{
+        url_clientes = '/clientes/buscar_cliente_vendedor'
+    };
 
     let container = document.getElementById('tblDataClientes');
     container.innerHTML = GlobalLoader;
@@ -1077,7 +1170,7 @@ function tbl_clientes(filtro){
 
     let dia = document.getElementById('cmbDiaCliente').value;
 
-    axios.post('/clientes/buscar_cliente_vendedor', {
+    axios.post(url_clientes, {
         token:TOKEN,
         sucursal: GlobalEmpnit,
         filtro:filtro,
@@ -1563,6 +1656,94 @@ function insert_producto_pedido(codprod,desprod,codmedida,equivale,costo,precio,
 };
 
 function get_tbl_pedido(){
+
+    let container = document.getElementById('tblPosPedido');
+    container.innerHTML = GlobalLoader;
+
+    let str = '';
+    let varTotalItems = 0;
+    let varTotalVenta = 0;
+    let varTotalCosto = 0;
+    let varTotalDescuento = 0;
+
+    selectTempVentasPOS(GlobalEmpnit)
+    .then((data)=>{
+        let datos = data.map((rows)=>{
+            varTotalItems += 1;
+            varTotalVenta = varTotalVenta + Number(rows.TOTALPRECIO);
+            varTotalCosto = varTotalCosto + Number(rows.TOTALCOSTO);
+            varTotalDescuento += Number(rows.DESCUENTO);
+            return `
+            <tr class="border-base border-left-0 border-right-0 border-top-0">
+                <td class="text-left">
+                    ${rows.DESPROD}
+                    <br>
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="negrita"><b>${rows.CODPROD}</b></small>
+                        </div>
+                    </div>
+
+                    <br>
+                    <tr>
+                        <td>
+                        ${rows.CODMEDIDA} (eq: ${rows.EQUIVALE})
+                        </td>
+                        <td>
+                            <b class="text-info" style="font-size:140%">${rows.CANTIDAD}</b>
+                        </td>
+                        <td class="negrita">${F.setMoneda(rows.PRECIO,'Q')}</td>
+                        <td class="negrita h4">${F.setMoneda(rows.TOTALPRECIO,'Q')}</td>
+                        <td class="negrita text-danger">${F.setMoneda(rows.DESCUENTO,'Q')}</td>
+                        <td class="negrita text-verde h4">${F.setMoneda((Number(rows.TOTALPRECIO)-Number(rows.DESCUENTO)),'Q')}</td>
+                    </tr>
+
+                </td>
+               
+                <td>
+                    <button class="btn btn-md btn-circle btn-info shadow hand" onclick="edit_item_pedido('${rows.ID}','${rows.CODPROD}','${rows.DESPROD}','${rows.CODMEDIDA}','${rows.EQUIVALE}','${rows.CANTIDAD}','${rows.COSTO}','${rows.PRECIO}','${rows.TIPOPROD}','${rows.EXENTO}','${rows.EXISTENCIA}','${rows.BONO}','${rows.DESCUENTO}')">
+                        <i class="fal fa-edit"></i>
+                    </button>
+                </td> 
+                <td>
+                    <button class="btn btn-md btn-circle btn-danger shadow hand" onclick="delete_item_pedido('${rows.ID}')">
+                        <i class="fal fa-trash"></i>
+                    </button>
+                </td>                            
+            </tr>`
+       }).join('\n');
+        container.innerHTML = datos;
+
+        GlobalTotalCostoDocumento = varTotalCosto;
+        GlobalTotalDocumento = varTotalVenta;
+        GlobalTotalDescuento = varTotalDescuento;
+
+        document.getElementById('lbTotalItems').innerText = varTotalItems.toString() + ' items';
+        document.getElementById('lbTotalVenta').innerText = F.setMoneda(varTotalVenta,'Q');
+        document.getElementById('lbTotalDescuento').innerText = `- ${F.setMoneda(varTotalDescuento,'Q')}` ;
+        document.getElementById('lbTotalVentaDescuento').innerText = F.setMoneda((varTotalVenta-varTotalDescuento),'Q');
+        
+        document.getElementById('lbPosCobroTotalPagar').innerText = F.setMoneda((varTotalVenta-varTotalDescuento),'Q');
+    })
+    .catch((error)=>{
+        
+        console.log(error)
+        container.innerHTML = 'No hay datos...';
+        GlobalTotalCostoDocumento = 0;
+        GlobalTotalDocumento = 0;
+        GlobalTotalDescuento = 0;
+
+        document.getElementById('lbTotalItems').innerText = '---';
+        document.getElementById('lbTotalVenta').innerText = 
+        document.getElementById('lbTotalDescuento').innerText = '---';
+        document.getElementById('lbTotalVentaDescuento').innerText = '---';
+        document.getElementById('lbPosCobroTotalPagar').innerText = '---';
+    })
+
+
+};
+
+function BACKUP_get_tbl_pedido(){
 
     let container = document.getElementById('tblPosPedido');
     container.innerHTML = GlobalLoader;
