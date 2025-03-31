@@ -974,23 +974,6 @@ let F = {
       gotoGoogleMaps:(lat,long)=>{
         window.open(`https://www.google.com/maps?q=${lat},${long}`);
       },
-      BACKUPimprimirSelec:(nombreDiv)=>{
-          var contenido= document.getElementById(nombreDiv).innerHTML;
-          var contenidoOriginal= document.body.innerHTML;
-      
-          document.body.innerHTML = contenido;
-      
-          /*
-          setTimeout(() => {
-            window.print();
-            document.body.innerHTML = contenidoOriginal;    
-          }, 3000);
-          */
-
-          window.print();
-          document.body.innerHTML = contenidoOriginal;
-        
-      },
       imprimirSelec:(nombreDiv)=>{
         
         var contenido= document.getElementById(nombreDiv).innerHTML;

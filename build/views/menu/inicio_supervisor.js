@@ -18,7 +18,10 @@ function getView(){
                             ${view.rpt_productos()}
                         </div>
                         <div class="tab-pane fade" id="cinco" role="tabpanel" aria-labelledby="home-tab">
-                            ${view.rpt_clientes()}
+                            ${view.rpt_vendedores()}
+                        </div>  
+                        <div class="tab-pane fade" id="seis" role="tabpanel" aria-labelledby="home-tab">
+                            ${view.rpt_inventarios()}
                         </div>    
                     </div>
 
@@ -42,6 +45,10 @@ function getView(){
                         <li class="nav-item">
                             <a class="nav-link negrita text-danger" id="tab-cinco" data-toggle="tab" href="#cinco" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
+                        </li>  
+                        <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-seis" data-toggle="tab" href="#seis" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>
                         </li>         
                     </ul>
                     
@@ -62,10 +69,35 @@ function getView(){
 
             <br>
 
+            
+            <div class="row">
+            </div>
+            
        
 
             <div class="row">
-                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6 p-2">
+                <div class="col-sm-12 col-md-4 col-xl-4 col-lg-4 p-2">
+                    
+                    <div class="card border-info card-rounded bg-white shadow col-12 hand"  
+                    onclick="Menu.clientes()">
+                        <div class="card-body p-4">
+                            
+                            <h4 class="text-info">CATALOGO CLIENTES</h4>
+
+                            <div class="row">
+                                <div class="col-6">
+                                </div>
+                                <div class="col-6 text-right">
+                                    <i class="fal fa-user negrita text-info" style="font-size:250%"></i>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+
+                </div>
+                <div class="col-sm-12 col-md-4 col-xl-4 col-lg-4 p-2">
                     
                     <div class="card border-info card-rounded bg-white shadow col-12 hand"  
                     onclick="Menu.ventas_pedidos()">
@@ -86,7 +118,7 @@ function getView(){
                     
 
                 </div>
-                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6 p-2" >
+                <div class="col-sm-12 col-md-4 col-xl-4 col-lg-4 p-2" >
                     
                     <div class="card border-info card-rounded  bg-white shadow col-12 hand"  
                     onclick="Menu.ventas_censo()">
@@ -112,7 +144,7 @@ function getView(){
             <br>
 
             <div class="row">
-                <div class="col-sm-12 col-md-3 col-xl-3 col-lg-3 p-2">
+                <div class="col-sm-12 col-md-6 col-xl-2 col-lg-2 p-2">
                     
                     <div class="card card-rounded bg-white shadow col-12 hand" id="btnMenuRptMarcas">
                         <div class="card-body p-4">
@@ -132,7 +164,7 @@ function getView(){
                     
 
                 </div>
-                <div class="col-sm-12 col-md-3 col-xl-3 col-lg-3 p-2">
+                <div class="col-sm-12 col-md-6 col-xl-2 col-lg-2 p-2">
                     
                     <div class="card card-rounded bg-white shadow col-12 hand" id="btnMenuRptDocumentos">
                         <div class="card-body p-4">
@@ -152,7 +184,7 @@ function getView(){
                     
 
                 </div>
-                <div class="col-sm-12 col-md-3 col-xl-3 col-lg-3 p-2">
+                <div class="col-sm-12 col-md-6 col-xl-2 col-lg-2 p-2">
                     
                     <div class="card card-rounded   bg-white shadow col-12 hand" id="btnMenuRptProductos">
                         <div class="card-body p-4">
@@ -172,18 +204,38 @@ function getView(){
                     
 
                 </div>
-                <div class="col-sm-12 col-md-3 col-xl-3 col-lg-3 p-2">
+                <div class="col-sm-12 col-md-6 col-xl-2 col-lg-2 p-2">
                     
-                    <div class="card card-rounded   bg-white shadow col-12 hand" id="btnMenuRptProductos">
+                    <div class="card card-rounded   bg-white shadow col-12 hand" id="btnMenuRptInventario">
                         <div class="card-body p-4">
 
-                            <h4 class="">REPORTE CLIENTES</h4>
+                            <h4 class="">INVENTARIO</h4>
                           
                              <div class="row">
                                 <div class="col-6">
                                 </div>
                                 <div class="col-6 text-right">
-                                    <i class="fal fa-user negrita text-secondary" style="font-size:250%"></i>
+                                    <i class="fal fa-warehouse negrita text-secondary" style="font-size:250%"></i>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    
+
+                </div>
+                <div class="col-sm-12 col-md-6 col-xl-2 col-lg-2 p-2">
+                    
+                    <div class="card card-rounded   bg-white shadow col-12 hand" id="btnMenuRptVendedores">
+                        <div class="card-body p-4">
+
+                            <h4 class="">VENTAS VENDEDORES</h4>
+                          
+                             <div class="row">
+                                <div class="col-6">
+                                </div>
+                                <div class="col-6 text-right">
+                                    <i class="fal fa-chart negrita text-secondary" style="font-size:250%"></i>
                                 </div>
                             </div>
 
@@ -440,6 +492,67 @@ function getView(){
         },
         rpt_productos:()=>{
             return `
+            <div class="card card-rounded shadow col-12" id="rpt_productos_embarque">
+                <div class="card-body p-4">
+            
+                    <div class="row">
+                        <div class="col-6">
+                            <h4 class="negrita text-base">Productos del Embarque</h4>
+                            <h5 id="lbProdCodembarque"></h5>
+                            <br>
+                        </div>
+                        <div class="col-6">
+                            <label class="negrita text-info" id="lbProdTotalPedidos">Pedidos:</label>
+                            <br>
+                            <label class="negrita text-danger" id="lbProdTotalImporte">Importe:</label>
+                        </div>
+                    </div>
+
+                    <br>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label>Fecha Inicial</label>
+                                    <input type="date" class="form-control negrita" id='txtRptProdFechaInicial'>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label>Fecha Final</label>
+                                    <input type="date" class="form-control negrita" id='txtRptProdFechaFinal'>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+
+                    <div class="table-responsive">
+
+                         <table class="table h-full table-bordered col-12" id="tblFProductos">
+                                <thead class="bg-secondary text-white negrita">
+                                    <tr>
+                                        <td>CODIGO</td>
+                                        <td>PRODUCTO</td>
+                                        <td>UXC</td>
+                                        <td>CAJAS</td>
+                                        <td>UNIDADES</td>
+                                        <td>IMPORTE</td>
+                                        <td></td>
+                                    </tr>
+                                </thead>
+                                <tbody id="tblDataFProductos"></tbody>
+
+                            </table>
+
+                    </div>
+            
+
+                </div>
+            </div>
+
+            <button class="btn btn-info btn-xl btn-circle hand shadow btn-bottom-r" onclick="F.imprimirSelec('rpt_productos_embarque')">
+                <i class="fal fa-print"></i>
+            </button>
+            
             
             
             <button class="btn btn-secondary btn-circle btn-xl hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
@@ -447,7 +560,7 @@ function getView(){
             </button>
             `
         },
-        rpt_clientes:()=>{
+        rpt_vendedores:()=>{
             return `
             
             
@@ -456,6 +569,56 @@ function getView(){
             </button>
             `
         },
+        rpt_inventarios:()=>{
+            return `
+            <div class="card card-rounded shadow">
+                <div class="card-body p-2">
+                    
+                    <h3 class="negrita text-danger">INVENTARIO ACTUAL</h3>
+
+                    <div class="row">
+                        <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
+                            <select class="form-control negrita text-base" id="cmbSt">
+                                <option value="SI">PRODUCTOS HABILITADOS</option>
+                                <option value="NO">PRODUCTOS NO HABILITADOS</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
+                            <h5 id="lbTotalItems"></h5>
+                        </div>
+                        <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
+                            <button class="btn btn-success btn-md hand shadow" id="btnExportarInventario">
+                                <i class="fal fa-share"></i> Exportar Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive col-12">
+                        <table class="table h-full table-hover col-12" id="tblInventario">
+                            <thead class="bg-base text-white">
+                                <tr>
+                                    <td>CODIGO</td>
+                                    <td>CODIGO 2</td>
+                                    <td>CODIGO 3</td>
+                                    <td>PRODUCTO</td>
+                                    <td>MARCA</td>
+                                    <td>EXISTENCIA</td>
+                                    <td></td>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataInventario">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary btn-circle btn-xl hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
+                <i class="fal fa-arrow-left"></i>
+            </button>
+
+            `
+        }
     }
 
     root.innerHTML = view.body();
@@ -489,6 +652,12 @@ function addListeners(){
 
     })
 
+    document.getElementById('btnMenuRptProductos').addEventListener('click',()=>{
+        document.getElementById('tab-cuatro').click();
+        rpt_tbl_productos();
+
+    })
+
 
 
     //MENU
@@ -512,6 +681,8 @@ function addListeners(){
     });
 
 
+    
+
 
 
     document.getElementById('txtMarcaFechaInicial').value = F.getFecha();
@@ -524,6 +695,31 @@ function addListeners(){
 
     document.getElementById('txtMarcaFechaFinal').addEventListener('change',()=>{
         rpt_tbl_marcas();
+    });
+
+
+
+    
+
+    document.getElementById('txtRptProdFechaInicial').value = F.getFecha();
+
+    document.getElementById('txtRptProdFechaInicial').addEventListener('change',()=>{
+        rpt_tbl_productos();
+    });
+
+    document.getElementById('txtRptProdFechaFinal').value = F.getFecha();
+
+    document.getElementById('txtRptProdFechaFinal').addEventListener('change',()=>{
+        rpt_tbl_productos();
+    });
+
+
+    document.getElementById('btnMenuRptInventario').addEventListener('click',()=>{
+
+        document.getElementById('tab-seis').click();
+
+        tbl_inventario();
+
     });
 
 
@@ -743,3 +939,101 @@ function rpt_tbl_marcas(){
 
 };
 
+
+
+function tbl_inventario(){
+
+    let container = document.getElementById('tblDataInventario');
+    container.innerHTML = GlobalLoader;
+
+    let st = document.getElementById('cmbSt').value;
+
+    GF.get_data_inventarios_general(GlobalEmpnit,st)
+    .then((data)=>{
+
+        let str = '';
+        data.recordset.map((r)=>{
+            str += `
+            <tr>
+                <td>${r.CODPROD}</td>
+                <td>${r.CODPROD2}</td>
+                <td>${r.DESPROD3}</td>
+                <td>${r.DESPROD}</td>
+                <td>${r.DESMARCA}</td>
+                <td>${r.TOTALUNIDADES}</td>
+                <td></td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
+
+        F.initit_datatable('tblInventario', true);
+
+    })
+    .catch(()=>{
+
+        container.innerHTML = 'No se cargaron datos...';
+    })
+
+
+    
+
+};
+
+
+
+
+function rpt_tbl_productos(){
+
+
+
+    let container = document.getElementById('tblDataFProductos');
+
+    container.innerHTML = GlobalLoader;
+    let contador = 0;
+    let varTotal = 0;
+
+
+    let fi = F.devuelveFecha('txtRptProdFechaInicial');
+    let ff = F.devuelveFecha('txtRptProdFechaFinal');
+
+    GF.get_data_embarque_productos_vendedor_todos(GlobalEmpnit,fi,ff)
+    .then((data)=>{
+
+        let str = '';
+
+        data.recordset.map((r)=>{
+         
+            contador +=1;
+            varTotal += Number(r.IMPORTE);
+            str += `
+                <tr>
+                    <td>${r.CODPROD}
+                    <br>
+                        <small>${r.TOTALUNIDADES}</small>
+                    </td>
+                    <td>${r.DESPROD}
+                        <br>
+                        <small>${r.DESMARCA}</small>
+                    </td>
+                    <td>${r.UXC}</td>
+                    <td>${r.CAJAS}</td>
+                    <td>${r.UNIDADES}</td>
+                    <td>${F.setMoneda(r.IMPORTE,'Q')}</td>
+                    <td></td>
+                </tr>
+                `
+        })
+        container.innerHTML = str;
+        document.getElementById('lbProdTotalPedidos').innerText = `Pedidos: ${contador}`;
+        document.getElementById('lbProdTotalImporte').innerText =`Total: ${F.setMoneda(varTotal,'Q')}`;
+
+    })
+    .catch((error)=>{
+        container.innerHTML = 'No se cargaron datos....';
+        document.getElementById('lbProdTotalPedidos').innerText = '';
+        document.getElementById('lbProdTotalImporte').innerText = '';
+    })
+
+
+};
