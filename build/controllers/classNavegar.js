@@ -30,8 +30,9 @@ let Navegar = {
                 Navegar.inicio_gerencia();
                 break;
             case 2: //SUPERVISOR
-                //document.getElementById('js-nav-menu').style = "visibility:visible";
-                Navegar.inicio_compras();
+                GF.fcn_load_navbar('SUPERVISOR','js-nav-menu_vendedor','js-primary-nav')
+              
+                Navegar.inicio_supervisor();
                 break;
             case 3: //VENDEDOR
                 
@@ -57,7 +58,7 @@ let Navegar = {
         }
             
     },
-    get_menu:(nivel)=>{
+    BACKUP_get_menu:(nivel)=>{
         
         let strMenu = "";
 
@@ -335,6 +336,13 @@ let Navegar = {
     inicio_gerencia:()=>{
         if(Number(GlobalNivelUsuario)==0){return;}
         F.loadScript('../views/menu/inicio_gerencia.js','root')
+        .then(async()=>{
+            initView();
+        })
+    },
+    inicio_supervisor:()=>{
+        if(Number(GlobalNivelUsuario)==0){return;}
+        F.loadScript('../views/menu/inicio_supervisor.js','root')
         .then(async()=>{
             initView();
         })

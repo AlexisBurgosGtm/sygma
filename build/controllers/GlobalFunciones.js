@@ -17,6 +17,10 @@ let GF = {
             case 'VENDEDOR':
                 strMenu = botones_menu.inicio_vendedor();
                 break;
+            case 'SUPERVISOR':
+                    strMenu = botones_menu.inicio_supervisor();
+                    break;
+                    
             default:
                 strMenu = '';
                 break;
@@ -1023,6 +1027,34 @@ let GF = {
         }) 
     
     },
+    get_data_pedidos_pendientes_vendedores_fechas:(fi,ff)=>{
+        
+        return new Promise((resolve,reject)=>{
+
+            let data = {sucursal:GlobalEmpnit,fi:fi,ff:ff}
+
+            axios.post(GlobalUrlCalls + '/despacho/pedidos_pendientes_vendedores_fechas', data)
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        }) 
+    
+    },
     get_data_pedidos_pendientes_vendedores_embarque:(codembarque)=>{
         
         return new Promise((resolve,reject)=>{
@@ -1164,6 +1196,38 @@ let GF = {
             };
     
             axios.post(`/despacho/pedidos_marcas_vendedor`, data)
+            .then(res => {
+               
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch((error)=>{
+              
+                reject();
+            })
+    
+        })
+    },
+    get_data_marcas_vendedor_todas: (empnit,fi,ff)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                fi:fi,
+                ff:ff
+            };
+    
+            axios.post(`/despacho/pedidos_marcas_vendedor_todas`, data)
             .then(res => {
                
                 if(res.status.toString()=='200'){

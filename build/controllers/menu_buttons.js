@@ -507,7 +507,28 @@ let botones_menu = {
         `
     },
     inicio_supervisor: ()=>{
-
+        return `
+                        <ul id="js-nav-menu_vendedor" class="nav-menu">
+                            <li>
+                                <a href="#"  class="text-base"  data-filter-tags="application intel"  onclick="Navegar.inicio();">
+                                    <i class="fal fa-home"></i>
+                                    <span class="nav-link-text" data-i18n="nav.application_intel">INICIO</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#"  class="text-base"  data-filter-tags="application intel"  onclick="Menu.ventas_pedidos()">
+                                    <i class="fal fa-shopping-cart"></i>
+                                    <span class="nav-link-text" data-i18n="nav.application_intel">PEDIDOS</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#"  class="text-base"  data-filter-tags="application intel"  onclick="Menu.ventas_censo()">
+                                    <i class="fal fa-users"></i>
+                                    <span class="nav-link-text" data-i18n="nav.application_intel">CENSO</span>
+                                </a>
+                            </li>                            
+                        </ul>
+        `
     },
     inicio_gerente: ()=>{
 
