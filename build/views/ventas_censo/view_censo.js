@@ -250,9 +250,20 @@ async function addListeners(){
     //inicializa la animación en las tabs
     F.slideAnimationTabs();
 
-    document.getElementById('cmbVendedor').disabled = true;
-    document.getElementById('cmbVendedorCliente').disabled = true;
+
+    //cmbVendedor
+    if(Number(GlobalNivelUsuario)==2){
+        document.getElementById('cmbVendedor').disabled = false;
+        document.getElementById('cmbVendedorCliente').disabled = false;
     
+    }else{
+        document.getElementById('cmbVendedor').disabled = true;
+        document.getElementById('cmbVendedorCliente').disabled = true;
+    };
+
+    document.getElementById('cmbVendedor').addEventListener('change',()=>{
+        tbl_clientes();
+    })
     
     let cmbVisita = document.getElementById('cmbVisita');
     cmbVisita.innerHTML = '<option value="TODOS">TODOS</option>' + F.ComboSemana("LETRAS");
@@ -325,9 +336,10 @@ async function addListeners(){
 
     get_empleados();
 
+    /*
     document.getElementById('change',()=>{
         tbl_clientes();
-    })
+    })*/
     
     document.getElementById('cmbDepartamento').addEventListener('change',()=>{
 

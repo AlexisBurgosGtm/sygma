@@ -38,10 +38,10 @@ let rootErrores = document.getElementById('rootErrores');
 let navmenu = document.getElementById('js-nav-menu');
 
 
-let GlobalLoader = special_loader_puntos_saltando; //`<b class="negrita text-base">Cargando... </b> ${special_loader_puntos}`;
+//let GlobalLoader = special_loader_puntos_saltando; //`<b class="negrita text-base">Cargando... </b> ${special_loader_puntos}`;
 
 
-let GlobalLoaderX = `
+let GlobalLoader = `
                 <div>
                     <div  class="spinner-border" role="status">
                         <img src="./favicon.png" width="40" height="40">

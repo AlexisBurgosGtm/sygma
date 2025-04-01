@@ -12,6 +12,7 @@ router.post("/lista_clientes_general", async(req,res)=>{
 
         qry = `
         SELECT CLIENTES.EMPNIT,
+        CLIENTES.CODEMPLEADO,
         CLIENTES.CODCLIENTE, 
         CLIENTES.NIT, 
         CLIENTES.NOMBRE, 
@@ -22,7 +23,8 @@ router.post("/lista_clientes_general", async(req,res)=>{
         CLIENTES.CODMUN, 
         MUNICIPIOS.DESMUN, 
         CLIENTES.CODDEPTO, 
-        DEPARTAMENTOS.DESDEPTO, 
+        DEPARTAMENTOS.DESDEPTO,
+        CLIENTES.CODSECTOR, 
         SECTORES.DESSECTOR, 
         CLIENTES.TELEFONO, 
                CLIENTES.LATITUD, CLIENTES.LONGITUD, 
@@ -140,74 +142,6 @@ router.post("/censo_lista_clientes", async(req,res)=>{
 
 
 
-router.post("/BACKUP_censo_lista_clientes", async(req,res)=>{
-   
-    const { token, sucursal,visita, codven} = req.body;
-
-    let qry = '';
-
-
-    if(visita=='TODOS'){
-        qry = `
-        SELECT CLIENTES.EMPNIT,CLIENTES.CODCLIENTE, CLIENTES.NIT, 
-        CLIENTES.NOMBRE, 
-        CLIENTES.TIPONEGOCIO, CLIENTES.NEGOCIO,
-        CLIENTES.CATEGORIA,
-        CLIENTES.DIRECCION, 
-        CLIENTES.CODMUN, MUNICIPIOS.DESMUN, 
-        CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
-        SECTORES.DESSECTOR, CLIENTES.TELEFONO, 
-               CLIENTES.LATITUD, CLIENTES.LONGITUD, 
-               CLIENTES.SALDO, CLIENTES.HABILITADO, 
-               CLIENTES.LASTSALE, CLIENTES.DIASCREDITO, 
-               CLIENTES.REFERENCIA, EMPLEADOS.NOMEMPLEADO,
-               CLIENTES.DIAVISITA AS VISITA
-         FROM     CLIENTES LEFT OUTER JOIN
-               EMPLEADOS ON CLIENTES.CODEMPLEADO = EMPLEADOS.CODEMPLEADO LEFT OUTER JOIN
-               SECTORES ON CLIENTES.CODSECTOR = SECTORES.CODSECTOR LEFT OUTER JOIN
-               DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO LEFT OUTER JOIN
-               MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
-         WHERE (CLIENTES.EMPNIT = '${sucursal}')        
-         AND (CLIENTES.CODEMPLEADO = ${codven})
-         AND (CLIENTES.HABILITADO='NA')
-        `
-
-    }else{
-        qry = `
-        SELECT CLIENTES.EMPNIT,CLIENTES.CODCLIENTE, CLIENTES.NIT, 
-        CLIENTES.NOMBRE, 
-        CLIENTES.TIPONEGOCIO, CLIENTES.NEGOCIO,
-        CLIENTES.CATEGORIA,
-        CLIENTES.DIRECCION, 
-        CLIENTES.CODMUN, MUNICIPIOS.DESMUN, 
-        CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
-        SECTORES.DESSECTOR, CLIENTES.TELEFONO, 
-               CLIENTES.LATITUD, CLIENTES.LONGITUD, 
-               CLIENTES.SALDO, CLIENTES.HABILITADO, 
-               CLIENTES.LASTSALE, CLIENTES.DIASCREDITO, 
-               CLIENTES.REFERENCIA, EMPLEADOS.NOMEMPLEADO,
-               CLIENTES.DIAVISITA AS VISITA
-         FROM     CLIENTES LEFT OUTER JOIN
-               EMPLEADOS ON CLIENTES.CODEMPLEADO = EMPLEADOS.CODEMPLEADO LEFT OUTER JOIN
-               SECTORES ON CLIENTES.CODSECTOR = SECTORES.CODSECTOR LEFT OUTER JOIN
-               DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO LEFT OUTER JOIN
-               MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
-         WHERE (CLIENTES.EMPNIT = '${sucursal}')  
-         AND (CLIENTES.DIAVISITA = '${visita}') 
-         AND (CLIENTES.CODEMPLEADO = ${codven})
-         AND (CLIENTES.HABILITADO='NA')
-        `
-
-    }
-
-
- 
-
-
-    execute.QueryToken(res,qry,token);
-     
-});
-
 
 router.post("/censo_insert", async(req,res)=>{
 
@@ -228,6 +162,61 @@ router.post("/censo_insert", async(req,res)=>{
      execute.QueryToken(res,qry,'');
      
 });
+
+
+router.post("/cliente_insert", async(req,res)=>{
+
+    const{sucursal,codven,fecha,nitclie,tiponegocio,negocio,categoria,nomclie,dirclie,codmun,coddepto,referencia,obs,telefono,visita,lat,long,sector} = req.body;
+
+    let qry = `
+        INSERT INTO CLIENTES (EMPNIT,CODEMPLEADO,DIAVISITA,DPI,NIT,TIPONEGOCIO,NEGOCIO,NOMBRE,DIRECCION,REFERENCIA,CODMUN,CODDEPTO,CODSECTOR,TELEFONO,
+                    EMAIL,FECHANACIMIENTO,LATITUD,LONGITUD,CATEGORIA,CODRUTA,SALDO,FECHAINICIO,HABILITADO,LIMITECREDITO,DIASCREDITO,LASTSALE)
+        SELECT '${sucursal}' AS EMPNIT,${codven} AS CODEMPLEADO,'${visita}' AS DIAVISITA,
+                '' AS DPI, '${nitclie}' AS NIT, '${tiponegocio}' AS TIPONEGOCIO, '${negocio}' AS NEGOCIO, '${nomclie}' AS NOMBRE,'${dirclie}' AS DIRECCION,
+                '${referencia}' AS REFERENCIA, ${codmun} AS CODMUN, ${coddepto} AS CODDEPTO, ${sector} AS CODSECTOR,
+                '${telefono}' AS TELEFONO, '' AS EMAIL, '${fecha}' AS FECHANACIMIENTO,
+                '${lat}' AS LATITUD, '${long}' AS LONGITUD, '${categoria}' AS CATEGORIA, 0 AS CODRUTA, 0 AS SALDO,
+                '${fecha}' AS FECHAINICIO, 'SI' AS HABILITADO, 0 AS LIMITECREDITO, 0 AS DIASCREDITO,
+                '${fecha}' AS LASTSALE
+            `
+    
+     execute.QueryToken(res,qry,'');
+     
+});
+
+
+router.post("/cliente_edit", async(req,res)=>{
+
+    const{sucursal,codclie,codven,fecha,nitclie,tiponegocio,negocio,categoria,nomclie,dirclie,codmun,coddepto,referencia,obs,telefono,visita,lat,long,sector} = req.body;
+
+    let qry = `
+        UPDATE CLIENTES SET
+                CODEMPLEADO= ${codven},
+                DIAVISITA='${visita}',
+                NIT='${nitclie}',
+                TIPONEGOCIO='${tiponegocio}',
+                NEGOCIO='${negocio}',
+                NOMBRE='${nomclie}',
+                DIRECCION='${dirclie}',
+                REFERENCIA='${referencia}',
+                CODMUN=${codmun},
+                CODDEPTO=${coddepto},
+                CODSECTOR=${sector},
+                TELEFONO='${telefono}',
+                LATITUD='${lat}',
+                LONGITUD='${long}',
+                CATEGORIA='${categoria}',
+                LASTSALE='${fecha}'
+            WHERE CODCLIENTE=${codclie}
+            `
+    
+     execute.QueryToken(res,qry,'');
+     
+});
+
+
+
+
 
 router.post("/censo_delete_cliente", async(req,res)=>{
 

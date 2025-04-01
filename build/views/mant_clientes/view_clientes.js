@@ -9,7 +9,7 @@ function getView(){
                             ${view.vista_listado()}
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
-                           
+                           ${view.vista_datos_cliente()}
                         </div>
                         <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
                             
@@ -91,39 +91,172 @@ function getView(){
                     </div>
                 </div>
             </div>
+
+            <button id="btnNuevo" class="btn btn-bottom-r btn-success btn-xl btn-circle shadow hand">
+                <i class="fal fa-plus"></i>
+            </button>
             `
         },
-        modal:()=>{
+        vista_datos_cliente:()=>{
             return `
-              <div id="modal_" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-right modal-xl">
-                    <div class="modal-content">
-                        <div class="dropdown-header bg-secondary d-flex justify-content-center align-items-center w-100">
-                            <h4 class="m-0 text-center color-white" id="">
-                                TITULO
-                            </h4>
-                        </div>
-                        <div class="modal-body p-4">
-                            
-                            <div class="card card-rounded">
-                                <div class="card-body p-2">
-
+            <div class="row">
+                <div class=" col-sm-12 col-md-12 col-xl-6 col-lg-6">
+                     
+                    <div class="card shadow card-rounded p-4">
+                        <div class="card-body">
+                        
+                                <div class="form-group">
+                                    <label class="negrita text-secondary">VENDEDOR</label>
+                                    <select id="cmbVendedorCliente" class="form-control"></select>
                                 </div>
-                            </div>
 
+                                <div class="row">
+                                    
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <label class="negrita text-secondary">NIT:</label>
+                                            <input id="txtNit" class="form-control" type="text" placeholder="Escriba el NIT ..."  maxlenght="20">
+                                        </div>    
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <label class="negrita text-secondary">Visita:</label>
+                                            <select id="cmbVisitaCliente" class="form-control"></select>
+                                        </div>    
+                                    </div>   
+                                    
+                                </div>
+                                <br>
+
+                                <div class="form-group">
+                                    <label class="negrita text-secondary">Giro de Negocio  /  Tipo (Categoria):</label>
+                                    <div class="input-group">
+                                        <select id="cmbTipoNegocio" class="form-control negrita"></select>
+                                        <select id="cmbCategoria" class="form-control">
+                                            <option value='A'>A</option>
+                                            <option value='B'>B</option>
+                                            <option value='C'>C</option>
+                                            <option value='D'>D</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="negrita text-secondary">Nombre del Negocio:</label>
+                                    <input id="txtNegocio" class="form-control" type="text" placeholder="nombre del negocio"  maxlenght="150">    
+                                </div>
+                   
+                                <br>
+                                <div class="form-group">
+                                    <label class="negrita text-secondary">Nombre y Apellido:</label>
+                                    <input id="txtNomcliente" class="form-control" type="text" maxlenght="200" placeholder="nombre completo">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="negrita text-secondary">Dirección:</label>
+                                    <input id="txtDircliente" class="form-control" type="text" maxlenght="250" placeholder="Dirección cliente...">
+                                </div>
+                                <br>
                                 
-                            <div class="row">
-                                <button class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
-                                    <i class="fal fa-arrow-left"></i>
-                                </button>
-                            </div>
-
+                                <div class="form-group">
+                                    <label class="negrita text-secondary">Referencia:</label>
+                                    <input id="txtReferencia" class="form-control" type="text" maxlenght="250" placeholder="Referencia del cliente...">
+                                </div>
+                        
                         </div>
-                    
-                    </div>
+                     </div>
+
+                </div>
+                <div class=" col-sm-12 col-md-12 col-xl-6 col-lg-6">
+              
+                    <div class="card shadow card-rounded p-4">
+                        <div class="card-body">
+                        
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <label class="negrita text-secondary">Departamento:</label>
+                                            <select id="cmbDepartamento" class="form-control">
+                                            </select>
+                                        </div>   
+
+                                       
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <label class="negrita text-secondary">Municipio:</label>
+                                            <select id="cmbMunicipio" class="form-control">
+                                            </select>
+                                        </div>    
+                                    </div>
+                                </div>
+
+                                <br>
+
+                               <div class="form-group">
+                                    <label class="negrita text-secondary">Sector / aldea:</label>
+                                    <select id="cmbSector" class="form-control">
+                                    </select>
+                                </div> 
+                                
+                                <br>
+
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                                    
+                                        <div class="form-group">
+                                            <label class="negrita text-secondary">Telefonos:</label>
+                                            <input id="txtTelefono"  maxlength="8" class="form-control" type="number" placeholder="Telefono cliente">
+                                        </div>
+                                    
+                                    </div>
+                                </div>
+                                
+
+                                <br>
+
+                                <div class="row">
+                                    <div class="col-5">
+                                        <div class="form-group">
+                                            <label class="negrita text-secondary">Latitud:</label>
+                                            <label class="text-info" id="txtLatitud">0</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-5">
+                                        <div class="form-group">
+                                            <label class="negrita text-secondary">Longitud:</label>
+                                            <label class="text-info" id="txtLongitud">0</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-2">
+                                        <div class="form-group">
+                                            <button class="btn btn-circle btn-danger" id="btnUbicacion">
+                                                <i class="fal fa-map-marker"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <input type='text' id="txtCodclie" class="hidden" disabled>
+
+                        
+                        </div>
+                     </div>
+              
                 </div>
             </div>
+                          
+            <button class="btn btn-secondary btn-bottom-l btn-xl btn-circle hand shadow" onclick="document.getElementById('tab-uno').click()">
+                <i class="fal fa-arrow-left"></i>
+            </button>
+
+            <button id="btnGuardar" class="btn btn-bottom-r btn-info btn-xl btn-circle shadow hand">
+                <i class="fal fa-save"></i>
+            </button>
             `
+
+
         }
     }
 
@@ -133,6 +266,8 @@ function getView(){
 
 function addListeners(){
 
+
+        F.slideAnimationTabs();
     
         document.getElementById('cmbTipo').addEventListener('change',()=>{
             tbl_clientes();    
@@ -140,6 +275,184 @@ function addListeners(){
 
 
         tbl_clientes();
+
+
+
+
+        document.getElementById('btnNuevo').addEventListener('click',()=>{
+
+            document.getElementById('tab-dos').click();
+
+            document.getElementById('txtCodclie').value ='';
+
+            clean_data();
+
+        });
+
+
+        let cmbVisitaCliente = document.getElementById('cmbVisitaCliente');
+        cmbVisitaCliente.innerHTML = F.ComboSemana("LETRAS");
+    
+        let cmbTipoNegocio = document.getElementById('cmbTipoNegocio')
+        cmbTipoNegocio.innerHTML = F.getComboTipoClientes();
+    
+     
+        
+
+        get_combos_mun_deptos('cmbMunicipio','cmbDepartamento','cmbSector');
+
+        get_empleados();
+    
+  
+        
+        document.getElementById('cmbDepartamento').addEventListener('change',()=>{
+    
+        
+            let contenedor = document.getElementById('cmbMunicipio');
+            let strdata = '';
+            
+            let contenedor3 = document.getElementById('cmbSector');
+            let strdata3 = '';
+    
+    
+            get_municipios(document.getElementById('cmbDepartamento').value)
+            .then((data)=>{
+                data.recordset.map((rows)=>{
+                        strdata = strdata + `<option value='${rows.CODIGO}'>${rows.DESCRIPCION}</option>`
+                })
+                contenedor.innerHTML = strdata;
+    
+                    get_sectores(contenedor.value)
+                    .then((data)=>{
+                        data.recordset.map((rows)=>{
+                                strdata3 = strdata3 + `<option value='${rows.CODIGO}'>${rows.DESCRIPCION}</option>`
+                        })
+                        contenedor3.innerHTML = strdata3;
+                    })
+                    .catch(()=>{
+                        contenedor3.innerHTML = `<option value='0'>NO SE CARGARON</option>`
+                    })
+            })
+            .catch(()=>{
+                contenedor.innerHTML = `<option value='0'>NO SE CARGARON</option>`
+            })
+    
+    
+        });
+    
+    
+        document.getElementById('cmbMunicipio').addEventListener('change',()=>{
+    
+            let contenedor3 = document.getElementById('cmbSector');
+            let strdata3 = '';
+    
+    
+            get_sectores(document.getElementById('cmbMunicipio').value)
+            .then((data)=>{
+                data.recordset.map((rows)=>{
+                        strdata3 = strdata3 + `<option value='${rows.CODIGO}'>${rows.DESCRIPCION}</option>`
+                })
+                contenedor3.innerHTML = strdata3;
+            })
+            .catch(()=>{
+                contenedor3.innerHTML = `<option value='0'>NO SE CARGARON</option>`
+            })
+    
+    
+        })
+    
+    
+        
+        
+        let btnGuardar = document.getElementById('btnGuardar');
+        btnGuardar.addEventListener('click',()=>{
+    
+         
+            let codclie = document.getElementById('txtCodclie').value || '';
+            if(codclie==''){
+
+                F.Confirmacion('¿Está seguro que desea GUARDAR este Cliente?')
+                .then((value)=>{
+                    if(value==true){
+
+                        document.getElementById('btnGuardar').disabled = true;
+                        document.getElementById('btnGuardar').innerHTML = '<i class="fal fa-save fa-spin"></i>'; 
+                        
+                        fcnGuardarCliente()
+                        .then(()=>{
+                           
+                           
+                            F.Aviso('Cliente Creado exitosamente!!');
+
+                            document.getElementById('btnGuardar').disabled = false;
+                            document.getElementById('btnGuardar').innerHTML = '<i class="fal fa-save"></i>';
+
+
+                            document.getElementById('tab-uno').click();
+
+                        
+                            tbl_clientes();
+                           
+
+                        })
+                        .catch(()=>{
+
+                            F.AvisoError('Error al guardar el cliente');
+
+                            document.getElementById('btnGuardar').disabled = false;
+                            document.getElementById('btnGuardar').innerHTML = '<i class="fal fa-save"></i>';
+
+                        })
+                        
+                    }
+                })
+
+            }else{
+
+                F.Confirmacion('¿Está seguro que desea ACTUALIZAR este Cliente?')
+                .then((value)=>{
+                    if(value==true){
+
+                        document.getElementById('btnGuardar').disabled = true;
+                        document.getElementById('btnGuardar').innerHTML = '<i class="fal fa-save fa-spin"></i>'; 
+                        
+                        fcnEditarCliente()
+                        .then(()=>{
+                           
+                           
+                            F.Aviso('Cliente actualizado exitosamente!!');
+
+                            document.getElementById('btnGuardar').disabled = false;
+                            document.getElementById('btnGuardar').innerHTML = '<i class="fal fa-save"></i>';
+
+
+                            document.getElementById('tab-uno').click();
+
+                        
+                            tbl_clientes();
+                           
+
+                        })
+                        .catch(()=>{
+
+                            F.AvisoError('Error al actualizar el cliente');
+
+                            document.getElementById('btnGuardar').disabled = false;
+                            document.getElementById('btnGuardar').innerHTML = '<i class="fal fa-save"></i>';
+
+                        })
+                        
+                    }
+                })
+
+            }
+    
+             
+
+
+                 
+            
+        });
 
 
 
@@ -199,14 +512,21 @@ function tbl_clientes(){
                         <i class="fal fa-sync"></i>
                     </button>
                 </td>
-                <td></td>
+                <td>
+                    <button class="btn btn-md btn-info btn-circle hand shadow"
+                    onclick="edit_cliente('${r.CODCLIENTE}','${r.NIT}','${r.TIPONEGOCIO}','${r.NEGOCIO}','${r.VISITA}','${r.NOMBRE}','${r.DIRECCION}','${r.REFERENCIA}','${r.CODMUN}','${r.CODDEPTO}','${r.CODSECTOR}','${r.CODEMPLEADO}','${r.TELEFONO}','${r.LATITUD}','${r.LONGITUD}','${r.CATEGORIA}')">
+                        <i class="fal fa-edit"></i>
+                    </button>
+                </td>
             </tr>
             `
         })
         container.innerHTML = str;
 
     })
-    .catch(()=>{
+    .catch((error)=>{
+        console.log(error);
+
         container.innerHTML = 'No se cargaron datos...';
 
     })
@@ -272,4 +592,443 @@ function update_status_cliente(codclie,st,idbtn){
 
 
 
+};
+
+
+function edit_cliente(codclie,nit,tiponegocio,negocio,visita,nomclie,dirclie,referencia,municipio,departamento,sector,
+                    codven,telefono,latitud,longitud,categoria
+){
+
+
+        document.getElementById('tab-dos').click();
+
+        document.getElementById('txtCodclie').value = codclie;
+        document.getElementById('txtNit').value = nit;
+        document.getElementById('cmbTipoNegocio').value = tiponegocio;
+        document.getElementById('cmbVisitaCliente').value = visita;
+        document.getElementById('txtNegocio').value = negocio;
+        document.getElementById('txtNomcliente').value= nomclie;
+        document.getElementById('txtDircliente').value = dirclie;
+        document.getElementById('txtReferencia').value = referencia;
+
+        document.getElementById('cmbDepartamento').value = departamento;
+        get_municipios(departamento)
+        .then((data)=>{
+            let strdata ='';
+            data.recordset.map((rows)=>{
+                strdata = strdata + `<option value='${rows.CODIGO}'>${rows.DESCRIPCION}</option>`
+            })
+            document.getElementById('cmbMunicipio').innerHTML = strdata;
+            document.getElementById('cmbMunicipio').value = municipio;
+
+            get_sectores(municipio)
+            .then((data)=>{
+                let strdata3 = '';
+                data.recordset.map((rows)=>{
+                        strdata3 = strdata3 + `<option value='${rows.CODIGO}'>${rows.DESCRIPCION}</option>`
+                })
+                document.getElementById('cmbSector').innerHTML = strdata3;
+                document.getElementById('cmbSector').value = sector;
+            })
+            .catch(()=>{
+                contenedor3.innerHTML = `<option value='0'>NO SE CARGARON</option>`
+            })
+        })
+
+        
+        document.getElementById('cmbSector').value = sector;
+        
+        document.getElementById('cmbVendedorCliente').value = codven;
+        document.getElementById('txtTelefono').value = telefono;
+        document.getElementById('txtLatitud').value = latitud;
+        document.getElementById('txtLongitud').value = longitud;
+        document.getElementById('cmbCategoria').value = categoria;
+
+
+};
+
+
+
+function clean_data(){
+
+    document.getElementById('txtCodclie').value = "";
+    
+    document.getElementById('txtNit').value = "CF";
+    //document.getElementById('cmbTipoNegocio').value = "TIENDITA";
+    document.getElementById('txtNegocio').value = ""; 
+    document.getElementById('txtNomcliente').value = "";
+    document.getElementById('txtDircliente').value = "";
+    document.getElementById('txtReferencia').value = "";
+    document.getElementById('txtTelefono').value = "";
+   // document.getElementById('txtObs').value = "SN";
+
+
+};
+
+function get_empleados(){
+
+    
+    GF.get_data_empleados_tipo(3)
+    .then((data)=>{
+
+        let str = '';
+        data.recordset.map((r)=>{
+            str += `<option value='${r.CODEMPLEADO}'>${r.NOMEMPLEADO}</option>`
+        })
+
+        //document.getElementById('cmbVendedor').innerHTML = str;
+        document.getElementById('cmbVendedorCliente').innerHTML = str;
+
+       
+        //carga la lista de clientes luego de tener al primer vendedor
+        tbl_clientes();
+
+
+    })
+    .catch(()=>{
+
+        //document.getElementById('cmbVendedor').innerHTML = '';
+        document.getElementById('cmbVendedorCliente').innerHTML = '';
+
+    })
+
+
+
+
+}
+
+
+
+function get_combos_mun_deptos(idContainerMun,idcontainerDep,idcontainerSec){
+
+
+
+    let contenedor = document.getElementById(idContainerMun);
+    let strdata = '';
+    
+
+    let contenedor2 = document.getElementById(idcontainerDep);
+    let strdata2 = '';
+   
+    let contenedor3 = document.getElementById(idcontainerSec);
+    let strdata3 = '';
+
+
+    
+
+    get_departamentos()
+    .then((data)=>{
+        data.recordset.map((rows)=>{
+                strdata2 = strdata2 + `<option value='${rows.CODIGO}'>${rows.DESCRIPCION}</option>`
+        })
+        contenedor2.innerHTML = strdata2;
+
+        get_municipios(contenedor2.value)
+        .then((data)=>{
+            data.recordset.map((rows)=>{
+                    strdata = strdata + `<option value='${rows.CODIGO}'>${rows.DESCRIPCION}</option>`
+            })
+            contenedor.innerHTML = strdata;
+
+                get_sectores(contenedor.value)
+                .then((data)=>{
+                    data.recordset.map((rows)=>{
+                            strdata3 = strdata3 + `<option value='${rows.CODIGO}'>${rows.DESCRIPCION}</option>`
+                    })
+                    contenedor3.innerHTML = strdata3;
+                })
+                .catch(()=>{
+                    contenedor3.innerHTML = `<option value='0'>NO SE CARGARON</option>`
+                })
+        })
+        .catch(()=>{
+            contenedor.innerHTML = `<option value='0'>NO SE CARGARON</option>`
+        })
+        
+    })
+    .catch(()=>{
+        contenedor2.innerHTML = `<option value='0'>NO SE CARGARON</option>`
+    })
+
+
+  
+  
+};
+
+function get_municipios(coddepto){
+    return new Promise((resolve,reject)=>{
+
+        axios.post('/clientes/municipios', {
+            sucursal: GlobalEmpnit,
+            coddepto: coddepto
+        })  
+        .then(async(response) => {
+            const data = response.data;
+            if(Number(data.rowsAffected[0])==0){
+                reject();
+            }else{  
+                resolve(data);
+            }
+        }, (error) => {
+           reject();
+        });
+
+    })
+}
+
+function get_sectores(codmun){
+    return new Promise((resolve,reject)=>{
+
+        axios.post('/clientes/sectores', {
+            sucursal: GlobalEmpnit,
+            codmun: codmun
+        })  
+        .then(async(response) => {
+            const data = response.data;
+            if(Number(data.rowsAffected[0])==0){
+                reject();
+            }else{  
+                resolve(data);
+            }
+        }, (error) => {
+           reject();
+        });
+
+    })
+}
+
+function get_departamentos(){
+    return new Promise((resolve,reject)=>{
+
+        axios.post('/clientes/departamentos', {
+            sucursal: GlobalEmpnit
+        })  
+        .then(async(response) => {
+            const data = response.data;
+            if(Number(data.rowsAffected[0])==0){
+                reject();
+            }else{  
+                resolve(data);
+            }
+        }, (error) => {
+           reject();
+        });
+
+    })
+}
+
+
+function delete_cliente_censo(codclie,idbtn){
+
+    let btn = document.getElementById(idbtn);
+    
+
+    F.Confirmacion('¿Está seguro que desea ELIMINAR este cliente?')
+    .then((value)=>{
+        if(value==true){
+
+            btn.innerHTML = `<i class="fal fa-trash fa-spin"></i>`;
+            btn.disabled = true;
+
+            
+            delete_clientes(codclie)
+            .then(()=>{
+                F.Aviso('Cliente eliminado exitosamente!!');
+                tbl_clientes();
+            })
+            .catch(()=>{
+                F.AvisoError('No se pudo eliminar');
+                btn.innerHTML = `<i class="fal fa-trash"></i>`;
+                btn.disabled = false;
+            })
+
+
+        }
+    })
+
+
+};
+
+
+function delete_clientes(codcliente){
+    return new Promise((resolve,reject)=>{
+
+        axios.post('/clientes/censo_delete_cliente', {
+            sucursal: GlobalEmpnit,
+            codclie: codcliente
+        })  
+        .then(async(response) => {
+            if(response.status.toString()=='200'){
+                let data = response.data;
+                if(data.toString()=="error"){
+                    reject();
+                }else{
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    } 
+                }       
+            }else{
+                reject();
+            }   
+        }, (error) => {
+           reject();
+        });
+
+    })
+}
+
+
+
+
+function fcnGuardarCliente(){  
+    
+    return new Promise((resolve,reject)=>{
+
+        let txtNit = document.getElementById('txtNit');
+        let cmbTipoNegocio = document.getElementById('cmbTipoNegocio');
+        let cmbVisitaCliente = document.getElementById('cmbVisitaCliente');
+        let txtNegocio = document.getElementById('txtNegocio'); 
+        let nomclie = document.getElementById('txtNomcliente').value || '';
+        let dirclie = document.getElementById('txtDircliente').value || 'CIUDAD';
+        let txtReferencia = document.getElementById('txtReferencia');
+        let cmbMunicipio = document.getElementById('cmbMunicipio');
+        let cmbDepartamento = document.getElementById('cmbDepartamento');
+        let cmbSector = document.getElementById('cmbSector');
+        let cmbVendedor = document.getElementById('cmbVendedorCliente');
+        let txtTelefono = document.getElementById('txtTelefono');
+        let txtLatitud = document.getElementById('txtLatitud');
+        let txtLongitud = document.getElementById('txtLongitud');
+        let codruta = 1;
+        let categoria = document.getElementById('cmbCategoria').value;
+
+
+        if(nomclie==''){F.AvisoError('Escriba un nombre de cliente');return;}
+       
+   
+        axios.post('/clientes/cliente_insert',{
+            sucursal:GlobalEmpnit,
+            codven:cmbVendedor.value,
+            codruta:codruta,
+            sector: cmbSector.value,
+            categoria:categoria,
+            fecha:F.getFecha(),
+            tiponegocio:cmbTipoNegocio.value,
+            nitclie:txtNit.value,
+            negocio: F.limpiarTexto(txtNegocio.value),
+            nomclie: F.limpiarTexto(nomclie), 
+            dirclie: F.limpiarTexto(dirclie), 
+            codmun:cmbMunicipio.value,
+            coddepto:cmbDepartamento.value,
+            referencia: F.limpiarTexto(txtReferencia.value), 
+            telefono:txtTelefono.value,
+            visita:cmbVisitaCliente.value,
+            lat:txtLatitud.innerText,
+            long:txtLongitud.innerText
+        })
+        .then((response) => {
+        
+           
+            
+            if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+            }else{
+                    reject();
+            }
+            
+        }, (error) => {
+            console.log(error);
+            reject();
+        });      
+
+
+    });
+};
+
+
+function fcnEditarCliente(){  
+    
+    return new Promise((resolve,reject)=>{
+
+
+        let codclie = document.getElementById('txtCodclie').value;
+        let txtNit = document.getElementById('txtNit');
+        let cmbTipoNegocio = document.getElementById('cmbTipoNegocio');
+        let cmbVisitaCliente = document.getElementById('cmbVisitaCliente');
+        let txtNegocio = document.getElementById('txtNegocio'); 
+        let nomclie = document.getElementById('txtNomcliente').value || '';
+        let dirclie = document.getElementById('txtDircliente').value || 'CIUDAD';
+        let txtReferencia = document.getElementById('txtReferencia');
+        let cmbMunicipio = document.getElementById('cmbMunicipio');
+        let cmbDepartamento = document.getElementById('cmbDepartamento');
+        let cmbSector = document.getElementById('cmbSector');
+        let cmbVendedor = document.getElementById('cmbVendedorCliente');
+        let txtTelefono = document.getElementById('txtTelefono');
+        let txtLatitud = document.getElementById('txtLatitud');
+        let txtLongitud = document.getElementById('txtLongitud');
+        let codruta = 1;
+        let categoria = document.getElementById('cmbCategoria').value;
+
+        if(nomclie==''){F.AvisoError('Escriba un nombre de cliente');return;}
+       
+   
+        axios.post('/clientes/cliente_edit',{
+            sucursal:GlobalEmpnit,
+            codclie:codclie,
+            codven:cmbVendedor.value,
+            codruta:codruta,
+            sector: cmbSector.value,
+            categoria:categoria,
+            fecha:F.getFecha(),
+            tiponegocio:cmbTipoNegocio.value,
+            nitclie:txtNit.value,
+            negocio: F.limpiarTexto(txtNegocio.value),
+            nomclie: F.limpiarTexto(nomclie), 
+            dirclie: F.limpiarTexto(dirclie), 
+            codmun:cmbMunicipio.value,
+            coddepto:cmbDepartamento.value,
+            referencia: F.limpiarTexto(txtReferencia.value), 
+            telefono:txtTelefono.value,
+            visita:cmbVisitaCliente.value,
+            lat:txtLatitud.innerText,
+            long:txtLongitud.innerText
+        })
+        .then((response) => {
+        
+           
+            
+            if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+            }else{
+                    reject();
+            }
+            
+        }, (error) => {
+            console.log(error);
+            reject();
+        });      
+
+
+    });
 };
