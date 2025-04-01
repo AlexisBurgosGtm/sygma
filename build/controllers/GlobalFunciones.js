@@ -1410,6 +1410,40 @@ let GF = {
     
         })
     },
+    get_data_ventas_vendedores_todos: (empnit,fi,ff)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                fi:fi,
+                ff:ff
+            };
+    
+            axios.post(`/despacho/ventas_vendedores_todos`, data)
+            .then(res => {
+                
+
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch((error)=>{
+                console.log('api error')
+                console.log(error)
+                reject();
+            })
+    
+        })
+    },
     get_data_surtido: (empnit)=>{
         return new Promise((resolve, reject)=>{
             

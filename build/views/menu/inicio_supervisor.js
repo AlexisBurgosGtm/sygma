@@ -71,15 +71,10 @@ function getView(){
 
             
             <div class="row">
-            </div>
-            
-       
-
-            <div class="row">
-                <div class="col-sm-12 col-md-4 col-xl-4 col-lg-4 p-2">
-                    
+                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
+                
                     <div class="card border-info card-rounded bg-white shadow col-12 hand"  
-                    onclick="Menu.clientes()">
+                        onclick="Menu.clientes()">
                         <div class="card-body p-4">
                             
                             <h4 class="text-info">CATALOGO CLIENTES</h4>
@@ -94,11 +89,9 @@ function getView(){
                             
                         </div>
                     </div>
-                    
 
-                </div>
-                <div class="col-sm-12 col-md-4 col-xl-4 col-lg-4 p-2">
-                    
+                    <br>
+
                     <div class="card border-info card-rounded bg-white shadow col-12 hand"  
                     onclick="Menu.ventas_pedidos()">
                         <div class="card-body p-4">
@@ -115,11 +108,9 @@ function getView(){
                             
                         </div>
                     </div>
-                    
 
-                </div>
-                <div class="col-sm-12 col-md-4 col-xl-4 col-lg-4 p-2" >
-                    
+                    <br>
+
                     <div class="card border-info card-rounded  bg-white shadow col-12 hand"  
                     onclick="Menu.ventas_censo()">
                         <div class="card-body p-4">
@@ -136,76 +127,13 @@ function getView(){
 
                         </div>
                     </div>
-                    
 
+
+                
                 </div>
-            </div>
+                
+                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
 
-            <br>
-
-            <div class="row">
-                <div class="col-sm-12 col-md-6 col-xl-2 col-lg-2 p-2">
-                    
-                    <div class="card card-rounded bg-white shadow col-12 hand" id="btnMenuRptMarcas">
-                        <div class="card-body p-4">
-                            
-                            <h4>REPORTE MARCAS</h4>
-
-                            <div class="row">
-                                <div class="col-6">
-                                </div>
-                                <div class="col-6 text-right">
-                                    <i class="fal fa-list negrita text-secondary" style="font-size:250%"></i>
-                                </div>
-                            </div>
-                            
-                        </div>
-                    </div>
-                    
-
-                </div>
-                <div class="col-sm-12 col-md-6 col-xl-2 col-lg-2 p-2">
-                    
-                    <div class="card card-rounded bg-white shadow col-12 hand" id="btnMenuRptDocumentos">
-                        <div class="card-body p-4">
-                            
-                            <h4>REPORTE DE FACTURAS</h4>
-
-                            <div class="row">
-                                <div class="col-6">
-                                </div>
-                                <div class="col-6 text-right">
-                                    <i class="fal fa-chart-pie negrita text-secondary" style="font-size:250%"></i>
-                                </div>
-                            </div>
-                            
-                        </div>
-                    </div>
-                    
-
-                </div>
-                <div class="col-sm-12 col-md-6 col-xl-2 col-lg-2 p-2">
-                    
-                    <div class="card card-rounded   bg-white shadow col-12 hand" id="btnMenuRptProductos">
-                        <div class="card-body p-4">
-
-                            <h4 class="">REPORTE PRODUCTOS</h4>
-                          
-                             <div class="row">
-                                <div class="col-6">
-                                </div>
-                                <div class="col-6 text-right">
-                                    <i class="fal fa-box negrita text-secondary" style="font-size:250%"></i>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                    
-
-                </div>
-                <div class="col-sm-12 col-md-6 col-xl-2 col-lg-2 p-2">
-                    
                     <div class="card card-rounded   bg-white shadow col-12 hand" id="btnMenuRptInventario">
                         <div class="card-body p-4">
 
@@ -221,11 +149,8 @@ function getView(){
 
                         </div>
                     </div>
-                    
+                    <br>
 
-                </div>
-                <div class="col-sm-12 col-md-6 col-xl-2 col-lg-2 p-2">
-                    
                     <div class="card card-rounded   bg-white shadow col-12 hand" id="btnMenuRptVendedores">
                         <div class="card-body p-4">
 
@@ -235,16 +160,65 @@ function getView(){
                                 <div class="col-6">
                                 </div>
                                 <div class="col-6 text-right">
-                                    <i class="fal fa-chart negrita text-secondary" style="font-size:250%"></i>
+                                    <i class="fal fa-chart-bar negrita text-secondary" style="font-size:250%"></i>
                                 </div>
                             </div>
 
                         </div>
                     </div>
-                    
+                    <br>
+                    <div class="card card-rounded bg-white shadow col-12 hand" id="btnMenuRptMarcas">
+                        <div class="card-body p-4">
+                            
+                            <h4>REPORTE MARCAS</h4>
 
+                            <div class="row">
+                                <div class="col-6">
+                                </div>
+                                <div class="col-6 text-right">
+                                    <i class="fal fa-list negrita text-secondary" style="font-size:250%"></i>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <br>
+                    <div class="card card-rounded bg-white shadow col-12 hand" id="btnMenuRptDocumentos">
+                        <div class="card-body p-4">
+                            
+                            <h4>REPORTE DE FACTURAS</h4>
+
+                            <div class="row">
+                                <div class="col-6">
+                                </div>
+                                <div class="col-6 text-right">
+                                    <i class="fal fa-chart-pie negrita text-secondary" style="font-size:250%"></i>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <br>
+                    <div class="card card-rounded   bg-white shadow col-12 hand" id="btnMenuRptProductos">
+                        <div class="card-body p-4">
+
+                            <h4 class="">REPORTE PRODUCTOS</h4>
+                          
+                             <div class="row">
+                                <div class="col-6">
+                                </div>
+                                <div class="col-6 text-right">
+                                    <i class="fal fa-box negrita text-secondary" style="font-size:250%"></i>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                
                 </div>
             </div>
+            
+       
 
             `
         },
@@ -497,7 +471,7 @@ function getView(){
             
                     <div class="row">
                         <div class="col-6">
-                            <h4 class="negrita text-base">Productos del Embarque</h4>
+                            <h4 class="negrita text-base">Productos Vendidos</h4>
                             <h5 id="lbProdCodembarque"></h5>
                             <br>
                         </div>
@@ -562,6 +536,59 @@ function getView(){
         },
         rpt_vendedores:()=>{
             return `
+            <div class="card card-rounded shadow col-12">
+                <div class="card-body p-4">
+            
+                    <div class="row">
+                        <div class="col-6">
+                            <h4 class="negrita text-base">Ventas por Vendedor</h4>
+                            
+                            <br>
+                        </div>
+                        <div class="col-6">
+                            <br>
+                            <label class="negrita text-danger" id="lbVenTotalImporte">Importe:</label>
+                        </div>
+                    </div>
+
+                    <br>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label>Fecha Inicial</label>
+                                    <input type="date" class="form-control negrita" id='txtRptVenFechaInicial'>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label>Fecha Final</label>
+                                    <input type="date" class="form-control negrita" id='txtRptVenFechaFinal'>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+
+                    <div class="table-responsive">
+
+                         <table class="table h-full table-bordered col-12" id="tblVendedores">
+                                <thead class="bg-base text-white negrita">
+                                    <tr>
+                                        <td>VENDEDOR</td>
+                                        <td>TELEFONO</td>
+                                        <td>IMPORTE</td>
+                                        <td></td>
+                                    </tr>
+                                </thead>
+                                <tbody id="tblDataVendedores"></tbody>
+
+                            </table>
+
+                    </div>
+            
+
+                </div>
+            </div>
+
             
             
             <button class="btn btn-secondary btn-circle btn-xl hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
@@ -720,6 +747,29 @@ function addListeners(){
 
         tbl_inventario();
 
+    });
+
+
+
+
+    document.getElementById('btnMenuRptVendedores').addEventListener('click',()=>{
+
+        document.getElementById('tab-cinco').click();
+
+        rpt_tbl_vendedores();
+
+    });
+
+    document.getElementById('txtRptVenFechaInicial').value = F.getFecha();
+
+    document.getElementById('txtRptVenFechaInicial').addEventListener('change',()=>{
+        rpt_tbl_vendedores();
+    });
+
+    document.getElementById('txtRptVenFechaFinal').value = F.getFecha();
+
+    document.getElementById('txtRptVenFechaFinal').addEventListener('change',()=>{
+        rpt_tbl_vendedores();
     });
 
 
@@ -1033,6 +1083,57 @@ function rpt_tbl_productos(){
         container.innerHTML = 'No se cargaron datos....';
         document.getElementById('lbProdTotalPedidos').innerText = '';
         document.getElementById('lbProdTotalImporte').innerText = '';
+    })
+
+
+};
+
+
+
+function rpt_tbl_vendedores(){
+
+
+    
+    let container = document.getElementById('tblDataVendedores');
+
+    container.innerHTML = GlobalLoader;
+    let contador = 0;
+    let varTotal = 0;
+
+
+    let fi = F.devuelveFecha('txtRptVenFechaInicial');
+    let ff = F.devuelveFecha('txtRptVenFechaFinal');
+
+    GF.get_data_ventas_vendedores_todos(GlobalEmpnit,fi,ff)
+    .then((data)=>{
+
+        let str = '';
+
+        data.recordset.map((r)=>{
+         
+            contador +=1;
+            varTotal += Number(r.TOTALPRECIO);
+            str += `
+                <tr>
+                    <td>${r.EMPLEADO}
+                        <br>
+                        <small class="negrita text-info">Usuario: ${r.USUARIO}</small>
+                        <br>
+                        <small class="negrita text-danger">Clave: ${r.CLAVE}</small>
+                    </td>
+                    <td>${r.TELEFONO}</td>
+                    <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                    <td></td>
+                </tr>
+                `
+        })
+        container.innerHTML = str;
+        document.getElementById('lbVenTotalImporte').innerText =`Total: ${F.setMoneda(varTotal,'Q')}`;
+
+    })
+    .catch((error)=>{
+        container.innerHTML = 'No se cargaron datos....';
+        document.getElementById('lbVenTotalImporte').innerText = '';
     })
 
 

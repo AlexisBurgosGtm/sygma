@@ -392,6 +392,37 @@ router.post("/pedidos_pendientes_embarque_productos_vendedor_todos", async(req,r
 });
 
 
+router.post("/ventas_vendedores_todos", async(req,res)=>{
+   
+    const { token, sucursal, fi, ff } = req.body;
+
+    let qry = `
+            SELECT EMPLEADOS.NOMEMPLEADO AS EMPLEADO, 
+                    EMPLEADOS.TELEFONO, 
+                    EMPLEADOS.USUARIO, 
+                    EMPLEADOS.CLAVE, 
+                    SUM(DOCUMENTOS.TOTALCOSTO) AS TOTALCOSTO, 
+                    SUM(DOCUMENTOS.TOTALVENTA) AS TOTALVENTA, 
+                    SUM(DOCUMENTOS.TOTALPRECIO) AS TOTALPRECIO
+            FROM DOCUMENTOS LEFT OUTER JOIN
+                  EMPLEADOS ON DOCUMENTOS.CODEMP = EMPLEADOS.CODEMPLEADO AND DOCUMENTOS.EMPNIT = EMPLEADOS.EMPNIT LEFT OUTER JOIN
+                  TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+            WHERE 
+                (DOCUMENTOS.EMPNIT = '${sucursal}') 
+                AND (DOCUMENTOS.FECHA BETWEEN '${fi}' AND '${ff}') 
+                AND (DOCUMENTOS.STATUS <> 'A') 
+                AND (TIPODOCUMENTOS.TIPODOC IN('FAC','FEF','FEC','FCP','FES','FPC'))
+            GROUP BY EMPLEADOS.NOMEMPLEADO, 
+                EMPLEADOS.TELEFONO, EMPLEADOS.USUARIO, EMPLEADOS.CLAVE
+            ORDER BY EMPLEADOS.NOMEMPLEADO;
+            `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
 
 
 
