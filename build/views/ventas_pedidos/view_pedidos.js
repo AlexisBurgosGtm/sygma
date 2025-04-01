@@ -583,7 +583,6 @@ function getView(){
                                         <tr>
                                             <td>NIT / CÓDIGO</td>
                                             <td>CLIENTE / TELÉFONO</td>
-                                            <td>SALDO</td>
                                             <td></td>
                                         </tr>
                                     </thead>
@@ -1198,6 +1197,8 @@ function tbl_clientes(filtro,qr){
                         </button>
                     </td>
                     <td>
+                        <small class="text-info">${r.TIPONEGOCIO}-${r.NEGOCIO}</small>
+                        <br>
                         ${r.NOMBRE}
                         <br>
                         <small>${r.DIRECCION}</small>
@@ -1207,7 +1208,6 @@ function tbl_clientes(filtro,qr){
                         <small>Tel: ${r.TELEFONO}</small>
                     </td>
                      
-                    <td>${F.setMoneda(r.SALDO,'Q')}</td>
                     <td>
                         <button class="btn btn-circle btn-md btn-base hand shadow" 
                         onclick="get_datos_cliente('${r.CODCLIENTE}','${r.NIT}','${r.NOMBRE}','${r.DIRECCION}','${r.TELEFONO}')">
@@ -1743,88 +1743,7 @@ function get_tbl_pedido(){
 
 };
 
-function BACKUP_get_tbl_pedido(){
 
-    let container = document.getElementById('tblPosPedido');
-    container.innerHTML = GlobalLoader;
-
-    let str = '';
-    let varTotalItems = 0;
-    let varTotalVenta = 0;
-    let varTotalCosto = 0;
-    let varTotalDescuento = 0;
-
-    selectTempVentasPOS(GlobalEmpnit)
-    .then((data)=>{
-        let datos = data.map((rows)=>{
-            varTotalItems += 1;
-            varTotalVenta = varTotalVenta + Number(rows.TOTALPRECIO);
-            varTotalCosto = varTotalCosto + Number(rows.TOTALCOSTO);
-            varTotalDescuento += Number(rows.DESCUENTO);
-            return `
-            <tr class="border-base border-left-0 border-right-0 border-top-0">
-                <td class="text-left">
-                    ${rows.DESPROD}
-                    <br>
-                    <div class="row">
-                        <div class="col-6">
-                            <small class="negrita"><b>${rows.CODPROD}</b></small>
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    ${rows.CODMEDIDA} (eq: ${rows.EQUIVALE})
-                </td>
-                <td>
-                    <b class="text-info" style="font-size:140%">${rows.CANTIDAD}</b>
-                </td>
-                <td class="negrita">${F.setMoneda(rows.PRECIO,'Q')}</td>
-                <td class="negrita h4">${F.setMoneda(rows.TOTALPRECIO,'Q')}</td>
-                <td class="negrita text-danger">${F.setMoneda(rows.DESCUENTO,'Q')}</td>
-                <td class="negrita text-verde h4">${F.setMoneda((Number(rows.TOTALPRECIO)-Number(rows.DESCUENTO)),'Q')}</td>
-
-                <td>
-                    <button class="btn btn-md btn-circle btn-info shadow hand" onclick="edit_item_pedido('${rows.ID}','${rows.CODPROD}','${rows.DESPROD}','${rows.CODMEDIDA}','${rows.EQUIVALE}','${rows.CANTIDAD}','${rows.COSTO}','${rows.PRECIO}','${rows.TIPOPROD}','${rows.EXENTO}','${rows.EXISTENCIA}','${rows.BONO}','${rows.DESCUENTO}')">
-                        <i class="fal fa-edit"></i>
-                    </button>
-                </td> 
-                <td>
-                    <button class="btn btn-md btn-circle btn-danger shadow hand" onclick="delete_item_pedido('${rows.ID}')">
-                        <i class="fal fa-trash"></i>
-                    </button>
-                </td>                            
-            </tr>`
-       }).join('\n');
-        container.innerHTML = datos;
-
-        GlobalTotalCostoDocumento = varTotalCosto;
-        GlobalTotalDocumento = varTotalVenta;
-        GlobalTotalDescuento = varTotalDescuento;
-
-        document.getElementById('lbTotalItems').innerText = varTotalItems.toString() + ' items';
-        document.getElementById('lbTotalVenta').innerText = F.setMoneda(varTotalVenta,'Q');
-        document.getElementById('lbTotalDescuento').innerText = `- ${F.setMoneda(varTotalDescuento,'Q')}` ;
-        document.getElementById('lbTotalVentaDescuento').innerText = F.setMoneda((varTotalVenta-varTotalDescuento),'Q');
-        
-        document.getElementById('lbPosCobroTotalPagar').innerText = F.setMoneda((varTotalVenta-varTotalDescuento),'Q');
-    })
-    .catch((error)=>{
-        
-        console.log(error)
-        container.innerHTML = 'No hay datos...';
-        GlobalTotalCostoDocumento = 0;
-        GlobalTotalDocumento = 0;
-        GlobalTotalDescuento = 0;
-
-        document.getElementById('lbTotalItems').innerText = '---';
-        document.getElementById('lbTotalVenta').innerText = 
-        document.getElementById('lbTotalDescuento').innerText = '---';
-        document.getElementById('lbTotalVentaDescuento').innerText = '---';
-        document.getElementById('lbPosCobroTotalPagar').innerText = '---';
-    })
-
-
-};
 
 function edit_item_pedido(id,codprod,desprod,codmedida,equivale,cantidad,costo,precio,tipoprod,exento,existencia,bono,descuento){
 

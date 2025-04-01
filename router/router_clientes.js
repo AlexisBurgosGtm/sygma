@@ -304,7 +304,8 @@ router.post("/buscar_cliente_vendedor", async(req,res)=>{
     const { token, sucursal, filtro, codven, dia} = req.body;
 
     let qry = `
-        SELECT CLIENTES.CODCLIENTE, CLIENTES.NIT, 
+        SELECT CLIENTES.CODCLIENTE, CLIENTES.NIT,
+            CLIENTES.TIPONEGOCIO, CLIENTES.NEGOCIO, 
             CLIENTES.NOMBRE, CLIENTES.DIRECCION, 
             CLIENTES.CODMUN, MUNICIPIOS.DESMUN, 
             CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
@@ -326,6 +327,12 @@ router.post("/buscar_cliente_vendedor", async(req,res)=>{
         OR 
             (CLIENTES.EMPNIT='${sucursal}') AND 
             (CLIENTES.NIT='${filtro}') AND
+            (CLIENTES.CODEMPLEADO=${codven}) AND
+            (CLIENTES.DIAVISITA='${dia}') AND
+            (CLIENTES.HABILITADO='SI')
+        OR 
+            (CLIENTES.EMPNIT='${sucursal}') AND 
+            (CLIENTES.NEGOCIO='${filtro}') AND
             (CLIENTES.CODEMPLEADO=${codven}) AND
             (CLIENTES.DIAVISITA='${dia}') AND
             (CLIENTES.HABILITADO='SI')
