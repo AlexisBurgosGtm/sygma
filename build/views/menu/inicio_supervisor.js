@@ -22,7 +22,10 @@ function getView(){
                         </div>  
                         <div class="tab-pane fade" id="seis" role="tabpanel" aria-labelledby="home-tab">
                             ${view.rpt_inventarios()}
-                        </div>    
+                        </div>
+                        <div class="tab-pane fade" id="siete" role="tabpanel" aria-labelledby="home-tab">
+                            ${view.rpt_clientes()}
+                        </div>       
                     </div>
 
                     <ul class="nav nav-tabs hidden" id="myTabHome" role="tablist">
@@ -48,6 +51,10 @@ function getView(){
                         </li>  
                         <li class="nav-item">
                             <a class="nav-link negrita text-danger" id="tab-seis" data-toggle="tab" href="#seis" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>
+                        </li> 
+                         <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-siete" data-toggle="tab" href="#siete" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
                         </li>         
                     </ul>
@@ -214,6 +221,23 @@ function getView(){
 
                         </div>
                     </div>
+                    <br>
+                    <div class="card card-rounded   bg-white shadow col-12 hand" id="btnMenuRptClientesVendedor">
+                        <div class="card-body p-4">
+
+                            <h4 class="">CLIENTES POR VENDEDOR</h4>
+                          
+                             <div class="row">
+                                <div class="col-6">
+                                </div>
+                                <div class="col-6 text-right">
+                                    <i class="fal fa-map negrita text-secondary" style="font-size:250%"></i>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
                 
                 </div>
             </div>
@@ -645,6 +669,38 @@ function getView(){
             </button>
 
             `
+        },
+        rpt_clientes:()=>{
+            return `
+            <div class="card card-rounded shadow col-12">
+                <div class="card-body p-4">
+                    
+                    <h3 class="negrita text-secondary">CLIENTES POR VENDEDOR</h3>
+                    <h3 class="negrita text-danger" id="lbTotalClientesVendedores"></h3>
+                    
+
+                    <div class="table-responsive col-12">
+                        <table class="table h-full table-hover col-12" id="">
+                            <thead class="bg-secondary text-white">
+                                <tr>
+                                    <td>VENDEDOR</td>
+                                    <td>DIA</td>
+                                    <td>TOTAL CLIENTES</td>
+                                    <td></td>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataClientesVendedor">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary btn-circle btn-xl hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
+                <i class="fal fa-arrow-left"></i>
+            </button>
+
+            `
         }
     }
 
@@ -745,7 +801,7 @@ function addListeners(){
 
         document.getElementById('tab-seis').click();
 
-        tbl_inventario();
+        rpt_tbl_clientes_vendedores();
 
     });
 
@@ -773,6 +829,15 @@ function addListeners(){
     });
 
 
+
+
+    document.getElementById('btnMenuRptClientesVendedor').addEventListener('click',()=>{
+
+        document.getElementById('tab-siete').click();
+
+        rpt_tbl_clientes_vendedores();
+
+    });
 
 };
 
@@ -1134,6 +1199,50 @@ function rpt_tbl_vendedores(){
     .catch((error)=>{
         container.innerHTML = 'No se cargaron datos....';
         document.getElementById('lbVenTotalImporte').innerText = '';
+    })
+
+
+};
+
+
+
+function rpt_tbl_clientes_vendedores(){
+
+
+
+    let container = document.getElementById('tblDataClientesVendedor');
+
+    container.innerHTML = GlobalLoader;
+    let contador = 0;
+    let varTotal = 0;
+
+
+    GF.get_data_ventas_vendedores_clientes_resumen(GlobalEmpnit)
+    .then((data)=>{
+
+        let str = '';
+
+        data.recordset.map((r)=>{
+         
+            contador +=1;
+            //varTotal += Number(r.IMPORTE);
+            str += `
+                <tr>
+                    <td>${r.NOMEMP}
+                    <td>${r.VISITA}</td>
+                    <td>${r.CONTEO}</td>
+                    <td></td>
+                </tr>
+                `
+        })
+        container.innerHTML = str;
+        document.getElementById('lbTotalClientesVendedores').innerText = `Total: ${contador}`;
+      
+    })
+    .catch((error)=>{
+        container.innerHTML = 'No se cargaron datos....';
+        document.getElementById('lbTotalClientesVendedores').innerText = '';
+       
     })
 
 

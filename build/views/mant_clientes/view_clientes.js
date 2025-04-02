@@ -38,12 +38,13 @@ function getView(){
         vista_listado:()=>{
             return `
             <div class="card card-rounded shadow">
-                <div class="card-body p-2">
+                <div class="card-body p-4">
 
                     <div class="row">
                         <div class="col-6">
                         
                             <h3 class="negrita text-base">Catálogo de Clientes</h3>
+                            <h3 class="negrita text-danger" id="lbTotalClientes"></h3>
                         
                         </div>
                         <div class="col-6">
@@ -483,7 +484,7 @@ function tbl_clientes(){
             
             let idbtnE = `btnE${r.CODCLIENTE}`;
             let strClassBtn = ``;
-            if(st=='SI'){strClassBtn='btn-danger'}else{strClassBtn='btn-info'};
+            if(st=='SI'){strClassBtn='btn-danger'}else{strClassBtn='btn-success'};
 
             contador +=1;
             str += `
@@ -522,12 +523,13 @@ function tbl_clientes(){
             `
         })
         container.innerHTML = str;
-
+        document.getElementById('lbTotalClientes').innerText = `Total: ${contador}`;
     })
     .catch((error)=>{
         console.log(error);
 
         container.innerHTML = 'No se cargaron datos...';
+        document.getElementById('lbTotalClientes').innerText = '';
 
     })
 
