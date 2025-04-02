@@ -428,13 +428,18 @@ router.post("/clientes_vendedores_resumen", async(req,res)=>{
     const { token, sucursal } = req.body;
 
     let qry = `
-             SELECT EMPLEADOS.NOMEMPLEADO AS NOMEMP, CLIENTES.DIAVISITA AS VISITA, COUNT(CLIENTES.NOMBRE) AS CONTEO
-            FROM  CLIENTES LEFT OUTER JOIN
-                TEMP_ORDEN_DIAS ON CLIENTES.DIAVISITA = TEMP_ORDEN_DIAS.DIA LEFT OUTER JOIN
-                EMPLEADOS ON CLIENTES.CODEMPLEADO = EMPLEADOS.CODEMPLEADO
-            WHERE  (CLIENTES.EMPNIT = '${sucursal}') AND (CLIENTES.HABILITADO <> 'NO')
-            GROUP BY EMPLEADOS.NOMEMPLEADO, CLIENTES.DIAVISITA, TEMP_ORDEN_DIAS.NUMDIA
-            ORDER BY NOMEMP,  TEMP_ORDEN_DIAS.NUMDIA
+             SELECT NOMEMP, 
+                SUM(LUNES) AS LUNES, 
+                SUM(MARTES) AS MARTES, 
+                SUM(MIERCOLES) AS MIERCOLES, 
+                SUM(JUEVES) AS JUEVES, 
+                SUM(VIERNES) AS VIERNES, 
+                SUM(SABADO) AS SABADO, 
+                SUM(DOMINGO) AS DOMINGO,
+                SUM(LUNES)+SUM(MARTES)+SUM(MIERCOLES)+SUM(JUEVES)+SUM(VIERNES)+SUM(SABADO)+SUM(DOMINGO) AS TOTAL
+            FROM     view_clientes_resumen_dias
+                WHERE  (EMPNIT = '${sucursal}')
+            GROUP BY NOMEMP
             `;
     
 

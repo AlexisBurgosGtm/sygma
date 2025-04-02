@@ -684,9 +684,14 @@ function getView(){
                             <thead class="bg-secondary text-white">
                                 <tr>
                                     <td>VENDEDOR</td>
-                                    <td>DIA</td>
-                                    <td>TOTAL CLIENTES</td>
-                                    <td></td>
+                                    <td>LUNES</td>
+                                    <td>MARTES</td>
+                                   <td>MIERCOLES</td>
+                                   <td>JUEVES</td>
+                                   <td>VIERNES</td>
+                                   <td>SABADO</td>
+                                   <td>DOMINGO</td>
+                                    <td>TOTAL</td>
                                 </tr>
                             </thead>
                             <tbody id="tblDataClientesVendedor">
@@ -1223,15 +1228,20 @@ function rpt_tbl_clientes_vendedores(){
         let str = '';
 
         data.recordset.map((r)=>{
-         
-            contador +=1;
+            
+            contador +=Number(r.TOTAL);
             //varTotal += Number(r.IMPORTE);
             str += `
                 <tr>
                     <td>${r.NOMEMP}
-                    <td>${r.VISITA}</td>
-                    <td>${r.CONTEO}</td>
-                    <td></td>
+                    <td>${r.LUNES}</td>
+                    <td>${r.MARTES}</td>
+                    <td>${r.MIERCOLES}</td>
+                    <td>${r.JUEVES}</td>
+                    <td>${r.VIERNES}</td>
+                    <td>${r.SABADO}</td>
+                    <td>${r.DOMINGO}</td>
+                    <td class="negrita text-danger">${r.TOTAL}</td>
                 </tr>
                 `
         })
@@ -1240,6 +1250,7 @@ function rpt_tbl_clientes_vendedores(){
       
     })
     .catch((error)=>{
+        console.log(error);
         container.innerHTML = 'No se cargaron datos....';
         document.getElementById('lbTotalClientesVendedores').innerText = '';
        
