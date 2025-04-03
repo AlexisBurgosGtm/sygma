@@ -217,6 +217,17 @@ let Menu = {
             F.AvisoError('No tiene permitido entrar a esta sección');
         }
     },
+    bodega_lista_precios:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/bodega_lista_precios/view_lista_precios.js','root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        }
+    },
     documentos:()=>{
         if(Menu.verify()==true){
             Menu.salidaMenu();

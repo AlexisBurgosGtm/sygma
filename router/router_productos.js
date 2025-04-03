@@ -4,6 +4,30 @@ const router = express.Router();
 
 
 
+router.post("/lista_precios", async(req,res)=>{
+   
+    const {token,sucursal} = req.body;
+
+   
+    let qry = `
+            SELECT
+                CODIGO,CODIGO2,CODIGO3,PRODUCTO,
+                COSTO_ULTIMO,HABILITADO,TIPOPROD,CODMARCA,
+                MARCA,COD_TIPO,CLASIFICACION_TIPO,
+                MEDIDA,EQUIVALE,ISNULL(COSTO,0) AS COSTO,
+                ISNULL(PRECIO,0) AS PRECIO,
+                ISNULL(PRECIO_A,0) AS PRECIO_A,
+                ISNULL(PRECIO_B,0) AS PRECIO_B,
+                ISNULL(PRECIO_C,0) AS PRECIO_C  
+            FROM 
+                view_lista_productos_precios 
+            `
+
+            console.log(qry)
+
+    execute.QueryToken(res,qry,token);
+     
+});
 
 
 

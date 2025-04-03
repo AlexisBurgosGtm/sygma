@@ -1183,6 +1183,36 @@ let GF = {
     
         })
     },
+    get_data_lista_precios: (empnit)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:empnit
+            };
+    
+            axios.post(`/productos/lista_precios`, data)
+            .then(res => {
+               
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch((error)=>{
+              
+                reject();
+            })
+    
+        })
+    },
     get_data_marcas_vendedor: (empnit,fi,ff,codven)=>{
         
         return new Promise((resolve, reject)=>{
