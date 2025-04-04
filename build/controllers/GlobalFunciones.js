@@ -1192,7 +1192,7 @@ let GF = {
                 sucursal:empnit
             };
     
-            axios.post(`/productos/lista_precios`, data)
+            axios.post(`/productos/lista_precios_general`, data)
             .then(res => {
                
                 if(res.status.toString()=='200'){

@@ -4,7 +4,7 @@ const router = express.Router();
 
 
 
-router.post("/lista_precios", async(req,res)=>{
+router.post("/lista_precios_general", async(req,res)=>{
    
     const {token,sucursal} = req.body;
 

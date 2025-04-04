@@ -166,11 +166,11 @@ function tbl_lista_precios(){
             <tr>
                 <td>${r.CODIGO}</td>
                 <td>${r.CODIGO2}</td>
-                <td>${r.CODIGO3}CODIGO3</td>
-                <td>${r.PRODUCTO}PRODUCTO</td>
-                <td>${r.HABILITADO}HABILITADO</td>
-                <td>${r.TIPOPROD}TIPOPROD</td>
-                <td>${r.MARCA}MARCA</td>
+                <td>${r.CODIGO3}</td>
+                <td>${r.PRODUCTO}</td>
+                <td>${r.HABILITADO}</td>
+                <td>${r.TIPOPROD}</td>
+                <td>${r.MARCA}</td>
                 <td>${r.CLASIFICACION_TIPO}</td>
                 <td>${r.MEDIDA}</td>
                 <td>${r.EQUIVALE}</td>
