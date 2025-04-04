@@ -922,7 +922,7 @@ let F = {
             // your code on active tab shown
         });
       },
-      exportTableToExcel: (tableID, filename = '')=>{
+      BACKUP_exportTableToExcel: (tableID, filename = '')=>{
         var downloadLink;
         var dataType = 'application/vnd.ms-excel;charset=UTF-8';
         var tableSelect = document.getElementById(tableID);
@@ -951,6 +951,23 @@ let F = {
             //triggering the function
             downloadLink.click();
         }
+      },
+      exportTableToExcel: (tableID, filename)=>{
+
+            let $tabla = document.querySelector("#" + tableID);
+
+
+            let tableExport = new TableExport($tabla, {
+              exportButtons: false, // No queremos botones
+              filename: "Reporte de prueba", //Nombre del archivo de Excel
+              sheetname: "Reporte de prueba", //Título de la hoja
+          });
+          let datos = tableExport.getExportData();
+          let preferenciasDocumento = datos.tabla.xlsx;
+          tableExport.export2file(preferenciasDocumento.data, preferenciasDocumento.mimeType, preferenciasDocumento.filename, preferenciasDocumento.fileExtension, preferenciasDocumento.merges, preferenciasDocumento.RTL, preferenciasDocumento.sheetname);
+      
+
+
       },
       getHora:()=>{
         let hoy = new Date();

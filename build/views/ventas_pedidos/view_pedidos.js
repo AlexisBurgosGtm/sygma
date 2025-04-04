@@ -1810,24 +1810,25 @@ function get_coddoc(tipo){
 };
 
 function get_correlativo_coddoc(coddoc){
-    return new Promise((resolve, reject)=>{
-        axios.post('/tipodocumentos/correlativo_doc', {
-            sucursal: GlobalEmpnit,
-            coddoc:coddoc
+    return new Promise((resolve,reject)=>{
+        axios.post('/tipodocumentos/correlativo',{
+            sucursal:GlobalEmpnit,
+            coddoc:coddoc,
+            token:TOKEN
         })
         .then((response) => {
-            if(response=='error'){
-                resolve('         0')
-            }else{
+            let data = response.data;
+            if(Number(data.rowsAffected[0])>0){
                 let correlativo = '';
-                const data = response.data;
                 data.recordset.map((r)=>{
-                    correlativo = r.CORRELATIVO;
+                    correlativo = r.CORRELATIVO
                 })
-                resolve(correlativo);
-            }
+                resolve(correlativo);             
+            }else{
+                reject('0');
+            }                     
         }, (error) => {
-            resolve('         0')
+            reject('0');
         });
     })
 };
@@ -1837,6 +1838,9 @@ function get_correlativo_coddoc(coddoc){
 function finalizar_pedido(){
 
 
+    let btnGuardarFactura = document.getElementById('btnGuardarFactura');
+        
+
     let coddoc = document.getElementById('cmbCoddoc').value;
     let correlativoDoc = document.getElementById('txtCorrelativo').value;
 
@@ -1844,8 +1848,15 @@ function finalizar_pedido(){
 
     F.showToast('Obteniendo correlativo');
 
+    btnGuardarFactura.disabled = true;
+    btnGuardarFactura.innerHTML = `<i class="fal fa-save fa-spin"></i>`;
+
     get_correlativo_coddoc(coddoc)
     .then((correlativo)=>{
+
+        btnGuardarFactura.disabled = false;
+        btnGuardarFactura.innerHTML = `<i class="fal fa-save"></i>`;
+
         document.getElementById('txtCorrelativo').value = correlativo;
         correlativoDoc = correlativo;
 
@@ -1898,7 +1909,6 @@ function finalizar_pedido(){
         let entrega_lat = '0';
         let entrega_long = '0';
     
-        let btnGuardarFactura = document.getElementById('btnGuardarFactura');
         
         get_tbl_pedido();
     
@@ -1980,6 +1990,8 @@ function finalizar_pedido(){
     .catch(()=>{
         document.getElementById('txtCorrelativo').value = '0';
         F.AvisoError('No se pudo obtener el correlativo del documento... intentelo de nuevo');
+        btnGuardarFactura.disabled = false;
+        btnGuardarFactura.innerHTML = `<i class="fal fa-save"></i>`;
     })
 
 
