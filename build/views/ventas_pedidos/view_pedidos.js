@@ -1836,132 +1836,153 @@ function get_correlativo_coddoc(coddoc){
 
 function finalizar_pedido(){
 
-    
-    let codcliente = document.getElementById('txtPosCobroNitclie').value || ''; //GlobalSelectedCodCliente;
-    if(codcliente==''){
-        F.AvisoError('Seleccione un cliente');
-        return;
-    };
-
-    let nit = document.getElementById('txtPosCobroNit').value || 'CF';
-    let ClienteNombre = document.getElementById('txtPosCobroNombre').value;
-    GlobalSelectedNomCliente = ClienteNombre;
-    let dirclie = document.getElementById('txtPosCobroDireccion').value;
-    GlobalSelectedDirCliente = dirclie;
-    let obs = F.limpiarTexto(document.getElementById('txtObs').value) || '';  
-    let direntrega = "SN"; 
-    let codbodega = GlobalCodBodega;
-    let cmbTipoEntrega = ''; 
-    
-    let txtFecha = new Date(document.getElementById('txtFecha').value);
-    let anio = txtFecha.getFullYear();
-    let mes = txtFecha.getUTCMonth()+1;
-    let dia = txtFecha.getUTCDate() 
-    let fecha = F.devuelveFecha('txtFecha'); //F.getFecha() //anio + '-' + mes + '-' + d; 
-    
-    let hora = F.getHora();
 
     let coddoc = document.getElementById('cmbCoddoc').value;
     let correlativoDoc = document.getElementById('txtCorrelativo').value;
 
-   
-    let latdoc = '0';
-    let longdoc = '0';
 
-    let tipo_pago = 'CON'; 
-    let tipo_doc = '';
+
+    get_correlativo_coddoc(coddoc)
+    .then((correlativo)=>{
+        document.getElementById('txtCorrelativo').value = correlativo;
+        correlativoDoc = correlativo;
+
+
+        let codcliente = document.getElementById('txtPosCobroNitclie').value || ''; //GlobalSelectedCodCliente;
+        if(codcliente==''){
+            F.AvisoError('Seleccione un cliente');
+            return;
+        };
     
-    let var_mostrador = document.getElementById('inlineRadio1').checked.toString();
-    let var_domicilio = document.getElementById('inlineRadio2').checked.toString();
-    let var_callcenter = document.getElementById('inlineRadio3').checked.toString();
-    if(var_mostrador=="true"){tipo_doc='MOSTRADOR'};
-    if(var_domicilio=="true"){tipo_doc='DOMICILIO'};
-    if(var_callcenter=="true"){tipo_doc='CALLCENTER'};
-
-
-    let entrega_contacto = ClienteNombre;
-    let entrega_telefono = ''; 
-    let entrega_direccion = ''; 
-    let entrega_referencia = ''; 
-    let entrega_lat = '0';
-    let entrega_long = '0';
-
-    let btnGuardarFactura = document.getElementById('btnGuardarFactura');
+        let nit = document.getElementById('txtPosCobroNit').value || 'CF';
+        let ClienteNombre = document.getElementById('txtPosCobroNombre').value;
+        GlobalSelectedNomCliente = ClienteNombre;
+        let dirclie = document.getElementById('txtPosCobroDireccion').value;
+        GlobalSelectedDirCliente = dirclie;
+        let obs = F.limpiarTexto(document.getElementById('txtObs').value) || '';  
+        let direntrega = "SN"; 
+        let codbodega = GlobalCodBodega;
+        let cmbTipoEntrega = ''; 
+        
+        let txtFecha = new Date(document.getElementById('txtFecha').value);
+        let anio = txtFecha.getFullYear();
+        let mes = txtFecha.getUTCMonth()+1;
+        let dia = txtFecha.getUTCDate() 
+        let fecha = F.devuelveFecha('txtFecha'); //F.getFecha() //anio + '-' + mes + '-' + d; 
+        
+        let hora = F.getHora();
     
-    get_tbl_pedido();
-
-        //VERIFICACIONES
-    if(Number(GlobalTotalDocumento)==0){F.AvisoError('No hay productos agregados');return;}
+       
     
-    btnGuardarFactura.disabled = true;
-    btnGuardarFactura.innerHTML = `<i class="fal fa-save fa-spin"></i>`;
-
-        gettempDocproductos_pos(GlobalUsuario)
-        .then((response)=>{
-            axios.post('/pos/insertventa_factura', {
-                jsondocproductos:JSON.stringify(response),
-                sucursal:GlobalEmpnit,
-                coddoc:coddoc,
-                correlativo: correlativoDoc,
-                anio:anio,
-                mes:mes,
-                fecha:fecha,
-                fechaentrega:fecha,
-                formaentrega:cmbTipoEntrega,
-                codbodega:codbodega,
-                codcaja: 0, //cmbCaja.value,
-                codcliente: codcliente, //x
-                nomclie:ClienteNombre,
-                totalcosto:GlobalTotalCostoDocumento,
-                totalprecio:GlobalTotalDocumento,
-                totaldescuento:GlobalTotalDescuento,
-                nitclie:nit,
-                dirclie:dirclie,
-                obs:obs,
-                direntrega:direntrega,
-                usuario:GlobalUsuario,
-                codven: GlobalCodUsuario, //cmbVendedor.value,
-                lat:latdoc,
-                long:longdoc,
-                hora:hora,
-                tipo_pago:tipo_pago,
-                tipo_doc:tipo_doc,
-                entrega_contacto:entrega_contacto,
-                entrega_telefono:entrega_telefono,
-                entrega_direccion:entrega_direccion,
-                entrega_referencia:entrega_referencia,
-                entrega_lat:entrega_lat,
-                entrega_long:entrega_long,
-                iva:GlobalConfigIVA
-            })
-            .then((response) => {
-                const data = response.data;
-                if (data=='error'){
+       
+        let latdoc = '0';
+        let longdoc = '0';
+    
+        let tipo_pago = 'CON'; 
+        let tipo_doc = '';
+        
+        let var_mostrador = document.getElementById('inlineRadio1').checked.toString();
+        let var_domicilio = document.getElementById('inlineRadio2').checked.toString();
+        let var_callcenter = document.getElementById('inlineRadio3').checked.toString();
+        if(var_mostrador=="true"){tipo_doc='MOSTRADOR'};
+        if(var_domicilio=="true"){tipo_doc='DOMICILIO'};
+        if(var_callcenter=="true"){tipo_doc='CALLCENTER'};
+    
+    
+        let entrega_contacto = ClienteNombre;
+        let entrega_telefono = ''; 
+        let entrega_direccion = ''; 
+        let entrega_referencia = ''; 
+        let entrega_lat = '0';
+        let entrega_long = '0';
+    
+        let btnGuardarFactura = document.getElementById('btnGuardarFactura');
+        
+        get_tbl_pedido();
+    
+            //VERIFICACIONES
+        if(Number(GlobalTotalDocumento)==0){F.AvisoError('No hay productos agregados');return;}
+        
+        btnGuardarFactura.disabled = true;
+        btnGuardarFactura.innerHTML = `<i class="fal fa-save fa-spin"></i>`;
+    
+            gettempDocproductos_pos(GlobalUsuario)
+            .then((response)=>{
+                axios.post('/pos/insertventa_factura', {
+                    jsondocproductos:JSON.stringify(response),
+                    sucursal:GlobalEmpnit,
+                    coddoc:coddoc,
+                    correlativo: correlativoDoc,
+                    anio:anio,
+                    mes:mes,
+                    fecha:fecha,
+                    fechaentrega:fecha,
+                    formaentrega:cmbTipoEntrega,
+                    codbodega:codbodega,
+                    codcaja: 0, //cmbCaja.value,
+                    codcliente: codcliente, //x
+                    nomclie:ClienteNombre,
+                    totalcosto:GlobalTotalCostoDocumento,
+                    totalprecio:GlobalTotalDocumento,
+                    totaldescuento:GlobalTotalDescuento,
+                    nitclie:nit,
+                    dirclie:dirclie,
+                    obs:obs,
+                    direntrega:direntrega,
+                    usuario:GlobalUsuario,
+                    codven: GlobalCodUsuario, //cmbVendedor.value,
+                    lat:latdoc,
+                    long:longdoc,
+                    hora:hora,
+                    tipo_pago:tipo_pago,
+                    tipo_doc:tipo_doc,
+                    entrega_contacto:entrega_contacto,
+                    entrega_telefono:entrega_telefono,
+                    entrega_direccion:entrega_direccion,
+                    entrega_referencia:entrega_referencia,
+                    entrega_lat:entrega_lat,
+                    entrega_long:entrega_long,
+                    iva:GlobalConfigIVA
+                })
+                .then((response) => {
+                    const data = response.data;
+                    if (data=='error'){
+                        F.AvisoError('No se pudo guardar');
+                        btnGuardarFactura.disabled = false;
+                        btnGuardarFactura.innerHTML = `<i class="fal fa-save"></i>`;
+                    }else{
+                        F.Aviso('Generado Exitosamente !!!')
+                        btnGuardarFactura.disabled = false;
+                        btnGuardarFactura.innerHTML = `<i class="fal fa-save"></i>`;
+    
+                        deleteTempVenta_pos(GlobalUsuario);
+    
+                        fcnNuevoPedido();
+                    }
+                }, (error) => {
+                    console.log(error);
                     F.AvisoError('No se pudo guardar');
                     btnGuardarFactura.disabled = false;
                     btnGuardarFactura.innerHTML = `<i class="fal fa-save"></i>`;
-                }else{
-                    F.Aviso('Generado Exitosamente !!!')
-                    btnGuardarFactura.disabled = false;
-                    btnGuardarFactura.innerHTML = `<i class="fal fa-save"></i>`;
-
-                    deleteTempVenta_pos(GlobalUsuario);
-
-                    fcnNuevoPedido();
-                }
-            }, (error) => {
+                });        
+            })
+            .catch((error)=>{
                 console.log(error);
                 F.AvisoError('No se pudo guardar');
                 btnGuardarFactura.disabled = false;
                 btnGuardarFactura.innerHTML = `<i class="fal fa-save"></i>`;
-            });        
-        })
-        .catch((error)=>{
-            console.log(error);
-            F.AvisoError('No se pudo guardar');
-            btnGuardarFactura.disabled = false;
-            btnGuardarFactura.innerHTML = `<i class="fal fa-save"></i>`;
-        })
+            })
+    
+
+    })
+    .catch(()=>{
+        document.getElementById('txtCorrelativo').value = '0';
+        F.AvisoError('No se pudo obtener el correlativo del documento... intentelo de nuevo');
+    })
+
+
+
+
 
             
 };
