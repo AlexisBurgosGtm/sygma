@@ -1842,6 +1842,8 @@ function finalizar_pedido(){
 
 
 
+    F.showToast('Obteniendo correlativo');
+
     get_correlativo_coddoc(coddoc)
     .then((correlativo)=>{
         document.getElementById('txtCorrelativo').value = correlativo;
