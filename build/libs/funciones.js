@@ -922,7 +922,7 @@ let F = {
             // your code on active tab shown
         });
       },
-      BACKUP_exportTableToExcel: (tableID, filename = '')=>{
+      exportTableToExcel: (tableID, filename = '')=>{
         var downloadLink;
         var dataType = 'application/vnd.ms-excel;charset=UTF-8';
         var tableSelect = document.getElementById(tableID);
@@ -952,10 +952,9 @@ let F = {
             downloadLink.click();
         }
       },
-      exportTableToExcel: (tableID, filename)=>{
+      BACKUP_exportTableToExcel: (tableID, filename)=>{
 
-            let $tabla = document.querySelector("#" + tableID);
-
+        const $tabla = document.querySelector("#" + tableID);
 
             let tableExport = new TableExport($tabla, {
               exportButtons: false, // No queremos botones

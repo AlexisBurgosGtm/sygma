@@ -1,38 +1,14 @@
-{
-    "usuario": "APIGUATEX",
-    "password": "GTXADMINGT",
-    "codigoCobro": "CON1289",
-    "tipoUsuario": "C",
-    "nombreRemitente": "PRUEBA API SUMINISTROS PORCINOS",
-    "direccionRemitente": "14 AV 4-11 ZONA 12 GUATEMALA GUATEMALA",
-    "telefonoRemitente": "31313131",
-    "codigoOrigen": "223",
-    "generaZPL" : "S",
-    "generaPDF": "N",
-    "estaListo": "S",
-    "guias": [
-        {
-            "llaveCliente": "PRUEBA LLAVE",
-            "nombreDestinatario": "PRUEBA API DESTINATARIO",
-            "telefonoDestinatario": "31313131",
-            "direccionDestinatario": "MORALES IZABAL",
-            "municipioDestino": "1",
-            "descripcionEnvio": "PRUEBA DESCRIPCION.",
-            "recogeOficina": "N",
-            "codigoCobroGuia": "CON4087",
-            "codigoDestino": "535",
-            "lineasDetalle": [
-                {
-                    "piezas": "1",
-                    "tipoEnvio": "2",
-                    "peso": "1"
-                },
-                { "piezas": "1",
-                 "tipoEnvio": "1", 
-                 "peso": "1" 
-                 }
-                 
-            ]
-        }
-    ]
-}
+[{
+    "CODSUCURSAL":"XELASOL001",
+    "EMPNIT":"XELASOL001",
+    "USUARIO":"",
+    "CODPROD":"B3101",
+    "DESPROD":"PRESTOBARBA 3",
+    "CODMEDIDA":"CARTON",
+    "EQUIVALE":1,
+    "COSTO":95.1,
+    "TOTALCOSTO":95.1,
+    "PRECIO":100,
+    "CANTIDAD":1,
+    "TOTALUNIDADES":1,"TOTALPRECIO":100,"EXENTO":0,"TIPOPROD":"B","TIPOPRECIO":"PRECIO","EXISTENCIA":3.5,"BONO":0,"DESCUENTO":0,"ID":6},{"CODSUCURSAL":"XELASOL001","EMPNIT":"XELASOL001","USUARIO":"","CODPROD":"Y3004","DESPROD":"BONI PRESTOBARBA 3","CODMEDIDA":"BONI","EQUIVALE":1,"COSTO":0.001,"TOTALCOSTO":0.001,"PRECIO":0.001,"CANTIDAD":1,"TOTALUNIDADES":1,"TOTALPRECIO":0.001,
+    "EXENTO":0,"TIPOPROD":"B","TIPOPRECIO":"PRECIO","EXISTENCIA":114,"BONO":0,"DESCUENTO":0,"ID":7}]

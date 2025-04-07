@@ -4,6 +4,74 @@ const router = express.Router();
 
 
 
+
+router.post("/fix_documento", async(req,res)=>{
+   
+    const { token, sucursal, coddoc,correlativo } = req.body;
+
+   
+
+
+    let qrydel = ` DELETE FROM DOCPRODUCTOS 
+            WHERE EMPNIT='${sucursal}' 
+            AND CODDOC='${coddoc}' 
+            AND CORRELATIVO=${correlativo};`
+    execute.get_data_qry(qrydel,'')
+    .then(()=>{
+
+       
+        let qry = `
+        SELECT MES, ANIO, FECHA, JSONDOCPRODUCTOS FROM DOCUMENTOS 
+             WHERE EMPNIT='${sucursal}' 
+             AND CODDOC='${coddoc}' 
+             AND CORRELATIVO=${correlativo};
+       
+        `;
+
+        execute.get_data_qry(qry,'')
+        .then((data)=>{
+    
+            
+            let datos = data.recordset[0].JSONDOCPRODUCTOS;
+            let mes = data.recordset[0].MES;
+            let anio = data.recordset[0].ANIO;
+            let fecha = ''
+            
+    
+    
+
+            let qryDocproductos = str_qry_docproductos(sucursal,coddoc,correlativo, anio, mes, 0, '01',fecha,datos);
+    
+     
+
+            execute.QueryToken(res,qryDocproductos,token);
+         
+    
+        })
+        .catch((err)=>{
+            console.log(err)
+            res.send('error');
+    
+        })
+
+
+    })
+    .catch((err)=>{
+        console.log(err)
+        res.send('error');
+
+    })
+
+    
+   
+   
+
+    
+     
+});
+
+
+
 router.post("/pedidos_pendientes_facturar_pedido", async(req,res)=>{
    
         const { token, sucursal, coddoc, correlativo, coddoc_fac, correlativo_fac, fecha_fac, mes_fac, anio_fac } = req.body;
@@ -87,12 +155,16 @@ function str_qry_docproductos(sucursal,coddoc,correlativo,anio,mes,iva,codbodega
 
     let qry = '';    
 
-   
-    
-    let data = JSON.parse(jsondocproductos);
+  
+    let strDatos = jsondocproductos
+
+  
+
+    let data = JSON.parse(strDatos);
     
     let json = []; json = data;
     let datos = JSON.parse(json);
+
 
    
     datos.map((r)=>{
@@ -160,7 +232,7 @@ function str_qry_docproductos(sucursal,coddoc,correlativo,anio,mes,iva,codbodega
             '' AS OBS,
             '${r.TIPOPROD}' AS TIPOPROD,
             '${r.TIPOPRECIO}' AS TIPOPRECIO,
-            '${fecha}' AS LASTUPDATE,
+            '${fecha.toString().replace('T00:00:00.000Z','')}' AS LASTUPDATE,
             0 AS TOTALUNIDADES_DEVUELTAS,
             ${iva} AS POR_IVA,
             ${r.EXISTENCIA} AS EXISTENCIA,
@@ -450,7 +522,7 @@ router.post("/clientes_vendedores_resumen", async(req,res)=>{
 
 
 
-router.post("/pedidos_pendientes_vendedores", async(req,res)=>{
+router.post("/BACKUP_pedidos_pendientes_vendedores", async(req,res)=>{
    
     const { token, sucursal } = req.body;
 
@@ -497,6 +569,37 @@ WHERE  (DOCUMENTOS.EMPNIT = '${sucursal}')
         AND (DOCUMENTOS.NOCORTE = 0) 
         AND (TIPODOCUMENTOS.TIPODOC IN ('FAC','FEF','FEC','FCP','FES','FPC','ENV')) 
         AND (DOCUMENTOS.STATUS<>'F')
+    `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/pedidos_pendientes_vendedores", async(req,res)=>{
+   
+    const { token, sucursal } = req.body;
+
+    
+    
+
+    let qry = `
+   SELECT DOCUMENTOS.FECHA, DOCUMENTOS.HORA, DOCUMENTOS.CODDOC, DOCUMENTOS.CORRELATIVO, DOCUMENTOS.DOC_NIT AS NIT, DOCUMENTOS.DOC_NOMCLIE AS NOMCLIE, DOCUMENTOS.DOC_DIRCLIE AS DIRCLIE, 
+                  DOCUMENTOS.TOTALPRECIO AS IMPORTE, DOCUMENTOS.STATUS, DOCUMENTOS.DIRENTREGA, DOCUMENTOS.LAT, DOCUMENTOS.LONG, EMPLEADOS.NOMEMPLEADO, ISNULL(DOCUMENTOS.CODEMBARQUE, '') 
+                  AS CODEMBARQUE, MUNICIPIOS.DESMUN, DEPARTAMENTOS.DESDEPTO, SUM(ISNULL(DOCPRODUCTOS.TOTALPRECIO,0)) AS TOTALPRECIOPROD
+FROM     DOCPRODUCTOS RIGHT OUTER JOIN
+                  DOCUMENTOS ON DOCPRODUCTOS.CORRELATIVO = DOCUMENTOS.CORRELATIVO AND DOCPRODUCTOS.CODDOC = DOCUMENTOS.CODDOC AND DOCPRODUCTOS.EMPNIT = DOCUMENTOS.EMPNIT LEFT OUTER JOIN
+                  MUNICIPIOS RIGHT OUTER JOIN
+                  CLIENTES ON MUNICIPIOS.CODMUN = CLIENTES.CODMUN LEFT OUTER JOIN
+                  DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO ON DOCUMENTOS.CODCLIENTE = CLIENTES.CODCLIENTE LEFT OUTER JOIN
+                  EMPLEADOS ON DOCUMENTOS.EMPNIT = EMPLEADOS.EMPNIT AND DOCUMENTOS.CODEMP = EMPLEADOS.CODEMPLEADO LEFT OUTER JOIN
+                  TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+WHERE  (DOCUMENTOS.EMPNIT = '${sucursal}') AND (DOCUMENTOS.NOCORTE = 0) AND (TIPODOCUMENTOS.TIPODOC IN ('FAC', 'FEF', 'FEC', 'FCP', 'FES', 'FPC', 'ENV'))
+GROUP BY DOCUMENTOS.FECHA, DOCUMENTOS.HORA, DOCUMENTOS.CODDOC, DOCUMENTOS.CORRELATIVO, DOCUMENTOS.DOC_NIT, DOCUMENTOS.DOC_NOMCLIE, DOCUMENTOS.DOC_DIRCLIE, DOCUMENTOS.TOTALPRECIO, 
+                  DOCUMENTOS.STATUS, DOCUMENTOS.DIRENTREGA, DOCUMENTOS.LAT, DOCUMENTOS.LONG, EMPLEADOS.NOMEMPLEADO, ISNULL(DOCUMENTOS.CODEMBARQUE, ''), MUNICIPIOS.DESMUN, 
+                  DEPARTAMENTOS.DESDEPTO
+HAVING (DOCUMENTOS.STATUS <> 'F')
+ORDER BY DOCUMENTOS.FECHA, EMPLEADOS.NOMEMPLEADO
     `;
     
 
@@ -659,24 +762,6 @@ router.post("/pedido_update_embarque", async(req,res)=>{
      
 });
 
-router.post("/BACKUP_pedido_update_embarque", async(req,res)=>{
-   
-    const {  token,sucursal,codembarque,coddoc,correlativo} = req.body;
-
-    let qry = `
-
-            UPDATE DOCUMENTOS_TEMPORALES 
-            SET CODEMBARQUE='${codembarque}'
-            WHERE EMPNIT='${sucursal}' 
-            AND CODDOC='${coddoc}'
-            AND CORRELATIVO=${correlativo};
-            `;
-
-       
-            
-    execute.QueryToken(res,qry,token);
-     
-});
 
 
 

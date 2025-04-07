@@ -131,10 +131,10 @@ function getView(){
 function addListeners(){
 
     document.getElementById('btnExportarInventario').addEventListener('click',()=>{
-
         F.exportTableToExcel('tblListaPrecios','Listado de Precios General')
-
     });
+
+
 
     tbl_lista_precios();
 

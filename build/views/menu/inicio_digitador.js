@@ -988,21 +988,40 @@ function tbl_pedidos_pendientes(idContainer){
 
         data.recordset.map((r)=>{
             let idRowPedido = `idRowPedido${r.CODDOC}-${r.CORRELATIVO}`;
+            let idBtnEmbarque = `idBtnEmbarque${r.CODDOC}-${r.CORRELATIVO}`;
             contador +=1;
-            let strClassSt = 'info'; if(r.STATUS.toString()=='A'){strClassSt='danger'};
+            let strClassSt = 'success'; if(r.STATUS.toString()=='A'){strClassSt='danger'};
             let idbtnAnular = `btnAnular${r.CODDOC}-${r.CORRELATIVO}`
-            str += `
-                <tr>
-                    <td class="text-left">
-                        <button class="btn btn-info btn-md btn-circle hand shadow"
+            
+
+            let strClassBtnFixEmb = ''; 
+            if(r.TOTALPRECIOPROD.toString()==r.IMPORTE.toString()){
+                strClassBtnFixEmb= `
+                        <button class="btn btn-base btn-md btn-circle hand shadow" id="${idBtnEmbarque}"
                             onclick="get_embarques_pedido('${r.CODDOC}','${r.CORRELATIVO}','${idRowPedido}')">
                                 <i class="fal fa-plus"></i>
                         </button>
+                `;
+            }else{
+                strClassBtnFixEmb=`
+                        <button class="btn btn-danger btn-md btn-circle hand shadow" id="${idBtnEmbarque}"
+                            onclick="get_fix_pedido('${r.CODDOC}','${r.CORRELATIVO}','${idBtnEmbarque}')">
+                                <i class="fal fa-wrench"></i>
+                        </button>
+                `;
+            }
+
+
+            str += `
+                <tr>
+                    <td class="text-left">
+
+                        ${strClassBtnFixEmb}
                         
                         <b class="text-danger" id="${idRowPedido}">${r.CODEMBARQUE}</b>
                     </td>
                     <td>${r.NOMEMPLEADO}
-                        <button class="btn btn-info btn-circle btn-sm hand shadow"
+                        <button class="btn btn-outline-info btn-circle btn-sm hand shadow"
                         onclick="F.gotoGoogleMaps('${r.LAT}','${r.LONG}')">
                             <i class="fal fa-map"></i>
                         </button>
@@ -1020,7 +1039,11 @@ function tbl_pedidos_pendientes(idContainer){
                     <td>
                         ${r.DESMUN}
                     </td>
-                    <td class="negrita text-danger text-right">${F.setMoneda(r.IMPORTE,'Q')}</td>
+                    <td class="negrita text-danger text-right">
+                        ${F.setMoneda(r.IMPORTE,'Q')}
+                        <br>
+                        <small class="negrita text-base">${F.setMoneda(r.TOTALPRECIOPROD,'Q')}</small>
+                    </td>
                     <td>
                         <button class="btn btn-${strClassSt} btn-md btn-circle hand shadow" id="${idbtnAnular}"
                             onclick="anular_pedido('${r.CODDOC}','${r.CORRELATIVO}','${r.STATUS}','${idbtnAnular}')">
@@ -1061,6 +1084,21 @@ function tbl_pedidos_pendientes(idContainer){
 
 
 };
+
+
+function get_fix_pedido(coddoc,correlativo,idbtn){
+
+
+    GF.update_fix_documento(coddoc,correlativo)
+    .then((data)=>{
+
+    })
+    .catch(()=>{
+        
+    })
+
+};
+
 
 function anular_pedido(coddoc,correlativo,statusActual,idbtn){
 
