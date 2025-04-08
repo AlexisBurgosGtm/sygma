@@ -1088,13 +1088,23 @@ function tbl_pedidos_pendientes(idContainer){
 
 function get_fix_pedido(coddoc,correlativo,idbtn){
 
+    let btn = document.getElementById(idbtn);
+    
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fal fa-spin fa-wrench"></i>`
 
     GF.update_fix_documento(coddoc,correlativo)
     .then((data)=>{
-
+        F.Aviso('Documento corregido exitosamente!!');
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fal fa-wrench"></i>`
+        tbl_pedidos_pendientes('tblDataPedidos');
+        
     })
     .catch(()=>{
-        
+        F.AvisoError('No se pudo corregir el documento');
+         btn.disabled = false;
+        btn.innerHTML = `<i class="fal fa-wrench"></i>`
     })
 
 };

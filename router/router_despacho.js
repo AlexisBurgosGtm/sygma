@@ -1,7 +1,7 @@
 const execute = require('./../connection');
 const express = require('express');
 const router = express.Router();
-
+const helpers = require('./../helper');
 
 
 
@@ -31,19 +31,97 @@ router.post("/fix_documento", async(req,res)=>{
         execute.get_data_qry(qry,'')
         .then((data)=>{
     
-            
-            let datos = data.recordset[0].JSONDOCPRODUCTOS;
-            let mes = data.recordset[0].MES;
-            let anio = data.recordset[0].ANIO;
-            let fecha = ''
-            
-    
-    
 
-            let qryDocproductos = str_qry_docproductos(sucursal,coddoc,correlativo, anio, mes, 0, '01',fecha,datos);
-    
-     
+            let productos;
+            let mes = 0; let anio = 0;
 
+            let codbodega = '01';
+            let fecha = helpers.getFecha();
+            let iva = 1.12;
+
+            data.recordset.map((r)=>{
+                productos = JSON.parse(r.JSONDOCPRODUCTOS);
+                mes = r.MES;
+                anio = r.ANIO;
+            })
+
+            let qryDocproductos ='';
+
+            productos.map((r)=>{
+                qryDocproductos += `
+                INSERT INTO DOCPRODUCTOS (
+                    EMPNIT,
+                    ANIO,
+                    MES,
+                    CODDOC,
+                    CORRELATIVO,
+                    CODPROD,
+                    DESPROD,
+                    CODMEDIDA,
+                    CANTIDAD,
+                    CANTIDADBONIF,
+                    EQUIVALE,
+                    TOTALUNIDADES,
+                    TOTALBONIF,
+                    COSTO,
+                    PRECIO,
+                    TOTALCOSTO,
+                    DESCUENTO,
+                    TOTALPRECIO,
+                    ENTREGADOS_TOTALUNIDADES,
+                    COSTOANTERIOR,
+                    COSTOPROMEDIO,
+                    CODBODEGA,
+                    NOSERIE,
+                    EXENTO,
+                    OBS,
+                    TIPOPROD,
+                    TIPOPRECIO,
+                    LASTUPDATE,
+                    TOTALUNIDADES_DEVUELTAS,
+                    POR_IVA,
+                    EXISTENCIA,
+                    BONO,
+                    TOTALBONO
+                    )
+                SELECT 
+                    '${sucursal}' AS EMPNIT,
+                    ${anio} AS ANIO,
+                    ${mes} AS MES,
+                    '${coddoc}' AS CODDOC,
+                    ${correlativo} AS CORRELATIVO,
+                    '${r.CODPROD}' AS CODPROD,
+                    '${r.DESPROD}' AS DESPROD,
+                    '${r.CODMEDIDA}' AS CODMEDIDA,
+                    ${r.CANTIDAD} AS CANTIDAD,
+                    0 AS CANTIDADBONIF,
+                    ${r.EQUIVALE} AS EQUIVALE,
+                    ${r.TOTALUNIDADES} AS TOTALUNIDADES,
+                    0 AS TOTALBONIF,
+                    ${r.COSTO} AS COSTO,
+                    ${r.PRECIO} AS PRECIO,
+                    ${r.TOTALCOSTO} AS TOTALCOSTO,
+                    ${r.DESCUENTO} AS DESCUENTO,
+                    ${r.TOTALPRECIO} AS TOTALPRECIO,
+                    0 AS ENTREGADOS_TOTALUNIDADES,
+                    ${r.COSTO} AS COSTOANTERIOR,
+                    ${r.COSTO} AS COSTOPROMEDIO,
+                    ${codbodega} AS CODBODEGA,
+                    '' AS NOSERIE,
+                    ${r.EXENTO} AS EXENTO,
+                    '' AS OBS,
+                    '${r.TIPOPROD}' AS TIPOPROD,
+                    '${r.TIPOPRECIO}' AS TIPOPRECIO,
+                    '${fecha}' AS LASTUPDATE,
+                    0 AS TOTALUNIDADES_DEVUELTAS,
+                    ${iva} AS POR_IVA,
+                    ${r.EXISTENCIA} AS EXISTENCIA,
+                    ${r.BONO} AS BONO,
+                    ${Number(r.BONO) * Number(r.CANTIDAD)} AS TOTALBONO;
+                `
+        
+            })
+        
             execute.QueryToken(res,qryDocproductos,token);
          
     
