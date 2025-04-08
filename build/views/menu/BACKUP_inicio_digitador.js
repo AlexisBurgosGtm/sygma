@@ -10,7 +10,7 @@ function getView(){
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
 
-                          
+                            ${view.vista_pedidos_pendientes() + view.vista_pedidos_modal_embarques() + view.modal_detalle_documento()}
 
                         </div>
                         <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
@@ -80,24 +80,23 @@ function getView(){
 
             <div class="row">
                 <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
-
-                    <div class="card card-rounded shadow hand col-12"  id="btnMenuFacturacion">
+                    
+                    <div class="card card-rounded bg-white shadow col-12 hand"  onclick="document.getElementById('tab-dos').click()">
                         <div class="card-body p-4">
                             
-                            <h4>FACTURAR PEDIDOS EMBARQUES</h4>
-                            <h1 class="negrita text-danger" id="">Gestión de Pedidos</h1>
-                            
+                            <h4>PEDIDOS PENDIENTES</h4>
+                            <h1 class="negrita text-danger" id="lbTotalMP"></h1>
+
                             <div class="row">
                                 <div class="col-6">
                                 </div>
                                 <div class="col-6 text-right">
-                                    <i class="fal fa-box negrita text-secondary" style="font-size:250%"></i>
+                                    <i class="fal fa-tasks negrita text-secondary" style="font-size:250%"></i>
                                 </div>
                             </div>
-                           
+                            
                         </div>
                     </div>
-                  
                     
 
                 </div>
@@ -152,21 +151,20 @@ function getView(){
                 </div>
                 <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6" >
                     
-                     
-                    <div class="hidden card card-rounded bg-white shadow col-12 hand"  onclick="document.getElementById('tab-dos').click()">
+                    <div class="card card-rounded shadow hand col-12"  id="btnMenuFacturacion">
                         <div class="card-body p-4">
                             
-                            <h4>PEDIDOS PENDIENTES</h4>
-                            <h1 class="negrita text-danger" id="lbTotalMP"></h1>
-
+                            <h4>FACTURAR PEDIDOS EMBARQUES</h4>
+                            <h1 class="negrita text-danger" id="">Gestión de Pedidos</h1>
+                            
                             <div class="row">
                                 <div class="col-6">
                                 </div>
                                 <div class="col-6 text-right">
-                                    <i class="fal fa-tasks negrita text-secondary" style="font-size:250%"></i>
+                                    <i class="fal fa-box negrita text-secondary" style="font-size:250%"></i>
                                 </div>
                             </div>
-                            
+                           
                         </div>
                     </div>
                     
@@ -186,13 +184,7 @@ function getView(){
                             
                             <div class="row">
                                 <div class="col-6">
-                                    <h4>LISTADO DE FACTURAS PENDIENTES</h4>
-                                    <div class="form-group">
-                                        <input type="text" class="form-control negrita text-info" id="txtFPBuscar"
-                                        placeholder="Escriba para buscar..."
-                                        oninput="F.FiltrarTabla('tblPedidos','txtFPBuscar')">
-                                    </div>
-                                    <br>
+                                    <h4>LISTADO DE FACTURAS / PEDIDOS PENDIENTES</h4>
                                 </div>
                                 <div class="col-6">
                                     <label class="negrita text-danger" id="lbTotalP"></label>
@@ -611,7 +603,6 @@ function getView(){
                             <input type="date" class="form-control negrita text-secondary" id="txtFFecha">
                             
                             <select class="form-control border-danger negrita text-danger" id="cmbFTipo">
-                                <option value='PENDIENTES'>FACTURAS PENDIENTES</option>
                                 <option value='FACTURAS'>FACTURAS EMBARQUE</option>
                                 <option value='PRODUCTOS'>PRODUCTOS EMBARQUE</option>
                             </select>
@@ -623,11 +614,10 @@ function getView(){
              </div>
              <div class="col-12 p-0">
                     <div class="tab-content" id="myTabHomeContent2">
-                        <div class="tab-pane fade show active" id="Funo" role="tabpanel" aria-labelledby="receta-tab">
-                          ${view.vista_pedidos_pendientes() + view.vista_pedidos_modal_embarques() + view.modal_detalle_documento()}    
-                            
+                        <div class="tab-pane fade" id="Funo" role="tabpanel" aria-labelledby="receta-tab">
+                            ${view.facturacion_crear_facturas()}
                         </div>
-                        <div class="tab-pane fade" id="Fdos" role="tabpanel" aria-labelledby="home-tab">
+                        <div class="tab-pane fade show active" id="Fdos" role="tabpanel" aria-labelledby="home-tab">
                             ${view.facturacion_embarque_facturas()}
                      
                         </div>
@@ -865,6 +855,7 @@ function initView(){
 
 function listeners_pedidos_pendientes(){
 
+    tbl_pedidos_pendientes('tblDataPedidos');
 
     tbl_modal_embarques();
 
@@ -881,9 +872,6 @@ function listeners_pedidos_pendientes(){
         get_combo_embarques();
         
         document.getElementById('tab-Funo').click();
-        
-        tbl_pedidos_pendientes('tblDataPedidos');
-
     
     });
 
@@ -934,14 +922,7 @@ function listeners_pedidos_pendientes(){
         let codembarque = document.getElementById('cmbFEmbarques').value;
 
         switch (tipo) {
-          
-            case 'PENDIENTES':
-                document.getElementById('tab-Funo').click();
-                tbl_pedidos_pendientes('tblDataPedidos');
-
-              
-                break;
-
+            
             case 'FACTURAS':
                 document.getElementById('tab-Fdos').click();
 
@@ -966,9 +947,10 @@ function listeners_pedidos_pendientes(){
     
 
     
-        //document.getElementById('txtFacFecha').value = F.getFecha();
-        //let cmbFacCoddoc = document.getElementById('cmbFacCoddoc');
-        /*
+        document.getElementById('txtFacFecha').value = F.getFecha();
+
+        let cmbFacCoddoc = document.getElementById('cmbFacCoddoc');
+        
         GF.get_data_tipodoc_coddoc('FACTURAS')
         .then((data)=>{
 
@@ -982,7 +964,7 @@ function listeners_pedidos_pendientes(){
         .catch(()=>{
             cmbFacCoddoc.innerHTML = '<option value="SN">No se cargo...</Option>';
         })
-        */
+
 
 
 
@@ -1014,13 +996,17 @@ function tbl_pedidos_pendientes(idContainer){
 
             let strClassBtnFixEmb = ''; 
             if(r.TOTALPRECIOPROD.toFixed(2).toString()==r.IMPORTE.toFixed(2).toString()){
-                strClassBtnFixEmb= ` `;
+                strClassBtnFixEmb= `
+                        <button class="btn btn-base btn-md btn-circle hand shadow" id="${idBtnEmbarque}"
+                            onclick="get_embarques_pedido('${r.CODDOC}','${r.CORRELATIVO}','${idRowPedido}')">
+                                <i class="fal fa-plus"></i>
+                        </button>
+                `;
             }else{
-              
                 strClassBtnFixEmb=`
-                        <button class="btn btn-danger btn-sm hand shadow" id="${idBtnEmbarque}"
+                        <button class="btn btn-danger btn-md btn-circle hand shadow" id="${idBtnEmbarque}"
                             onclick="get_fix_pedido('${r.CODDOC}','${r.CORRELATIVO}','${idBtnEmbarque}')">
-                                <i class="fal fa-wrench"></i>&nbsp Reparar
+                                <i class="fal fa-wrench"></i>
                         </button>
                 `;
             }
@@ -1030,12 +1016,9 @@ function tbl_pedidos_pendientes(idContainer){
                 <tr>
                     <td class="text-left">
 
-                        <button class="btn btn-base btn-md btn-circle hand shadow" id="${idBtnEmbarque}"
-                        onclick="get_embarques_pedido('${r.CODDOC}','${r.CORRELATIVO}','${idRowPedido}')">
-                                <i class="fal fa-plus"></i>
-                        </button>
+                        ${strClassBtnFixEmb}
                         
-                      
+                        <b class="text-danger" id="${idRowPedido}">${r.CODEMBARQUE}</b>
                     </td>
                     <td>${r.NOMEMPLEADO}
                         <button class="btn btn-outline-info btn-circle btn-sm hand shadow"
@@ -1044,14 +1027,10 @@ function tbl_pedidos_pendientes(idContainer){
                         </button>
                         <br>
                         <small class="negrita">${r.CODDOC}-${r.CORRELATIVO}</small>
-                        <br>
-                        <b class="text-danger" id="${idRowPedido}">${r.CODEMBARQUE}</b>
                     </td>
                     <td>${F.convertDateNormal(r.FECHA)}
                         <br>
                         <small>Hora:${r.HORA}</small>
-                        <br>
-                        ${strClassBtnFixEmb}
                     </td>
                     <td>${r.NOMCLIE}
                         <br>
@@ -1089,7 +1068,7 @@ function tbl_pedidos_pendientes(idContainer){
         })
         container.innerHTML = str;
         document.getElementById('lbTotalP').innerText = `Pendientes: ${contador}`
-        //document.getElementById('lbTotalMP').innerText =`${contador} pedidos`
+        document.getElementById('lbTotalMP').innerText =`${contador} pedidos`
 
 
         //F.initit_datatable('tblPedidos',true);
@@ -1098,7 +1077,7 @@ function tbl_pedidos_pendientes(idContainer){
     .catch((error)=>{
         container.innerHTML = 'No se cargaron datos....'
         document.getElementById('lbTotalP').innerText = '---'
-        //document.getElementById('lbTotalMP').innerText = '---'
+        document.getElementById('lbTotalMP').innerText = '---'
     })
 
 
@@ -1118,14 +1097,14 @@ function get_fix_pedido(coddoc,correlativo,idbtn){
     .then((data)=>{
         F.Aviso('Documento corregido exitosamente!!');
         btn.disabled = false;
-        btn.innerHTML = `<i class="fal fa-wrench"></i>&nbsp Reparar`
+        btn.innerHTML = `<i class="fal fa-wrench"></i>`
         tbl_pedidos_pendientes('tblDataPedidos');
         
     })
     .catch(()=>{
         F.AvisoError('No se pudo corregir el documento');
          btn.disabled = false;
-        btn.innerHTML = `<i class="fal fa-wrench"></i>&nbsp Reparar`
+        btn.innerHTML = `<i class="fal fa-wrench"></i>`
     })
 
 };
@@ -1336,7 +1315,7 @@ function get_combo_embarques(){
     let container = document.getElementById('cmbFEmbarques');
     let fecha = F.devuelveFecha('txtFFecha');
 
-    let str = ``;
+    let str = `<option value='TODOS'>TODOS</option>`;
 
     GF.get_data_embarques_listado_activos_fecha(GlobalEmpnit, fecha)
     .then((data)=>{

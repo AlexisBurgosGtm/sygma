@@ -1081,6 +1081,17 @@ let F = {
           let bol = false;
           if(bol_busqueda==true){bol=true}else{bol=false}
 
+
+          try {
+            
+            //$('#' + idtbl).DataTable().clear();
+            $('#' + idtbl).DataTable().destroy();
+
+          } catch (error) {
+            console.log('datatable:')
+            console.log(error);
+          }
+
           try {
               new DataTable('#' + idtbl, {
                   paging: false,
