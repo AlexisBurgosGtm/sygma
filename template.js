@@ -108,10 +108,3 @@ function initView(){
 };
 
 
-
-<input class="hand" type="checkbox"  id="paramZ" data-on="ZACAPA" data-off="ZACAPA" checked data-toggle="toggle"  data-width="95" data-onstyle="danger" data-offstyle="secondary"></input>
-                                       
-if(document.getElementById('paramZ').checked==true){
-                                        parametrosEmpresas += `'ME-ZACAPA',`;
-                                        GlobalSelectedEmpresas.push('ME-ZACAPA');
-                                      }                                       

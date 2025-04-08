@@ -62,6 +62,8 @@ function getView(){
                     </ul>
 
                 </div>
+
+                ${view.modal_detalle_documento()}
                
             `
         },
@@ -84,8 +86,8 @@ function getView(){
                     <div class="card card-rounded shadow hand col-12"  id="btnMenuFacturacion">
                         <div class="card-body p-4">
                             
-                            <h4>FACTURAR PEDIDOS EMBARQUES</h4>
-                            <h1 class="negrita text-danger" id="">Gestión de Pedidos</h1>
+                            <h4>ASIGNACION DE FACTURAS</h4>
+                            <h1 class="negrita text-danger" id="">Armado de Embarques</h1>
                             
                             <div class="row">
                                 <div class="col-6">
@@ -614,6 +616,7 @@ function getView(){
                                 <option value='PENDIENTES'>FACTURAS PENDIENTES</option>
                                 <option value='FACTURAS'>FACTURAS EMBARQUE</option>
                                 <option value='PRODUCTOS'>PRODUCTOS EMBARQUE</option>
+                                <option value='VENDEDORES'>RESUMEN VENDEDOR</option>
                             </select>
 
                         </div>
@@ -624,7 +627,7 @@ function getView(){
              <div class="col-12 p-0">
                     <div class="tab-content" id="myTabHomeContent2">
                         <div class="tab-pane fade show active" id="Funo" role="tabpanel" aria-labelledby="receta-tab">
-                          ${view.vista_pedidos_pendientes() + view.vista_pedidos_modal_embarques() + view.modal_detalle_documento()}    
+                          ${view.vista_pedidos_pendientes() + view.vista_pedidos_modal_embarques() }    
                             
                         </div>
                         <div class="tab-pane fade" id="Fdos" role="tabpanel" aria-labelledby="home-tab">
@@ -635,7 +638,7 @@ function getView(){
                             ${view.facturacion_embarque_productos()}
                         </div>
                         <div class="tab-pane fade" id="Fcuatro" role="tabpanel" aria-labelledby="home-tab">
-                     
+                            ${view.facturacion_vendedores()}
                         </div>    
                     </div>
 
@@ -735,7 +738,7 @@ function getView(){
                     <div class="row">
                         <div class="col-6">
                             <h4 class="negrita text-base">Facturas del Embarque</h4>
-                            <h5 id="lbFacCodembarque"></h5>
+                            <h5 class="negrita" id="lbFacCodembarque"></h5>
                             <br>
                         </div>
                         <div class="col-6">
@@ -751,11 +754,13 @@ function getView(){
                          <table class="table h-full table-bordered col-12" id="tblFFacturas">
                                 <thead class="bg-success text-white negrita">
                                     <tr>
+                                        <td></td>
                                         <td>VENDEDOR</td>
                                         <td>FECHA</td>
                                         <td>CLIENTE</td>
                                         <td>MUNICIPIO</td>
                                         <td>IMPORTE</td>
+                                        <td></td>
                                         <td></td>
                                     </tr>
                                 </thead>
@@ -825,6 +830,51 @@ function getView(){
                 <i class="fal fa-print"></i>
             </button>
             `
+        },
+        facturacion_vendedores:()=>{
+            return `
+            <br>
+
+            <div class="card card-rounded shadow col-12">
+                <div class="card-body p-4">
+            
+                    <div class="row">
+                        <div class="col-6">
+                            <h4 class="negrita text-base">Resumen por Vendedor</h4>
+                            <br>
+                        </div>
+                        <div class="col-6">
+                        
+                            <label class="negrita text-danger" id="lbFVImporte">Importe:</label>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+
+                         <table class="table h-full table-bordered col-12" id="tblVendedores">
+                                <thead class="bg-secondary text-white negrita">
+                                    <tr>
+                                        <td>VENDEDOR</td>
+                                        <td>PEDIDOS</td>
+                                        <td>IMPORTE</td>
+                                        <td></td>
+                                    </tr>
+                                </thead>
+                                <tbody id="tblDataVendedores"></tbody>
+
+                            </table>
+
+                    </div>
+            
+
+                </div>
+            </div>
+
+            <button class="btn btn-info btn-xl btn-circle hand shadow btn-bottom-r" onclick="F.imprimirSelec('rpt_productos_embarque')">
+                <i class="fal fa-print"></i>
+            </button>
+
+            `
         }
     }
 
@@ -855,7 +905,6 @@ function initView(){
     addListeners();
 
 };
-
 
 
 
@@ -919,6 +968,12 @@ function listeners_pedidos_pendientes(){
 
 
                 break;
+            case 'VENDEDORES':
+                document.getElementById('tab-Fcuatro').click();
+
+                tbl_resumen_embarque(codembarque);
+
+                break;
         
         }
         
@@ -958,36 +1013,18 @@ function listeners_pedidos_pendientes(){
 
 
                 break;
+                case 'VENDEDORES':
+                    document.getElementById('tab-Fcuatro').click();
+    
+                    tbl_resumen_embarque(codembarque);
+                    
+                    break;
         
         }
 
     });
 
     
-
-    
-        //document.getElementById('txtFacFecha').value = F.getFecha();
-        //let cmbFacCoddoc = document.getElementById('cmbFacCoddoc');
-        /*
-        GF.get_data_tipodoc_coddoc('FACTURAS')
-        .then((data)=>{
-
-            let str = '';
-            data.recordset.map((r)=>{
-                str += `<option value="${r.CODDOC}">${r.CODDOC}</option>`
-            })
-            cmbFacCoddoc.innerHTML = str;
-
-        })
-        .catch(()=>{
-            cmbFacCoddoc.innerHTML = '<option value="SN">No se cargo...</Option>';
-        })
-        */
-
-
-
-    
-
 
 
 };
@@ -1352,7 +1389,7 @@ function get_combo_embarques(){
         
         console.log(error);
 
-        container.innerHTML = `<option value=''>NO HAY EMBARQUES CON ESA FECHA</option>`;
+        container.innerHTML = `<option value='SN'>NO HAY EMBARQUES CON ESA FECHA</option>`;
 
     })
 
@@ -1499,6 +1536,45 @@ function facturar_pedido(coddoc,correlativo,idbtn){
 };
 
 
+function tbl_resumen_embarque(codembarque){
+
+    let container = document.getElementById('tblDataVendedores');
+
+    container.innerHTML = GlobalLoader;
+    let contador = 0;
+    let varTotal = 0;
+
+    GF.get_data_embarque_resumen_vendedores(GlobalEmpnit,codembarque)
+    .then((data)=>{
+
+        let str = '';
+
+        data.recordset.map((r)=>{
+
+            
+            varTotal += Number(r.IMPORTE);
+            str += `
+                <tr>
+                    <td>${r.EMPLEADO}</td>
+                    <td>${r.CONTEO}</td>
+                    <td class="negrita text-danger text-right">${F.setMoneda(r.IMPORTE,'Q')}</td>
+                    <td>
+                    </td>
+                </tr>
+            `
+        })
+        container.innerHTML = str;
+        document.getElementById('lbFVImporte').innerText =`Total: ${F.setMoneda(varTotal,'Q')}`;
+
+    })
+    .catch((error)=>{
+        container.innerHTML = 'No se cargaron datos....';
+        document.getElementById('lbFVImporte').innerText = '';
+    })
+
+
+};
+
 function tbl_facturas_embarque(codembarque){
 
     let container = document.getElementById('tblDataFFacturas');
@@ -1513,11 +1589,19 @@ function tbl_facturas_embarque(codembarque){
         let str = '';
 
         data.recordset.map((r)=>{
-         
+
+            let idBtnEmbarque = `btnDeleteEmbarque${r.CODDOC}-${r.CORRELATIVO}`;
+            
             contador +=1;
             varTotal += Number(r.IMPORTE);
             str += `
                 <tr>
+                    <td>
+                        <button class="btn btn-danger btn-md btn-circle hand shadow" id="${idBtnEmbarque}"
+                        onclick="quitar_embarque_factura('${r.CODDOC}','${r.CORRELATIVO}','${idBtnEmbarque}')">
+                                <i class="fal fa-unlink"></i>
+                        </button>
+                    </td>
                     <td>${r.NOMEMPLEADO}
                         <br>
                         <small class="negrita">${r.CODDOC}-${r.CORRELATIVO}</small>
@@ -1535,9 +1619,15 @@ function tbl_facturas_embarque(codembarque){
                     </td>
                     <td class="negrita text-danger text-right">${F.setMoneda(r.IMPORTE,'Q')}</td>
                     <td>
-                        <button class="btn btn-secondary btn-md btn-circle hand shadow"
-                        onclick="">
+                        <button class="btn btn-warning btn-md btn-circle hand shadow"
+                            onclick="get_detalle_pedido('${r.CODDOC}','${r.CORRELATIVO}')">
                                 <i class="fal fa-list"></i>
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn btn-info btn-md btn-circle hand shadow"
+                            onclick="fcn_editar_factura('${r.CODDOC}','${r.CORRELATIVO}','${r.NOMCLIE}','${r.DIRCLIE}')">
+                                <i class="fal fa-edit"></i>
                         </button>
                     </td>
                 </tr>
@@ -1556,6 +1646,52 @@ function tbl_facturas_embarque(codembarque){
 
 
 };
+
+
+function quitar_embarque_factura(coddoc,correlativo,idbtn){
+
+    let btn = document.getElementById(idbtn);
+
+
+    F.Confirmacion("¿Está seguro que desea Quitar este Embarque?")
+    .then((value)=>{
+        if(value==true){
+
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fal fa-unlink fa-spin"></i>`;
+
+                GF.get_data_pedidos_update_embarque(GlobalEmpnit,coddoc,correlativo,'')
+                .then((data)=>{
+
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fal fa-unlink"></i>`;
+
+                    let codembarque = document.getElementById('cmbFEmbarques').value;
+                    tbl_facturas_embarque(codembarque);
+
+                    tbl_pedidos_pendientes('tblDataPedidos');
+
+
+                })
+                .catch(()=>{
+
+                    F.AvisoError('No se pudo actualizar el Embarque')
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fal fa-unlink"></i>`;
+                })
+
+
+        }
+    })
+
+
+    
+
+
+
+};
+
+
 
 function tbl_productos_embarque(codembarque){
 

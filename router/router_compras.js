@@ -222,6 +222,7 @@ function str_qry_documentos(jsondocproductos,sucursal,
             ETIQUETA,
             CODDOC_ORIGEN,
             CORRELATIVO_ORIGEN,
+            CODEMBARQUE,
             JSONDOCPRODUCTOS)
         SELECT
             '${sucursal}' AS EMPNIT,
@@ -268,6 +269,7 @@ function str_qry_documentos(jsondocproductos,sucursal,
             '${etiqueta}' AS ETIQUETA,
             '${coddoc_origen}' AS CODDOC_ORIGEN,
             '${correlativo_origen}' AS CORRELATIVO_ORIGEN,
+            '' AS CODEMBARQUE,
             '${jsondocproductos}' AS JSONDOCPRODUCTOS;
         `
 

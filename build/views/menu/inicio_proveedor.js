@@ -1,13 +1,3 @@
-//PLANTILLA
-
-<div class="card card-rounded col-12 border-primary">
-    <div class="card-body p-4">                    
-    </div>
-</div>
-
-<br>
-
-
 function getView(){
     let view = {
         body:()=>{
@@ -19,7 +9,6 @@ function getView(){
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
                            
-                            
                         </div>
                         <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
                             
@@ -40,6 +29,7 @@ function getView(){
                                 <i class="fal fa-comments"></i></a>
                         </li>         
                     </ul>
+                    
                 </div>
                
             `
@@ -52,10 +42,10 @@ function getView(){
                         <table class="table table-responsive table-hover col-12">
                             <thead class="bg-base text-white">
                                 <tr>
-                                    <td>PEDIDO</td>
-                                    <td>VENDEDOR</td>
-                                    <td>CLIENTE</td>
-                                    <td>IMPORTE</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
                                     <td></td>
                                 </tr>
                             </thead>
@@ -67,8 +57,37 @@ function getView(){
             </div>
             `
         },
-        vista_nuevo:()=>{
+        modal:()=>{
+            return `
+              <div id="modal_" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-right modal-xl">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-secondary d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white" id="">
+                                TITULO
+                            </h4>
+                        </div>
+                        <div class="modal-body p-4">
+                            
+                            <div class="card card-rounded">
+                                <div class="card-body p-2">
 
+                                </div>
+                            </div>
+
+                                
+                            <div class="row">
+                                <button class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
+                                    <i class="fal fa-arrow-left"></i>
+                                </button>
+                            </div>
+
+                        </div>
+                    
+                    </div>
+                </div>
+            </div>
+            `
         }
     }
 
@@ -86,4 +105,3 @@ function initView(){
     addListeners();
 
 };
-

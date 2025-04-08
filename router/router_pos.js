@@ -191,6 +191,7 @@ function str_qry_documentos(jsondocproductos,sucursal,
             POR_IVA,
             TIPO_VENTA,
             ETIQUETA,
+            CODEMBARQUE,
             JSONDOCPRODUCTOS)
         SELECT
             '${sucursal}' AS EMPNIT,
@@ -234,7 +235,8 @@ function str_qry_documentos(jsondocproductos,sucursal,
             'NO' AS ENTREGADO, 
             ${iva} POR_IVA,
             '${tipo_doc}' AS TIPO_VENTA,
-            '${etiqueta}' AS ETIQUETA,            
+            '${etiqueta}' AS ETIQUETA,
+            '' AS CODEMBARQUE,            
             '${jsondocproductos}' AS JSONDOCPRODUCTOS;
         `
 
@@ -381,6 +383,7 @@ function str_qry_documentos_temporal(jsondocproductos,sucursal,
             POR_IVA,
             TIPO_VENTA,
             ETIQUETA,
+            CODEMBARQUE,
             JSONDOCPRODUCTOS)
         SELECT
             '${sucursal}' AS EMPNIT,
@@ -424,7 +427,8 @@ function str_qry_documentos_temporal(jsondocproductos,sucursal,
             'NO' AS ENTREGADO, 
             ${iva} POR_IVA,
             '${tipo_doc}' AS TIPO_VENTA,
-            '${etiqueta}' AS ETIQUETA,            
+            '${etiqueta}' AS ETIQUETA,
+            '' AS CODEMBARQUE,            
             '${jsondocproductos}' AS JSONDOCPRODUCTOS;
         `
 
