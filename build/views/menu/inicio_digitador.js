@@ -1013,7 +1013,7 @@ function listeners_pedidos_pendientes(){
 
 
                 break;
-                case 'VENDEDORES':
+            case 'VENDEDORES':
                     document.getElementById('tab-Fcuatro').click();
     
                     tbl_resumen_embarque(codembarque);
@@ -1868,6 +1868,10 @@ function listeners_embarques(){
         let descripcion = F.limpiarTexto(document.getElementById('txtEmbarqueDescripcion').value) || '';    
         let ruteo  = F.limpiarTexto(document.getElementById('txtEmbarqueRuteo').value) || '';
         let codempleado = document.getElementById('cmbEmbarqueEmpleado').value; 
+
+
+        if(codembarque==''){F.AvisoError('Debe indicar un código de Embarque');return;}
+
 
         let statusEmbarque = document.getElementById('cmbStatus').value;
 
