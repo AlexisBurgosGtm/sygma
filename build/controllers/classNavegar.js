@@ -55,6 +55,9 @@ let Navegar = {
             case 6: //BODEGA
                 
                 break;
+            case 7: //proveedor
+                Navegar.inicio_proveedor();
+                break;
         }
             
     },
@@ -378,6 +381,13 @@ let Navegar = {
     inicio_despacho:()=>{
         if(Number(GlobalNivelUsuario)==0){return;}
         F.loadScript('../views/menu/inicio_despacho.js','root')
+        .then(async()=>{
+            initView();
+        })
+    },
+    inicio_proveedor:()=>{
+        if(Number(GlobalNivelUsuario)==0){return;}
+        F.loadScript('../views/menu/inicio_proveedor.js','root')
         .then(async()=>{
             initView();
         })

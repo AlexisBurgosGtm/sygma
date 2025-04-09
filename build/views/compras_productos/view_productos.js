@@ -2621,7 +2621,7 @@ function get_tbl_productos(){
         container.innerHTML = str;
         lbTotalProductos.innerText = '';
 
-        F.initit_datatable('tblProductos',false);
+        //F.initit_datatable('tblProductos',false);
         
 
     })

@@ -1,4 +1,9 @@
+
+let GlobalEntSal = 0;
+
 function fcn_editar_factura(coddoc,correlativo,nomclie,dirclie){
+
+  
 
 
     F.Confirmacion('¿Está seguro que desea EDITAR este Documento?')
@@ -162,7 +167,7 @@ function fcn_eliminar_producto_factura(idprod,idbtn,coddoc,correlativo){
 
 };
 
-function fcn_get_buscar_producto(filtro){
+function fcn_get_buscar_producto(filtro,entsal){
 
 
     let container = document.getElementById('EF_tblDataEditarFacturaProductos');
@@ -177,7 +182,8 @@ function fcn_get_buscar_producto(filtro){
         sucursal: GlobalEmpnit,
         token:TOKEN,
         filtro:filtro,
-        tipoprecio:data_empresa_config.TIPO_PRECIO
+        tipoprecio:data_empresa_config.TIPO_PRECIO,
+        entsal:GlobalEntSal
     })
     .then((response) => {        
         if(response=='error'){

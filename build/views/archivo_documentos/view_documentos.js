@@ -217,6 +217,11 @@ function get_documentos(){
     let container = document.getElementById('tblDataDocumentos')
     container.innerHTML = GlobalLoader;
 
+
+    GlobalEntSal = get_tipo_movinv_documento(tipo);
+
+
+
     GF.get_data_documentos(tipo,mes,anio)
     .then((data)=>{
         let str = '';
@@ -231,13 +236,16 @@ function get_documentos(){
                     <td>${r.CONCRE}</td>
                     <td>${r.STATUS}</td>
                     <td>
-                        <button class="btn btn-md btn-circle hand shadow btn-info" 
+                        <button class="btn btn-md btn-circle hand shadow btn-warning" 
                             onclick="get_detalle_tomar_datos('${r.CODDOC}','${r.CORRELATIVO}','${r.NOMBRE}','${r.ETIQUETA}','${r.OBS}')">
                             <i class="fal fa-list"></i>
                         </button>
                     </td>
                     <td>
-                    
+                       <button class="btn btn-info btn-md btn-circle hand shadow"
+                            onclick="fcn_editar_factura('${r.CODDOC}','${r.CORRELATIVO}','${r.NOMBRE}','${r.DIRECCION}')">
+                                <i class="fal fa-edit"></i>
+                        </button>
                     </td>
                 </tr>
             `
@@ -253,6 +261,7 @@ function get_documentos(){
    
 
 }
+
 
 
 function get_detalle_tomar_datos(coddoc,correlativo,nombre,prioridad,obs){
