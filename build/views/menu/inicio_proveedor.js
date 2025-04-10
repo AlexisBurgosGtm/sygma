@@ -241,18 +241,32 @@ function getView(){
                    
                     <h3 class="negrita text-center text-secondary">VENTAS POR MARCAS</h3>
 
-                    <br>
-                    <div class="form-group">
-                        <label class="negrita">Seleccione mes y año</label>
-                        
-                        <div class="input-group">
-                            <select class="negrita form-control" id="cmbMMes">
-                            </select>
-                            <select class="negrita form-control" id="cmbMAnio">
-                            </select>
+                                        <br>
+                    <div class="row">
+                        <div class="col-sm-12 col-md-8 col-lg-8 col-xl-8">
+                            
+                            <div class="form-group">
+                                <label class="negrita">Seleccione mes y año</label>
+                                
+                                <div class="input-group">
+                                    <select class="negrita form-control" id="cmbMMes">
+                                    </select>
+                                    <select class="negrita form-control" id="cmbMAnio">
+                                    </select>
+                                </div>
+
+                            </div>
+
+                        </div>
+                        <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
+
+                            <h1 class="negrita text-danger" id="lbTotalMImporte">--</h1>
+
                         </div>
 
                     </div>
+
+
 
                 </div>
             </div>
@@ -263,7 +277,21 @@ function getView(){
                     <div class="card card-rounded shadow col-12">
                         <div class="card-body p-4">
 
+
+                            <div class="table-responsive">
+                                <table class="table h-full table-bordered col-12" id="tblMarcas">
+                                    <thead class="bg-success text-white negrita">
+                                        <tr>
+                                            <td>MARCA</td>
+                                            <td>IMPORTE</td>
+                                            <td></td>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDataMarcas"></tbody>
+                                </table>
+                            </div>
                         
+
                         </div>
                     </div>
 
@@ -377,12 +405,6 @@ function addListeners(){
     
 
 
-    document.getElementById('btnMenuVentasMarcas').addEventListener('click',()=>{
-
-        document.getElementById('tab-tres').click();
-
-
-    })
 
     document.getElementById('btnMenuVentasSellout').addEventListener('click',()=>{
 
@@ -420,7 +442,29 @@ function addListeners(){
     //---------------------------------
 
 
+    // marcas
 
+    document.getElementById('btnMenuVentasMarcas').addEventListener('click',()=>{
+
+        document.getElementById('tab-tres').click();
+
+
+        tbl_rpt_marcas();
+
+    })
+
+
+    document.getElementById('cmbMMes').addEventListener('change',()=>{
+        tbl_rpt_marcas();
+    });
+
+    document.getElementById('cmbMAnio').addEventListener('change',()=>{
+        tbl_rpt_marcas();
+    });
+
+
+    // marcas
+    
 
 
 
@@ -479,5 +523,64 @@ function tbl_rpt_vendedores(){
 
 
 };
+
+
+
+
+
+function tbl_rpt_marcas(){
+
+    let mes = document.getElementById('cmbMMes').value;
+    let anio = document.getElementById('cmbMAnio').value;
+
+
+    let container = document.getElementById('tblDataMarcas');
+    container.innerHTML = GlobalLoader;
+
+    let contador = 0;
+    let varTotal = 0;
+
+   
+    RPT.data_marcas(GlobalEmpnit,mes,anio)
+    .then((data)=>{
+
+   
+        let str = '';
+
+        data.recordset.map((r)=>{
+        
+            contador +=1;
+            varTotal += Number(r.TOTALPRECIO);
+            str += `
+
+                <tr>
+                    <td>${r.DESMARCA}</td>
+                    <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-md btn-circle hand shadow"
+                        onclick="">
+                                <i class="fal fa-list"></i>
+                        </button>
+                    </td>
+                </tr>
+            `
+        })
+        container.innerHTML = str;
+       
+        document.getElementById('lbTotalMImporte').innerText =`Total: ${F.setMoneda(varTotal,'Q')}`;
+
+    })
+    .catch((err)=>{
+       
+
+        container.innerHTML = 'No se cargaron datos....';
+       
+        document.getElementById('lbTotalMImporte').innerText = '';
+    })
+
+
+
+};
+
 
 

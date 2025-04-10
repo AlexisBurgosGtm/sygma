@@ -3,6 +3,35 @@ const express = require('express');
 const router = express.Router();
 
 
+router.post("/rpt_marcas", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio } = req.body;
+
+    let qry = `
+        SELECT ISNULL(MARCAS.DESMARCA,'') AS DESMARCA, 
+            SUM(ISNULL(DOCPRODUCTOS.TOTALUNIDADES,0)) AS TOTALUNIDADES, 
+            SUM(ISNULL(DOCPRODUCTOS.TOTALCOSTO,0)) AS TOTALCOSTO, 
+            SUM(ISNULL(DOCPRODUCTOS.TOTALPRECIO,0)) AS TOTALPRECIO
+        FROM  DOCUMENTOS LEFT OUTER JOIN
+            TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC 
+            AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT LEFT OUTER JOIN
+            DOCPRODUCTOS ON DOCUMENTOS.CORRELATIVO = DOCPRODUCTOS.CORRELATIVO 
+            AND DOCUMENTOS.CODDOC = DOCPRODUCTOS.CODDOC AND DOCUMENTOS.EMPNIT = DOCPRODUCTOS.EMPNIT LEFT OUTER JOIN
+            PRODUCTOS LEFT OUTER JOIN
+            MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA ON DOCPRODUCTOS.CODPROD = PRODUCTOS.CODPROD
+        WHERE (DOCUMENTOS.EMPNIT = '${sucursal}') 
+        AND (DOCUMENTOS.MES = ${mes})
+        AND (DOCUMENTOS.ANIO = ${anio}) 
+        AND (DOCUMENTOS.STATUS <> 'A')
+        AND (TIPODOCUMENTOS.TIPODOC IN('FAC','FEF','FEC','FCP','FES','FPC'))
+        GROUP BY MARCAS.DESMARCA
+    `;
+    
+   
+
+    execute.QueryToken(res,qry,token);
+     
+});
 
 
 router.post("/rpt_ventas_vendedor", async(req,res)=>{
