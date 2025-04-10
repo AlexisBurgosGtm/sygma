@@ -159,17 +159,31 @@ function getView(){
                     <h3 class="negrita text-center text-info">VENTAS POR VENDEDOR</h3>
 
                     <br>
-                    <div class="form-group">
-                        <label class="negrita">Seleccione mes y año</label>
-                        
-                        <div class="input-group">
-                            <select class="negrita form-control" id="cmbVMes">
-                            </select>
-                            <select class="negrita form-control" id="cmbVAnio">
-                            </select>
+                    <div class="row">
+                        <div class="col-sm-12 col-md-8 col-lg-8 col-xl-8">
+                            
+                            <div class="form-group">
+                                <label class="negrita">Seleccione mes y año</label>
+                                
+                                <div class="input-group">
+                                    <select class="negrita form-control" id="cmbVMes">
+                                    </select>
+                                    <select class="negrita form-control" id="cmbVAnio">
+                                    </select>
+                                </div>
+
+                            </div>
+
+                        </div>
+                        <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
+
+                            <h1 class="negrita text-danger" id="lbTotalVImporte">--</h1>
+
                         </div>
 
                     </div>
+
+                    
 
                 </div>
             </div>
@@ -180,6 +194,22 @@ function getView(){
                     <div class="card card-rounded shadow col-12">
                         <div class="card-body p-4">
 
+                            <div class="table-responsive">
+
+                                <table class="table table-bordered h-full col-12" id="tblVendedores">
+                                    <thead class="bg-secondary text-white negrita">
+                                        <tr>
+                                            <td>VENDEDOR</td>
+                                            <td>TELEFONO</td>
+                                            <td>PEDIDOS</td>
+                                            <td>IMPORTE</td>
+                                            <td></td>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDataVendedores"></tbody>
+                                </table>
+
+                            </div>
 
                         </div>
                     </div>
@@ -259,7 +289,50 @@ function getView(){
         },
         vista_sellout:()=>{
             return `
-            
+            <div class="card card-rounded shadow col-12">
+                <div class="card-body p-4">
+                   
+                    <h3 class="negrita text-center text-base">SELL OUT</h3>
+
+                    <br>
+                    <div class="form-group">
+                        <label class="negrita">Seleccione mes y año</label>
+                        
+                        <div class="input-group">
+                            <select class="negrita form-control" id="cmbSMes">
+                            </select>
+                            <select class="negrita form-control" id="cmbSAnio">
+                            </select>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
+                    
+                    <div class="card card-rounded shadow col-12">
+                        <div class="card-body p-4">
+
+                        
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
+
+                    <div class="card card-rounded shadow col-12">
+                        <div class="card-body p-4">
+                                
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+           
 
             
             <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
@@ -279,13 +352,29 @@ function addListeners(){
     F.slideAnimationTabs();
 
 
+    //iniciales
+    document.getElementById('cmbVMes').innerHTML = F.ComboMeses();  
+    document.getElementById('cmbMMes').innerHTML = F.ComboMeses();
+    document.getElementById('cmbSMes').innerHTML = F.ComboMeses();
+    document.getElementById('cmbVAnio').innerHTML = F.ComboAnio();
+    document.getElementById('cmbMAnio').innerHTML = F.ComboAnio();
+    document.getElementById('cmbSAnio').innerHTML = F.ComboAnio();
 
-    document.getElementById('btnMenuVentasVendedor').addEventListener('click',()=>{
-        
-        document.getElementById('tab-dos').click();
+    document.getElementById('cmbVMes').value = F.get_mes_curso();  
+    document.getElementById('cmbMMes').value = F.get_mes_curso();
+    document.getElementById('cmbSMes').value = F.get_mes_curso();
+    document.getElementById('cmbVAnio').value = F.get_anio_curso();
+    document.getElementById('cmbMAnio').value = F.get_anio_curso();
+    document.getElementById('cmbSAnio').value = F.get_anio_curso();
 
 
-    })
+
+
+    // inciales
+    //----------------------------------
+
+
+    
 
 
     document.getElementById('btnMenuVentasMarcas').addEventListener('click',()=>{
@@ -303,6 +392,40 @@ function addListeners(){
     })
 
 
+    //--------------------------------
+
+
+    // ventas vendedor
+
+    document.getElementById('btnMenuVentasVendedor').addEventListener('click',()=>{
+        
+        document.getElementById('tab-dos').click();
+
+        tbl_rpt_vendedores();
+
+    })
+
+    document.getElementById('cmbVMes').addEventListener('change',()=>{
+        tbl_rpt_vendedores();
+    });
+
+    document.getElementById('cmbVAnio').addEventListener('change',()=>{
+        tbl_rpt_vendedores();
+    });
+
+
+
+
+    // ventas vendedor
+    //---------------------------------
+
+
+
+
+
+
+
+
 
 };
 
@@ -312,3 +435,49 @@ function initView(){
     addListeners();
 
 };
+
+
+
+
+function tbl_rpt_vendedores(){
+
+    let mes = document.getElementById('cmbVMes').value;
+    let anio = document.getElementById('cmbVAnio').value;
+
+    let container = document.getElementById('tblDataVendedores');
+    container.innerHTML = GlobalLoader;
+
+
+    let varTotal = 0;
+
+    RPT.data_ventas_vendedor(GlobalEmpnit,mes,anio)
+    .then((data)=>{
+
+        let str = '';
+        data.recordset.map((r)=>{
+            varTotal += Number(r.TOTALPRECIO);
+            str += `
+                <tr>
+                    <td>${r.EMPLEADO}</td>
+                    <td>${r.TELEFONO}</td>
+                    <td>${r.CONTEO}</td>
+                    <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                    <td></td>
+                </tr>
+            `
+        })
+        
+        container.innerHTML = str;
+        document.getElementById('lbTotalVImporte').innerText = `Total: ${F.setMoneda(varTotal,'Q')}`;
+    })
+    .catch(()=>{
+        
+        container.innerHTML = 'No se cargaron datos...';
+        document.getElementById('lbTotalVImporte').innerText = '';
+
+    })
+
+
+};
+
+

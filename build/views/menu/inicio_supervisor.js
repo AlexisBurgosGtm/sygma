@@ -1026,7 +1026,7 @@ function rpt_tbl_marcas(){
         data.recordset.map((r)=>{
         
             contador +=1;
-            varTotal += Number(r.IMPORTE);
+            varTotal += Number(r.TOTALPRECIO);
             str += `
 
                 <tr>

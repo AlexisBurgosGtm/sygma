@@ -5,6 +5,41 @@ const router = express.Router();
 
 
 
+router.post("/rpt_ventas_vendedor", async(req,res)=>{
+
+    const {token,sucursal,anio,mes} = req.body;
+
+    let qry = `
+         SELECT EMPLEADOS.NOMEMPLEADO AS EMPLEADO, 
+                    EMPLEADOS.TELEFONO, 
+                    EMPLEADOS.USUARIO, 
+                    EMPLEADOS.CLAVE, 
+                    COUNT(DOCUMENTOS.CODDOC) AS CONTEO,
+                    SUM(DOCUMENTOS.TOTALCOSTO) AS TOTALCOSTO, 
+                    SUM(DOCUMENTOS.TOTALVENTA) AS TOTALVENTA, 
+                    SUM(DOCUMENTOS.TOTALPRECIO) AS TOTALPRECIO
+            FROM DOCUMENTOS LEFT OUTER JOIN
+                  EMPLEADOS ON DOCUMENTOS.CODEMP = EMPLEADOS.CODEMPLEADO AND DOCUMENTOS.EMPNIT = EMPLEADOS.EMPNIT LEFT OUTER JOIN
+                  TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+            WHERE 
+                (DOCUMENTOS.EMPNIT = '${sucursal}') 
+                AND (DOCUMENTOS.MES = ${mes})
+                AND (DOCUMENTOS.ANIO = ${anio}) 
+                AND (DOCUMENTOS.STATUS <> 'A') 
+                AND (TIPODOCUMENTOS.TIPODOC IN('FAC','FEF','FEC','FCP','FES','FPC'))
+            GROUP BY EMPLEADOS.NOMEMPLEADO, 
+                EMPLEADOS.TELEFONO, EMPLEADOS.USUARIO, EMPLEADOS.CLAVE, DOCUMENTOS.MES, DOCUMENTOS.ANIO
+            ORDER BY EMPLEADOS.NOMEMPLEADO;
+        `
+
+     
+  
+    execute.QueryToken(res,qry,token)
+
+});
+
+
+
 
 
 
