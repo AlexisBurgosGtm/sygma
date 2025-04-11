@@ -3,6 +3,40 @@ const express = require('express');
 const router = express.Router();
 
 
+
+
+router.post("/rpt_sellout", async(req,res)=>{
+   
+    const { token, sucursal, fi, ff } = req.body;
+
+    let qry = `
+    SELECT EMPNIT,RELOP,ANIO,MES,FECHA,CODIGO_CLIENTE,
+        TIPONEGOCIO,NEGOCIO,CLIENTE,DIRECCION,VISITA,
+        CODIGO_VENDEDOR,VENDEDOR,CODIGO_CATEGORIA,
+        CATEGORIA,CODIGO_MARCA,MARCA,CODIGO_RUTA,
+        CODIGO_DEPARTAMENTO,GEO2_DEPARTAMENTO,
+        CODIGO_MUNICIPIO,GEO3_MUNICIPIO,CODIGO_SECTOR,
+        GEO4_ALDEA_CASERIO,PRODUCTO,CODIGO_DUN,CODIGO_BARRA_EAN,
+        DESCRIPCION_PRODUCTO,VENTA_EN_CANTIDAD,FACTOR,
+        UNIDADES_POR_CAJA,TOTALUNIDADES,MEDIDA,VENTA_EN_QUETZALES,
+        ISNULL(FACTURA_SAT_SERIE,'') AS FACTURA_SAT_SERIE,
+        ISNULL(FACTURA_SAT_NUMERO,'') AS FACTURA_SAT_NUMERO,
+        ISNULL(FACTURA_SAT_UUDI,'') AS FACTURA_SAT_UUDI,
+        TRANSACCION,LATITUD,LONGITUD,
+        COSTO,PRECIO,TOTALCOSTO,TOTALPRECIO,TIPOPROD,INV
+  FROM view_rpt_general
+    WHERE (EMPNIT='${sucursal}') 
+    AND (FECHA BETWEEN '${fi}' AND '${ff}')
+    `;
+    
+   
+
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
 router.post("/rpt_marcas", async(req,res)=>{
    
     const { token, sucursal, mes, anio } = req.body;

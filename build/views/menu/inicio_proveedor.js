@@ -61,16 +61,16 @@ function getView(){
             <div class="row">
                 <div class="col-sm-12 col-md-4 col-xl-4 col-lg-4">
                     
-                    <div class="card card-rounded   bg-white shadow col-12 hand" id="btnMenuVentasVendedor">
+                    <div class="card card-rounded border-info  bg-white shadow col-12 hand" id="btnMenuVentasVendedor">
                         <div class="card-body p-4">
 
-                            <h4 class="">VENTAS POR VENDEDOR</h4>
+                            <h4 class="text-info">VENTAS POR VENDEDOR</h4>
                           
                              <div class="row">
                                 <div class="col-6">
                                 </div>
                                 <div class="col-6 text-right">
-                                    <i class="fal fa-users negrita text-secondary" style="font-size:250%"></i>
+                                    <i class="fal fa-users negrita text-info" style="font-size:250%"></i>
                                 </div>
                             </div>
 
@@ -80,10 +80,10 @@ function getView(){
                 </div>
                 <div class="col-sm-12 col-md-4 col-xl-4 col-lg-4">
 
-                    <div class="card card-rounded   bg-white shadow col-12 hand" id="btnMenuVentasMarcas">
+                    <div class="card card-rounded border-secondary  bg-white shadow col-12 hand" id="btnMenuVentasMarcas">
                         <div class="card-body p-4">
 
-                            <h4 class="">VENTAS POR MARCA</h4>
+                            <h4 class="text-secondary">VENTAS POR MARCA</h4>
                           
                              <div class="row">
                                 <div class="col-6">
@@ -99,16 +99,16 @@ function getView(){
                 </div>
                 <div class="col-sm-12 col-md-4 col-xl-4 col-lg-4">
                 
-                    <div class="card card-rounded   bg-white shadow col-12 hand" id="btnMenuVentasSellout">
+                    <div class="card card-rounded border-success  bg-white shadow col-12 hand" id="btnMenuVentasSellout">
                         <div class="card-body p-4">
 
-                            <h4 class="">SELL OUT</h4>
+                            <h4 class="text-success">SELL OUT</h4>
                           
                              <div class="row">
                                 <div class="col-6">
                                 </div>
                                 <div class="col-6 text-right">
-                                    <i class="fal fa-chart-pie negrita text-secondary" style="font-size:250%"></i>
+                                    <i class="fal fa-chart-pie negrita text-success" style="font-size:250%"></i>
                                 </div>
                             </div>
 
@@ -323,41 +323,69 @@ function getView(){
                     <h3 class="negrita text-center text-base">SELL OUT</h3>
 
                     <br>
-                    <div class="form-group">
-                        <label class="negrita">Seleccione mes y año</label>
-                        
-                        <div class="input-group">
-                            <select class="negrita form-control" id="cmbSMes">
-                            </select>
-                            <select class="negrita form-control" id="cmbSAnio">
-                            </select>
+                    <div class="row">
+                        <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
+                            <div class="form-group">
+                                <label class="negrita">Fecha Inicial</label>
+                                <input type="date" class="negrita form-control" id="txtSFechaInicial">
+                            </div>
                         </div>
-
+                        <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
+                            <div class="form-group">
+                                <label class="negrita">Fecha Inicial</label>
+                                <input type="date" class="negrita form-control" id="txtSFechaFinal">
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                            <br>
+                            <button class="btn btn-success btn-md hand shadow" onclick="F.exportTableToExcel('tblSellout','SellOut')">
+                                <i class="fal fa-share"></i> Exportar Excel
+                            </button>
+                        </div>
                     </div>
+
+                    
 
                 </div>
             </div>
             <br>
-            <div class="row">
-                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
-                    
-                    <div class="card card-rounded shadow col-12">
-                        <div class="card-body p-4">
+            <div class="card card-rounded shadow col-12">
+                <div class="card-body p-4">
 
+                        <div class="table-responsive">
+                            <table class="table h-full table-bordered col-12" id="tblSellout">
+                                <thead class="bg-success text-white negrita">
+                                    <tr>
+                                        <td>RELOP</td>
+                                        <td>FECHA</td>
+                                        <td>CODIGO CLIENTE</td>
+                                        <td>CLIENTE</td>
+                                        <td>TIPO CLIENTE</td>
+                                        <td>CODIGO VENDEDOR</td>
+                                        <td>VENDEDOR</td>
+                                        <td>CATEGORIA</td>
+                                        <td>MARCA</td>
+                                        <td>CODIGO RUTA</td>
+                                        <td>GEO1-PAIS</td>
+                                        <td>GEO2-DEPARTAMENTO</td>
+                                        <td>GEO3-MUNICIPIO</td>
+                                        <td>CEO4-ALDEA-CASERIO</td>
+                                        <td>PRODUCTO</td>
+                                        <td>CODIGO DUN</td>
+                                        <td>CODIGO EAN</td>
+                                        <td>DESCRIPCION</td>
+                                        <td>VENTA EN CANTIDAD</td>
+                                        <td>FACTOR</td>
+                                        <td>UNIDADES POR CAJA</td>
+                                        <td>MEDIDA</td>
+                                        <td>VENTA EN QUETZALES</td>
+                                        <td>FACTURA SAT</td>
+                                    </tr>
+                                </thead>
+                                <tbody id="tblDataSellout"></tbody>
+                            </table>
+                        </div>
                         
-                        </div>
-                    </div>
-
-                </div>
-                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
-
-                    <div class="card card-rounded shadow col-12">
-                        <div class="card-body p-4">
-                                
-
-                        </div>
-                    </div>
-
                 </div>
             </div>
            
@@ -383,19 +411,18 @@ function addListeners(){
     //iniciales
     document.getElementById('cmbVMes').innerHTML = F.ComboMeses();  
     document.getElementById('cmbMMes').innerHTML = F.ComboMeses();
-    document.getElementById('cmbSMes').innerHTML = F.ComboMeses();
     document.getElementById('cmbVAnio').innerHTML = F.ComboAnio();
     document.getElementById('cmbMAnio').innerHTML = F.ComboAnio();
-    document.getElementById('cmbSAnio').innerHTML = F.ComboAnio();
-
+   
     document.getElementById('cmbVMes').value = F.get_mes_curso();  
     document.getElementById('cmbMMes').value = F.get_mes_curso();
-    document.getElementById('cmbSMes').value = F.get_mes_curso();
     document.getElementById('cmbVAnio').value = F.get_anio_curso();
     document.getElementById('cmbMAnio').value = F.get_anio_curso();
-    document.getElementById('cmbSAnio').value = F.get_anio_curso();
+   
 
-
+    document.getElementById('txtSFechaInicial').value = F.getFecha();
+    document.getElementById('txtSFechaFinal').value = F.getFecha();
+    
 
 
     // inciales
@@ -406,12 +433,7 @@ function addListeners(){
 
 
 
-    document.getElementById('btnMenuVentasSellout').addEventListener('click',()=>{
-
-        document.getElementById('tab-cuatro').click();
-
-
-    })
+   
 
 
     //--------------------------------
@@ -467,8 +489,22 @@ function addListeners(){
     
 
 
+    //sell out
+    document.getElementById('btnMenuVentasSellout').addEventListener('click',()=>{
+
+        document.getElementById('tab-cuatro').click();
+
+        tbl_rpt_sellout();
+
+    })
 
 
+    document.getElementById('txtSFechaInicial').addEventListener('change',()=>{
+        tbl_rpt_sellout();
+    })
+    document.getElementById('txtSFechaFinal').addEventListener('change',()=>{
+        tbl_rpt_sellout();
+    })
 
 
 };
@@ -528,7 +564,79 @@ function tbl_rpt_vendedores(){
 
 
 
+function tbl_rpt_sellout(){
+
+    let fi = F.devuelveFecha('txtSFechaInicial');
+    let ff = F.devuelveFecha('txtSFechaFinal');
+
+
+    let container = document.getElementById('tblDataSellout');
+    container.innerHTML = GlobalLoader;
+
+    let contador = 0;
+    let varTotal = 0;
+
+   
+    RPT.data_sellout(GlobalEmpnit,fi,ff)
+    .then((data)=>{
+
+   
+        let str = '';
+
+        data.recordset.map((r)=>{
+        
+            contador +=1;
+            varTotal += Number(r.TOTALPRECIO);
+            str += `
+                                    <tr>
+                                        <td>${r.RELOP}</td>
+                                        <td>${F.convertDateNormal(r.FECHA)}</td>
+                                        <td>${r.CODIGO_CLIENTE}</td>
+                                        <td>${r.TIPONEGOCIO} ${r.NEGOCIO} - ${r.CLIENTE}</td>
+                                        <td>DETALLE</td>
+                                        <td>${r.CODIGO_VENDEDOR}</td>
+                                        <td>${r.VENDEDOR}</td>
+                                        <td>${r.CATEGORIA}</td>
+                                        <td>${r.MARCA}</td>
+                                        <td>${r.CODIGO_RUTA}</td>
+                                        <td>GUATEMALA</td>
+                                        <td>${r.GEO2_DEPARTAMENTO}</td>
+                                        <td>${r.GEO3_MUNICIPIO}</td>
+                                        <td>${r.GEO4_ALDEA_CASERIO}</td>
+                                        <td>${r.PRODUCTO}</td>
+                                        <td>${r.CODIGO_DUN}</td>
+                                        <td>${r.CODIGO_BARRA_EAN}</td>
+                                        <td>${r.DESCRIPCION_PRODUCTO}</td>
+                                        <td>${r.VENTA_EN_CANTIDAD}</td>
+                                        <td>${r.FACTOR}</td>
+                                        <td>${r.UNIDADES_POR_CAJA}</td>
+                                        <td>${r.MEDIDA}</td>
+                                        <td>${r.VENTA_EN_QUETZALES}</td>
+                                        <td>${r.FACTURA_SAT_SERIE} - ${r.FACTURA_SAT_NUMERO}</td>
+                                    </tr>
+            `
+        })
+        container.innerHTML = str;
+       
+        //document.getElementById('lbTotalMImporte').innerText =`Total: ${F.setMoneda(varTotal,'Q')}`;
+
+    })
+    .catch((err)=>{
+       
+
+        container.innerHTML = 'No se cargaron datos....';
+       
+        //document.getElementById('lbTotalMImporte').innerText = '';
+    })
+
+
+
+};
+
+
+
 function tbl_rpt_marcas(){
+
 
     let mes = document.getElementById('cmbMMes').value;
     let anio = document.getElementById('cmbMAnio').value;
@@ -579,8 +687,4 @@ function tbl_rpt_marcas(){
     })
 
 
-
 };
-
-
-
