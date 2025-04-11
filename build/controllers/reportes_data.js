@@ -30,6 +30,38 @@ let RPT = {
         }) 
     
     },
+    data_ventas_vendedor_marcas:(empnit,codemp,mes,anio)=>{
+
+        return new Promise((resolve,reject)=>{
+
+            axios.post(GlobalUrlCalls + '/reportes/rpt_ventas_vendedor_marcas', {
+                token:TOKEN,
+                sucursal:empnit,
+                codemp:codemp,
+                mes:mes,
+                anio:anio
+            })
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        }) 
+    
+    },
     data_marcas: (empnit,mes,anio)=>{
         
         return new Promise((resolve, reject)=>{
@@ -42,6 +74,39 @@ let RPT = {
             };
     
             axios.post(`/reportes/rpt_marcas`, data)
+            .then(res => {
+               
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch((error)=>{
+              
+                reject();
+            })
+    
+        })
+    },
+    data_marcas_productos: (empnit,codmarca,mes,anio)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                mes:mes,
+                anio:anio,
+                codmarca:codmarca
+            };
+    
+            axios.post(`/reportes/rpt_marcas_productos`, data)
             .then(res => {
                
                 if(res.status.toString()=='200'){

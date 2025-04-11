@@ -197,7 +197,7 @@ function getView(){
                             <div class="table-responsive">
 
                                 <table class="table table-bordered h-full col-12" id="tblVendedores">
-                                    <thead class="bg-secondary text-white negrita">
+                                    <thead class="bg-info text-white negrita">
                                         <tr>
                                             <td>VENDEDOR</td>
                                             <td>TELEFONO</td>
@@ -219,7 +219,21 @@ function getView(){
 
                     <div class="card card-rounded shadow col-12">
                         <div class="card-body p-4">
-                                
+
+                            <h5 class="negrita text-info" id="lbVendedorMarcas"></h5>
+
+                            <div class="table-responsive">
+                                <table class="table h-full table-bordered col-12" id="tblVendedorMarcas">
+                                    <thead class="bg-secondary text-white negrita">
+                                        <tr>
+                                            <td>MARCA</td>
+                                            <td>IMPORTE</td>
+                                          
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDataVendedorMarcas"></tbody>
+                                </table>
+                            </div>
 
                         </div>
                     </div>
@@ -272,15 +286,16 @@ function getView(){
             </div>
             <br>
             <div class="row">
-                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
+                <div class="col-sm-12 col-md-4 col-xl-4 col-lg-4">
                     
                     <div class="card card-rounded shadow col-12">
                         <div class="card-body p-4">
 
+                   
 
                             <div class="table-responsive">
                                 <table class="table h-full table-bordered col-12" id="tblMarcas">
-                                    <thead class="bg-success text-white negrita">
+                                    <thead class="bg-secondary text-white negrita">
                                         <tr>
                                             <td>MARCA</td>
                                             <td>IMPORTE</td>
@@ -296,11 +311,26 @@ function getView(){
                     </div>
 
                 </div>
-                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
+                <div class="col-sm-12 col-md-8 col-xl-8 col-lg-8">
 
                     <div class="card card-rounded shadow col-12">
                         <div class="card-body p-4">
                                 
+                            <h5 class="negrita text-secondary" id="lbMarcasProductos"></h5>
+
+                            <div class="table-responsive">
+                                <table class="table h-full table-bordered col-12" id="tblMarcasProductos">
+                                    <thead class="bg-secondary text-white negrita">
+                                        <tr>
+                                            <td>CODIGO EAN</td>
+                                            <td>PRODUCTO</td>
+                                            <td>CAJAS</td>
+                                            <td>IMPORTE</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDataMarcasProductos"></tbody>
+                                </table>
+                            </div>
 
                         </div>
                     </div>
@@ -357,6 +387,7 @@ function getView(){
                                 <thead class="bg-success text-white negrita">
                                     <tr>
                                         <td>RELOP</td>
+                                        <td>TRANSACCION</td>
                                         <td>FECHA</td>
                                         <td>CODIGO CLIENTE</td>
                                         <td>CLIENTE</td>
@@ -542,7 +573,12 @@ function tbl_rpt_vendedores(){
                     <td>${r.TELEFONO}</td>
                     <td>${r.CONTEO}</td>
                     <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
-                    <td></td>
+                    <td>
+                        <button class="btn btn-info btn-md hand shadow btn-circle"
+                        onclick="get_rpt_marcas_vendedor('${r.CODEMP}', '${r.EMPLEADO}','${mes}', '${anio}')">
+                            <i class="fal fa-arrow-right"></i>
+                        </button>
+                    </td>
                 </tr>
             `
         })
@@ -561,59 +597,29 @@ function tbl_rpt_vendedores(){
 };
 
 
+function get_rpt_marcas_vendedor(codemp,nombre,mes,anio){
 
+    document.getElementById('lbVendedorMarcas').innerText = nombre;
 
-
-function tbl_rpt_sellout(){
-
-    let fi = F.devuelveFecha('txtSFechaInicial');
-    let ff = F.devuelveFecha('txtSFechaFinal');
-
-
-    let container = document.getElementById('tblDataSellout');
+    let container = document.getElementById('tblDataVendedorMarcas');
     container.innerHTML = GlobalLoader;
-
-    let contador = 0;
+    
     let varTotal = 0;
 
-   
-    RPT.data_sellout(GlobalEmpnit,fi,ff)
+    RPT.data_ventas_vendedor_marcas(GlobalEmpnit,codemp,mes,anio)
     .then((data)=>{
 
-   
         let str = '';
 
         data.recordset.map((r)=>{
         
-            contador +=1;
             varTotal += Number(r.TOTALPRECIO);
             str += `
-                                    <tr>
-                                        <td>${r.RELOP}</td>
-                                        <td>${F.convertDateNormal(r.FECHA)}</td>
-                                        <td>${r.CODIGO_CLIENTE}</td>
-                                        <td>${r.TIPONEGOCIO} ${r.NEGOCIO} - ${r.CLIENTE}</td>
-                                        <td>DETALLE</td>
-                                        <td>${r.CODIGO_VENDEDOR}</td>
-                                        <td>${r.VENDEDOR}</td>
-                                        <td>${r.CATEGORIA}</td>
-                                        <td>${r.MARCA}</td>
-                                        <td>${r.CODIGO_RUTA}</td>
-                                        <td>GUATEMALA</td>
-                                        <td>${r.GEO2_DEPARTAMENTO}</td>
-                                        <td>${r.GEO3_MUNICIPIO}</td>
-                                        <td>${r.GEO4_ALDEA_CASERIO}</td>
-                                        <td>${r.PRODUCTO}</td>
-                                        <td>${r.CODIGO_DUN}</td>
-                                        <td>${r.CODIGO_BARRA_EAN}</td>
-                                        <td>${r.DESCRIPCION_PRODUCTO}</td>
-                                        <td>${r.VENTA_EN_CANTIDAD}</td>
-                                        <td>${r.FACTOR}</td>
-                                        <td>${r.UNIDADES_POR_CAJA}</td>
-                                        <td>${r.MEDIDA}</td>
-                                        <td>${r.VENTA_EN_QUETZALES}</td>
-                                        <td>${r.FACTURA_SAT_SERIE} - ${r.FACTURA_SAT_NUMERO}</td>
-                                    </tr>
+                <tr>
+                    <td>${r.DESMARCA}</td>
+                    <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                
+                </tr>
             `
         })
         container.innerHTML = str;
@@ -622,7 +628,7 @@ function tbl_rpt_sellout(){
 
     })
     .catch((err)=>{
-       
+       console.log(err)
 
         container.innerHTML = 'No se cargaron datos....';
        
@@ -632,6 +638,9 @@ function tbl_rpt_sellout(){
 
 
 };
+
+
+
 
 
 
@@ -666,8 +675,8 @@ function tbl_rpt_marcas(){
                     <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
                     <td>
                         <button class="btn btn-secondary btn-md btn-circle hand shadow"
-                        onclick="">
-                                <i class="fal fa-list"></i>
+                        onclick="tbl_rpt_marcas_productos('${r.CODMARCA}','${r.DESMARCA}',${mes},${anio})">
+                                <i class="fal fa-arrow-right"></i>
                         </button>
                     </td>
                 </tr>
@@ -685,6 +694,123 @@ function tbl_rpt_marcas(){
        
         document.getElementById('lbTotalMImporte').innerText = '';
     })
+
+
+};
+
+function tbl_rpt_marcas_productos(codmarca,desmarca,mes,anio){
+
+
+
+    let container = document.getElementById('tblDataMarcasProductos');
+    container.innerHTML = GlobalLoader;
+
+    let contador = 0;
+    let varTotal = 0;
+
+   
+    RPT.data_marcas_productos(GlobalEmpnit,codmarca,mes,anio)
+    .then((data)=>{
+
+   
+        let str = '';
+
+        data.recordset.map((r)=>{
+        
+            contador +=1;
+            varTotal += Number(r.TOTALPRECIO);
+            str += `
+                <tr>
+                    <td>${r.CODIGO_EAN}</td>
+                    <td>${r.DESPROD}</td>
+                    <td>${F.setMoneda(r.CAJAS,'')}</td>
+                    <td>${F.setMoneda(r.TOTALPRECIO,'')}</td>
+                </tr>
+            `
+        })
+        container.innerHTML = str;
+       
+        //document.getElementById('lbTotalMImporte').innerText =`Total: ${F.setMoneda(varTotal,'Q')}`;
+
+    })
+    .catch((err)=>{
+       
+
+        container.innerHTML = 'No se cargaron datos....';
+       
+        //document.getElementById('lbTotalMImporte').innerText = '';
+    })
+
+
+};
+
+
+function tbl_rpt_sellout(){
+
+    let fi = F.devuelveFecha('txtSFechaInicial');
+    let ff = F.devuelveFecha('txtSFechaFinal');
+
+
+    let container = document.getElementById('tblDataSellout');
+    container.innerHTML = GlobalLoader;
+
+    let contador = 0;
+    let varTotal = 0;
+
+   
+    RPT.data_sellout(GlobalEmpnit,fi,ff)
+    .then((data)=>{
+
+   
+        let str = '';
+
+        data.recordset.map((r)=>{
+        
+            contador +=1;
+            varTotal += Number(r.TOTALPRECIO);
+            str += `
+                                    <tr>
+                                        <td>${r.RELOP}</td>
+                                        <td>${r.TRANSACCION}</td>
+                                        <td>${F.convertDateNormal(r.FECHA)}</td>
+                                        <td>${r.CODIGO_CLIENTE}</td>
+                                        <td>${r.TIPONEGOCIO} ${r.NEGOCIO} - ${r.CLIENTE}</td>
+                                        <td>DETALLE</td>
+                                        <td>${r.CODIGO_VENDEDOR}</td>
+                                        <td>${r.VENDEDOR}</td>
+                                        <td>${r.CATEGORIA}</td>
+                                        <td>${r.MARCA}</td>
+                                        <td>${r.CODIGO_RUTA}</td>
+                                        <td>GUATEMALA</td>
+                                        <td>${r.GEO2_DEPARTAMENTO}</td>
+                                        <td>${r.GEO3_MUNICIPIO}</td>
+                                        <td>${r.GEO4_ALDEA_CASERIO}</td>
+                                        <td>${r.PRODUCTO}</td>
+                                        <td>${r.CODIGO_DUN}</td>
+                                        <td>${r.CODIGO_BARRA_EAN}</td>
+                                        <td>${r.DESCRIPCION_PRODUCTO}</td>
+                                        <td>${r.VENTA_EN_CANTIDAD}</td>
+                                        <td>${r.FACTOR}</td>
+                                        <td>${r.UNIDADES_POR_CAJA}</td>
+                                        <td>${r.MEDIDA}</td>
+                                        <td>${F.setMoneda(r.VENTA_EN_QUETZALES,'Q')}</td>
+                                        <td>${r.FACTURA_SAT_SERIE} - ${r.FACTURA_SAT_NUMERO}</td>
+                                    </tr>
+            `
+        })
+        container.innerHTML = str;
+       
+        //document.getElementById('lbTotalMImporte').innerText =`Total: ${F.setMoneda(varTotal,'Q')}`;
+
+    })
+    .catch((err)=>{
+       
+
+        container.innerHTML = 'No se cargaron datos....';
+       
+        //document.getElementById('lbTotalMImporte').innerText = '';
+    })
+
 
 
 };
