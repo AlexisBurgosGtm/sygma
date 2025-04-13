@@ -25,7 +25,7 @@ router.post("/rpt_sellout", async(req,res)=>{
         TRANSACCION,LATITUD,LONGITUD,
         COSTO,PRECIO,TOTALCOSTO,TOTALPRECIO,TIPOPROD,INV
   FROM view_rpt_general
-    WHERE (EMPNIT='${sucursal}') 
+    WHERE (EMPNIT LIKE '${sucursal}') 
     AND (FECHA BETWEEN '${fi}' AND '${ff}')
     `;
     
@@ -35,7 +35,6 @@ router.post("/rpt_sellout", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
-
 
 router.post("/rpt_marcas", async(req,res)=>{
    
@@ -53,7 +52,7 @@ router.post("/rpt_marcas", async(req,res)=>{
             AND DOCUMENTOS.CODDOC = DOCPRODUCTOS.CODDOC AND DOCUMENTOS.EMPNIT = DOCPRODUCTOS.EMPNIT LEFT OUTER JOIN
             PRODUCTOS LEFT OUTER JOIN
             MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA ON DOCPRODUCTOS.CODPROD = PRODUCTOS.CODPROD
-        WHERE (DOCUMENTOS.EMPNIT = '${sucursal}') 
+        WHERE (DOCUMENTOS.EMPNIT LIKE '${sucursal}') 
         AND (DOCUMENTOS.MES = ${mes})
         AND (DOCUMENTOS.ANIO = ${anio}) 
         AND (DOCUMENTOS.STATUS <> 'A')
@@ -83,7 +82,7 @@ FROM     DOCUMENTOS LEFT OUTER JOIN
                   DOCPRODUCTOS ON DOCUMENTOS.CORRELATIVO = DOCPRODUCTOS.CORRELATIVO AND DOCUMENTOS.CODDOC = DOCPRODUCTOS.CODDOC AND DOCUMENTOS.EMPNIT = DOCPRODUCTOS.EMPNIT LEFT OUTER JOIN
                   PRODUCTOS LEFT OUTER JOIN
                   MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA ON DOCPRODUCTOS.CODPROD = PRODUCTOS.CODPROD
-WHERE  (DOCUMENTOS.EMPNIT = '${sucursal}') 
+WHERE  (DOCUMENTOS.EMPNIT LIKE '${sucursal}') 
         AND (DOCUMENTOS.MES = ${mes}) 
         AND (DOCUMENTOS.ANIO = ${anio}) 
         AND (DOCUMENTOS.STATUS <> 'A') 
@@ -99,8 +98,6 @@ ORDER BY PRODUCTOS.CODPROD
     execute.QueryToken(res,qry,token);
      
 });
-
-
 
 router.post("/rpt_ventas_vendedor", async(req,res)=>{
 
@@ -119,7 +116,7 @@ router.post("/rpt_ventas_vendedor", async(req,res)=>{
                   EMPLEADOS ON DOCUMENTOS.CODEMP = EMPLEADOS.CODEMPLEADO AND DOCUMENTOS.EMPNIT = EMPLEADOS.EMPNIT LEFT OUTER JOIN
                   TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
             WHERE 
-                (DOCUMENTOS.EMPNIT = '${sucursal}') 
+                (DOCUMENTOS.EMPNIT LIKE '${sucursal}') 
                 AND (DOCUMENTOS.MES = ${mes})
                 AND (DOCUMENTOS.ANIO = ${anio}) 
                 AND (DOCUMENTOS.STATUS <> 'A') 
@@ -147,7 +144,7 @@ router.post("/rpt_ventas_vendedor_marcas", async(req,res)=>{
                   DOCPRODUCTOS ON DOCUMENTOS.CORRELATIVO = DOCPRODUCTOS.CORRELATIVO AND DOCUMENTOS.CODDOC = DOCPRODUCTOS.CODDOC AND DOCUMENTOS.EMPNIT = DOCPRODUCTOS.EMPNIT LEFT OUTER JOIN
                   PRODUCTOS LEFT OUTER JOIN
                   MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA ON DOCPRODUCTOS.CODPROD = PRODUCTOS.CODPROD
-        WHERE  (DOCUMENTOS.EMPNIT = '${sucursal}') 
+        WHERE  (DOCUMENTOS.EMPNIT LIKE '${sucursal}') 
             AND (DOCUMENTOS.MES = ${mes}) 
             AND (DOCUMENTOS.ANIO = ${anio}) 
             AND (DOCUMENTOS.STATUS <> 'A') 
@@ -171,6 +168,14 @@ router.post("/rpt_ventas_vendedor_marcas", async(req,res)=>{
 
 
 
+
+
+
+
+
+
+
+//--------------------------------------------------------
 
 router.post("/rpt_ventas_fechas_compras", async(req,res)=>{
 

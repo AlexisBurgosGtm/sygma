@@ -2,6 +2,23 @@ function getView(){
     let view = {
         body:()=>{
             return `
+            <div class="card card-rounded shadow col-12 bg-base text-white">
+                <div class="card-body p-4">
+                   
+                    <div class="row">
+                        <div class="col-6">
+                            <h4 class="negrita text-white text-center">INICIO RELOP</h4>
+                        </div>
+                        <div class="col-6">
+                            <select class="form-control negrita" id="cmbSucursal">
+                            </select>
+                        </div>
+                   </div>
+
+
+                </div>
+            </div>
+            <br>
                 <div class="col-12 p-0 bg-white">
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
@@ -50,14 +67,7 @@ function getView(){
         },
         menu:()=>{
             return `
-            <div class="card card-rounded shadow col-12 bg-base text-white">
-                <div class="card-body p-4">
-                   
-                    <h1 class="negrita text-white text-center">INICIO RELOP</h1>
-
-                </div>
-            </div>
-            <br>
+            
             <div class="row">
                 <div class="col-sm-12 col-md-4 col-xl-4 col-lg-4">
                     
@@ -439,6 +449,38 @@ function addListeners(){
     F.slideAnimationTabs();
 
 
+    let cmbSucursal = document.getElementById('cmbSucursal');
+    
+
+    //bloqueo los controles para que no cargue nada
+    document.getElementById('btnMenuVentasVendedor').disbled = true;
+    document.getElementById('btnMenuVentasMarcas').disabled = true;
+    document.getElementById('btnMenuVentasSellout').disabled = true;
+
+
+    GF.get_data_empresas()
+        .then((data)=>{
+            let str = '<option value="%">TODAS LAS SEDES</option>';
+            data.recordset.map((r)=>{
+                str += `
+                    <option value="${r.EMPNIT}">${r.NOMBRE}</option>
+                `
+            })
+            cmbSucursal.innerHTML = str;
+            document.getElementById('btnMenuVentasVendedor').disbled = false;
+            document.getElementById('btnMenuVentasMarcas').disabled = false;
+            document.getElementById('btnMenuVentasSellout').disabled = false;
+            
+            cmbSucursal.addEventListener('change',()=>{
+                document.getElementById('tab-uno').click();
+            })
+        })
+        .catch(()=>{
+            cmbSucursal.innerHTML = "<option value=''>NO SE CARGARON LAS SEDES</option>"
+        })
+        
+      
+
     //iniciales
     document.getElementById('cmbVMes').innerHTML = F.ComboMeses();  
     document.getElementById('cmbMMes').innerHTML = F.ComboMeses();
@@ -558,10 +600,11 @@ function tbl_rpt_vendedores(){
     let container = document.getElementById('tblDataVendedores');
     container.innerHTML = GlobalLoader;
 
+    let sucursal = document.getElementById('cmbSucursal').value;
 
     let varTotal = 0;
 
-    RPT.data_ventas_vendedor(GlobalEmpnit,mes,anio)
+    RPT.data_ventas_vendedor(sucursal,mes,anio)
     .then((data)=>{
 
         let str = '';
@@ -606,7 +649,10 @@ function get_rpt_marcas_vendedor(codemp,nombre,mes,anio){
     
     let varTotal = 0;
 
-    RPT.data_ventas_vendedor_marcas(GlobalEmpnit,codemp,mes,anio)
+    let sucursal = document.getElementById('cmbSucursal').value;
+
+
+    RPT.data_ventas_vendedor_marcas(sucursal,codemp,mes,anio)
     .then((data)=>{
 
         let str = '';
@@ -657,8 +703,10 @@ function tbl_rpt_marcas(){
     let contador = 0;
     let varTotal = 0;
 
+    let sucursal = document.getElementById('cmbSucursal').value;
+
    
-    RPT.data_marcas(GlobalEmpnit,mes,anio)
+    RPT.data_marcas(sucursal,mes,anio)
     .then((data)=>{
 
    
@@ -709,7 +757,10 @@ function tbl_rpt_marcas_productos(codmarca,desmarca,mes,anio){
     let varTotal = 0;
 
    
-    RPT.data_marcas_productos(GlobalEmpnit,codmarca,mes,anio)
+    let sucursal = document.getElementById('cmbSucursal').value;
+
+
+    RPT.data_marcas_productos(sucursal,codmarca,mes,anio)
     .then((data)=>{
 
    
@@ -757,8 +808,10 @@ function tbl_rpt_sellout(){
     let contador = 0;
     let varTotal = 0;
 
+    let sucursal = document.getElementById('cmbSucursal').value;
+
    
-    RPT.data_sellout(GlobalEmpnit,fi,ff)
+    RPT.data_sellout(sucursal,fi,ff)
     .then((data)=>{
 
    
@@ -814,3 +867,8 @@ function tbl_rpt_sellout(){
 
 
 };
+
+
+
+
+

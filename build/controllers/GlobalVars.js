@@ -44,10 +44,10 @@ let navmenu = document.getElementById('js-nav-menu');
 let GlobalLoader = `
                 <div>
                     <div  class="spinner-border" role="status">
-                        <img src="./favicon.png" width="40" height="40">
+                        <img src="./favicon.png" width="30" height="30">
                     </div>
                     <div  class="spinner-border" role="status">
-                        <img src="./favicon.png" width="40" height="40">
+                        <img src="./favicon.png" width="30" height="30">
                     </div>
                     <div class="spinner-border text-base" role="status"><span class="sr-only">Loading...</span></div>
                     <div class="spinner-border text-base" role="status"><span class="sr-only">Loading...</span></div>
