@@ -99,26 +99,7 @@ function getView(){
 function addListeners(){
     
 
-    document.getElementById('btnGuatex').addEventListener('click',()=>{
-
-        let container = document.getElementById('root_guatex');
-        container.innerHTML = GlobalLoader;
-
-
-        SEGURIDAD.guatex()
-        .then((data)=>{
-            container.innerHTML = data;
-        })
-        .catch((error)=>{
-            container.innerHTML = error;
-        })
-
-
-    })
-
-
-
-
+   
     document.title = "Login";
 
     let cmbEmpresa = document.getElementById('cmbEmpresa');
@@ -157,16 +138,18 @@ function addListeners(){
             GF.login_empleado(cmbEmpresa.value,usuario,clave)
             .then((data)=>{
                 
-                GlobalEmpnit = cmbEmpresa.value;
                 
 
                 data.recordset.map((r)=>{
+                    GlobalEmpnit = r.EMPNIT;
                     GlobalUsuario = r.NOMBRE;
                     GlobalNivelUsuario = Number(r.NIVEL);
                     GlobalCodUsuario = Number(r.CODIGO);
                     Selected_coddoc_env = r.CODDOC_ENV;
                     Selected_coddoc_cot = r.CODDOC_COT;
                 })
+                
+                cmbEmpresa.value = GlobalEmpnit;
                 
                 GF.get_data_empresa_config(GlobalEmpnit)
                 .then((data)=>{

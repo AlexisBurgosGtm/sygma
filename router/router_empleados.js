@@ -115,12 +115,24 @@ router.post("/empleados_login", async(req,res)=>{
    
     const { token, sucursal, u, p } = req.body;
 
-    let qry = `SELECT CODEMPLEADO AS CODIGO, CODPUESTO AS NIVEL, 
+
+    let BACKUP_qry = `SELECT CODEMPLEADO AS CODIGO, CODPUESTO AS NIVEL, 
         NOMEMPLEADO AS NOMBRE, 
         ISNULL(CODDOC_ENV,'') AS CODDOC_ENV,
         ISNULL(CODDOC_COT,'') AS CODDOC_COT
          FROM EMPLEADOS 
         WHERE EMPNIT='${sucursal}' AND USUARIO='${u}' AND CLAVE='${p}';`
+    
+
+
+    let qry = `SELECT EMPNIT,
+                        CODEMPLEADO AS CODIGO, 
+                        CODPUESTO AS NIVEL, 
+                        NOMEMPLEADO AS NOMBRE, 
+        ISNULL(CODDOC_ENV,'') AS CODDOC_ENV,
+        ISNULL(CODDOC_COT,'') AS CODDOC_COT
+         FROM EMPLEADOS 
+        WHERE USUARIO='${u}' AND CLAVE='${p}';`
     
     execute.QueryToken(res,qry,token); 
      

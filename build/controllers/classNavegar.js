@@ -26,9 +26,14 @@ let Navegar = {
 
         switch (Number(GlobalNivelUsuario)) {
             case 1: //GERENTE
-                document.getElementById('js-primary-nav').style = "visibility:visible";
+                
+                //document.getElementById('js-primary-nav').style = "visibility:visible";
                 Navegar.inicio_gerencia();
+
+
+
                 break;
+
             case 2: //SUPERVISOR
                 GF.fcn_load_navbar('SUPERVISOR','js-nav-menu_vendedor','js-primary-nav')
               
