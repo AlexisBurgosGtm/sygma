@@ -3,6 +3,44 @@ const express = require('express');
 const router = express.Router();
 
 
+
+
+router.post("/select_rutas", async(req,res)=>{
+   
+    const { token, sucursal} = req.body;
+
+    let qry = `
+          SELECT RUTAS_CLIENTES.CODRUTA, RUTAS_CLIENTES.DESRUTA AS RUTA, RUTAS_CLIENTES.CODEMP, EMPLEADOS.NOMEMPLEADO AS EMPLEADO
+            FROM  RUTAS_CLIENTES LEFT OUTER JOIN
+                    EMPLEADOS ON RUTAS_CLIENTES.CODEMP = EMPLEADOS.CODEMPLEADO
+            WHERE (RUTAS_CLIENTES.EMPNIT = '${sucursal}');  `
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+
+router.post("/insert_ruta", async(req,res)=>{
+   
+    const { token, sucursal, codigo, descripcion, codemp} = req.body;
+
+    let qry = '';
+
+        qry = `
+           INSERT INTO RUTAS_CLIENTES
+            (EMPNIT,CODRUTA,DESRUTA,CODEMP)
+            SELECT '${sucursal}' AS EMPNIT, ${codigo} AS CODRUTA, '${descripcion}' AS DESRUTA, ${codemp} AS CODEMP;
+        `
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+
+
+
 router.post("/lista_clientes_general", async(req,res)=>{
    
     const { token, sucursal, st} = req.body;

@@ -266,6 +266,17 @@ let Menu = {
             F.AvisoError('No tiene permitido entrar a esta sección');
         } 
     },
+    clientes_rutas:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/mant_clientes/view_clientes_rutas.js','root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        } 
+    },
     empleados:()=>{
         if(Menu.verify()==true){
             Menu.salidaMenu();
