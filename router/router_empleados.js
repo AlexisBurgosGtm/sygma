@@ -125,14 +125,11 @@ router.post("/empleados_login", async(req,res)=>{
     
 
 
-    let qry = `SELECT EMPNIT,
-                        CODEMPLEADO AS CODIGO, 
-                        CODPUESTO AS NIVEL, 
-                        NOMEMPLEADO AS NOMBRE, 
-        ISNULL(CODDOC_ENV,'') AS CODDOC_ENV,
-        ISNULL(CODDOC_COT,'') AS CODDOC_COT
-         FROM EMPLEADOS 
-        WHERE USUARIO='${u}' AND CLAVE='${p}';`
+    let qry = `SELECT EMPLEADOS.EMPNIT, EMPLEADOS.CODEMPLEADO AS CODIGO, EMPLEADOS.CODPUESTO AS NIVEL, EMPLEADOS.NOMEMPLEADO AS NOMBRE, ISNULL(EMPLEADOS.CODDOC_ENV, '') AS CODDOC_ENV, 
+                  ISNULL(EMPLEADOS.CODDOC_COT, '') AS CODDOC_COT, EMPRESAS.NOMBRE AS EMPRESA
+FROM     EMPLEADOS LEFT OUTER JOIN
+                  EMPRESAS ON EMPLEADOS.EMPNIT = EMPRESAS.EMPNIT
+WHERE  (EMPLEADOS.USUARIO = '${u}') AND (EMPLEADOS.CLAVE = '${p}')`
     
     execute.QueryToken(res,qry,token); 
      

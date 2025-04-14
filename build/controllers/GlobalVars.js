@@ -9,7 +9,11 @@ let GlobalUrlServicioLocal = 'http://192.168.1.16:8080'
 let GlobalUrlPrinter = 'http://192.168.0.250:9000'
 let TOKEN = '';
 let GlobalEmpnitBodega = '';
+
+
 let GlobalEmpnit ='';
+let GlobalNomEmpresa = '';
+
 
 let GlobalUsuario = '';
 let GlobalPass = '';

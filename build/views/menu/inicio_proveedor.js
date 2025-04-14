@@ -447,7 +447,10 @@ function addListeners(){
 
 
     F.slideAnimationTabs();
+    
+    document.title = `Proveedor - ${GlobalNomEmpresa}`;
 
+  
 
     let cmbSucursal = document.getElementById('cmbSucursal');
     

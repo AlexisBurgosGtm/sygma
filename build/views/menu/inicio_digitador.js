@@ -884,6 +884,7 @@ function getView(){
 
 function addListeners(){
 
+    document.title = `Digitador - ${GlobalNomEmpresa}`;
 
     F.slideAnimationTabs();
 

@@ -387,6 +387,8 @@ function addListeners(){
 
     F.slideAnimationTabs();
 
+    document.title = `Vendedor - ${GlobalNomEmpresa}`;
+    
 
     document.getElementById('btnMenuRptProductos').addEventListener('click',()=>{
 

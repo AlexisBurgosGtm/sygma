@@ -20,7 +20,10 @@ function getView(){
                     <div class="card-body">
                         <div class="" id="frmLogin" autocomplete="off">
                            
-                        
+                            <div class="form-group">
+                                <label class="negrita text-base">Sucursal:</label>
+                                <select class="form-control negrita text-base" id="cmbEmpresa"></select>
+                            </div>
 
                             <div class="form-group">
                                 <label class="negrita text-base">Usuario:</label>
@@ -99,7 +102,25 @@ function addListeners(){
    
     document.title = "Login";
 
-  
+    let cmbEmpresa = document.getElementById('cmbEmpresa');
+    //cmbEmpresa.innerHTML = get_empresas();
+    document.getElementById('btnIniciar').style="visibility:hidden";
+    
+        GF.get_data_empresas()
+        .then((data)=>{
+            let str = '';
+            data.recordset.map((r)=>{
+                str += `
+                    <option value="${r.EMPNIT}">${r.NOMBRE}</option>
+                `
+            })
+            cmbEmpresa.innerHTML = str;
+            document.getElementById('btnIniciar').style="visibility:visible";
+        })
+        .catch(()=>{
+            cmbEmpresa.innerHTML = "<option value=''>NO SE CARGARON LAS SEDES</option>"
+        })
+        
       
 
         GlobalNivelUsuario = 0;
@@ -114,14 +135,13 @@ function addListeners(){
             btnIniciar.disabled = true;
             btnIniciar.innerHTML = `<i class="fal fa-unlock fa-spin"></i>`;
 
-            GF.login_empleado('',usuario,clave)
+            GF.login_empleado(cmbEmpresa.value,usuario,clave)
             .then((data)=>{
                 
                 
 
                 data.recordset.map((r)=>{
                     GlobalEmpnit = r.EMPNIT;
-                    GlobalNomEmpresa = r.EMPRESA;
                     GlobalUsuario = r.NOMBRE;
                     GlobalNivelUsuario = Number(r.NIVEL);
                     GlobalCodUsuario = Number(r.CODIGO);
@@ -129,8 +149,8 @@ function addListeners(){
                     Selected_coddoc_cot = r.CODDOC_COT;
                 })
                 
-                //cmbEmpresa.value = GlobalEmpnit;
-
+                cmbEmpresa.value = GlobalEmpnit;
+                
                 GF.get_data_empresa_config(GlobalEmpnit)
                 .then((data)=>{
                     
@@ -150,20 +170,75 @@ function addListeners(){
                 })
 
             })
-            .catch((error)=>{
+            .catch(()=>{
                 
-                console.log('login error:')
-                console.log(error)
-
                 F.AvisoError('Usuario o clave incorrecto');
 
                 btnIniciar.disabled = false;
                 btnIniciar.innerHTML = `<i class="fal fa-lock"></i>`;
             })
+
+
+
             
-        });
+
+            
+            return;
 
 
+            let u = document.getElementById('txtUser').value || '';
+            let p = document.getElementById('txtPass').value || '';
+
+            btnIniciar.innerHTML = `<i class="fal fa-unlock fa-spin"></i>`;
+            btnIniciar.disabled = true;
+
+            
+            login(u,p)
+            .then((data)=>{
+                
+                btnIniciar.innerHTML = `<i class="fal fa-lock"></i>`;
+                btnIniciar.disabled = false;
+
+                //data_empresas = data.recordset;
+
+                //btnMenu.style = "visibility:visible";
+                GlobalEmpnit = cmbEmpresa.value;
+                GlobalUsuario = u;
+
+                let str = '';
+               
+                data.recordset.map((r)=>{
+                    //TOKEN = r.TOKEN;
+                    GlobalNivelUsuario = Number(r.NIVEL);
+                    //str += `<option value='${r.EMPNIT}'>${r.EMPNOMBRE}</option>`
+                });
+               
+                console.log('por aca...');
+
+                Navegar.inicio();
+                
+
+            })
+            .catch((error)=>{
+                console.log('error en el login:')
+                console.log(error)
+
+                btnIniciar.innerHTML = `<i class="fal fa-lock"></i>`;
+                btnIniciar.disabled = false;
+
+                GlobalEmpnit='';
+                F.AvisoError('No se pudo iniciar sesión');
+            })
+        })
+
+
+        var scene = document.getElementById('scene');
+        var scene2 = document.getElementById('scene2');
+        var parallaxInstance = new Parallax(scene);
+        var parallaxInstance2 = new Parallax(scene2);
+
+
+        //efecto_nieve();
 
 };
 

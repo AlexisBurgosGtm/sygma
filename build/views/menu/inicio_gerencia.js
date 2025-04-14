@@ -20,10 +20,10 @@ function getView(){
                             <br>
                             
                             <div class="row">
-                                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                                <div class="col-sm-12 col-md-8 col-lg-8 col-xl-8">
                                     ${view.vista_lista_fechas()}
                                 </div>
-                                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                                <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
                                     ${view.vista_lista_fechas_compras()}
                                 </div>
                                
@@ -59,38 +59,55 @@ function getView(){
         },
         vista_lista_fechas:()=>{
             return `
-            <div class="table-responsive col-12">
-                <table class="table table-responsive col-12" id="tblFechas">
-                    <thead class="bg-personal text-white negrita">
-                        <tr>
-                            <td>FECHA</td>
-                            <td>TOTAL COSTO</td>
-                            <td>TOTAL VENTA</td>
-                            <td>UTILIDAD</td>
-                        </tr>
-                    </thead>
-                    <tbody id="tblDataFechas">
-                    </tbody>
-                </table>
+            <div class="card card-rounded col-12 p-2">
+                <div class="card-body">
+                    <h5 class="negrita text-base">Ventas por Fechas</h5>
+                    <br>
+                    <div class="table-responsive col-12">
+                        <table class="table table-responsive col-12 h-full" id="tblFechas">
+                            <thead class="bg-base text-white negrita">
+                                <tr>
+                                    <td>FECHA</td>
+                                    <td>TOTAL COSTO</td>
+                                    <td>TOTAL VENTA</td>
+                                    <td>UTILIDAD</td>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataFechas">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
+
+            
             `
         },
         vista_lista_fechas_compras:()=>{
             return `
-            <div class="table-responsive col-12">
-                <table class="table table-responsive col-12" id="tblFechasC">
-                    <thead class="bg-info text-white negrita">
-                        <tr>
-                            <td>FECHA</td>
-                            <td>TOTAL COSTO</td>
-                            <td>TOTAL VENTA</td>
-                            <td>UTILIDAD</td>
-                        </tr>
-                    </thead>
-                    <tbody id="tblDataFechasC">
-                    </tbody>
-                </table>
+            <div class="card card-rounded col-12 p-2">
+                <div class="card-body">
+                
+
+                    <h5 class="negrita text-info">Comprass por Fechas</h5>
+                    <br>
+                    <div class="table-responsive col-12">
+                        <table class="table table-responsive col-12 h-full" id="tblFechasC">
+                            <thead class="bg-info text-white negrita">
+                                <tr>
+                                    <td>FECHA</td>
+                                    <td>TOTAL COSTO</td>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataFechasC">
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
             </div>
+
+           
             `
         },
         vista_lista_productos:()=>{
@@ -118,7 +135,10 @@ function getView(){
                 <div class="card-body">
                     <div class="form-group">
                         <label>Seleccione mes y año</label>
-                        <div class="input-group">
+                        <select class="form-control negrita" id="cmbEmpresa">
+                        </select>
+
+                        <div class="input-group"> 
                             <select class="form-control negrita border-personal text-personal" id="cmbMes"></select>
                             <select class="form-control negrita border-personal text-personal" id="cmbAnio"></select>
                         </div>
@@ -170,10 +190,8 @@ function getView(){
 
 function addListeners(){
 
-    console.log('inicio gerencia')
-
-    cmbEmpresa.removeEventListener('change', handle_empresa_change)
-    cmbEmpresa.addEventListener('change', handle_empresa_change)
+   
+    document.title = `Gerencia`;
 
 
     let f = new Date();
@@ -185,6 +203,39 @@ function addListeners(){
 
     mes.value = f.getMonth()+1;
     anio.value = f.getFullYear();
+
+    let cmbEmpresa = document.getElementById('cmbEmpresa');
+
+    GF.get_data_empresas()
+    .then((data)=>{
+            let str = '<option value="%">TODAS LAS SEDES</option>';
+            data.recordset.map((r)=>{
+                str += `
+                    <option value="${r.EMPNIT}">${r.NOMBRE}</option>
+                `
+            })
+            cmbEmpresa.innerHTML = str;
+
+            get_rpt_fechas();
+            get_rpt_fechas_compras();
+            //get_rpt_productos();
+        
+           
+    })
+    .catch(()=>{
+        cmbEmpresa.innerHTML = "<option value=''>NO SE CARGARON LAS SEDES</option>"
+    })
+
+
+    cmbEmpresa.addEventListener('change',()=>{
+        try {
+            get_rpt_fechas();
+            get_rpt_fechas_compras();
+            //get_rpt_productos();
+        } catch (error) {
+            
+        }
+    })
 
     mes.addEventListener('change',()=>{
         try {
@@ -206,10 +257,7 @@ function addListeners(){
         }
     })
  
-    get_rpt_fechas();
-    get_rpt_fechas_compras();
-    //get_rpt_productos();
-
+   
 };
 
 function initView(){
@@ -219,11 +267,7 @@ function initView(){
 
 };
 
-function handle_empresa_change(){
-    get_rpt_fechas();
-    get_rpt_fechas_compras();
-    //get_rpt_productos();
-};
+
 
 function get_rpt_fechas(){
     
@@ -233,8 +277,13 @@ function get_rpt_fechas(){
 
     let anio = document.getElementById('cmbAnio').value;
     let mes = document.getElementById('cmbMes').value;
+
+    let cmbEmpresa = document.getElementById('cmbEmpresa');
+
+
     let container = document.getElementById('tblDataFechas')
     container.innerHTML = GlobalLoader;
+
 
     let data = {sucursal:cmbEmpresa.value,
                 token:TOKEN,
@@ -285,6 +334,9 @@ function get_rpt_fechas_compras(){
 
     let anio = document.getElementById('cmbAnio').value;
     let mes = document.getElementById('cmbMes').value;
+    let cmbEmpresa = document.getElementById('cmbEmpresa');
+    
+
     let container = document.getElementById('tblDataFechasC')
     container.innerHTML = GlobalLoader;
 
@@ -307,8 +359,6 @@ function get_rpt_fechas_compras(){
             <tr>
                 <td>${F.convertDateNormal(r.FECHA)}</td>
                 <td>${F.setMoneda(r.COSTO,'Q')}</td>
-                <td>${F.setMoneda(r.VENTA,'Q')}</td>
-                <td>${F.setMoneda(r.UTILIDAD,'Q')} <small class="text-danger">(${margen})%</small></td>
             </tr>
             `
         })
@@ -333,6 +383,9 @@ function get_rpt_productos(){
     
     let anio = document.getElementById('cmbAnio').value;
     let mes = document.getElementById('cmbMes').value;
+    let cmbEmpresa = document.getElementById('cmbEmpresa');
+    
+
     let container = document.getElementById('tblDataProductos')
     container.innerHTML = GlobalLoader;
 

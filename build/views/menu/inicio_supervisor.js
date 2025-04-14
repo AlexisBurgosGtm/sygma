@@ -717,6 +717,9 @@ function addListeners(){
 
     F.slideAnimationTabs();
 
+   document.title = `Supervisor - ${GlobalNomEmpresa}`;
+
+  
 
 
     //MENU
