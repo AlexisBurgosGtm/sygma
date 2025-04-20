@@ -18,8 +18,11 @@ let GF = {
                 strMenu = botones_menu.inicio_vendedor();
                 break;
             case 'SUPERVISOR':
-                    strMenu = botones_menu.inicio_supervisor();
-                    break;
+                strMenu = botones_menu.inicio_supervisor();
+                break;
+            case 'GERENCIA':
+                strMenu = botones_menu.inicio_gerente();
+                break;
                     
             default:
                 strMenu = '';

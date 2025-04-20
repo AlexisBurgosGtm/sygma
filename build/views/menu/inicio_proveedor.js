@@ -34,7 +34,7 @@ function getView(){
                             ${view.vista_sellout()}
                         </div>
                         <div class="tab-pane fade" id="cinco" role="tabpanel" aria-labelledby="home-tab">
-                            
+                            ${view.rpt_inventarios()}
                         </div>    
                     </div>
 
@@ -56,7 +56,7 @@ function getView(){
                                 <i class="fal fa-comments"></i></a>
                         </li>  
                         <li class="nav-item">
-                            <a class="nav-link negrita text-danger" id="tab-cinco" data-toggle="tab" href="#cincos" role="tab" aria-controls="home" aria-selected="true">
+                            <a class="nav-link negrita text-danger" id="tab-cinco" data-toggle="tab" href="#cinco" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
                         </li>         
                     </ul>
@@ -69,7 +69,7 @@ function getView(){
             return `
             
             <div class="row">
-                <div class="col-sm-12 col-md-4 col-xl-4 col-lg-4">
+                <div class="col-sm-12 col-md-3 col-xl-3 col-lg-3">
                     
                     <div class="card card-rounded border-info  bg-white shadow col-12 hand" id="btnMenuVentasVendedor">
                         <div class="card-body p-4">
@@ -88,7 +88,7 @@ function getView(){
                     </div>
 
                 </div>
-                <div class="col-sm-12 col-md-4 col-xl-4 col-lg-4">
+                <div class="col-sm-12 col-md-3 col-xl-3 col-lg-3">
 
                     <div class="card card-rounded border-secondary  bg-white shadow col-12 hand" id="btnMenuVentasMarcas">
                         <div class="card-body p-4">
@@ -107,7 +107,7 @@ function getView(){
                     </div>
 
                 </div>
-                <div class="col-sm-12 col-md-4 col-xl-4 col-lg-4">
+                <div class="col-sm-12 col-md-3 col-xl-3 col-lg-3">
                 
                     <div class="card card-rounded border-success  bg-white shadow col-12 hand" id="btnMenuVentasSellout">
                         <div class="card-body p-4">
@@ -125,6 +125,26 @@ function getView(){
                         </div>
                     </div>
                 
+                </div>
+
+                <div class="col-sm-12 col-md-3 col-xl-3 col-lg-3">
+
+                    <div class="card card-rounded   bg-white shadow col-12 hand" id="btnMenuRptInventario">
+                        <div class="card-body p-4">
+
+                            <h4 class="">INVENTARIO</h4>
+                          
+                             <div class="row">
+                                <div class="col-6">
+                                </div>
+                                <div class="col-6 text-right">
+                                    <i class="fal fa-warehouse negrita text-secondary" style="font-size:250%"></i>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
                 </div>
             </div>
             `
@@ -437,6 +457,56 @@ function getView(){
             </button>
             `
         },
+        rpt_inventarios:()=>{
+            return `
+            <div class="card card-rounded shadow">
+                <div class="card-body p-2">
+                    
+                    <h3 class="negrita text-danger">INVENTARIO ACTUAL</h3>
+
+                    <div class="row">
+                        <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
+                            <select class="form-control negrita text-base" id="cmbSt">
+                                <option value="SI">PRODUCTOS HABILITADOS</option>
+                                <option value="NO">PRODUCTOS NO HABILITADOS</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
+                            <h5 id="lbTotalItems"></h5>
+                        </div>
+                        <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
+                            <button class="btn btn-success btn-md hand shadow" id="btnExportarInventario">
+                                <i class="fal fa-share"></i> Exportar Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive col-12">
+                        <table class="table h-full table-hover col-12" id="tblInventario">
+                            <thead class="bg-base text-white">
+                                <tr>
+                                    <td>CODIGO</td>
+                                    <td>CODIGO 2</td>
+                                    <td>CODIGO 3</td>
+                                    <td>PRODUCTO</td>
+                                    <td>MARCA</td>
+                                    <td>EXISTENCIA</td>
+                                    <td></td>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataInventario">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary btn-circle btn-xl hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
+                <i class="fal fa-arrow-left"></i>
+            </button>
+
+            `
+        },
     }
 
     root.innerHTML = view.body();
@@ -581,6 +651,16 @@ function addListeners(){
     document.getElementById('txtSFechaFinal').addEventListener('change',()=>{
         tbl_rpt_sellout();
     })
+
+
+
+    // inventarios
+    document.getElementById('btnMenuRptInventario').addEventListener('click',()=>{
+
+        document.getElementById('tab-cinco').click();
+
+        tbl_inventario();
+    });
 
 
 };
@@ -873,5 +953,44 @@ function tbl_rpt_sellout(){
 
 
 
+
+function tbl_inventario(){
+
+    let container = document.getElementById('tblDataInventario');
+    container.innerHTML = GlobalLoader;
+
+    let st = document.getElementById('cmbSt').value;
+
+    GF.get_data_inventarios_general(GlobalEmpnit,st)
+    .then((data)=>{
+
+        let str = '';
+        data.recordset.map((r)=>{
+            str += `
+            <tr>
+                <td>${r.CODPROD}</td>
+                <td>${r.CODPROD2}</td>
+                <td>${r.DESPROD3}</td>
+                <td>${r.DESPROD}</td>
+                <td>${r.DESMARCA}</td>
+                <td>${r.TOTALUNIDADES}</td>
+                <td></td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
+
+        F.initit_datatable('tblInventario', true);
+
+    })
+    .catch(()=>{
+
+        container.innerHTML = 'No se cargaron datos...';
+    })
+
+
+    
+
+};
 
 

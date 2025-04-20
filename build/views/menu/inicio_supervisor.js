@@ -809,7 +809,7 @@ function addListeners(){
 
         document.getElementById('tab-seis').click();
 
-        rpt_tbl_clientes_vendedores();
+        tbl_inventario();
 
     });
 
