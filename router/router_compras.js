@@ -7,6 +7,47 @@ router.post("/select_inventario_general", async(req,res)=>{
    
     const {token,sucursal,st} = req.body;
 
+    
+    let qry = '';
+
+    if(sucursal=='%'){
+        qry = `
+        SELECT view_invsaldo.CODPROD, view_invsaldo.CODPROD2, view_invsaldo.DESPROD3, view_invsaldo.DESPROD, SUM(view_invsaldo.TOTALUNIDADES) AS TOTALUNIDADES, SUM(view_invsaldo.TOTALCOSTO) AS TOTALCOSTO, 
+                  SUM(view_invsaldo.MINIMO) AS MINIMO, SUM(view_invsaldo.MAXIMO) AS MAXIMO, SUM(view_invsaldo.EXISTENCIA) AS EXISTENCIA, view_invsaldo.HABILITADO, view_invsaldo.COSTO_ULTIMO, view_invsaldo.COSTO_ANTERIOR, 
+                  view_invsaldo.COSTO_PROMEDIO, PRODUCTOS.CODMARCA, MARCAS.DESMARCA
+FROM     PRODUCTOS RIGHT OUTER JOIN
+                  view_invsaldo ON PRODUCTOS.CODPROD = view_invsaldo.CODPROD LEFT OUTER JOIN
+                  MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA
+GROUP BY view_invsaldo.CODPROD, view_invsaldo.CODPROD2, view_invsaldo.DESPROD3, view_invsaldo.DESPROD, view_invsaldo.HABILITADO, view_invsaldo.COSTO_ULTIMO, view_invsaldo.COSTO_ANTERIOR, 
+                  view_invsaldo.COSTO_PROMEDIO, PRODUCTOS.CODMARCA, MARCAS.DESMARCA
+HAVING (view_invsaldo.HABILITADO = '${st}')
+ORDER BY view_invsaldo.CODPROD
+        `
+    }else{
+        qry = `
+        SELECT view_invsaldo.CODPROD, view_invsaldo.CODPROD2, view_invsaldo.DESPROD3, 
+                view_invsaldo.DESPROD, view_invsaldo.TOTALUNIDADES, view_invsaldo.TOTALCOSTO, view_invsaldo.MINIMO, view_invsaldo.MAXIMO, 
+                view_invsaldo.EXISTENCIA, view_invsaldo.HABILITADO, view_invsaldo.COSTO_ULTIMO, 
+                view_invsaldo.COSTO_ANTERIOR, view_invsaldo.COSTO_PROMEDIO, PRODUCTOS.CODMARCA, MARCAS.DESMARCA
+        FROM  PRODUCTOS RIGHT OUTER JOIN
+                view_invsaldo ON PRODUCTOS.CODPROD = view_invsaldo.CODPROD LEFT OUTER JOIN
+                MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA
+        WHERE (view_invsaldo.EMPNIT = '${sucursal}') AND (view_invsaldo.HABILITADO='${st}')
+        ORDER BY view_invsaldo.CODPROD;
+        `
+
+    }
+   
+    
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+router.post("/BACKUP_select_inventario_general", async(req,res)=>{
+   
+    const {token,sucursal,st} = req.body;
+
    
     let qry = `
         SELECT view_invsaldo.CODPROD, view_invsaldo.CODPROD2, view_invsaldo.DESPROD3, 

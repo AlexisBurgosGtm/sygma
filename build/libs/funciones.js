@@ -1078,6 +1078,9 @@ let F = {
       },
       initit_datatable: (idtbl,bol_busqueda)=>{
 
+          return;
+
+          
           let bol = false;
           if(bol_busqueda==true){bol=true}else{bol=false}
 

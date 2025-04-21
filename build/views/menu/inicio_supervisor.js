@@ -629,10 +629,14 @@ function getView(){
 
                     <div class="row">
                         <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
-                            <select class="form-control negrita text-base" id="cmbSt">
-                                <option value="SI">PRODUCTOS HABILITADOS</option>
-                                <option value="NO">PRODUCTOS NO HABILITADOS</option>
-                            </select>
+                             <div class="input-group">
+                                <select class="form-control negrita text-base" id="cmbSt">
+                                    <option value="SI">PRODUCTOS HABILITADOS</option>
+                                    <option value="NO">PRODUCTOS NO HABILITADOS</option>
+                                </select>
+                                <input type="text" class="form-control" placeholder="Escriba para buscar..." id="txtBuscarProductoInventario" oninput="F.FiltrarTabla('tblInventario','txtBuscarProductoInventario')">
+
+                            </div>
                         </div>
                         <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
                             <h5 id="lbTotalItems"></h5>

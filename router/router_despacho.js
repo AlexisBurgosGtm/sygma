@@ -556,6 +556,7 @@ router.post("/pedidos_pendientes_embarque_productos_vendedor_todos", async(req,r
                     AND (DOCUMENTOS.FECHA BETWEEN '${fi}' AND '${ff}')
                     AND (DOCUMENTOS.STATUS<>'A') 
                     AND (TIPODOCUMENTOS.TIPODOC IN('FAC','FEF','FEC','FCP','FES','FPC'))
+                    AND (PRODUCTOS.CODPROD IS NOT NULL)
             GROUP BY DOCPRODUCTOS.CODPROD, PRODUCTOS.DESPROD, 
                 PRODUCTOS.UXC, MARCAS.DESMARCA
             ORDER BY MARCAS.DESMARCA, PRODUCTOS.DESPROD;

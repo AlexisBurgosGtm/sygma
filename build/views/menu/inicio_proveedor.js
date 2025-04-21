@@ -466,10 +466,16 @@ function getView(){
 
                     <div class="row">
                         <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
-                            <select class="form-control negrita text-base" id="cmbSt">
-                                <option value="SI">PRODUCTOS HABILITADOS</option>
-                                <option value="NO">PRODUCTOS NO HABILITADOS</option>
-                            </select>
+                            <div class="input-group">
+                                <select class="form-control negrita text-base" id="cmbSt">
+                                    <option value="SI">PRODUCTOS HABILITADOS</option>
+                                    <option value="NO">PRODUCTOS NO HABILITADOS</option>
+                                </select>
+                                <input type="text" class="form-control" placeholder="Escriba para buscar..." id="txtBuscarProductoInventario" oninput="F.FiltrarTabla('tblInventario','txtBuscarProductoInventario')">
+
+                            </div>
+
+                            
                         </div>
                         <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
                             <h5 id="lbTotalItems"></h5>
@@ -480,6 +486,8 @@ function getView(){
                             </button>
                         </div>
                     </div>
+
+                    <br>
 
                     <div class="table-responsive col-12">
                         <table class="table h-full table-hover col-12" id="tblInventario">
@@ -652,6 +660,8 @@ function addListeners(){
         tbl_rpt_sellout();
     })
 
+    //sell out
+
 
 
     // inventarios
@@ -661,6 +671,14 @@ function addListeners(){
 
         tbl_inventario();
     });
+
+
+    document.getElementById('cmbSt').addEventListener('change',()=>{
+        tbl_inventario();
+    });
+
+
+     // inventarios
 
 
 };
@@ -961,7 +979,10 @@ function tbl_inventario(){
 
     let st = document.getElementById('cmbSt').value;
 
-    GF.get_data_inventarios_general(GlobalEmpnit,st)
+    let sucursal = document.getElementById('cmbSucursal').value;
+
+
+    GF.get_data_inventarios_general(sucursal,st)
     .then((data)=>{
 
         let str = '';
@@ -980,7 +1001,7 @@ function tbl_inventario(){
         })
         container.innerHTML = str;
 
-        F.initit_datatable('tblInventario', true);
+        //F.initit_datatable('tblInventario', true);
 
     })
     .catch(()=>{
