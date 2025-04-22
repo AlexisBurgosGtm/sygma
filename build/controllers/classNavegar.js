@@ -25,16 +25,16 @@ let Navegar = {
         //let rootMenu = document.getElementById('rootMenu');
 
         switch (Number(GlobalNivelUsuario)) {
-            case 1: //GERENTE
+            case 1: //GERENCIA
                 
-                GF.fcn_load_navbar('GERENCIA','js-nav-menu_vendedor','js-primary-nav')
+                GF.fcn_load_navbar('GERENCIA','js-nav-menu_gerencia','js-primary-nav')
                 
                 Navegar.inicio_gerencia();
 
                 break;
 
             case 2: //SUPERVISOR
-                GF.fcn_load_navbar('SUPERVISOR','js-nav-menu_vendedor','js-primary-nav')
+                GF.fcn_load_navbar('SUPERVISOR','js-nav-menu_supervisor','js-primary-nav')
               
                 Navegar.inicio_supervisor();
                 break;

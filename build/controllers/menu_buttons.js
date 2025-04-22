@@ -519,7 +519,7 @@ let botones_menu = {
     },
     inicio_supervisor: ()=>{
         return `
-                        <ul id="js-nav-menu_vendedor" class="nav-menu">
+                        <ul id="js-nav-menu_supervisor" class="nav-menu">
                             <li>
                                 <a href="#"  class="text-base"  data-filter-tags="application intel"  onclick="Navegar.inicio();">
                                     <i class="fal fa-home"></i>
@@ -543,7 +543,7 @@ let botones_menu = {
     },
     inicio_gerente: ()=>{
         return `
-        <ul id="js-nav-menu_digitador" class="nav-menu">
+        <ul id="js-nav-menu_gerencia" class="nav-menu">
                             <li>
                                 <a href="#"  class="text-base"  data-filter-tags="application intel"  onclick="Navegar.inicio();">
                                     <i class="fal fa-home"></i>

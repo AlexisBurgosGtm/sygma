@@ -31,6 +31,8 @@ let GF = {
 
         container.innerHTML = strMenu;
         
+        console.log(menu)
+        
 
         $('#' + idNavbar).navigation({ 
             accordion: true,
@@ -40,6 +42,7 @@ let GF = {
             openedSign: '-',
             initClass: 'js-nav-built'
         });
+
 
     },
     print_orden_soporte:(noorden)=>{
