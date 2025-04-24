@@ -555,6 +555,10 @@ router.post("/insert_marca", async(req,res)=>{
 
    
     let qry = `
+    INSERT INTO MARCAS (DESMARCA,PORCENTAJE,OBJETIVO) VALUES ('${desmarca}',0,0);
+    `
+
+    let qryxxx = `
     INSERT INTO MARCAS (CODMARCA,DESMARCA,PORCENTAJE) VALUES (${codmarca},'${desmarca}',0);
     `
 

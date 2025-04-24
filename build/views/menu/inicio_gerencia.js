@@ -89,7 +89,7 @@ function getView(){
                 <div class="card-body">
                 
 
-                    <h5 class="negrita text-info">Comprass por Fechas</h5>
+                    <h5 class="negrita text-info">Compras por Fechas</h5>
                     <br>
                     <div class="table-responsive col-12">
                         <table class="table table-responsive col-12 h-full" id="tblFechasC">

@@ -5,7 +5,7 @@ function getView(){
                 <div class="col-12 p-0 bg-white">
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
-                            ${view.vista_listado() + view.modal_nuevo()}
+                            ${view.vista_listado() + view.modal_nuevo() + view.modal_nuevo_marca()}
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
                            
@@ -47,6 +47,7 @@ function getView(){
                             <div class="form-group">
                                 <label class="negrita text-danger">Seleccione una Clasificación</label>
                                 <select class="form-control negrita text-verde" id="cmbTipo">
+                                    <option value="MARCA">MARCAS</option>
                                     <option value="BI">TIPO DE RENTABILIDAD</option>
                                     <option value="TIPO">TIPO PRODUCTO</option>
                                     <option value="LABORATORIO">CLASIFICACION 2</option>
@@ -67,11 +68,13 @@ function getView(){
             <div class="card card-rounded shadow">
                 <div class="card-body p-2">
                     <div class="table-responsive col-12">
+                        
                         <table class="table table-responsive table-hover col-12" id="tblListado">
                             <thead class="bg-base text-white">
                                 <tr>
                                     <td>CÓDIGO</td>
                                     <td>DESCRIPCIÓN</td>
+                                    <td>OBJETIVO</td>
                                     <td></td>
                                     <td></td>
                                 </tr>
@@ -79,6 +82,7 @@ function getView(){
                             <tbody id="tblDataListado">
                             </tbody>
                         </table>
+
                     </div>
                 </div>
             </div>
@@ -108,6 +112,7 @@ function getView(){
                             <br>
 
                             <div class="row">
+
                                     <div class="col-5 text-right">
                                         <button class="btn btn-secondary btn-xl btn-circle hand shadow waves-effect waves-themed" data-dismiss="modal" id="">
                                             <i class="fal fa-arrow-left"></i>
@@ -121,11 +126,66 @@ function getView(){
                                             <i class="fal fa-save"></i>
                                         </button>
                                     </div>
+
                             </div>
                             
                             <div class="form-group hidden">
                                 <label>Codigo</label>
                                 <input type="text" class="form-control negrita text-verde" id="txtCodigo">
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>`
+        },
+        modal_nuevo_marca:()=>{
+            return `
+            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" 
+            id="modal_nuevo_marca" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+                            <label class="modal-title text-success h3 negrita" id="lbTituloMarca"></label>
+                        </div>
+            
+                        <div class="modal-body p-4">
+                            
+                            <div class="form-group">
+                                <label>Marca</label>
+                                <input type="text" class="form-control negrita text-verde border-base" id="txtDescripcionMarca">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Objetivo</label>
+                                <input type="number" class="form-control negrita text-verde border-base" id="txtObjetivoMarca">
+                            </div>
+
+                            <br>
+
+                            <div class="row">
+
+                                    <div class="col-5 text-right">
+                                        <button class="btn btn-secondary btn-xl btn-circle hand shadow waves-effect waves-themed" 
+                                        data-dismiss="modal" id="">
+                                            <i class="fal fa-arrow-left"></i>
+                                        </button>                                
+                                    </div>
+        
+                                    <div class="col-1"></div>
+        
+                                    <div class="col-5 text-right">
+                                        <button class="btn btn-info btn-xl btn-circle hand shadow waves-effect waves-themed" id="btnGuardarMarca">
+                                            <i class="fal fa-save"></i>
+                                        </button>
+                                    </div>
+                                    
+                            </div>
+                            
+                            <div class="form-group hidden">
+                                <label>Codigo</label>
+                                <input type="text" class="form-control negrita text-verde" id="txtCodigoMarca">
                             </div>
 
                         </div>
@@ -152,6 +212,10 @@ function addListeners(){
 
         let strTitulo = '';
         switch (tipo.value) {
+            case 'MARCA':
+
+
+                break;
             case 'BI':
                 strTitulo = `TIPO DE RENTABILIDAD`
                 break;
@@ -181,9 +245,19 @@ function addListeners(){
         document.getElementById('lbTitulo').innerText = strTitulo;
 
         document.getElementById('txtCodigo').value = '';
-        document.getElementById('txtDescripcion').value = '';;
+        document.getElementById('txtDescripcion').value = '';
 
-        $("#modal_nuevo").modal('show');
+        if(tipo.value=='MARCA'){
+            document.getElementById('txtCodigoMarca').value = '';
+            document.getElementById('txtDescripcionMarca').value = '';
+            document.getElementById('txtCodigo').value = '';
+            document.getElementById('txtObjetivoMarca').value = '0';
+
+            $("#modal_nuevo_marca").modal('show');
+        }else{
+            $("#modal_nuevo").modal('show');
+        }
+        
 
     })
 
@@ -267,7 +341,84 @@ function addListeners(){
     })
 
 
+    //
 
+    let btnGuardarMarca = document.getElementById('btnGuardarMarca');
+    btnGuardarMarca.addEventListener('click',()=>{
+    
+
+        let codigo = document.getElementById('txtCodigoMarca').value;
+        let descripcion = document.getElementById('txtDescripcionMarca').value || 'SN';
+        let objetivo = document.getElementById('txtObjetivoMarca').value || '0';
+
+        if(descripcion=='SN'){F.AvisoError('Escriba una descripción de la clasificación a agregar');return;};
+
+        F.Confirmacion('¿Está seguro que desea CREAR/EDITAR esta Marca?')
+        .then((value)=>{
+            if(value==true){
+
+                btnGuardarMarca.disabled = true;
+                btnGuardarMarca.innerHTML = `<i class="fal fa-save fa-spin"></i>`;
+
+                descripcion = F.limpiarTexto(descripcion);
+
+                if(document.getElementById('txtCodigoMarca').value==''){
+                    
+                    insert_marca(tipo.value,descripcion,objetivo)
+                    .then(()=>{
+                        
+                        F.Aviso('Marca agregada exitosamente!!');
+                        
+                        btnGuardarMarca.disabled = false;
+                        btnGuardarMarca.innerHTML = `<i class="fal fa-save"></i>`;
+                    
+                        $("#modal_nuevo_marca").modal('hide');
+            
+                        get_listado(tipo.value);
+            
+                    })
+                    .catch(()=>{
+                        F.AvisoError('No se pudo crear la nueva marca');
+                        btnGuardarMarca.disabled = false;
+                        btnGuardarMarca.innerHTML = `<i class="fal fa-save"></i>`;
+                    
+    
+                    })  
+
+                }else{
+
+                    edit_marca(codigo,descripcion,objetivo)
+                    .then(()=>{
+                        
+                        F.Aviso('Marca actualizada exitosamente!!');
+                        
+                        btnGuardarMarca.disabled = false;
+                        btnGuardarMarca.innerHTML = `<i class="fal fa-save"></i>`;
+                    
+                        $("#modal_nuevo_marca").modal('hide');
+            
+                        get_listado(tipo.value);
+            
+                    })
+                    .catch(()=>{
+                        F.AvisoError('No se pudo actualizar la marca');
+                        btnGuardarMarca.disabled = false;
+                        btnGuardarMarca.innerHTML = `<i class="fal fa-save"></i>`;
+                    
+    
+                    })  
+
+                }
+
+
+               
+
+            }
+        })
+
+
+
+    })
 
 
 };
@@ -296,8 +447,9 @@ function get_listado(tipo){
             <tr>
                 <td>${r.CODIGO}</td>
                 <td>${r.DESCRIPCION}</td>
+                <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
                 <td>
-                    <button class="btn btn-circle btn-info hand shadow" onclick="get_clasificacion('${r.CODIGO}','${r.DESCRIPCION}')">
+                    <button class="btn btn-circle btn-info hand shadow" onclick="get_clasificacion('${r.CODIGO}','${r.DESCRIPCION}','${r.PORCENTAJE}')">
                         <i class="fal fa-edit"></i>
                     </button>
                 </td>
@@ -317,12 +469,36 @@ function get_listado(tipo){
     })
 };
 
-function get_clasificacion(codigo,descripcion){
+function get_clasificacion(codigo,descripcion,objetivo){
 
-    document.getElementById('txtCodigo').value = codigo;
-    document.getElementById('txtDescripcion').value = descripcion;
 
-    $("#modal_nuevo").modal('show');
+    let tipo = document.getElementById('cmbTipo').value;
+
+    switch (tipo) {
+        case 'MARCA':
+            
+            document.getElementById('txtCodigoMarca').value = codigo;
+            document.getElementById('txtDescripcionMarca').value = descripcion;
+            document.getElementById('txtObjetivoMarca').value = objetivo;
+        
+            $("#modal_nuevo_marca").modal('show');
+            
+            break;
+    
+        default:
+
+            document.getElementById('txtCodigo').value = codigo;
+            document.getElementById('txtDescripcion').value = descripcion;
+        
+            $("#modal_nuevo").modal('show');
+
+            break;
+    }
+
+    
+
+
+  
 
 };
 
@@ -385,21 +561,57 @@ function eliminar_clasificacion(codigo,ibBtn){
             btn.disabled = true;
             btn.innerHTML = `<i class="fal fa-trash fa-spin"></i>`;
 
-            delete_clasificacion(codigo)
-            .then(()=>{
-                F.Aviso('Clasificación eliminada exitosamente!!');
-                                
-                btn.disabled = false;
-                btn.innerHTML = `<i class="fal fa-trash"></i>`;
 
-                get_listado(document.getElementById('cmbTipo').value);
-                
-            })
-            .catch(()=>{
-                F.AvisoError('No se pudo eliminar, verifique si no existen productos asociados a esta clasificación')
-                btn.disabled = false;
-                btn.innerHTML = `<i class="fal fa-trash"></i>`;
-            })
+            let tipo = document.getElementById('cmbTipo').value;
+
+            switch (tipo) {
+                case 'MARCA':
+                   
+                delete_marca(codigo)
+                .then(()=>{
+
+                    F.Aviso('Marca eliminada exitosamente!!');
+                                    
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fal fa-trash"></i>`;
+    
+                    get_listado(document.getElementById('cmbTipo').value);
+                    
+                })
+                .catch(()=>{
+                    F.AvisoError('No se pudo eliminar, verifique si no existen productos asociados a esta marca')
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fal fa-trash"></i>`;
+                })
+
+                    
+                    break;
+            
+                default:
+        
+                        delete_clasificacion(codigo)
+                        .then(()=>{
+                            F.Aviso('Clasificación eliminada exitosamente!!');
+                                            
+                            btn.disabled = false;
+                            btn.innerHTML = `<i class="fal fa-trash"></i>`;
+            
+                            get_listado(document.getElementById('cmbTipo').value);
+                            
+                        })
+                        .catch(()=>{
+                            F.AvisoError('No se pudo eliminar, verifique si no existen productos asociados a esta clasificación')
+                            btn.disabled = false;
+                            btn.innerHTML = `<i class="fal fa-trash"></i>`;
+                        })
+        
+                    break;
+            }
+        
+            
+
+
+          
 
 
         }
@@ -412,6 +624,85 @@ function delete_clasificacion(codigo){
     return new Promise((resolve,reject)=>{
 
         axios.post(GlobalUrlCalls + '/clasificaciones/delete_clasificacion', {token:TOKEN,codigo:codigo})
+        .then((response) => {
+           
+            if(response.data.toString()=='error'){
+                reject();
+            }else{
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        }            
+                }else{
+                    reject();
+                }    
+            }
+                    
+        }, (error) => {
+            reject();
+        });
+    })
+
+};
+
+
+function insert_marca(tipo,descripcion,objetivo){
+
+    return new Promise((resolve,reject)=>{
+
+        axios.post(GlobalUrlCalls + '/clasificaciones/insert_marca', {token:TOKEN,descripcion:descripcion,objetivo:objetivo})
+        .then((response) => {
+            if(response.status.toString()=='200'){
+                let data = response.data;
+                if(Number(data.rowsAffected[0])>0){
+                    resolve(data);             
+                }else{
+                    reject();
+                }            
+            }else{
+                reject();
+            }             
+        }, (error) => {
+            reject();
+        });
+    })
+
+};
+
+function edit_marca(codigo,descripcion,objetivo){
+
+    return new Promise((resolve,reject)=>{
+
+        axios.post(GlobalUrlCalls + '/clasificaciones/edit_marca', {token:TOKEN,
+                                                                            codigo:codigo,
+                                                                            descripcion:descripcion,
+                                                                            objetivo:objetivo})
+        .then((response) => {
+            if(response.status.toString()=='200'){
+                let data = response.data;
+                if(Number(data.rowsAffected[0])>0){
+                    resolve(data);             
+                }else{
+                    reject();
+                }            
+            }else{
+                reject();
+            }             
+        }, (error) => {
+            reject();
+        });
+    })
+
+};
+
+function delete_marca(codigo){
+
+    return new Promise((resolve,reject)=>{
+
+        axios.post(GlobalUrlCalls + '/clasificaciones/delete_marca', {token:TOKEN,codigo:codigo})
         .then((response) => {
            
             if(response.data.toString()=='error'){
