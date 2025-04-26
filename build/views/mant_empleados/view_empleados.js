@@ -38,7 +38,7 @@ function getView(){
         vista_listado:()=>{
             return `
             <div class="card card-rounded shadow">
-                <div class="card-body p-2">
+                <div class="card-body p-4">
 
                     <div class="row">
                         <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
@@ -53,6 +53,12 @@ function getView(){
                             </div>
                         </div>
                         <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                            
+                            <div class="form-group">
+                                <select class="form-control negrita" id="cmbSucursal">
+                                </select>
+                            </div>
+                            
                             <div class="form-group">
                                 <label>Tipo lista</label>
                                 <select class="form-control negrita text-base" id="cmbStatus">
@@ -205,34 +211,40 @@ function getView(){
 function addListeners(){
 
 
+    let cmbSucursal = document.getElementById('cmbSucursal');
+
+    GF.get_data_empresas()
+    .then((data)=>{
+            let str = ''; //'<option value="%">TODAS LAS SEDES</option>';
+            data.recordset.map((r)=>{
+                str += `
+                    <option value="${r.EMPNIT}">${r.NOMBRE}</option>
+                `
+            })
+            cmbSucursal.innerHTML = str;
+            cmbSucursal.value = GlobalEmpnit;
+           
+    })
+    .catch(()=>{
+            cmbSucursal.innerHTML = "<option value=''>NO SE CARGARON LAS SEDES</option>"
+    });
+
+    
+    
+    cmbSucursal.addEventListener('change',()=>{
+        GlobalEmpnit = cmbSucursal.value;
+        get_coddoc();
+        tbl_empleados();
+    });
+
+
+
     //CARGA LOS TIPOS
     document.getElementById('cmbPuesto').innerHTML = tipo_empleados.map((r)=>{return `<option value='${r.codigo}'>${r.descripcion}</option>`}).join();
 
-
-        GF.get_data_tipodoc_coddoc('FAC')
-        .then((data)=>{
-                    let coddoc = '<option value="">NO ASIGNADO</option>'
-                    data.recordset.map((r)=>{
-                        coddoc += `<option value="${r.CODDOC}">${r.CODDOC}</option>`
-                    })        
-                    document.getElementById('cmbCoddocEnv').innerHTML = coddoc;
-        })
-        .catch(()=>{
-            document.getElementById('cmbCoddocEnv').innerHTML = `<option value="">NO SE CARGO...</option>`;
-        })
-
-        GF.get_data_tipodoc_coddoc('COT')
-        .then((data)=>{
-            let coddoc = '<option value="">NO ASIGNADO</option>'
-            data.recordset.map((r)=>{
-                coddoc += `<option value="${r.CODDOC}">${r.CODDOC}</option>`
-            })        
-            document.getElementById('cmbCoddocCot').innerHTML = coddoc;
-        })
-        .catch(()=>{
-            document.getElementById('cmbCoddocCot').innerHTML = `<option value="">NO SE CARGO...</option>`;
-        })
-
+    //carga los coddocs
+    get_coddoc();
+        
 
     document.getElementById('cmbStatus').addEventListener('change',()=>{
         tbl_empleados();    
@@ -354,6 +366,37 @@ function initView(){
     addListeners();
 
 };
+
+function get_coddoc(){
+
+    GF.get_data_tipodoc_coddoc('FAC')
+        .then((data)=>{
+                    let coddoc = '<option value="">NO ASIGNADO</option>'
+                    data.recordset.map((r)=>{
+                        coddoc += `<option value="${r.CODDOC}">${r.CODDOC}</option>`
+                    })        
+                    document.getElementById('cmbCoddocEnv').innerHTML = coddoc;
+        })
+        .catch(()=>{
+            document.getElementById('cmbCoddocEnv').innerHTML = `<option value="">NO SE CARGO...</option>`;
+        })
+
+        GF.get_data_tipodoc_coddoc('COT')
+        .then((data)=>{
+            let coddoc = '<option value="">NO ASIGNADO</option>'
+            data.recordset.map((r)=>{
+                coddoc += `<option value="${r.CODDOC}">${r.CODDOC}</option>`
+            })        
+            document.getElementById('cmbCoddocCot').innerHTML = coddoc;
+        })
+        .catch(()=>{
+            document.getElementById('cmbCoddocCot').innerHTML = `<option value="">NO SE CARGO...</option>`;
+        })
+
+
+};
+
+
 
 function clean_data(){
 

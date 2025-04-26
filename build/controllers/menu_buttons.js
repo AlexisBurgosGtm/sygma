@@ -231,11 +231,7 @@ let botones_menu = {
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_layout_options">PROVEEDORES</span>
                                         </a>
                                     </li>
-                                    <li>
-                                        <a href="#" title="Skin Options" data-filter-tags="theme settings skin options"  onclick="Menu.marcas()">
-                                            <span class="nav-link-text" data-i18n="nav.theme_settings_skin_options">MARCAS</span>
-                                        </a>
-                                    </li>
+                                   
 
                                     <li>
                                         <a href="#" title="Skin Options" data-filter-tags="theme settings skin options"  onclick="Menu.medidas()">
@@ -443,11 +439,7 @@ let botones_menu = {
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_layout_options">PROVEEDORES</span>
                                         </a>
                                     </li>
-                                    <li>
-                                        <a href="#" title="Skin Options" data-filter-tags="theme settings skin options" onclick="Menu.marcas()">
-                                            <span class="nav-link-text" data-i18n="nav.theme_settings_skin_options">MARCAS</span>
-                                        </a>
-                                    </li>
+                                    
 
                                     <li>
                                         <a href="#" title="Skin Options" data-filter-tags="theme settings skin options"  onclick="Menu.medidas()">
@@ -703,11 +695,7 @@ let botones_menu = {
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_layout_options">PROVEEDORES</span>
                                         </a>
                                     </li>
-                                    <li>
-                                        <a href="#" title="Skin Options" data-filter-tags="theme settings skin options" onclick="Menu.marcas()">
-                                            <span class="nav-link-text" data-i18n="nav.theme_settings_skin_options">MARCAS</span>
-                                        </a>
-                                    </li>
+                                  
 
                                     <li>
                                         <a href="#" title="Skin Options" data-filter-tags="theme settings skin options"  onclick="Menu.medidas()">
