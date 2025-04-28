@@ -489,7 +489,10 @@ function tbl_clientes(){
             contador +=1;
             str += `
             <tr>
-                <td>${r.NOMEMPLEADO}</td>
+                <td>${r.NOMEMPLEADO}
+                    <br>
+                    <small>${r.VISITA}</small>
+                </td>
                 <td>${r.NIT}
                     <br>
                     <small>Cod: ${r.CODCLIENTE}</small>
