@@ -190,6 +190,11 @@ let botones_menu = {
                                 </a>
                                 <ul>
                                     <li>
+                                        <a href="#" title="Layout Options" data-filter-tags="theme settings layout options"  onclick="Menu.objetivos()">
+                                            <span class="nav-link-text" data-i18n="nav.theme_settings_layout_options">GESTION DE OBJETIVOS</span>
+                                        </a>
+                                    </li>
+                                    <li>
                                         <a href="#" title="How it works" data-filter-tags="theme settings how it works"  onclick="Menu.documentos()">
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">DOCUMENTOS</span>
                                         </a>
@@ -215,6 +220,7 @@ let botones_menu = {
                                     <span class="nav-link-text" data-i18n="nav.theme_settings">MANTENIMIENTOS</span>
                                 </a>
                                 <ul>
+                                    
                                     <li>
                                         <a href="#" title="Skin Options" data-filter-tags="theme settings skin options"  onclick="Menu.mantenimiento_generales()">
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_skin_options">CLASIFICACIONES GENERALES</span>
@@ -388,6 +394,11 @@ let botones_menu = {
                                     <span class="nav-link-text" data-i18n="nav.theme_settings">ARCHIVO</span>
                                 </a>
                                 <ul>
+                                    <li>
+                                        <a href="#" title="Layout Options" data-filter-tags="theme settings layout options"  onclick="Menu.objetivos()">
+                                            <span class="nav-link-text" data-i18n="nav.theme_settings_layout_options">GESTION DE OBJETIVOS</span>
+                                        </a>
+                                    </li>
                                     <li>
                                         <a href="#" title="How it works" data-filter-tags="theme settings how it works"  onclick="Menu.documentos()">
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">DOCUMENTOS</span>
@@ -644,6 +655,11 @@ let botones_menu = {
                                     <span class="nav-link-text" data-i18n="nav.theme_settings">ARCHIVO</span>
                                 </a>
                                 <ul>
+                                    <li>
+                                        <a href="#" title="Layout Options" data-filter-tags="theme settings layout options"  onclick="Menu.objetivos()">
+                                            <span class="nav-link-text" data-i18n="nav.theme_settings_layout_options">GESTION DE OBJETIVOS</span>
+                                        </a>
+                                    </li>
                                     <li>
                                         <a href="#" title="How it works" data-filter-tags="theme settings how it works"  onclick="Menu.documentos()">
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">DOCUMENTOS</span>

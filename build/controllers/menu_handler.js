@@ -320,5 +320,16 @@ let Menu = {
         }else{
             F.AvisoError('No tiene permitido entrar a esta sección');
         }
-    }
+    },
+    objetivos:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/bi_objetivos/view_objetivos.js','root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        } 
+    },
 }
