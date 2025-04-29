@@ -796,7 +796,7 @@ function getView(){
                             <br>
                         </div>
                         <div class="col-6">
-                            <label class="negrita text-info" id="lbProdTotalPedidos">Pedidos:</label>
+                            <label class="negrita text-info" id="lbProdTotalPedidos">Productos:</label>
                             <br>
                             <label class="negrita text-danger" id="lbProdTotalImporte">Importe:</label>
                         </div>
@@ -983,7 +983,7 @@ function listeners_pedidos_pendientes(){
 
 
 
-    document.getElementById('cmbFTipo').addEventListener('click',()=>{
+    document.getElementById('cmbFTipo').addEventListener('change',()=>{
         
         let tipo = document.getElementById('cmbFTipo').value;
 
@@ -1730,7 +1730,7 @@ function tbl_productos_embarque(codembarque){
                 `
         })
         container.innerHTML = str;
-        document.getElementById('lbProdTotalPedidos').innerText = `Pedidos: ${contador}`;
+        document.getElementById('lbProdTotalPedidos').innerText = `Items: ${contador}`;
         document.getElementById('lbProdTotalImporte').innerText =`Total: ${F.setMoneda(varTotal,'Q')}`;
 
     })

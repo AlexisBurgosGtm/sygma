@@ -402,12 +402,13 @@ router.post("/pedidos_pendientes_embarque_documentos", async(req,res)=>{
         TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
     WHERE (DOCUMENTOS.EMPNIT = '${sucursal}')  
         AND (DOCUMENTOS.CODEMBARQUE = '${codembarque}')
-        AND (DOCUMENTOS.STATUS='O')
+        AND (DOCUMENTOS.STATUS <>'A')
          AND (TIPODOCUMENTOS.TIPODOC IN('FAC','FEF','FEC','FCP','FES','FPC'))
     ORDER BY EMPLEADOS.NOMEMPLEADO, DOCUMENTOS.CODDOC, DOCUMENTOS.CORRELATIVO
 
     `;
     
+
 
     execute.QueryToken(res,qry,token);
      
@@ -494,7 +495,7 @@ router.post("/pedidos_pendientes_embarque_productos", async(req,res)=>{
             ORDER BY MARCAS.DESMARCA, PRODUCTOS.DESPROD;
             `;
     
-
+          
     execute.QueryToken(res,qry,token);
      
 });
