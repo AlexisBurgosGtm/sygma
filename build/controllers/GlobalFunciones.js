@@ -843,6 +843,39 @@ let GF = {
     
         })
     },
+    get_data_eliminar_documento: (empnit,coddoc,correlativo)=>{
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                sucursal:empnit,
+                token:TOKEN,
+                coddoc:coddoc,
+                correlativo:correlativo
+            };
+    
+            axios.post(`/documentos/eliminar_documento`, data)
+            .then(response => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }       
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
     get_data_empresa_config(sucursal){
     
   

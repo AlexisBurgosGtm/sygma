@@ -221,6 +221,20 @@ router.post("/BACKUP_detalle_documento_json", async(req,res)=>{
 });
 
 
+router.post("/eliminar_documento", async(req,res)=>{
+   
+    const { token, sucursal, coddoc,correlativo} = req.body;
+
+    let qry = `DELETE FROM DOCUMENTOS 
+                    WHERE EMPNIT='${sucursal}' AND CODDOC='${coddoc}' AND CORRELATIVO=${correlativo};
+                DELETE FROM DOCPRODUCTOS 
+                    WHERE EMPNIT='${sucursal}' AND CODDOC='${coddoc}' AND CORRELATIVO=${correlativo};    
+                `
+    
+    execute.QueryToken(res,qry,token);
+     
+});
+
 
 router.post("/anular_documento", async(req,res)=>{
    

@@ -75,6 +75,7 @@ function getView(){
                                     <td>ST</td>
                                     <td></td>
                                     <td></td>
+                                    <td></td>
                                 </tr>
                             </thead>
                             <tbody id="tblDataDocumentos">
@@ -226,6 +227,7 @@ function get_documentos(){
     .then((data)=>{
         let str = '';
         data.recordset.map((r)=>{
+            let btnEliminar = `btnEliminar${r.CODDOC}-${r.CORRELATIVO}`
             str += `
                 <tr class="hand">
                     <td>${F.convertDateNormal(r.FECHA)}</td>
@@ -245,6 +247,12 @@ function get_documentos(){
                        <button class="btn btn-info btn-md btn-circle hand shadow"
                             onclick="fcn_editar_factura('${r.CODDOC}','${r.CORRELATIVO}','${r.NOMBRE}','${r.DIRECCION}')">
                                 <i class="fal fa-edit"></i>
+                        </button>
+                    </td>
+                    <td>
+                       <button class="btn btn-danger btn-md btn-circle hand shadow" id="${btnEliminar}"
+                            onclick="fcn_eliminar_factura('${r.CODDOC}','${r.CORRELATIVO}','${btnEliminar}')">
+                                <i class="fal fa-trash"></i>
                         </button>
                     </td>
                 </tr>
@@ -302,6 +310,40 @@ function get_detalle_tomar_datos(coddoc,correlativo,nombre,prioridad,obs){
 
 
 
+
+
+
+};
+
+
+function fcn_eliminar_factura(coddoc,correlativo,idbtn){
+
+
+    let btn = document.getElementById(idbtn);
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fal fa-trash fa-spin"></i>`;
+
+
+        
+        GF.get_data_eliminar_documento(GlobalEmpnit,coddoc,correlativo)
+        .then((data)=>{
+
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fal fa-trash"></i>`;
+
+            F.Aviso('Documento eliminado exitosamente!!');
+
+            get_documentos();
+
+        })
+        .catch(()=>{
+
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fal fa-trash"></i>`;
+
+            F.AvisoError('No se pudo Eliminar este documento');
+            
+        })
 
 
 
