@@ -319,31 +319,42 @@ function get_detalle_tomar_datos(coddoc,correlativo,nombre,prioridad,obs){
 function fcn_eliminar_factura(coddoc,correlativo,idbtn){
 
 
-    let btn = document.getElementById(idbtn);
-    btn.disabled = true;
-    btn.innerHTML = `<i class="fal fa-trash fa-spin"></i>`;
+
+    F.Confirmacion('¿Está seguro que desea ELIMINAR este documento?')
+    .then((value)=>{
+        if(value==true){
 
 
+
+            let btn = document.getElementById(idbtn);
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fal fa-trash fa-spin"></i>`;
         
-        GF.get_data_eliminar_documento(GlobalEmpnit,coddoc,correlativo)
-        .then((data)=>{
+        
+                
+                GF.get_data_eliminar_documento(GlobalEmpnit,coddoc,correlativo)
+                .then((data)=>{
+        
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fal fa-trash"></i>`;
+        
+                    F.Aviso('Documento eliminado exitosamente!!');
+        
+                    get_documentos();
+        
+                })
+                .catch(()=>{
+        
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fal fa-trash"></i>`;
+        
+                    F.AvisoError('No se pudo Eliminar este documento');
+                    
+                })
 
-            btn.disabled = false;
-            btn.innerHTML = `<i class="fal fa-trash"></i>`;
+        }
+    })
 
-            F.Aviso('Documento eliminado exitosamente!!');
-
-            get_documentos();
-
-        })
-        .catch(()=>{
-
-            btn.disabled = false;
-            btn.innerHTML = `<i class="fal fa-trash"></i>`;
-
-            F.AvisoError('No se pudo Eliminar este documento');
-            
-        })
 
 
 
