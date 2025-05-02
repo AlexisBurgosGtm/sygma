@@ -571,7 +571,10 @@ function getView(){
                         </div>
                         <div class="col-6">
                             <br>
-                            <label class="negrita text-danger" id="lbVenTotalImporte">Importe:</label>
+                            <label class="negrita text-info h5" id="lbVenTotalPedidos">Pedidos:</label>
+                            
+                            <br>
+                            <label class="negrita text-danger h4" id="lbVenTotalImporte">Importe:</label>
                         </div>
                     </div>
 
@@ -598,12 +601,13 @@ function getView(){
                                 <thead class="bg-base text-white negrita">
                                     <tr>
                                         <td>VENDEDOR</td>
-                                        <td>TELEFONO</td>
+                                        <td>PEDIDOS</td>
                                         <td>IMPORTE</td>
                                         <td></td>
                                     </tr>
                                 </thead>
                                 <tbody id="tblDataVendedores"></tbody>
+                                <t>
 
                             </table>
 
@@ -1176,6 +1180,7 @@ function rpt_tbl_vendedores(){
     container.innerHTML = GlobalLoader;
     let contador = 0;
     let varTotal = 0;
+    let varTotalPedidos = 0;
 
 
     let fi = F.devuelveFecha('txtRptVenFechaInicial');
@@ -1190,6 +1195,7 @@ function rpt_tbl_vendedores(){
          
             contador +=1;
             varTotal += Number(r.TOTALPRECIO);
+            varTotalPedidos += Number(r.PEDIDOS);
             str += `
                 <tr>
                     <td>${r.EMPLEADO}
@@ -1198,7 +1204,7 @@ function rpt_tbl_vendedores(){
                         <br>
                         <small class="negrita text-danger">Clave: ${r.CLAVE}</small>
                     </td>
-                    <td>${r.TELEFONO}</td>
+                    <td>${r.PEDIDOS}</td>
                     <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
                     <td></td>
                 </tr>
@@ -1206,11 +1212,12 @@ function rpt_tbl_vendedores(){
         })
         container.innerHTML = str;
         document.getElementById('lbVenTotalImporte').innerText =`Total: ${F.setMoneda(varTotal,'Q')}`;
-
+        document.getElementById('lbVenTotalPedidos').innerText = `Pedidos: ${varTotalPedidos}`;
     })
     .catch((error)=>{
         container.innerHTML = 'No se cargaron datos....';
         document.getElementById('lbVenTotalImporte').innerText = '';
+        document.getElementById('lbVenTotalPedidos').innerText = ``
     })
 
 
