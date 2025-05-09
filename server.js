@@ -19,6 +19,7 @@ var nodemailer = require('nodemailer');
 
 const execute = require('./connection');
 
+var router_objetivos = require('./router/router_objetivos.js');
 var router_config = require('./router/router_config.js');
 var router_contabilidad = require('./router/router_conta.js');
 var router_general = require('./router/router_general');
@@ -419,6 +420,7 @@ app.get('/guatex_guia_pdf', function(req, res) {
 
 
 //Router 
+app.use('/objetivos', router_objetivos);
 app.use('/config', router_config);
 app.use('/general', router_general);
 app.use('/conta', router_contabilidad);

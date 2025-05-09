@@ -386,6 +386,12 @@ let botones_menu = {
                                 </ul>
                             </li>
 
+                            <li>
+                                <a href="#" title="Theme Settings" data-filter-tags="theme settings"  onclick="Menu.objetivos()">
+                                    <i class="fal fa-chart-pie"></i>
+                                    <span class="nav-link-text" data-i18n="nav.theme_settings">GESTION DE OBJETIVOS</span>
+                                </a>
+                            </li>
                           
 
                             <li>
@@ -647,7 +653,12 @@ let botones_menu = {
                                 </ul>
                             </li>
 
-                          
+                            <li>
+                                <a href="#" title="Theme Settings" data-filter-tags="theme settings"  onclick="Menu.objetivos()">
+                                    <i class="fal fa-chart-pie"></i>
+                                    <span class="nav-link-text" data-i18n="nav.theme_settings">GESTION DE OBJETIVOS</span>
+                                </a>
+                            </li>
 
                             <li>
                                 <a href="#" title="Theme Settings" data-filter-tags="theme settings">
