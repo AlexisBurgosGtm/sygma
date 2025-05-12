@@ -9,10 +9,10 @@ function getView(){
                             ${view.vista_inicio()}
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
-                           
+                           ${view.vista_detalle_marca()}
                         </div>
                         <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
-                            
+                            ${view.vista_detalle_vendedor()}
                         </div>    
                     </div>
 
@@ -134,6 +134,26 @@ function getView(){
                     </div>
                 </div>
             </div>
+            `
+        },
+        vista_detalle_marca:()=>{
+            return `
+            
+
+
+
+            <button class="btn btn-circle btn-secondary hand btn-xl shadow" onclick="document.getElementById('tab-uno').click()">
+                <i class="fal fa-arrow-left"></i>
+            </button>
+            `
+        },
+        vista_detalle_vendedor:()=>{
+            return `
+            
+
+            <button class="btn btn-circle btn-secondary hand btn-xl shadow" onclick="document.getElementById('tab-uno').click()">
+                <i class="fal fa-arrow-left"></i>
+            </button>
             `
         },
     }
