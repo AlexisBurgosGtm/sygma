@@ -95,7 +95,6 @@ function getView(){
                             <thead class="bg-base text-white">
                                 <tr>
                                     <td>MARCA</td>
-                                    <td>CAJAS</td>
                                     <td>IMPORTE</td>
                                     <td>OBJETIVO</td>
                                     <td>FALTA</td>
@@ -222,6 +221,7 @@ function get_reportes(){
     let anio = document.getElementById('cmbAnio').value;
 
 
+    tbl_logro_marcas(sucursal,mes,anio);
 
 
 
@@ -288,7 +288,7 @@ function tbl_logro_marcas(sucursal,mes,anio){
 
     })
     .catch(()=>{
-
+        container.innerHTML = 'No se cargaron datos...';
     })
 
 
