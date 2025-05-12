@@ -226,4 +226,71 @@ function get_reportes(){
 
 
 
+
+};
+
+
+function get_data_logro_marcas(sucursal,mes,anio){
+
+     return new Promise((resolve,reject)=>{
+
+            axios.post(GlobalUrlCalls + '/objetivos/select_logro_marcas', {
+                    token:TOKEN,
+                    sucursal:sucursal,
+                    mes:mes,
+                    anio:anio})
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        }) 
+    
+
+};
+function tbl_logro_marcas(sucursal,mes,anio){
+
+
+    let container = document.getElementById('tblDataMarcas');
+    container.innerHTML = GlobalLoader;
+
+
+    get_data_logro_marcas(sucursal,mes,anio)
+    .then((data)=>{
+
+        let str = '';
+        data.recordset.map((r)=>{
+            let varFaltan = (Number(r.OBJETIVO) - Number(r.TOTALPRECIO));
+            str += `
+            <tr>
+                <td>${r.MARCA}</td>
+                <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
+                <td>${F.setMoneda(varFaltan,'Q')}</td>
+                <td>${((Number(varFaltan)/Number(r.OBJETIVO))*100).toFixed(2)} %</td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
+
+    })
+    .catch(()=>{
+
+    })
+
+
+
 };

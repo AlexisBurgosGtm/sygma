@@ -3,6 +3,42 @@ const express = require('express');
 const router = express.Router();
 
 
+// se cambio marcas por clasificaion TIPO
+router.post("/select_logro_marcas", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio} = req.body;
+
+    let qry = `
+       SELECT view_rpt_objetivos_categorias.EMPNIT, 
+                view_rpt_objetivos_categorias.RELOP, 
+                view_rpt_objetivos_categorias.CODIGO_MARCA,
+                view_rpt_objetivos_categorias.MARCA, 
+                OBJETIVOS_GENERAL.OBJETIVO,
+                SUM(view_rpt_objetivos_categorias.TOTALUNIDADES) * -1 AS TOTALUNIDADES, 
+                SUM(view_rpt_objetivos_categorias.TOTALCOSTO) * - 1 AS TOTALCOSTO, 
+                SUM(view_rpt_objetivos_categorias.TOTALPRECIO) * - 1 AS TOTALPRECIO
+FROM     view_rpt_objetivos_categorias LEFT OUTER JOIN
+                  OBJETIVOS_GENERAL ON view_rpt_objetivos_categorias.CODIGO_MARCA = OBJETIVOS_GENERAL.CODMARCA AND view_rpt_objetivos_categorias.MES = OBJETIVOS_GENERAL.MES AND 
+                  view_rpt_objetivos_categorias.ANIO = OBJETIVOS_GENERAL.ANIO AND view_rpt_objetivos_categorias.EMPNIT = OBJETIVOS_GENERAL.EMPNIT
+WHERE  (view_rpt_objetivos_categorias.ANIO = ${anio}) 
+AND (view_rpt_objetivos_categorias.MES = ${mes}) 
+AND (OBJETIVOS_GENERAL.OBJETIVO IS NOT NULL)
+GROUP BY view_rpt_objetivos_categorias.EMPNIT, view_rpt_objetivos_categorias.RELOP, view_rpt_objetivos_categorias.CODIGO_MARCA, view_rpt_objetivos_categorias.MARCA, OBJETIVOS_GENERAL.OBJETIVO
+HAVING (view_rpt_objetivos_categorias.EMPNIT like '${sucursal}')
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+
+
+
+
+
+
 router.post("/insert_objetivo_general_marca", async(req,res)=>{
    
     const { token, sucursal, mes, anio, codmarca, objetivo } = req.body;
@@ -25,15 +61,10 @@ router.post("/select_objetivo_general_marcas", async(req,res)=>{
     const { token, sucursal, mes, anio} = req.body;
 
     let qry = `
-        SELECT OBJETIVOS_GENERAL.EMPNIT, 
-                OBJETIVOS_GENERAL.MES, 
-                OBJETIVOS_GENERAL.ANIO, 
-                OBJETIVOS_GENERAL.CODMARCA, 
-                OBJETIVOS_GENERAL.OBJETIVO,
-                MARCAS.DESMARCA
-        FROM OBJETIVOS_GENERAL LEFT OUTER JOIN
-                  MARCAS ON OBJETIVOS_GENERAL.CODMARCA = MARCAS.CODMARCA
-            WHERE  OBJETIVOS_GENERAL.EMPNIT='${sucursal}' AND 
+       SELECT OBJETIVOS_GENERAL.EMPNIT, OBJETIVOS_GENERAL.MES, OBJETIVOS_GENERAL.ANIO, OBJETIVOS_GENERAL.CODMARCA, OBJETIVOS_GENERAL.OBJETIVO, CLASIFICACIONES_GENERALES.DESCRIPCION AS DESMARCA
+        FROM     OBJETIVOS_GENERAL LEFT OUTER JOIN
+                  CLASIFICACIONES_GENERALES ON OBJETIVOS_GENERAL.CODMARCA = CLASIFICACIONES_GENERALES.CODIGO
+        WHERE  (OBJETIVOS_GENERAL.EMPNIT = '${sucursal}') AND
             OBJETIVOS_GENERAL.MES=${mes} AND 
             OBJETIVOS_GENERAL.ANIO=${anio};
         `;
@@ -85,21 +116,16 @@ router.post("/select_objetivo_vendedores_marcas", async(req,res)=>{
     const { token, sucursal, mes, anio} = req.body;
 
     let qry = `
-    SELECT OBJETIVOS_EMPLEADO.ID, 
-        OBJETIVOS_EMPLEADO.CODEMP, 
-        EMPLEADOS.NOMEMPLEADO AS NOMEMP, 
-        OBJETIVOS_EMPLEADO.MES, 
-        OBJETIVOS_EMPLEADO.ANIO, 
-        OBJETIVOS_EMPLEADO.CODMARCA, 
-        MARCAS.DESMARCA, 
-        OBJETIVOS_EMPLEADO.OBJETIVO
+    SELECT OBJETIVOS_EMPLEADO.ID, OBJETIVOS_EMPLEADO.CODEMP, EMPLEADOS.NOMEMPLEADO AS NOMEMP, OBJETIVOS_EMPLEADO.MES, OBJETIVOS_EMPLEADO.ANIO, OBJETIVOS_EMPLEADO.CODMARCA, 
+                  OBJETIVOS_EMPLEADO.OBJETIVO, CLASIFICACIONES_GENERALES.DESCRIPCION AS DESMARCA
     FROM OBJETIVOS_EMPLEADO LEFT OUTER JOIN
+                  CLASIFICACIONES_GENERALES ON OBJETIVOS_EMPLEADO.CODMARCA = CLASIFICACIONES_GENERALES.CODIGO LEFT OUTER JOIN
                   EMPLEADOS ON OBJETIVOS_EMPLEADO.CODEMP = EMPLEADOS.CODEMPLEADO LEFT OUTER JOIN
                   MARCAS ON OBJETIVOS_EMPLEADO.CODMARCA = MARCAS.CODMARCA
-    WHERE  (OBJETIVOS_EMPLEADO.MES = ${mes}) 
-        AND (OBJETIVOS_EMPLEADO.ANIO = ${anio}) 
-        AND (OBJETIVOS_EMPLEADO.EMPNIT = '${sucursal}')
-    ORDER BY EMPLEADOS.NOMEMPLEADO, MARCAS.DESMARCA
+    WHERE (OBJETIVOS_EMPLEADO.MES = ${mes}) AND 
+        (OBJETIVOS_EMPLEADO.ANIO = ${anio}) AND 
+        (OBJETIVOS_EMPLEADO.EMPNIT = '${sucursal}')
+    ORDER BY NOMEMP
         `;
     
 

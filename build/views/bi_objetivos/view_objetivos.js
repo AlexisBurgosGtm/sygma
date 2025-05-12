@@ -216,7 +216,7 @@ function getView(){
                                 <div class="card-body p-4">
                                 
                                     <div class="form-group">
-                                        <label class="negrita">Marca</label>
+                                        <label class="negrita">Categoría</label>
                                         <select class="negrita form-control" id="cmbGenMarca">
                                         </select>
                                     </div>
@@ -276,7 +276,7 @@ function getView(){
                                     </div>
 
                                     <div class="form-group">
-                                        <label class="negrita">Marca</label>
+                                        <label class="negrita">Categoría</label>
                                         <select class="negrita form-control" id="cmbVenMarca">
                                         </select>
                                     </div>
@@ -480,11 +480,30 @@ function limpiar_datos_general(){
 };
 
 
+//se cambio de marcas a clasificacions TIPO
 function get_combo_marcas(){
 
         let container = document.getElementById('cmbGenMarca');
         let container2 = document.getElementById('cmbVenMarca');
         
+
+         GF.get_clasificaciones_listado('TIPO')
+        .then((data)=>{
+            let str = '';
+            data.recordset.map((r)=>{
+                str += `<option value='${r.CODIGO}'>${r.DESCRIPCION}</option>`
+            })
+            container.innerHTML = str;
+            container2.innerHTML = str
+        })
+        .catch(()=>{
+            container.innerHTML = `<option value='SN'>No se cargó la clasificacion</option>`;
+            container2.innerHTML = `<option value='SN'>No se cargó la clasificacion</option>`;
+        })
+    
+
+        return;
+
         axios.post(GlobalUrlCalls + '/productos/listado_marcas',
             {
                 sucursal:GlobalEmpnit,
@@ -570,6 +589,7 @@ function data_objetivos_generales(){
         let mes = Number(document.getElementById('cmbMes').value);
         let anio = Number(document.getElementById('cmbAnio').value);
        
+        //se cambio de marcas a clasificaciones TIPO
         axios.post(GlobalUrlCalls + '/objetivos/select_objetivo_general_marcas',
             {
                 sucursal:GlobalEmpnit,
