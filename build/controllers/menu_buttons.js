@@ -386,18 +386,11 @@ let botones_menu = {
                                 </ul>
                             </li>
 
-                            <li>
-                                <a href="#" title="Theme Settings" data-filter-tags="theme settings"  onclick="Menu.objetivos()">
-                                    <i class="fal fa-chart-pie"></i>
-                                    <span class="nav-link-text" data-i18n="nav.theme_settings">GESTION DE OBJETIVOS</span>
-                                </a>
-                            </li>
-                          
-
+                           
                             <li>
                                 <a href="#" title="Theme Settings" data-filter-tags="theme settings">
-                                    <i class="fal fa-folder-open"></i>
-                                    <span class="nav-link-text" data-i18n="nav.theme_settings">ARCHIVO</span>
+                                    <i class="fal fa-chart-pie"></i>
+                                    <span class="nav-link-text" data-i18n="nav.theme_settings">OBJETIVOS</span>
                                 </a>
                                 <ul>
                                     <li>
@@ -405,6 +398,19 @@ let botones_menu = {
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_layout_options">GESTION DE OBJETIVOS</span>
                                         </a>
                                     </li>
+                                    <li>
+                                        <a href="#" title="How it works" data-filter-tags="theme settings how it works"  onclick="Menu.objetivos_bi()">
+                                            <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">LOGRO DE OBJETIVOS</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#" title="Theme Settings" data-filter-tags="theme settings">
+                                    <i class="fal fa-folder-open"></i>
+                                    <span class="nav-link-text" data-i18n="nav.theme_settings">ARCHIVO</span>
+                                </a>
+                                <ul>
                                     <li>
                                         <a href="#" title="How it works" data-filter-tags="theme settings how it works"  onclick="Menu.documentos()">
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">DOCUMENTOS</span>
@@ -654,10 +660,22 @@ let botones_menu = {
                             </li>
 
                             <li>
-                                <a href="#" title="Theme Settings" data-filter-tags="theme settings"  onclick="Menu.objetivos()">
+                                <a href="#" title="Theme Settings" data-filter-tags="theme settings">
                                     <i class="fal fa-chart-pie"></i>
-                                    <span class="nav-link-text" data-i18n="nav.theme_settings">GESTION DE OBJETIVOS</span>
+                                    <span class="nav-link-text" data-i18n="nav.theme_settings">OBJETIVOS</span>
                                 </a>
+                                <ul>
+                                    <li>
+                                        <a href="#" title="Layout Options" data-filter-tags="theme settings layout options"  onclick="Menu.objetivos()">
+                                            <span class="nav-link-text" data-i18n="nav.theme_settings_layout_options">GESTION DE OBJETIVOS</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" title="How it works" data-filter-tags="theme settings how it works"  onclick="Menu.objetivos_bi()">
+                                            <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">LOGRO DE OBJETIVOS</span>
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
 
                             <li>
@@ -666,11 +684,6 @@ let botones_menu = {
                                     <span class="nav-link-text" data-i18n="nav.theme_settings">ARCHIVO</span>
                                 </a>
                                 <ul>
-                                    <li>
-                                        <a href="#" title="Layout Options" data-filter-tags="theme settings layout options"  onclick="Menu.objetivos()">
-                                            <span class="nav-link-text" data-i18n="nav.theme_settings_layout_options">GESTION DE OBJETIVOS</span>
-                                        </a>
-                                    </li>
                                     <li>
                                         <a href="#" title="How it works" data-filter-tags="theme settings how it works"  onclick="Menu.documentos()">
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">DOCUMENTOS</span>

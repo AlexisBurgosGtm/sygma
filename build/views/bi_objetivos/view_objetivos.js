@@ -66,8 +66,31 @@ function getView(){
 
             <div class="row">
 
-                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
                 
+                    ${view.frag_objetivo_marca()}
+
+                </div>
+                <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                
+                    ${view.frag_objetivo_vendedores()}
+                
+                </div>
+                 <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                
+                    ${view.frag_objetivo_todos_vendedores()}
+                
+                </div>
+
+
+            </div>
+
+           
+            `
+        },
+        frag_objetivo_marca:()=>{
+            return `
+            
                     <div class="card card-rounded shadow col-12">
                         <div class="card-body p-2">
 
@@ -103,10 +126,11 @@ function getView(){
                         </div>
                     </div>
                     
-                </div>
-                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                
-                    <div class="card card-rounded shadow col-12">
+            `
+        },
+        frag_objetivo_vendedores:()=>{
+            return `
+            <div class="card card-rounded shadow col-12">
                         <div class="card-body p-2">
 
                             <h5 class="negrita text-secondary">OBJETIVOS VENDEDORES</h5>
@@ -140,14 +164,40 @@ function getView(){
                             </div>
                         </div>
                     </div>
-            
-                
-                </div>
+            `
+        },
+        frag_objetivo_todos_vendedores:()=>{
+            return `
+            <div class="card card-rounded shadow col-12">
+                        <div class="card-body p-2">
 
+                            <h5 class="negrita text-secondary">RESUMEN VENDEDORES</h5>
 
-            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <h5 class="negrita text-danger" id="lbTotalVendedoresTodos"></h5>
+                                </div>
+                                <div class="col-6 text-right">
+                                    
+                                </div>
+                            </div>
 
-           
+                            <br>
+                         
+                            <div class="table-responsive col-12">
+                                <table class="table table-hover h-full">
+                                    <thead class="bg-secondary text-white">
+                                        <tr>
+                                            <td>VENDEDOR</td>
+                                            <td>OBJETIVO</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDataVendedorTodos">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
             `
         },
         modal_objetivo_general:()=>{
@@ -347,6 +397,19 @@ function addListeners(){
     });
 
 
+    GF.get_data_empleados_tipo(3)
+    .then((data)=>{
+      
+        let str = '';
+        data.recordset.map((r)=>{
+            str += `<option value="${r.CODEMPLEADO}">${r.NOMEMPLEADO}</option>`
+        })
+        document.getElementById('cmbVenVendedor').innerHTML = str;
+    })
+    .catch(()=>{
+
+    })
+
     let btnVenGuardar =document.getElementById('btnVenGuardar');
     btnVenGuardar.addEventListener('click',()=>{
 
@@ -366,6 +429,8 @@ function addListeners(){
                     F.Aviso('Objetivo agregado exitosamente!!');
 
                     tbl_objetivos_vendedores();
+
+                    tbl_objetivos_vendedores_resumen();
 
                     $("#modal_vendedor").modal('hide');
      
@@ -392,6 +457,7 @@ function addListeners(){
     tbl_objetivos_vendedores();
 
 
+    tbl_objetivos_vendedores_resumen();
 
 
 };
@@ -701,7 +767,94 @@ function insert_objetivo_vendedor_marca(){
       
 };
 
+
+
+function data_objetivos_empleado(){
+
+    return new Promise((resolve,reject)=>{
+
+
+        let mes = Number(document.getElementById('cmbMes').value);
+        let anio = Number(document.getElementById('cmbAnio').value);
+       
+        axios.post(GlobalUrlCalls + '/objetivos/select_objetivo_vendedores_marcas',
+            {
+                sucursal:GlobalEmpnit,
+                token:TOKEN,
+                mes:mes,
+                anio:anio
+            })
+        .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }        
+        }, (error) => {
+             reject();
+        });
+
+    })
+
+};
 function tbl_objetivos_vendedores(){
+
+
+    let container = document.getElementById('tblDataVendedor');
+    container.innerHTML = GlobalLoader;
+
+    let varTotal = 0;
+
+    data_objetivos_empleado()
+    .then((data)=>{
+
+        let str = '';
+        data.recordset.map((r)=>{
+            varTotal += Number(r.OBJETIVO);
+            let idbtnEliminar = `btnElimnVend${r.ID}`
+            str += `
+            <tr>
+                <td>${r.NOMEMP}</td>
+                <td>${r.DESMARCA}</td>
+                <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
+                <td>
+                    <button class="btn btn-md btn-danger hand shadow btn-circle"
+                        id="${idbtnEliminar}"
+                        onclick="eliminar_marca_vendedor('${r.ID}','${idbtnEliminar}')"
+                    >
+                        <i class="fal fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
+        document.getElementById('lbTotalVendedores').innerText = `Total: ${F.setMoneda(varTotal,'Q')}`;
+        
+    })
+    .catch(()=>{
+        container.innerHTML = 'No se cargaron datos...';
+
+        document.getElementById('lbTotalVendedores').innerText = '';
+
+    })
+
+
+};
+
+
+function eliminar_marca_vendedor(id,ibtn){
+
+
 
 
 };
@@ -710,3 +863,74 @@ function tbl_objetivos_vendedores(){
 
 
 
+function data_objetivos_empleado_resumen(){
+
+    return new Promise((resolve,reject)=>{
+
+
+        let mes = Number(document.getElementById('cmbMes').value);
+        let anio = Number(document.getElementById('cmbAnio').value);
+       
+        axios.post(GlobalUrlCalls + '/objetivos/select_objetivo_vendedores_marcas_resumen',
+            {
+                sucursal:GlobalEmpnit,
+                token:TOKEN,
+                mes:mes,
+                anio:anio
+            })
+        .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }        
+        }, (error) => {
+             reject();
+        });
+
+    })
+
+};
+function tbl_objetivos_vendedores_resumen(){
+
+
+    let container = document.getElementById('tblDataVendedorTodos');
+    container.innerHTML = GlobalLoader;
+
+    let varTotal = 0;
+
+    data_objetivos_empleado_resumen()
+    .then((data)=>{
+
+        let str = '';
+        data.recordset.map((r)=>{
+            varTotal += Number(r.OBJETIVO);
+            str += `
+            <tr>
+                <td>${r.NOMEMP}</td>
+                <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
+        document.getElementById('lbTotalVendedoresTodos').innerText = `Total: ${F.setMoneda(varTotal,'Q')}`;
+        
+    })
+    .catch(()=>{
+        container.innerHTML = 'No se cargaron datos...';
+
+        document.getElementById('lbTotalVendedoresTodos').innerText = '';
+
+    })
+
+
+};
