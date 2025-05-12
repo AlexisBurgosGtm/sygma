@@ -103,6 +103,15 @@ function getView(){
                             </thead>
                             <tbody id="tblDataMarcas">
                             </tbody>
+                            <tfoot class="bg-base text-white negrita">
+                                <tr>
+                                    <td></td>
+                                    <td id="lbTotalMarcasImporte"></td>
+                                    <td id="lbTotalMarcasObjetivo"></td>
+                                    <td id="lbTotalMarcasFalta"></td>
+                                    <td id="lbTotalMarcasLogro"></td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
                 </div>
@@ -129,6 +138,15 @@ function getView(){
                             </thead>
                             <tbody id="tblDataVendedores">
                             </tbody>
+                            <tfoot class="bg-secondary text-white negrita">
+                                <tr>
+                                    <td></td>
+                                    <td id="lbTotalVendedoresImporte"></td>
+                                    <td id="lbTotalVendedoresObjetivo"></td>
+                                    <td id="lbTotalVendedoresFalta"></td>
+                                    <td id="lbTotalVendedoresLogro"></td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
                 </div>
@@ -141,7 +159,8 @@ function getView(){
 
 
 
-            <button class="btn btn-circle btn-secondary hand btn-xl shadow" onclick="document.getElementById('tab-uno').click()">
+
+            <button class="btn btn-circle btn-bottom-l btn-secondary hand btn-xl shadow" onclick="document.getElementById('tab-uno').click()">
                 <i class="fal fa-arrow-left"></i>
             </button>
             `
@@ -150,7 +169,7 @@ function getView(){
             return `
             
 
-            <button class="btn btn-circle btn-secondary hand btn-xl shadow" onclick="document.getElementById('tab-uno').click()">
+            <button class="btn btn-circle  btn-bottom-l btn-secondary hand btn-xl shadow" onclick="document.getElementById('tab-uno').click()">
                 <i class="fal fa-arrow-left"></i>
             </button>
             `
@@ -164,6 +183,7 @@ function getView(){
 function addListeners(){
 
 
+    F.slideAnimationTabs();
 
 
     let cmbSucursal = document.getElementById('cmbSucursal');
@@ -222,9 +242,8 @@ function get_reportes(){
 
 
     tbl_logro_marcas(sucursal,mes,anio);
-
-
-
+    
+    tbl_logro_vendedores(sucursal,mes,anio);
 
 
 };
@@ -267,30 +286,160 @@ function tbl_logro_marcas(sucursal,mes,anio){
     let container = document.getElementById('tblDataMarcas');
     container.innerHTML = GlobalLoader;
 
+    let conteo = 0;
+    let varTotalObjetivo =0; let varTotalImporte = 0; 
+    let varTotalFaltan = 0; let varTotalLogro = 0;
 
     get_data_logro_marcas(sucursal,mes,anio)
     .then((data)=>{
 
         let str = '';
         data.recordset.map((r)=>{
+            conteo += 1;
             let varFaltan = (Number(r.OBJETIVO) - Number(r.TOTALPRECIO));
+            let varLOGRO = ((Number(r.TOTALPRECIO)/Number(r.OBJETIVO))*100);
+            
+            varTotalObjetivo += Number(r.OBJETIVO);
+            varTotalImporte += Number(r.TOTALPRECIO);
+            varTotalFaltan += Number(varFaltan);
+            varTotalLogro += Number(varLOGRO);
+
             str += `
-            <tr>
+            <tr class="hand" onclick="get_detalle_marca('${r.CODIGO_MARCA}')">
                 <td>${r.MARCA}</td>
                 <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
                 <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
                 <td>${F.setMoneda(varFaltan,'Q')}</td>
-                <td>${((Number(varFaltan)/Number(r.OBJETIVO))*100).toFixed(2)} %</td>
+                <td>${varLOGRO.toFixed(2)} %</td>
             </tr>
             `
         })
         container.innerHTML = str;
 
+
+        document.getElementById('lbTotalMarcasImporte').innerHTML = F.setMoneda(varTotalImporte,'Q');
+        document.getElementById('lbTotalMarcasObjetivo').innerHTML = F.setMoneda(varTotalObjetivo,'Q');
+        document.getElementById('lbTotalMarcasFalta').innerHTML = F.setMoneda(varTotalFaltan,'Q');
+        document.getElementById('lbTotalMarcasLogro').innerHTML = `${F.setMoneda(varTotalLogro / conteo,'')} %`
+
     })
     .catch(()=>{
         container.innerHTML = 'No se cargaron datos...';
+
+        document.getElementById('lbTotalMarcasImporte').innerHTML = '';
+        document.getElementById('lbTotalMarcasObjetivo').innerHTML =''; 
+        document.getElementById('lbTotalMarcasFalta').innerHTML = '';
+        document.getElementById('lbTotalMarcasLogro').innerHTML = '';
     })
 
 
 
 };
+function get_detalle_marca(codmarca){
+
+    document.getElementById('tab-dos').click();
+
+
+
+
+};
+
+
+function get_data_logro_vendedores(sucursal,mes,anio){
+
+     return new Promise((resolve,reject)=>{
+
+            axios.post(GlobalUrlCalls + '/objetivos/select_logro_vendedores', {
+                    token:TOKEN,
+                    sucursal:sucursal,
+                    mes:mes,
+                    anio:anio})
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        }) 
+    
+
+};
+function tbl_logro_vendedores(sucursal,mes,anio){
+
+
+    let container = document.getElementById('tblDataVendedores');
+    container.innerHTML = GlobalLoader;
+
+    let conteo = 0;
+    let varTotalObjetivo =0; let varTotalImporte = 0; 
+    let varTotalFaltan = 0; let varTotalLogro = 0;
+
+    get_data_logro_vendedores(sucursal,mes,anio)
+    .then((data)=>{
+
+        let str = '';
+        data.recordset.map((r)=>{
+            conteo += 1;
+            let varFaltan = (Number(r.OBJETIVO) - Number(r.TOTALPRECIO));
+            let varLOGRO = ((Number(r.TOTALPRECIO)/Number(r.OBJETIVO))*100);
+            
+            varTotalObjetivo += Number(r.OBJETIVO);
+            varTotalImporte += Number(r.TOTALPRECIO);
+            varTotalFaltan += Number(varFaltan);
+            varTotalLogro += Number(varLOGRO);
+
+            str += `
+            <tr class="hand" onclick="get_detalle_vendedor('${r.CODIGO_VENDEDOR}')">
+                <td>${r.VENDEDOR}</td>
+                <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
+                <td>${F.setMoneda(varFaltan,'Q')}</td>
+                <td>${varLOGRO.toFixed(2)} %</td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
+
+
+        document.getElementById('lbTotalVendedoresImporte').innerHTML = F.setMoneda(varTotalImporte,'Q');
+        document.getElementById('lbTotalVendedoresObjetivo').innerHTML = F.setMoneda(varTotalObjetivo,'Q');
+        document.getElementById('lbTotalVendedoresFalta').innerHTML = F.setMoneda(varTotalFaltan,'Q');
+        document.getElementById('lbTotalVendedoresLogro').innerHTML = `${F.setMoneda(varTotalLogro / conteo,'')} %`
+
+    })
+    .catch(()=>{
+        container.innerHTML = 'No se cargaron datos...';
+        
+        document.getElementById('lbTotalVendedoresImporte').innerHTML = '';
+        document.getElementById('lbTotalVendedoresObjetivo').innerHTML =''; 
+        document.getElementById('lbTotalVendedoresFalta').innerHTML = '';
+        document.getElementById('lbTotalVendedoresLogro').innerHTML = '';
+    })
+
+
+
+};
+function get_detalle_vendedor(codemp){
+
+    document.getElementById('tab-tres').click();
+
+
+
+    
+};
+
+
+
+
