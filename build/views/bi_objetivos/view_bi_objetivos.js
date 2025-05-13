@@ -167,6 +167,28 @@ function getView(){
         },
         vista_detalle_vendedor:()=>{
             return `
+            <div class="card card-rounded col-12 shadow">
+                <div class="card-body p-4">
+
+                    <h3 class="negrita text-danger text-center" id="lbVendedorNombre"></h3>
+
+                    <div class="table-responsive">
+                        <table class="table h-full col-12 table-bordered" id="tblDetalleVendedor">
+                            <thead class="bg-secondary text-white negrita" >
+                                <tr>
+                                    <td>MARCA</td>
+                                    <td>IMPORTE</td>
+                                    <td>OBJETIVO</td>
+                                    <td>FALTA</td>
+                                    <td>ALCANCE</td>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataDetalleVendedor"></tbody>
+                        </table>
+                    </div>
+                
+                </div>
+            </div>
             
 
             <button class="btn btn-circle  btn-bottom-l btn-secondary hand btn-xl shadow" onclick="document.getElementById('tab-uno').click()">
@@ -218,9 +240,6 @@ function addListeners(){
 
 
     get_reportes();
-
-
-
 
 
 
@@ -401,7 +420,7 @@ function tbl_logro_vendedores(sucursal,mes,anio){
             varTotalLogro += Number(varLOGRO);
 
             str += `
-            <tr class="hand" onclick="get_detalle_vendedor('${r.CODIGO_VENDEDOR}')">
+            <tr class="hand" onclick="get_detalle_vendedor('${r.CODIGO_VENDEDOR}','${r.VENDEDOR}')">
                 <td>${r.VENDEDOR}</td>
                 <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
                 <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
@@ -431,10 +450,45 @@ function tbl_logro_vendedores(sucursal,mes,anio){
 
 
 };
-function get_detalle_vendedor(codemp){
+function get_detalle_vendedor(codemp, nomemp){
+
 
     document.getElementById('tab-tres').click();
+    
+    let sucursal = document.getElementById('cmbSucursal').value;
+    let mes = document.getElementById('cmbMes').value;
+    let anio = document.getElementById('cmbAnio').value;
 
+    document.getElementById('lbVendedorNombre').innerText = nomemp;
+
+    let container = document.getElementById('tblDataDetalleVendedor');
+    container.innerHTML = GlobalLoader;
+
+
+    get_data_detalle_vendedores(sucursal,mes,anio,codemp)
+    .then((data)=>{
+        let str = '';
+
+        data.recordset.map((r)=>{
+            let varFaltan = (Number(r.OBJETIVO)-Number(r.TOTALPRECIO));
+            let varLOGRO = (Number(r.TOTALPRECIO)/Number(r.OBJETIVO)) * 100;
+             str += `
+            <tr>
+                <td>${r.CATEGORIA}</td>
+                <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
+                <td>${F.setMoneda(varFaltan,'Q')}</td>
+                <td>${varLOGRO.toFixed(2)} %</td>
+            </tr>
+            `
+        })
+
+        container.innerHTML = str;
+    })
+    .catch((error)=>{
+        console.log(error)
+        container.innerHTML = 'No se cargaron datos...';
+    })
 
 
     
@@ -443,3 +497,36 @@ function get_detalle_vendedor(codemp){
 
 
 
+function get_data_detalle_vendedores(sucursal,mes,anio,codemp){
+
+     return new Promise((resolve,reject)=>{
+
+            axios.post(GlobalUrlCalls + '/objetivos/select_logro_vendedores_detalle', {
+                    token:TOKEN,
+                    sucursal:sucursal,
+                    mes:mes,
+                    anio:anio,
+                    codemp:codemp
+                })
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        }) 
+    
+
+};

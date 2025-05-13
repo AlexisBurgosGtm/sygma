@@ -3,6 +3,39 @@ const express = require('express');
 const router = express.Router();
 
 
+
+
+// se cambio marcas por clasificaion TIPO
+router.post("/select_logro_vendedores_detalle", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio, codemp} = req.body;
+
+    let qry = `
+       SELECT 
+                view_rpt_objetivos_vendedores_categorias.VENDEDOR, 
+                view_rpt_objetivos_vendedores_categorias.CODIGO_CATEGORIA, 
+                view_rpt_objetivos_vendedores_categorias.CATEGORIA, 
+                SUM(view_rpt_objetivos_vendedores_categorias.TOTALUNIDADES) AS TOTALUNIDADES, 
+                SUM(view_rpt_objetivos_vendedores_categorias.TOTALCOSTO) AS TOTALCOSTO, 
+                SUM(view_rpt_objetivos_vendedores_categorias.TOTALPRECIO) AS TOTALPRECIO, 
+                ISNULL(OBJETIVOS_EMPLEADO.OBJETIVO,0) AS OBJETIVO
+FROM     view_rpt_objetivos_vendedores_categorias LEFT OUTER JOIN
+                  OBJETIVOS_EMPLEADO ON view_rpt_objetivos_vendedores_categorias.CODIGO_CATEGORIA = OBJETIVOS_EMPLEADO.CODMARCA AND view_rpt_objetivos_vendedores_categorias.ANIO = OBJETIVOS_EMPLEADO.ANIO AND 
+                  view_rpt_objetivos_vendedores_categorias.MES = OBJETIVOS_EMPLEADO.MES AND view_rpt_objetivos_vendedores_categorias.EMPNIT = OBJETIVOS_EMPLEADO.EMPNIT
+WHERE  (view_rpt_objetivos_vendedores_categorias.EMPNIT LIKE '${sucursal}') 
+        AND (view_rpt_objetivos_vendedores_categorias.ANIO = ${anio}) 
+        AND (view_rpt_objetivos_vendedores_categorias.MES = ${mes}) 
+        AND (view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR = ${codemp})
+GROUP BY view_rpt_objetivos_vendedores_categorias.VENDEDOR, view_rpt_objetivos_vendedores_categorias.CODIGO_CATEGORIA, view_rpt_objetivos_vendedores_categorias.CATEGORIA, OBJETIVOS_EMPLEADO.OBJETIVO
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+
 // se cambio marcas por clasificaion TIPO
 router.post("/select_logro_marcas", async(req,res)=>{
    
