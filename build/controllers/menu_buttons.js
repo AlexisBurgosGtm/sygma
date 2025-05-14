@@ -56,7 +56,7 @@ let botones_menu = {
                                     </li>
                                     
                                     <li>
-                                        <a href="#" title="Introduction" data-filter-tags="application intel introduction"  onclick="Menu.pendiente()">
+                                        <a href="#" title="Introduction" data-filter-tags="application intel introduction"  onclick="Menu.devoluciones_clientes()">
                                             <span class="nav-link-text" data-i18n="nav.application_intel_introduction">NOTAS DE CRÉDITO CLIENTES</span>
                                         </a>
                                     </li>                                   
@@ -309,7 +309,7 @@ let botones_menu = {
                                     </li>  
                                     
                                     <li>
-                                        <a href="#" title="Introduction" data-filter-tags="application intel introduction"  onclick="Menu.pendiente()">
+                                        <a href="#" title="Introduction" data-filter-tags="application intel introduction"  onclick="Menu.devoluciones_clientes()">
                                             <span class="nav-link-text" data-i18n="nav.application_intel_introduction">NOTAS DE CRÉDITO CLIENTES</span>
                                         </a>
                                     </li>
@@ -582,7 +582,7 @@ let botones_menu = {
                                     </li>  
                                     
                                     <li>
-                                        <a href="#" title="Introduction" data-filter-tags="application intel introduction"  onclick="Menu.pendiente()">
+                                        <a href="#" title="Introduction" data-filter-tags="application intel introduction"  onclick="Menu.devoluciones_clientes()">
                                             <span class="nav-link-text" data-i18n="nav.application_intel_introduction">NOTAS DE CRÉDITO CLIENTES</span>
                                         </a>
                                     </li>

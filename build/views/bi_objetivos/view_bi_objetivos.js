@@ -219,6 +219,16 @@ function addListeners(){
             str += `<option value="${r.EMPNIT}">${r.NOMBRE}</option>`;
         })
         cmbSucursal.innerHTML = str; 
+        
+        if(Number(GlobalNivelUsuario)==1){
+
+        }else{
+            cmbSucursal.value = GlobalEmpnit;
+            cmbSucursal.disabled = true;
+        };
+
+        get_reportes();
+
     })
     .catch(()=>{
         cmbSucursal.innerHTML = `<option value="%">No se cargaron las sedes</option>`
@@ -239,8 +249,7 @@ function addListeners(){
     document.getElementById('cmbAnio').addEventListener('change',()=>{ get_reportes(); });
 
 
-    get_reportes();
-
+ 
 
 
 };

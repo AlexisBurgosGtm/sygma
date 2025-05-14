@@ -321,6 +321,17 @@ let Menu = {
             F.AvisoError('No tiene permitido entrar a esta sección');
         }
     },
+    devoluciones_clientes:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/transacciones/view_devoluciones.js','root')
+            .then(async()=>{
+                    initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        }
+    },
     objetivos:()=>{
         if(Menu.verify()==true){
             Menu.salidaMenu();
