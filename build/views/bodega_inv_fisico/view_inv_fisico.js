@@ -68,8 +68,9 @@ function getView(){
                                     <td>CODIGO 3</td>
                                     <td>PRODUCTO</td>
                                     <td>MARCA</td>
-                                    <td>EXISTENCIA</td>
-                                    <td></td>
+                                    <td>TOTALCOSTO</td>
+                                    <td>EXISTENCIA(UNS)</td>
+                                    <td>FARDOS</td>
                                 </tr>
                             </thead>
                             <tbody id="tblDataInventario">
@@ -166,6 +167,8 @@ function tbl_inventario(){
 
             let str = '';
             data.recordset.map((r)=>{
+                let totalunidades = Number(r.TOTALUNIDADES);
+                let cajas = totalunidades / Number(r.UXC);
                 str += `
                 <tr>
                     <td>${r.CODPROD}</td>
@@ -173,8 +176,9 @@ function tbl_inventario(){
                     <td>${r.DESPROD3}</td>
                     <td>${r.DESPROD}</td>
                     <td>${r.DESMARCA}</td>
+                    <td>${F.setMoneda(r.TOTALCOSTO,'Q')}</td>
                     <td>${r.TOTALUNIDADES}</td>
-                    <td></td>
+                    <td>${F.setMoneda(cajas,'')}</td>
                 </tr>
                 `
             })
