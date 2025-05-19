@@ -1,4 +1,3 @@
-const { listen } = require("soap")
 
 function getView(){
     let view = {
@@ -171,7 +170,7 @@ function getView(){
                                 <div class="col-6">
                                 </div>
                                 <div class="col-6 text-right">
-                                    <i class="fal fa-chart-pie negrita text-success" style="font-size:250%"></i>
+                                    <i class="fal fa-list negrita text-base" style="font-size:250%"></i>
                                 </div>
                             </div>
 
@@ -560,6 +559,12 @@ function getView(){
                     ${view.frag_vendedores()}
                 </div>
             </div>
+
+            
+            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
+                <i class="fal fa-arrow-left"></i>
+            </button>
+
             `
         },
         frag_parametros: ()=>{
@@ -571,11 +576,7 @@ function getView(){
 
                     <div class="row">
                         <div class="col-sm-12 col-xl-6 col-lg-6 col-md-6">
-                            <div class="form-group">
-                                <label class="negrita text-secondary">Sucursal</label>
-                                <select class="form-control negrita" id="cmbSucursal">
-                                </select>
-                            </div>
+                            
                         </div>
                         <div class="col-sm-12 col-xl-6 col-lg-6 col-md-6">
                                 <div class="form-group">
@@ -833,7 +834,7 @@ function addListeners(){
 
 
      listeners_objetivos();
-     
+
 };
 
 function initView(){
@@ -1190,32 +1191,7 @@ function listeners_objetivos(){
     
     let cmbSucursal = document.getElementById('cmbSucursal');
 
-    GF.get_data_empresas()
-    .then((data)=>{
-
-        let str = `<option value="%">TODAS</option>`;
-
-        data.recordset.map((r)=>{
-            str += `<option value="${r.EMPNIT}">${r.NOMBRE}</option>`;
-        })
-        cmbSucursal.innerHTML = str; 
-        
-        if(Number(GlobalNivelUsuario)==1){
-
-        }else{
-            cmbSucursal.value = GlobalEmpnit;
-            cmbSucursal.disabled = true;
-        };
-
-        get_reportes();
-
-    })
-    .catch(()=>{
-        cmbSucursal.innerHTML = `<option value="%">No se cargaron las sedes</option>`
-    })
-
-
-
+   
     document.getElementById('cmbMes').innerHTML = F.ComboMeses();
     document.getElementById('cmbMes').value = F.get_mes_curso();
 
@@ -1224,7 +1200,7 @@ function listeners_objetivos(){
 
 
 
-    cmbSucursal.addEventListener('change',()=>{ get_reportes(); });
+    //cmbSucursal.addEventListener('change',()=>{ get_reportes(); });
     document.getElementById('cmbMes').addEventListener('change',()=>{ get_reportes(); });
     document.getElementById('cmbAnio').addEventListener('change',()=>{ get_reportes(); });
 
