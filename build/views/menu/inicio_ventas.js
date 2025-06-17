@@ -267,6 +267,8 @@ function getView(){
                                     <tr>
                                         <td>MARCA</td>
                                         <td>IMPORTE</td>
+                                        <td>OBJETIVO</td>
+                                        <td>FALTAN</td>
                                         <td></td>
                                     </tr>
                                 </thead>
@@ -624,12 +626,9 @@ function rpt_tbl_marcas(){
                 <tr>
                     <td>${r.DESMARCA}</td>
                     <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
-                    <td>
-                        <button class="btn btn-secondary btn-md btn-circle hand shadow"
-                        onclick="">
-                                <i class="fal fa-list"></i>
-                        </button>
-                    </td>
+                    <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
+                    <td>${F.setMoneda((Number(r.OBJETIVO)-Number(r.TOTALPRECIO)),'Q')}</td>
+                    <td class="negrita">${F.setMoneda((Number(r.OBJETIVO)/Number(r.TOTALPRECIO)) * 100,'')}%</td>
                 </tr>
             `
         })

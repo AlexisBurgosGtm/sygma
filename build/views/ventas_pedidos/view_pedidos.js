@@ -1299,8 +1299,8 @@ function get_buscar_producto(filtro){
                 let strClassExistencia = '';
                 let existencia = Number(r.EXISTENCIA);
                 if(existencia<=0){strClassExistencia='bg-danger text-white'};
-                let invaldo = F.setMoneda(existencia/Number(r.EQUIVALE),'')
 
+                
                 str += `
                     <tr class="hand" onclick="get_producto('${r.CODPROD}','${r.DESPROD}','${r.CODMEDIDA}','${r.EQUIVALE}','${r.COSTO}','${r.PRECIO}','${r.TIPOPROD}','${r.EXENTO}','${r.EXISTENCIA}','${r.BONO}')">
                         
@@ -1310,7 +1310,7 @@ function get_buscar_producto(filtro){
                         </td>
                         <td>${r.CODMEDIDA} (Eq:${r.EQUIVALE})</td>
                         <td>${F.setMoneda(r.PRECIO,'Q')}</td>
-                        <td class="${strClassExistencia}">${r.EXISTENCIA}</td>
+                        <td class="negrita ${strClassExistencia}">${F.setMoneda(r.EXISTENCIA,'')}</td>
                         <td>${r.DESMARCA}</td>
                         <td>${r.TIPOPROD}</td>
                     </tr>
