@@ -1294,15 +1294,19 @@ function get_buscar_producto(filtro){
         }else{
             const data = response.data.recordset;
             data.map((r)=>{
+                
+                let EXISTENCIA = F.get_existencia(Number(r.EXISTENCIA),Number(r.EQUIVALE)); //r.EXISTENCIA
+
+
                 let strClassIps = '';
                 if(r.BONO.toString()=='0'){}else{}strClassIps = 'negrita text-base'
                 let strClassExistencia = '';
-                let existencia = Number(r.EXISTENCIA);
+                let existencia = Number(EXISTENCIA);
                 if(existencia<=0){strClassExistencia='bg-danger text-white'};
 
                 
                 str += `
-                    <tr class="hand" onclick="get_producto('${r.CODPROD}','${r.DESPROD}','${r.CODMEDIDA}','${r.EQUIVALE}','${r.COSTO}','${r.PRECIO}','${r.TIPOPROD}','${r.EXENTO}','${r.EXISTENCIA}','${r.BONO}')">
+                    <tr class="hand" onclick="get_producto('${r.CODPROD}','${r.DESPROD}','${r.CODMEDIDA}','${r.EQUIVALE}','${r.COSTO}','${r.PRECIO}','${r.TIPOPROD}','${r.EXENTO}','${EXISTENCIA}','${r.BONO}')">
                         
                         <td><b style="color:${r.COLOR}">${r.DESPROD}</b>
                             <br>
@@ -1310,7 +1314,7 @@ function get_buscar_producto(filtro){
                         </td>
                         <td>${r.CODMEDIDA} (Eq:${r.EQUIVALE})</td>
                         <td>${F.setMoneda(r.PRECIO,'Q')}</td>
-                        <td class="negrita ${strClassExistencia}">${F.setMoneda(r.EXISTENCIA,'')}</td>
+                        <td class="negrita ${strClassExistencia}">${F.setMoneda(EXISTENCIA,'')}</td>
                         <td>${r.DESMARCA}</td>
                         <td>${r.TIPOPROD}</td>
                     </tr>

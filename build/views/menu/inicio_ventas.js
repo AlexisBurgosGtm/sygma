@@ -622,7 +622,6 @@ function rpt_tbl_marcas(){
             contador +=1;
             varTotal += Number(r.IMPORTE);
             str += `
-
                 <tr>
                     <td>${r.DESMARCA}</td>
                     <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>

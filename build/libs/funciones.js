@@ -1133,6 +1133,19 @@ let F = {
         localStorage.setItem('lastTab', '#' + tabinicio.toString());
 
       },
+      get_existencia:(totalunidades,equivale)=>{
+         
+          let saldo = 0;
+          
+          try {
+            saldo = Number(totalunidades)/Number(equivale);
+          } catch (error) {
+            saldo=0;
+          }
+          
+          return saldo;
+          
+      }
 };
 
 //export default funciones;
