@@ -35,7 +35,7 @@ function getView(){
                             ${view.vista_sellout()}
                         </div>
                         <div class="tab-pane fade" id="cinco" role="tabpanel" aria-labelledby="home-tab">
-                            ${view.rpt_inventarios()}
+                            ${view.rpt_inventarios() + view.modal_sellout_config()}
                         </div>
                         <div class="tab-pane fade" id="seis" role="tabpanel" aria-labelledby="home-tab">
                             ${view.objetivos()}
@@ -488,17 +488,19 @@ function getView(){
             <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
                 <i class="fal fa-arrow-left"></i>
             </button>
+
+            
             `
         },
         rpt_inventarios:()=>{
             return `
             <div class="card card-rounded shadow">
-                <div class="card-body p-2">
+                <div class="card-body p-4">
                     
                     <h3 class="negrita text-danger">INVENTARIO ACTUAL</h3>
 
                     <div class="row">
-                        <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
+                        <div class="col-sm-6 col-md-8 col-lg-8 col-xl-8">
                             <div class="input-group">
                                 <select class="form-control negrita text-base" id="cmbSt">
                                     <option value="SI">PRODUCTOS HABILITADOS</option>
@@ -510,9 +512,7 @@ function getView(){
 
                             
                         </div>
-                        <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
-                            <h5 id="lbTotalItems"></h5>
-                        </div>
+                        
                         <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
                             <button class="btn btn-success btn-md hand shadow" id="btnExportarInventario">
                                 <i class="fal fa-share"></i> Exportar Excel
@@ -531,8 +531,8 @@ function getView(){
                                     <td>CODIGO 3</td>
                                     <td>PRODUCTO</td>
                                     <td>MARCA</td>
-                                    <td>EXISTENCIA</td>
-                                    <td></td>
+                                    <td>EXISTENCIA (CAJAS)</td>
+                                    <td>SELLOUT</td>
                                 </tr>
                             </thead>
                             <tbody id="tblDataInventario">
@@ -546,6 +546,70 @@ function getView(){
                 <i class="fal fa-arrow-left"></i>
             </button>
 
+            <button class="btn btn-warning btn-xl btn-circle hand shadow btn-bottom-r" onclick="$('#modal_sellout_config').modal('show')">
+                <i class="fal fa-cog"></i>
+            </button>
+
+            `
+        },
+        modal_sellout_config:()=>{
+            return `
+              <div id="modal_sellout_config" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-secondary d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white" id="">
+                                Configuracion de Promedio SellOut
+                            </h4>
+                        </div>
+                        <div class="modal-body p-4">
+                            
+                            <div class="card card-rounded">
+                                <div class="card-body p-4">
+
+                                        <div class="form-group">
+                                            <label>Seleccione el Año</label>
+                                            <select class="form-control negrita" id="cmbSOAnio">
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Seleccione el Mes Inicial</label>
+                                            <select class="form-control negrita" id="cmbSOMesInicial">
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Seleccione el Mes Final</label>
+                                            <select class="form-control negrita" id="cmbSOMesFinal">
+                                            </select>
+                                        </div>
+
+                                        <br>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <button class="btn btn-secondary btn-xl btn-circle hand shadow" id="" data-dismiss="modal">
+                                                    <i class="fal fa-arrow-left"></i>
+                                                </button>
+                                            </div>
+                                            <div class="col-6">
+                                                <button class="btn btn-xl btn-info btn-circle hand shadow" id="btnConfigSellout">
+                                                    <i class="fal fa-save"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                </div>
+                            </div>
+
+                                
+                    
+
+                        </div>
+                    
+                    </div>
+                </div>
+            </div>
             `
         },
         objetivos:()=>{
@@ -729,6 +793,10 @@ function addListeners(){
     document.getElementById('txtSFechaInicial').value = F.getFecha();
     document.getElementById('txtSFechaFinal').value = F.getFecha();
     
+
+    document.getElementById('cmbSOMesInicial').innerHTML = F.ComboMeses();document.getElementById('cmbSOMesInicial').value=F.get_mes_curso();
+    document.getElementById('cmbSOMesFinal').innerHTML = F.ComboMeses();document.getElementById('cmbSOMesFinal').value=F.get_mes_curso();
+    document.getElementById('cmbSOAnio').innerHTML = F.ComboAnio(); document.getElementById('cmbSOAnio').value = F.get_anio_curso();
 
 
     // inciales
@@ -1148,8 +1216,8 @@ function tbl_inventario(){
                 <td>${r.DESPROD3}</td>
                 <td>${r.DESPROD}</td>
                 <td>${r.DESMARCA}</td>
-                <td>${r.TOTALUNIDADES}</td>
-                <td></td>
+                <td>${F.get_existencia(Number(r.TOTALUNIDADES),Number(r.UXC)).toFixed(2)}</td>
+                <td>${F.get_existencia(Number(r.SELLOUT),Number(r.UXC)).toFixed(2)}</td>
             </tr>
             `
         })

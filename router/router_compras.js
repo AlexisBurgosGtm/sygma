@@ -3,6 +3,45 @@ const express = require('express');
 const router = express.Router();
 
 
+
+router.post("/update_sell_out_productos", async(req,res)=>{
+   
+
+    const { token,sucursal,mi,mf,anio} = req.body;
+
+    let promedio = (Number(mf)-Number(mi)) + 1;
+    let qry ='';  
+
+
+
+    qry = `
+       UPDATE PRODUCTOS SET SELLOUT = T.TOTALUNIDADES FROM PRODUCTOS 
+       INNER JOIN (
+            SELECT DOCPRODUCTOS.CODPROD, 
+            SUM(ISNULL(DOCPRODUCTOS.TOTALUNIDADES,0) / ${promedio}) AS TOTALUNIDADES, 
+            SUM(DOCPRODUCTOS.TOTALPRECIO) AS TOTALPRECIO
+            FROM     DOCUMENTOS LEFT OUTER JOIN
+                DOCPRODUCTOS ON DOCUMENTOS.CORRELATIVO = DOCPRODUCTOS.CORRELATIVO AND 
+                DOCUMENTOS.CODDOC = DOCPRODUCTOS.CODDOC AND DOCUMENTOS.EMPNIT = DOCPRODUCTOS.EMPNIT LEFT OUTER JOIN
+                TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+            WHERE  
+                (DOCUMENTOS.STATUS <> 'A') AND 
+                (DOCUMENTOS.ANIO = ${anio}) AND 
+                (DOCUMENTOS.MES BETWEEN ${mi} AND ${mf}) AND 
+                (TIPODOCUMENTOS.TIPODOC IN('FAC','FCP','FPC','FEC','FEF','FES')) AND
+                (DOCPRODUCTOS.CODPROD IS NOT NULL)
+            GROUP BY DOCPRODUCTOS.CODPROD) T ON PRODUCTOS.CODPROD= T.CODPROD
+        `
+
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+
+
+
 router.post("/select_inventario_general", async(req,res)=>{
    
     const {token,sucursal,st} = req.body;
@@ -12,16 +51,29 @@ router.post("/select_inventario_general", async(req,res)=>{
 
     if(sucursal=='%'){
         qry = `
-        SELECT view_invsaldo.CODPROD, view_invsaldo.CODPROD2, view_invsaldo.DESPROD3, view_invsaldo.DESPROD, SUM(view_invsaldo.TOTALUNIDADES) AS TOTALUNIDADES, SUM(view_invsaldo.TOTALCOSTO) AS TOTALCOSTO, 
-                  SUM(view_invsaldo.MINIMO) AS MINIMO, SUM(view_invsaldo.MAXIMO) AS MAXIMO, SUM(view_invsaldo.EXISTENCIA) AS EXISTENCIA, view_invsaldo.HABILITADO, view_invsaldo.COSTO_ULTIMO, view_invsaldo.COSTO_ANTERIOR, 
-                  view_invsaldo.COSTO_PROMEDIO, PRODUCTOS.CODMARCA, 
-                  MARCAS.DESMARCA, PRODUCTOS.UXC
+        SELECT  view_invsaldo.CODPROD, 
+                view_invsaldo.CODPROD2, 
+                view_invsaldo.DESPROD3, 
+                view_invsaldo.DESPROD, 
+                SUM(view_invsaldo.TOTALUNIDADES) AS TOTALUNIDADES, 
+                SUM(view_invsaldo.TOTALCOSTO) AS TOTALCOSTO, 
+                SUM(view_invsaldo.MINIMO) AS MINIMO, 
+                SUM(view_invsaldo.MAXIMO) AS MAXIMO, 
+                SUM(view_invsaldo.EXISTENCIA) AS EXISTENCIA, 
+                view_invsaldo.HABILITADO, 
+                view_invsaldo.COSTO_ULTIMO, 
+                view_invsaldo.COSTO_ANTERIOR, 
+                view_invsaldo.COSTO_PROMEDIO, 
+                PRODUCTOS.CODMARCA, 
+                MARCAS.DESMARCA, 
+                PRODUCTOS.UXC,
+                ISNULL(PRODUCTOS.SELLOUT,0) AS SELLOUT
         FROM     PRODUCTOS RIGHT OUTER JOIN
                   view_invsaldo ON PRODUCTOS.CODPROD = view_invsaldo.CODPROD LEFT OUTER JOIN
                   MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA
         GROUP BY view_invsaldo.CODPROD, view_invsaldo.CODPROD2, view_invsaldo.DESPROD3, view_invsaldo.DESPROD, view_invsaldo.HABILITADO, view_invsaldo.COSTO_ULTIMO, view_invsaldo.COSTO_ANTERIOR, 
                   view_invsaldo.COSTO_PROMEDIO, PRODUCTOS.CODMARCA, 
-                  MARCAS.DESMARCA, PRODUCTOS.UXC
+                  MARCAS.DESMARCA, PRODUCTOS.UXC,PRODUCTOS.SELLOUT
         HAVING (view_invsaldo.HABILITADO = '${st}')
         ORDER BY view_invsaldo.CODPROD
         `
@@ -32,7 +84,8 @@ router.post("/select_inventario_general", async(req,res)=>{
                 view_invsaldo.EXISTENCIA, view_invsaldo.HABILITADO, view_invsaldo.COSTO_ULTIMO, 
                 view_invsaldo.COSTO_ANTERIOR, view_invsaldo.COSTO_PROMEDIO, 
                 PRODUCTOS.CODMARCA, MARCAS.DESMARCA,
-                PRODUCTOS.UXC
+                PRODUCTOS.UXC,
+                ISNULL(PRODUCTOS.SELLOUT,0) AS SELLOUT
         FROM  PRODUCTOS RIGHT OUTER JOIN
                 view_invsaldo ON PRODUCTOS.CODPROD = view_invsaldo.CODPROD LEFT OUTER JOIN
                 MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA
@@ -46,9 +99,6 @@ router.post("/select_inventario_general", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
-
-
-
 
 
 router.post("/insertcompra", async(req,res)=>{
