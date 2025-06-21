@@ -17,7 +17,9 @@ router.post("/listado", async(req,res)=>{
                 CODMARCA AS CODIGO, 
                 DESMARCA AS DESCRIPCION, 
                 PORCENTAJE, 
-                ISNULL(OBJETIVO,0) AS OBJETIVO 
+                ISNULL(OBJETIVO,0) AS OBJETIVO,
+                0 AS CODMARCA,
+                '' AS DESMARCA 
             FROM MARCAS;
             ` 
                 
@@ -25,12 +27,15 @@ router.post("/listado", async(req,res)=>{
     
         default:
             qry = `
-            SELECT 
-                CODIGO, 
-                DESCRIPCION, 
-                0 AS OBJETIVO 
-            FROM 
-                CLASIFICACIONES_GENERALES WHERE TIPO='${tipo}';
+           SELECT 
+                CLASIFICACIONES_GENERALES.CODIGO, 
+                CLASIFICACIONES_GENERALES.DESCRIPCION, 
+                0 AS OBJETIVO, 
+                isnull(CLASIFICACIONES_GENERALES.CODMARCA,0) AS CODMARCA, 
+                ISNULL(MARCAS.DESMARCA,'') AS DESMARCA
+            FROM CLASIFICACIONES_GENERALES LEFT OUTER JOIN
+                MARCAS ON CLASIFICACIONES_GENERALES.CODMARCA = MARCAS.CODMARCA 
+            WHERE CLASIFICACIONES_GENERALES.TIPO='${tipo}';
             ` 
     
             break;
@@ -45,23 +50,27 @@ router.post("/listado", async(req,res)=>{
 
 router.post("/insert_clasificacion", async(req,res)=>{
    
-    const { token, sucursal, tipo, descripcion} = req.body;
+        const { token, sucursal, tipo, descripcion,codmarca} = req.body;
 
-    let qry = `
-        INSERT INTO CLASIFICACIONES_GENERALES (TIPO, DESCRIPCION) VALUES ('${tipo}','${descripcion}');
-        ` 
+        let qry = `
+            INSERT INTO CLASIFICACIONES_GENERALES (TIPO, DESCRIPCION,CODMARCA) VALUES ('${tipo}','${descripcion}',${codmarca});
+            ` 
 
-    execute.QueryToken(res,qry,token);
+        execute.QueryToken(res,qry,token);
      
 });
 
 
 router.post("/edit_clasificacion", async(req,res)=>{
    
-    const { token, sucursal, codigo, descripcion} = req.body;
+    const { token, sucursal, codigo, descripcion,codmarca} = req.body;
 
     let qry = `
-        UPDATE CLASIFICACIONES_GENERALES SET DESCRIPCION='${descripcion}'
+        UPDATE 
+            CLASIFICACIONES_GENERALES 
+        SET 
+            DESCRIPCION='${descripcion}',
+            CODMARCA=${codmarca}
         WHERE CODIGO=${codigo};
         ` 
 

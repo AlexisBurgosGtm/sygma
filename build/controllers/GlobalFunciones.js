@@ -349,6 +349,29 @@ let GF = {
             });
         })     
     },
+    get_data_marcas:()=>{
+        return new Promise((resolve,reject)=>{
+                axios.post(GlobalUrlCalls + '/productos/listado_marcas',
+                {
+                    sucursal:GlobalEmpnit,
+                    token:TOKEN
+                })
+                .then((response) => {
+                    if(response.status.toString()=='200'){
+                        let data = response.data;
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);
+                        }else{
+                            reject();
+                        }            
+                    }else{
+                        reject();
+                    }             
+                }, (error) => {
+                    reject();
+                });
+        })
+    },
     get_data_cajas:()=>{
         return new Promise((resolve,reject)=>{
     

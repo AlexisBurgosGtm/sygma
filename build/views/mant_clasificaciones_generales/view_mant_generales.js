@@ -74,7 +74,7 @@ function getView(){
                                 <tr>
                                     <td>CÓDIGO</td>
                                     <td>DESCRIPCIÓN</td>
-                                    <td>OBJETIVO</td>
+                                    <td>MARCA ASOCIADA</td>
                                     <td></td>
                                     <td></td>
                                 </tr>
@@ -107,7 +107,13 @@ function getView(){
                             <div class="form-group">
                                 <label>Descripción</label>
                                 <input type="text" class="form-control negrita text-verde border-base" id="txtDescripcion">
-                            </div>                      
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Marca Asociada</label>
+                                <select class="form-control negrita text-verde border-base" id="cmbCodMarca">
+                                </select>
+                            </div>
 
                             <br>
 
@@ -157,7 +163,11 @@ function getView(){
                                 <input type="text" class="form-control negrita text-verde border-base" id="txtDescripcionMarca">
                             </div>
                             
-                            <div class="form-group">
+                         
+
+                           
+
+                            <div class="form-group hidden">
                                 <label>Objetivo</label>
                                 <input type="number" class="form-control negrita text-verde border-base" id="txtObjetivoMarca">
                             </div>
@@ -271,6 +281,9 @@ function addListeners(){
 
         let codigo = document.getElementById('txtCodigo').value;
         let descripcion = document.getElementById('txtDescripcion').value || 'SN';
+        let codmarca = document.getElementById('cmbCodMarca').value;
+
+
         if(descripcion=='SN'){F.AvisoError('Escriba una descripción de la clasificación a agregar');return;};
 
         F.Confirmacion('¿Está seguro que desea CREAR/EDITAR esta Clasificación?')
@@ -284,7 +297,7 @@ function addListeners(){
 
                 if(document.getElementById('txtCodigo').value==''){
                     
-                    insert_clasificacion(tipo.value,descripcion)
+                    insert_clasificacion(tipo.value,descripcion,codmarca)
                     .then(()=>{
                         
                         F.Aviso('Clasificación agregada exitosamente!!');
@@ -307,7 +320,7 @@ function addListeners(){
 
                 }else{
 
-                    edit_clasificacion(codigo,descripcion)
+                    edit_clasificacion(codigo,descripcion,codmarca)
                     .then(()=>{
                         
                         F.Aviso('Clasificación actualizada exitosamente!!');
@@ -350,7 +363,7 @@ function addListeners(){
         let codigo = document.getElementById('txtCodigoMarca').value;
         let descripcion = document.getElementById('txtDescripcionMarca').value || 'SN';
         let objetivo = document.getElementById('txtObjetivoMarca').value || '0';
-
+       
         if(descripcion=='SN'){F.AvisoError('Escriba una descripción de la clasificación a agregar');return;};
 
         F.Confirmacion('¿Está seguro que desea CREAR/EDITAR esta Marca?')
@@ -421,6 +434,22 @@ function addListeners(){
     })
 
 
+
+    GF.get_data_marcas()
+    .then((data)=>{
+        
+        let str = '<option value="0">Sin Marca</option>';
+        data.recordset.map((r)=>{
+            str += `<option value='${r.CODMARCA}'>${r.DESMARCA}</option>`
+        })
+        document.getElementById('cmbCodMarca').innerHTML = str;
+
+    })
+    .catch(()=>{
+        document.getElementById('cmbCodMarca').innerHTML = '<option value="0">Sin Marca</option>';
+    })
+
+
 };
 
 
@@ -447,9 +476,9 @@ function get_listado(tipo){
             <tr>
                 <td>${r.CODIGO}</td>
                 <td>${r.DESCRIPCION}</td>
-                <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
+                <td>${r.DESMARCA}</td>
                 <td>
-                    <button class="btn btn-circle btn-info hand shadow" onclick="get_clasificacion('${r.CODIGO}','${r.DESCRIPCION}','${r.PORCENTAJE}')">
+                    <button class="btn btn-circle btn-info hand shadow" onclick="get_clasificacion('${r.CODIGO}','${r.DESCRIPCION}','${r.PORCENTAJE}','${r.CODMARCA}')">
                         <i class="fal fa-edit"></i>
                     </button>
                 </td>
@@ -469,7 +498,7 @@ function get_listado(tipo){
     })
 };
 
-function get_clasificacion(codigo,descripcion,objetivo){
+function get_clasificacion(codigo,descripcion,objetivo,codmarca){
 
 
     let tipo = document.getElementById('cmbTipo').value;
@@ -480,6 +509,7 @@ function get_clasificacion(codigo,descripcion,objetivo){
             document.getElementById('txtCodigoMarca').value = codigo;
             document.getElementById('txtDescripcionMarca').value = descripcion;
             document.getElementById('txtObjetivoMarca').value = objetivo;
+            //document.getElementById('cmbCodMarca').value = codmarca;
         
             $("#modal_nuevo_marca").modal('show');
             
@@ -489,6 +519,7 @@ function get_clasificacion(codigo,descripcion,objetivo){
 
             document.getElementById('txtCodigo').value = codigo;
             document.getElementById('txtDescripcion').value = descripcion;
+            document.getElementById('cmbCodMarca').value = codmarca;
         
             $("#modal_nuevo").modal('show');
 
@@ -502,11 +533,11 @@ function get_clasificacion(codigo,descripcion,objetivo){
 
 };
 
-function insert_clasificacion(tipo,descripcion){
+function insert_clasificacion(tipo,descripcion,codmarca){
 
     return new Promise((resolve,reject)=>{
 
-        axios.post(GlobalUrlCalls + '/clasificaciones/insert_clasificacion', {token:TOKEN,tipo:tipo,descripcion:descripcion})
+        axios.post(GlobalUrlCalls + '/clasificaciones/insert_clasificacion', {token:TOKEN,tipo:tipo,descripcion:descripcion,codmarca:codmarca})
         .then((response) => {
             if(response.status.toString()=='200'){
                 let data = response.data;
@@ -525,13 +556,14 @@ function insert_clasificacion(tipo,descripcion){
 
 };
 
-function edit_clasificacion(codigo,descripcion){
+function edit_clasificacion(codigo,descripcion,codmarca){
 
     return new Promise((resolve,reject)=>{
 
         axios.post(GlobalUrlCalls + '/clasificaciones/edit_clasificacion', {token:TOKEN,
                                                                             codigo:codigo,
-                                                                            descripcion:descripcion})
+                                                                            descripcion:descripcion,
+                                                                            codmarca:codmarca})
         .then((response) => {
             if(response.status.toString()=='200'){
                 let data = response.data;

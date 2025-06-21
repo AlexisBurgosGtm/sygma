@@ -149,7 +149,17 @@ function getView(){
                             <br>
                          
                             <div class="table-responsive col-12">
-                                <table class="table table-hover h-full">
+                                
+                                <div class="form-group">
+                                    <input type="text" 
+                                        class="form-control negrita"
+                                        placeholder="Escriba para buscar..."
+                                        id="txtBuscarVen"
+                                        oninput="F.FiltrarTabla('tblObjetivoVendedores','txtBuscarVen')"
+                                    >
+                                </div>
+
+                                <table class="table table-hover h-full" id="tblObjetivoVendedores">
                                     <thead class="bg-secondary text-white">
                                         <tr>
                                             <td>VENDEDOR</td>
@@ -432,6 +442,8 @@ function addListeners(){
 
                     tbl_objetivos_vendedores_resumen();
 
+                    tbl_objetivos_generales();
+
                     $("#modal_vendedor").modal('hide');
      
 
@@ -676,7 +688,7 @@ function data_objetivos_generales(){
         let anio = Number(document.getElementById('cmbAnio').value);
        
         //se cambio de marcas a clasificaciones TIPO
-        axios.post(GlobalUrlCalls + '/objetivos/select_objetivo_general_marcas',
+        axios.post(GlobalUrlCalls + '/objetivos/select_objetivo_general_categorias',
             {
                 sucursal:GlobalEmpnit,
                 token:TOKEN,
@@ -721,18 +733,12 @@ function tbl_objetivos_generales(){
 
         data.recordset.map((r)=>{
             varTotal += Number(r.OBJETIVO);
-            let idbtnEliminar = `btnEliminar${r.CODMARCA}`
             str += `
             <tr>
-                <td>${r.DESMARCA}</td>
+                <td>${r.OBJ_DESMARCA}</td>
                 <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
                 <td>
-                    <button class="btn btn-md btn-danger hand shadow btn-circle"
-                        id="${idbtnEliminar}"
-                        onclick="eliminar_marca_general('${r.CODMARCA}','${idbtnEliminar}')"
-                    >
-                        <i class="fal fa-trash"></i>
-                    </button>
+                   
                 </td>
             </tr>
             `
@@ -746,7 +752,7 @@ function tbl_objetivos_generales(){
         
         document.getElementById('lbTotalGeneral').innerText = '';
         container.innerHTML = 'No se cargaron datos... ';
-        
+
     })
 
 

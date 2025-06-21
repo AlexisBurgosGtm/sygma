@@ -136,7 +136,17 @@ router.post("/select_objetivo_general_categorias", async(req,res)=>{
     const { token, sucursal, mes, anio} = req.body;
 
     let qry = `
-     
+        SELECT 
+            EMPNIT, EMPRESA, 
+            MES, ANIO, 
+            OBJ_CODMARCA, OBJ_DESMARCA, 
+            SUM(OBJETIVO) AS OBJETIVO
+        FROM view_data_objetivos_vendedor
+        GROUP BY EMPNIT, EMPRESA, MES, OBJ_CODMARCA, OBJ_DESMARCA, ANIO
+        HAVING (EMPNIT = '${sucursal}') 
+                AND (MES = ${mes}) 
+                AND (ANIO = ${anio});
+
         `;
     
 
