@@ -379,12 +379,13 @@ function getView(){
                     <div class="card card-rounded shadow col-12">
                         <div class="card-body p-4">
                                 
-                            <h5 class="negrita text-secondary" id="lbMarcasProductos"></h5>
+                            <h2 class="negrita text-danger" id="lbMarcasProductos"></h2>
 
                             <div class="table-responsive">
                                 <table class="table h-full table-bordered col-12" id="tblMarcasProductos">
                                     <thead class="bg-secondary text-white negrita">
                                         <tr>
+                                            <td>CODIGO DUN</td>
                                             <td>CODIGO EAN</td>
                                             <td>PRODUCTO</td>
                                             <td>CAJAS</td>
@@ -546,7 +547,7 @@ function getView(){
                 <i class="fal fa-arrow-left"></i>
             </button>
 
-            <button class="btn btn-warning btn-xl btn-circle hand shadow btn-bottom-r" onclick="$('#modal_sellout_config').modal('show')">
+            <button class="btn btn-warning btn-xl btn-circle hand shadow btn-bottom-r" id="btnSOConfigModal">
                 <i class="fal fa-cog"></i>
             </button>
 
@@ -583,6 +584,11 @@ function getView(){
                                             <label>Seleccione el Mes Final</label>
                                             <select class="form-control negrita" id="cmbSOMesFinal">
                                             </select>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Ultimo SellOut generado</label>
+                                            <input type="text" class="form-control negrita" id="txtSOObs" disabled="true">
                                         </div>
 
                                         <br>
@@ -745,6 +751,7 @@ function addListeners(){
     document.title = `Proveedor - ${GlobalNomEmpresa}`;
 
   
+    selected_tab = ''; //VENTAS_VENDEDOR,VENTAS_MARCAS,SELLOUT,INVENTARIOS,OBJETIVOS
 
     let cmbSucursal = document.getElementById('cmbSucursal');
     
@@ -769,7 +776,8 @@ function addListeners(){
             document.getElementById('btnMenuVentasSellout').disabled = false;
             
             cmbSucursal.addEventListener('change',()=>{
-                document.getElementById('tab-uno').click();
+                //document.getElementById('tab-uno').click();
+                get_grid_tab();
             })
         })
         .catch(()=>{
@@ -819,6 +827,8 @@ function addListeners(){
         
         document.getElementById('tab-dos').click();
 
+        selected_tab = 'VENTAS_VENDEDOR';
+
         tbl_rpt_vendedores();
 
     })
@@ -844,7 +854,8 @@ function addListeners(){
 
         document.getElementById('tab-tres').click();
 
-
+        selected_tab = 'VENTAS_MARCAS';
+        
         tbl_rpt_marcas();
 
     })
@@ -868,6 +879,8 @@ function addListeners(){
 
         document.getElementById('tab-cuatro').click();
 
+        selected_tab = 'SELLOUT';
+        
         tbl_rpt_sellout();
 
     })
@@ -889,6 +902,9 @@ function addListeners(){
 
         document.getElementById('tab-cinco').click();
 
+        selected_tab = 'INVENTARIOS';
+        
+
         tbl_inventario();
     });
 
@@ -898,12 +914,129 @@ function addListeners(){
     });
 
 
+    document.getElementById('cmbSOAnio').addEventListener('change',()=>{
+        get_config_obs_sellout();
+    });
+    document.getElementById('cmbSOMesInicial').addEventListener('change',()=>{
+        get_config_obs_sellout();
+    });
+    document.getElementById('cmbSOMesFinal').addEventListener('change',()=>{
+        get_config_obs_sellout();
+    });
+
+
+    document.getElementById('btnSOConfigModal').addEventListener('click',()=>{
+
+        $('#modal_sellout_config').modal('show');
+        document.getElementById('txtSOObs').value = data_config_general[2].OBS;
+
+    })
+
+    let btnConfigSellout = document.getElementById('btnConfigSellout');
+    btnConfigSellout.addEventListener('click',()=>{
+
+        F.Confirmacion('¿Esta seguro que desea GENERAR el SellOut con estos parametros?')
+        .then((value)=>{
+            if(value==true){
+
+                let sucursalSO = document.getElementById('cmbSucursal').value;
+                let mi = document.getElementById('cmbSOMesInicial').value;
+                let mf = document.getElementById('cmbSOMesFinal').value;
+                let anio = document.getElementById('cmbSOAnio').value;
+                let obs = document.getElementById('txtSOObs').value;
+                
+
+                    btnConfigSellout.disabled = true;
+                    btnConfigSellout.innerHTML = `<i class="fal fa-save fa-spin"></i>`;
+
+                    GF.get_data_inventarios_sellout_config(sucursalSO,mi,mf,anio,obs)
+                    .then(()=>{
+                        
+                        F.Aviso('SellOut establecido exitosamente!!');
+                        
+                        tbl_inventario();
+
+                        btnConfigSellout.disabled = false;
+                        btnConfigSellout.innerHTML = `<i class="fal fa-save"></i>`;
+                    
+                    })
+                    .catch(()=>{
+                      
+                        btnConfigSellout.disabled = false;
+                        btnConfigSellout.innerHTML = `<i class="fal fa-save"></i>`;
+
+                    })
+
+
+
+
+            }
+        })
+        
+     
+
+
+
+
+
+        
+
+
+
+    });
+
      // inventarios
+
 
 
      listeners_objetivos();
 
 };
+
+function get_grid_tab(){
+  
+        //selected_tab = ''; 
+        //VENTAS_VENDEDOR,VENTAS_MARCAS,SELLOUT,INVENTARIOS,OBJETIVOS
+
+    switch (selected_tab) {
+        case 'VENTAS_VENDEDOR':
+            tbl_rpt_vendedores();
+
+            break;
+        case 'VENTAS_MARCAS':
+            tbl_rpt_marcas();
+
+            break;
+        case 'SELLOUT':
+            tbl_rpt_sellout();
+
+            break;
+        case 'INVENTARIOS':
+            tbl_inventario();
+
+            break;
+        case 'OBJETIVOS':
+            get_reportes();
+
+            break;
+
+    }
+
+};
+
+function get_config_obs_sellout(){
+
+    let mes_inicial = document.getElementById('cmbSOMesInicial').value;
+    let mes_final = document.getElementById('cmbSOMesFinal').value;
+    let anio = document.getElementById('cmbSOAnio').value;
+    
+
+    document.getElementById('txtSOObs').value = `Sellout del mes ${mes_inicial} al mes ${mes_final} del año ${anio}`;
+
+
+};
+
+
 
 function initView(){
 
@@ -1072,6 +1205,7 @@ function tbl_rpt_marcas(){
 function tbl_rpt_marcas_productos(codmarca,desmarca,mes,anio){
 
 
+    document.getElementById('lbMarcasProductos').innerText = desmarca;
 
     let container = document.getElementById('tblDataMarcasProductos');
     container.innerHTML = GlobalLoader;
@@ -1095,6 +1229,7 @@ function tbl_rpt_marcas_productos(codmarca,desmarca,mes,anio){
             varTotal += Number(r.TOTALPRECIO);
             str += `
                 <tr>
+                    <td>${r.CODPROD2}</td>
                     <td>${r.CODIGO_EAN}</td>
                     <td>${r.DESPROD}</td>
                     <td>${F.setMoneda(r.CAJAS,'')}</td>
@@ -1250,9 +1385,12 @@ function listeners_objetivos(){
 
     document.getElementById('btnMenuObjetivos').addEventListener('click',()=>{
 
-         document.getElementById('tab-seis').click();
+        document.getElementById('tab-seis').click();
 
-          get_reportes();
+        selected_tab = 'OBJETIVOS';
+
+        get_reportes();
+
     });
 
 

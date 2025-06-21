@@ -7,14 +7,15 @@ const router = express.Router();
 router.post("/update_sell_out_productos", async(req,res)=>{
    
 
-    const { token,sucursal,mi,mf,anio} = req.body;
+    const { token,sucursal,mi,mf,anio,obs} = req.body;
 
     let promedio = (Number(mf)-Number(mi)) + 1;
-    let qry ='';  
+    
+    let qry_sellout ='';  
 
 
 
-    qry = `
+    qry_sellout = `
        UPDATE PRODUCTOS SET SELLOUT = T.TOTALUNIDADES FROM PRODUCTOS 
        INNER JOIN (
             SELECT DOCPRODUCTOS.CODPROD, 
@@ -30,10 +31,17 @@ router.post("/update_sell_out_productos", async(req,res)=>{
                 (DOCUMENTOS.MES BETWEEN ${mi} AND ${mf}) AND 
                 (TIPODOCUMENTOS.TIPODOC IN('FAC','FCP','FPC','FEC','FEF','FES')) AND
                 (DOCPRODUCTOS.CODPROD IS NOT NULL)
-            GROUP BY DOCPRODUCTOS.CODPROD) T ON PRODUCTOS.CODPROD= T.CODPROD
+            GROUP BY DOCPRODUCTOS.CODPROD) T ON PRODUCTOS.CODPROD= T.CODPROD;
         `
 
 
+
+    let qry_update_config = `UPDATE CONFIG SET OBS='${obs}' WHERE ID=3;`
+
+
+    let qry = qry_sellout + qry_update_config;
+
+    
     execute.QueryToken(res,qry,token);
      
 });

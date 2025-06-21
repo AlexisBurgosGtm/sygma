@@ -1147,5 +1147,3 @@ let F = {
           
       }
 };
-
-//export default funciones;

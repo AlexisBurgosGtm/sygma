@@ -112,6 +112,8 @@ let selected_ped_codembarque = '';
 let selected_id_element = '';
 
 
+let selected_tab = '';
+
 
 function getRandomColor() {
     var letters = '0123456789ABCDEF'.split('');

@@ -137,7 +137,7 @@ function addListeners(){
                     btnIniciar.disabled = false;
                     btnIniciar.innerHTML = `<i class="fal fa-lock"></i>`;
 
-                    GF.get_data_config().then((data)=>{data_config_general = data.recordset[0]}).catch(()=>{data_config_general = []})
+                    GF.get_data_config().then((data)=>{data_config_general = data.recordset}).catch(()=>{data_config_general = []})
 
                     data_empresa_config = data.recordset[0];
                     Navegar.inicio();

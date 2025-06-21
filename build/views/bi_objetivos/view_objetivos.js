@@ -68,11 +68,6 @@ function getView(){
 
                 <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
                 
-                    ${view.frag_objetivo_marca()}
-
-                </div>
-                <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
-                
                     ${view.frag_objetivo_vendedores()}
                 
                 </div>
@@ -80,6 +75,11 @@ function getView(){
                 
                     ${view.frag_objetivo_todos_vendedores()}
                 
+                </div>
+                <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                
+                    ${view.frag_objetivo_marca()}
+
                 </div>
 
 
@@ -100,7 +100,7 @@ function getView(){
                                 <div class="col-6">
                                     <h5 class="negrita text-danger" id="lbTotalGeneral"></h5>
                                 </div>
-                                <div class="col-6 text-right">
+                                <div class="col-6 text-right hidden">
                                     <button class="btn btn-success hand shadow" id="btnNuevoGeneral">
                                         <i class="fal fa-plus"></i> Agregar Nuevo
                                     </button>
@@ -581,6 +581,92 @@ function insert_objetivo_general_marca(){
 
 
 
+function BACKUP_data_objetivos_generales(){
+
+    return new Promise((resolve,reject)=>{
+
+
+        let mes = Number(document.getElementById('cmbMes').value);
+        let anio = Number(document.getElementById('cmbAnio').value);
+       
+        //se cambio de marcas a clasificaciones TIPO
+        axios.post(GlobalUrlCalls + '/objetivos/select_objetivo_general_marcas',
+            {
+                sucursal:GlobalEmpnit,
+                token:TOKEN,
+                mes:mes,
+                anio:anio
+            })
+        .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }        
+        }, (error) => {
+             reject();
+        });
+
+    })
+
+};
+function BACKUP_tbl_objetivos_generales(){
+
+    let container = document.getElementById('tblDataGenerales');
+    container.innerHTML = GlobalLoader;
+
+    document.getElementById('lbTotalGeneral').innerText = '';
+
+    let varTotal = 0;
+
+    data_objetivos_generales()
+    .then((data)=>{
+
+        let str = '';
+        data.recordset.map((r)=>{
+            varTotal += Number(r.OBJETIVO);
+            let idbtnEliminar = `btnEliminar${r.CODMARCA}`
+            str += `
+            <tr>
+                <td>${r.DESMARCA}</td>
+                <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
+                <td>
+                    <button class="btn btn-md btn-danger hand shadow btn-circle"
+                        id="${idbtnEliminar}"
+                        onclick="eliminar_marca_general('${r.CODMARCA}','${idbtnEliminar}')"
+                    >
+                        <i class="fal fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
+        document.getElementById('lbTotalGeneral').innerText = `Total: ${F.setMoneda(varTotal, 'Q')}`;
+
+    })
+    .catch((error)=>{
+        console.log(error);
+        document.getElementById('lbTotalGeneral').innerText = '';
+        container.innerHTML = 'No se cargaron datos... ';
+    })
+
+
+};
+
+
+
+
+
 function data_objetivos_generales(){
 
     return new Promise((resolve,reject)=>{
@@ -632,6 +718,7 @@ function tbl_objetivos_generales(){
     .then((data)=>{
 
         let str = '';
+
         data.recordset.map((r)=>{
             varTotal += Number(r.OBJETIVO);
             let idbtnEliminar = `btnEliminar${r.CODMARCA}`
@@ -650,14 +737,16 @@ function tbl_objetivos_generales(){
             </tr>
             `
         })
+
         container.innerHTML = str;
         document.getElementById('lbTotalGeneral').innerText = `Total: ${F.setMoneda(varTotal, 'Q')}`;
 
     })
     .catch((error)=>{
-        console.log(error);
+        
         document.getElementById('lbTotalGeneral').innerText = '';
         container.innerHTML = 'No se cargaron datos... ';
+        
     })
 
 
@@ -849,7 +938,7 @@ function tbl_objetivos_vendedores(){
                 <td>
                     <button class="btn btn-md btn-danger hand shadow btn-circle"
                         id="${idbtnEliminar}"
-                        onclick="eliminar_marca_vendedor('${r.ID}','${idbtnEliminar}')"
+                        onclick="eliminar_marca_vendedor('${r.ID}','${idbtnEliminar}','${r.NOMEMP}','${r.DESMARCA}')"
                     >
                         <i class="fal fa-trash"></i>
                     </button>
@@ -862,6 +951,7 @@ function tbl_objetivos_vendedores(){
         
     })
     .catch(()=>{
+
         container.innerHTML = 'No se cargaron datos...';
 
         document.getElementById('lbTotalVendedores').innerText = '';
@@ -872,10 +962,72 @@ function tbl_objetivos_vendedores(){
 };
 
 
-function eliminar_marca_vendedor(id,ibtn){
+
+function data_objetivos_eliminar_id_vendedor(id){
+
+    return new Promise((resolve,reject)=>{
+
+        axios.post(GlobalUrlCalls + '/objetivos/delete_objetivo_vendedor_marca',
+            {
+                sucursal:GlobalEmpnit,
+                token:TOKEN,
+                id:id
+            })
+        .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }        
+        }, (error) => {
+             reject();
+        });
+
+    })
+
+};
 
 
+function eliminar_marca_vendedor(id,idbtn,nomven,desmarca){
 
+
+        let btn = document.getElementById(idbtn);
+
+        F.Confirmacion(`¿Está seguro que desea ELIMINAR este objetivo (${nomven} - ${desmarca})`)
+        .then((value)=>{
+            if(value==true){
+
+                btn.innerHTML = `<i class="fal fa-trash fa-spin"></i>`;
+                btn.disabled = true;
+
+                data_objetivos_eliminar_id_vendedor(id)
+                .then(()=>{
+
+                    F.Aviso('Objetivo eliminado exitosamente!!')
+                    tbl_objetivos_vendedores();
+
+                })
+                .catch(()=>{
+        
+                    F.AvisoError('No se pudo eliminar este objetivo');
+
+                    btn.innerHTML = `<i class="fal fa-trash"></i>`;
+                    btn.disabled = false;
+
+                })
+                
+
+            }
+        })
 
 };
 

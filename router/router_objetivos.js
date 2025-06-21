@@ -131,6 +131,19 @@ router.post("/select_objetivo_general_marcas", async(req,res)=>{
      
 });
 
+router.post("/select_objetivo_general_categorias", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio} = req.body;
+
+    let qry = `
+     
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
 
 router.post("/delete_objetivo_general_marca", async(req,res)=>{
    
