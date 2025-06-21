@@ -379,9 +379,25 @@ function getView(){
                     <div class="card card-rounded shadow col-12">
                         <div class="card-body p-4">
                                 
-                            <h2 class="negrita text-danger" id="lbMarcasProductos"></h2>
+                            <div class="row">
+                                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                                    <h2 class="negrita text-danger" id="lbMarcasProductos"></h2>
+                                </div>
+                                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control negrita"
+                                            placeholder="Escriba para buscar..."
+                                            id="txtMarcasBuscarProd"
+                                            oninput="F.FiltrarTabla('tblMarcasProductos','txtMarcasBuscarProd')"
+                                        >
+                                    </div>
+                                    
+                                </div>
+                            </div>
 
+                            <br>
                             <div class="table-responsive">
+                                
                                 <table class="table h-full table-bordered col-12" id="tblMarcasProductos">
                                     <thead class="bg-secondary text-white negrita">
                                         <tr>
@@ -635,6 +651,7 @@ function getView(){
                 <i class="fal fa-arrow-left"></i>
             </button>
 
+            ${view.modal_categorias_marca()}
             `
         },
         frag_parametros: ()=>{
@@ -732,6 +749,53 @@ function getView(){
                                 </tr>
                             </tfoot>
                         </table>
+                    </div>
+                </div>
+            </div>
+            `
+        },
+        modal_categorias_marca:()=>{
+            return `
+              <div id="modal_categorias_marca" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-right modal-xl">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-secondary d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white" id="lbMarcasDescategoria">
+                                
+                            </h4>
+                        </div>
+                        <div class="modal-body p-4">
+                            
+                            <div class="card card-rounded">
+                                <div class="card-body p-4">
+
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered h-full col-12">
+                                            <thead class="bg-base text-white"> 
+                                                <tr>
+                                                    <td>CATEGORIA</td>
+                                                    <td>OBJETIVO</td>
+                                                    <td>LOGRO</td>
+                                                    <td>FALTAN</td>
+                                                    <td></td>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tblDataCategoriasMarca"></tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                                
+                            <div class="row">
+                                <button class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
+                                    <i class="fal fa-arrow-left"></i>
+                                </button>
+                            </div>
+
+                        </div>
+                    
                     </div>
                 </div>
             </div>
@@ -898,6 +962,11 @@ function addListeners(){
 
 
     // inventarios
+
+    document.getElementById('btnExportarInventario').addEventListener('click',()=>{
+        F.exportTableToExcel('tblInventario','Inventario');
+    });
+
     document.getElementById('btnMenuRptInventario').addEventListener('click',()=>{
 
         document.getElementById('tab-cinco').click();
@@ -1485,7 +1554,7 @@ function tbl_logro_marcas(sucursal,mes,anio){
             varTotalLogro += Number(varLOGRO);
 
             str += `
-            <tr class="hand" onclick="get_detalle_marca('${r.CODIGO_MARCA}')">
+            <tr class="hand" onclick="get_detalle_marca('${r.CODIGO_MARCA}','${r.MARCA}')">
                 <td>${r.MARCA}</td>
                 <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
                 <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
@@ -1575,7 +1644,10 @@ function tbl_logro_vendedores(sucursal,mes,anio){
 
             str += `
             <tr class="hand" onclick="get_detalle_vendedor('${r.CODIGO_VENDEDOR}','${r.VENDEDOR}')">
-                <td>${r.VENDEDOR}</td>
+                <td>${r.VENDEDOR}
+                    <br>
+                    <small class="negrita text-info">${r.EMPRESA}</small>
+                </td>
                 <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
                 <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
                 <td>${F.setMoneda(varFaltan,'Q')}</td>
@@ -1606,3 +1678,89 @@ function tbl_logro_vendedores(sucursal,mes,anio){
 };
 
 //OBJETIVOS
+
+
+function get_detalle_marca(codmarca,desmarca){
+
+
+    $("#modal_categorias_marca").modal('show');
+
+    document.getElementById('lbMarcasDescategoria').innerText = desmarca;
+    
+    tbl_logro_categorias_marca(codmarca);
+
+
+
+}
+
+
+function get_data_logro_categorias_marcas(sucursal,codmarca,mes,anio){
+
+     return new Promise((resolve,reject)=>{
+
+            axios.post(GlobalUrlCalls + '/objetivos/select_logro_marcas_categorias', {
+                    token:TOKEN,
+                    sucursal:sucursal,
+                    codmarca:codmarca,
+                    mes:mes,
+                    anio:anio})
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        }) 
+    
+
+};
+
+function tbl_logro_categorias_marca(codmarca){
+
+    let container = document.getElementById('tblDataCategoriasMarca');
+    container.innerHTML = GlobalLoader;
+
+
+    let sucursal = document.getElementById('cmbSucursal').value;
+    let mes = document.getElementById('cmbMes').value;
+    let anio = document.getElementById('cmbAnio').value;
+
+
+
+    get_data_logro_categorias_marcas(sucursal,codmarca,mes,anio)
+    .then((data)=>{
+        let str = '';
+        data.recordset.map((r)=>{
+           
+            let varLOGRO = ((Number(r.TOTALPRECIO)/Number(r.OBJETIVO))*100);
+           
+            str += `
+            <tr>
+                <td>${r.CATEGORIA}</td>
+                <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
+                <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                <td>${F.setMoneda((Number(r.OBJETIVO)-Number(r.TOTALPRECIO)),'Q')}</td>
+                <td>${varLOGRO.toFixed(2)}%</td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
+    })
+    .catch(()=>{
+        container.innerHTML = 'No se cargaron datos...';
+    })
+
+
+};

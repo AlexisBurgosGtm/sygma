@@ -42,6 +42,29 @@ router.post("/select_logro_marcas", async(req,res)=>{
     const { token, sucursal, mes, anio} = req.body;
 
     let qry = `
+		SELECT view_data_objetivos_marcas.MES, view_data_objetivos_marcas.ANIO, view_data_objetivos_marcas.OBJ_CODMARCA AS CODIGO_MARCA, view_data_objetivos_marcas.OBJ_DESMARCA AS MARCA, 
+                  SUM(view_data_objetivos_marcas.OBJETIVO) AS OBJETIVO, SUM(view_rpt_objetivos_marca_resumen.TOTALUNIDADES) AS TOTALUNIDADES, SUM(view_rpt_objetivos_marca_resumen.TOTALCOSTO) AS TOTALCOSTO, 
+                  SUM(view_rpt_objetivos_marca_resumen.TOTALPRECIO) AS TOTALPRECIO
+        FROM     view_rpt_objetivos_marca_resumen RIGHT OUTER JOIN
+                  view_data_objetivos_marcas ON view_rpt_objetivos_marca_resumen.CODIGO_MARCA = view_data_objetivos_marcas.OBJ_CODMARCA AND view_rpt_objetivos_marca_resumen.ANIO = view_data_objetivos_marcas.ANIO AND 
+                  view_rpt_objetivos_marca_resumen.MES = view_data_objetivos_marcas.MES AND view_rpt_objetivos_marca_resumen.EMPNIT = view_data_objetivos_marcas.EMPNIT
+        WHERE  (view_data_objetivos_marcas.EMPNIT LIKE '%${sucursal}%')
+        GROUP BY view_data_objetivos_marcas.MES, view_data_objetivos_marcas.ANIO, view_data_objetivos_marcas.OBJ_CODMARCA, view_data_objetivos_marcas.OBJ_DESMARCA
+        HAVING (view_data_objetivos_marcas.MES = ${mes}) AND 
+                (view_data_objetivos_marcas.ANIO = ${anio})
+
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/BACKUP_select_logro_marcas", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio} = req.body;
+
+    let qry = `
        SELECT view_rpt_objetivos_categorias.EMPNIT, 
                 view_rpt_objetivos_categorias.RELOP, 
                 view_rpt_objetivos_categorias.CODIGO_MARCA,
@@ -66,12 +89,44 @@ HAVING (view_rpt_objetivos_categorias.EMPNIT like '${sucursal}')
 });
 
 
+router.post("/select_logro_marcas_categorias", async(req,res)=>{
+   
+    const { token, codmarca, sucursal, mes, anio} = req.body;
+
+    let qry = `
+	SELECT view_data_objetivo_categorias.CODCATEGORIA, 
+		view_data_objetivo_categorias.CATEGORIA, 
+		SUM(ISNULL(view_data_objetivo_categorias.OBJETIVO,0)) AS OBJETIVO, 
+        SUM(ISNULL(view_rpt_objetivos_categorias_resumen.TOTALUNIDADES,0)) AS TOTALUNIDADES, 
+		SUM(ISNULL(view_rpt_objetivos_categorias_resumen.TOTALCOSTO,0)) AS TOTALCOSTO, 
+		SUM(ISNULL(view_rpt_objetivos_categorias_resumen.TOTALPRECIO,0)) AS TOTALPRECIO
+    FROM     view_data_objetivo_categorias LEFT OUTER JOIN
+                  view_rpt_objetivos_categorias_resumen ON view_data_objetivo_categorias.OBJ_CODMARCA = view_rpt_objetivos_categorias_resumen.CODIGO_MARCA AND 
+                  view_data_objetivo_categorias.CODCATEGORIA = view_rpt_objetivos_categorias_resumen.CODIGO_CATEGORIA AND view_data_objetivo_categorias.ANIO = view_rpt_objetivos_categorias_resumen.ANIO AND 
+                  view_data_objetivo_categorias.MES = view_rpt_objetivos_categorias_resumen.MES AND view_data_objetivo_categorias.EMPNIT = view_rpt_objetivos_categorias_resumen.EMPNIT
+    WHERE  (view_data_objetivo_categorias.OBJ_CODMARCA = ${codmarca}) 
+        AND (view_data_objetivo_categorias.EMPNIT LIKE '%${sucursal}%')
+    GROUP BY view_data_objetivo_categorias.MES, 
+            view_data_objetivo_categorias.ANIO, 
+            view_data_objetivo_categorias.CODCATEGORIA, view_data_objetivo_categorias.CATEGORIA
+    HAVING (view_data_objetivo_categorias.MES = ${mes}) 
+        AND (view_data_objetivo_categorias.ANIO = ${anio})
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+
 router.post("/select_logro_vendedores", async(req,res)=>{
    
     const { token, sucursal, mes, anio} = req.body;
 
     let qry = `
-      SELECT view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR, view_rpt_objetivos_vendedores_categorias.VENDEDOR, SUM(view_rpt_objetivos_vendedores_categorias.TOTALUNIDADES) AS TOTALUNIDADES, 
+      SELECT view_rpt_objetivos_vendedores_categorias.RELOP AS EMPRESA,
+        view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR, view_rpt_objetivos_vendedores_categorias.VENDEDOR, SUM(view_rpt_objetivos_vendedores_categorias.TOTALUNIDADES) AS TOTALUNIDADES, 
                   SUM(view_rpt_objetivos_vendedores_categorias.TOTALCOSTO) AS TOTALCOSTO, 
 				  SUM(view_rpt_objetivos_vendedores_categorias.TOTALPRECIO) AS TOTALPRECIO, 
 				  SUM(ISNULL(OBJETIVOS_EMPLEADO.OBJETIVO,0)) AS OBJETIVO
@@ -82,7 +137,8 @@ FROM     view_rpt_objetivos_vendedores_categorias LEFT OUTER JOIN
 WHERE  (view_rpt_objetivos_vendedores_categorias.EMPNIT LIKE '${sucursal}') 
 AND (view_rpt_objetivos_vendedores_categorias.ANIO = ${anio}) 
 AND (view_rpt_objetivos_vendedores_categorias.MES = ${mes})
-GROUP BY view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR, view_rpt_objetivos_vendedores_categorias.VENDEDOR
+GROUP BY view_rpt_objetivos_vendedores_categorias.RELOP, 
+        view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR, view_rpt_objetivos_vendedores_categorias.VENDEDOR
         `;
     
 
