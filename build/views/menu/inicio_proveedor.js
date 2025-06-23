@@ -550,6 +550,7 @@ function getView(){
                                     <td>MARCA</td>
                                     <td>EXISTENCIA (CAJAS)</td>
                                     <td>SELLOUT</td>
+                                    <td>MESES_INV</td>
                                 </tr>
                             </thead>
                             <tbody id="tblDataInventario">
@@ -1413,6 +1414,10 @@ function tbl_inventario(){
 
         let str = '';
         data.recordset.map((r)=>{
+
+            let SELLOUT = F.get_existencia(Number(r.SELLOUT),Number(r.UXC)).toFixed(2);
+            let CAJAS = F.get_existencia(Number(r.TOTALUNIDADES),Number(r.UXC)).toFixed(2);
+
             str += `
             <tr>
                 <td>${r.CODPROD}</td>
@@ -1420,8 +1425,9 @@ function tbl_inventario(){
                 <td>${r.DESPROD3}</td>
                 <td>${r.DESPROD}</td>
                 <td>${r.DESMARCA}</td>
-                <td>${F.get_existencia(Number(r.TOTALUNIDADES),Number(r.UXC)).toFixed(2)}</td>
-                <td>${F.get_existencia(Number(r.SELLOUT),Number(r.UXC)).toFixed(2)}</td>
+                <td>${CAJAS}</td>
+                <td>${SELLOUT}</td>
+                <td>${F.get_existencia(Number(CAJAS),Number(SELLOUT)).toFixed(2)}</td>
             </tr>
             `
         })

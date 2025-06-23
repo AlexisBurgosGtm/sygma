@@ -1402,6 +1402,7 @@ function listeners_menu_productos(){
                                 document.getElementById('txtUxc').value = r.UXC;
                                 //document.getElementById('txtBono').value = r.BONO;
                                 document.getElementById('cmbTipoProd').value = r.TIPOPROD;
+                                document.getElementById('cmbTipoTipo').value = r.CLASIF_TIPO;
                                 document.getElementById('cmbColor').value = r.NF;
                                 document.getElementById('cmbMarca').value = r.CODMARCA;
 

@@ -2,39 +2,39 @@ function getView(){
     let view = {
         body:()=>{
             return `
+                <div class="row">
+                    <div class="col-sm-6 col-lg-3 col-xl-3 col-md-3">
+                        ${view.parametros()}
+                    </div>
+                    <div class="col-sm-6 col-lg-3 col-xl-3 col-md-3">
+                        ${view.vista_grafica_ventas()}
+                    </div>
+                    <div class="col-sm-6 col-lg-3 col-xl-3 col-md-3">
+                        ${view.vista_grafica_compras()}
+                    </div>
+                    <div class="col-sm-6 col-lg-3 col-xl-3 col-md-3">
+                        ${view.vista_grafica_inventario()}
+                    </div>
+                </div>
+                <br>
+
                 <div class="col-12 p-0 bg-white">
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
                             
-                            <div class="row">
-                                <div class="col-4">
-                                    ${view.parametros()}
-                                </div>
-                                <div class="col-4">
-                                    ${view.vista_grafica_dos()}
-                                </div>
-                                <div class="col-4">
-                                    ${view.vista_grafica_tres()}
-                                </div>
-                            </div>
-                            <br>
-                            
-                            <div class="row">
-                                <div class="col-sm-12 col-md-8 col-lg-8 col-xl-8">
-                                    ${view.vista_lista_fechas()}
-                                </div>
-                                <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
-                                    ${view.vista_lista_fechas_compras()}
-                                </div>
-                               
-                            </div>
-                        </div>
-                        
+
+                        </div>                        
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
                            
                             
                         </div>
                         <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
+                            ${view.tab_inventario()}
+                        </div>
+                        <div class="tab-pane fade" id="cuatro" role="tabpanel" aria-labelledby="home-tab">
+                            
+                        </div>
+                        <div class="tab-pane fade" id="cinco" role="tabpanel" aria-labelledby="home-tab">
                             
                         </div>    
                     </div>
@@ -51,11 +51,31 @@ function getView(){
                         <li class="nav-item">
                             <a class="nav-link negrita text-danger" id="tab-tres" data-toggle="tab" href="#tres" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-cuatro" data-toggle="tab" href="#cuatro" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-cinco" data-toggle="tab" href="#cinco" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>
                         </li>         
                     </ul>
                 </div>
                
             `
+        },
+        tab_inicio:()=>{
+            return `
+                <div class="row">
+                    <div class="col-sm-12 col-md-8 col-lg-8 col-xl-8">
+                        ${view.vista_lista_fechas()}
+                    </div>
+                    <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                        ${view.vista_lista_fechas_compras()}
+                    </div>       
+                </div>
+                `
         },
         vista_lista_fechas:()=>{
             return `
@@ -114,7 +134,7 @@ function getView(){
             return `
             <div class="table-responsive col-12">
                 <table class="table table-responsive col-12" id="tblProductos">
-                    <thead class="bg-personal text-warning negrita">
+                    <thead class="bg-base text-warning negrita">
                         <tr>
                             <td>PRODUCTO</td>
                             <td>UNIDADES</td>
@@ -131,54 +151,125 @@ function getView(){
         },
         parametros:()=>{
             return `
-            <div class="card card-rounded shadow hand col-12 border-personal">
+            <div class="card card-rounded shadow hand col-12 border-base">
                 <div class="card-body">
                     <div class="form-group">
-                        <label>Seleccione mes y año</label>
-                        <select class="form-control negrita" id="cmbEmpresa">
+                        <label class="text-secondary">Seleccione mes y año</label>
+                        <select class="form-control negrita text-danger" id="cmbSucursal">
                         </select>
 
                         <div class="input-group"> 
-                            <select class="form-control negrita border-personal text-personal" id="cmbMes"></select>
-                            <select class="form-control negrita border-personal text-personal" id="cmbAnio"></select>
+                            <select class="form-control negrita border-base text-base" id="cmbMes"></select>
+                            <select class="form-control negrita border-base text-base" id="cmbAnio"></select>
                         </div>
                     </div>
                 </div>
             </div>
             `
         },
-        vista_grafica_dos:()=>{
+        vista_grafica_ventas:()=>{
             return `
-            <div class="card card-rounded shadow hand col-12 border-personal">
+            <div class="card card-rounded shadow hand col-12 border-success">
                 <div class="card-body">
-                    <h5 class="text-personal negrita">VENTAS</h5>
-                    <small class="negrita">Total Costo:</small>
+                    <h5 class="text-success negrita">VENTAS</h5>
+                    <small class="negrita  text-secondary">Total Costo:</small>
                     <label id="lbTotalCosto" class="text-secondary negrita"></label>
                     <br>
-                    <small class="negrita">Total Venta:</small>
+                    <small class="negrita text-secondary">Total Venta:</small>
                     <label id="lbTotalVenta" class="text-success negrita"></label>
                     <br>
-                    <small class="negrita">Utilidad:</small>
+                    <small class="negrita text-secondary">Utilidad:</small>
                     <label id="lbTotalUtilidad" class="text-danger negrita"></label>
                 </div>
             </div>
             `
         },
-        vista_grafica_tres:()=>{
+        vista_grafica_compras:()=>{
             return `
             <div class="card card-rounded shadow hand col-12 border-info">
                 <div class="card-body">
                     <h5 class="text-info negrita">COMPRAS</h5>
-                    <small class="negrita">Total Costo:</small>
+                    <small class="negrita text-secondary">Total Costo:</small>
                     <label id="lbTotalCostoC" class="text-secondary negrita"></label>
                     <br>
-                    <small class="negrita">Total Venta:</small>
+                    <small class="negrita text-secondary">Total Venta:</small>
                     <label id="lbTotalVentaC" class="text-success negrita"></label>
                     <br>
-                    <small class="negrita">Utilidad:</small>
+                    <small class="negrita text-secondary">Utilidad:</small>
                     <label id="lbTotalUtilidadC" class="text-danger negrita"></label>
                 </div>
             </div>
+            `
+        },
+        vista_grafica_inventario:()=>{
+            return `
+            <div class="card card-rounded shadow hand col-12 border-base" id="btnMenuInventarios">
+                <div class="card-body">
+                    <h5 class="text-base negrita">INVENTARIOS</h5>
+                    <small class="negrita text-secondary">Total Costo:</small>
+                    <label id="lbTotalCostoI" class="text-secondary negrita"></label>
+                    <br>
+                    <small class="negrita text-secondary">Total Items:</small>
+                    <label id="lbTotalItemsI" class="text-success negrita"></label>
+                   
+                </div>
+            </div>
+            `
+        },
+        tab_inventario:()=>{
+              return `
+            <div class="card card-rounded shadow">
+                <div class="card-body p-4">
+                    
+                    <h3 class="negrita text-danger">INVENTARIO ACTUAL</h3>
+
+                    <div class="row">
+                        <div class="col-sm-6 col-md-8 col-lg-8 col-xl-8">
+                            <div class="input-group">
+                                <select class="form-control negrita text-base" id="cmbSt">
+                                    <option value="SI">PRODUCTOS HABILITADOS</option>
+                                    <option value="NO">PRODUCTOS NO HABILITADOS</option>
+                                </select>
+                                <input type="text" class="form-control" placeholder="Escriba para buscar..." id="txtBuscarProductoInventario" oninput="F.FiltrarTabla('tblInventario','txtBuscarProductoInventario')">
+
+                            </div>
+
+                            
+                        </div>
+                        
+                        <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
+                            <button class="btn btn-success btn-md hand shadow" id="btnExportarInventario">
+                                <i class="fal fa-share"></i> Exportar Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    <br>
+
+                    <div class="table-responsive col-12">
+                        <table class="table h-full table-hover col-12" id="tblInventario">
+                            <thead class="bg-base text-white">
+                                <tr>
+                                    <td>CODIGO</td>
+                                    <td>CODIGO 2</td>
+                                    <td>CODIGO 3</td>
+                                    <td>PRODUCTO</td>
+                                    <td>MARCA</td>
+                                    <td>EXISTENCIA (CAJAS)</td>
+                                    <td>TOTALCOSTO</td>
+                                    <td>SELLOUT</td>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataInventario">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary btn-circle btn-xl hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
+                <i class="fal fa-arrow-left"></i>
+            </button>
             `
         }
     }
@@ -189,6 +280,10 @@ function getView(){
 
 
 function addListeners(){
+
+
+
+    F.slideAnimationTabs();
 
    
     document.title = `Gerencia`;
@@ -204,7 +299,7 @@ function addListeners(){
     mes.value = f.getMonth()+1;
     anio.value = f.getFullYear();
 
-    let cmbEmpresa = document.getElementById('cmbEmpresa');
+    let cmbSucursal = document.getElementById('cmbSucursal');
 
     GF.get_data_empresas()
     .then((data)=>{
@@ -214,23 +309,25 @@ function addListeners(){
                     <option value="${r.EMPNIT}">${r.NOMBRE}</option>
                 `
             })
-            cmbEmpresa.innerHTML = str;
+            cmbSucursal.innerHTML = str;
 
-            get_rpt_fechas();
-            get_rpt_fechas_compras();
+            //get_rpt_fechas();
+            //get_rpt_fechas_compras();
+            
             //get_rpt_productos();
         
            
     })
     .catch(()=>{
-        cmbEmpresa.innerHTML = "<option value=''>NO SE CARGARON LAS SEDES</option>"
+        cmbSucursal.innerHTML = "<option value=''>NO SE CARGARON LAS SEDES</option>"
     })
 
 
-    cmbEmpresa.addEventListener('change',()=>{
+    cmbSucursal.addEventListener('change',()=>{
         try {
-            get_rpt_fechas();
-            get_rpt_fechas_compras();
+            //get_rpt_fechas();
+            //get_rpt_fechas_compras();
+            
             //get_rpt_productos();
         } catch (error) {
             
@@ -239,8 +336,9 @@ function addListeners(){
 
     mes.addEventListener('change',()=>{
         try {
-            get_rpt_fechas();
-            get_rpt_fechas_compras();
+            //get_rpt_fechas();
+            //get_rpt_fechas_compras();
+            
             //get_rpt_productos();
         } catch (error) {
             
@@ -249,16 +347,77 @@ function addListeners(){
 
     anio.addEventListener('change',()=>{
         try {
-            get_rpt_fechas();
-            get_rpt_fechas_compras();
+            //get_rpt_fechas();
+            //get_rpt_fechas_compras();
+            
             //get_rpt_productos();
         } catch (error) {
             
         }
     })
  
+
+
+    listeners_inventario();
+
+
+
    
 };
+
+function get_grid(){
+
+    switch (selected_tab) {
+        case '':
+            
+            break;
+    
+        case '':
+            
+            break;
+    
+        case '':
+            
+            break;
+            
+        case '':
+            
+            break;
+    
+    
+    }
+};
+
+function listeners_objetivos(){
+
+};
+
+
+function listeners_inventario(){
+    
+    
+    document.getElementById('btnMenuInventarios').addEventListener('click',()=>{
+
+        document.getElementById('tab-tres').click();
+
+        selected_tab = 'INVENTARIOS';
+        
+        tbl_inventario();
+    });
+
+    
+    document.getElementById('btnExportarInventario').addEventListener('click',()=>{
+        F.exportTableToExcel('tblInventario','Inventario');
+    });
+
+   
+
+
+    document.getElementById('cmbSt').addEventListener('change',()=>{
+        tbl_inventario();
+    });
+
+}
 
 function initView(){
 
@@ -278,14 +437,14 @@ function get_rpt_fechas(){
     let anio = document.getElementById('cmbAnio').value;
     let mes = document.getElementById('cmbMes').value;
 
-    let cmbEmpresa = document.getElementById('cmbEmpresa');
+    let cmbSucursal = document.getElementById('cmbSucursal');
 
 
     let container = document.getElementById('tblDataFechas')
     container.innerHTML = GlobalLoader;
 
 
-    let data = {sucursal:cmbEmpresa.value,
+    let data = {sucursal:cmbSucursal.value,
                 token:TOKEN,
                 anio:anio,
                 mes:mes}
@@ -334,13 +493,13 @@ function get_rpt_fechas_compras(){
 
     let anio = document.getElementById('cmbAnio').value;
     let mes = document.getElementById('cmbMes').value;
-    let cmbEmpresa = document.getElementById('cmbEmpresa');
+    let cmbSucursal = document.getElementById('cmbSucursal');
     
 
     let container = document.getElementById('tblDataFechasC')
     container.innerHTML = GlobalLoader;
 
-    let data = {sucursal:cmbEmpresa.value,
+    let data = {sucursal:cmbSucursal.value,
                 token:TOKEN,
                 anio:anio,
                 mes:mes}
@@ -383,13 +542,13 @@ function get_rpt_productos(){
     
     let anio = document.getElementById('cmbAnio').value;
     let mes = document.getElementById('cmbMes').value;
-    let cmbEmpresa = document.getElementById('cmbEmpresa');
+    let cmbSucursal = document.getElementById('cmbSucursal');
     
 
     let container = document.getElementById('tblDataProductos')
     container.innerHTML = GlobalLoader;
 
-    let data = {sucursal:cmbEmpresa.value,
+    let data = {sucursal:cmbSucursal.value,
                 token:TOKEN,
                 anio:anio,
                 mes:mes}
@@ -416,5 +575,58 @@ function get_rpt_productos(){
         container.innerHTML = 'No hay datos para mostrar...';
     })
 
+
+};
+
+
+
+
+function tbl_inventario(){
+
+    let container = document.getElementById('tblDataInventario');
+    container.innerHTML = GlobalLoader;
+
+    let st = document.getElementById('cmbSt').value;
+
+    let sucursal = document.getElementById('cmbSucursal').value;
+
+
+    let varTotalItems =0; let varTotalCosto = 0;
+
+    GF.get_data_inventarios_general(sucursal,st)
+    .then((data)=>{
+
+        let str = '';
+        data.recordset.map((r)=>{
+            varTotalItems +=1;
+            varTotalCosto += Number(r.TOTALCOSTO)
+            str += `
+            <tr>
+                <td>${r.CODPROD}</td>
+                <td>${r.CODPROD2}</td>
+                <td>${r.DESPROD3}</td>
+                <td>${r.DESPROD}</td>
+                <td>${r.DESMARCA}</td>
+                <td>${F.get_existencia(Number(r.TOTALUNIDADES),Number(r.UXC)).toFixed(2)}</td>
+                <td>${ F.setMoneda(r.TOTALCOSTO,'Q')}</td>
+                <td>${F.get_existencia(Number(r.SELLOUT),Number(r.UXC)).toFixed(2)}</td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
+        document.getElementById('lbTotalCostoI').innerText = F.setMoneda(varTotalCosto,'Q');
+        document.getElementById('lbTotalItemsI').innerText = varTotalItems;
+
+        //F.initit_datatable('tblInventario', true);
+
+    })
+    .catch(()=>{
+        document.getElementById('lbTotalCostoI').innerText = '';
+        document.getElementById('lbTotalItemsI').innerText = '';
+        container.innerHTML = 'No se cargaron datos...';
+    })
+
+
+    
 
 };
