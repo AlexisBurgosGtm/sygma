@@ -1145,5 +1145,14 @@ let F = {
           
           return saldo;
           
+      },
+      create_qr_code:(codigo,idcontainer)=>{
+
+          let container = document.getElementById(idcontainer);
+          container.innerHTML = '';
+
+          let qrcodetext = `XELASOL-${codigo}`;
+          new QRCode(container, qrcodetext);
+
       }
 };

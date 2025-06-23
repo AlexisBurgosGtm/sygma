@@ -6,7 +6,7 @@ function getView(){
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="dias-tab">
                         
-                            ${view.modal_lista_clientes()}
+                            ${view.modal_lista_clientes() + view.modal_qr() + view.modal_camara()}
                         
                         </div> 
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="clientes-tab">
@@ -520,6 +520,11 @@ function getView(){
                     <i class="fal fa-folder"></i>  
                 </button>
 
+
+                <button class="btn btn-danger btn-xl btn-bottom-r btn-circle shadow hand" id="btnCameraQR">
+                    <i class="fal fa-camera"></i>  
+                </button>
+
                     `
         },
         modal_lista_documentos:()=>{
@@ -555,7 +560,82 @@ function getView(){
 
                     </div>
                 `
-        }
+        },
+        modal_qr:()=>{
+            return `
+            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" 
+                role="dialog" aria-hidden="true" id="modal_qr">
+                <div class="modal-dialog modal-dialog-right modal-xl">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-base d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white" id="">
+                                Codigo QR del Cliente
+                            </h4>
+                        </div>
+                        <div class="modal-body p-4">
+                            
+                            <div class="card card-rounded" id="print_qr">
+                                <div class="card-body p-4">
+
+                                    <h3 class="negrita text-danger" id="lbNomclieQR"></h3>
+                                    <h5 class="negrita text-danger" id="lbCodclieQR"></h5>
+
+                                    <div id="container_qr">
+                                    </div>
+
+                                </div>
+
+                                <br>
+                                
+                                <button class="btn btn-xl btn-secondary btn-circle hand shadow" data-dismiss="modal">
+                                    <i class="fal fa-arrow-left"></i>
+                                </button>
+                            </div>                              
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            `
+        },
+        modal_camara:()=>{
+            return `
+            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" 
+                role="dialog" aria-hidden="true" id="modal_barcode">
+                <div class="modal-dialog modal-dialog-right modal-xl">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-danger d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white" id="">
+                                Lectura de Codigo QR
+                            </h4>
+                        </div>
+                        <div class="modal-body p-4">
+                            
+                            <div class="card card-rounded" id="">
+                                <div class="card-body p-4">
+
+                                   <div class="" id="root_barcode">
+                                    </div>
+
+                                </div>
+
+                                <br>
+                                
+                                <button class="btn btn-xl btn-secondary btn-circle hand shadow" data-dismiss="modal">
+                                    <i class="fal fa-arrow-left"></i>
+                                </button>
+                            </div>                              
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            `
+        },
     }
 
     root.innerHTML = view.body();
@@ -624,6 +704,15 @@ function addListeners(){
 
     });
 
+
+
+    let btnCameraQR = document.getElementById('btnCameraQR');
+    btnCameraQR.addEventListener('click',()=>{
+
+        $("#modal_barcode").modal('show');
+        iniciar_barcode();
+
+    });
 
     
 
@@ -1125,6 +1214,13 @@ function tbl_clientes(filtro,qr){
                         <button class="btn btn-md btn-circle btn-info hand shadow" onclick="F.gotoGoogleMaps('${r.LATITUD}','${r.LONGITUD}')">
                             <i class="fal fa-globe"></i>
                         </button>
+
+                        <br><br>
+
+                        <button class="btn btn-md btn-circle btn-warning hand shadow" onclick="create_qr_code('${r.CODCLIENTE}','${r.NOMBRE}')">
+                            <i class="fal fa-barcode"></i>
+                        </button>
+
                     </td>
                     <td>
                         <small class="text-info">${r.TIPONEGOCIO}-${r.NEGOCIO}</small>
@@ -1157,6 +1253,91 @@ function tbl_clientes(filtro,qr){
 
 
 };
+
+
+function create_qr_code(codigo,nomclie){
+
+
+    $("#modal_qr").modal('show');
+
+    document.getElementById('lbNomclieQR').innerText = nomclie;
+    document.getElementById('lbCodclieQR').innerText = `Codigo: ${codigo}`
+
+    F.create_qr_code(codigo,'container_qr');
+
+}
+
+async function iniciar_barcode() {
+
+    let root_barcode = document.getElementById('root_barcode');
+
+    try {
+        let child = document.getElementById('barcode_video');
+        root_barcode.removeChild(child)        
+    } catch (error) {
+        
+    }
+    
+    let txtCodprod = document.getElementById('txtBuscarClie')
+    
+
+    if('BarcodeDetector' in window ){
+        
+    }else{
+        root_barcode.innerHTML = 'No se puede usar Barcode en este dispositivo';
+        return;
+    };
+
+    
+    const barcodeDetector = new BarcodeDetector({
+        formats: ["code_39", "codabar", "ean_13",'code_128','qr_code'],
+    });
+
+    
+    const mediaStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" }
+    });
+  
+    const video = document.createElement("video");
+    video.width=400;
+    video.height=500;
+    video.srcObject = mediaStream;
+    video.autoplay = true;
+    video.id = "barcode_video"
+  
+    //list.before(video);
+
+    root_barcode.appendChild(video);
+    let codproducto = '';
+
+    let contador = 0;
+    function render() {
+      barcodeDetector
+        .detect(video)
+        .then((barcodes) => {
+            
+          barcodes.forEach((barcode) => {
+                contador+=1;
+                    if(contador==1){
+                        codproducto = barcode.rawValue;
+                        //esto para evitar que busque muchas veces el mismo código
+                        txtCodprod.value = codproducto;
+                        $("#modal_barcode").modal('hide');
+                        get_data_producto();
+                    }
+                    
+          });
+        })
+        .catch(console.error);
+    }
+  
+    (function renderLoop() {
+      requestAnimationFrame(renderLoop);
+      render();
+    })();
+};
+
+
 
 function insert_cliente(nit,nombre,direccion,telefono){
 
