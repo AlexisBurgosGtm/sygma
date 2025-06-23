@@ -125,24 +125,25 @@ router.post("/select_logro_vendedores", async(req,res)=>{
     const { token, sucursal, mes, anio} = req.body;
 
     let qry = `
-            SELECT view_rpt_objetivos_vendedores_categorias.RELOP AS EMPRESA, 
-                    view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR, 
-                    view_rpt_objetivos_vendedores_categorias.VENDEDOR, 
-                    SUM(view_rpt_objetivos_vendedores_categorias.TOTALUNIDADES) AS TOTALUNIDADES, 
-                    SUM(view_rpt_objetivos_vendedores_categorias.TOTALCOSTO) AS TOTALCOSTO, 
-                    SUM(view_rpt_objetivos_vendedores_categorias.TOTALPRECIO) AS TOTALPRECIO, 
-                    view_data_objetivos_empleado_resumen.OBJETIVO
-            FROM  view_rpt_objetivos_vendedores_categorias RIGHT OUTER JOIN
-                    view_data_objetivos_empleado_resumen ON view_rpt_objetivos_vendedores_categorias.MES = view_data_objetivos_empleado_resumen.MES AND 
-                    view_rpt_objetivos_vendedores_categorias.ANIO = view_data_objetivos_empleado_resumen.ANIO AND view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR = view_data_objetivos_empleado_resumen.CODEMP AND 
-                    view_rpt_objetivos_vendedores_categorias.EMPNIT = view_data_objetivos_empleado_resumen.EMPNIT
-            WHERE  (view_rpt_objetivos_vendedores_categorias.EMPNIT LIKE '%${sucursal}%') AND 
-                    (view_rpt_objetivos_vendedores_categorias.ANIO = ${anio}) AND 
-                    (view_rpt_objetivos_vendedores_categorias.MES = ${mes})
-            GROUP BY view_rpt_objetivos_vendedores_categorias.RELOP, 
-                    view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR, 
-                    view_rpt_objetivos_vendedores_categorias.VENDEDOR, 
-                    view_data_objetivos_empleado_resumen.OBJETIVO
+        SELECT view_rpt_objetivos_vendedores_categorias.RELOP AS EMPRESA, 
+					view_data_objetivos_empleado_resumen.CODEMP AS CODIGO_VENDEDOR, 
+					view_data_objetivos_empleado_resumen.NOMEMPLEADO AS VENDEDOR, 
+					SUM(ISNULL(view_rpt_objetivos_vendedores_categorias.TOTALUNIDADES,0)) AS TOTALUNIDADES, 
+					SUM(ISNULL(view_rpt_objetivos_vendedores_categorias.TOTALCOSTO,0)) AS TOTALCOSTO, 
+					SUM(ISNULL(view_rpt_objetivos_vendedores_categorias.TOTALPRECIO,0)) AS TOTALPRECIO, 
+					view_data_objetivos_empleado_resumen.OBJETIVO
+        FROM     view_rpt_objetivos_vendedores_categorias RIGHT OUTER JOIN
+                  view_data_objetivos_empleado_resumen ON view_rpt_objetivos_vendedores_categorias.MES = view_data_objetivos_empleado_resumen.MES AND 
+                  view_rpt_objetivos_vendedores_categorias.ANIO = view_data_objetivos_empleado_resumen.ANIO AND view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR = view_data_objetivos_empleado_resumen.CODEMP AND 
+                  view_rpt_objetivos_vendedores_categorias.EMPNIT = view_data_objetivos_empleado_resumen.EMPNIT
+        WHERE  (view_data_objetivos_empleado_resumen.EMPNIT LIKE '%${sucursal}%') AND 
+                (view_data_objetivos_empleado_resumen.ANIO = ${anio}) AND 
+                (view_data_objetivos_empleado_resumen.MES = ${mes})
+        GROUP BY view_rpt_objetivos_vendedores_categorias.RELOP, 
+                view_data_objetivos_empleado_resumen.OBJETIVO, 
+                view_data_objetivos_empleado_resumen.NOMEMPLEADO, 
+                view_data_objetivos_empleado_resumen.CODEMP
+        ORDER BY view_data_objetivos_empleado_resumen.NOMEMPLEADO
             `;
     
 
