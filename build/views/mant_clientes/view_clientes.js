@@ -6,7 +6,7 @@ function getView(){
                 <div class="col-12 p-0 bg-white">
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
-                            ${view.vista_listado()}
+                            ${view.vista_listado() + view.modal_qr()}
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
                            ${view.vista_datos_cliente()}
@@ -82,8 +82,9 @@ function getView(){
                                     <td>NOMBRE</td>
                                     <td>DIRECCION/REF</td>
                                     <td>MUNICIPIO</td>
-                                    <td></td>
-                                    <td></td>
+                                    <td>QR</td>
+                                    <td>A/D</td>
+                                    <td>E</td>
                                 </tr>
                             </thead>
                             <tbody id="tblDataClientes">
@@ -258,7 +259,82 @@ function getView(){
             `
 
 
-        }
+        },
+        modal_qr:()=>{
+            return `
+            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" 
+                role="dialog" aria-hidden="true" id="modal_qr">
+                <div class="modal-dialog modal-dialog-right modal-xl">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-base d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white" id="">
+                                Codigo QR del Cliente
+                            </h4>
+                        </div>
+                        <div class="modal-body p-4">
+                            
+                            <div class="card card-rounded" id="print_qr">
+                                <div class="card-body p-4">
+
+                                    <h3 class="negrita text-danger" id="lbNomclieQR"></h3>
+                                    <h5 class="negrita text-danger" id="lbCodclieQR"></h5>
+
+                                    <div id="container_qr">
+                                    </div>
+
+                                </div>
+
+                                <br>
+                                
+                                <button class="btn btn-xl btn-secondary btn-circle hand shadow" data-dismiss="modal">
+                                    <i class="fal fa-arrow-left"></i>
+                                </button>
+                            </div>                              
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            `
+        },
+        modal_camara:()=>{
+            return `
+            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" 
+                role="dialog" aria-hidden="true" id="modal_barcode">
+                <div class="modal-dialog modal-dialog-right modal-xl">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-danger d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white" id="">
+                                Lectura de Codigo QR
+                            </h4>
+                        </div>
+                        <div class="modal-body p-4">
+                            
+                            <div class="card card-rounded" id="">
+                                <div class="card-body p-4">
+
+                                   <div class="" id="root_barcode">
+                                    </div>
+
+                                </div>
+
+                                <br>
+                                
+                                <button class="btn btn-xl btn-secondary btn-circle hand shadow" data-dismiss="modal">
+                                    <i class="fal fa-arrow-left"></i>
+                                </button>
+                            </div>                              
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            `
+        }   
     }
 
     root.innerHTML = view.body();
@@ -509,6 +585,12 @@ function tbl_clientes(){
                 <td>${r.DESMUN}
                 <br>
                 <small>${r.DESDEPTO}</td>
+                <td>
+                    <button class="btn btn-md btn-warning btn-circle hand shadow"
+                        onclick="create_qr_code('${r.CODCLIENTE}','${r.NOMBRE}')">
+                        <i class="fal fa-barcode"></i>
+                    </button>
+                </td>
                 <td>
                     <button class="btn ${strClassBtn} btn-md btn-circle hand shadow"
                     id="${idbtnE}"
@@ -1036,4 +1118,19 @@ function fcnEditarCliente(){
 
 
     });
+};
+
+
+
+
+function create_qr_code(codigo,nomclie){
+
+
+    $("#modal_qr").modal('show');
+
+    document.getElementById('lbNomclieQR').innerText = nomclie;
+    document.getElementById('lbCodclieQR').innerText = `Codigo: ${codigo}`
+
+    F.create_qr_code(codigo,'container_qr');
+
 };
