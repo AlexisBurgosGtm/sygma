@@ -1321,9 +1321,9 @@ async function iniciar_barcode() {
                     if(contador==1){
                         codproducto = barcode.rawValue;
                         //esto para evitar que busque muchas veces el mismo código
-                        txtCodprod.value = codproducto;
+                        txtCodprod.value = codproducto.replace('XELASOL-','');
                         $("#modal_barcode").modal('hide');
-                        get_data_producto();
+                        document.getElementById('btnBuscarClie').click();
                     }
                     
           });

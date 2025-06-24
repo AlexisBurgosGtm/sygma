@@ -376,10 +376,10 @@ function get_grid(){
             
             break;
     
-        case '':
-            
+        case 'INVENTARIOS':
+            tbl_inventario();
             break;
-            
+
         case '':
             
             break;
