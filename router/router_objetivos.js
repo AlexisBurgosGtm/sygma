@@ -4,6 +4,21 @@ const router = express.Router();
 
 
 
+router.post("/cobertura_categorias", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio} = req.body;
+
+    let qry = `
+		
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+
 
 // se cambio marcas por clasificaion TIPO
 router.post("/select_logro_vendedores_detalle", async(req,res)=>{
@@ -118,6 +133,35 @@ router.post("/select_logro_marcas_categorias", async(req,res)=>{
      
 });
 
+
+router.post("/select_logro_vendedores_categorias", async(req,res)=>{
+   
+    const { token, codemp, sucursal, mes, anio} = req.body;
+
+    let qry = `
+	SELECT view_data_objetivos_vendedor.EMPNIT, view_data_objetivos_vendedor.EMPRESA, 
+				view_data_objetivos_vendedor.CODEMP, 
+				view_data_objetivos_vendedor.EMPLEADO, 
+				view_data_objetivos_vendedor.CODCATEGORIA, 
+                 view_data_objetivos_vendedor.CATEGORIA, 
+				 view_data_objetivos_vendedor.OBJETIVO, 
+				 SUM(ISNULL(view_rpt_objetivos_vendedores_categorias.TOTALUNIDADES,0)) AS TOTALUNIDADES, 
+                 SUM(ISNULL(view_rpt_objetivos_vendedores_categorias.TOTALCOSTO,0)) AS TOTALCOSTO, 
+				 SUM(ISNULL(view_rpt_objetivos_vendedores_categorias.TOTALPRECIO,0)) AS LOGRO
+FROM     view_rpt_objetivos_vendedores_categorias RIGHT OUTER JOIN
+                  view_data_objetivos_vendedor ON view_rpt_objetivos_vendedores_categorias.CODIGO_CATEGORIA = view_data_objetivos_vendedor.CODCATEGORIA AND 
+                  view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR = view_data_objetivos_vendedor.CODEMP AND view_rpt_objetivos_vendedores_categorias.EMPNIT = view_data_objetivos_vendedor.EMPNIT
+WHERE  (view_data_objetivos_vendedor.MES = ${mes}) 
+		AND (view_data_objetivos_vendedor.ANIO = ${anio})
+GROUP BY view_data_objetivos_vendedor.EMPNIT, view_data_objetivos_vendedor.EMPRESA, view_data_objetivos_vendedor.CODEMP, view_data_objetivos_vendedor.EMPLEADO, view_data_objetivos_vendedor.CODCATEGORIA, 
+                  view_data_objetivos_vendedor.CATEGORIA, view_data_objetivos_vendedor.OBJETIVO
+HAVING (view_data_objetivos_vendedor.CODEMP = ${codemp})
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
 
 
 router.post("/select_logro_vendedores", async(req,res)=>{

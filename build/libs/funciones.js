@@ -1146,6 +1146,20 @@ let F = {
           return saldo;
           
       },
+      get_logrado:(venta,objetivo)=>{
+         
+          let saldo = 0;
+          
+          try {
+            saldo = Number(venta)/Number(objetivo);
+            saldo = saldo * 100;
+          } catch (error) {
+            saldo=0;
+          }
+          
+          return saldo.toFixed(2);
+          
+      },
       create_qr_code:(codigo,idcontainer)=>{
 
           let container = document.getElementById(idcontainer);

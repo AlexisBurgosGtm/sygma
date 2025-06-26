@@ -11,7 +11,7 @@ function getView(){
                     </div>
                     <div class="col-sm-6 col-lg-3 col-xl-3 col-md-3">
                       
-                         ${view.menu_ventas()}
+                         ${view.menu_cobertura()}
                     </div>
                     <div class="col-sm-6 col-lg-3 col-xl-3 col-md-3">
                         ${view.menu_inventarios()}
@@ -25,13 +25,13 @@ function getView(){
                             ${view.tab_objetivos()}
                         </div>                        
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
-                                                                                   
+                            ${view.tab_cobertura()}                                           
                         </div>
                         <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
                             ${view.tab_inventario()}
                         </div>
                         <div class="tab-pane fade" id="cuatro" role="tabpanel" aria-labelledby="home-tab">
-                            
+                          
                         </div>
                         <div class="tab-pane fade" id="cinco" role="tabpanel" aria-labelledby="home-tab">
                             
@@ -183,16 +183,31 @@ function getView(){
             </div>
             `
         },
+        menu_cobertura:()=>{
+            return `
+            <div class="card card-rounded shadow hand col-12 border-success" id="btnMenuCobertura">
+                <div class="card-body">
+                    <h5 class="text-success negrita">COBERTURA</h5>
+                    
+                    <small class="negrita text-secondary">Logrado:</small>
+                    <div class="input-group" id="lbCoberturaLogrado"></div>
+                    <br>
+                    <small class="negrita text-secondary">Faltan:</small>
+                    <div class="input-group" id="lbCoberturaFalta"></div>
+                </div>
+            </div>
+            `
+        },
         menu_objetivos:()=>{
             return `
             <div class="card card-rounded shadow hand col-12 border-info" id="btnMenuObjetivos">
                 <div class="card-body">
                     <h5 class="text-info negrita">Objetivos</h5>
                     <small class="negrita text-secondary">Logrado:</small>
-                    <div id="lbObjLogrado"></div>
+                    <div class="input-group" id="lbObjLogrado"></div>
                     <br>
                     <small class="negrita text-secondary">Faltan:</small>
-                    <div id="lbObjLogradoFalta"></div>
+                    <div class="input-group" id="lbObjLogradoFalta"></div>
                 </div>
             </div>
             `
@@ -282,7 +297,7 @@ function getView(){
 
         
 
-            ${view.modal_categorias_marca()}
+            ${view.modal_categorias_marca() + view.modal_categorias_vendedor()}
             `
         },
         frag_marcas:()=>{
@@ -331,8 +346,8 @@ function getView(){
                         <table class="table h-full table-hover col-12">
                             <thead class="bg-secondary text-white">
                                 <tr>
-                                    <td>VENDEDOR</td>
-                                    <td>IMPORTE</td>
+                                    <td>CATEGORIA</td>
+                                    <td>VENTA</td>
                                     <td>OBJETIVO</td>
                                     <td>FALTA</td>
                                     <td>ALCANCE</td>
@@ -398,6 +413,63 @@ function getView(){
                         </div>
                     
                     </div>
+                </div>
+            </div>
+            `
+        },
+        modal_categorias_vendedor:()=>{
+            return `
+              <div id="modal_categorias_vendedor" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-right modal-xl">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-secondary d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white" id="lbVendedorCategorias">
+                                
+                            </h4>
+                        </div>
+                        <div class="modal-body p-4">
+                            
+                            <div class="card card-rounded">
+                                <div class="card-body p-4">
+
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered h-full col-12">
+                                            <thead class="bg-base text-white"> 
+                                                <tr>
+                                                    <td>CATEGORIA</td>
+                                                    <td>OBJETIVO</td>
+                                                    <td>LOGRO</td>
+                                                    <td>FALTAN</td>
+                                                    <td></td>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tblDataVendedorCategorias"></tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                                
+                            <div class="row">
+                                <button class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
+                                    <i class="fal fa-arrow-left"></i>
+                                </button>
+                            </div>
+
+                        </div>
+                    
+                    </div>
+                </div>
+            </div>
+            `
+        },
+        tab_cobertura:()=>{
+            return `
+            <div class="card card-rounded col-12 shadow">
+                <div class="card-body p-2">
+                
+                
                 </div>
             </div>
             `
@@ -480,6 +552,7 @@ function addListeners(){
 
 
     listeners_objetivos();
+    listeners_cobertura();
     listeners_inventario();
 
 
@@ -495,8 +568,8 @@ function get_grid(){
             get_reportes();
             break;
     
-        case '':
-            
+        case 'COBERTURA':
+            tbl_cobertura();
             break;
     
         case 'INVENTARIOS':
@@ -510,6 +583,21 @@ function get_grid(){
     
     }
 };
+
+function listeners_cobertura(){
+
+        document.getElementById('btnMenuCobertura').addEventListener('click',()=>{
+
+            selected_tab = 'COBERTURA';
+
+            document.getElementById('tab-dos').click();
+
+            tbl_cobertura();
+
+        });
+
+};
+
 
 function listeners_objetivos(){
 
@@ -866,10 +954,11 @@ function tbl_logro_marcas(sucursal,mes,anio){
             logrado=0;
             faltaLogro=0;   
         }
-        document.getElementById('lbObjLogrado').innerHTML = `<progress value="${logrado}" max="100"></progress>`;
-        document.getElementById('lbObjLogradoFalta').innerHTML = `<progress class="progress-falta" value="${faltaLogro}" max="100"></progress>`;
+        document.getElementById('lbObjLogrado').innerHTML = `<progress class="form-control" value="${logrado}" max="100"></progress><b class="text-success">${logrado.toFixed(2)}%</b>`;
+        document.getElementById('lbObjLogradoFalta').innerHTML = `<progress class="form-control progress-falta" value="${faltaLogro}" max="100"></progress><b class="text-danger">${faltaLogro.toFixed(2)}%</b>`;
     })
     .catch(()=>{
+
         container.innerHTML = 'No se cargaron datos...';
 
         document.getElementById('lbTotalMarcasImporte').innerHTML = '';
@@ -886,11 +975,96 @@ function tbl_logro_marcas(sucursal,mes,anio){
 
 };
 
+function get_detalle_marca(codmarca,desmarca){
+
+
+    $("#modal_categorias_marca").modal('show');
+
+    document.getElementById('lbMarcasDescategoria').innerText = desmarca;
+    
+    tbl_logro_categorias_marca(codmarca);
+
+
+
+}
+
+
+function get_data_logro_categorias_marcas(sucursal,codmarca,mes,anio){
+
+     return new Promise((resolve,reject)=>{
+
+            axios.post(GlobalUrlCalls + '/objetivos/select_logro_marcas_categorias', {
+                    token:TOKEN,
+                    sucursal:sucursal,
+                    codmarca:codmarca,
+                    mes:mes,
+                    anio:anio})
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        }) 
+    
+
+};
+
+function tbl_logro_categorias_marca(codmarca){
+
+    let container = document.getElementById('tblDataCategoriasMarca');
+    container.innerHTML = GlobalLoader;
+
+
+    let sucursal = document.getElementById('cmbSucursal').value;
+    let mes = document.getElementById('cmbMes').value;
+    let anio = document.getElementById('cmbAnio').value;
+
+
+
+    get_data_logro_categorias_marcas(sucursal,codmarca,mes,anio)
+    .then((data)=>{
+        let str = '';
+        data.recordset.map((r)=>{
+           
+            let varLOGRO = ((Number(r.TOTALPRECIO)/Number(r.OBJETIVO))*100);
+           
+            str += `
+            <tr>
+                <td>${r.CATEGORIA}</td>
+                <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
+                <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                <td>${F.setMoneda((Number(r.OBJETIVO)-Number(r.TOTALPRECIO)),'Q')}</td>
+                <td>${varLOGRO.toFixed(2)}%</td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
+    })
+    .catch(()=>{
+        container.innerHTML = 'No se cargaron datos...';
+    })
+
+
+};
+
 
 
 function get_data_logro_vendedores(sucursal,mes,anio){
 
-     return new Promise((resolve,reject)=>{
+    return new Promise((resolve,reject)=>{
 
             axios.post(GlobalUrlCalls + '/objetivos/select_logro_vendedores', {
                     token:TOKEN,
@@ -979,29 +1153,24 @@ function tbl_logro_vendedores(sucursal,mes,anio){
 };
 
 
-
-function get_detalle_marca(codmarca,desmarca){
-
-
-    $("#modal_categorias_marca").modal('show');
-
-    document.getElementById('lbMarcasDescategoria').innerText = desmarca;
-    
-    tbl_logro_categorias_marca(codmarca);
+function get_detalle_vendedor(codemp,nombre){
 
 
+        $("#modal_categorias_vendedor").modal('show');
 
-}
+        document.getElementById('lbVendedorCategorias').innerText = nombre;
 
+        tbl_detalle_vendedor(codemp);
 
-function get_data_logro_categorias_marcas(sucursal,codmarca,mes,anio){
+};
 
-     return new Promise((resolve,reject)=>{
+function get_data_vendedor(codemp,mes,anio){
 
-            axios.post(GlobalUrlCalls + '/objetivos/select_logro_marcas_categorias', {
+    return new Promise((resolve,reject)=>{
+
+            axios.post(GlobalUrlCalls + '/objetivos/select_logro_vendedores_categorias', {
                     token:TOKEN,
-                    sucursal:sucursal,
-                    codmarca:codmarca,
+                    codemp:codemp,
                     mes:mes,
                     anio:anio})
             .then((response) => {
@@ -1022,47 +1191,62 @@ function get_data_logro_categorias_marcas(sucursal,codmarca,mes,anio){
             }, (error) => {
                 reject();
             });
-        }) 
+    }) 
     
 
+
 };
+function tbl_detalle_vendedor(codemp){
 
-function tbl_logro_categorias_marca(codmarca){
-
-    let container = document.getElementById('tblDataCategoriasMarca');
+    let container = document.getElementById('tblDataVendedorCategorias');
     container.innerHTML = GlobalLoader;
 
-
-    let sucursal = document.getElementById('cmbSucursal').value;
     let mes = document.getElementById('cmbMes').value;
     let anio = document.getElementById('cmbAnio').value;
 
 
-
-    get_data_logro_categorias_marcas(sucursal,codmarca,mes,anio)
+    get_data_vendedor(codemp,mes,anio)
     .then((data)=>{
         let str = '';
+
         data.recordset.map((r)=>{
-           
-            let varLOGRO = ((Number(r.TOTALPRECIO)/Number(r.OBJETIVO))*100);
-           
+            
+            let logrado = F.get_logrado(Number(r.LOGRO),Number(r.OBJETIVO));
+            let faltan = Number(r.OBJETIVO)-Number(r.LOGRO);
+          
             str += `
             <tr>
                 <td>${r.CATEGORIA}</td>
                 <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
-                <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
-                <td>${F.setMoneda((Number(r.OBJETIVO)-Number(r.TOTALPRECIO)),'Q')}</td>
-                <td>${varLOGRO.toFixed(2)}%</td>
+                <td>${F.setMoneda(r.LOGRO,'Q')}</td>
+                <td>${F.setMoneda(faltan,'Q')}</td>
+                <td>
+                    <div class="input-group"><progress value="${logrado}" max="100"></progress>${logrado}%</div>
+                </td>
             </tr>
             `
         })
         container.innerHTML = str;
+
     })
     .catch(()=>{
         container.innerHTML = 'No se cargaron datos...';
     })
 
 
-};
+}
+
 
 // OBJETIVOS
+
+
+//COBERTURA
+
+function tbl_cobertura(){
+
+
+
+};
+
+
+//COBERTURA

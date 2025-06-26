@@ -296,35 +296,31 @@ function getView(){
                             <i class="fal fa-search"></i>
                         </button>
                     </div>
+
+                    <br>
+                    <label class="negrita text-base">Categoria (Tipo)</label>
+                    <div class="input-group">
+                        <select class="form-control" id="cmbTipoTipo">
+                        </select>
+                        
+                    </div>
                    
                      <br>
                     <label class="negrita text-base">Tipo Rentabilidad</label>
                     <div class="input-group">
                         <select class="form-control" id="cmbTipoRentabilidad">
                         </select>
-                        <button class="btn btn-base hand" id="">
-                            <i class="fal fa-search"></i>
-                        </button>
+                      
                     </div>
 
-                     <br>
-                    <label class="negrita text-base">Clasificación (Tipo)</label>
-                    <div class="input-group">
-                        <select class="form-control" id="cmbTipoTipo">
-                        </select>
-                        <button class="btn btn-base hand" id="">
-                            <i class="fal fa-search"></i>
-                        </button>
-                    </div>
+                    
 
                     <br>
                     <label class="negrita text-base">Clasificación 2</label>
                     <div class="input-group">
                         <select class="form-control" id="cmbTipoLaboratorio">
                         </select>
-                        <button class="btn btn-base hand" id="">
-                            <i class="fal fa-search"></i>
-                        </button>
+                       
                     </div>
                                         
                     <br>
@@ -332,9 +328,7 @@ function getView(){
                     <div class="input-group">
                         <select class="form-control" id="cmbTipoImpulso">
                         </select>    
-                        <button class="btn btn-base hand" id="">
-                            <i class="fal fa-search"></i>
-                        </button>
+                        
                     </div>
                                         
                     <br>
@@ -342,9 +336,7 @@ function getView(){
                     <div class="input-group">
                         <select class="form-control" id="cmbTipoProgramaSalud">
                         </select>
-                        <button class="btn btn-base hand">
-                            <i class="fal fa-search"></i>
-                        </button>
+                       
                     </div>
 
                     <br>
@@ -352,9 +344,7 @@ function getView(){
                     <div class="input-group">
                         <select class="form-control" id="cmbTipoRMMR">
                         </select>
-                        <button class="btn btn-base hand">
-                            <i class="fal fa-search"></i>
-                        </button>
+                       
                     </div>
 
                     <br>
@@ -362,9 +352,7 @@ function getView(){
                     <div class="input-group">
                         <select class="form-control" id="cmbTipoRelleno">
                         </select>
-                        <button class="btn btn-base hand">
-                            <i class="fal fa-search"></i>
-                        </button>
+                       
                     </div>
                                         
                    
