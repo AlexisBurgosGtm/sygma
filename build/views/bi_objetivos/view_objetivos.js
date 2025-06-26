@@ -43,14 +43,21 @@ function getView(){
                         <h3 class="negrita text-danger text-center">GESTION DE OBJETIVOS</h3>
 
                         <div class="row">
-                            <div class="col-6">
+                            <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                                <div class="form-group">
+                                    <label>Sucursal</label>
+                                    <select class="form-control negrita text-secondary" id="cmbSucursal">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
                                 <div class="form-group">
                                     <label>Mes</label>
                                     <select class="form-control negrita text-secondary" id="cmbMes">
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-6">
+                            <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
                                 <div class="form-group">
                                     <label>Año</label>
                                     <select class="form-control negrita text-secondary" id="cmbAnio">
@@ -336,6 +343,35 @@ function addListeners(){
     document.getElementById('cmbMes').innerHTML = F.ComboMeses(); document.getElementById('cmbMes').value = F.get_mes_curso();
     document.getElementById('cmbAnio').innerHTML = F.ComboAnio(); document.getElementById('cmbAnio').value = F.get_anio_curso();
     
+
+    let cmbSucursal = document.getElementById('cmbSucursal');
+    GF.get_data_empresas()
+    .then((data)=>{
+            let str = '';
+            data.recordset.map((r)=>{
+                str += `
+                    <option value="${r.EMPNIT}">${r.NOMBRE}</option>
+                `
+            })
+            cmbSucursal.innerHTML = str;
+            cmbSucursal.value = GlobalEmpnit;
+
+            get_grid();
+            
+
+           
+    })
+    .catch(()=>{
+        cmbSucursal.innerHTML = "<option value=''>NO SE CARGARON LAS SEDES</option>"
+    })
+
+
+    cmbSucursal.addEventListener('change',()=>{
+        get_grid();
+    })
+
+
+
     get_combo_marcas();
 
     
@@ -346,13 +382,17 @@ function addListeners(){
 
 
     document.getElementById('cmbMes').addEventListener('change',()=>{
-        tbl_objetivos_generales();
-        tbl_objetivos_vendedores()
+         tbl_objetivos_generales();    
+        tbl_objetivos_vendedores();
+        tbl_objetivos_vendedores_resumen();
     });
 
     document.getElementById('cmbAnio').addEventListener('change',()=>{
-        tbl_objetivos_generales();
-        tbl_objetivos_vendedores()
+
+        tbl_objetivos_generales();    
+        tbl_objetivos_vendedores();
+        tbl_objetivos_vendedores_resumen();
+
     });
 
 
@@ -397,8 +437,7 @@ function addListeners(){
 
     });
 
-    tbl_objetivos_generales();
-
+    
 
 
     document.getElementById('btnNuevoVendedor').addEventListener('click',()=>{
@@ -407,18 +446,7 @@ function addListeners(){
     });
 
 
-    GF.get_data_empleados_tipo(3)
-    .then((data)=>{
-      
-        let str = '';
-        data.recordset.map((r)=>{
-            str += `<option value="${r.CODEMPLEADO}">${r.NOMEMPLEADO}</option>`
-        })
-        document.getElementById('cmbVenVendedor').innerHTML = str;
-    })
-    .catch(()=>{
-
-    })
+  
 
     let btnVenGuardar =document.getElementById('btnVenGuardar');
     btnVenGuardar.addEventListener('click',()=>{
@@ -466,11 +494,6 @@ function addListeners(){
     });
 
 
-    tbl_objetivos_vendedores();
-
-
-    tbl_objetivos_vendedores_resumen();
-
 
 };
 
@@ -481,6 +504,29 @@ function initView(){
 
 };
 
+function get_grid(){
+
+            GF.get_data_empleados_tipo_emp(3,cmbSucursal.value)
+                .then((data)=>{
+                
+                    let str = '';
+                    data.recordset.map((r)=>{
+                        str += `<option value="${r.CODEMPLEADO}">${r.NOMEMPLEADO}</option>`
+                    })
+                    document.getElementById('cmbVenVendedor').innerHTML = str;
+                })
+                .catch(()=>{
+
+                })
+
+            tbl_objetivos_generales();
+            
+            tbl_objetivos_vendedores();
+
+            tbl_objetivos_vendedores_resumen();
+
+
+};
 
 function limpiar_datos_general(){
 
@@ -514,36 +560,6 @@ function get_combo_marcas(){
         })
     
 
-        return;
-
-        axios.post(GlobalUrlCalls + '/productos/listado_marcas',
-            {
-                sucursal:GlobalEmpnit,
-                token:TOKEN
-            })
-        .then((response) => {
-            if(response.status.toString()=='200'){
-                let data = response.data;
-                if(Number(data.rowsAffected[0])>0){
-                    let str = '';
-                    data.recordset.map((r)=>{
-                        str += `<option value='${r.CODMARCA}'>${r.DESMARCA}</option>`
-                    })
-                    container.innerHTML = str;
-                    container2.innerHTML = str;     
-                }else{
-                    container.innerHTML = `<option value='0'>No se cargó las Marcas</option>`;
-                    container2.innerHTML = `<option value='0'>No se cargó las Marcas</option>`;
-                }            
-            }else{
-                container.innerHTML = `<option value='0'>No se cargó las Marcas</option>`;
-                container2.innerHTML = `<option value='0'>No se cargó las Marcas</option>`;
-            }             
-        }, (error) => {
-            container.innerHTML = `<option value='0'>No se cargó las Marcas</option>`;
-            container2.innerHTML = `<option value='0'>No se cargó las Marcas</option>`;
-        });
-
 };
 
 
@@ -557,10 +573,12 @@ function insert_objetivo_general_marca(){
         let anio = Number(document.getElementById('cmbAnio').value);
         let codmarca = Number(document.getElementById('cmbGenMarca').value || 0);
         let objetivo = Number(document.getElementById('txtGenObjetivo').value || 0);
+        let sucursal = document.getElementById('cmbSucursal').value;
+        
 
         axios.post(GlobalUrlCalls + '/objetivos/insert_objetivo_general_marca',
             {
-                sucursal:GlobalEmpnit,
+                sucursal:sucursal,
                 token:TOKEN,
                 mes:mes,
                 anio:anio,
@@ -593,88 +611,6 @@ function insert_objetivo_general_marca(){
 
 
 
-function BACKUP_data_objetivos_generales(){
-
-    return new Promise((resolve,reject)=>{
-
-
-        let mes = Number(document.getElementById('cmbMes').value);
-        let anio = Number(document.getElementById('cmbAnio').value);
-       
-        //se cambio de marcas a clasificaciones TIPO
-        axios.post(GlobalUrlCalls + '/objetivos/select_objetivo_general_marcas',
-            {
-                sucursal:GlobalEmpnit,
-                token:TOKEN,
-                mes:mes,
-                anio:anio
-            })
-        .then((response) => {
-                if(response.status.toString()=='200'){
-                    let data = response.data;
-                    if(data.toString()=="error"){
-                        reject();
-                    }else{
-                        if(Number(data.rowsAffected[0])>0){
-                            resolve(data);             
-                        }else{
-                            reject();
-                        } 
-                    }       
-                }else{
-                    reject();
-                }        
-        }, (error) => {
-             reject();
-        });
-
-    })
-
-};
-function BACKUP_tbl_objetivos_generales(){
-
-    let container = document.getElementById('tblDataGenerales');
-    container.innerHTML = GlobalLoader;
-
-    document.getElementById('lbTotalGeneral').innerText = '';
-
-    let varTotal = 0;
-
-    data_objetivos_generales()
-    .then((data)=>{
-
-        let str = '';
-        data.recordset.map((r)=>{
-            varTotal += Number(r.OBJETIVO);
-            let idbtnEliminar = `btnEliminar${r.CODMARCA}`
-            str += `
-            <tr>
-                <td>${r.DESMARCA}</td>
-                <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
-                <td>
-                    <button class="btn btn-md btn-danger hand shadow btn-circle"
-                        id="${idbtnEliminar}"
-                        onclick="eliminar_marca_general('${r.CODMARCA}','${idbtnEliminar}')"
-                    >
-                        <i class="fal fa-trash"></i>
-                    </button>
-                </td>
-            </tr>
-            `
-        })
-        container.innerHTML = str;
-        document.getElementById('lbTotalGeneral').innerText = `Total: ${F.setMoneda(varTotal, 'Q')}`;
-
-    })
-    .catch((error)=>{
-        console.log(error);
-        document.getElementById('lbTotalGeneral').innerText = '';
-        container.innerHTML = 'No se cargaron datos... ';
-    })
-
-
-};
-
 
 
 
@@ -686,11 +622,12 @@ function data_objetivos_generales(){
 
         let mes = Number(document.getElementById('cmbMes').value);
         let anio = Number(document.getElementById('cmbAnio').value);
+        let sucursal = document.getElementById('cmbSucursal').value;
        
         //se cambio de marcas a clasificaciones TIPO
         axios.post(GlobalUrlCalls + '/objetivos/select_objetivo_general_categorias',
             {
-                sucursal:GlobalEmpnit,
+                sucursal:sucursal,
                 token:TOKEN,
                 mes:mes,
                 anio:anio
@@ -763,9 +700,11 @@ function data_delete_marca_general(codmarca,mes,anio){
 
     return new Promise((resolve,reject)=>{
 
+        let sucursal = document.getElementById('cmbSucursal').value;
+
         axios.post(GlobalUrlCalls + '/objetivos/delete_objetivo_general_marca',
             {
-                sucursal:GlobalEmpnit,
+                sucursal:sucursal,
                 token:TOKEN,
                 mes:mes,
                 anio:anio,
@@ -846,11 +785,13 @@ function insert_objetivo_vendedor_marca(){
         let codmarca = Number(document.getElementById('cmbVenMarca').value);
         let objetivo = Number(document.getElementById('txtVenObjetivo').value || 0);
         let codemp = document.getElementById('cmbVenVendedor').value;
+        let sucursal = document.getElementById('cmbSucursal').value;
+        
 
 
         axios.post(GlobalUrlCalls + '/objetivos/insert_objetivo_vendedor_marca',
             {
-                sucursal:GlobalEmpnit,
+                sucursal:sucursal,
                 token:TOKEN,
                 mes:mes,
                 anio:anio,
@@ -891,10 +832,12 @@ function data_objetivos_empleado(){
 
         let mes = Number(document.getElementById('cmbMes').value);
         let anio = Number(document.getElementById('cmbAnio').value);
-       
+        let sucursal = document.getElementById('cmbSucursal').value;
+        
+
         axios.post(GlobalUrlCalls + '/objetivos/select_objetivo_vendedores_marcas',
             {
-                sucursal:GlobalEmpnit,
+                sucursal:sucursal,
                 token:TOKEN,
                 mes:mes,
                 anio:anio
@@ -971,11 +914,14 @@ function tbl_objetivos_vendedores(){
 
 function data_objetivos_eliminar_id_vendedor(id){
 
+    let sucursal = document.getElementById('cmbSucursal').value;
+        
+
     return new Promise((resolve,reject)=>{
 
         axios.post(GlobalUrlCalls + '/objetivos/delete_objetivo_vendedor_marca',
             {
-                sucursal:GlobalEmpnit,
+                sucursal:sucursal,
                 token:TOKEN,
                 id:id
             })
@@ -1049,9 +995,11 @@ function data_objetivos_empleado_resumen(){
         let mes = Number(document.getElementById('cmbMes').value);
         let anio = Number(document.getElementById('cmbAnio').value);
        
+        let sucursal = document.getElementById('cmbSucursal').value;
+        
         axios.post(GlobalUrlCalls + '/objetivos/select_objetivo_vendedores_marcas_resumen',
             {
-                sucursal:GlobalEmpnit,
+                sucursal:sucursal,
                 token:TOKEN,
                 mes:mes,
                 anio:anio

@@ -349,6 +349,35 @@ let GF = {
             });
         })     
     },
+    get_data_empleados_tipo_emp:(tipo,sucursal)=>{
+        return new Promise((resolve,reject)=>{
+    
+            axios.post(GlobalUrlCalls + '/empleados/empleados_tipo',
+                {
+                    sucursal:sucursal,
+                    token:TOKEN,
+                    tipo:tipo
+                })
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        })     
+    },
     get_data_marcas:()=>{
         return new Promise((resolve,reject)=>{
                 axios.post(GlobalUrlCalls + '/productos/listado_marcas',
