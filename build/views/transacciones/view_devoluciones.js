@@ -42,7 +42,15 @@ function getView(){
             <br>
             ${view.frag_listado_productos()}
 
+            <button class="btn btn-bottom-l btn-success btn-circle btn-xl hand shadow" id="btnNuevo">
+                <i class="fal fa-plus"></i>
+            </button>
 
+             <button class="btn btn-bottom-r btn-info btn-circle btn-xl hand shadow" id="btnGuardar">
+                <i class="fal fa-save"></i>
+            </button>
+
+            
             ${view.modal_listado_facturas()}
 
             `
@@ -59,10 +67,19 @@ function getView(){
                                 <select class="form-control negrita text-danger" id="cmbSucursal">
                                 </select>
                             </div>
+
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <select class="form-control negrita text-danger" id="cmbCoddoc">
+                                    </select>
+                                    <input type="number" id="txtCorrelativo" class="form-control negrita text-danger" disabled="true">
+                                </div>
+                            </div>
+
                         </div>
                         <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                            <h3 class="negrita text-danger" id="lbNomclie"></h3>
-                            <h5 class="text-secondary negrita" id="lbDocumento"></h5>
+                            <h3 class="negrita text-danger" id="lbNomclie">CLIENTE</h3>
+                            <h5 class="text-secondary negrita" id="lbDocumento">DOCUMENTO</h5>
                             <select class="form-control negrita text-secondary" id="cmbEmpleados">
                             </select>
                         </div>
@@ -111,9 +128,7 @@ function getView(){
                 </div>
             </div>
 
-            <button class="btn btn-bottom-r btn-success btn-circle btn-xl hand shadow" id="btnNuevo">
-                <i class="fal fa-plus"></i>
-            </button>
+          
             `
         },
         modal_listado_facturas:()=>{
@@ -130,6 +145,7 @@ function getView(){
                             
                             <div class="card card-rounded">
                                 <div class="card-body p-4">
+
                                     <div class="row">
                                         <div class="col-6">
                                             <div class="form-group">
@@ -144,15 +160,13 @@ function getView(){
                                             </div>
                                         </div>
                                     </div>
+
                                     <br>
                                     <div class="row">
                                         
                                         <div class="form-group">
-                                            <input type="text"
-                                            class="border-danger text-danger form-control"
-                                            placeholder="Escriba para buscar..."
-                                            oninput="F.FiltrarTabla('tblFacturas','txtBuscarFac')"
-                                            id="txtBuscarFac">
+                                            <input type="text" class="border-danger text-danger form-control col-12" placeholder="Escriba para buscar..."
+                                            oninput="F.FiltrarTabla('tblFacturas','txtBuscarFac')" id="txtBuscarFac">
                                         </div>
 
                                         <table class="col-12 h-full table table-bordered table-hover" id="tblFacturas">
@@ -168,6 +182,7 @@ function getView(){
                                             </thead>
                                             <tbody id="tblDataFacturas"></tbody>
                                         </table>
+
                                     </div>
 
                                 </div>
@@ -243,6 +258,8 @@ function addListeners(){
             cmbSucursal.value = GlobalEmpnit;
 
             get_empleados();
+
+            get_coddoc();
     })
     .catch(()=>{
         cmbSucursal.innerHTML = "<option value=''>NO SE CARGARON LAS SEDES</option>"
@@ -251,7 +268,7 @@ function addListeners(){
     cmbSucursal.addEventListener('change',()=>{
 
         get_empleados();
-
+        get_coddoc();
 
     })
 
@@ -286,6 +303,29 @@ function addListeners(){
 
 
 
+    let btnGuardar = document.getElementById('btnGuardar');
+    btnGuardar.addEventListener('click',()=>{
+
+        get_grid_productos();
+
+            F.Confirmacion('¿Está seguro que desea GUARDAR este Documento?')
+            .then((value)=>{
+                if(value==true){
+                    
+                    if(global_var_total_precio==0){F.AvisoError('Agregue productos al documento');return;};
+
+                    
+                   
+
+
+                }
+            })
+
+
+
+
+    })
+
 
 
 };
@@ -296,6 +336,33 @@ function initView(){
     addListeners();
 
 };
+
+
+function get_coddoc(){
+
+    let sucursal = document.getElementById('cmbSucursal').value;
+
+    GF.get_data_tipodoc_coddoc_sucursal(sucursal,'FAC')
+    .then((data)=>{
+        let strCoddoc = ''
+        data.recordset.map((r)=>{
+            strCoddoc += `<option value="${r.CODDOC}">${r.CODDOC}</option>`
+        })        
+        document.getElementById('cmbCoddoc').innerHTML = strCoddoc;
+
+        GF.get_data_coddoc_correlativo_sucursal(sucursal,document.getElementById('cmbCoddoc').value)
+        .then((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
+        .catch((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
+    })
+    .catch(()=>{
+        document.getElementById('cmbCoddoc').innerHTML = `<option value=''></option>`;
+        document.getElementById('txtCorrelativo').value = '0'
+    })
+
+
+};
+
+
 
 function get_empleados(){
 
@@ -443,13 +510,16 @@ function get_grid_productos(){
 
     document.getElementById('lbTotal').innerText = '---';
     let varTotal = 0;
+    let varTotalCosto = 0;
 
     db_devoluciones.selectTempVentasPOS()
     .then((datos)=>{
 
         let str = '';
         datos.map((r)=>{
+
             varTotal += Number(r.TOTALPRECIO);
+            varTotalCosto += Number(r.TOTALCOSTO);
             str += `
             <tr>
                 <td>${r.CODPROD}</td>
@@ -474,6 +544,8 @@ function get_grid_productos(){
         })
         container.innerHTML = str;
         document.getElementById('lbTotal').innerText = F.setMoneda(varTotal,'Q');
+        global_var_total_costo = Number(varTotalCosto);
+        global_var_total_precio = Number(varTotal);
     })
 
 };

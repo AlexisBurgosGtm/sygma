@@ -124,3 +124,7 @@ function getRandomColor() {
     return color;
 };
 
+
+
+let global_var_total_costo = 0;
+let global_var_total_precio = 0;

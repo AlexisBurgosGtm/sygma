@@ -501,11 +501,55 @@ let GF = {
         })
    
     },
+    get_data_tipodoc_coddoc_sucursal:(sucursal,tipodoc)=>{
+
+        return new Promise((resolve, reject)=>{
+            axios.post('/tipodocumentos/coddoc', {
+                sucursal: sucursal,
+                tipo:tipodoc
+            })
+            .then((response) => {
+                if(response=='error'){
+                    reject();
+                }else{
+                    const data = response.data;
+                    resolve(data);
+                }
+            }, (error) => {
+                reject();
+            });
+        })
+   
+    },
     get_data_coddoc_correlativo:(coddoc)=>{
 
         return new Promise((resolve, reject)=>{
             axios.post('/tipodocumentos/correlativo', {
                 sucursal: GlobalEmpnit,
+                coddoc:coddoc
+            })
+            .then((response) => {
+                if(response=='error'){
+                    reject('0');
+                }else{
+                    
+                    const data = response.data;
+                    let correlativo =data.recordset[0].CORRELATIVO;
+                    resolve(correlativo);
+
+                }
+            }, (error) => {
+                console.log(error)
+                reject('0');
+            });
+        })
+   
+    },
+    get_data_coddoc_correlativo_sucursal:(sucursal,coddoc)=>{
+
+        return new Promise((resolve, reject)=>{
+            axios.post('/tipodocumentos/correlativo', {
+                sucursal: sucursal,
                 coddoc:coddoc
             })
             .then((response) => {
