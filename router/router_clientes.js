@@ -414,11 +414,14 @@ router.post("/buscar_cliente_vendedor", async(req,res)=>{
             (CLIENTES.CODEMPLEADO=${codven}) AND
             (CLIENTES.DIAVISITA='${dia}') AND
             (CLIENTES.HABILITADO='SI')
+        
+        `
+        /*
         OR 
             (CLIENTES.EMPNIT='${sucursal}') AND 
             (CLIENTES.CODCLIENTE=${filtro}) AND
             (CLIENTES.HABILITADO='SI')
-        `
+        */
     
     }
 

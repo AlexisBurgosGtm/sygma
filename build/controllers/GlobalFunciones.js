@@ -657,6 +657,37 @@ let GF = {
             });
         })     
     },
+    get_data_documentos_fechas:(sucursal,tipo,fi,ff)=>{
+        return new Promise((resolve,reject)=>{
+    
+            axios.post(GlobalUrlCalls + '/documentos/listado_documentos_fechas',
+                {
+                    sucursal:sucursal,
+                    token:TOKEN,
+                    tipo:tipo,
+                    fi:fi,
+                    ff:ff
+                })
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        })     
+    },
     get_anulacion_documento:(coddoc,correlativo,status)=>{
         return new Promise((resolve,reject)=>{
     

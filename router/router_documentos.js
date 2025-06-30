@@ -281,6 +281,40 @@ router.post("/listado_documentos", async(req,res)=>{
      
 });
 
+router.post("/listado_documentos_fechas", async(req,res)=>{
+   
+    const { token, sucursal, fi, ff, tipo} = req.body;
+
+    let qry = `SELECT DOCUMENTOS.EMPNIT, DOCUMENTOS.FECHA, 
+                DOCUMENTOS.CODDOC, 
+                DOCUMENTOS.CORRELATIVO, 
+                DOCUMENTOS.DOC_NIT AS NIT, 
+                DOCUMENTOS.DOC_NOMCLIE AS NOMBRE, 
+                DOCUMENTOS.DOC_DIRCLIE AS DIRECCION, 
+                  DOCUMENTOS.TOTALCOSTO, DOCUMENTOS.TOTALVENTA, 
+                  DOCUMENTOS.STATUS, DOCUMENTOS.USUARIO, 
+                  DOCUMENTOS.CONCRE, 
+                  DOCUMENTOS.CODCAJA, 
+                  DOCUMENTOS.NOCORTE, DOCUMENTOS.LAT, DOCUMENTOS.LONG, 
+                  DOCUMENTOS.ENTREGADO, TIPODOCUMENTOS.TIPODOC, DOCUMENTOS.ETIQUETA, 
+                  DOCUMENTOS.EMPNIT_DESTINO, 
+                  DOCUMENTOS.OBS, 
+                  DOCUMENTOS.CODDOC_ORIGEN, 
+                  DOCUMENTOS.CORRELATIVO_ORIGEN, 
+                  EMPRESAS.NOMBRE AS SUCURSAL, 
+                  DOCUMENTOS.CODEMP,
+                  EMPLEADOS.NOMEMPLEADO AS EMPLEADO
+FROM     DOCUMENTOS LEFT OUTER JOIN
+                  EMPLEADOS ON DOCUMENTOS.CODEMP = EMPLEADOS.CODEMPLEADO LEFT OUTER JOIN
+                  EMPRESAS ON DOCUMENTOS.EMPNIT = EMPRESAS.EMPNIT LEFT OUTER JOIN
+                  TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+    WHERE (DOCUMENTOS.EMPNIT LIKE '%${sucursal}%') AND (DOCUMENTOS.FECHA BETWEEN '${fi}' AND '${ff}')  
+    AND (TIPODOCUMENTOS.TIPODOC = '${tipo}')`
+    
+    execute.QueryToken(res,qry,token);
+     
+});
+
 
 
 
