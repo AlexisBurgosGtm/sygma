@@ -38,11 +38,20 @@ function getView(){
         vista_devolucion:()=>{
             return `
             
-            ${view.frag_encabezado()}
-            <br>
-            ${view.frag_listado_productos()}
+            <div class="row">
+                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
+                    ${view.frag_encabezado()}
+                </div>
+                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
+                    ${view.frag_listado_productos()}
+                </div>
+            </div>
 
-            <button class="btn btn-bottom-l btn-success btn-circle btn-xl hand shadow" id="btnNuevo">
+            
+          
+            
+
+            <button class="hidden btn btn-bottom-l btn-success btn-circle btn-xl hand shadow">
                 <i class="fal fa-plus"></i>
             </button>
 
@@ -60,31 +69,78 @@ function getView(){
             <div class="card card-rounded shadow col-12">
                 <div class="card-body p-4">
 
-                    <div class="row">
-                        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                            <div class="form-group">
-                                <label>Sucursal</label>
-                                <select class="form-control negrita text-danger" id="cmbSucursal">
-                                </select>
-                            </div>
+                    <h3 class="negrita text-danger text-center">INGRESO DE DEVOLUCIONES</h3>
 
-                            <div class="form-group">
-                                <div class="input-group">
-                                    <select class="form-control negrita text-danger" id="cmbCoddoc">
-                                    </select>
-                                    <input type="number" id="txtCorrelativo" class="form-control negrita text-danger" disabled="true">
-                                </div>
-                            </div>
+                    <div class="form-group">
+                        <label class="negrita text-base">Sucursal</label>
+                        <select class="form-control negrita text-danger" id="cmbSucursal">
+                        </select>
+                    </div>
 
-                        </div>
-                        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                            <h3 class="negrita text-danger" id="lbNomclie">CLIENTE</h3>
-                            <h5 class="text-secondary negrita" id="lbDocumento">DOCUMENTO</h5>
-                            <select class="form-control negrita text-secondary" id="cmbEmpleados">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <select class="form-control negrita text-danger" id="cmbCoddoc">
                             </select>
+                            <input type="number" id="txtCorrelativo" class="form-control negrita text-secondary" disabled="true">
+                            <input type="date" id="txtFecha" class="form-control negrita text-secondary">
                         </div>
                     </div>
-                                   
+
+                    <div class="form-group">
+                        <select class="form-control negrita text-secondary" id="cmbCaja">
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="negrita text-base">Cliente</label>
+                        <h5 class="negrita text-danger" id="lbNomclie">CLIENTE</h5>
+                        <small class="negrita text-secondary" id="lbDirclie"></small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="negrita text-base">Factura</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="cmbCoddocFac" disabled="true">
+                            <input type="text" class="form-control" id="cmbCorrelativoFac" disabled="true">
+                            <button class="btn btn-md btn-success shadow hand" id="btnNuevo">
+                                <i class="fal fa-plus"></i>
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <div class="form-group">
+                        <label class="negrita text-base">Embarque / Picking</label>
+                        <input type="text" class="form-control negrita text-secondary" id="txtCodembarque" disabled="true">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="negrita text-base">Vendedor</label>
+                        <select class="form-control negrita text-secondary" id="cmbEmpleados">
+                        </select>
+                    </div>
+
+                     <div class="form-group">
+                        <label class="negrita text-base">Motivo</label>
+                        <select class="form-control negrita text-secondary" id="cmbObs">
+                            <option value='DEVOLUCION PARCIAL'>DEVOLUCION PARCIAL</option>
+                            <option value='SIN DINERO'>SIN DINERO</option>
+                            <option value='CERRADO'>CERRADO</option>
+                            <option value='CLIENTE NO RECIBIO'>CLIENTE NO RECIBIO</option>
+                            <option value='PASO BLOQUEADO'>PASO BLOQUEADO</option>
+                            <option value='MALA NEGOCIACION'>MALA NEGOCIACION</option>
+                            <option value='CLIENTE NUNCA RECIBE'>CLIENTE NUNCA RECIBE</option>
+                        </select>
+                    </div>
+
+
+
+                    <input class="hidden" type="number" id="txtCodclie" disabled="true">  
+                   
+                    <input class="hidden" type="text" id="txtNit" disabled="true">  
+                                      
+                
+                                  
                 </div>
             </div>
          
@@ -93,7 +149,7 @@ function getView(){
         frag_listado_productos:()=>{
             return `
             <div class="card card-rounded shadow col-12">
-                <div class="card-body p-4">
+                <div class="card-body p-2">
 
                     <div class="row">
                         <div class="col-6">
@@ -260,6 +316,8 @@ function addListeners(){
             get_empleados();
 
             get_coddoc();
+
+            get_cajas();
     })
     .catch(()=>{
         cmbSucursal.innerHTML = "<option value=''>NO SE CARGARON LAS SEDES</option>"
@@ -269,11 +327,15 @@ function addListeners(){
 
         get_empleados();
         get_coddoc();
+        get_cajas();
 
     })
 
+    document.getElementById('txtFecha').value = F.getFecha();
 
-    
+
+  
+    db_devoluciones.deleteTempVenta_pos();
   
 
     document.getElementById('btnNuevo').addEventListener('click',()=>{
@@ -281,6 +343,7 @@ function addListeners(){
         if(cmbSucursal.value==''){
             F.AvisoError('No se ha cargardo la lista de Sucursales');
         }else{
+            
             
             $('#modal_listado_facturas').modal('show');
             get_listado_factura();
@@ -296,25 +359,77 @@ function addListeners(){
     document.getElementById('txtFechaFinalFac').value = F.getFecha();
     document.getElementById('txtFechaInicialFac').addEventListener('change',()=>{
         get_listado_factura();
-    })
-     document.getElementById('txtFechaFinalFac').addEventListener('change',()=>{
+    });
+    document.getElementById('txtFechaFinalFac').addEventListener('change',()=>{
         get_listado_factura();
-    })
+    });
 
 
 
     let btnGuardar = document.getElementById('btnGuardar');
     btnGuardar.addEventListener('click',()=>{
 
-        get_grid_productos();
+            get_grid_productos();
+          
 
             F.Confirmacion('¿Está seguro que desea GUARDAR este Documento?')
             .then((value)=>{
                 if(value==true){
                     
                     if(global_var_total_precio==0){F.AvisoError('Agregue productos al documento');return;};
+                    let codclie = document.getElementById('txtCodclie').value || '';
+                    if(codclie.toString()==''){F.AvisoError('No se selecciono una Factura');return;}
 
+                    let sucursal = document.getElementById('cmbSucursal').value;
+                    let coddoc = document.getElementById('cmbCoddoc').value;
+
+                    btnGuardar.disabled = true;
+                    btnGuardar.innerHTML = `<i class="fal fa-save fa-spin"></i>`;
+
+                    F.showToast('Obteniendo el correlativo del documento a generar');
+
+                    GF.get_data_coddoc_correlativo_sucursal(sucursal,coddoc)
+                    .then((correlativo)=>{
+        
+                                document.getElementById('txtCorrelativo').value = correlativo;
                     
+                                insert_documento()
+                                .then(()=>{
+
+                                    F.Aviso('Documento Creado Exitosamente!!');
+
+                                    btnGuardar.disabled = false;
+                                    btnGuardar.innerHTML = `<i class="fal fa-save"></i>`;
+
+                                    clean_data();
+
+                                    
+                                    get_grid_productos();
+
+                                })
+                                .catch((error)=>{
+                                    
+                                    console.log(error);
+
+                                    F.AvisoError('No se pudo crear el documento');
+
+                                    btnGuardar.disabled = false;
+                                    btnGuardar.innerHTML = `<i class="fal fa-save"></i>`;
+
+                                })
+                    })
+                    .catch((correlativo)=>{
+
+                        document.getElementById('txtCorrelativo').value = correlativo;
+                        F.AvisoError('No se logro obtener el correlativo');
+
+                        btnGuardar.disabled = false;
+                        btnGuardar.innerHTML = `<i class="fal fa-save"></i>`;
+
+                    })
+
+                  
+                   
                    
 
 
@@ -337,26 +452,50 @@ function initView(){
 
 };
 
+function get_cajas(){
+
+    let sucursal = document.getElementById('cmbSucursal').value;
+
+    GF.get_data_cajas_sucursal(sucursal)
+    .then((data)=>{
+        let str = '';
+        data.recordset.map((r)=>{
+            str += `<option value="${r.CODCAJA}">${r.DESCAJA}</option>`
+        });
+        document.getElementById('cmbCaja').innerHTML = str;
+    })
+    .catch(()=>{
+        F.AvisoError('No se cargaron las cajas');
+        document.getElementById('cmbCaja').innerHTML ='<option value="1">SIN CAJA</option>';
+    })
+
+};
 
 function get_coddoc(){
 
     let sucursal = document.getElementById('cmbSucursal').value;
 
-    GF.get_data_tipodoc_coddoc_sucursal(sucursal,'FAC')
+    GF.get_data_tipodoc_coddoc_sucursal(sucursal,'DEV')
     .then((data)=>{
+
         let strCoddoc = ''
         data.recordset.map((r)=>{
             strCoddoc += `<option value="${r.CODDOC}">${r.CODDOC}</option>`
         })        
         document.getElementById('cmbCoddoc').innerHTML = strCoddoc;
 
+
         GF.get_data_coddoc_correlativo_sucursal(sucursal,document.getElementById('cmbCoddoc').value)
         .then((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
         .catch((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
+
+
     })
     .catch(()=>{
+
         document.getElementById('cmbCoddoc').innerHTML = `<option value=''></option>`;
         document.getElementById('txtCorrelativo').value = '0'
+    
     })
 
 
@@ -404,7 +543,7 @@ function get_listado_factura(){
         data.recordset.map((r)=>{
             str+= `
             <tr class="hand"
-                onclick="get_datos_factura('${r.CODDOC}','${r.CORRELATIVO}','${F.limpiarTexto(r.NOMBRE)}','${r.CODEMP}')">
+                onclick="get_datos_factura('${r.CODDOC}','${r.CORRELATIVO}','${r.CODCLIENTE}','${r.NIT}','${F.limpiarTexto(r.NOMBRE)}','${F.limpiarTexto(r.DIRECCION)}','${r.CODEMP}','${r.CODEMBARQUE}')">
                 <td>${F.convertDateNormal(r.FECHA)}</td>
                 <td>${r.CODDOC}-${r.CORRELATIVO}</td>
                 <td>${F.limpiarTexto(r.NOMBRE)}</td>
@@ -424,10 +563,20 @@ function get_listado_factura(){
 };
 
 
-function get_datos_factura(coddoc,correlativo,nomclie,codemp){
+function get_datos_factura(coddoc,correlativo,codclie,nit,nomclie,dirclie,codemp,codembarque){
+
 
     document.getElementById('lbNomclie').innerText = nomclie;
-    document.getElementById('lbDocumento').innerText = `${coddoc}-${correlativo}`;
+    document.getElementById('txtCodclie').value = codclie;
+    document.getElementById('txtNit').value = nit;
+    
+    document.getElementById('lbDirclie').innerText = dirclie;
+    
+
+    document.getElementById('cmbCoddocFac').value = coddoc;
+    document.getElementById('cmbCorrelativoFac').value = correlativo;
+    document.getElementById('txtCodembarque').value = codembarque;
+    
     
     
     let sucursal = document.getElementById('cmbSucursal').value;
@@ -570,13 +719,135 @@ function delete_item(id){
 
 
 
+function insert_documento(){
 
 
-function data_listado_factura(){
+        let sucursal = document.getElementById('cmbSucursal').value;
+        let coddoc = document.getElementById('cmbCoddoc').value;
+        let correlativo = document.getElementById('txtCorrelativo').value;
+        let codemp = document.getElementById('cmbEmpleados').value;
+        let caja = document.getElementById('cmbCaja').value;
+
+
+        let codembarque = document.getElementById('txtCodembarque').value;
     
-    return new Promise((resolve,reject)=>{
+        let codclie = document.getElementById('txtCodclie').value || '';
+        let nomclie = document.getElementById('lbNomclie').innerText;
+        let nit = document.getElementById('txtNit').value;
+        let dirclie = document.getElementById('lbDirclie').innerText;
+        let obs = document.getElementById('cmbObs').value;
+
+
+        let coddoc_origen = document.getElementById('cmbCoddocFac').value || '';
+        let correlativo_origen = document.getElementById('cmbCorrelativoFac').value;
+
+    
+        let anio = 0;
+        let mes = 0;
+        let fecha = F.devuelveFecha('txtFecha');
+        let hora = F.getHora();
+
+        return new Promise((resolve, reject)=>{
+
+
+                db_devoluciones.gettempDocproductos_pos(GlobalUsuario)
+                .then((response)=>{
+              
+                        axios.post('/documentos/insert_devolucion', {
+                                jsondocproductos:JSON.stringify(response),
+                                sucursal:sucursal,
+                                codembarque:codembarque,
+                                coddoc:coddoc,
+                                correlativo: correlativo,
+                                serie_fac:coddoc,
+                                numero_fac:correlativo,
+                                coddoc_origen:coddoc_origen,
+                                correlativo_origen:correlativo_origen,
+                                anio:anio,
+                                mes:mes,
+                                fecha:fecha,
+                                fechaentrega:fecha,
+                                formaentrega:'',
+                                codbodega:'0',
+                                codcaja:caja,
+                                codcliente: codclie, 
+                                nomclie:nomclie,
+                                totalcosto:global_var_total_costo,
+                                totalprecio:global_var_total_precio,
+                                totaldescuento:0,
+                                nitclie:nit,
+                                dirclie:dirclie,
+                                obs:F.limpiarTexto(obs),
+                                direntrega:'',
+                                usuario:GlobalUsuario,
+                                codven:codemp,
+                                lat:'0',
+                                long:'0',
+                                hora:hora,
+                                tipo_pago:'CON',
+                                tipo_doc:'DEV',
+                                entrega_contacto:'',
+                                entrega_telefono:'',
+                                entrega_direccion:'',
+                                entrega_referencia:'',
+                                entrega_lat:'0',
+                                entrega_long:'0',
+                                iva:GlobalConfigIVA,
+                                etiqueta:'BAJA'
+                        })
+                        .then((response) => {
+
+                                if(response.status.toString()=='200'){
+                                    let data = response.data;
+                                    if(data.toString()=="error"){
+                                        reject('error');
+                                    }else{
+                                    
+                                        if(data.rowsAffected[0].toString()=='0'){
+                                            reject('sin filas');           
+                                        }else{
+                                            resolve();  
+                                        } 
+                                    }       
+                                }else{
+                                    reject('error');
+                                }          
+                                
+                        }, (error) => {
+                            reject(error);
+                        });  
+                })
+            
+        })
 
         
-    })
+
+
+
+
+};
+
+function clean_data(){
+
+
+        let sucursal = document.getElementById('cmbSucursal').value;
+        
+        GF.get_data_coddoc_correlativo_sucursal(sucursal,document.getElementById('cmbCoddoc').value)
+        .then((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
+        .catch((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
+
+
+
+        document.getElementById('txtCodembarque').value='';
+    
+        document.getElementById('txtCodclie').value='';
+        document.getElementById('lbNomclie').innerText='';
+        document.getElementById('txtNit').value='';
+        document.getElementById('lbDirclie').innerText='';
+        
+        document.getElementById('cmbCoddocFac').value='';
+        document.getElementById('cmbCorrelativoFac').value='';
+
+
 
 };
