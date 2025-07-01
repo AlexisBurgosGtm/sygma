@@ -1641,8 +1641,7 @@ function get_producto(codprod,desprod,codmedida,equivale,costo,precio,tipoprod,e
 
             //$("#modal_lista_precios").modal('hide');
             
-            $("#modal_cantidad").modal('show');
- 
+            
    
             let container = document.getElementById('container_precio');
             container.innerHTML = GlobalLoader;
@@ -1679,6 +1678,9 @@ function get_producto(codprod,desprod,codmedida,equivale,costo,precio,tipoprod,e
             container.innerHTML = '';
 
             document.getElementById('btnMCGuardar').disabled = false;
+
+            $("#modal_cantidad").modal('show');
+ 
 
             document.getElementById('txtMCCantidad').focus();
    
@@ -1730,8 +1732,15 @@ function insert_producto_pedido(codprod,desprod,codmedida,equivale,costo,precio,
 
     //RUTINA QUE COMPARA EXISTENCIA CON CANTIDAD
    
+  
+    
         let varTotalUnidades = Number(cantidad * equivale);
-        if(varTotalUnidades > Number(existencia)){F.AvisoError('Existencia menor a la cantidad pedida');return;}
+        let varExistencia = Number(existencia * equivale);
+
+        console.log(varTotalUnidades)
+        console.log(varExistencia);
+    
+        if(varTotalUnidades > Number(varExistencia)){F.AvisoError('Existencia menor a la cantidad pedida');return;}
     
 
     let datos = 
