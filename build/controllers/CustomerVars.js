@@ -19,7 +19,8 @@ let tipo_empleados = [
     {codigo:4,descripcion:"REPARTIDOR"},
     {codigo:5,descripcion:"DIGITADOR"},
     {codigo:6,descripcion:"BODEGA"},
-    {codigo:7,descripcion:"PROVEEDOR"}
+    {codigo:7,descripcion:"PROVEEDOR"},
+    {codigo:8,descripcion:"VENDEDOR COMODIN"}
 ]
 
 

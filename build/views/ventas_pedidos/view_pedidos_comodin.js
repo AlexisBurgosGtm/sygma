@@ -6,12 +6,12 @@ function getView(){
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="dias-tab">
                         
-                            ${view.modal_lista_clientes()}
+                            ${view.modal_lista_clientes() + view.modal_qr() + view.modal_camara()}
                         
                         </div> 
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="clientes-tab">
                         
-                            ${view.pedido() + view.modal_cantidad() + view.modal_editar_cantidad() + view.modal_lista_precios() }
+                            ${view.pedido() + view.modal_lista_precios() + view.modal_cantidad() + view.modal_editar_cantidad()}
 
                         </div>
 
@@ -100,7 +100,7 @@ function getView(){
                                             <b class="text-base">Productos agregados a la Factura</b>
                                         </div>
                                     </div>
-                                    <table class="table table-responsive  table-hover col-12 h-full">
+                                    <table class="table  table-hover col-12 h-full">
                                         <thead class="bg-verde text-white">
                                             <tr>
                                                 <td>PRODUCTO</td>
@@ -141,10 +141,20 @@ function getView(){
                     <div class="modal-content">
             
                         <div class="modal-body p-4">
-                            <label class="modal-title text-base h3" id="">Buscar producto</label>
+                            <div class="row">
+                                <div class="col-8">
+                                    <label class="modal-title text-base h3" id="">Buscar producto</label>
+                                </div>
+                                <div class="col-4">
+                                    <button class="btn btn-secondary btn-md  hand shadow waves-effect waves-themed" data-dismiss="modal" id="">
+                                        <i class="fal fa-arrow-left"></i> Cerrar(x)
+                                    </button>
+                                </div>
+                            </div>
 
+                            
                             <div class="form-group">
-                                <label>Buscar un producto</label>
+                                
                                 <input type="text" class="form-control border-danger negrita text-danger"
                                 id="txtBuscarP"
                                 placeholder="Escriba para filtrar"
@@ -154,12 +164,11 @@ function getView(){
                                     <table class="table table-responsive  table-hover table-bordered h-full" id="tblProductos">
                                         <thead class="bg-base text-white">
                                             <tr>
-                                                <td>MARCA</td>
                                                 <td>PRODUCTO</td>
                                                 <td>MEDIDA</td>
                                                 <td>PRECIO</td>
                                                 <td>EXISTENCIA</td>
-                                                <td>IPs</td>
+                                                <td>MARCA</td>
                                                 <td>TIPO</td>
                                             </tr>
                                         </thead>
@@ -492,7 +501,7 @@ function getView(){
                             </div>
                             <br>
                             <div class="row">
-                                <table class="col-12 table table-responsive table-hover table-border">
+                                <table class="col-12 table table-hover table-border h-full">
                                     <thead class="bg-base text-white">
                                         <tr>
                                             <td>NIT / CÓDIGO</td>
@@ -509,6 +518,11 @@ function getView(){
 
                 <button class="btn btn-warning btn-xl btn-bottom-l btn-circle shadow hand hidden" id="btnListadoDocumentos">
                     <i class="fal fa-folder"></i>  
+                </button>
+
+
+                <button class="btn btn-danger btn-xl btn-bottom-r btn-circle shadow hand" id="btnCameraQR">
+                    <i class="fal fa-camera"></i>  
                 </button>
 
                     `
@@ -546,7 +560,82 @@ function getView(){
 
                     </div>
                 `
-        }
+        },
+        modal_qr:()=>{
+            return `
+            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" 
+                role="dialog" aria-hidden="true" id="modal_qr">
+                <div class="modal-dialog modal-dialog-right modal-xl">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-base d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white" id="">
+                                Codigo QR del Cliente
+                            </h4>
+                        </div>
+                        <div class="modal-body p-4">
+                            
+                            <div class="card card-rounded" id="print_qr">
+                                <div class="card-body p-4">
+
+                                    <h3 class="negrita text-danger" id="lbNomclieQR"></h3>
+                                    <h5 class="negrita text-danger" id="lbCodclieQR"></h5>
+
+                                    <div id="container_qr">
+                                    </div>
+
+                                </div>
+
+                                <br>
+                                
+                                <button class="btn btn-xl btn-secondary btn-circle hand shadow" data-dismiss="modal">
+                                    <i class="fal fa-arrow-left"></i>
+                                </button>
+                            </div>                              
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            `
+        },
+        modal_camara:()=>{
+            return `
+            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" 
+                role="dialog" aria-hidden="true" id="modal_barcode">
+                <div class="modal-dialog modal-dialog-right modal-xl">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-danger d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white" id="">
+                                Lectura de Codigo QR
+                            </h4>
+                        </div>
+                        <div class="modal-body p-4">
+                            
+                            <div class="card card-rounded" id="">
+                                <div class="card-body p-4">
+
+                                   <div class="" id="root_barcode">
+                                    </div>
+
+                                </div>
+
+                                <br>
+                                
+                                <button class="btn btn-xl btn-secondary btn-circle hand shadow" data-dismiss="modal">
+                                    <i class="fal fa-arrow-left"></i>
+                                </button>
+                            </div>                              
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            `
+        },
     }
 
     root.innerHTML = view.body();
@@ -615,6 +704,15 @@ function addListeners(){
 
     });
 
+
+
+    let btnCameraQR = document.getElementById('btnCameraQR');
+    btnCameraQR.addEventListener('click',()=>{
+
+        $("#modal_barcode").modal('show');
+        iniciar_barcode();
+
+    });
 
     
 
@@ -821,10 +919,12 @@ function listener_vista_pedido(){
     });
     document.getElementById('txtMCCantidad').addEventListener('keyup',(e)=>{
         if (e.code === 'Enter') { 
-            document.getElementById('txtMCPrecio').focus();
+            //document.getElementById('txtMCPrecio').focus();
+            document.getElementById('btnMCGuardar').focus();
         };
         if (e.keyCode === 13 && !e.shiftKey) {
-            document.getElementById('txtMCPrecio').focus();
+            //document.getElementById('txtMCPrecio').focus();
+            document.getElementById('btnMCGuardar').focus();
         };  
     });
     document.getElementById('txtMCPrecio').addEventListener('input',()=>{
@@ -881,10 +981,12 @@ function listener_vista_pedido(){
     });
     document.getElementById('txtMCCantidadE').addEventListener('keyup',(e)=>{
         if (e.code === 'Enter') { 
-            document.getElementById('txtMCPrecioE').focus();
+            //document.getElementById('txtMCPrecioE').focus();
+            document.getElementById('btnMCGuardarE').focus();
         };
         if (e.keyCode === 13 && !e.shiftKey) {
-            document.getElementById('txtMCPrecioE').focus();
+            //document.getElementById('txtMCPrecioE').focus();
+            document.getElementById('btnMCGuardarE').focus();
         };  
     });
     document.getElementById('txtMCPrecioE').addEventListener('input',()=>{
@@ -1076,7 +1178,14 @@ function tbl_clientes(filtro,qr){
     if(qr=='SI'){
         url_clientes = '/clientes/buscar_cliente_vendedor_qr'
     }else{
-        url_clientes = '/clientes/buscar_cliente_vendedor'
+        if(Number(GlobalNivelUsuario)==8){
+            //es vendedor comodin
+            url_clientes = '/clientes/buscar_cliente_vendedor_comodin'
+        }else{
+            //es vendedor normal
+            url_clientes = '/clientes/buscar_cliente_vendedor'
+        }
+        
     };
 
     let container = document.getElementById('tblDataClientes');
@@ -1112,6 +1221,13 @@ function tbl_clientes(filtro,qr){
                         <button class="btn btn-md btn-circle btn-info hand shadow" onclick="F.gotoGoogleMaps('${r.LATITUD}','${r.LONGITUD}')">
                             <i class="fal fa-globe"></i>
                         </button>
+
+                        <br><br>
+
+                        <button class="btn btn-md btn-circle btn-warning hand shadow" onclick="create_qr_code('${r.CODCLIENTE}','${r.NOMBRE}')">
+                            <i class="fal fa-barcode"></i>
+                        </button>
+
                     </td>
                     <td>
                         <small class="text-info">${r.TIPONEGOCIO}-${r.NEGOCIO}</small>
@@ -1144,6 +1260,91 @@ function tbl_clientes(filtro,qr){
 
 
 };
+
+
+function create_qr_code(codigo,nomclie){
+
+
+    $("#modal_qr").modal('show');
+
+    document.getElementById('lbNomclieQR').innerText = nomclie;
+    document.getElementById('lbCodclieQR').innerText = `Codigo: ${codigo}`
+
+    F.create_qr_code(codigo,'container_qr');
+
+}
+
+async function iniciar_barcode() {
+
+    let root_barcode = document.getElementById('root_barcode');
+
+    try {
+        let child = document.getElementById('barcode_video');
+        root_barcode.removeChild(child)        
+    } catch (error) {
+        
+    }
+    
+    let txtCodprod = document.getElementById('txtBuscarClie')
+    
+
+    if('BarcodeDetector' in window ){
+        
+    }else{
+        root_barcode.innerHTML = 'No se puede usar Barcode en este dispositivo';
+        return;
+    };
+
+    
+    const barcodeDetector = new BarcodeDetector({
+        formats: ["code_39", "codabar", "ean_13",'code_128','qr_code'],
+    });
+
+    
+    const mediaStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" }
+    });
+  
+    const video = document.createElement("video");
+    video.width=400;
+    video.height=500;
+    video.srcObject = mediaStream;
+    video.autoplay = true;
+    video.id = "barcode_video"
+  
+    //list.before(video);
+
+    root_barcode.appendChild(video);
+    let codproducto = '';
+
+    let contador = 0;
+    function render() {
+      barcodeDetector
+        .detect(video)
+        .then((barcodes) => {
+            
+          barcodes.forEach((barcode) => {
+                contador+=1;
+                    if(contador==1){
+                        codproducto = barcode.rawValue;
+                        //esto para evitar que busque muchas veces el mismo código
+                        txtCodprod.value = codproducto.replace('XELASOL-','');
+                        $("#modal_barcode").modal('hide');
+                        document.getElementById('btnBuscarClie').click();
+                    }
+                    
+          });
+        })
+        .catch(console.error);
+    }
+  
+    (function renderLoop() {
+      requestAnimationFrame(renderLoop);
+      render();
+    })();
+};
+
+
 
 function insert_cliente(nit,nombre,direccion,telefono){
 
@@ -1281,23 +1482,28 @@ function get_buscar_producto(filtro){
         }else{
             const data = response.data.recordset;
             data.map((r)=>{
+                
+                let EXISTENCIA = F.get_existencia(Number(r.EXISTENCIA),Number(r.EQUIVALE)); //r.EXISTENCIA
+
+
                 let strClassIps = '';
                 if(r.BONO.toString()=='0'){}else{}strClassIps = 'negrita text-base'
                 let strClassExistencia = '';
-                let existencia = Number(r.EXISTENCIA);
+                let existencia = Number(EXISTENCIA);
                 if(existencia<=0){strClassExistencia='bg-danger text-white'};
 
+                
                 str += `
-                    <tr class="hand" onclick="get_producto('${r.CODPROD}','${r.DESPROD}','${r.CODMEDIDA}','${r.EQUIVALE}','${r.COSTO}','${r.PRECIO}','${r.TIPOPROD}','${r.EXENTO}','${r.EXISTENCIA}','${r.BONO}')">
-                        <td>${r.DESMARCA}</td>
+                    <tr class="hand" onclick="get_producto('${r.CODPROD}','${r.DESPROD}','${r.CODMEDIDA}','${r.EQUIVALE}','${r.COSTO}','${r.PRECIO}','${r.TIPOPROD}','${r.EXENTO}','${EXISTENCIA}','${r.BONO}')">
+                        
                         <td><b style="color:${r.COLOR}">${r.DESPROD}</b>
                             <br>
                             <small class="negrita text-danger">Cód:${r.CODPROD}</small>
                         </td>
                         <td>${r.CODMEDIDA} (Eq:${r.EQUIVALE})</td>
                         <td>${F.setMoneda(r.PRECIO,'Q')}</td>
-                        <td class="${strClassExistencia}">${r.EXISTENCIA}</td>
-                        <td class='${strClassIps}'>${F.setMoneda(r.BONO,'Q')}</td>
+                        <td class="negrita ${strClassExistencia}">${F.setMoneda(EXISTENCIA,'')}</td>
+                        <td>${r.DESMARCA}</td>
                         <td>${r.TIPOPROD}</td>
                     </tr>
                 `
@@ -1440,10 +1646,9 @@ function get_tbl_productos_clasificacion(codigo){
 
 function get_producto(codprod,desprod,codmedida,equivale,costo,precio,tipoprod,exento,existencia,bono){
 
-            $("#modal_lista_precios").modal('hide');
+            //$("#modal_lista_precios").modal('hide');
             
-            $("#modal_cantidad").modal('show');
- 
+            
    
             let container = document.getElementById('container_precio');
             container.innerHTML = GlobalLoader;
@@ -1480,6 +1685,9 @@ function get_producto(codprod,desprod,codmedida,equivale,costo,precio,tipoprod,e
             container.innerHTML = '';
 
             document.getElementById('btnMCGuardar').disabled = false;
+
+            $("#modal_cantidad").modal('show');
+ 
 
             document.getElementById('txtMCCantidad').focus();
    
@@ -1531,8 +1739,15 @@ function insert_producto_pedido(codprod,desprod,codmedida,equivale,costo,precio,
 
     //RUTINA QUE COMPARA EXISTENCIA CON CANTIDAD
    
+  
+    
         let varTotalUnidades = Number(cantidad * equivale);
-        if(varTotalUnidades > Number(existencia)){F.AvisoError('Existencia menor a la cantidad pedida');return;}
+        let varExistencia = Number(existencia * equivale);
+
+        console.log(varTotalUnidades)
+        console.log(varExistencia);
+    
+        if(varTotalUnidades > Number(varExistencia)){F.AvisoError('Existencia menor a la cantidad pedida');return;}
     
 
     let datos = 
@@ -1572,6 +1787,8 @@ function insert_producto_pedido(codprod,desprod,codmedida,equivale,costo,precio,
 
 };
 
+
+
 function get_tbl_pedido(){
 
     let container = document.getElementById('tblPosPedido');
@@ -1595,26 +1812,23 @@ function get_tbl_pedido(){
                 <td class="text-left">
                     ${rows.DESPROD}
                     <br>
-                    <div class="row">
-                        <div class="col-6">
-                            <small class="negrita"><b>${rows.CODPROD}</b></small>
-                        </div>
-                    </div>
-
+                    <small class="negrita"><b>${rows.CODPROD}</b></small>
                     <br>
-                    <tr>
-                        <td>
                         ${rows.CODMEDIDA} (eq: ${rows.EQUIVALE})
-                        </td>
-                        <td>
-                            <b class="text-info" style="font-size:140%">${rows.CANTIDAD}</b>
-                        </td>
-                        <td class="negrita">${F.setMoneda(rows.PRECIO,'Q')}</td>
-                        <td class="negrita h4">${F.setMoneda(rows.TOTALPRECIO,'Q')}</td>
-                        <td class="negrita text-danger">${F.setMoneda(rows.DESCUENTO,'Q')}</td>
-                        <td class="negrita text-verde h4">${F.setMoneda((Number(rows.TOTALPRECIO)-Number(rows.DESCUENTO)),'Q')}</td>
-                    </tr>
+                    <br>
 
+                    <div class="row">
+                        <div class="col-3">
+                            <b class="text-info" style="font-size:140%">${rows.CANTIDAD}</b>
+                        </div>
+                        <div class="col-4">
+                            <small class="negrita">${F.setMoneda(rows.PRECIO,'Q')}</small>
+                        </div>
+                        <div class="col-5">
+                            <b class="negrita text-danger h5">${F.setMoneda(rows.TOTALPRECIO,'Q')}</b>
+                        </div>
+                       
+                    </div>
                 </td>
                
                 <td>
@@ -1926,6 +2140,8 @@ function fcnNuevoPedido(){
         GlobalTotalDescuento =0;
         GlobalTotalCostoDocumento=0;
         
+        
+        document.getElementById('txtObs').value = '';
         
         document.getElementById('inlineRadio1').checked = true;
 

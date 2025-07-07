@@ -337,6 +337,135 @@ router.post("/buscar_cliente", async(req,res)=>{
 
 
 
+
+router.post("/buscar_cliente_vendedor_comodin", async(req,res)=>{
+   
+    const { token, sucursal, filtro, codven, dia} = req.body;
+
+
+    let qry = '';
+
+    if(filtro==''){
+        qry = `
+        SELECT CLIENTES.CODCLIENTE, CLIENTES.NIT,
+            CLIENTES.TIPONEGOCIO, CLIENTES.NEGOCIO, 
+            CLIENTES.NOMBRE, CLIENTES.DIRECCION, 
+            CLIENTES.CODMUN, MUNICIPIOS.DESMUN, 
+            CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
+            CLIENTES.TELEFONO, CLIENTES.LATITUD, 
+            CLIENTES.LONGITUD, CLIENTES.SALDO, 
+            CLIENTES.HABILITADO, CLIENTES.LASTSALE, 
+            CLIENTES.DIASCREDITO, CLIENTES.REFERENCIA,
+            CLIENTES.DIAVISITA AS VISITA
+        FROM CLIENTES LEFT OUTER JOIN
+            DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO LEFT OUTER JOIN
+            MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+        WHERE
+            (CLIENTES.EMPNIT='${sucursal}') AND 
+            (CLIENTES.NOMBRE LIKE '%${filtro}%') AND
+            (CLIENTES.DIAVISITA='${dia}') AND
+            (CLIENTES.HABILITADO='SI')
+
+        OR 
+            (CLIENTES.EMPNIT='${sucursal}') AND 
+            (CLIENTES.NIT='${filtro}') AND
+            (CLIENTES.DIAVISITA='${dia}') AND
+            (CLIENTES.HABILITADO='SI')
+        OR 
+            (CLIENTES.EMPNIT='${sucursal}') AND 
+            (CLIENTES.NEGOCIO='${filtro}') AND
+            (CLIENTES.DIAVISITA='${dia}') AND
+            (CLIENTES.HABILITADO='SI')
+        `
+    
+    }else{
+        if(isNaN(filtro)==false){
+        qry = `
+                SELECT CLIENTES.CODCLIENTE, CLIENTES.NIT,
+                    CLIENTES.TIPONEGOCIO, CLIENTES.NEGOCIO, 
+                    CLIENTES.NOMBRE, CLIENTES.DIRECCION, 
+                    CLIENTES.CODMUN, MUNICIPIOS.DESMUN, 
+                    CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
+                    CLIENTES.TELEFONO, CLIENTES.LATITUD, 
+                    CLIENTES.LONGITUD, CLIENTES.SALDO, 
+                    CLIENTES.HABILITADO, CLIENTES.LASTSALE, 
+                    CLIENTES.DIASCREDITO, CLIENTES.REFERENCIA,
+                    CLIENTES.DIAVISITA AS VISITA
+                FROM CLIENTES LEFT OUTER JOIN
+                    DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO LEFT OUTER JOIN
+                    MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+                WHERE
+                    (CLIENTES.EMPNIT='${sucursal}') AND 
+                    (CLIENTES.NOMBRE LIKE '%${filtro}%') AND
+                    (CLIENTES.DIAVISITA='${dia}') AND
+                    (CLIENTES.HABILITADO='SI')
+
+                OR 
+                    (CLIENTES.EMPNIT='${sucursal}') AND 
+                    (CLIENTES.NIT='${filtro}') AND
+                    (CLIENTES.CODEMPLEADO=${codven}) AND
+                    (CLIENTES.DIAVISITA='${dia}') AND
+                    (CLIENTES.HABILITADO='SI')
+                OR 
+                    (CLIENTES.EMPNIT='${sucursal}') AND 
+                    (CLIENTES.NEGOCIO='${filtro}') AND
+                    (CLIENTES.CODEMPLEADO=${codven}) AND
+                    (CLIENTES.DIAVISITA='${dia}') AND
+                    (CLIENTES.HABILITADO='SI')
+                OR 
+                    (CLIENTES.EMPNIT='${sucursal}') AND 
+                    (CLIENTES.CODCLIENTE=${filtro}) AND
+                    (CLIENTES.HABILITADO='SI')
+                `
+        
+        }else{
+        qry = `
+                SELECT CLIENTES.CODCLIENTE, CLIENTES.NIT,
+                    CLIENTES.TIPONEGOCIO, CLIENTES.NEGOCIO, 
+                    CLIENTES.NOMBRE, CLIENTES.DIRECCION, 
+                    CLIENTES.CODMUN, MUNICIPIOS.DESMUN, 
+                    CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
+                    CLIENTES.TELEFONO, CLIENTES.LATITUD, 
+                    CLIENTES.LONGITUD, CLIENTES.SALDO, 
+                    CLIENTES.HABILITADO, CLIENTES.LASTSALE, 
+                    CLIENTES.DIASCREDITO, CLIENTES.REFERENCIA,
+                    CLIENTES.DIAVISITA AS VISITA
+                FROM CLIENTES LEFT OUTER JOIN
+                    DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO LEFT OUTER JOIN
+                    MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+                WHERE
+                    (CLIENTES.EMPNIT='${sucursal}') AND 
+                    (CLIENTES.NOMBRE LIKE '%${filtro}%') AND
+                    (CLIENTES.DIAVISITA='${dia}') AND
+                    (CLIENTES.HABILITADO='SI')
+
+                OR 
+                    (CLIENTES.EMPNIT='${sucursal}') AND 
+                    (CLIENTES.NIT='${filtro}') AND
+                    (CLIENTES.DIAVISITA='${dia}') AND
+                    (CLIENTES.HABILITADO='SI')
+                OR 
+                    (CLIENTES.EMPNIT='${sucursal}') AND 
+                    (CLIENTES.NEGOCIO='${filtro}') AND
+                    (CLIENTES.DIAVISITA='${dia}') AND
+                    (CLIENTES.HABILITADO='SI')
+                
+            `
+        }
+
+        
+    
+    }
+
+    
+ 
+        
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
 router.post("/buscar_cliente_vendedor", async(req,res)=>{
    
     const { token, sucursal, filtro, codven, dia} = req.body;
@@ -465,8 +594,6 @@ router.post("/buscar_cliente_vendedor", async(req,res)=>{
 
     
  
-        console.log(qry);
-        
 
     execute.QueryToken(res,qry,token);
      
@@ -496,7 +623,6 @@ router.post("/buscar_cliente_vendedor_qr", async(req,res)=>{
         `
     
  
-        console.log(qry);
         
 
     execute.QueryToken(res,qry,token);

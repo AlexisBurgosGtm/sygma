@@ -62,6 +62,13 @@ let Navegar = {
             case 7: //proveedor
                 Navegar.inicio_proveedor();
                 break;
+            case 8: //VENDEDOR COMODIN
+                
+                GF.fcn_load_navbar('VENDEDOR','js-nav-menu_vendedor','js-primary-nav')
+                
+                Navegar.inicio_vendedor();
+                break;
+           
         }
             
     },

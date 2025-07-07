@@ -17,6 +17,9 @@ let GF = {
             case 'VENDEDOR':
                 strMenu = botones_menu.inicio_vendedor();
                 break;
+            case 'VENDEDOR_COMODIN':
+                strMenu = botones_menu.inicio_vendedor_comodin();
+                break;
             case 'SUPERVISOR':
                 strMenu = botones_menu.inicio_supervisor();
                 break;
