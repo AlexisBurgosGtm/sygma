@@ -1355,7 +1355,7 @@ function tbl_rpt_sellout(){
                                         <td>${r.TRANSACCION}</td>
                                         <td>${F.convertDateNormal(r.FECHA)}</td>
                                         <td>${r.CODIGO_CLIENTE}</td>
-                                        <td>${r.TIPONEGOCIO} ${F.limpiarTexto(r.NEGOCIO)} - ${F.limpiarTexto(r.CLIENTE)}</td>
+                                        <td>${r.TIPONEGOCIO} ${F.limpiarTextoExport(r.NEGOCIO)} - ${F.limpiarTextoExport(r.CLIENTE)}</td>
                                         <td>DETALLE</td>
                                         <td>${r.CODIGO_VENDEDOR}</td>
                                         <td>${r.VENDEDOR}</td>
@@ -1366,10 +1366,10 @@ function tbl_rpt_sellout(){
                                         <td>${r.GEO2_DEPARTAMENTO}</td>
                                         <td>${r.GEO3_MUNICIPIO}</td>
                                         <td>${r.GEO4_ALDEA_CASERIO}</td>
-                                        <td>${F.limpiarTexto(r.PRODUCTO)}</td>
+                                        <td>${F.limpiarTextoExport(r.PRODUCTO)}</td>
                                         <td>${r.CODIGO_DUN}</td>
                                         <td>${r.CODIGO_BARRA_EAN}</td>
-                                        <td>${F.limpiarTexto(r.DESCRIPCION_PRODUCTO)}</td>
+                                        <td>${F.limpiarTextoExport(r.DESCRIPCION_PRODUCTO)}</td>
                                         <td>${r.VENTA_EN_CANTIDAD}</td>
                                         <td>${r.FACTOR}</td>
                                         <td>${r.UNIDADES_POR_CAJA}</td>
