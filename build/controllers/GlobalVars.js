@@ -1,4 +1,4 @@
-let versionapp = "M.07.07.2025:0"
+let versionapp = "M.09.07.2025:0"
 // &nbsp
 
 let map; //mapa de leaflet
@@ -89,6 +89,7 @@ let Selected_existencia = 0;
 let Selected_bono = 0;
 
 let GlobalSelectedCodclie = 0;
+let selected_cod_cliente = 0;
 let GlobalSelectedNoOrden = 0;
 let GlobalSelectedCodEquipo = 0;
 let GlobalConfigIVA = 1.12;

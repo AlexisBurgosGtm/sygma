@@ -1084,7 +1084,11 @@ function listener_vista_cobro(){
 
     document.getElementById('btnBuscarClie').addEventListener('click',(e)=>{  
         let filtro = document.getElementById('txtBuscarClie').value || '';
+        
         tbl_clientes(filtro);
+
+        document.getElementById('txtBuscarClie').value='';
+
     });
 
 

@@ -5,24 +5,17 @@ function getView(){
                 <div class="col-12 p-0">
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="dias-tab">
-                        
-                            ${view.modal_lista_clientes() + view.modal_qr() + view.modal_camara()}
-                        
+                            ${view.modal_lista_clientes() + view.modal_qr() + view.modal_camara() + view.modal_visita()}
                         </div> 
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="clientes-tab">
-                        
                             ${view.pedido() + view.modal_lista_precios() + view.modal_cantidad() + view.modal_editar_cantidad()}
-
                         </div>
-
                         <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
                             ${view.documento()}
                         </div>
-
                         <div class="tab-pane fade" id="cuatro" role="tabpanel" aria-labelledby="clientes-tab">
                             ${view.modal_lista_documentos()}
                         </div>
-
                     </div>
 
                     <ul class="nav nav-tabs hidden" id="myTabHome" role="tablist">
@@ -636,6 +629,68 @@ function getView(){
             
             `
         },
+        modal_visita:()=>{
+            return `
+            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" 
+                role="dialog" aria-hidden="true" 
+                id="modal_visita">
+                <div class="modal-dialog modal-dialog-right modal-xl">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-warning d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white" id="">
+                                Motivo por el que no se le Vendio al Cliente
+                            </h4>
+                        </div>
+                        <div class="modal-body p-4">
+                            
+                            <div class="card card-rounded" id="print_qr">
+                                <div class="card-body p-4">
+
+                                   
+                                    <h3 class="negrita text-danger" id="lbNegocioclieVisita"></h3>
+                                    <h3 class="negrita text-danger" id="lbNomclieVisita"></h3>
+                                   
+                                    <h5 class="negrita text-danger" id="lbCodclieVisita"></h5>
+
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary">Motivo</label>
+                                        <select class="form-control negrita text-danger" id="cmbMotivoNoVisita">
+                                            <option value='NO DINERO'>NO DINERO</option>
+                                            <option value='NEGOCIO CERRADO'>NEGOCIO CERRADO</option>
+                                            <option value='NO ESTA EL ENCARGADO'>NO ESTA EL ENCARGADO</option>
+                                            <option value='TIENE PRODUCTO'>TIENE PRODUCTO</option>
+                                            <option value='PASO CERRADO'>PASO CERRADO</option>
+                                            <option value='TIENDA NO EXISTE'>TIENDA NO EXISTE</option>
+                                        </select>
+                                    </div>
+
+                                    <br>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <button class="btn btn-xl btn-secondary btn-circle hand shadow" data-dismiss="modal">
+                                                <i class="fal fa-arrow-left"></i>
+                                            </button>
+                                        </div>
+                                        <div class="col-6">
+                                            <button class="btn btn-xl btn-info btn-circle hand shadow" id="btnGuardarVisita">
+                                                <i class="fal fa-paper-plane"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+
+                                </div>                                
+                                
+                            </div>                              
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            `
+        },
     }
 
     root.innerHTML = view.body();
@@ -714,6 +769,46 @@ function addListeners(){
 
     });
 
+
+    let btnGuardarVisita = document.getElementById('btnGuardarVisita');
+    btnGuardarVisita.addEventListener('click',()=>{
+
+                let motivo = document.getElementById('cmbMotivoNoVisita').value
+                F.ObtenerUbicacion()
+                .then((location)=>{
+
+                    let latitud = location.latitude.toString();
+                    let longitud = location.longitude.toString();
+
+                    insert_visita(selected_cod_cliente,motivo,latitud,longitud)
+                    .then(()=>{
+                        F.Aviso('Visita registrada exitosamente!!');
+                        $("#modal_visita").modal('hide');
+
+                    })
+                    .catch(()=>{
+                        F.AvisoError('No se pudo enviar');
+                    })
+
+                })
+                .catch(()=>{
+                    
+                    let latitud = 0;   //location.latitude.toString();
+                    let longitud = 0;   //location.longitude.toString();
+
+                    insert_visita(selected_cod_cliente,motivo,latitud,longitud)
+                    .then(()=>{
+                        F.Aviso('Visita registrada exitosamente!!');
+                        $("#modal_visita").modal('hide');
+                    })
+                    .catch(()=>{
+                        F.AvisoError('No se pudo enviar');
+                    })
+
+                })
+
+
+    });
     
 
 };
@@ -1085,6 +1180,9 @@ function listener_vista_cobro(){
     document.getElementById('btnBuscarClie').addEventListener('click',(e)=>{  
         let filtro = document.getElementById('txtBuscarClie').value || '';
         tbl_clientes(filtro);
+        
+        document.getElementById('txtBuscarClie').value='';
+
     });
 
 
@@ -1235,10 +1333,19 @@ function tbl_clientes(filtro,qr){
                     </td>
                      
                     <td>
-                        <button class="btn btn-circle btn-md btn-base hand shadow" 
+                        <button class="btn btn-circle btn-md btn-success hand shadow" 
                         onclick="get_datos_cliente('${r.CODCLIENTE}','${r.NIT}','${r.NOMBRE}','${r.DIRECCION}','${r.TELEFONO}')">
                             <i class="fal fa-shopping-cart"></i>
                         </button>
+
+                        <br><br><br><br>
+
+                        <button class="btn btn-circle btn-md btn-outline-danger hand shadow" 
+                        onclick="get_visita('${r.CODCLIENTE}','${r.NOMBRE}','${r.TIPONEGOCIO}','${r.NEGOCIO}')">
+                            <i class="fal fa-history"></i>
+                        </button>
+
+                        
                     </td>
                 </tr>
                 `
@@ -1251,6 +1358,62 @@ function tbl_clientes(filtro,qr){
     });
 
 
+
+};
+
+function get_visita(codclie,nomclie,tiponegocio,negocio){
+
+    $("#modal_visita").modal('show');
+
+    selected_cod_cliente = codclie;
+    
+
+    document.getElementById('lbNegocioclieVisita').innerText = `${tiponegocio}-${negocio}`;
+    document.getElementById('lbNomclieVisita').innerText = nomclie;
+    document.getElementById('lbCodclieVisita').innerText = codclie;
+  
+    document.getElementById('cmbMotivoNoVisita').value = 'NO DINERO';
+
+
+};
+
+function insert_visita(codclie,motivo,latitud,longitud){
+
+
+    return new Promise((resolve,reject)=>{
+
+
+        let fecha = F.getFecha();
+        let hora = F.getHora();
+
+        
+                axios.post(GlobalUrlCalls + '/despacho/insert_visita',
+                {
+                    sucursal:GlobalEmpnit,
+                    token:TOKEN,
+                    codclie:codclie,
+                    codemp:GlobalCodUsuario,
+                    motivo:motivo,
+                    hora:hora,
+                    fecha:fecha,
+                    lat: latitud,
+                    long: longitud
+                })
+                .then((response) => {
+                    if(response.status.toString()=='200'){
+                        let data = response.data;
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);
+                        }else{
+                            reject();
+                        }            
+                    }else{
+                        reject();
+                    }             
+                }, (error) => {
+                    reject();
+                });
+    })
 
 };
 
@@ -1336,6 +1499,7 @@ async function iniciar_barcode() {
       render();
     })();
 };
+
 
 
 
@@ -2009,7 +2173,6 @@ function finalizar_pedido(){
         
         let hora = F.getHora();
     
-       
     
        
         let latdoc = '0';

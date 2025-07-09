@@ -5,6 +5,32 @@ const helpers = require('./../helper');
 
 
 
+router.post("/insert_visita", async(req,res)=>{
+   
+    const { token, sucursal, codemp, codclie, fecha,hora,motivo,lat,long } = req.body;
+
+    let qry = `
+        INSERT INTO CLIENTES_VISITAS (EMPNIT,CODCLIENTE,FECHA,HORA,CODEMP,MOTIVO,LATITUD,LONGITUD)
+        SELECT '${sucursal}' AS EMPNIT, 
+                ${codclie} AS CODCLIENTE, 
+                '${fecha}' AS FECHA, 
+                '${hora}' AS HORA, 
+                ${codemp} AS CODEMP, 
+                '${motivo}' AS MOTIVO, 
+                ${lat} AS LATITUD,
+                ${long} AS LONGITUD
+            `;
+    
+          
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+
+
+
+
 router.post("/fix_documento", async(req,res)=>{
    
     const { token, sucursal, coddoc,correlativo } = req.body;

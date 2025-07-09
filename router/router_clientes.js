@@ -536,7 +536,6 @@ router.post("/buscar_cliente_vendedor", async(req,res)=>{
                     (CLIENTES.CODEMPLEADO=${codven}) AND
                     (CLIENTES.DIAVISITA='${dia}') AND
                     (CLIENTES.HABILITADO='SI')
-
                 OR 
                     (CLIENTES.EMPNIT='${sucursal}') AND 
                     (CLIENTES.NIT='${filtro}') AND
@@ -594,10 +593,8 @@ router.post("/buscar_cliente_vendedor", async(req,res)=>{
                 
             `
         }
-    }
+    };
 
-    
- 
 
     execute.QueryToken(res,qry,token);
      
@@ -622,11 +619,11 @@ router.post("/buscar_cliente_vendedor_qr", async(req,res)=>{
             DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO LEFT OUTER JOIN
             MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
         WHERE
-            (CLIENTES.EMPNIT='${sucursal}') AND 
             (CLIENTES.CODCLIENTE = ${filtro})
         `
     
  
+        //  (CLIENTES.EMPNIT='${sucursal}') AND 
         
 
     execute.QueryToken(res,qry,token);
