@@ -1079,10 +1079,8 @@ function listeners_pedidos_pendientes(){
                     break;
         
             case 'ANULADAS':
-                 document.getElementById('tab-Fcinco').click();
-                    tbl_pedidos_pendientes_anulados('tblDataPedidosAnulados');
-
-
+                document.getElementById('tab-Fcinco').click();
+                tbl_pedidos_pendientes_anulados('tblDataPedidosAnulados');
 
                 break;
         }
