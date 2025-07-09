@@ -1224,6 +1224,34 @@ let GF = {
         }) 
     
     },
+    get_data_pedidos_pendientes_vendedores_anulados:()=>{
+        
+        return new Promise((resolve,reject)=>{
+
+            let data = {sucursal:GlobalEmpnit}
+
+            axios.post(GlobalUrlCalls + '/despacho/pedidos_pendientes_vendedores_anulados', data)
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        }) 
+    
+    },
     get_data_pedidos_pendientes_vendedores_fechas:(fi,ff)=>{
         
         return new Promise((resolve,reject)=>{

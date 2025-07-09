@@ -10,7 +10,6 @@ function getView(){
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
 
-                          
 
                         </div>
                         <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
@@ -217,6 +216,55 @@ function getView(){
                                     </tr>
                                 </thead>
                                 <tbody id="tblDataPedidos"></tbody>
+
+                            </table>
+                        
+
+                        </div>
+                    </div>
+
+                    <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
+                        <i class="fal fa-arrow-left"></i>
+                    </button>
+            `
+        },
+        vista_pedidos_pendientes_anulados:()=>{
+            return `
+                    <div class="card card-rounded shadow col-12">
+                        <div class="card-body p-4 table-responsive">
+                        
+                            
+                            <div class="row">
+                                <div class="col-6">
+                                    <h4>LISTADO DE FACTURAS PENDIENTES ANULADAS</h4>
+                                    <div class="form-group">
+                                        <input type="text" class="form-control negrita text-info" id="txtFPBuscarAnuladas"
+                                        placeholder="Escriba para buscar..."
+                                        oninput="F.FiltrarTabla('tblPedidosAnulados','txtFPBuscarAnuladas')">
+                                    </div>
+                                    <br>
+                                </div>
+                                <div class="col-6">
+                                    <label class="negrita text-danger" id="lbTotalPA"></label>
+                                </div>
+                            </div>
+                            
+
+                            <table class="table h-full table-bordered col-12" id="tblPedidosAnulados">
+                                <thead class="bg-base text-white negrita">
+                                    <tr>
+                                        <td class="text-left">EMBARQUE</td>
+                                        <td>VENDEDOR</td>
+                                        <td>FECHA</td>
+                                        <td>CLIENTE</td>
+                                        <td>MUNICIPIO</td>
+                                        <td>IMPORTE</td>
+                                        <td>ST</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                </thead>
+                                <tbody id="tblDataPedidosAnulados"></tbody>
 
                             </table>
                         
@@ -617,6 +665,7 @@ function getView(){
                                 <option value='FACTURAS'>FACTURAS EMBARQUE</option>
                                 <option value='PRODUCTOS'>PRODUCTOS EMBARQUE</option>
                                 <option value='VENDEDORES'>RESUMEN VENDEDOR</option>
+                                <option value='ANULADAS'>FACTURAS ANULADAS</option>
                             </select>
 
                         </div>
@@ -639,6 +688,9 @@ function getView(){
                         </div>
                         <div class="tab-pane fade" id="Fcuatro" role="tabpanel" aria-labelledby="home-tab">
                             ${view.facturacion_vendedores()}
+                        </div>
+                        <div class="tab-pane fade" id="Fcinco" role="tabpanel" aria-labelledby="home-tab">
+                            ${view.vista_pedidos_pendientes_anulados()}
                         </div>    
                     </div>
 
@@ -657,6 +709,10 @@ function getView(){
                         </li>  
                         <li class="nav-item">
                             <a class="nav-link negrita text-danger" id="tab-Fcuatro" data-toggle="tab" href="#Fcuatro" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-Fcinco" data-toggle="tab" href="#Fcinco" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
                         </li>           
                     </ul>
@@ -975,6 +1031,7 @@ function listeners_pedidos_pendientes(){
                 tbl_resumen_embarque(codembarque);
 
                 break;
+           
         
         }
         
@@ -1021,6 +1078,13 @@ function listeners_pedidos_pendientes(){
                     
                     break;
         
+            case 'ANULADAS':
+                 document.getElementById('tab-Fcinco').click();
+                    tbl_pedidos_pendientes_anulados('tblDataPedidosAnulados');
+
+
+
+                break;
         }
 
     });
@@ -1038,6 +1102,120 @@ function tbl_pedidos_pendientes(idContainer){
     let contador = 0;
 
     GF.get_data_pedidos_pendientes_vendedores()
+    .then((data)=>{
+
+        let str = '';
+
+        data.recordset.map((r)=>{
+            let idRowPedido = `idRowPedido${r.CODDOC}-${r.CORRELATIVO}`;
+            let idBtnEmbarque = `idBtnEmbarque${r.CODDOC}-${r.CORRELATIVO}`;
+            contador +=1;
+            let strClassSt = 'success'; if(r.STATUS.toString()=='A'){strClassSt='danger'};
+            let idbtnAnular = `btnAnular${r.CODDOC}-${r.CORRELATIVO}`
+            
+
+            let strClassBtnFixEmb = ''; 
+            if(r.TOTALPRECIOPROD.toFixed(2).toString()==r.IMPORTE.toFixed(2).toString()){
+                strClassBtnFixEmb= ` `;
+            }else{
+              
+                strClassBtnFixEmb=`
+                        <button class="btn btn-danger btn-sm hand shadow" id="${idBtnEmbarque}"
+                            onclick="get_fix_pedido('${r.CODDOC}','${r.CORRELATIVO}','${idBtnEmbarque}')">
+                                <i class="fal fa-wrench"></i>&nbsp Reparar
+                        </button>
+                `;
+            }
+
+
+            str += `
+                <tr>
+                    <td class="text-left">
+
+                        <button class="btn btn-base btn-md btn-circle hand shadow" id="${idBtnEmbarque}"
+                        onclick="get_embarques_pedido('${r.CODDOC}','${r.CORRELATIVO}','${idRowPedido}')">
+                                <i class="fal fa-plus"></i>
+                        </button>
+                        
+                      
+                    </td>
+                    <td>${r.NOMEMPLEADO}
+                        <button class="btn btn-outline-info btn-circle btn-sm hand shadow"
+                        onclick="F.gotoGoogleMaps('${r.LAT}','${r.LONG}')">
+                            <i class="fal fa-map"></i>
+                        </button>
+                        <br>
+                        <small class="negrita">${r.CODDOC}-${r.CORRELATIVO}</small>
+                        <br>
+                        <b class="text-danger" id="${idRowPedido}">${r.CODEMBARQUE}</b>
+                    </td>
+                    <td>${F.convertDateNormal(r.FECHA)}
+                        <br>
+                        <small>Hora:${r.HORA}</small>
+                        <br>
+                        ${strClassBtnFixEmb}
+                    </td>
+                    <td>${r.NOMCLIE}
+                        <br>
+                        <small>${r.DIRCLIE}</small>
+                    </td>
+                    <td>
+                        ${r.DESMUN}
+                    </td>
+                    <td class="negrita text-danger text-right">
+                        ${F.setMoneda(r.IMPORTE,'Q')}
+                        <br>
+                        <small class="negrita text-base">${F.setMoneda(r.TOTALPRECIOPROD,'Q')}</small>
+                    </td>
+                    <td>
+                        <button class="btn btn-${strClassSt} btn-md btn-circle hand shadow" id="${idbtnAnular}"
+                            onclick="anular_pedido('${r.CODDOC}','${r.CORRELATIVO}','${r.STATUS}','${idbtnAnular}')">
+                            ${r.STATUS}        
+                        </button>
+                        
+                    </td>                    
+                    <td>
+                        <button class="btn btn-warning btn-md btn-circle hand shadow"
+                            onclick="get_detalle_pedido('${r.CODDOC}','${r.CORRELATIVO}')">
+                                <i class="fal fa-list"></i>
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn btn-info btn-md btn-circle hand shadow"
+                            onclick="fcn_editar_factura('${r.CODDOC}','${r.CORRELATIVO}','${r.NOMCLIE}','${r.DIRCLIE}')">
+                                <i class="fal fa-edit"></i>
+                        </button>
+                    </td>
+                </tr>
+            `
+        })
+        container.innerHTML = str;
+        document.getElementById('lbTotalP').innerText = `Pendientes: ${contador}`
+        //document.getElementById('lbTotalMP').innerText =`${contador} pedidos`
+
+
+        //F.initit_datatable('tblPedidos',true);
+
+    })
+    .catch((error)=>{
+        container.innerHTML = 'No se cargaron datos....'
+        document.getElementById('lbTotalP').innerText = '---'
+        //document.getElementById('lbTotalMP').innerText = '---'
+    })
+
+
+
+
+};
+
+function tbl_pedidos_pendientes_anulados(idContainer){
+
+    let container = document.getElementById(idContainer);
+
+    container.innerHTML = GlobalLoader;
+    let contador = 0;
+
+    GF.get_data_pedidos_pendientes_vendedores_anulados()
     .then((data)=>{
 
         let str = '';
@@ -1647,6 +1825,7 @@ function tbl_facturas_embarque(codembarque){
 
 
 };
+
 
 
 function quitar_embarque_factura(coddoc,correlativo,idbtn){
