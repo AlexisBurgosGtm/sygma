@@ -437,13 +437,22 @@ function getView(){
                                             <thead class="bg-base text-white"> 
                                                 <tr>
                                                     <td>CATEGORIA</td>
+                                                     <td>VENTA</td>
                                                     <td>OBJETIVO</td>
-                                                    <td>LOGRO</td>
                                                     <td>FALTAN</td>
                                                     <td></td>
                                                 </tr>
                                             </thead>
                                             <tbody id="tblDataVendedorCategorias"></tbody>
+                                             <tfoot class="bg-base text-white"> 
+                                                <tr>
+                                                    <td></td>
+                                                    <td  id="lbTotalCategoriaVendedorLogro"></td>
+                                                    <td id="lbTotalCategoriaVendedorObjetivo"></td>
+                                                    <td  id="lbTotalCategoriaVendedorFaltan"></td>
+                                                    <td></td>
+                                                </tr>
+                                            </tfoot>
                                         </table>
                                     </div>
 
@@ -1204,6 +1213,7 @@ function tbl_detalle_vendedor(codemp){
     let mes = document.getElementById('cmbMes').value;
     let anio = document.getElementById('cmbAnio').value;
 
+    let varTObjetivo = 0; let varTLogro = 0; let varTFaltan = 0;
 
     get_data_vendedor(codemp,mes,anio)
     .then((data)=>{
@@ -1214,11 +1224,15 @@ function tbl_detalle_vendedor(codemp){
             let logrado = F.get_logrado(Number(r.LOGRO),Number(r.OBJETIVO));
             let faltan = Number(r.OBJETIVO)-Number(r.LOGRO);
           
+            varTObjetivo += Number(r.OBJETIVO);
+            varTLogro += Number(r.LOGRO);
+            varTFaltan += Number(faltan);
+
             str += `
             <tr>
                 <td>${r.CATEGORIA}</td>
-                <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
                 <td>${F.setMoneda(r.LOGRO,'Q')}</td>
+                <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
                 <td>${F.setMoneda(faltan,'Q')}</td>
                 <td>
                     <div class="input-group"><progress value="${logrado}" max="100"></progress>${logrado}%</div>
@@ -1227,10 +1241,22 @@ function tbl_detalle_vendedor(codemp){
             `
         })
         container.innerHTML = str;
+        document.getElementById('lbTotalCategoriaVendedorObjetivo').innerText = F.setMoneda(varTObjetivo,'Q');
+        document.getElementById('lbTotalCategoriaVendedorLogro').innerText = F.setMoneda(varTLogro,'Q');
+        document.getElementById('lbTotalCategoriaVendedorFaltan').innerText = F.setMoneda(varTFaltan,'Q');
+        
 
     })
-    .catch(()=>{
+    .catch((error)=>{
+
+        console.log(error);
+
         container.innerHTML = 'No se cargaron datos...';
+        
+        document.getElementById('lbTotalCategoriaVendedorObjetivo').innerText = '';
+        document.getElementById('lbTotalCategoriaVendedorLogro').innerText = '';
+        document.getElementById('lbTotalCategoriaVendedorFaltan').innerText = '';
+        
     })
 
 

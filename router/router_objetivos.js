@@ -57,9 +57,15 @@ router.post("/select_logro_marcas", async(req,res)=>{
     const { token, sucursal, mes, anio} = req.body;
 
     let qry = `
-		SELECT view_data_objetivos_marcas.MES, view_data_objetivos_marcas.ANIO, view_data_objetivos_marcas.OBJ_CODMARCA AS CODIGO_MARCA, view_data_objetivos_marcas.OBJ_DESMARCA AS MARCA, 
-                  SUM(view_data_objetivos_marcas.OBJETIVO) AS OBJETIVO, SUM(view_rpt_objetivos_marca_resumen.TOTALUNIDADES) AS TOTALUNIDADES, SUM(view_rpt_objetivos_marca_resumen.TOTALCOSTO) AS TOTALCOSTO, 
-                  SUM(view_rpt_objetivos_marca_resumen.TOTALPRECIO) AS TOTALPRECIO
+		SELECT 
+            view_data_objetivos_marcas.MES, 
+            view_data_objetivos_marcas.ANIO, 
+            view_data_objetivos_marcas.OBJ_CODMARCA AS CODIGO_MARCA, 
+            view_data_objetivos_marcas.OBJ_DESMARCA AS MARCA, 
+            SUM(ISNULL(view_data_objetivos_marcas.OBJETIVO,0)) AS OBJETIVO, 
+            SUM(ISNULL(view_rpt_objetivos_marca_resumen.TOTALUNIDADES,0)) AS TOTALUNIDADES, 
+            SUM(ISNULL(view_rpt_objetivos_marca_resumen.TOTALCOSTO,0)) AS TOTALCOSTO, 
+            SUM(ISNULL(view_rpt_objetivos_marca_resumen.TOTALPRECIO,0)) AS TOTALPRECIO
         FROM     view_rpt_objetivos_marca_resumen RIGHT OUTER JOIN
                   view_data_objetivos_marcas ON view_rpt_objetivos_marca_resumen.CODIGO_MARCA = view_data_objetivos_marcas.OBJ_CODMARCA AND view_rpt_objetivos_marca_resumen.ANIO = view_data_objetivos_marcas.ANIO AND 
                   view_rpt_objetivos_marca_resumen.MES = view_data_objetivos_marcas.MES AND view_rpt_objetivos_marca_resumen.EMPNIT = view_data_objetivos_marcas.EMPNIT
@@ -75,33 +81,7 @@ router.post("/select_logro_marcas", async(req,res)=>{
      
 });
 
-router.post("/BACKUP_select_logro_marcas", async(req,res)=>{
-   
-    const { token, sucursal, mes, anio} = req.body;
 
-    let qry = `
-       SELECT view_rpt_objetivos_categorias.EMPNIT, 
-                view_rpt_objetivos_categorias.RELOP, 
-                view_rpt_objetivos_categorias.CODIGO_MARCA,
-                view_rpt_objetivos_categorias.MARCA, 
-                OBJETIVOS_GENERAL.OBJETIVO,
-                SUM(view_rpt_objetivos_categorias.TOTALUNIDADES) * -1 AS TOTALUNIDADES, 
-                SUM(view_rpt_objetivos_categorias.TOTALCOSTO) * - 1 AS TOTALCOSTO, 
-                SUM(view_rpt_objetivos_categorias.TOTALPRECIO) * - 1 AS TOTALPRECIO
-FROM     view_rpt_objetivos_categorias LEFT OUTER JOIN
-                  OBJETIVOS_GENERAL ON view_rpt_objetivos_categorias.CODIGO_MARCA = OBJETIVOS_GENERAL.CODMARCA AND view_rpt_objetivos_categorias.MES = OBJETIVOS_GENERAL.MES AND 
-                  view_rpt_objetivos_categorias.ANIO = OBJETIVOS_GENERAL.ANIO AND view_rpt_objetivos_categorias.EMPNIT = OBJETIVOS_GENERAL.EMPNIT
-WHERE  (view_rpt_objetivos_categorias.ANIO = ${anio}) 
-AND (view_rpt_objetivos_categorias.MES = ${mes}) 
-AND (OBJETIVOS_GENERAL.OBJETIVO IS NOT NULL)
-GROUP BY view_rpt_objetivos_categorias.EMPNIT, view_rpt_objetivos_categorias.RELOP, view_rpt_objetivos_categorias.CODIGO_MARCA, view_rpt_objetivos_categorias.MARCA, OBJETIVOS_GENERAL.OBJETIVO
-HAVING (view_rpt_objetivos_categorias.EMPNIT like '${sucursal}')
-        `;
-    
-
-    execute.QueryToken(res,qry,token);
-     
-});
 
 
 router.post("/select_logro_marcas_categorias", async(req,res)=>{
@@ -135,6 +115,38 @@ router.post("/select_logro_marcas_categorias", async(req,res)=>{
 
 
 router.post("/select_logro_vendedores_categorias", async(req,res)=>{
+   
+    const { token, codemp, sucursal, mes, anio} = req.body;
+
+    let qry = `
+
+SELECT 
+    SUM(ISNULL(view_rpt_objetivos_vendedores_categorias.TOTALUNIDADES, 0)) AS TOTALUNIDADES, 
+    SUM(ISNULL(view_rpt_objetivos_vendedores_categorias.TOTALCOSTO, 0)) AS TOTALCOSTO, 
+    SUM(ISNULL(view_rpt_objetivos_vendedores_categorias.TOTALPRECIO, 0)) AS LOGRO, 
+    view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR, 
+    view_rpt_objetivos_vendedores_categorias.VENDEDOR, 
+    view_rpt_objetivos_vendedores_categorias.CODIGO_CATEGORIA, 
+    view_rpt_objetivos_vendedores_categorias.CATEGORIA, 
+    ISNULL(view_data_objetivos_vendedor.OBJETIVO,0) AS OBJETIVO
+FROM     view_rpt_objetivos_vendedores_categorias LEFT OUTER JOIN
+                  view_data_objetivos_vendedor ON view_rpt_objetivos_vendedores_categorias.MES = view_data_objetivos_vendedor.MES AND view_rpt_objetivos_vendedores_categorias.ANIO = view_data_objetivos_vendedor.ANIO AND 
+                  view_rpt_objetivos_vendedores_categorias.CODIGO_CATEGORIA = view_data_objetivos_vendedor.CODCATEGORIA AND 
+                  view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR = view_data_objetivos_vendedor.CODEMP
+GROUP BY view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR, view_rpt_objetivos_vendedores_categorias.VENDEDOR, view_rpt_objetivos_vendedores_categorias.ANIO, view_rpt_objetivos_vendedores_categorias.MES, 
+                  view_rpt_objetivos_vendedores_categorias.CODIGO_CATEGORIA, view_rpt_objetivos_vendedores_categorias.CATEGORIA, view_data_objetivos_vendedor.OBJETIVO, view_data_objetivos_vendedor.CATEGORIA
+HAVING (view_rpt_objetivos_vendedores_categorias.ANIO = ${anio}) 
+    AND (view_rpt_objetivos_vendedores_categorias.MES = ${mes}) 
+    AND (view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR = ${codemp})
+
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/BACKUP_select_logro_vendedores_categorias", async(req,res)=>{
    
     const { token, codemp, sucursal, mes, anio} = req.body;
 
