@@ -44,7 +44,7 @@ function getView(){
                             <h3 class="negrita text-danger">CLIENTES NO VISITADOS</h3>
                             
                             <div class="form-group">
-                                <label class="negrita text-secondary"></label>
+                                <label class="negrita text-secondary">Fecha Inicio y Fecha Final</label>
                                 <div class="input-group">
                                     <input type="date" class="form-control negrita text-danger" id="txtFechaInicial">
                                     <input type="date" class="form-control negrita text-danger" id="txtFechaFinal">
@@ -157,7 +157,7 @@ function addListeners(){
             })
             cmbSucursal.innerHTML = str;
 
-             if(Number(GlobalNivelUsuario)==3){
+             if(Number(GlobalNivelUsuario)==2){
                 cmbSucursal.disabled = true;
                 cmbSucursal.value = GlobalEmpnit;
             }
