@@ -2142,6 +2142,41 @@ let GF = {
 
 
     },
+    data_clientes_visitados:(empnit,codemp,fi,ff)=>{
+
+        return new Promise((resolve,reject)=>{
+
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                codemp:codemp,
+                fi:fi,
+                ff:ff
+            }
+
+            axios.post(GlobalUrlCalls + '/clientes/listado_clientes_visitados', data)
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        }) 
+
+
+    },
     get_data_clientes_update_st: (empnit,codclie,st)=>{
         
         return new Promise((resolve, reject)=>{
