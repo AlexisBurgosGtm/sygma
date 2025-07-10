@@ -3,6 +3,36 @@ const express = require('express');
 const router = express.Router();
 
 
+router.post("/historial_cliente", async(req,res)=>{
+   
+    const { token, sucursal , codclie, fi, ff} = req.body;
+
+    let qry = `
+        SELECT 
+            DOCUMENTOS.EMPNIT, 
+            DOCUMENTOS.FECHA, 
+            DOCUMENTOS.CODDOC, 
+            DOCUMENTOS.CORRELATIVO, 
+            DOCPRODUCTOS.CODPROD, 
+            DOCPRODUCTOS.DESPROD, 
+            DOCPRODUCTOS.CODMEDIDA, 
+            DOCPRODUCTOS.CANTIDAD, 
+            DOCPRODUCTOS.PRECIO, 
+            DOCPRODUCTOS.TOTALPRECIO
+        FROM  DOCUMENTOS LEFT OUTER JOIN
+            DOCPRODUCTOS ON DOCUMENTOS.CORRELATIVO = DOCPRODUCTOS.CORRELATIVO AND DOCUMENTOS.CODDOC = DOCPRODUCTOS.CODDOC AND DOCUMENTOS.EMPNIT = DOCPRODUCTOS.EMPNIT
+        WHERE  
+            (DOCUMENTOS.EMPNIT = '${sucursal}') AND 
+            (DOCUMENTOS.STATUS <> 'A') AND 
+            (DOCUMENTOS.FECHA BETWEEN '${fi}' AND '${ff}') AND 
+            (DOCUMENTOS.CODCLIENTE = ${codclie})
+    `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
 
 router.post("/listado_clientes_visitados", async(req,res)=>{
    

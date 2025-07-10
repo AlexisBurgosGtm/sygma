@@ -5,7 +5,7 @@ function getView(){
                 <div class="col-12 p-0">
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="dias-tab">
-                            ${view.modal_lista_clientes() + view.modal_qr() + view.modal_camara() + view.modal_visita()}
+                            ${view.modal_lista_clientes() + view.modal_qr() + view.modal_camara() + view.modal_visita() + view.modal_historial_cliente()}
                         </div> 
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="clientes-tab">
                             ${view.pedido() + view.modal_lista_precios() + view.modal_cantidad() + view.modal_editar_cantidad()}
@@ -691,6 +691,80 @@ function getView(){
             
             `
         },
+        modal_historial_cliente:()=>{
+            return `
+            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" 
+                role="dialog" aria-hidden="true" 
+                id="modal_historial_cliente">
+                <div class="modal-dialog modal-dialog-right modal-xl">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-base d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white" id="">
+                                Historial de Compras del Cliente
+                            </h4>
+                        </div>
+                        <div class="modal-body p-4">
+                            
+                            <div class="card card-rounded" id="print_qr">
+                                <div class="card-body p-4">
+
+                                   
+                                    <h3 class="negrita text-danger" id="lbNegocioclieHistorial"></h3>
+                                    <h3 class="negrita text-danger" id="lbNomclieHistorial"></h3>
+                                   
+                                    <h5 class="negrita text-danger" id="lbCodclieHistorial"></h5>
+
+                                    <div class="form-group">
+                                        <label>Fecha Inicio y Final</label>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <input type="date" class="form-control" id="txtFechaInicial">
+                                            </div>
+                                            <div class="col-6">
+                                                <input type="date" class="form-control" id="txtFechaFinal">
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="table-responsive">
+                                        <table class="table h-full col-12 table-bordered">
+                                            <thead class="bg-base text-white">
+                                                <tr>
+                                                    <td>FECHA</td>
+                                                    <td>PRODUCTO</td>
+                                                    <td>CANTIDAD</td>
+                                                    <td>IMPORTE</td>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tblDataHistorial"></tbody>
+                                        </table>
+                                    </div>
+
+                                    <br>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <button class="btn btn-xl btn-secondary btn-circle hand shadow" data-dismiss="modal">
+                                                <i class="fal fa-arrow-left"></i>
+                                            </button>
+                                        </div>
+                                        <div class="col-6">
+                                        </div>
+                                    </div>
+
+
+                                </div>                                
+                                
+                            </div>                              
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            `
+        },
     }
 
     root.innerHTML = view.body();
@@ -712,6 +786,15 @@ function addListeners(){
     let f = new Date();
     document.getElementById('cmbDiaCliente').value = F.getDiaSemana(f.getDay());
 
+
+    document.getElementById('txtFechaInicial').value = F.getFecha();
+    document.getElementById('txtFechaFinal').value = F.getFecha();
+    document.getElementById('txtFechaInicial').addEventListener('change',()=>{
+        tbl_historial_cliente();
+    })
+    document.getElementById('txtFechaFinal').addEventListener('change',()=>{
+        tbl_historial_cliente();
+    })
 
     //REINICIA EL HANDLE DE LA EMPRESA
     //cmbEmpresa.removeEventListener('change', handle_empresa_change)
@@ -1319,6 +1402,7 @@ function tbl_clientes(filtro,qr){
                             <i class="fal fa-barcode"></i>
                         </button>
 
+
                     </td>
                     <td>
                         <small class="text-info">${r.TIPONEGOCIO}-${r.NEGOCIO}</small>
@@ -1345,6 +1429,13 @@ function tbl_clientes(filtro,qr){
                             <i class="fal fa-history"></i>
                         </button>
 
+                         <br><br>
+
+                        <button class="btn btn-circle btn-md btn-secondary hand shadow" 
+                        onclick="get_historial_cliente('${r.CODCLIENTE}','${r.NOMBRE}','${r.TIPONEGOCIO}','${r.NEGOCIO}')">
+                            <i class="fal fa-book"></i>
+                        </button>
+
                         
                     </td>
                 </tr>
@@ -1358,6 +1449,61 @@ function tbl_clientes(filtro,qr){
     });
 
 
+
+};
+
+function get_historial_cliente(codclie,nomclie,tiponegocio,negocio){
+
+    $("#modal_historial_cliente").modal('show');
+
+     selected_cod_cliente = codclie;
+    
+
+    document.getElementById('lbNegocioclieHistorial').innerText = `${tiponegocio}-${negocio}`;
+    document.getElementById('lbNomclieHistorial').innerText = nomclie;
+    document.getElementById('lbCodclieHistorial').innerText = codclie;
+
+
+    tbl_historial_cliente();
+
+};
+
+function tbl_historial_cliente(){
+
+    let container = document.getElementById('tblDataHistorial');
+    container.innerHTML = GlobalLoader;
+
+    let fi = F.devuelveFecha('txtFechaInicial');
+    let ff = F.devuelveFecha('txtFechaFinal');
+    
+    
+
+    GF.data_cliente_historial(GlobalEmpnit,selected_cod_cliente,fi,ff)
+    .then((data)=>{
+
+        let str = '';
+        data.recordset.map((r)=>{
+            str += `
+            <tr>
+                <td>${F.convertDateNormal(r.FECHA)}</td>
+                <td>${r.DESPROD}
+                    <br>
+                    <small>${r.CODPROD}</small>
+                </td>
+                <td>${r.CANTIDAD}
+                    <br>
+                    <small>${r.CODMEDIDA}</small>
+                </td>
+                <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+            </tr>
+            `
+        })
+        container.innerHTML = str; 
+
+    })
+    .catch(()=>{
+        container.innerHTML = 'No se cargaron datos...';
+    })
 
 };
 

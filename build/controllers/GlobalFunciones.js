@@ -2177,6 +2177,41 @@ let GF = {
 
 
     },
+    data_cliente_historial:(empnit,codclie,fi,ff)=>{
+
+        return new Promise((resolve,reject)=>{
+
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                codclie:codclie,
+                fi:fi,
+                ff:ff
+            }
+
+            axios.post(GlobalUrlCalls + '/clientes/historial_cliente', data)
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        }) 
+
+
+    },
     get_data_clientes_update_st: (empnit,codclie,st)=>{
         
         return new Promise((resolve, reject)=>{

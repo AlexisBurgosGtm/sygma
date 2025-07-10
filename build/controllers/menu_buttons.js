@@ -289,6 +289,7 @@ let botones_menu = {
                             </li>
                             <li>
                                 <a href="#" title="Layout Options" data-filter-tags="theme settings layout options"  onclick="Menu.ventas_visitas()">
+                                    <i class="fal fa-list"></i>
                                     <span class="nav-link-text" data-i18n="nav.theme_settings_layout_options">CLIENTES NO VISITADOS</span>
                                 </a>
                             </li>
