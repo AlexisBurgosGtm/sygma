@@ -119,26 +119,46 @@ router.post("/select_logro_vendedores_categorias", async(req,res)=>{
     const { token, codemp, sucursal, mes, anio} = req.body;
 
     let qry = `
+        SELECT SUM(ISNULL(view_rpt_objetivos_vendedores_categorias_resumen.TOTALUNIDADES, 0)) AS TOTALUNIDADES, SUM(ISNULL(view_rpt_objetivos_vendedores_categorias_resumen.TOTALCOSTO, 0)) AS TOTALCOSTO, 
+                  SUM(ISNULL(view_rpt_objetivos_vendedores_categorias_resumen.TOTALPRECIO, 0)) AS LOGRO, 
+                  view_data_objetivos_vendedor.EMPLEADO AS VENDEDOR, 
+                  view_data_objetivos_vendedor.CODCATEGORIA AS CODIGO_CATEGORIA, 
+                  view_data_objetivos_vendedor.CATEGORIA, ISNULL(view_data_objetivos_vendedor.OBJETIVO, 0) AS OBJETIVO, view_data_objetivos_vendedor.CODEMP AS CODIGO_VENDEDOR
+FROM     view_rpt_objetivos_vendedores_categorias_resumen RIGHT OUTER JOIN
+                  view_data_objetivos_vendedor ON view_rpt_objetivos_vendedores_categorias_resumen.MES = view_data_objetivos_vendedor.MES AND 
+                  view_rpt_objetivos_vendedores_categorias_resumen.ANIO = view_data_objetivos_vendedor.ANIO AND 
+                  view_rpt_objetivos_vendedores_categorias_resumen.CODIGO_CATEGORIA = view_data_objetivos_vendedor.CODCATEGORIA AND 
+                  view_rpt_objetivos_vendedores_categorias_resumen.CODIGO_VENDEDOR = view_data_objetivos_vendedor.CODEMP
+GROUP BY view_data_objetivos_vendedor.ANIO, view_data_objetivos_vendedor.MES, view_data_objetivos_vendedor.OBJETIVO, view_data_objetivos_vendedor.CATEGORIA, view_data_objetivos_vendedor.CODEMP, 
+                  view_data_objetivos_vendedor.CODCATEGORIA, view_data_objetivos_vendedor.EMPLEADO
+HAVING (view_data_objetivos_vendedor.CODEMP = ${codemp}) AND 
+    (view_data_objetivos_vendedor.ANIO = ${anio}) AND 
+    (view_data_objetivos_vendedor.MES = ${mes})
+ORDER BY view_data_objetivos_vendedor.CODCATEGORIA
+        `;
 
-SELECT 
-    SUM(ISNULL(view_rpt_objetivos_vendedores_categorias.TOTALUNIDADES, 0)) AS TOTALUNIDADES, 
-    SUM(ISNULL(view_rpt_objetivos_vendedores_categorias.TOTALCOSTO, 0)) AS TOTALCOSTO, 
-    SUM(ISNULL(view_rpt_objetivos_vendedores_categorias.TOTALPRECIO, 0)) AS LOGRO, 
-    view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR, 
-    view_rpt_objetivos_vendedores_categorias.VENDEDOR, 
-    view_rpt_objetivos_vendedores_categorias.CODIGO_CATEGORIA, 
-    view_rpt_objetivos_vendedores_categorias.CATEGORIA, 
-    ISNULL(view_data_objetivos_vendedor.OBJETIVO,0) AS OBJETIVO
-FROM     view_rpt_objetivos_vendedores_categorias LEFT OUTER JOIN
-                  view_data_objetivos_vendedor ON view_rpt_objetivos_vendedores_categorias.MES = view_data_objetivos_vendedor.MES AND view_rpt_objetivos_vendedores_categorias.ANIO = view_data_objetivos_vendedor.ANIO AND 
-                  view_rpt_objetivos_vendedores_categorias.CODIGO_CATEGORIA = view_data_objetivos_vendedor.CODCATEGORIA AND 
-                  view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR = view_data_objetivos_vendedor.CODEMP
-GROUP BY view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR, view_rpt_objetivos_vendedores_categorias.VENDEDOR, view_rpt_objetivos_vendedores_categorias.ANIO, view_rpt_objetivos_vendedores_categorias.MES, 
-                  view_rpt_objetivos_vendedores_categorias.CODIGO_CATEGORIA, view_rpt_objetivos_vendedores_categorias.CATEGORIA, view_data_objetivos_vendedor.OBJETIVO, view_data_objetivos_vendedor.CATEGORIA
-HAVING (view_rpt_objetivos_vendedores_categorias.ANIO = ${anio}) 
-    AND (view_rpt_objetivos_vendedores_categorias.MES = ${mes}) 
-    AND (view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR = ${codemp})
-
+    let qryOLD = `
+        SELECT 
+            SUM(ISNULL(view_rpt_objetivos_vendedores_categorias.TOTALUNIDADES, 0)) AS TOTALUNIDADES, 
+            SUM(ISNULL(view_rpt_objetivos_vendedores_categorias.TOTALCOSTO, 0)) AS TOTALCOSTO, 
+            SUM(ISNULL(view_rpt_objetivos_vendedores_categorias.TOTALPRECIO, 0)) AS LOGRO, 
+            view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR, 
+            view_rpt_objetivos_vendedores_categorias.VENDEDOR, 
+            view_rpt_objetivos_vendedores_categorias.CODIGO_CATEGORIA, 
+            view_rpt_objetivos_vendedores_categorias.CATEGORIA, 
+            ISNULL(view_data_objetivos_vendedor.OBJETIVO,0) AS OBJETIVO
+        FROM  view_rpt_objetivos_vendedores_categorias LEFT OUTER JOIN
+            view_data_objetivos_vendedor ON view_rpt_objetivos_vendedores_categorias.MES = view_data_objetivos_vendedor.MES AND 
+            view_rpt_objetivos_vendedores_categorias.ANIO = view_data_objetivos_vendedor.ANIO AND 
+            view_rpt_objetivos_vendedores_categorias.CODIGO_CATEGORIA = view_data_objetivos_vendedor.CODCATEGORIA AND 
+            view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR = view_data_objetivos_vendedor.CODEMP
+        GROUP BY view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR, view_rpt_objetivos_vendedores_categorias.VENDEDOR,
+            view_rpt_objetivos_vendedores_categorias.ANIO, view_rpt_objetivos_vendedores_categorias.MES, 
+            view_rpt_objetivos_vendedores_categorias.CODIGO_CATEGORIA, view_rpt_objetivos_vendedores_categorias.CATEGORIA, 
+            view_data_objetivos_vendedor.OBJETIVO, view_data_objetivos_vendedor.CATEGORIA
+        HAVING (view_rpt_objetivos_vendedores_categorias.ANIO = ${anio}) 
+            AND (view_rpt_objetivos_vendedores_categorias.MES = ${mes}) 
+            AND (view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR = ${codemp});
         `;
     
 

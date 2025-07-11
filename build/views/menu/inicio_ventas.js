@@ -15,6 +15,9 @@ function getView(){
                         </div>
                         <div class="tab-pane fade" id="cuatro" role="tabpanel" aria-labelledby="home-tab">
                             ${view.rpt_marcas()}
+                        </div>   
+                         <div class="tab-pane fade" id="cinco" role="tabpanel" aria-labelledby="home-tab">
+                            ${view.rpt_categorias()}
                         </div>    
                     </div>
 
@@ -34,7 +37,11 @@ function getView(){
                         <li class="nav-item">
                             <a class="nav-link negrita text-danger" id="tab-cuatro" data-toggle="tab" href="#cuatro" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
-                        </li>         
+                        </li>  
+                         <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-cinco" data-toggle="tab" href="#cinco" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>
+                        </li>        
                     </ul>
                     
                 </div>
@@ -116,6 +123,26 @@ function getView(){
                                 </div>
                                 <div class="col-6 text-right">
                                     <i class="fal fa-list negrita text-secondary" style="font-size:250%"></i>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+
+                </div>
+                <div class="col-sm-12 col-md-4 col-xl-4 col-lg-4 p-2">
+                    
+                    <div class="card card-rounded bg-white shadow col-12 hand" id="btnMenuRptCategorias">
+                        <div class="card-body p-4">
+                            
+                            <h4>OBJETIVOS CATEGORIAS</h4>
+
+                            <div class="row">
+                                <div class="col-6">
+                                </div>
+                                <div class="col-6 text-right">
+                                    <i class="fal fa-chart-bar negrita text-secondary" style="font-size:250%"></i>
                                 </div>
                             </div>
                             
@@ -286,6 +313,69 @@ function getView(){
             `
 
         },
+        rpt_categorias:()=>{
+
+            return `
+            <div class="card card-rounded col-12">
+                <div class="card-body p-4">
+
+                    <div class="row">
+                        <div class="col-6">
+                            <h4 class="negrita text-base">Logro por Categoria</h4>
+
+                            <div class="form-group">
+                                <label class="negrita">Seleccione Mes y Año</label>
+                                <div class="input-group">
+                                    <select class="form-control negrita text-base" id="cmbMes"></select>
+                                    <select class="form-control negrita text-base" id="cmbAnio"></select>
+                                </div>
+                            </div>
+
+                           
+                            <br>
+                        </div>
+                        <div class="col-6">
+                         
+                            <label class="negrita text-danger" id="lbMarcaTotalImporte">Importe:</label>
+                        </div>
+                    </div>
+                    
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered h-full col-12">
+                            <thead class="bg-base text-white"> 
+                                <tr>
+                                    <td>CATEGORIA</td>
+                                    <td>VENTA</td>
+                                    <td>OBJETIVO</td>
+                                    <td>FALTAN</td>
+                                    <td></td>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataVendedorCategorias"></tbody>
+                            <tfoot class="bg-base text-white"> 
+                                <tr>
+                                    <td></td>
+                                    <td  id="lbTotalCategoriaVendedorLogro"></td>
+                                    <td id="lbTotalCategoriaVendedorObjetivo"></td>
+                                    <td  id="lbTotalCategoriaVendedorFaltan"></td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+            
+
+
+            <button class="btn btn-secondary btn-circle btn-xl hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
+                <i class="fal fa-arrow-left"></i>
+            </button>
+            `
+
+        },
         rpt_productos:()=>{
             return `
             
@@ -392,6 +482,19 @@ function addListeners(){
     document.title = `Vendedor - ${GlobalNomEmpresa}`;
     
 
+    document.getElementById('cmbMes').innerHTML = F.ComboMeses();
+    document.getElementById('cmbMes').value = F.get_mes_curso();
+    document.getElementById('cmbMes').addEventListener('change',()=>{
+        tbl_detalle_vendedor(GlobalCodUsuario);
+    });
+
+    document.getElementById('cmbAnio').innerHTML = F.ComboAnio();
+    document.getElementById('cmbAnio').value = F.get_anio_curso();
+    document.getElementById('cmbAnio').addEventListener('change',()=>{
+        tbl_detalle_vendedor(GlobalCodUsuario);
+    });
+    
+
     document.getElementById('btnMenuRptProductos').addEventListener('click',()=>{
 
             document.getElementById('tab-tres').click();
@@ -411,6 +514,13 @@ function addListeners(){
         rpt_tbl_marcas();
     })
 
+
+    
+    document.getElementById('btnMenuRptCategorias').addEventListener('click',()=>{
+
+        document.getElementById('tab-cinco').click();
+        tbl_detalle_vendedor(GlobalCodUsuario);
+    })
 
 
     document.getElementById('txtProdFechaInicial').value = F.getFecha();
@@ -657,3 +767,94 @@ function rpt_tbl_marcas(){
 
 
 };
+
+
+
+function get_data_vendedor(codemp,mes,anio){
+
+    return new Promise((resolve,reject)=>{
+
+            axios.post(GlobalUrlCalls + '/objetivos/select_logro_vendedores_categorias', {
+                    token:TOKEN,
+                    codemp:codemp,
+                    mes:mes,
+                    anio:anio})
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+    }) 
+    
+
+
+};
+function tbl_detalle_vendedor(codemp){
+
+    let container = document.getElementById('tblDataVendedorCategorias');
+    container.innerHTML = GlobalLoader;
+
+    let mes = document.getElementById('cmbMes').value;
+    let anio = document.getElementById('cmbAnio').value;
+
+    let varTObjetivo = 0; let varTLogro = 0; let varTFaltan = 0;
+
+    get_data_vendedor(codemp,mes,anio)
+    .then((data)=>{
+        let str = '';
+
+        data.recordset.map((r)=>{
+            
+            let logrado = F.get_logrado(Number(r.LOGRO),Number(r.OBJETIVO));
+            let faltan = Number(r.OBJETIVO)-Number(r.LOGRO);
+          
+            varTObjetivo += Number(r.OBJETIVO);
+            varTLogro += Number(r.LOGRO);
+            varTFaltan += Number(faltan);
+
+            str += `
+            <tr>
+                <td>${r.CATEGORIA}</td>
+                <td>${F.setMoneda(r.LOGRO,'Q')}</td>
+                <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
+                <td>${F.setMoneda(faltan,'Q')}</td>
+                <td>
+                    <div class="input-group"><progress value="${logrado}" max="100"></progress>${logrado}%</div>
+                </td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
+        document.getElementById('lbTotalCategoriaVendedorObjetivo').innerText = F.setMoneda(varTObjetivo,'Q');
+        document.getElementById('lbTotalCategoriaVendedorLogro').innerText = F.setMoneda(varTLogro,'Q');
+        document.getElementById('lbTotalCategoriaVendedorFaltan').innerText = F.setMoneda(varTFaltan,'Q');
+        
+
+    })
+    .catch((error)=>{
+
+        console.log(error);
+
+        container.innerHTML = 'No se cargaron datos...';
+        
+        document.getElementById('lbTotalCategoriaVendedorObjetivo').innerText = '';
+        document.getElementById('lbTotalCategoriaVendedorLogro').innerText = '';
+        document.getElementById('lbTotalCategoriaVendedorFaltan').innerText = '';
+        
+    })
+
+
+}
