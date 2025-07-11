@@ -1370,7 +1370,7 @@ function tbl_clientes(filtro,qr){
     if(qr=='SI'){
         url_clientes = '/clientes/buscar_cliente_vendedor_qr'
     }else{
-        url_clientes = '/clientes/buscar_cliente_vendedor'
+        url_clientes = '/clientes/buscar_cliente_vendedor_comodin'
     };
 
     let container = document.getElementById('tblDataClientes');

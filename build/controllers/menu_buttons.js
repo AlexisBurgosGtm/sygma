@@ -294,7 +294,7 @@ let botones_menu = {
                                 </a>
                             </li>
                             <li>
-                                <a href="#"  class="text-base"  data-filter-tags="application intel"  onclick="Menu.ventas_pedidos()">
+                                <a href="#"  class="text-base"  data-filter-tags="application intel"  onclick="Menu.ventas_pedidos_comodin()">
                                     <i class="fal fa-shopping-cart"></i>
                                     <span class="nav-link-text" data-i18n="nav.application_intel">PEDIDOS</span>
                                 </a>

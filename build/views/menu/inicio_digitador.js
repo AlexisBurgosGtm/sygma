@@ -25,7 +25,7 @@ function getView(){
                             ${view.vista_facturacion()}
                         </div>
                         <div class="tab-pane fade" id="siete" role="tabpanel" aria-labelledby="home-tab">
-                            
+                            ${view.vista_sellout()}
                         </div>    
                     </div>
 
@@ -154,17 +154,17 @@ function getView(){
                 <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6" >
                     
                      
-                    <div class="hidden card card-rounded bg-white shadow col-12 hand"  onclick="document.getElementById('tab-dos').click()">
+                    <div class="card card-rounded bg-white shadow col-12 hand" id="btnMenuSellout">
                         <div class="card-body p-4">
                             
-                            <h4>PEDIDOS PENDIENTES</h4>
-                            <h1 class="negrita text-danger" id="lbTotalMP"></h1>
+                            <h4>SELL OUT</h4>
+                            <h1 class="negrita text-danger" id="">Reporte SellOut</h1>
 
                             <div class="row">
                                 <div class="col-6">
                                 </div>
                                 <div class="col-6 text-right">
-                                    <i class="fal fa-tasks negrita text-secondary" style="font-size:250%"></i>
+                                    <i class="fal fa-folder negrita text-secondary" style="font-size:250%"></i>
                                 </div>
                             </div>
                             
@@ -931,7 +931,91 @@ function getView(){
             </button>
 
             `
-        }
+        },
+        vista_sellout:()=>{
+            return `
+            <div class="card card-rounded shadow col-12">
+                <div class="card-body p-4">
+                   
+                    <h3 class="negrita text-center text-base">SELL OUT</h3>
+
+                    <br>
+                    <div class="row">
+                        <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
+                            <div class="form-group">
+                                <label class="negrita">Fecha Inicial</label>
+                                <input type="date" class="negrita form-control" id="txtSFechaInicial">
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
+                            <div class="form-group">
+                                <label class="negrita">Fecha Inicial</label>
+                                <input type="date" class="negrita form-control" id="txtSFechaFinal">
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                            <br>
+                            <button class="btn btn-success btn-md hand shadow" onclick="F.exportTableToExcel('tblSellout','SellOut')">
+                                <i class="fal fa-share"></i> Exportar Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    
+
+                </div>
+            </div>
+            <br>
+            <div class="card card-rounded shadow col-12">
+                <div class="card-body p-4">
+
+                        <div class="table-responsive">
+                            <table class="table h-full table-bordered col-12" id="tblSellout">
+                                <thead class="bg-success text-white negrita">
+                                    <tr>
+                                        <td>RELOP</td>
+                                        <td>TRANSACCION</td>
+                                        <td>FECHA</td>
+                                        <td>CODIGO CLIENTE</td>
+                                        <td>CLIENTE</td>
+                                        <td>TIPO CLIENTE</td>
+                                        <td>CODIGO VENDEDOR</td>
+                                        <td>VENDEDOR</td>
+                                        <td>CATEGORIA</td>
+                                        <td>MARCA</td>
+                                        <td>CODIGO RUTA</td>
+                                        <td>GEO1-PAIS</td>
+                                        <td>GEO2-DEPARTAMENTO</td>
+                                        <td>GEO3-MUNICIPIO</td>
+                                        <td>CEO4-ALDEA-CASERIO</td>
+                                        <td>PRODUCTO</td>
+                                        <td>CODIGO DUN</td>
+                                        <td>CODIGO EAN</td>
+                                        <td>DESCRIPCION</td>
+                                        <td>VENTA EN CANTIDAD</td>
+                                        <td>FACTOR</td>
+                                        <td>UNIDADES POR CAJA</td>
+                                        <td>MEDIDA</td>
+                                        <td>VENTA EN QUETZALES</td>
+                                        <td>FACTURA SAT</td>
+                                    </tr>
+                                </thead>
+                                <tbody id="tblDataSellout"></tbody>
+                            </table>
+                        </div>
+                        
+                </div>
+            </div>
+           
+
+            
+            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
+                <i class="fal fa-arrow-left"></i>
+            </button>
+
+            
+            `
+        },
     }
 
     root.innerHTML = view.body();
@@ -952,6 +1036,30 @@ function addListeners(){
     listeners_pedidos_pendientes();
 
     listeners_embarques();
+
+
+
+    //SELLOUT
+
+    document.getElementById('txtSFechaInicial').value = F.getFecha();
+    document.getElementById('txtSFechaFinal').value = F.getFecha();
+    
+    document.getElementById('txtSFechaInicial').addEventListener('change',()=>{
+        tbl_rpt_sellout();
+    })
+
+    document.getElementById('txtSFechaFinal').addEventListener('change',()=>{
+        tbl_rpt_sellout();
+    })
+
+    document.getElementById('btnMenuSellout').addEventListener('click',()=>{
+
+        document.getElementById('tab-siete').click();
+        tbl_rpt_sellout();
+
+    });
+
+
 
 
 };
@@ -2368,3 +2476,86 @@ function finalizar_embarque(codembarque,idbtn){
 //------------------------
 // EMBARQUES
 //------------------------
+
+
+
+//------------
+// SELL OUT
+//------------
+
+
+function tbl_rpt_sellout(){
+
+    let fi = F.devuelveFecha('txtSFechaInicial');
+    let ff = F.devuelveFecha('txtSFechaFinal');
+
+
+    let container = document.getElementById('tblDataSellout');
+    container.innerHTML = GlobalLoader;
+
+    let contador = 0;
+    let varTotal = 0;
+
+    let sucursal = GlobalEmpnit; //document.getElementById('cmbSucursal').value;
+
+   
+    RPT.data_sellout(sucursal,fi,ff)
+    .then((data)=>{
+
+   
+        let str = '';
+
+        data.recordset.map((r)=>{
+        
+            contador +=1;
+            varTotal += Number(r.TOTALPRECIO);
+            str += `
+                                    <tr>
+                                        <td>${r.RELOP}</td>
+                                        <td>${r.TRANSACCION}</td>
+                                        <td>${F.convertDateNormal(r.FECHA)}</td>
+                                        <td>${r.CODIGO_CLIENTE}</td>
+                                        <td>${r.TIPONEGOCIO} ${F.limpiarTextoExport(r.NEGOCIO)} - ${F.limpiarTextoExport(r.CLIENTE)}</td>
+                                        <td>DETALLE</td>
+                                        <td>${r.CODIGO_VENDEDOR}</td>
+                                        <td>${r.VENDEDOR}</td>
+                                        <td>${r.CATEGORIA}</td>
+                                        <td>${r.MARCA}</td>
+                                        <td>${r.CODIGO_RUTA}</td>
+                                        <td>GUATEMALA</td>
+                                        <td>${r.GEO2_DEPARTAMENTO}</td>
+                                        <td>${r.GEO3_MUNICIPIO}</td>
+                                        <td>${r.GEO4_ALDEA_CASERIO}</td>
+                                        <td>${F.limpiarTextoExport(r.PRODUCTO)}</td>
+                                        <td>${r.CODIGO_DUN}</td>
+                                        <td>${r.CODIGO_BARRA_EAN}</td>
+                                        <td>${F.limpiarTextoExport(r.DESCRIPCION_PRODUCTO)}</td>
+                                        <td>${r.VENTA_EN_CANTIDAD}</td>
+                                        <td>${r.FACTOR}</td>
+                                        <td>${r.UNIDADES_POR_CAJA}</td>
+                                        <td>${r.MEDIDA}</td>
+                                        <td>${F.setMoneda(r.VENTA_EN_QUETZALES,'Q')}</td>
+                                        <td>${r.FACTURA_SAT_SERIE} - ${r.FACTURA_SAT_NUMERO}</td>
+                                    </tr>
+            `
+        })
+        container.innerHTML = str;
+       
+        //document.getElementById('lbTotalMImporte').innerText =`Total: ${F.setMoneda(varTotal,'Q')}`;
+
+    })
+    .catch((err)=>{
+       
+
+        container.innerHTML = 'No se cargaron datos....';
+       
+        //document.getElementById('lbTotalMImporte').innerText = '';
+    })
+
+
+
+};
+
+//------------
+// SELL OUT
+//------------

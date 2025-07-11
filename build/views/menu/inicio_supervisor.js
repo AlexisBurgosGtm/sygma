@@ -27,7 +27,7 @@ function getView(){
                             ${view.rpt_clientes()}
                         </div> 
                         <div class="tab-pane fade" id="ocho" role="tabpanel" aria-labelledby="home-tab">
-                            ${view.objetivos()}
+                            ${view.objetivos() + view.modal_categorias_marca() + view.modal_categorias_vendedor()}
                         </div>        
                     </div>
 
@@ -107,7 +107,7 @@ function getView(){
                     <br>
 
                     <div class="card border-info card-rounded bg-white shadow col-12 hand"  
-                    onclick="Menu.ventas_pedidos()">
+                    onclick="Menu.ventas_pedidos_comodin()">
                         <div class="card-body p-4">
                             
                             <h4 class="text-info">NUEVO PEDIDO</h4>
@@ -753,6 +753,13 @@ function getView(){
                     ${view.frag_vendedores()}
                 </div>
             </div>
+
+         
+
+            <button class="btn btn-bottom-l btn-secondary btn-circle btn-xl hand shadow"
+            onclick="document.getElementById('tab-uno').click()">
+                <i class="fal fa-arrow-left"></i>
+            </button>
             `
         },
         frag_parametros: ()=>{
@@ -769,18 +776,25 @@ function getView(){
                                 <select class="form-control negrita" id="cmbSucursal">
                                 </select>
                             </div>
+                            <div class="form-group">
+                                <label class="negrita text-secondary">Seleccione mes y año</label>
+                                <div class="input-group">
+                                    <select class="form-control negrita" id="cmbMes">
+                                    </select>
+                                    <select class="form-control negrita" id="cmbAnio">
+                                    </select>
+                                </div>
+                                    
+                            </div>
                         </div>
                         <div class="col-sm-12 col-xl-6 col-lg-6 col-md-6">
-                                <div class="form-group">
-                                    <label class="negrita text-secondary">Seleccione mes y año</label>
-                                    <div class="input-group">
-                                        <select class="form-control negrita" id="cmbMes">
-                                        </select>
-                                        <select class="form-control negrita" id="cmbAnio">
-                                        </select>
-                                    </div>
-                                    
-                                </div>
+                              <h5 class="text-info negrita">Objetivos</h5>
+                            <small class="negrita text-secondary">Logrado:</small>
+                            <div class="input-group" id="lbObjLogrado"></div>
+                            <br>
+                            <small class="negrita text-secondary">Faltan:</small>
+                            <div class="input-group" id="lbObjLogradoFalta"></div>
+                               
                         </div>
                     </div>
                 
@@ -857,6 +871,124 @@ function getView(){
                     </div>
                 </div>
             </div>
+            `
+        },
+        modal_categorias_marca:()=>{
+            return `
+              <div id="modal_categorias_marca" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-right modal-xl">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-secondary d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white" id="lbMarcasDescategoria">
+                                
+                            </h4>
+                        </div>
+                        <div class="modal-body p-4">
+                            
+                            <div class="card card-rounded">
+                                <div class="card-body p-4">
+
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered h-full col-12">
+                                            <thead class="bg-base text-white"> 
+                                                <tr>
+                                                    <td>CATEGORIA</td>
+                                                    <td>LOGRO</td>
+                                                    <td>OBJETIVO</td>
+                                                    <td>FALTAN</td>
+                                                    <td></td>
+                                                </tr>
+                                            </thead>
+                                            
+                                            <tbody id="tblDataCategoriasMarca">
+                                            </tbody>
+                                            
+                                            <tfoot class="bg-base text-white"> 
+                                                <tr>
+                                                    <td></td>
+                                                    <td id="lbTotalMarcaLogro"></td>
+                                                    <td id="lbTotalMarcaObjetivo"></td>
+                                                    <td  id="lbTotalMarcaFaltan"></td>
+                                                    <td></td>
+                                                </tr>
+                                            </tfoot>
+
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                                
+                            <div class="row">
+                                <button class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
+                                    <i class="fal fa-arrow-left"></i>
+                                </button>
+                            </div>
+
+                        </div>
+                    
+                    </div>
+                </div>
+            </div>
+            `
+        },
+        modal_categorias_vendedor:()=>{
+            return `
+              <div id="modal_categorias_vendedor" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-right modal-xl">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-secondary d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white" id="lbVendedorCategorias">
+                                
+                            </h4>
+                        </div>
+                        <div class="modal-body p-4">
+                            
+                            <div class="card card-rounded">
+                                <div class="card-body p-4">
+
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered h-full col-12">
+                                            <thead class="bg-secondary text-white"> 
+                                                <tr>
+                                                    <td>CATEGORIA</td>
+                                                     <td>VENTA</td>
+                                                    <td>OBJETIVO</td>
+                                                    <td>FALTAN</td>
+                                                    <td></td>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tblDataVendedorCategorias"></tbody>
+                                            <tfoot class="bg-secondary text-white"> 
+                                                <tr>
+                                                    <td></td>
+                                                    <td  id="lbTotalCategoriaVendedorLogro"></td>
+                                                    <td id="lbTotalCategoriaVendedorObjetivo"></td>
+                                                    <td  id="lbTotalCategoriaVendedorFaltan"></td>
+                                                    <td></td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                                
+                            <div class="row">
+                                <button class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
+                                    <i class="fal fa-arrow-left"></i>
+                                </button>
+                            </div>
+
+                        </div>
+                    
+                    </div>
+                </div>
+            </div>
+
+           
             `
         },
     }
@@ -1567,7 +1699,7 @@ function tbl_logro_marcas(sucursal,mes,anio){
             varTotalLogro += Number(varLOGRO);
 
             str += `
-            <tr class="hand" onclick="get_detalle_marca('${r.CODIGO_MARCA}')">
+            <tr class="hand" onclick="get_detalle_marca('${r.CODIGO_MARCA}','${r.MARCA}')">
                 <td>${r.MARCA}</td>
                 <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
                 <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
@@ -1584,16 +1716,132 @@ function tbl_logro_marcas(sucursal,mes,anio){
         document.getElementById('lbTotalMarcasFalta').innerHTML = F.setMoneda(varTotalFaltan,'Q');
         document.getElementById('lbTotalMarcasLogro').innerHTML = `${F.setMoneda(varTotalLogro / conteo,'')} %`
 
+        let logrado = 0; let faltaLogro = 0;
+        try {
+           logrado = (Number(varTotalImporte)/Number(varTotalObjetivo))*100;
+           faltaLogro = 100-Number(logrado);
+        } catch (error) {
+            logrado=0;
+            faltaLogro=0;   
+        }
+        document.getElementById('lbObjLogrado').innerHTML = `<progress class="form-control" value="${logrado}" max="100"></progress><b class="text-success">${logrado.toFixed(2)}%</b>`;
+        document.getElementById('lbObjLogradoFalta').innerHTML = `<progress class="form-control progress-falta" value="${faltaLogro}" max="100"></progress><b class="text-danger">${faltaLogro.toFixed(2)}%</b>`;
     })
     .catch(()=>{
+
         container.innerHTML = 'No se cargaron datos...';
 
         document.getElementById('lbTotalMarcasImporte').innerHTML = '';
         document.getElementById('lbTotalMarcasObjetivo').innerHTML =''; 
         document.getElementById('lbTotalMarcasFalta').innerHTML = '';
         document.getElementById('lbTotalMarcasLogro').innerHTML = '';
+
+        document.getElementById('lbObjLogrado').innerHTML = `<progress value="0" max="100"></progress>`;
+        document.getElementById('lbObjLogradoFalta').innerHTML = `<progress class="progress-falta" value="0" max="100"></progress>`;
+    
     })
 
+
+
+};
+
+function get_detalle_marca(codmarca,desmarca){
+
+
+    $("#modal_categorias_marca").modal('show');
+
+    document.getElementById('lbMarcasDescategoria').innerText = desmarca;
+    
+    tbl_logro_categorias_marca(codmarca);
+
+
+
+}
+
+
+function get_data_logro_categorias_marcas(sucursal,codmarca,mes,anio){
+
+     return new Promise((resolve,reject)=>{
+
+            axios.post(GlobalUrlCalls + '/objetivos/select_logro_marcas_categorias', {
+                    token:TOKEN,
+                    sucursal:sucursal,
+                    codmarca:codmarca,
+                    mes:mes,
+                    anio:anio})
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        }) 
+    
+
+};
+
+function tbl_logro_categorias_marca(codmarca){
+
+    let container = document.getElementById('tblDataCategoriasMarca');
+    container.innerHTML = GlobalLoader;
+
+
+    let sucursal = document.getElementById('cmbSucursal').value;
+    let mes = document.getElementById('cmbMes').value;
+    let anio = document.getElementById('cmbAnio').value;
+
+
+
+    let varTotalObjetivo = 0; let varTotalLogro = 0; let varTotalFaltan = 0;
+
+    get_data_logro_categorias_marcas(sucursal,codmarca,mes,anio)
+    .then((data)=>{
+        let str = '';
+        data.recordset.map((r)=>{
+           
+            let varLOGRO = ((Number(r.TOTALPRECIO)/Number(r.OBJETIVO))*100);
+          
+            varTotalObjetivo += Number(r.OBJETIVO);
+            varTotalLogro += Number(r.TOTALPRECIO);
+            let faltan = (Number(r.OBJETIVO)-Number(r.TOTALPRECIO))
+            varTotalFaltan += Number(faltan);
+
+            str += `
+            <tr>
+                <td>${r.CATEGORIA}</td>
+                <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
+                <td>${F.setMoneda(faltan,'Q')}</td>
+                <td>${varLOGRO.toFixed(2)}%</td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
+
+        document.getElementById('lbTotalMarcaObjetivo').innerHTML = F.setMoneda(varTotalObjetivo,'Q');
+        document.getElementById('lbTotalMarcaLogro').innerHTML = F.setMoneda(varTotalLogro,'Q');
+        document.getElementById('lbTotalMarcaFaltan').innerHTML = F.setMoneda(varTotalFaltan,'Q');
+    })
+    .catch(()=>{
+
+        container.innerHTML = 'No se cargaron datos...';
+
+        document.getElementById('lbTotalMarcaObjetivo').innerHTML = '';
+        document.getElementById('lbTotalMarcaLogro').innerHTML = '';
+        document.getElementById('lbTotalMarcaFaltan').innerHTML = '';
+    })
 
 
 };
@@ -1602,7 +1850,7 @@ function tbl_logro_marcas(sucursal,mes,anio){
 
 function get_data_logro_vendedores(sucursal,mes,anio){
 
-     return new Promise((resolve,reject)=>{
+    return new Promise((resolve,reject)=>{
 
             axios.post(GlobalUrlCalls + '/objetivos/select_logro_vendedores', {
                     token:TOKEN,
@@ -1657,7 +1905,10 @@ function tbl_logro_vendedores(sucursal,mes,anio){
 
             str += `
             <tr class="hand" onclick="get_detalle_vendedor('${r.CODIGO_VENDEDOR}','${r.VENDEDOR}')">
-                <td>${r.VENDEDOR}</td>
+                <td>${r.VENDEDOR}
+                    <br>
+                    <small class="negrita text-info">${r.EMPRESA}</small>
+                </td>
                 <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
                 <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
                 <td>${F.setMoneda(varFaltan,'Q')}</td>
@@ -1686,5 +1937,106 @@ function tbl_logro_vendedores(sucursal,mes,anio){
 
 
 };
+
+
+function get_detalle_vendedor(codemp,nombre){
+
+
+        $("#modal_categorias_vendedor").modal('show');
+
+        document.getElementById('lbVendedorCategorias').innerText = nombre;
+
+        tbl_detalle_vendedor(codemp);
+
+};
+
+function get_data_vendedor(codemp,mes,anio){
+
+    return new Promise((resolve,reject)=>{
+
+            axios.post(GlobalUrlCalls + '/objetivos/select_logro_vendedores_categorias', {
+                    token:TOKEN,
+                    codemp:codemp,
+                    mes:mes,
+                    anio:anio})
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+    }) 
+    
+
+
+};
+function tbl_detalle_vendedor(codemp){
+
+    let container = document.getElementById('tblDataVendedorCategorias');
+    container.innerHTML = GlobalLoader;
+
+    let mes = document.getElementById('cmbMes').value;
+    let anio = document.getElementById('cmbAnio').value;
+
+    let varTObjetivo = 0; let varTLogro = 0; let varTFaltan = 0;
+
+    get_data_vendedor(codemp,mes,anio)
+    .then((data)=>{
+        let str = '';
+
+        data.recordset.map((r)=>{
+            
+            let logrado = F.get_logrado(Number(r.LOGRO),Number(r.OBJETIVO));
+            let faltan = Number(r.OBJETIVO)-Number(r.LOGRO);
+          
+            varTObjetivo += Number(r.OBJETIVO);
+            varTLogro += Number(r.LOGRO);
+            varTFaltan += Number(faltan);
+
+            str += `
+            <tr>
+                <td>${r.CATEGORIA}</td>
+                <td>${F.setMoneda(r.LOGRO,'Q')}</td>
+                <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
+                <td>${F.setMoneda(faltan,'Q')}</td>
+                <td>
+                    <div class="input-group"><progress value="${logrado}" max="100"></progress>${logrado}%</div>
+                </td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
+        document.getElementById('lbTotalCategoriaVendedorObjetivo').innerText = F.setMoneda(varTObjetivo,'Q');
+        document.getElementById('lbTotalCategoriaVendedorLogro').innerText = F.setMoneda(varTLogro,'Q');
+        document.getElementById('lbTotalCategoriaVendedorFaltan').innerText = F.setMoneda(varTFaltan,'Q');
+        
+
+    })
+    .catch((error)=>{
+
+        console.log(error);
+
+        container.innerHTML = 'No se cargaron datos...';
+        
+        document.getElementById('lbTotalCategoriaVendedorObjetivo').innerText = '';
+        document.getElementById('lbTotalCategoriaVendedorLogro').innerText = '';
+        document.getElementById('lbTotalCategoriaVendedorFaltan').innerText = '';
+        
+    })
+
+
+}
 
 //OBJETIVOS
