@@ -859,42 +859,55 @@ function addListeners(){
     });
 
 
-    let btnGuardarVisita = document.getElementById('btnGuardarVisita');
+   let btnGuardarVisita = document.getElementById('btnGuardarVisita');
     btnGuardarVisita.addEventListener('click',()=>{
 
-                let motivo = document.getElementById('cmbMotivoNoVisita').value
-                F.ObtenerUbicacion()
-                .then((location)=>{
+                let motivo = document.getElementById('cmbMotivoNoVisita').value;
 
-                    let latitud = location.latitude.toString();
-                    let longitud = location.longitude.toString();
+                F.Confirmacion('¿Está seguro que desea reportar esta NO VISITA?')
+                .then((value)=>{
+                    if(value==true){
 
-                    insert_visita(selected_cod_cliente,motivo,latitud,longitud)
-                    .then(()=>{
-                        F.Aviso('Visita registrada exitosamente!!');
-                        $("#modal_visita").modal('hide');
+                            F.showToast('Obteniendo la ubicacion actual...');
+                            
+                            F.ObtenerUbicacion()
+                            .then((location)=>{
 
-                    })
-                    .catch(()=>{
-                        F.AvisoError('No se pudo enviar');
-                    })
+                                let latitud = location.latitude.toString();
+                                let longitud = location.longitude.toString();
 
+                                insert_visita(selected_cod_cliente,motivo,latitud,longitud)
+                                .then(()=>{
+                                    F.Aviso('Visita registrada exitosamente!!');
+                                    $("#modal_visita").modal('hide');
+
+                                })
+                                .catch(()=>{
+                                    F.AvisoError('No se pudo enviar');
+                                })
+
+                            })
+                            .catch(()=>{
+                                
+                                let latitud = 0;   //location.latitude.toString();
+                                let longitud = 0;   //location.longitude.toString();
+
+                                insert_visita(selected_cod_cliente,motivo,latitud,longitud)
+                                .then(()=>{
+                                    F.Aviso('Visita registrada exitosamente!!');
+                                    $("#modal_visita").modal('hide');
+                                })
+                                .catch(()=>{
+                                    F.AvisoError('No se pudo enviar');
+                                })
+
+                            })
+
+
+
+                    }
                 })
-                .catch(()=>{
-                    
-                    let latitud = 0;   //location.latitude.toString();
-                    let longitud = 0;   //location.longitude.toString();
 
-                    insert_visita(selected_cod_cliente,motivo,latitud,longitud)
-                    .then(()=>{
-                        F.Aviso('Visita registrada exitosamente!!');
-                        $("#modal_visita").modal('hide');
-                    })
-                    .catch(()=>{
-                        F.AvisoError('No se pudo enviar');
-                    })
-
-                })
 
 
     });
