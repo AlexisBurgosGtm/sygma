@@ -862,6 +862,9 @@ function addListeners(){
                 .then((value)=>{
                     if(value==true){
 
+                        btnGuardarVisita.disabled = true;
+                        btnGuardarVisita.innerHTML = `<i class="fal fa-paper-plane fa-spin"></i>`;
+
                             F.showToast('Obteniendo la ubicacion actual...');
                             
                             F.ObtenerUbicacion()
@@ -875,9 +878,14 @@ function addListeners(){
                                     F.Aviso('Visita registrada exitosamente!!');
                                     $("#modal_visita").modal('hide');
 
+                                    btnGuardarVisita.disabled = false;
+                                    btnGuardarVisita.innerHTML = `<i class="fal fa-paper-plane"></i>`;
+                        
                                 })
                                 .catch(()=>{
                                     F.AvisoError('No se pudo enviar');
+                                     btnGuardarVisita.disabled = false;
+                                    btnGuardarVisita.innerHTML = `<i class="fal fa-paper-plane"></i>`;
                                 })
 
                             })
@@ -890,9 +898,13 @@ function addListeners(){
                                 .then(()=>{
                                     F.Aviso('Visita registrada exitosamente!!');
                                     $("#modal_visita").modal('hide');
+                                     btnGuardarVisita.disabled = false;
+                                    btnGuardarVisita.innerHTML = `<i class="fal fa-paper-plane"></i>`;
                                 })
                                 .catch(()=>{
                                     F.AvisoError('No se pudo enviar');
+                                     btnGuardarVisita.disabled = false;
+                                    btnGuardarVisita.innerHTML = `<i class="fal fa-paper-plane"></i>`;
                                 })
 
                             })
