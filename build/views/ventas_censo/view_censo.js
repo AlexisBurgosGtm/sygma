@@ -252,13 +252,12 @@ async function addListeners(){
 
 
     //cmbVendedor
-    if(Number(GlobalNivelUsuario)==2){
-        document.getElementById('cmbVendedor').disabled = false;
-        document.getElementById('cmbVendedorCliente').disabled = false;
-    
-    }else{
+    if(Number(GlobalNivelUsuario)==3){
         document.getElementById('cmbVendedor').disabled = true;
         document.getElementById('cmbVendedorCliente').disabled = true;
+    }else{
+        document.getElementById('cmbVendedor').disabled = false;
+        document.getElementById('cmbVendedorCliente').disabled = false;
     };
 
     document.getElementById('cmbVendedor').addEventListener('change',()=>{
@@ -546,8 +545,14 @@ function get_empleados(){
         document.getElementById('cmbVendedorCliente').innerHTML = str;
 
         document.getElementById('cmbVendedor').value = GlobalCodUsuario;
-        document.getElementById('cmbVendedorCliente').value = GlobalCodUsuario;
+        
 
+        //si es vendedor queda en default
+        if(Number(GlobalNivelUsuario)==3){
+            document.getElementById('cmbVendedorCliente').value = GlobalCodUsuario;
+        }
+
+        
         //carga la lista de clientes luego de tener al primer vendedor
         tbl_clientes();
 
