@@ -16,6 +16,49 @@ router.post("/update_sell_out_productos", async(req,res)=>{
 
 
     qry_sellout = `
+       UPDATE INVSALDO SET SELLOUT = T.TOTALUNIDADES FROM INVSALDO 
+       INNER JOIN (
+            SELECT DOCPRODUCTOS.EMPNIT,DOCPRODUCTOS.CODPROD, 
+            SUM(ISNULL(DOCPRODUCTOS.TOTALUNIDADES,0) / ${promedio}) AS TOTALUNIDADES, 
+            SUM(DOCPRODUCTOS.TOTALPRECIO) AS TOTALPRECIO
+            FROM     DOCUMENTOS LEFT OUTER JOIN
+                DOCPRODUCTOS ON DOCUMENTOS.CORRELATIVO = DOCPRODUCTOS.CORRELATIVO AND 
+                DOCUMENTOS.CODDOC = DOCPRODUCTOS.CODDOC AND DOCUMENTOS.EMPNIT = DOCPRODUCTOS.EMPNIT LEFT OUTER JOIN
+                TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+            WHERE
+                (DOCUMENTOS.EMPNIT='${sucursal}') AND  
+                (DOCUMENTOS.STATUS <> 'A') AND 
+                (DOCUMENTOS.ANIO = ${anio}) AND 
+                (DOCUMENTOS.MES BETWEEN ${mi} AND ${mf}) AND 
+                (TIPODOCUMENTOS.TIPODOC IN('FAC','FCP','FPC','FEC','FEF','FES')) AND
+                (DOCPRODUCTOS.CODPROD IS NOT NULL)
+            GROUP BY DOCPRODUCTOS.EMPNIT,DOCPRODUCTOS.CODPROD) T ON INVSALDO.CODPROD= T.CODPROD AND INVSALDO.EMPNIT=T.EMPNIT;
+        `
+
+
+ 
+
+    let qry_update_config = `UPDATE CONFIG SET OBS='${obs}' WHERE ID=3;`
+
+
+    let qry = qry_sellout + qry_update_config;
+
+    
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/BACKUP_update_sell_out_productos", async(req,res)=>{
+   
+
+    const { token,sucursal,mi,mf,anio,obs} = req.body;
+
+    let promedio = (Number(mf)-Number(mi)) + 1;
+    
+    let qry_sellout ='';  
+
+
+
+    qry_sellout = `
        UPDATE PRODUCTOS SET SELLOUT = T.TOTALUNIDADES FROM PRODUCTOS 
        INNER JOIN (
             SELECT DOCPRODUCTOS.CODPROD, 
@@ -50,6 +93,7 @@ router.post("/update_sell_out_productos", async(req,res)=>{
 
 
 
+
 router.post("/select_inventario_general", async(req,res)=>{
    
     const {token,sucursal,st} = req.body;
@@ -75,7 +119,7 @@ router.post("/select_inventario_general", async(req,res)=>{
                 PRODUCTOS.CODMARCA, 
                 MARCAS.DESMARCA, 
                 PRODUCTOS.UXC,
-                ISNULL(PRODUCTOS.SELLOUT,0) AS SELLOUT
+                SUM(ISNULL(view_invsaldo.SELLOUT,0)) AS SELLOUT
         FROM     PRODUCTOS RIGHT OUTER JOIN
                   view_invsaldo ON PRODUCTOS.CODPROD = view_invsaldo.CODPROD LEFT OUTER JOIN
                   MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA
@@ -93,7 +137,7 @@ router.post("/select_inventario_general", async(req,res)=>{
                 view_invsaldo.COSTO_ANTERIOR, view_invsaldo.COSTO_PROMEDIO, 
                 PRODUCTOS.CODMARCA, MARCAS.DESMARCA,
                 PRODUCTOS.UXC,
-                ISNULL(PRODUCTOS.SELLOUT,0) AS SELLOUT
+                ISNULL(view_invsaldo.SELLOUT,0) AS SELLOUT
         FROM  PRODUCTOS RIGHT OUTER JOIN
                 view_invsaldo ON PRODUCTOS.CODPROD = view_invsaldo.CODPROD LEFT OUTER JOIN
                 MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA

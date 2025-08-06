@@ -997,7 +997,11 @@ function addListeners(){
 
     document.getElementById('btnSOConfigModal').addEventListener('click',()=>{
 
+        let sucursal = document.getElementById('cmbSucursal').value;
+        if(sucursal=='%'){F.AvisoError('Seleccione una sede para configurar SELLOUT');return;}
+
         $('#modal_sellout_config').modal('show');
+        
         document.getElementById('txtSOObs').value = data_config_general[2].OBS;
 
     })
