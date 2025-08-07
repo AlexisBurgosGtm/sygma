@@ -1,4 +1,4 @@
-let versionapp = "M.07.08.2025:0"
+let versionapp = "M.07.08.2025:1"
 // &nbsp
 
 let map; //mapa de leaflet
@@ -112,6 +112,8 @@ let selected_ped_codembarque = '';
 
 let selected_id_element = '';
 
+
+let selected_universo_clientes_sucursal = 0;
 
 let selected_tab = '';
 

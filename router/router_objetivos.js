@@ -34,15 +34,29 @@ router.post("/goles_resumen_vendedor", async(req,res)=>{
    
     const { token, sucursal,codemp, mes,anio} = req.body;
 
-    let qry = `
+    let qry = '';
+    if(codemp=='TODOS'){
+        qry = `
+        SELECT CODPROD, DESPROD, COUNT(CODCLIENTE) AS CONTEO, EMPNIT
+        FROM     view_rpt_goles_productos_cliente
+        WHERE  (ANIO = ${anio}) AND (MES = ${mes}) 
+        AND (EMPNIT='${sucursal}')
+        GROUP BY CODPROD, DESPROD, EMPNIT
+        ORDER BY CODPROD`
+    }else{
+        qry = `
         SELECT CODPROD, DESPROD, COUNT(CODCLIENTE) AS CONTEO, EMPNIT, CODEMP
         FROM     view_rpt_goles_productos_cliente
         WHERE  (ANIO = ${anio}) AND (MES = ${mes}) 
-        AND (CODEMP=${codemp}) AND (EMPNIT='${sucursal}')
+        AND (CODEMP=${Number(codemp)}) AND (EMPNIT='${sucursal}')
         GROUP BY CODPROD, DESPROD, EMPNIT, CODEMP
         ORDER BY CODPROD
-    `;
+        `;
+    }
+
     
+
+    console.log(qry)
 
     execute.QueryToken(res,qry,token);
      
@@ -58,6 +72,21 @@ router.post("/universo_clientes_empleado", async(req,res)=>{
         WHERE  (HABILITADO = 'SI') AND 
             (EMPNIT = '${sucursal}') AND 
             (CODEMPLEADO = ${codemp})
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/universo_clientes_sucursal", async(req,res)=>{
+   
+    const { token, sucursal} = req.body;
+
+    let qry = `
+       SELECT COUNT(CODCLIENTE) AS CONTEO
+        FROM     CLIENTES
+        WHERE  (HABILITADO = 'SI') AND 
+            (EMPNIT = '${sucursal}') 
         `;
     
 

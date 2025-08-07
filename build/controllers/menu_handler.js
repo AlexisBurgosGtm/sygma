@@ -376,4 +376,15 @@ let Menu = {
             F.AvisoError('No tiene permitido entrar a esta sección');
         } 
     },
+    objetivos_goles:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/bi_objetivos/view_objetivos_goles.js','root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        }   
+    }
 }

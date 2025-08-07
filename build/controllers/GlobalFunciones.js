@@ -2578,6 +2578,43 @@ let GF = {
     
         })
     },
+    get_data_universo_clientes_sucursal: (sucursal)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:sucursal
+            };
+    
+            axios.post(`/objetivos/universo_clientes_sucursal`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+
+                    if(data.toString()=="error"){
+                        reject(0);
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            let universo = Number(data.recordset[0].CONTEO);
+                         
+                            resolve(universo);
+                                        
+                        }else{
+                            reject(0);
+                        } 
+                    }             
+                }else{
+                    reject(0);
+                } 
+            })
+            .catch(()=>{
+                reject(0);
+            })
+    
+        })
+    },
     get_data_goles_resumen_mes: (sucursal,codemp,mes,anio)=>{
         
         return new Promise((resolve, reject)=>{
