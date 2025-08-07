@@ -5,7 +5,7 @@ function getView(){
                 <div class="col-12 p-0">
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="dias-tab">
-                            ${view.modal_lista_clientes() + view.modal_qr() + view.modal_camara() + view.modal_visita() + view.modal_historial_cliente()}
+                            ${view.modal_lista_clientes() + view.modal_qr() + view.modal_camara() + view.modal_visita() + view.modal_historial_cliente() + view.modal_goles()}
                         </div> 
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="clientes-tab">
                             ${view.pedido() + view.modal_lista_precios() + view.modal_cantidad() + view.modal_editar_cantidad()}
@@ -765,6 +765,68 @@ function getView(){
             
             `
         },
+        modal_goles:()=>{
+            return `
+            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" 
+                role="dialog" aria-hidden="true" 
+                id="modal_goles">
+                <div class="modal-dialog modal-dialog-right modal-xl">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-primary d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white" id="">
+                                Goles P&G logrados este Mes
+                            </h4>
+                        </div>
+                        <div class="modal-body p-4">
+                            
+                            <div class="card card-rounded" id="print_qr">
+                                <div class="card-body p-4">
+                                   
+                                    <h3 class="negrita text-danger" id="lbNegocioclieVisitaGoles"></h3>
+                                    <h3 class="negrita text-danger" id="lbNomclieVisitaGoles"></h3>
+                                   
+                                        <button class="btn btn-danger hand shadow" data-dismiss="modal"
+                                            onclick="document.getElementById('tblDataGoles').innerHTML='';">
+                                                <i class="fal fa-arrow-left"></i> Atras
+                                        </button>
+                                    <br>
+
+                                    <div class="table-responsive">
+                                            <div class="form-group">
+                                                <input type="text" class="border-info text-info form-control col-12"
+                                                placeholder="Escriba para buscar..."
+                                                id="txtBuscarGol"
+                                                oninput="F.FiltrarTabla('tblGoles','txtBuscarGol')">
+                                            </div>
+                                        <table class="table table-bordered h-full" id="tblGoles">
+                                            
+                                            <thead class="bg-primary text-white">
+                                                <tr>
+                                                    <td>PRODUCTO</td>
+                                                    <td>UNS.VENDIDAS</td>
+                                                    <td>IMPORTE</td>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tblDataGoles"></tbody>
+                                        </table>
+
+                                    </div>
+                                 
+
+
+
+                                </div>                                
+                                
+                            </div>                              
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            `
+        },
     }
 
     root.innerHTML = view.body();
@@ -1427,6 +1489,13 @@ function tbl_clientes(filtro,qr){
                             <i class="fal fa-barcode"></i>
                         </button>
 
+                        <br><br>
+
+                        <button class="btn btn-circle btn-md btn-primary hand shadow" 
+                        onclick="get_status_goles('${r.CODCLIENTE}','${r.NOMBRE}','${r.TIPONEGOCIO}','${r.NEGOCIO}')">
+                            <i class="fal fa-futbol"></i>
+                        </button>
+
 
                     </td>
                     <td>
@@ -1476,7 +1545,6 @@ function tbl_clientes(filtro,qr){
 
 
 };
-
 function get_historial_cliente(codclie,nomclie,tiponegocio,negocio){
 
     $("#modal_historial_cliente").modal('show');
@@ -1492,7 +1560,6 @@ function get_historial_cliente(codclie,nomclie,tiponegocio,negocio){
     tbl_historial_cliente();
 
 };
-
 function tbl_historial_cliente(){
 
     let container = document.getElementById('tblDataHistorial');
@@ -1531,6 +1598,9 @@ function tbl_historial_cliente(){
     })
 
 };
+
+
+
 
 function get_visita(codclie,nomclie,tiponegocio,negocio){
 
@@ -1587,6 +1657,55 @@ function insert_visita(codclie,motivo,latitud,longitud){
     })
 
 };
+
+
+
+
+function get_status_goles(codclie,nomclie,tiponegocio,negocio){
+
+    $("#modal_goles").modal('show');
+
+    selected_cod_cliente = codclie;
+    
+    document.getElementById('lbNegocioclieVisitaGoles').innerText = `${tiponegocio}-${negocio}`;
+    document.getElementById('lbNomclieVisitaGoles').innerText = nomclie;
+  
+    tbl_status_goles(codclie)
+
+};
+function tbl_status_goles(codclie){
+
+    let container = document.getElementById('tblDataGoles');
+    container.innerHTML = GlobalLoader;
+
+ 
+
+    GF.get_data_goles_cliente(GlobalEmpnit,codclie)
+    .then((data)=>{
+
+        let str = '';
+        data.recordset.map((r)=>{
+          str+= `
+            <tr>
+                <td>${F.limpiarTexto(r.DESPROD)}
+                    <br>
+                    <small class="text-secondary">${r.CODPROD}</small>
+                </td>
+                <td>${r.TOTALUNIDADES}</td>
+                <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+            </tr>
+            ` 
+        })
+        container.innerHTML = str;
+    })
+    .catch((error)=>{
+        container.innerHTML = 'No se cargaron datos...';
+    })
+
+
+};
+
+
 
 
 function create_qr_code(codigo,nomclie){

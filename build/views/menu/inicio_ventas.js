@@ -16,8 +16,11 @@ function getView(){
                         <div class="tab-pane fade" id="cuatro" role="tabpanel" aria-labelledby="home-tab">
                             ${view.rpt_marcas()}
                         </div>   
-                         <div class="tab-pane fade" id="cinco" role="tabpanel" aria-labelledby="home-tab">
+                        <div class="tab-pane fade" id="cinco" role="tabpanel" aria-labelledby="home-tab">
                             ${view.rpt_categorias()}
+                        </div>
+                        <div class="tab-pane fade" id="seis" role="tabpanel" aria-labelledby="home-tab">
+                            ${view.rpt_goles()}
                         </div>    
                     </div>
 
@@ -38,8 +41,12 @@ function getView(){
                             <a class="nav-link negrita text-danger" id="tab-cuatro" data-toggle="tab" href="#cuatro" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
                         </li>  
-                         <li class="nav-item">
+                        <li class="nav-item">
                             <a class="nav-link negrita text-danger" id="tab-cinco" data-toggle="tab" href="#cinco" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>
+                        </li>   
+                        <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-seis" data-toggle="tab" href="#seis" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
                         </li>        
                     </ul>
@@ -111,6 +118,7 @@ function getView(){
             <br>
 
             <div class="row">
+
                 <div class="col-sm-12 col-md-4 col-xl-4 col-lg-4 p-2">
                     
                     <div class="card card-rounded bg-white shadow col-12 hand" id="btnMenuRptMarcas">
@@ -188,9 +196,26 @@ function getView(){
 
                         </div>
                     </div>
-                    
-
                 </div>
+                 <div class="col-sm-12 col-md-4 col-xl-4 col-lg-4 p-2">
+                    
+                    <div class="card card-rounded   bg-white shadow col-12 hand" id="btnMenuRptGoles">
+                        <div class="card-body p-4">
+
+                            <h4 class="">REPORTE DE GOLES</h4>
+                          
+                             <div class="row">
+                                <div class="col-6">
+                                </div>
+                                <div class="col-6 text-right">
+                                    <i class="fal fa-futbol negrita text-secondary" style="font-size:250%"></i>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             `
@@ -436,6 +461,70 @@ function getView(){
             </button>
             `
         },
+        rpt_goles:()=>{
+            return `
+             <div class="card card-rounded col-12">
+                <div class="card-body p-4">
+            
+                    <h4 class="negrita text-base">LOGRO DE GOLES POR MES</h4>
+                   
+                    <br>
+                    <div class="row">
+                        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                            <div class="form-group">
+                                <label>Seleccione Mes y Año</label>
+                                <div class="input-group">
+                                    <select class="form-control negrita" id="cmbMesGoles">
+                                    </select>
+                                    <select class="form-control negrita" id="cmbAnioGoles">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                            <h5>Universo Clientes:</h5>
+                            <h1 class="negrita text-danger" id="lbUniversoGoles"></h1>
+                        </div>
+                    </div>
+
+                       
+
+                    <hr class="solid">
+
+                    <div class="table-responsive">
+
+                        <div class="form-group">
+                            <input type="text" class="form-control border-info text-info"
+                            id="txtBuscarGoles"
+                            placeholder="Escriba para buscar..." 
+                            oninput="F.FiltrarTabla('tblGoles','txtBuscarGoles')"
+                            >
+                        </div>
+
+                        <table class="table h-full table-hover" id="tblGoles">
+                            <thead class="bg-primary text-white">
+                                <tr>
+                                    <td>PRODUCTO</td>
+                                    <td>ALCANZADOS</td>
+                                    <td>UNIVERSO</td>
+                                    <td>LOGRO</td>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataGoles">
+                            </tbody>
+
+                        </table>
+
+                    </div>
+            
+                </div>
+            </div>
+
+            <button class="btn btn-secondary btn-circle btn-xl hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
+                <i class="fal fa-arrow-left"></i>
+            </button>
+            `
+        },
         modal:()=>{
             return `
               <div id="modal_" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
@@ -570,6 +659,47 @@ function addListeners(){
         rpt_tbl_marcas();
     });
 
+
+
+    // -------------------------------
+    // GOLES 
+    // -------------------------------
+    document.getElementById('btnMenuRptGoles').addEventListener('click',()=>{
+        
+        document.getElementById('tab-seis').click();
+        GF.get_data_universo_clientes_empleado(GlobalEmpnit,GlobalCodUsuario)
+        .then((universo)=>{
+            document.getElementById('lbUniversoGoles').innerText = universo.toString();
+            rpt_goles_resumen(universo);
+        })
+        .catch((error)=>{
+            document.getElementById('lbUniversoGoles').innerText = '';
+
+            F.AvisoError('No se logro obtener el total de clientes del vendedor')
+        })
+        
+
+    });
+    document.getElementById('cmbMesGoles').innerHTML = F.ComboMeses();
+    document.getElementById('cmbMesGoles').value = F.get_mes_curso();
+    document.getElementById('cmbMesGoles').addEventListener('change',()=>{
+
+        let universo = Number(document.getElementById('lbUniversoGoles').innerText);
+        rpt_goles_resumen(universo);
+
+    });
+
+    document.getElementById('cmbAnioGoles').innerHTML = F.ComboAnio();
+    document.getElementById('cmbAnioGoles').value = F.get_anio_curso();
+    document.getElementById('cmbAnioGoles').addEventListener('change',()=>{
+          
+            let universo = Number(document.getElementById('lbUniversoGoles').innerText);
+            rpt_goles_resumen(universo);
+        
+    });
+    // -------------------------------
+    // GOLES 
+    // -------------------------------
 
 
 };
@@ -858,3 +988,20 @@ function tbl_detalle_vendedor(codemp){
 
 
 }
+
+
+
+function rpt_goles_resumen(universo){
+
+
+    let container = document.getElementById('tblDataGoles');
+    container.innerHTML = GlobalLoader;
+
+
+    
+
+
+
+
+
+};

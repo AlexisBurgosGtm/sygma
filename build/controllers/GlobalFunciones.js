@@ -1659,6 +1659,37 @@ let GF = {
     
         })
     },
+    get_data_embarque_productos_bonif: (empnit,codembarque)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                codembarque:codembarque,
+                codmedida:data_config_general[3].VALOR.toString()
+            };
+    
+            axios.post(`/despacho/pedidos_pendientes_embarque_productos_bonif`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
     get_data_embarque_productos_vendedor: (empnit,fi,ff,codven)=>{
         
         return new Promise((resolve, reject)=>{
@@ -2463,6 +2494,116 @@ let GF = {
                     }else{
                         reject();
                     }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
+    get_data_goles_cliente: (sucursal,codclie)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:sucursal,
+                codclie:codclie,
+                fecha:F.getFecha()
+            };
+    
+            axios.post(`/objetivos/goles_cliente`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }             
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
+    get_data_universo_clientes_empleado: (sucursal,codemp)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:sucursal,
+                codemp:codemp
+            };
+    
+            axios.post(`/objetivos/universo_clientes_empleado`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+
+                    if(data.toString()=="error"){
+                        reject(0);
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            let universo = Number(data.recordset[0].CONTEO);
+                         
+                            resolve(universo);
+                                        
+                        }else{
+                            reject(0);
+                        } 
+                    }             
+                }else{
+                    reject(0);
+                } 
+            })
+            .catch(()=>{
+                reject(0);
+            })
+    
+        })
+    },
+    get_data_goles_resumen_mes: (sucursal,codemp,mes,anio)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:sucursal,
+                codemp:codemp,
+                fecha:F.getFecha()
+            };
+    
+            axios.post(`/objetivos/goles_cliente`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }             
                 }else{
                     reject();
                 } 

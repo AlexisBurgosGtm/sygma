@@ -664,6 +664,7 @@ function getView(){
                                 <option value='PENDIENTES'>FACTURAS PENDIENTES</option>
                                 <option value='FACTURAS'>FACTURAS EMBARQUE</option>
                                 <option value='PRODUCTOS'>PRODUCTOS EMBARQUE</option>
+                                <option value='BONIFICACIONES'>PRODUCTOS BONIFICADOS EMBARQUE</option>
                                 <option value='VENDEDORES'>RESUMEN VENDEDOR</option>
                                 <option value='ANULADAS'>FACTURAS ANULADAS</option>
                             </select>
@@ -691,6 +692,9 @@ function getView(){
                         </div>
                         <div class="tab-pane fade" id="Fcinco" role="tabpanel" aria-labelledby="home-tab">
                             ${view.vista_pedidos_pendientes_anulados()}
+                        </div>
+                        <div class="tab-pane fade" id="Fseis" role="tabpanel" aria-labelledby="home-tab">
+                            ${view.facturacion_embarque_productos_bonif()}
                         </div>    
                     </div>
 
@@ -713,6 +717,10 @@ function getView(){
                         </li>
                         <li class="nav-item">
                             <a class="nav-link negrita text-danger" id="tab-Fcinco" data-toggle="tab" href="#Fcinco" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>
+                        </li>  
+                        <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-Fseis" data-toggle="tab" href="#Fseis" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
                         </li>           
                     </ul>
@@ -883,6 +891,55 @@ function getView(){
             </div>
 
             <button class="btn btn-info btn-xl btn-circle hand shadow btn-bottom-r" onclick="F.imprimirSelec('rpt_productos_embarque')">
+                <i class="fal fa-print"></i>
+            </button>
+            `
+        },
+        facturacion_embarque_productos_bonif:()=>{
+            return `
+            <br>
+
+            <div class="card card-rounded shadow col-12" id="rpt_productos_embarqueB">
+                <div class="card-body p-4">
+            
+                    <div class="row">
+                        <div class="col-6">
+                            <h4 class="negrita text-base">Productos Bonificados del Embarque</h4>
+                            <h5 id="lbProdCodembarqueB"></h5>
+                            <br>
+                        </div>
+                        <div class="col-6">
+                            <label class="negrita text-info" id="lbProdTotalPedidosB">Productos:</label>
+                            <br>
+                            <label class="negrita text-danger" id="lbProdTotalImporteB">Importe:</label>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+
+                         <table class="table h-full table-bordered col-12" id="tblFProductosB">
+                                <thead class="bg-secondary text-white negrita">
+                                    <tr>
+                                        <td>CODIGO</td>
+                                        <td>PRODUCTO</td>
+                                        <td>UXC</td>
+                                        <td>CAJAS</td>
+                                        <td>UNIDADES</td>
+                                        <td>IMPORTE</td>
+                                        <td></td>
+                                    </tr>
+                                </thead>
+                                <tbody id="tblDataFProductosB"></tbody>
+
+                            </table>
+
+                    </div>
+            
+
+                </div>
+            </div>
+
+            <button class="btn btn-info btn-xl btn-circle hand shadow btn-bottom-r" onclick="F.imprimirSelec('rpt_productos_embarqueB')">
                 <i class="fal fa-print"></i>
             </button>
             `
@@ -1133,6 +1190,15 @@ function listeners_pedidos_pendientes(){
 
 
                 break;
+            case 'BONIFICACIONES':
+                document.getElementById('tab-Fseis').click();
+
+                tbl_productos_embarque_bonif(codembarque);
+                document.getElementById('lbProdCodembarqueB').innerText = codembarque;
+
+
+                break;
+                
             case 'VENDEDORES':
                 document.getElementById('tab-Fcuatro').click();
 
@@ -1176,6 +1242,14 @@ function listeners_pedidos_pendientes(){
 
                 tbl_productos_embarque(codembarque);
                 document.getElementById('lbProdCodembarque').innerText = codembarque;
+
+
+                break;
+            case 'BONIFICACIONES':
+                document.getElementById('tab-Fseis').click();
+
+                tbl_productos_embarque_bonif(codembarque);
+                document.getElementById('lbProdCodembarqueB').innerText = codembarque;
 
 
                 break;
@@ -1665,7 +1739,7 @@ function get_combo_embarques(){
 
         data.recordset.map((r)=>{
             str += `
-                <option value='${r.CODEMBARQUE}'>${r.DESCRIPCION}<small>(${r.NOMEMPLEADO})<small></option>
+                <option value='${r.CODEMBARQUE}'>${r.CODEMBARQUE}<small>(${r.NOMEMPLEADO})<small></option>
             `
         })
         container.innerHTML = str;
@@ -1934,6 +2008,7 @@ function tbl_facturas_embarque(codembarque){
 
 
 
+
 function quitar_embarque_factura(coddoc,correlativo,idbtn){
 
     let btn = document.getElementById(idbtn);
@@ -2023,6 +2098,54 @@ function tbl_productos_embarque(codembarque){
         container.innerHTML = 'No se cargaron datos....';
         document.getElementById('lbProdTotalPedidos').innerText = '';
         document.getElementById('lbProdTotalImporte').innerText = '';
+    })
+
+
+};
+function tbl_productos_embarque_bonif(codembarque){
+
+    let container = document.getElementById('tblDataFProductosB');
+
+    container.innerHTML = GlobalLoader;
+    let contador = 0;
+    let varTotal = 0;
+
+    GF.get_data_embarque_productos_bonif(GlobalEmpnit,codembarque)
+    .then((data)=>{
+
+        let str = '';
+
+        data.recordset.map((r)=>{
+         
+            contador +=1;
+            varTotal += Number(r.IMPORTE);
+            str += `
+                <tr>
+                    <td>${r.CODPROD}
+                    <br>
+                        <small>${r.TOTALUNIDADES}</small>
+                    </td>
+                    <td>${r.DESPROD}
+                        <br>
+                        <small>${r.DESMARCA}</small>
+                    </td>
+                    <td>${r.UXC}</td>
+                    <td>${r.CAJAS}</td>
+                    <td>${r.UNIDADES}</td>
+                    <td>${F.setMoneda(r.IMPORTE,'Q')}</td>
+                    <td></td>
+                </tr>
+                `
+        })
+        container.innerHTML = str;
+        document.getElementById('lbProdTotalPedidosB').innerText = `Items: ${contador}`;
+        document.getElementById('lbProdTotalImporteB').innerText =`Total: ${F.setMoneda(varTotal,'Q')}`;
+
+    })
+    .catch((error)=>{
+        container.innerHTML = 'No se cargaron datos....';
+        document.getElementById('lbProdTotalPedidosB').innerText = '';
+        document.getElementById('lbProdTotalImporteB').innerText = '';
     })
 
 

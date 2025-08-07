@@ -3,6 +3,79 @@ const express = require('express');
 const router = express.Router();
 
 
+// ----------------------
+// GOLES P&G
+// ----------------------
+router.post("/goles_cliente", async(req,res)=>{
+   
+    const { token, sucursal,codclie, fecha} = req.body;
+
+    let qry = `
+        SELECT PRODUCTOS.CODPROD, PRODUCTOS.DESPROD, 
+            (ISNULL(T.TOTALUNIDADES,0)*-1) AS TOTALUNIDADES,
+            (ISNULL(T.TOTALPRECIO,0)*-1) AS TOTALPRECIO 
+            FROM PRODUCTOS LEFT JOIN 
+            (SELECT CODPROD, SUM(UNIDADES) AS TOTALUNIDADES, SUM(IMPORTE) AS TOTALPRECIO
+            FROM     view_rpt_goles_productos_cliente
+            WHERE  (EMPNIT = '${sucursal}') AND 
+            (ANIO = YEAR('${fecha}')) AND 
+            (MES = MONTH('${fecha}')) AND 
+            (CODCLIENTE=${codclie})
+            GROUP BY CODPROD) AS T ON PRODUCTOS.CODPROD=T.CODPROD 
+            WHERE PRODUCTOS.HABILITADO='SI'
+            ORDER BY T.TOTALUNIDADES ASC;
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/goles_resumen_vendedor", async(req,res)=>{
+   
+    const { token, sucursal,codven, fecha} = req.body;
+
+    let qry = `
+        SELECT PRODUCTOS.CODPROD, PRODUCTOS.DESPROD, 
+            (ISNULL(T.TOTALUNIDADES,0)*-1) AS TOTALUNIDADES,
+            (ISNULL(T.TOTALPRECIO,0)*-1) AS TOTALPRECIO 
+            FROM PRODUCTOS LEFT JOIN 
+            (SELECT CODPROD, SUM(UNIDADES) AS TOTALUNIDADES, SUM(IMPORTE) AS TOTALPRECIO
+            FROM     view_rpt_goles_productos_cliente
+            WHERE  (EMPNIT = '${sucursal}') AND 
+            (ANIO = YEAR('${fecha}')) AND 
+            (MES = MONTH('${fecha}')) AND 
+            (CODCLIENTE=${codclie})
+            GROUP BY CODPROD) AS T ON PRODUCTOS.CODPROD=T.CODPROD 
+            WHERE PRODUCTOS.HABILITADO='SI'
+            ORDER BY T.TOTALUNIDADES ASC;
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/universo_clientes_empleado", async(req,res)=>{
+   
+    const { token, sucursal,codemp} = req.body;
+
+    let qry = `
+       SELECT COUNT(CODCLIENTE) AS CONTEO
+        FROM     CLIENTES
+        WHERE  (HABILITADO = 'SI') AND 
+            (EMPNIT = '${sucursal}') AND 
+            (CODEMPLEADO = ${codemp})
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+// ----------------------
+// GOLES P&G
+// ----------------------
+
 
 router.post("/cobertura_categorias", async(req,res)=>{
    
