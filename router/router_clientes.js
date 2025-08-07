@@ -406,8 +406,7 @@ router.post("/buscar_cliente", async(req,res)=>{
 
 router.post("/buscar_cliente_vendedor_comodin", async(req,res)=>{
    
-    const { token, sucursal, filtro, codven, dia} = req.body;
-
+    const { token, sucursal, filtro, codven, dia,fecha} = req.body;
 
     let qry = '';
 
@@ -420,7 +419,9 @@ router.post("/buscar_cliente_vendedor_comodin", async(req,res)=>{
             CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
             CLIENTES.TELEFONO, CLIENTES.LATITUD, 
             CLIENTES.LONGITUD, CLIENTES.SALDO, 
-            CLIENTES.HABILITADO, CLIENTES.LASTSALE, 
+            CLIENTES.HABILITADO, CLIENTES.LASTSALE,
+            CONCAT(MONTH(CLIENTES.LASTSALE),'-',YEAR(CLIENTES.LASTSALE)) AS MES_ULTIMO, 
+            CONCAT(MONTH('${fecha}'),'-',YEAR('${fecha}')) AS MES_CURSO, 
             CLIENTES.DIASCREDITO, CLIENTES.REFERENCIA,
             CLIENTES.DIAVISITA AS VISITA
         FROM CLIENTES LEFT OUTER JOIN
@@ -431,7 +432,6 @@ router.post("/buscar_cliente_vendedor_comodin", async(req,res)=>{
             (CLIENTES.NOMBRE LIKE '%${filtro}%') AND
             (CLIENTES.DIAVISITA='${dia}') AND
             (CLIENTES.HABILITADO='SI')
-
         OR 
             (CLIENTES.EMPNIT='${sucursal}') AND 
             (CLIENTES.NIT='${filtro}') AND
@@ -442,11 +442,12 @@ router.post("/buscar_cliente_vendedor_comodin", async(req,res)=>{
             (CLIENTES.NEGOCIO='${filtro}') AND
             (CLIENTES.DIAVISITA='${dia}') AND
             (CLIENTES.HABILITADO='SI')
+        ORDER BY CLIENTES.LASTSALE;
         `
     
     }else{
         if(isNaN(filtro)==false){
-        qry = `
+            qry = `
                 SELECT CLIENTES.CODCLIENTE, CLIENTES.NIT,
                     CLIENTES.TIPONEGOCIO, CLIENTES.NEGOCIO, 
                     CLIENTES.NOMBRE, CLIENTES.DIRECCION, 
@@ -454,7 +455,9 @@ router.post("/buscar_cliente_vendedor_comodin", async(req,res)=>{
                     CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
                     CLIENTES.TELEFONO, CLIENTES.LATITUD, 
                     CLIENTES.LONGITUD, CLIENTES.SALDO, 
-                    CLIENTES.HABILITADO, CLIENTES.LASTSALE, 
+                    CLIENTES.HABILITADO, CLIENTES.LASTSALE,
+                     CONCAT(MONTH(CLIENTES.LASTSALE),'-',YEAR(CLIENTES.LASTSALE)) AS MES_ULTIMO, 
+                    CONCAT(MONTH('${fecha}'),'-',YEAR('${fecha}')) AS MES_CURSO, 
                     CLIENTES.DIASCREDITO, CLIENTES.REFERENCIA,
                     CLIENTES.DIAVISITA AS VISITA
                 FROM CLIENTES LEFT OUTER JOIN
@@ -482,6 +485,7 @@ router.post("/buscar_cliente_vendedor_comodin", async(req,res)=>{
                     (CLIENTES.EMPNIT='${sucursal}') AND 
                     (CLIENTES.CODCLIENTE=${filtro}) AND
                     (CLIENTES.HABILITADO='SI')
+                ORDER BY CLIENTES.LASTSALE;
                 `
         
         }else{
@@ -493,7 +497,9 @@ router.post("/buscar_cliente_vendedor_comodin", async(req,res)=>{
                     CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
                     CLIENTES.TELEFONO, CLIENTES.LATITUD, 
                     CLIENTES.LONGITUD, CLIENTES.SALDO, 
-                    CLIENTES.HABILITADO, CLIENTES.LASTSALE, 
+                    CLIENTES.HABILITADO, CLIENTES.LASTSALE,
+                     CONCAT(MONTH(CLIENTES.LASTSALE),'-',YEAR(CLIENTES.LASTSALE)) AS MES_ULTIMO, 
+                    CONCAT(MONTH('${fecha}'),'-',YEAR('${fecha}')) AS MES_CURSO, 
                     CLIENTES.DIASCREDITO, CLIENTES.REFERENCIA,
                     CLIENTES.DIAVISITA AS VISITA
                 FROM CLIENTES LEFT OUTER JOIN
@@ -515,7 +521,7 @@ router.post("/buscar_cliente_vendedor_comodin", async(req,res)=>{
                     (CLIENTES.NEGOCIO='${filtro}') AND
                     (CLIENTES.DIAVISITA='${dia}') AND
                     (CLIENTES.HABILITADO='SI')
-                
+                ORDER BY CLIENTES.LASTSALE;
             `
         }
 
@@ -530,17 +536,14 @@ router.post("/buscar_cliente_vendedor_comodin", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
-
-
 router.post("/buscar_cliente_vendedor", async(req,res)=>{
    
-    const { token, sucursal, filtro, codven, dia} = req.body;
+    const { token, sucursal, filtro, codven, dia, fecha} = req.body;
 
 
     let qry = '';
 
     if(filtro==''){
-        console.log('listado completo')
 
         qry = `
         SELECT CLIENTES.CODCLIENTE, CLIENTES.NIT,
@@ -550,7 +553,9 @@ router.post("/buscar_cliente_vendedor", async(req,res)=>{
             CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
             CLIENTES.TELEFONO, CLIENTES.LATITUD, 
             CLIENTES.LONGITUD, CLIENTES.SALDO, 
-            CLIENTES.HABILITADO, CLIENTES.LASTSALE, 
+            CLIENTES.HABILITADO, CLIENTES.LASTSALE,
+            CONCAT(MONTH(CLIENTES.LASTSALE),'-',YEAR(CLIENTES.LASTSALE)) AS MES_ULTIMO,
+            CONCAT(MONTH('${fecha}'),'-',YEAR('${fecha}')) AS MES_CURSO,
             CLIENTES.DIASCREDITO, CLIENTES.REFERENCIA,
             CLIENTES.DIAVISITA AS VISITA
         FROM CLIENTES LEFT OUTER JOIN
@@ -558,23 +563,21 @@ router.post("/buscar_cliente_vendedor", async(req,res)=>{
             MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
         WHERE
             (CLIENTES.EMPNIT='${sucursal}') AND 
-            (CLIENTES.NOMBRE LIKE '%${filtro}%') AND
             (CLIENTES.CODEMPLEADO=${codven}) AND
             (CLIENTES.DIAVISITA='${dia}') AND
             (CLIENTES.HABILITADO='SI')
 
         OR 
             (CLIENTES.EMPNIT='${sucursal}') AND 
-            (CLIENTES.NIT='${filtro}') AND
             (CLIENTES.CODEMPLEADO=${codven}) AND
             (CLIENTES.DIAVISITA='${dia}') AND
             (CLIENTES.HABILITADO='SI')
         OR 
             (CLIENTES.EMPNIT='${sucursal}') AND 
-            (CLIENTES.NEGOCIO='${filtro}') AND
             (CLIENTES.CODEMPLEADO=${codven}) AND
             (CLIENTES.DIAVISITA='${dia}') AND
             (CLIENTES.HABILITADO='SI')
+        ORDER BY CLIENTES.LASTSALE;
         `
     
     }else{
@@ -590,7 +593,9 @@ router.post("/buscar_cliente_vendedor", async(req,res)=>{
                     CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
                     CLIENTES.TELEFONO, CLIENTES.LATITUD, 
                     CLIENTES.LONGITUD, CLIENTES.SALDO, 
-                    CLIENTES.HABILITADO, CLIENTES.LASTSALE, 
+                    CLIENTES.HABILITADO, CLIENTES.LASTSALE,
+                    CONCAT(MONTH(CLIENTES.LASTSALE),'-',YEAR(CLIENTES.LASTSALE)) AS MES_ULTIMO, 
+                    CONCAT(MONTH('${fecha}'),'-',YEAR('${fecha}')) AS MES_CURSO,
                     CLIENTES.DIASCREDITO, CLIENTES.REFERENCIA,
                     CLIENTES.DIAVISITA AS VISITA
                 FROM CLIENTES LEFT OUTER JOIN
@@ -614,6 +619,7 @@ router.post("/buscar_cliente_vendedor", async(req,res)=>{
                     (CLIENTES.CODEMPLEADO=${codven}) AND
                     (CLIENTES.DIAVISITA='${dia}') AND
                     (CLIENTES.HABILITADO='SI')
+                ORDER BY CLIENTES.LASTSALE;
                 `
         
         }else{
@@ -625,7 +631,9 @@ router.post("/buscar_cliente_vendedor", async(req,res)=>{
                     CLIENTES.NOMBRE, CLIENTES.DIRECCION, 
                     CLIENTES.CODMUN, MUNICIPIOS.DESMUN, 
                     CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
-                    CLIENTES.TELEFONO, CLIENTES.LATITUD, 
+                    CLIENTES.TELEFONO, CLIENTES.LATITUD,
+                    CONCAT(MONTH(CLIENTES.LASTSALE),'-',YEAR(CLIENTES.LASTSALE)) AS MES_ULTIMO,
+                    CONCAT(MONTH('${fecha}'),'-',YEAR('${fecha}')) AS MES_CURSO,
                     CLIENTES.LONGITUD, CLIENTES.SALDO, 
                     CLIENTES.HABILITADO, CLIENTES.LASTSALE, 
                     CLIENTES.DIASCREDITO, CLIENTES.REFERENCIA,
@@ -656,7 +664,7 @@ router.post("/buscar_cliente_vendedor", async(req,res)=>{
                     (CLIENTES.EMPNIT='${sucursal}') AND 
                     (CLIENTES.CODCLIENTE=${filtro}) AND
                     (CLIENTES.HABILITADO='SI')
-                
+                ORDER BY CLIENTES.LASTSALE;
             `
         }
     };
@@ -665,11 +673,9 @@ router.post("/buscar_cliente_vendedor", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
-
-
 router.post("/buscar_cliente_vendedor_qr", async(req,res)=>{
    
-    const { token, sucursal, filtro} = req.body;
+    const { token, sucursal, filtro,fecha} = req.body;
 
     let qry = `
         SELECT CLIENTES.CODCLIENTE, CLIENTES.NIT, 
@@ -678,7 +684,9 @@ router.post("/buscar_cliente_vendedor_qr", async(req,res)=>{
             CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
             CLIENTES.TELEFONO, CLIENTES.LATITUD, 
             CLIENTES.LONGITUD, CLIENTES.SALDO, 
-            CLIENTES.HABILITADO, CLIENTES.LASTSALE, 
+            CLIENTES.HABILITADO, CLIENTES.LASTSALE,
+             CONCAT(MONTH(CLIENTES.LASTSALE),'-',YEAR(CLIENTES.LASTSALE)) AS MES_ULTIMO, 
+                    CONCAT(MONTH('${fecha}'),'-',YEAR('${fecha}')) AS MES_CURSO, 
             CLIENTES.DIASCREDITO, CLIENTES.REFERENCIA,
             CLIENTES.DIAVISITA AS VISITA
         FROM CLIENTES LEFT OUTER JOIN
@@ -686,6 +694,7 @@ router.post("/buscar_cliente_vendedor_qr", async(req,res)=>{
             MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
         WHERE
             (CLIENTES.CODCLIENTE = ${filtro})
+        ORDER BY CLIENTES.LASTSALE;
         `
     
  
@@ -755,7 +764,6 @@ router.post("/listado", async(req,res)=>{
      
 });
 
-
 router.post("/delete", async(req,res)=>{
    
     const { token, sucursal, codcliente } = req.body;
@@ -765,6 +773,8 @@ router.post("/delete", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+
+
 
 
 module.exports = router;

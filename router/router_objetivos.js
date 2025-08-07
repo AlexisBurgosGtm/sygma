@@ -32,23 +32,16 @@ router.post("/goles_cliente", async(req,res)=>{
 });
 router.post("/goles_resumen_vendedor", async(req,res)=>{
    
-    const { token, sucursal,codven, fecha} = req.body;
+    const { token, sucursal,codemp, mes,anio} = req.body;
 
     let qry = `
-        SELECT PRODUCTOS.CODPROD, PRODUCTOS.DESPROD, 
-            (ISNULL(T.TOTALUNIDADES,0)*-1) AS TOTALUNIDADES,
-            (ISNULL(T.TOTALPRECIO,0)*-1) AS TOTALPRECIO 
-            FROM PRODUCTOS LEFT JOIN 
-            (SELECT CODPROD, SUM(UNIDADES) AS TOTALUNIDADES, SUM(IMPORTE) AS TOTALPRECIO
-            FROM     view_rpt_goles_productos_cliente
-            WHERE  (EMPNIT = '${sucursal}') AND 
-            (ANIO = YEAR('${fecha}')) AND 
-            (MES = MONTH('${fecha}')) AND 
-            (CODCLIENTE=${codclie})
-            GROUP BY CODPROD) AS T ON PRODUCTOS.CODPROD=T.CODPROD 
-            WHERE PRODUCTOS.HABILITADO='SI'
-            ORDER BY T.TOTALUNIDADES ASC;
-        `;
+        SELECT CODPROD, DESPROD, COUNT(CODCLIENTE) AS CONTEO, EMPNIT, CODEMP
+        FROM     view_rpt_goles_productos_cliente
+        WHERE  (ANIO = ${anio}) AND (MES = ${mes}) 
+        AND (CODEMP=${codemp}) AND (EMPNIT='${sucursal}')
+        GROUP BY CODPROD, DESPROD, EMPNIT, CODEMP
+        ORDER BY CODPROD
+    `;
     
 
     execute.QueryToken(res,qry,token);

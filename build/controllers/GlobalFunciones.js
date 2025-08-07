@@ -2586,10 +2586,11 @@ let GF = {
                 token:TOKEN,
                 sucursal:sucursal,
                 codemp:codemp,
-                fecha:F.getFecha()
+                mes:mes,
+                anio:anio
             };
     
-            axios.post(`/objetivos/goles_cliente`, data)
+            axios.post(`/objetivos/goles_resumen_vendedor`, data)
             .then(res => {
                 
                 if(res.status.toString()=='200'){

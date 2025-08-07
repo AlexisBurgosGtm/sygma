@@ -6,7 +6,7 @@ function getView(){
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="dias-tab">
                         
-                            ${view.modal_lista_clientes() + view.modal_qr() + view.modal_camara() + view.modal_historial_cliente()}
+                            ${view.modal_lista_clientes() + view.modal_qr() + view.modal_camara() + view.modal_historial_cliente() + view.modal_goles()}
                         
                         </div> 
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="clientes-tab">
@@ -500,8 +500,17 @@ function getView(){
                                
                             </div>
                             <br>
+                             <div class="row">
+                                    <div class="col-6">
+                                        <h5 class="negrita text-success" id="lbTVisitados"></h5>
+                                    </div>
+                                    <div class="col-6">
+                                        <h5 class="negrita text-danger" id="lbTNoVisitados"></h5>
+                                    </div>
+                            </div>
+
                             <div class="row">
-                                <table class="col-12 table table-hover table-border h-full">
+                                <table class="col-12 table table-bordered h-full">
                                     <thead class="bg-base text-white">
                                         <tr>
                                             <td>NIT / CÓDIGO</td>
@@ -757,6 +766,68 @@ function getView(){
                                         <div class="col-6">
                                         </div>
                                     </div>
+
+
+                                </div>                                
+                                
+                            </div>                              
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            `
+        },
+        modal_goles:()=>{
+            return `
+            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" 
+                role="dialog" aria-hidden="true" 
+                id="modal_goles">
+                <div class="modal-dialog modal-dialog-right modal-xl">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-primary d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white" id="">
+                                Goles P&G logrados este Mes
+                            </h4>
+                        </div>
+                        <div class="modal-body p-4">
+                            
+                            <div class="card card-rounded" id="print_qr">
+                                <div class="card-body p-4">
+                                   
+                                    <h3 class="negrita text-danger" id="lbNegocioclieVisitaGoles"></h3>
+                                    <h3 class="negrita text-danger" id="lbNomclieVisitaGoles"></h3>
+                                   
+                                        <button class="btn btn-danger hand shadow" data-dismiss="modal"
+                                            onclick="document.getElementById('tblDataGoles').innerHTML='';">
+                                                <i class="fal fa-arrow-left"></i> Atras
+                                        </button>
+                                    <br>
+
+                                    <div class="table-responsive">
+                                            <div class="form-group">
+                                                <input type="text" class="border-info text-info form-control col-12"
+                                                placeholder="Escriba para buscar..."
+                                                id="txtBuscarGol"
+                                                oninput="F.FiltrarTabla('tblGoles','txtBuscarGol')">
+                                            </div>
+                                        <table class="table table-bordered h-full" id="tblGoles">
+                                            
+                                            <thead class="bg-primary text-white">
+                                                <tr>
+                                                    <td>PRODUCTO</td>
+                                                    <td>UNS.VENDIDAS</td>
+                                                    <td>IMPORTE</td>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tblDataGoles"></tbody>
+                                        </table>
+
+                                    </div>
+                                 
+
 
 
                                 </div>                                
@@ -1411,17 +1482,28 @@ function tbl_clientes(filtro,qr){
         sucursal: GlobalEmpnit,
         filtro:filtro,
         codven:GlobalCodUsuario,
-        dia:dia
+        dia:dia,
+        fecha:F.getFecha()
     })
     .then((response) => {        
         if(response.data=='error'){
             F.AvisoError('Error en la solicitud');
             container.innerHTML = 'No day datos....';
         }else{
-            const data = response.data.recordset;
+               const data = response.data.recordset;
             data.map((r)=>{
+                
+                let strClassVisitado = '';
+                if(r.MES_CURSO.toString()==r.MES_ULTIMO.toString()){
+                    strClassVisitado='bg-visitado';
+                    varTotalVisitados+=1;
+                }else{
+                    strClassVisitado='bg-novisitado';
+                    varTotalNoVisitados+=1;
+                };
+
                 str += `
-                <tr class="hand">    
+                <tr class="hand border-secondary ${strClassVisitado}">    
                     <td>
                         ${r.NIT} / ${r.CODCLIENTE}
                         <br>
@@ -1439,10 +1521,17 @@ function tbl_clientes(filtro,qr){
                             <i class="fal fa-barcode"></i>
                         </button>
 
+                        <br><br>
+
+                        <button class="btn btn-circle btn-md btn-primary hand shadow" 
+                        onclick="get_status_goles('${r.CODCLIENTE}','${r.NOMBRE}','${r.TIPONEGOCIO}','${r.NEGOCIO}')">
+                            <i class="fal fa-futbol"></i>
+                        </button>
+
 
                     </td>
                     <td>
-                        <small class="text-info">${r.TIPONEGOCIO}-${r.NEGOCIO}</small>
+                        <small class="text-base negrita">${r.TIPONEGOCIO}-${r.NEGOCIO}</small>
                         <br>
                         ${r.NOMBRE}
                         <br>
@@ -1479,10 +1568,16 @@ function tbl_clientes(filtro,qr){
                 `
             })
             container.innerHTML = str;
+            document.getElementById('lbTVisitados').innerText = `Visitados: ${varTotalVisitados}`;
+            document.getElementById('lbTNoVisitados').innerText = `Pendientes: ${varTotalNoVisitados}`;
+        
         }
     }, (error) => {
         F.AvisoError('Error en la solicitud');
         container.innerHTML = 'No day datos....';
+        document.getElementById('lbTVisitados').innerText = ``;
+        document.getElementById('lbTNoVisitados').innerText = ``;
+      
     });
 
 

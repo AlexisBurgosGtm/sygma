@@ -490,11 +490,21 @@ function getView(){
                                         </button>
                                     </div>
                                 </div>
+                                
                                
                             </div>
                             <br>
                             <div class="row">
-                                <table class="col-12 table table-hover table-border h-full">
+                                    <div class="col-6">
+                                        <h5 class="negrita text-success" id="lbTVisitados"></h5>
+                                    </div>
+                                    <div class="col-6">
+                                        <h5 class="negrita text-danger" id="lbTNoVisitados"></h5>
+                                    </div>
+                            </div>
+                            
+                            <div class="row">
+                                <table class="col-12 table table-bordered h-full">
                                     <thead class="bg-base text-white">
                                         <tr>
                                             <td>NIT / CÓDIGO</td>
@@ -1456,12 +1466,16 @@ function tbl_clientes(filtro,qr){
 
     let dia = document.getElementById('cmbDiaCliente').value;
 
+    let varTotalVisitados = 0;
+    let varTotalNoVisitados = 0;
+
     axios.post(url_clientes, {
         token:TOKEN,
         sucursal: GlobalEmpnit,
         filtro:filtro,
         codven:GlobalCodUsuario,
-        dia:dia
+        dia:dia,
+        fecha:F.getFecha()
     })
     .then((response) => {        
         if(response.data=='error'){
@@ -1470,8 +1484,18 @@ function tbl_clientes(filtro,qr){
         }else{
             const data = response.data.recordset;
             data.map((r)=>{
+                
+                let strClassVisitado = '';
+                if(r.MES_CURSO.toString()==r.MES_ULTIMO.toString()){
+                    strClassVisitado='bg-visitado';
+                    varTotalVisitados+=1;
+                }else{
+                    strClassVisitado='bg-novisitado';
+                    varTotalNoVisitados+=1;
+                };
+
                 str += `
-                <tr class="hand">    
+                <tr class="hand border-secondary ${strClassVisitado}">    
                     <td>
                         ${r.NIT} / ${r.CODCLIENTE}
                         <br>
@@ -1499,7 +1523,7 @@ function tbl_clientes(filtro,qr){
 
                     </td>
                     <td>
-                        <small class="text-info">${r.TIPONEGOCIO}-${r.NEGOCIO}</small>
+                        <small class="text-base negrita">${r.TIPONEGOCIO}-${r.NEGOCIO}</small>
                         <br>
                         ${r.NOMBRE}
                         <br>
@@ -1536,10 +1560,14 @@ function tbl_clientes(filtro,qr){
                 `
             })
             container.innerHTML = str;
+            document.getElementById('lbTVisitados').innerText = `Visitados: ${varTotalVisitados}`;
+            document.getElementById('lbTNoVisitados').innerText = `Pendientes: ${varTotalNoVisitados}`;
         }
     }, (error) => {
         F.AvisoError('Error en la solicitud');
         container.innerHTML = 'No day datos....';
+        document.getElementById('lbTVisitados').innerText = ``;
+            document.getElementById('lbTNoVisitados').innerText = ``;
     });
 
 

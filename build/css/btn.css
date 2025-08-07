@@ -142,7 +142,12 @@
   background-color: rgb(107, 107, 107)
 }
 
-
+.bg-visitado{
+    background: rgb(224, 255, 245);
+}
+.bg-novisitado{
+    background: rgb(255, 205, 205);
+}
 
 .bg-mostaza{
     background: rgb(230, 145, 18);

@@ -482,8 +482,8 @@ function getView(){
                             </div>
                         </div>
                         <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                            <h5>Universo Clientes:</h5>
-                            <h1 class="negrita text-danger" id="lbUniversoGoles"></h1>
+                            <h5>Total Goles:</h5>
+                            <h1 class="negrita text-danger" id="lbTotalGoles"></h1>
                         </div>
                     </div>
 
@@ -501,13 +501,11 @@ function getView(){
                             >
                         </div>
 
-                        <table class="table h-full table-hover" id="tblGoles">
+                        <table class="table h-full table-hover table-bordered" id="tblGoles">
                             <thead class="bg-primary text-white">
                                 <tr>
                                     <td>PRODUCTO</td>
-                                    <td>ALCANZADOS</td>
-                                    <td>UNIVERSO</td>
-                                    <td>LOGRO</td>
+                                    <td>GOLES</td>
                                 </tr>
                             </thead>
                             <tbody id="tblDataGoles">
@@ -667,16 +665,8 @@ function addListeners(){
     document.getElementById('btnMenuRptGoles').addEventListener('click',()=>{
         
         document.getElementById('tab-seis').click();
-        GF.get_data_universo_clientes_empleado(GlobalEmpnit,GlobalCodUsuario)
-        .then((universo)=>{
-            document.getElementById('lbUniversoGoles').innerText = universo.toString();
-            rpt_goles_resumen(universo);
-        })
-        .catch((error)=>{
-            document.getElementById('lbUniversoGoles').innerText = '';
-
-            F.AvisoError('No se logro obtener el total de clientes del vendedor')
-        })
+     
+        rpt_goles_resumen();
         
 
     });
@@ -684,8 +674,7 @@ function addListeners(){
     document.getElementById('cmbMesGoles').value = F.get_mes_curso();
     document.getElementById('cmbMesGoles').addEventListener('change',()=>{
 
-        let universo = Number(document.getElementById('lbUniversoGoles').innerText);
-        rpt_goles_resumen(universo);
+        rpt_goles_resumen();
 
     });
 
@@ -693,8 +682,7 @@ function addListeners(){
     document.getElementById('cmbAnioGoles').value = F.get_anio_curso();
     document.getElementById('cmbAnioGoles').addEventListener('change',()=>{
           
-            let universo = Number(document.getElementById('lbUniversoGoles').innerText);
-            rpt_goles_resumen(universo);
+            rpt_goles_resumen();
         
     });
     // -------------------------------
@@ -991,15 +979,39 @@ function tbl_detalle_vendedor(codemp){
 
 
 
-function rpt_goles_resumen(universo){
+function rpt_goles_resumen(){
 
+    let mes = document.getElementById('cmbMesGoles').value;
+    let anio = document.getElementById('cmbAnioGoles').value;
 
     let container = document.getElementById('tblDataGoles');
     container.innerHTML = GlobalLoader;
 
+    let varTotal = 0;
 
-    
 
+    GF.get_data_goles_resumen_mes(GlobalEmpnit,GlobalCodUsuario,mes,anio)
+    .then((data)=>{
+        let str = '';
+        data.recordset.map((r)=>{
+            varTotal += Number(r.CONTEO);
+            str+= `
+            <tr>
+                <td>${r.DESPROD}
+                    <br>
+                    <small>${r.CODPROD}</small>
+                </td>
+                <td>${r.CONTEO}</td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
+        document.getElementById('lbTotalGoles').innerText = varTotal;
+    })
+    .catch(()=>{
+        container.innerHTML = 'No se cargaron datos....';
+        document.getElementById('lbTotalGoles').innerText = '';
+    })
 
 
 
