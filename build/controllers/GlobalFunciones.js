@@ -2652,5 +2652,110 @@ let GF = {
     
         })
     },
+    update_cobertura_empleados: (sucursal,mes,anio)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:sucursal,
+                mes:mes,
+                anio:anio
+            };
+    
+            axios.post(`/objetivos/update_cobertura_clientes`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }             
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
+    data_cobertura_empleados: (sucursal)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:sucursal
+            };
+    
+            axios.post(`/objetivos/cobertura_vendedores_sucursal`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }             
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
+    data_clientes_no_visitados_empleado: (sucursal,codemp)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:sucursal,
+                codemp:codemp
+            };
+    
+            axios.post(`/objetivos/cobertura_vendedores_clientes_no_visitados`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }             
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
 };
 

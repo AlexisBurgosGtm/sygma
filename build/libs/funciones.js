@@ -1,4 +1,18 @@
 let F = {
+      phone_call: (telefono)=>{
+      
+      let llamar = telefono.replace(" ","");
+      llamar = llamar.replace("-","");
+      llamar = llamar.replace("/","");
+      llamar = llamar.replace("*","");
+      llamar = llamar.replace("$","");
+      llamar = llamar.replace("&","");
+      llamar = llamar.replace("'","");
+      llamar = llamar.replace('"',"");
+
+      window.location.href = 'tel:' + llamar;
+      
+    },
       imprimirTicket2(coddoc,correlativo,fechaemision,nit,nombre,direccion,fel_uudi,fel_serie,fel_numero,fel_fecha){
 
             let container = document.getElementById('containerTicket');

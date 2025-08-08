@@ -386,5 +386,16 @@ let Menu = {
         }else{
             F.AvisoError('No tiene permitido entrar a esta sección');
         }   
+    },
+    objetivos_cobertura:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/bi_objetivos/view_objetivo_cobertura.js','root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        }   
     }
 }

@@ -124,6 +124,11 @@ let botones_menu = {
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">GOLES P&G</span>
                                         </a>
                                     </li>
+                                    <li>
+                                        <a href="#" title="How it works" data-filter-tags="theme settings how it works"  onclick="Menu.objetivos_cobertura()">
+                                            <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">COBERTURA CLIENTES</span>
+                                        </a>
+                                    </li>
                                 </ul>
                             </li>
                             <li>
@@ -315,6 +320,12 @@ let botones_menu = {
                                     <i class="fal fa-futbol"></i>
                                     <span class="nav-link-text" data-i18n="nav.application_intel">GOLES P&G</span>
                                 </a>
+                            </li>
+                            <li>
+                                <a href="#"  class="text-base"  data-filter-tags="application intel"  onclick="Menu.objetivos_cobertura()">
+                                    <i class="fal fa-map"></i>
+                                    <span class="nav-link-text" data-i18n="nav.application_intel">COBERTURA CLIENTES</span>
+                                </a>
                             </li>                            
                         </ul>
         `
@@ -441,6 +452,11 @@ let botones_menu = {
                                     <li>
                                         <a href="#" title="How it works" data-filter-tags="theme settings how it works"  onclick="Menu.objetivos_goles()">
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">GOLES P&G</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" title="How it works" data-filter-tags="theme settings how it works"  onclick="Menu.objetivos_cobertura()">
+                                            <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">COBERTURA CLIENTES</span>
                                         </a>
                                     </li>
                                 </ul>

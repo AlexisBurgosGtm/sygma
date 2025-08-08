@@ -98,19 +98,147 @@ router.post("/universo_clientes_sucursal", async(req,res)=>{
 // GOLES P&G
 // ----------------------
 
-
-router.post("/cobertura_categorias", async(req,res)=>{
+router.post("/cobertura_clientes_sucursal", async(req,res)=>{
    
     const { token, sucursal, mes, anio} = req.body;
 
     let qry = `
-		
+		SELECT CLIENTES.EMPNIT,CLIENTES.CODCLIENTE, CLIENTES.NOMBRE, ISNULL(T.TOTALPRECIO,0) AS TOTALPRECIO 
+        FROM CLIENTES LEFT JOIN
+        (SELECT EMPNIT, CODCLIENTE,TOTALPRECIO
+        FROM view_data_clientes_importe_mes_resumen
+        WHERE ANIO=${anio} AND MES=${mes}) AS T ON 
+        CLIENTES.EMPNIT=T.EMPNIT AND 
+        CLIENTES.CODCLIENTE=T.CODCLIENTE 
+        WHERE CLIENTES.EMPNIT='${sucursal}';
         `;
     
 
     execute.QueryToken(res,qry,token);
      
 });
+
+
+
+
+
+router.post("/update_cobertura_clientes", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio} = req.body;
+
+    let qry = `
+		  UPDATE CLIENTES SET IMPORTE = (SELECT SUM(ISNULL(TOTALPRECIO,0)) 
+            FROM DOCUMENTOS 
+                WHERE EMPNIT=CLIENTES.EMPNIT 
+                AND CODCLIENTE=CLIENTES.CODCLIENTE 
+                AND ANIO=${anio} 
+                AND MES=${mes}
+                AND STATUS<>'A')
+                WHERE CLIENTES.EMPNIT='${sucursal}';
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/cobertura_vendedores_sucursal", async(req,res)=>{
+   
+    const { token, sucursal} = req.body;
+
+    let qry = `
+		SELECT CLIENTES.CODEMPLEADO, EMPLEADOS.NOMEMPLEADO, 
+            COUNT(CLIENTES.CODCLIENTE) AS UNIVERSO, 
+            SUM(CASE WHEN ISNULL(IMPORTE, 0) = 0 THEN 0 ELSE 1 END) AS ALCANCE
+        FROM  CLIENTES LEFT OUTER JOIN
+            EMPLEADOS ON CLIENTES.CODEMPLEADO = EMPLEADOS.CODEMPLEADO
+        WHERE (CLIENTES.EMPNIT = '${sucursal}')
+        GROUP BY CLIENTES.CODEMPLEADO, EMPLEADOS.NOMEMPLEADO
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/cobertura_vendedores_clientes_no_visitados", async(req,res)=>{
+   
+    const { token, sucursal,codemp} = req.body;
+
+    let qry = `
+		SELECT CLIENTES.EMPNIT, 
+                CLIENTES.CODCLIENTE AS CODCLIE, 
+                CLIENTES.CODEMPLEADO AS CODEMP, 
+                CLIENTES.DIAVISITA AS VISITA, 
+                CLIENTES.TIPONEGOCIO, 
+                CLIENTES.NEGOCIO, 
+                CLIENTES.NOMBRE, 
+                CLIENTES.DIRECCION, 
+                MUNICIPIOS.DESMUN AS MUNICIPIO, 
+                SECTORES.DESSECTOR AS ALDEA, 
+				CLIENTES.TELEFONO, 
+                CLIENTES.LATITUD, 
+                CLIENTES.LONGITUD, 
+                CLIENTES.LASTSALE,
+				  CLIENTES.IMPORTE
+        FROM CLIENTES LEFT OUTER JOIN
+                  SECTORES ON CLIENTES.CODSECTOR = SECTORES.CODSECTOR LEFT OUTER JOIN
+                  MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+        WHERE (ISNULL(CLIENTES.IMPORTE,0) = 0) AND 
+                (CLIENTES.HABILITADO = 'SI') AND 
+                (CLIENTES.CODEMPLEADO = ${codemp})
+        ORDER BY CLIENTES.LASTSALE
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+
+
+
+
+//SIN USO AUN
+router.post("/cobertura_clientes_sucursal", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio} = req.body;
+
+    let qry = `
+		SELECT CLIENTES.EMPNIT,CLIENTES.CODCLIENTE, CLIENTES.NOMBRE, ISNULL(T.TOTALPRECIO,0) AS TOTALPRECIO 
+        FROM CLIENTES LEFT JOIN
+        (SELECT EMPNIT, CODCLIENTE,TOTALPRECIO
+        FROM view_data_clientes_importe_mes_resumen
+        WHERE ANIO=${anio} AND MES=${mes}) AS T ON 
+        CLIENTES.EMPNIT=T.EMPNIT AND 
+        CLIENTES.CODCLIENTE=T.CODCLIENTE 
+        WHERE CLIENTES.EMPNIT='${sucursal}';
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/cobertura_clientes_empleado", async(req,res)=>{
+   
+    const { token, sucursal, codemp, mes, anio} = req.body;
+
+    let qry = `
+		SELECT CLIENTES.EMPNIT,CLIENTES.CODCLIENTE, CLIENTES.NOMBRE, ISNULL(T.TOTALPRECIO,0) AS TOTALPRECIO 
+        FROM CLIENTES LEFT JOIN
+        (SELECT EMPNIT, CODCLIENTE,TOTALPRECIO
+        FROM view_data_clientes_importe_mes_resumen
+        WHERE ANIO=${anio} AND MES=${mes}) AS T ON 
+        CLIENTES.EMPNIT=T.EMPNIT AND 
+        CLIENTES.CODCLIENTE=T.CODCLIENTE 
+        WHERE CLIENTES.EMPNIT='${sucursal}'
+        AND CLIENTES.CODEMPLEADO=${codemp};
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+//SIN USO AUN
 
 
 
