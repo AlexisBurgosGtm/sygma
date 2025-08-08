@@ -277,7 +277,7 @@ function getView(){
             <div class="card card-rounded shadow">
                 <div class="card-body p-2">
                     <div class="table-responsive col-12">
-                        <table class="table table-responsive table-hover col-12">
+                        <table class="table table-responsive  col-12">
                             <thead class="bg-base text-white">
                                 <tr>
                                     <td></td>
@@ -463,7 +463,7 @@ function getView(){
                                         <br>
 
                                         <div class="table-responsive col-12">
-                                            <table class="table table-responsive table-bordered table-hover">
+                                            <table class="table table-responsive table-bordered ">
                                                 <thead class="bg-verde text-white">
                                                     <tr>
                                                         <td>CODIGO</td>
@@ -679,7 +679,7 @@ function getView(){
                     </div>
 
                     <div class="table-responsive col-12">
-                        <table class="table h-full table-hover col-12" id="tblInventario">
+                        <table class="table h-full  col-12" id="tblInventario">
                             <thead class="bg-base text-white">
                                 <tr>
                                     <td>CODIGO</td>
@@ -715,7 +715,7 @@ function getView(){
                     
 
                     <div class="table-responsive col-12">
-                        <table class="table h-full table-hover col-12" id="">
+                        <table class="table h-full  col-12" id="">
                             <thead class="bg-secondary text-white">
                                 <tr>
                                     <td>VENDEDOR</td>
@@ -811,7 +811,7 @@ function getView(){
                     <h4 class="negrita text-base text-center">LOGRO DE MARCAS</h4>
 
                     <div class="table-responsive col-12">
-                        <table class="table h-full table-hover col-12">
+                        <table class="table h-full  col-12">
                             <thead class="bg-base text-white">
                                 <tr>
                                     <td>MARCA</td>
@@ -846,7 +846,7 @@ function getView(){
                     <h4 class="negrita text-secondary text-center">LOGRO DE VENDEDORES</h4>
 
                     <div class="table-responsive col-12">
-                        <table class="table h-full table-hover col-12">
+                        <table class="table h-full  col-12">
                             <thead class="bg-secondary text-white">
                                 <tr>
                                     <td>VENDEDOR</td>
@@ -1692,14 +1692,16 @@ function tbl_logro_marcas(sucursal,mes,anio){
             conteo += 1;
             let varFaltan = (Number(r.OBJETIVO) - Number(r.TOTALPRECIO));
             let varLOGRO = ((Number(r.TOTALPRECIO)/Number(r.OBJETIVO))*100);
-            
+
+            let strLogro = get_color_logro(Number(varLOGRO));
+
             varTotalObjetivo += Number(r.OBJETIVO);
             varTotalImporte += Number(r.TOTALPRECIO);
             varTotalFaltan += Number(varFaltan);
             varTotalLogro += Number(varLOGRO);
 
             str += `
-            <tr class="hand" onclick="get_detalle_marca('${r.CODIGO_MARCA}','${r.MARCA}')">
+            <tr class="${strLogro} hand" onclick="get_detalle_marca('${r.CODIGO_MARCA}','${r.MARCA}')">
                 <td>${r.MARCA}</td>
                 <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
                 <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
@@ -1818,8 +1820,10 @@ function tbl_logro_categorias_marca(codmarca){
             let faltan = (Number(r.OBJETIVO)-Number(r.TOTALPRECIO))
             varTotalFaltan += Number(faltan);
 
+            let strLogro = get_color_logro(Number(varLOGRO));
+
             str += `
-            <tr>
+            <tr class="${strLogro}">
                 <td>${r.CATEGORIA}</td>
                 <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
                 <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
@@ -1897,6 +1901,8 @@ function tbl_logro_vendedores(sucursal,mes,anio){
             conteo += 1;
             let varFaltan = (Number(r.OBJETIVO) - Number(r.TOTALPRECIO));
             let varLOGRO = ((Number(r.TOTALPRECIO)/Number(r.OBJETIVO))*100);
+
+            let strLogro = get_color_logro(Number(varLOGRO));
             
             varTotalObjetivo += Number(r.OBJETIVO);
             varTotalImporte += Number(r.TOTALPRECIO);
@@ -1904,7 +1910,7 @@ function tbl_logro_vendedores(sucursal,mes,anio){
             varTotalLogro += Number(varLOGRO);
 
             str += `
-            <tr class="hand" onclick="get_detalle_vendedor('${r.CODIGO_VENDEDOR}','${r.VENDEDOR}')">
+            <tr class="${strLogro} hand" onclick="get_detalle_vendedor('${r.CODIGO_VENDEDOR}','${r.VENDEDOR}')">
                 <td>${r.VENDEDOR}
                     <br>
                     <small class="negrita text-info">${r.EMPRESA}</small>
@@ -2001,12 +2007,14 @@ function tbl_detalle_vendedor(codemp){
             let logrado = F.get_logrado(Number(r.LOGRO),Number(r.OBJETIVO));
             let faltan = Number(r.OBJETIVO)-Number(r.LOGRO);
           
+            let strLogro = get_color_logro(Number(logrado));
+
             varTObjetivo += Number(r.OBJETIVO);
             varTLogro += Number(r.LOGRO);
             varTFaltan += Number(faltan);
 
             str += `
-            <tr>
+            <tr class="${strLogro}">
                 <td>${r.CATEGORIA}</td>
                 <td>${F.setMoneda(r.LOGRO,'Q')}</td>
                 <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>

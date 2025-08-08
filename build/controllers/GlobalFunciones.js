@@ -1948,38 +1948,6 @@ let GF = {
     
         })
     },
-     get_data_embarques_listado_todos: (empnit,status,mes,anio)=>{
-        
-        return new Promise((resolve, reject)=>{
-            
-            let data = {
-                token:TOKEN,
-                sucursal:empnit,
-                status:status,
-                mes:mes,
-                anio:anio
-            };
-    
-            axios.post(`/despacho/embarques_lista`, data)
-            .then(res => {
-                
-                if(res.status.toString()=='200'){
-                    let data = res.data;
-                    if(Number(data.rowsAffected[0])>0){
-                        resolve(data);             
-                    }else{
-                        reject();
-                    }            
-                }else{
-                    reject();
-                } 
-            })
-            .catch(()=>{
-                reject();
-            })
-    
-        })
-    },
     get_data_embarques_listado_activos: (empnit)=>{
         
         return new Promise((resolve, reject)=>{

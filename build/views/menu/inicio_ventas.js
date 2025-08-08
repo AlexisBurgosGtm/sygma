@@ -938,13 +938,15 @@ function tbl_detalle_vendedor(codemp){
             
             let logrado = F.get_logrado(Number(r.LOGRO),Number(r.OBJETIVO));
             let faltan = Number(r.OBJETIVO)-Number(r.LOGRO);
+
+            let strLogro = get_color_logro(Number(logrado));
           
             varTObjetivo += Number(r.OBJETIVO);
             varTLogro += Number(r.LOGRO);
             varTFaltan += Number(faltan);
 
             str += `
-            <tr>
+            <tr class="${strLogro}">
                 <td>${r.CATEGORIA}</td>
                 <td>${F.setMoneda(r.LOGRO,'Q')}</td>
                 <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>

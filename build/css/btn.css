@@ -149,6 +149,22 @@
     background: rgb(255, 205, 205);
 }
 
+
+
+.bg-logrado{
+    background: #daffa2
+}
+
+.bg-falta{
+    background: #FFD700
+}
+
+.bg-nologrado{
+    background: rgb(255, 145, 145);
+}
+
+
+
 .bg-mostaza{
     background: rgb(230, 145, 18);
 }

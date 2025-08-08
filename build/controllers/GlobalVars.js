@@ -131,3 +131,48 @@ function getRandomColor() {
 
 let global_var_total_costo = 0;
 let global_var_total_precio = 0;
+let global_var_dias_objetivo = 0;
+
+
+
+
+function get_color_logro(porcentaje){
+
+    let strClass = '';
+
+    let f = new Date();
+    let diastranscurridos = Number(f.getDate());
+    let diasmes = global_var_dias_objetivo;
+
+    let porcentaje_diario = (Number(porcentaje) / Number(diastranscurridos));
+    
+    console.log('diario:')
+    console.log(porcentaje_diario);
+
+
+    let proyeccion = (Number(diasmes)*Number(porcentaje_diario));
+
+      
+    console.log('proyeccion')
+    console.log(proyeccion);
+
+
+
+    if(Number(proyeccion)>=100){
+        //console.log('verde');
+        strClass = 'bg-logrado';
+    }
+    if(Number(proyeccion)>= 80 && Number(proyeccion) < 100){
+        //console.log('amarillo');
+        strClass='bg-falta';
+    }
+    if(Number(proyeccion)<90){
+        //console.log('rojo');
+        strClass = 'bg-nologrado';
+    }
+    
+
+    return strClass;
+    
+
+}

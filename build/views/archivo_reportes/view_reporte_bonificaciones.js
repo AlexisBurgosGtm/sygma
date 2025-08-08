@@ -206,7 +206,7 @@ function cargar_embarques(){
             data.recordset.map((r)=>{
                 str += `
                     <option value='${r.CODEMBARQUE}'>
-                        (F:${r.FINALIZADO}) ${r.CODEMBARQUE} <small>(${r.NOMEMPLEADO})</small>
+                        (F:${r.FINALIZADO}) (${F.convertDateNormal(r.FECHA)}) ${r.CODEMBARQUE} <small>(${r.NOMEMPLEADO})</small>
                     </option>
                 `
             })

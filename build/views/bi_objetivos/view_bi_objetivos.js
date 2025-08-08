@@ -91,7 +91,7 @@ function getView(){
                     <h4 class="negrita text-base text-center">LOGRO DE MARCAS</h4>
 
                     <div class="table-responsive col-12">
-                        <table class="table h-full table-hover col-12">
+                        <table class="table h-full  col-12">
                             <thead class="bg-base text-white">
                                 <tr>
                                     <td>MARCA</td>
@@ -126,7 +126,7 @@ function getView(){
                     <h4 class="negrita text-secondary text-center">LOGRO DE VENDEDORES</h4>
 
                     <div class="table-responsive col-12">
-                        <table class="table h-full table-hover col-12">
+                        <table class="table h-full  col-12">
                             <thead class="bg-secondary text-white">
                                 <tr>
                                     <td>VENDEDOR</td>
@@ -327,13 +327,15 @@ function tbl_logro_marcas(sucursal,mes,anio){
             let varFaltan = (Number(r.OBJETIVO) - Number(r.TOTALPRECIO));
             let varLOGRO = ((Number(r.TOTALPRECIO)/Number(r.OBJETIVO))*100);
             
+            let strLogro = get_color_logro(Number(varLOGRO));
+
             varTotalObjetivo += Number(r.OBJETIVO);
             varTotalImporte += Number(r.TOTALPRECIO);
             varTotalFaltan += Number(varFaltan);
             varTotalLogro += Number(varLOGRO);
 
             str += `
-            <tr class="hand" onclick="get_detalle_marca('${r.CODIGO_MARCA}')">
+            <tr class="${strLogro} hand" onclick="get_detalle_marca('${r.CODIGO_MARCA}')">
                 <td>${r.MARCA}</td>
                 <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
                 <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
@@ -423,13 +425,15 @@ function tbl_logro_vendedores(sucursal,mes,anio){
             let varFaltan = (Number(r.OBJETIVO) - Number(r.TOTALPRECIO));
             let varLOGRO = ((Number(r.TOTALPRECIO)/Number(r.OBJETIVO))*100);
             
+            let strLogro = get_color_logro(Number(varLOGRO));
+
             varTotalObjetivo += Number(r.OBJETIVO);
             varTotalImporte += Number(r.TOTALPRECIO);
             varTotalFaltan += Number(varFaltan);
             varTotalLogro += Number(varLOGRO);
 
             str += `
-            <tr class="hand" onclick="get_detalle_vendedor('${r.CODIGO_VENDEDOR}','${r.VENDEDOR}')">
+            <tr class="${strLogro} hand" onclick="get_detalle_vendedor('${r.CODIGO_VENDEDOR}','${r.VENDEDOR}')">
                 <td>${r.VENDEDOR}</td>
                 <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
                 <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
@@ -481,8 +485,11 @@ function get_detalle_vendedor(codemp, nomemp){
         data.recordset.map((r)=>{
             let varFaltan = (Number(r.OBJETIVO)-Number(r.TOTALPRECIO));
             let varLOGRO = (Number(r.TOTALPRECIO)/Number(r.OBJETIVO)) * 100;
+
+            let strLogro = get_color_logro(Number(varLOGRO));
+
              str += `
-            <tr>
+            <tr class="${strLogro}">
                 <td>${r.CATEGORIA}</td>
                 <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
                 <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
