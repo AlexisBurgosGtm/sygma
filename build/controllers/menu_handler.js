@@ -244,6 +244,22 @@ let Menu = {
             F.AvisoError('No tiene permitido entrar a esta sección');
         }
     },
+    reporte_bonificaciones:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/archivo_reportes/view_reporte_bonificaciones.js','root')
+            .then(async()=>{
+                F.loadClass('../models/classTipodocumentos.js','root')
+                .then(async()=>{
+
+                    initView();
+                   
+                })
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        }
+    },
     mantenimiento_generales:()=>{
         if(Menu.verify()==true){
             Menu.salidaMenu();

@@ -976,11 +976,12 @@ router.post("/embarques_lista", async(req,res)=>{
                 EMBARQUES.F_TOTALCOSTO, 
                 EMBARQUES.F_TOTALPRECIO, 
                 EMBARQUES.F_DEVOLUCIONES, 
-                EMBARQUES.F_REPORTADO
+                EMBARQUES.F_REPORTADO,
+                EMBARQUES.FINALIZADO
             FROM EMBARQUES LEFT OUTER JOIN
                 EMPLEADOS ON EMBARQUES.EMPNIT = EMPLEADOS.EMPNIT 
                 AND EMBARQUES.CODEMPLEADO = EMPLEADOS.CODEMPLEADO
-            WHERE  (EMBARQUES.FINALIZADO = '${status}') 
+            WHERE  (EMBARQUES.FINALIZADO LIKE '%${status}%') 
             AND (EMBARQUES.EMPNIT = '${sucursal}') 
             AND (EMBARQUES.MES=${mes}) 
             AND (EMBARQUES.ANIO=${anio})    

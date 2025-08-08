@@ -148,8 +148,8 @@ let botones_menu = {
                                         </a>
                                     </li>
                                     <li>
-                                        <a href="#" title="Layout Options" data-filter-tags="theme settings layout options"  onclick="Menu.reportes()">
-                                            <span class="nav-link-text" data-i18n="nav.theme_settings_layout_options">REPORTES</span>
+                                        <a href="#" title="Layout Options" data-filter-tags="theme settings layout options"  onclick="Menu.reporte_bonificaciones()">
+                                            <span class="nav-link-text" data-i18n="nav.theme_settings_layout_options">REPORTE DE BONIFICACIONES ENTREGADAS</span>
                                         </a>
                                     </li>
                                     <li>
@@ -479,8 +479,8 @@ let botones_menu = {
                                         </a>
                                     </li>
                                     <li>
-                                        <a href="#" title="Layout Options" data-filter-tags="theme settings layout options"  onclick="Menu.reportes()">
-                                            <span class="nav-link-text" data-i18n="nav.theme_settings_layout_options">REPORTES</span>
+                                        <a href="#" title="Layout Options" data-filter-tags="theme settings layout options"  onclick="Menu.reporte_bonificaciones()">
+                                            <span class="nav-link-text" data-i18n="nav.theme_settings_layout_options">REPORTE DE BONIFICACIONES ENTREGADAS</span>
                                         </a>
                                     </li>
                                     <li>
