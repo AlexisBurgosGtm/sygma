@@ -1367,11 +1367,13 @@ function listener_vista_cobro(){
     });
 
     document.getElementById('btnBuscarClie').addEventListener('click',(e)=>{  
+        
         let filtro = document.getElementById('txtBuscarClie').value || '';
         
         tbl_clientes(filtro);
 
-        document.getElementById('txtBuscarClie').value='';
+      
+        //document.getElementById('txtBuscarClie').value='';
 
     });
 
@@ -1477,6 +1479,11 @@ function tbl_clientes(filtro,qr){
 
     let dia = document.getElementById('cmbDiaCliente').value;
 
+    
+     let varTotalVisitados = 0;
+    let varTotalNoVisitados = 0;
+
+
     axios.post(url_clientes, {
         token:TOKEN,
         sucursal: GlobalEmpnit,
@@ -1490,7 +1497,8 @@ function tbl_clientes(filtro,qr){
             F.AvisoError('Error en la solicitud');
             container.innerHTML = 'No day datos....';
         }else{
-               const data = response.data.recordset;
+            
+            const data = response.data.recordset;
             data.map((r)=>{
                 
                 let strClassVisitado = '';
@@ -1567,12 +1575,19 @@ function tbl_clientes(filtro,qr){
                 </tr>
                 `
             })
+            
+            console.log('por aqui...')
+
             container.innerHTML = str;
+
             document.getElementById('lbTVisitados').innerText = `Visitados: ${varTotalVisitados}`;
             document.getElementById('lbTNoVisitados').innerText = `Pendientes: ${varTotalNoVisitados}`;
         
         }
     }, (error) => {
+        
+        console.log(error);
+
         F.AvisoError('Error en la solicitud');
         container.innerHTML = 'No day datos....';
         document.getElementById('lbTVisitados').innerText = ``;
@@ -1865,11 +1880,13 @@ function get_datos_cliente(nitclie,nit,nomclie,dirclie,telefono){
     document.getElementById('txtPosCobroDireccion').value = dirclie;
     document.getElementById('txtPosCobroTelefono').value = telefono;
     
+    document.getElementById('txtBuscarClie').value=''; //limpio el filtro a la hora de vender
     
     document.getElementById('tab-dos').click();
 
     document.getElementById('txtPosCodprod').focus();
 
+    
 
 };
 

@@ -409,7 +409,118 @@ router.post("/buscar_cliente_vendedor_comodin", async(req,res)=>{
     const { token, sucursal, filtro, codven, dia,fecha} = req.body;
 
     let qry = '';
+    
+    if(filtro==''){
 
+        qry = `
+        SELECT TOP 100 CLIENTES.CODCLIENTE, CLIENTES.NIT,
+            CLIENTES.TIPONEGOCIO, CLIENTES.NEGOCIO, 
+            CLIENTES.NOMBRE, CLIENTES.DIRECCION, 
+            CLIENTES.CODMUN, MUNICIPIOS.DESMUN, 
+            CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
+            CLIENTES.TELEFONO, CLIENTES.LATITUD, 
+            CLIENTES.LONGITUD, CLIENTES.SALDO, 
+            CLIENTES.HABILITADO, CLIENTES.LASTSALE,
+            CONCAT(MONTH(CLIENTES.LASTSALE),'-',YEAR(CLIENTES.LASTSALE)) AS MES_ULTIMO,
+            CONCAT(MONTH('${fecha}'),'-',YEAR('${fecha}')) AS MES_CURSO,
+            CLIENTES.DIASCREDITO, CLIENTES.REFERENCIA,
+            CLIENTES.DIAVISITA AS VISITA
+        FROM CLIENTES LEFT OUTER JOIN
+            DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO LEFT OUTER JOIN
+            MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+        WHERE
+            (CLIENTES.EMPNIT='${sucursal}') AND 
+            (CLIENTES.DIAVISITA='${dia}') AND
+            (CLIENTES.HABILITADO='SI')
+        ORDER BY CLIENTES.LASTSALE;
+        `
+    
+    }else{
+        if(isNaN(filtro)==true){
+            
+            console.log('el filtro NO es numero');
+
+            qry = `
+                SELECT TOP 100 CLIENTES.CODCLIENTE, CLIENTES.NIT,
+                    CLIENTES.TIPONEGOCIO, CLIENTES.NEGOCIO, 
+                    CLIENTES.NOMBRE, CLIENTES.DIRECCION, 
+                    CLIENTES.CODMUN, MUNICIPIOS.DESMUN, 
+                    CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
+                    CLIENTES.TELEFONO, CLIENTES.LATITUD, 
+                    CLIENTES.LONGITUD, CLIENTES.SALDO, 
+                    CLIENTES.HABILITADO, CLIENTES.LASTSALE,
+                    CONCAT(MONTH(CLIENTES.LASTSALE),'-',YEAR(CLIENTES.LASTSALE)) AS MES_ULTIMO, 
+                    CONCAT(MONTH('${fecha}'),'-',YEAR('${fecha}')) AS MES_CURSO,
+                    CLIENTES.DIASCREDITO, CLIENTES.REFERENCIA,
+                    CLIENTES.DIAVISITA AS VISITA
+                FROM CLIENTES LEFT OUTER JOIN
+                    DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO LEFT OUTER JOIN
+                    MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+                WHERE
+                    (CLIENTES.EMPNIT='${sucursal}') AND 
+                    (CLIENTES.NOMBRE LIKE '%${filtro}%') AND
+                    (CLIENTES.DIAVISITA='${dia}') AND
+                    (CLIENTES.HABILITADO='SI')
+                OR 
+                    (CLIENTES.EMPNIT='${sucursal}') AND 
+                    (CLIENTES.NIT='${filtro}') AND
+                    (CLIENTES.DIAVISITA='${dia}') AND
+                    (CLIENTES.HABILITADO='SI')
+                OR 
+                    (CLIENTES.EMPNIT='${sucursal}') AND 
+                    (CLIENTES.NEGOCIO LIKE '%${filtro}%') AND
+                    (CLIENTES.DIAVISITA='${dia}') AND
+                    (CLIENTES.HABILITADO='SI')
+                ORDER BY CLIENTES.LASTSALE;
+                `
+        
+        }else{
+             console.log('el filtro es numero');
+
+            qry = `
+                SELECT TOP 100 CLIENTES.CODCLIENTE, CLIENTES.NIT,
+                    CLIENTES.TIPONEGOCIO, CLIENTES.NEGOCIO, 
+                    CLIENTES.NOMBRE, CLIENTES.DIRECCION, 
+                    CLIENTES.CODMUN, MUNICIPIOS.DESMUN, 
+                    CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
+                    CLIENTES.TELEFONO, CLIENTES.LATITUD,
+                    CONCAT(MONTH(CLIENTES.LASTSALE),'-',YEAR(CLIENTES.LASTSALE)) AS MES_ULTIMO,
+                    CONCAT(MONTH('${fecha}'),'-',YEAR('${fecha}')) AS MES_CURSO,
+                    CLIENTES.LONGITUD, CLIENTES.SALDO, 
+                    CLIENTES.HABILITADO, CLIENTES.LASTSALE, 
+                    CLIENTES.DIASCREDITO, CLIENTES.REFERENCIA,
+                    CLIENTES.DIAVISITA AS VISITA
+                FROM CLIENTES LEFT OUTER JOIN
+                    DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO LEFT OUTER JOIN
+                    MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+                WHERE
+                    (CLIENTES.EMPNIT='${sucursal}') AND 
+                    (CLIENTES.NOMBRE LIKE '%${filtro}%') AND
+                    (CLIENTES.DIAVISITA='${dia}') AND
+                    (CLIENTES.HABILITADO='SI')
+
+                OR 
+                    (CLIENTES.EMPNIT='${sucursal}') AND 
+                    (CLIENTES.NIT='${filtro}') AND
+                    (CLIENTES.DIAVISITA='${dia}') AND
+                    (CLIENTES.HABILITADO='SI')
+                OR 
+                    (CLIENTES.EMPNIT='${sucursal}') AND 
+                    (CLIENTES.NEGOCIO LIKE '%${filtro}%') AND
+                    (CLIENTES.DIAVISITA='${dia}') AND
+                    (CLIENTES.HABILITADO='SI')
+                OR 
+                    (CLIENTES.EMPNIT='${sucursal}') AND 
+                    (CLIENTES.CODCLIENTE=${filtro}) AND
+                    (CLIENTES.HABILITADO='SI')
+                ORDER BY CLIENTES.LASTSALE;
+            `
+        }
+    };
+
+
+
+/*
     if(filtro==''){
         qry = `
         SELECT CLIENTES.CODCLIENTE, CLIENTES.NIT,
@@ -528,10 +639,7 @@ router.post("/buscar_cliente_vendedor_comodin", async(req,res)=>{
         
     
     }
-
-    
- 
-        
+*/
 
     execute.QueryToken(res,qry,token);
      

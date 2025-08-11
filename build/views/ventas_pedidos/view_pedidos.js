@@ -1361,7 +1361,7 @@ function listener_vista_cobro(){
         let filtro = document.getElementById('txtBuscarClie').value || '';
         tbl_clientes(filtro);
         
-        document.getElementById('txtBuscarClie').value='';
+        //document.getElementById('txtBuscarClie').value='';
 
     });
 
@@ -1903,6 +1903,9 @@ function get_datos_cliente(nitclie,nit,nomclie,dirclie,telefono){
     document.getElementById('txtPosCobroDireccion').value = dirclie;
     document.getElementById('txtPosCobroTelefono').value = telefono;
     
+    document.getElementById('txtBuscarClie').value=''; //limpio el filtro a la hora de vender
+    
+   
     
     document.getElementById('tab-dos').click();
 
