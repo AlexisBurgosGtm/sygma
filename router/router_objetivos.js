@@ -303,6 +303,34 @@ router.post("/select_logro_marcas", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+router.post("/select_logro_marcas_vendedor", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio} = req.body;
+
+    let qry = `
+		SELECT 
+            view_data_objetivos_marcas_vendedor.MES, 
+            view_data_objetivos_marcas_vendedor.ANIO, 
+            view_data_objetivos_marcas_vendedor.OBJ_CODMARCA AS CODIGO_MARCA, 
+            view_data_objetivos_marcas_vendedor.OBJ_DESMARCA AS MARCA, 
+            SUM(ISNULL(view_data_objetivos_marcas_vendedor.OBJETIVO,0)) AS OBJETIVO, 
+            SUM(ISNULL(view_rpt_objetivos_marca_resumen.TOTALUNIDADES,0)) AS TOTALUNIDADES, 
+            SUM(ISNULL(view_rpt_objetivos_marca_resumen.TOTALCOSTO,0)) AS TOTALCOSTO, 
+            SUM(ISNULL(view_rpt_objetivos_marca_resumen.TOTALPRECIO,0)) AS TOTALPRECIO
+        FROM     view_rpt_objetivos_marca_resumen RIGHT OUTER JOIN
+                  view_data_objetivos_marcas ON view_rpt_objetivos_marca_resumen.CODIGO_MARCA = view_data_objetivos_marcas.OBJ_CODMARCA AND view_rpt_objetivos_marca_resumen.ANIO = view_data_objetivos_marcas.ANIO AND 
+                  view_rpt_objetivos_marca_resumen.MES = view_data_objetivos_marcas.MES AND view_rpt_objetivos_marca_resumen.EMPNIT = view_data_objetivos_marcas.EMPNIT
+        WHERE  (view_data_objetivos_marcas.EMPNIT LIKE '%${sucursal}%')
+        GROUP BY view_data_objetivos_marcas.MES, view_data_objetivos_marcas.ANIO, view_data_objetivos_marcas.OBJ_CODMARCA, view_data_objetivos_marcas.OBJ_DESMARCA
+        HAVING (view_data_objetivos_marcas.MES = ${mes}) AND 
+                (view_data_objetivos_marcas.ANIO = ${anio})
+
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
 
 
 

@@ -1739,7 +1739,7 @@ function get_combo_embarques(){
 
         data.recordset.map((r)=>{
             str += `
-                <option value='${r.CODEMBARQUE}'>${r.CODEMBARQUE}<small>(${r.NOMEMPLEADO})<small></option>
+                <option value='${r.CODEMBARQUE}'>${r.CODEMBARQUE}<small>(${r.NOMEMPLEADO})</small></option>
             `
         })
         container.innerHTML = str;
