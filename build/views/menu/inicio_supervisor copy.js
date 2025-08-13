@@ -810,11 +810,6 @@ function getView(){
 
                     <h4 class="negrita text-base text-center">LOGRO DE MARCAS</h4>
 
-                    <div class="form-group">
-                        <select class="form-control negrita text-danger" id="cmb_objetivos_vendedores">
-                        </select>
-                    </div>
-
                     <div class="table-responsive col-12">
                         <table class="table h-full  col-12">
                             <thead class="bg-base text-white">
@@ -1608,8 +1603,6 @@ function listeners_objetivos(){
             cmbSucursal.disabled = true;
         };
 
-        get_combo_vendedores();
-
         get_reportes();
 
     })
@@ -1618,12 +1611,6 @@ function listeners_objetivos(){
     })
 
 
-    document.getElementById('cmb_objetivos_vendedores').addEventListener('change',()=>{
-            let sucursal = document.getElementById('cmbSucursal').value;
-            let mes = document.getElementById('cmbMes').value;
-            let anio = document.getElementById('cmbAnio').value;
-            tbl_logro_marcas(sucursal,mes,anio);
-    });
 
     document.getElementById('cmbMes').innerHTML = F.ComboMeses();
     document.getElementById('cmbMes').value = F.get_mes_curso();
@@ -1640,37 +1627,6 @@ function listeners_objetivos(){
 
 
 };
-function get_combo_vendedores(){
-
-    let sucursal = document.getElementById('cmbSucursal').value;
-
-
-    return new Promise((resolve,reject)=>{
-
-         GF.get_data_empleados_tipo_emp(3,sucursal)
-        .then((data)=>{
-
-            let str = `<option value="TODOS">TODOS</option>`;
-            
-            data.recordset.map((r)=>{
-                str += `
-                <option value="${r.CODEMPLEADO}">${r.NOMEMPLEADO}</option>
-                `
-            })
-            document.getElementById('cmb_objetivos_vendedores').innerHTML = str;
-            resolve();
-        })
-        .catch(()=>{
-            document.getElementById('cmb_objetivos_vendedores').innerHTML = `<option value="">NO SE CARGARON</option>`;
-            resolve();
-        })
-        
-    })
-
-   
-
-
-}
 
 function get_reportes(){
 
@@ -1678,42 +1634,24 @@ function get_reportes(){
     let mes = document.getElementById('cmbMes').value;
     let anio = document.getElementById('cmbAnio').value;
 
-    get_combo_vendedores()
-    .then(()=>{
 
-        tbl_logro_marcas(sucursal,mes,anio);
+    tbl_logro_marcas(sucursal,mes,anio);
     
-    })
-    .catch(()=>{
-        
-    })
-
- 
     tbl_logro_vendedores(sucursal,mes,anio);
 
 
 };
 
 
-// ------------------------ logro marcas
-
-function get_data_logro_marcas(sucursal,mes,anio,codemp){
+function get_data_logro_marcas(sucursal,mes,anio){
 
      return new Promise((resolve,reject)=>{
 
-            let url = '';
-            if(codemp=='TODOS'){
-                url = '/objetivos/select_logro_marcas';
-            }else{
-                url = '/objetivos/select_logro_marcas_vendedor'
-            }
-
-            axios.post(GlobalUrlCalls + url, {
+            axios.post(GlobalUrlCalls + '/objetivos/select_logro_marcas', {
                     token:TOKEN,
                     sucursal:sucursal,
                     mes:mes,
-                    anio:anio,
-                    codemp:codemp})
+                    anio:anio})
             .then((response) => {
                 if(response.status.toString()=='200'){
                     let data = response.data;
@@ -1738,7 +1676,6 @@ function get_data_logro_marcas(sucursal,mes,anio,codemp){
 };
 function tbl_logro_marcas(sucursal,mes,anio){
 
-    let empleado = document.getElementById('cmb_objetivos_vendedores').value;
 
     let container = document.getElementById('tblDataMarcas2');
     container.innerHTML = GlobalLoader;
@@ -1747,75 +1684,68 @@ function tbl_logro_marcas(sucursal,mes,anio){
     let varTotalObjetivo =0; let varTotalImporte = 0; 
     let varTotalFaltan = 0; let varTotalLogro = 0;
 
+    get_data_logro_marcas(sucursal,mes,anio)
+    .then((data)=>{
 
-  
-           get_data_logro_marcas(sucursal,mes,anio,empleado)
-            .then((data)=>{
+        let str = '';
+        data.recordset.map((r)=>{
+            conteo += 1;
+            let varFaltan = (Number(r.OBJETIVO) - Number(r.TOTALPRECIO));
+            let varLOGRO = ((Number(r.TOTALPRECIO)/Number(r.OBJETIVO))*100);
 
-                let str = '';
-                data.recordset.map((r)=>{
-                    conteo += 1;
-                    let varFaltan = (Number(r.OBJETIVO) - Number(r.TOTALPRECIO));
-                    let varLOGRO = ((Number(r.TOTALPRECIO)/Number(r.OBJETIVO))*100);
+            let strLogro = get_color_logro(Number(varLOGRO));
 
-                    let strLogro = get_color_logro(Number(varLOGRO));
+            varTotalObjetivo += Number(r.OBJETIVO);
+            varTotalImporte += Number(r.TOTALPRECIO);
+            varTotalFaltan += Number(varFaltan);
+            varTotalLogro += Number(varLOGRO);
 
-                    varTotalObjetivo += Number(r.OBJETIVO);
-                    varTotalImporte += Number(r.TOTALPRECIO);
-                    varTotalFaltan += Number(varFaltan);
-                    varTotalLogro += Number(varLOGRO);
-
-                    str += `
-                    <tr class="${strLogro} hand" onclick="get_detalle_marca('${r.CODIGO_MARCA}','${r.MARCA}')">
-                        <td>${r.MARCA}</td>
-                        <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
-                        <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
-                        <td>${F.setMoneda(varFaltan,'Q')}</td>
-                        <td>${varLOGRO.toFixed(2)} %</td>
-                    </tr>
-                    `
-                })
-                container.innerHTML = str;
+            str += `
+            <tr class="${strLogro} hand" onclick="get_detalle_marca('${r.CODIGO_MARCA}','${r.MARCA}')">
+                <td>${r.MARCA}</td>
+                <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
+                <td>${F.setMoneda(varFaltan,'Q')}</td>
+                <td>${varLOGRO.toFixed(2)} %</td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
 
 
-                document.getElementById('lbTotalMarcasImporte').innerHTML = F.setMoneda(varTotalImporte,'Q');
-                document.getElementById('lbTotalMarcasObjetivo').innerHTML = F.setMoneda(varTotalObjetivo,'Q');
-                document.getElementById('lbTotalMarcasFalta').innerHTML = F.setMoneda(varTotalFaltan,'Q');
-                document.getElementById('lbTotalMarcasLogro').innerHTML = `${F.setMoneda(varTotalLogro / conteo,'')} %`
+        document.getElementById('lbTotalMarcasImporte').innerHTML = F.setMoneda(varTotalImporte,'Q');
+        document.getElementById('lbTotalMarcasObjetivo').innerHTML = F.setMoneda(varTotalObjetivo,'Q');
+        document.getElementById('lbTotalMarcasFalta').innerHTML = F.setMoneda(varTotalFaltan,'Q');
+        document.getElementById('lbTotalMarcasLogro').innerHTML = `${F.setMoneda(varTotalLogro / conteo,'')} %`
 
-                let logrado = 0; let faltaLogro = 0;
-                try {
-                logrado = (Number(varTotalImporte)/Number(varTotalObjetivo))*100;
-                faltaLogro = 100-Number(logrado);
-                } catch (error) {
-                    logrado=0;
-                    faltaLogro=0;   
-                }
-                document.getElementById('lbObjLogrado').innerHTML = `<progress class="form-control" value="${logrado}" max="100"></progress><b class="text-success">${logrado.toFixed(2)}%</b>`;
-                document.getElementById('lbObjLogradoFalta').innerHTML = `<progress class="form-control progress-falta" value="${faltaLogro}" max="100"></progress><b class="text-danger">${faltaLogro.toFixed(2)}%</b>`;
-            })
-            .catch(()=>{
+        let logrado = 0; let faltaLogro = 0;
+        try {
+           logrado = (Number(varTotalImporte)/Number(varTotalObjetivo))*100;
+           faltaLogro = 100-Number(logrado);
+        } catch (error) {
+            logrado=0;
+            faltaLogro=0;   
+        }
+        document.getElementById('lbObjLogrado').innerHTML = `<progress class="form-control" value="${logrado}" max="100"></progress><b class="text-success">${logrado.toFixed(2)}%</b>`;
+        document.getElementById('lbObjLogradoFalta').innerHTML = `<progress class="form-control progress-falta" value="${faltaLogro}" max="100"></progress><b class="text-danger">${faltaLogro.toFixed(2)}%</b>`;
+    })
+    .catch(()=>{
 
-                container.innerHTML = 'No se cargaron datos...';
+        container.innerHTML = 'No se cargaron datos...';
 
-                document.getElementById('lbTotalMarcasImporte').innerHTML = '';
-                document.getElementById('lbTotalMarcasObjetivo').innerHTML =''; 
-                document.getElementById('lbTotalMarcasFalta').innerHTML = '';
-                document.getElementById('lbTotalMarcasLogro').innerHTML = '';
+        document.getElementById('lbTotalMarcasImporte').innerHTML = '';
+        document.getElementById('lbTotalMarcasObjetivo').innerHTML =''; 
+        document.getElementById('lbTotalMarcasFalta').innerHTML = '';
+        document.getElementById('lbTotalMarcasLogro').innerHTML = '';
 
-                document.getElementById('lbObjLogrado').innerHTML = `<progress value="0" max="100"></progress>`;
-                document.getElementById('lbObjLogradoFalta').innerHTML = `<progress class="progress-falta" value="0" max="100"></progress>`;
-            
-            })
-   
-   
+        document.getElementById('lbObjLogrado').innerHTML = `<progress value="0" max="100"></progress>`;
+        document.getElementById('lbObjLogradoFalta').innerHTML = `<progress class="progress-falta" value="0" max="100"></progress>`;
+    
+    })
 
 
 
 };
-// ------------------------ logro marcas
-
-
 
 function get_detalle_marca(codmarca,desmarca){
 
@@ -1833,26 +1763,14 @@ function get_detalle_marca(codmarca,desmarca){
 
 function get_data_logro_categorias_marcas(sucursal,codmarca,mes,anio){
 
-    return new Promise((resolve,reject)=>{
+     return new Promise((resolve,reject)=>{
 
-
-        let url = '';
-        let empleado = document.getElementById('cmb_objetivos_vendedores').value;
-        
-        if(empleado=='TODOS'){
-            url = '/objetivos/select_logro_marcas_categorias';
-        }else{
-            url = '/objetivos/select_logro_vendedores_categorias';
-        }
-
-
-            axios.post(GlobalUrlCalls + url, {
+            axios.post(GlobalUrlCalls + '/objetivos/select_logro_marcas_categorias', {
                     token:TOKEN,
                     sucursal:sucursal,
                     codmarca:codmarca,
                     mes:mes,
-                    anio:anio,
-                    codemp:empleado})
+                    anio:anio})
             .then((response) => {
                 if(response.status.toString()=='200'){
                     let data = response.data;
@@ -1871,9 +1789,7 @@ function get_data_logro_categorias_marcas(sucursal,codmarca,mes,anio){
             }, (error) => {
                 reject();
             });
-
-
-    }) 
+        }) 
     
 
 };
@@ -1889,9 +1805,8 @@ function tbl_logro_categorias_marca(codmarca){
     let anio = document.getElementById('cmbAnio').value;
 
 
+
     let varTotalObjetivo = 0; let varTotalLogro = 0; let varTotalFaltan = 0;
-
-
 
     get_data_logro_categorias_marcas(sucursal,codmarca,mes,anio)
     .then((data)=>{
