@@ -34,8 +34,7 @@ let GF = {
 
         container.innerHTML = strMenu;
         
-        console.log(menu)
-        
+     
 
         $('#' + idNavbar).navigation({ 
             accordion: true,

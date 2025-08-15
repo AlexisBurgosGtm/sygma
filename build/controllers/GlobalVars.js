@@ -1,4 +1,4 @@
-let versionapp = "M.13.08.2025:0"
+let versionapp = "M.15.8.2025:0"
 // &nbsp
 
 let map; //mapa de leaflet
@@ -146,18 +146,10 @@ function get_color_logro(porcentaje){
 
     let porcentaje_diario = (Number(porcentaje) / Number(diastranscurridos));
     
-    console.log('diario:')
-    console.log(porcentaje_diario);
-
-
+  
     let proyeccion = (Number(diasmes)*Number(porcentaje_diario));
 
-      
-    console.log('proyeccion')
-    console.log(proyeccion);
-
-
-
+         
     if(Number(proyeccion)>=100){
         //console.log('verde');
         strClass = 'bg-logrado';

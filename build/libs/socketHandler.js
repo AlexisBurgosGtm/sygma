@@ -1,4 +1,17 @@
-var socket = io();
+//var socket = io();
+
+
+
+const socket = io({
+  reconnectionDelayMax: 10000,
+  auth: {
+    token: "123"
+  },
+  query: {
+    "my-key": "my-value"
+  }
+});
+
 
 socket.on('MODO_SAT', function(clave){
   try {
@@ -69,6 +82,10 @@ socket.on('fin_despacho', (empnit,coddoc,correlativo)=>{
     }
 
 
+});
+
+socket.io.on("error", (error) => {
+  // ...
 });
 
 

@@ -17,7 +17,7 @@ function getView(){
                             ${view.rpt_marcas()}
                         </div>   
                         <div class="tab-pane fade" id="cinco" role="tabpanel" aria-labelledby="home-tab">
-                            ${view.rpt_categorias()}
+                            ${view.rpt_categorias() + view.modal_categorias_marca()}
                         </div>
                         <div class="tab-pane fade" id="seis" role="tabpanel" aria-labelledby="home-tab">
                             ${view.rpt_goles()}
@@ -360,6 +360,143 @@ function getView(){
                             <br>
                         </div>
                         <div class="col-6">
+                            <h5 class="text-info negrita">Objetivos</h5>
+                            <small class="negrita text-secondary">Logrado:</small>
+                            <div class="input-group" id="lbObjLogrado"></div>
+                            <br>
+                            <small class="negrita text-secondary">Faltan:</small>
+                            <div class="input-group" id="lbObjLogradoFalta"></div>
+                            <br>
+                            <label class="negrita text-danger" id="lbMarcaTotalImporte">Importe:</label>
+                        </div>
+                    </div>
+                    
+
+
+
+                    <div class="table-responsive col-12">
+                        <table class="table h-full table-bordered col-12">
+                            <thead class="bg-base text-white">
+                                <tr>
+                                    <td>MARCA</td>
+                                    <td>IMPORTE</td>
+                                    <td>OBJETIVO</td>
+                                    <td>FALTA</td>
+                                    <td>ALCANCE</td>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataMarcas2">
+                            </tbody>
+                            <tfoot class="bg-base text-white negrita">
+                                <tr>
+                                    <td></td>
+                                    <td id="lbTotalMarcasImporte"></td>
+                                    <td id="lbTotalMarcasObjetivo"></td>
+                                    <td id="lbTotalMarcasFalta"></td>
+                                    <td id="lbTotalMarcasLogro"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+
+
+
+
+
+                </div>
+            </div>
+            
+
+
+            <button class="btn btn-secondary btn-circle btn-xl hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
+                <i class="fal fa-arrow-left"></i>
+            </button>
+            `
+
+        },
+        modal_categorias_marca:()=>{
+            return `
+              <div id="modal_categorias_marca" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-right modal-xl">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-secondary d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white" id="lbMarcasDescategoria">
+                                
+                            </h4>
+                        </div>
+                        <div class="modal-body p-4">
+                            
+                            <div class="card card-rounded">
+                                <div class="card-body p-4">
+
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered h-full col-12">
+                                            <thead class="bg-base text-white"> 
+                                                <tr>
+                                                    <td>CATEGORIA</td>
+                                                    <td>LOGRO</td>
+                                                    <td>OBJETIVO</td>
+                                                    <td>FALTAN</td>
+                                                    <td></td>
+                                                </tr>
+                                            </thead>
+                                            
+                                            <tbody id="tblDataCategoriasMarca">
+                                            </tbody>
+                                            
+                                            <tfoot class="bg-base text-white"> 
+                                                <tr>
+                                                    <td></td>
+                                                    <td id="lbTotalMarcaLogro"></td>
+                                                    <td id="lbTotalMarcaObjetivo"></td>
+                                                    <td  id="lbTotalMarcaFaltan"></td>
+                                                    <td></td>
+                                                </tr>
+                                            </tfoot>
+
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                                
+                            <div class="row">
+                                <button class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
+                                    <i class="fal fa-arrow-left"></i>
+                                </button>
+                            </div>
+
+                        </div>
+                    
+                    </div>
+                </div>
+            </div>
+            `
+        },
+        BACKUP_rpt_categorias:()=>{
+
+            return `
+            <div class="card card-rounded col-12">
+                <div class="card-body p-4">
+
+                    <div class="row">
+                        <div class="col-6">
+                            <h4 class="negrita text-base">Logro por Categoria</h4>
+
+                            <div class="form-group">
+                                <label class="negrita">Seleccione Mes y Año</label>
+                                <div class="input-group">
+                                    <select class="form-control negrita text-base" id="cmbMes"></select>
+                                    <select class="form-control negrita text-base" id="cmbAnio"></select>
+                                </div>
+                            </div>
+
+                           
+                            <br>
+                        </div>
+                        <div class="col-6">
                          
                             <label class="negrita text-danger" id="lbMarcaTotalImporte">Importe:</label>
                         </div>
@@ -603,13 +740,15 @@ function addListeners(){
     document.getElementById('cmbMes').innerHTML = F.ComboMeses();
     document.getElementById('cmbMes').value = F.get_mes_curso();
     document.getElementById('cmbMes').addEventListener('change',()=>{
-        tbl_detalle_vendedor(GlobalCodUsuario);
+        //tbl_detalle_vendedor(GlobalCodUsuario);
+        tbl_logro_marcas(GlobalEmpnit);
     });
 
     document.getElementById('cmbAnio').innerHTML = F.ComboAnio();
     document.getElementById('cmbAnio').value = F.get_anio_curso();
     document.getElementById('cmbAnio').addEventListener('change',()=>{
-        tbl_detalle_vendedor(GlobalCodUsuario);
+        //tbl_detalle_vendedor(GlobalCodUsuario);
+        tbl_logro_marcas(GlobalEmpnit);
     });
     
 
@@ -637,7 +776,9 @@ function addListeners(){
     document.getElementById('btnMenuRptCategorias').addEventListener('click',()=>{
 
         document.getElementById('tab-cinco').click();
-        tbl_detalle_vendedor(GlobalCodUsuario);
+        //tbl_detalle_vendedor(GlobalCodUsuario);
+        tbl_logro_marcas(GlobalEmpnit);
+        
     })
 
 
@@ -1056,16 +1197,22 @@ function rpt_goles_resumen(){
 
 
 
-// logro marcas
-function get_data_logro_marcas(sucursal,mes,anio){
+
+// ------------------------ logro marcas
+
+function get_data_logro_marcas(sucursal,mes,anio,codemp){
 
      return new Promise((resolve,reject)=>{
 
-            axios.post(GlobalUrlCalls + '/objetivos/select_logro_marcas', {
+            let url = '';
+                url = '/objetivos/select_logro_marcas_vendedor'
+            
+            axios.post(GlobalUrlCalls + url, {
                     token:TOKEN,
                     sucursal:sucursal,
                     mes:mes,
-                    anio:anio})
+                    anio:anio,
+                    codemp:codemp})
             .then((response) => {
                 if(response.status.toString()=='200'){
                     let data = response.data;
@@ -1088,75 +1235,209 @@ function get_data_logro_marcas(sucursal,mes,anio){
     
 
 };
-function tbl_logro_marcas(sucursal,mes,anio){
+function tbl_logro_marcas(sucursal){
 
+    let empleado = GlobalCodUsuario;//document.getElementById('cmb_objetivos_vendedores').value;
 
     let container = document.getElementById('tblDataMarcas2');
     container.innerHTML = GlobalLoader;
+
+    let mes = document.getElementById('cmbMes').value;
+    let anio = document.getElementById('cmbAnio').value;
+
 
     let conteo = 0;
     let varTotalObjetivo =0; let varTotalImporte = 0; 
     let varTotalFaltan = 0; let varTotalLogro = 0;
 
-    get_data_logro_marcas(sucursal,mes,anio)
-    .then((data)=>{
 
+  
+           get_data_logro_marcas(sucursal,mes,anio,empleado)
+            .then((data)=>{
+
+                let str = '';
+                data.recordset.map((r)=>{
+                    conteo += 1;
+                    let varFaltan = (Number(r.OBJETIVO) - Number(r.TOTALPRECIO));
+                    let varLOGRO = ((Number(r.TOTALPRECIO)/Number(r.OBJETIVO))*100);
+
+                    let strLogro = get_color_logro(Number(varLOGRO));
+
+                    varTotalObjetivo += Number(r.OBJETIVO);
+                    varTotalImporte += Number(r.TOTALPRECIO);
+                    varTotalFaltan += Number(varFaltan);
+                    varTotalLogro += Number(varLOGRO);
+
+                    str += `
+                    <tr class="${strLogro} hand" onclick="get_detalle_marca('${r.CODIGO_MARCA}','${r.MARCA}')">
+                        <td>${r.MARCA}</td>
+                        <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                        <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
+                        <td>${F.setMoneda(varFaltan,'Q')}</td>
+                        <td>${varLOGRO.toFixed(2)} %</td>
+                    </tr>
+                    `
+                })
+                container.innerHTML = str;
+
+
+                document.getElementById('lbTotalMarcasImporte').innerHTML = F.setMoneda(varTotalImporte,'Q');
+                document.getElementById('lbTotalMarcasObjetivo').innerHTML = F.setMoneda(varTotalObjetivo,'Q');
+                document.getElementById('lbTotalMarcasFalta').innerHTML = F.setMoneda(varTotalFaltan,'Q');
+                document.getElementById('lbTotalMarcasLogro').innerHTML = `${F.setMoneda(varTotalLogro / conteo,'')} %`
+
+                let logrado = 0; let faltaLogro = 0;
+                try {
+                logrado = (Number(varTotalImporte)/Number(varTotalObjetivo))*100;
+                faltaLogro = 100-Number(logrado);
+                } catch (error) {
+                    logrado=0;
+                    faltaLogro=0;   
+                }
+                document.getElementById('lbObjLogrado').innerHTML = `<progress class="form-control" value="${logrado}" max="100"></progress><b class="text-success">${logrado.toFixed(2)}%</b>`;
+                document.getElementById('lbObjLogradoFalta').innerHTML = `<progress class="form-control progress-falta" value="${faltaLogro}" max="100"></progress><b class="text-danger">${faltaLogro.toFixed(2)}%</b>`;
+            })
+            .catch(()=>{
+
+                container.innerHTML = 'No se cargaron datos...';
+
+                document.getElementById('lbTotalMarcasImporte').innerHTML = '';
+                document.getElementById('lbTotalMarcasObjetivo').innerHTML =''; 
+                document.getElementById('lbTotalMarcasFalta').innerHTML = '';
+                document.getElementById('lbTotalMarcasLogro').innerHTML = '';
+
+                document.getElementById('lbObjLogrado').innerHTML = `<progress value="0" max="100"></progress>`;
+                document.getElementById('lbObjLogradoFalta').innerHTML = `<progress class="progress-falta" value="0" max="100"></progress>`;
+            
+            })
+   
+   
+
+
+
+};
+// ------------------------ logro marcas
+
+
+
+// ------------------------------------------------
+// ------------------------------------------------
+//OBTIENE EL DETALLE DE CATEGORIAS DE LA MARCA
+
+function get_detalle_marca(codmarca,desmarca){
+
+
+    $("#modal_categorias_marca").modal('show');
+
+    document.getElementById('lbMarcasDescategoria').innerText = desmarca;
+    
+    tbl_logro_categorias_marca(codmarca);
+
+
+
+};
+function get_data_logro_categorias_marcas(sucursal,codmarca,mes,anio){
+
+    return new Promise((resolve,reject)=>{
+
+
+        let url = '';
+        let empleado = GlobalCodUsuario; //document.getElementById('cmb_objetivos_vendedores').value;
+        
+            url = '/objetivos/select_logro_vendedores_categorias';
+        
+
+            axios.post(GlobalUrlCalls + url, {
+                    token:TOKEN,
+                    sucursal:sucursal,
+                    codmarca:codmarca,
+                    mes:mes,
+                    anio:anio,
+                    codemp:empleado})
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+
+
+    }) 
+    
+
+};
+function tbl_logro_categorias_marca(codmarca){
+
+    let container = document.getElementById('tblDataCategoriasMarca');
+    container.innerHTML = GlobalLoader;
+
+
+    let sucursal = GlobalEmpnit; //document.getElementById('cmbSucursal').value;
+    let mes = document.getElementById('cmbMes').value;
+    let anio = document.getElementById('cmbAnio').value;
+
+
+    let varTotalObjetivo = 0; let varTotalLogro = 0; let varTotalFaltan = 0;
+
+  
+    get_data_logro_categorias_marcas(sucursal,codmarca,mes,anio)
+    .then((data)=>{
         let str = '';
         data.recordset.map((r)=>{
-            conteo += 1;
-            let varFaltan = (Number(r.OBJETIVO) - Number(r.TOTALPRECIO));
+      
             let varLOGRO = ((Number(r.TOTALPRECIO)/Number(r.OBJETIVO))*100);
-            
-            let strLogro = get_color_logro(Number(varLOGRO));
-            
+          
             varTotalObjetivo += Number(r.OBJETIVO);
-            varTotalImporte += Number(r.TOTALPRECIO);
-            varTotalFaltan += Number(varFaltan);
-            varTotalLogro += Number(varLOGRO);
+            varTotalLogro += Number(r.TOTALPRECIO);
+            let faltan = (Number(r.OBJETIVO)-Number(r.TOTALPRECIO))
+            varTotalFaltan += Number(faltan);
 
+            let strLogro = get_color_logro(Number(varLOGRO));
+
+         
             str += `
-            <tr class="${strLogro} hand" onclick="get_detalle_marca('${r.CODIGO_MARCA}','${r.MARCA}')">
-                <td>${r.MARCA}</td>
+            <tr class="${strLogro}">
+                <td>${r.CATEGORIA}</td>
                 <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
                 <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
-                <td>${F.setMoneda(varFaltan,'Q')}</td>
-                <td>${varLOGRO.toFixed(2)} %</td>
+                <td>${F.setMoneda(faltan,'Q')}</td>
+                <td>${varLOGRO.toFixed(2)}%</td>
             </tr>
             `
         })
         container.innerHTML = str;
 
-
-        document.getElementById('lbTotalMarcasImporte').innerHTML = F.setMoneda(varTotalImporte,'Q');
-        document.getElementById('lbTotalMarcasObjetivo').innerHTML = F.setMoneda(varTotalObjetivo,'Q');
-        document.getElementById('lbTotalMarcasFalta').innerHTML = F.setMoneda(varTotalFaltan,'Q');
-        document.getElementById('lbTotalMarcasLogro').innerHTML = `${F.setMoneda(varTotalLogro / conteo,'')} %`
-
-        let logrado = 0; let faltaLogro = 0;
-        try {
-           logrado = (Number(varTotalImporte)/Number(varTotalObjetivo))*100;
-           faltaLogro = 100-Number(logrado);
-        } catch (error) {
-            logrado=0;
-            faltaLogro=0;   
-        }
-        document.getElementById('lbObjLogrado').innerHTML = `<progress class="form-control" value="${logrado}" max="100"></progress><b class="text-success">${logrado.toFixed(2)}%</b>`;
-        document.getElementById('lbObjLogradoFalta').innerHTML = `<progress class="form-control progress-falta" value="${faltaLogro}" max="100"></progress><b class="text-danger">${faltaLogro.toFixed(2)}%</b>`;
+        document.getElementById('lbTotalMarcaObjetivo').innerHTML = F.setMoneda(varTotalObjetivo,'Q');
+        document.getElementById('lbTotalMarcaLogro').innerHTML = F.setMoneda(varTotalLogro,'Q');
+        document.getElementById('lbTotalMarcaFaltan').innerHTML = F.setMoneda(varTotalFaltan,'Q');
     })
-    .catch(()=>{
+    .catch((err)=>{
+
+        console.log(err);
 
         container.innerHTML = 'No se cargaron datos...';
 
-        document.getElementById('lbTotalMarcasImporte').innerHTML = '';
-        document.getElementById('lbTotalMarcasObjetivo').innerHTML =''; 
-        document.getElementById('lbTotalMarcasFalta').innerHTML = '';
-        document.getElementById('lbTotalMarcasLogro').innerHTML = '';
-
-        document.getElementById('lbObjLogrado').innerHTML = `<progress value="0" max="100"></progress>`;
-        document.getElementById('lbObjLogradoFalta').innerHTML = `<progress class="progress-falta" value="0" max="100"></progress>`;
-    
+        document.getElementById('lbTotalMarcaObjetivo').innerHTML = '';
+        document.getElementById('lbTotalMarcaLogro').innerHTML = '';
+        document.getElementById('lbTotalMarcaFaltan').innerHTML = '';
     })
 
 
-
 };
+
+//OBTIENE EL DETALLE DE CATEGORIAS DE LA MARCA
+// ------------------------------------------------
+// ------------------------------------------------
+

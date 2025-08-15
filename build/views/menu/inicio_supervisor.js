@@ -788,7 +788,7 @@ function getView(){
                             </div>
                         </div>
                         <div class="col-sm-12 col-xl-6 col-lg-6 col-md-6">
-                              <h5 class="text-info negrita">Objetivos</h5>
+                            <h5 class="text-info negrita">Objetivos</h5>
                             <small class="negrita text-secondary">Logrado:</small>
                             <div class="input-group" id="lbObjLogrado"></div>
                             <br>
@@ -1571,11 +1571,6 @@ function rpt_tbl_clientes_vendedores(){
 
 
 
-
-
-
-
-
 //OBJETIVOS
 
 function listeners_objetivos(){
@@ -1738,7 +1733,8 @@ function get_data_logro_marcas(sucursal,mes,anio,codemp){
 };
 function tbl_logro_marcas(sucursal,mes,anio){
 
-    let empleado = document.getElementById('cmb_objetivos_vendedores').value;
+    let empleado = GlobalCodUsuario;
+    //document.getElementById('cmb_objetivos_vendedores').value;
 
     let container = document.getElementById('tblDataMarcas2');
     container.innerHTML = GlobalLoader;
@@ -1817,6 +1813,10 @@ function tbl_logro_marcas(sucursal,mes,anio){
 
 
 
+// ------------------------------------------------
+// ------------------------------------------------
+//OBTIENE EL DETALLE DE CATEGORIAS DE LA MARCA
+
 function get_detalle_marca(codmarca,desmarca){
 
 
@@ -1828,9 +1828,7 @@ function get_detalle_marca(codmarca,desmarca){
 
 
 
-}
-
-
+};
 function get_data_logro_categorias_marcas(sucursal,codmarca,mes,anio){
 
     return new Promise((resolve,reject)=>{
@@ -1877,7 +1875,6 @@ function get_data_logro_categorias_marcas(sucursal,codmarca,mes,anio){
     
 
 };
-
 function tbl_logro_categorias_marca(codmarca){
 
     let container = document.getElementById('tblDataCategoriasMarca');
@@ -1891,13 +1888,12 @@ function tbl_logro_categorias_marca(codmarca){
 
     let varTotalObjetivo = 0; let varTotalLogro = 0; let varTotalFaltan = 0;
 
-
-
+  
     get_data_logro_categorias_marcas(sucursal,codmarca,mes,anio)
     .then((data)=>{
         let str = '';
         data.recordset.map((r)=>{
-           
+      
             let varLOGRO = ((Number(r.TOTALPRECIO)/Number(r.OBJETIVO))*100);
           
             varTotalObjetivo += Number(r.OBJETIVO);
@@ -1907,6 +1903,7 @@ function tbl_logro_categorias_marca(codmarca){
 
             let strLogro = get_color_logro(Number(varLOGRO));
 
+         
             str += `
             <tr class="${strLogro}">
                 <td>${r.CATEGORIA}</td>
@@ -1923,7 +1920,9 @@ function tbl_logro_categorias_marca(codmarca){
         document.getElementById('lbTotalMarcaLogro').innerHTML = F.setMoneda(varTotalLogro,'Q');
         document.getElementById('lbTotalMarcaFaltan').innerHTML = F.setMoneda(varTotalFaltan,'Q');
     })
-    .catch(()=>{
+    .catch((err)=>{
+
+        console.log(err);
 
         container.innerHTML = 'No se cargaron datos...';
 
@@ -1935,6 +1934,9 @@ function tbl_logro_categorias_marca(codmarca){
 
 };
 
+//OBTIENE EL DETALLE DE CATEGORIAS DE LA MARCA
+// ------------------------------------------------
+// ------------------------------------------------
 
 
 function get_data_logro_vendedores(sucursal,mes,anio){
