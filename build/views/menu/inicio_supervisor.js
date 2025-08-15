@@ -1733,7 +1733,7 @@ function get_data_logro_marcas(sucursal,mes,anio,codemp){
 };
 function tbl_logro_marcas(sucursal,mes,anio){
 
-    let empleado = GlobalCodUsuario;
+    let empleado = document.getElementById('cmb_objetivos_vendedores').value;
     //document.getElementById('cmb_objetivos_vendedores').value;
 
     let container = document.getElementById('tblDataMarcas2');
@@ -1888,12 +1888,13 @@ function tbl_logro_categorias_marca(codmarca){
 
     let varTotalObjetivo = 0; let varTotalLogro = 0; let varTotalFaltan = 0;
 
-  
+  console.log('por aqui 0');
     get_data_logro_categorias_marcas(sucursal,codmarca,mes,anio)
     .then((data)=>{
         let str = '';
         data.recordset.map((r)=>{
       
+            console.log('por aqui 1');
             let varLOGRO = ((Number(r.TOTALPRECIO)/Number(r.OBJETIVO))*100);
           
             varTotalObjetivo += Number(r.OBJETIVO);
