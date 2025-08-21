@@ -221,11 +221,24 @@ var tblCredenciales = {
     }
 };
 
+var tblTempCargaCostos = {
+    name: 'temp_carga_costos',
+    columns: {
+        ID:{ primaryKey: true, autoIncrement: true },
+        CODPROD:{dataType: "string"},
+        DESPROD:{dataType: "string"},
+        CODMEDIDA:{dataType: "string"},
+        EQUIVALE:{dataType: "number"},
+        COSTO:{dataType: "number"},
+        COSTO_NUEVO:{dataType: "number"},
+        PRECIO:{dataType: "number"}
+    }
+};
 
 
 var database = {
     name: DbName,
-    tables: [tblDocumentos,tblTempventas,tblTempventasPos,tblTempCompras,tblTempventasMovinv,tblTempventasMovinvBod,tblTempDevoluciones,tblCredenciales]
+    tables: [tblDocumentos,tblTempventas,tblTempventasPos,tblTempCompras,tblTempventasMovinv,tblTempventasMovinvBod,tblTempDevoluciones,tblTempCargaCostos,tblCredenciales]
 };
  
 // initiate jsstore connection

@@ -118,7 +118,7 @@ router.post("/universo_clientes_sucursal", async(req,res)=>{
        SELECT COUNT(CODCLIENTE) AS CONTEO
         FROM     CLIENTES
         WHERE  (HABILITADO = 'SI') AND 
-            (EMPNIT = '${sucursal}') 
+            (EMPNIT LIKE '%${sucursal}%') 
         `;
     
 

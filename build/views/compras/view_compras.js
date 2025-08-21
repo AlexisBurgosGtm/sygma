@@ -680,6 +680,56 @@ function getView(){
                 </div>
             </div>`
         },
+        modal_actualizar_costos:()=>{
+            return `
+            <div class="modal fade"  id="modal_actualizar_costos" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+
+                        <div class="modal-header bg-secondary">
+                            <label class="modal-title text-white h3">Actualización de Costos</label>
+                        </div>
+            
+                        <div class="modal-body p-4">
+                            
+                            <div class="table-responsive col-12">
+
+                                <table class="table table-responsive table-bordered table-hover" id="tblTomarDatos">
+                                    <thead class="bg-secondary text-white">
+                                        <tr>
+                                            <td>CODIGO</td>
+                                            <td>PRODUCTO</td>
+                                            <td>MEDIDA</td>
+                                            <td>EQUIVALE</td>
+                                            <td>COSTO ACTUAL</td>
+                                            <td>COSTO NUEVO</td>
+                                            <td>PRECIO</td>
+                                            <td></td>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDataTomarDatos"></tbody>
+                                </table>
+
+                                 <div class="row">
+                                    <div class="col-6 text-left">
+                                        <button class="btn btn-secondary btn-xl btn-circle hand shadow waves-effect waves-themed" data-dismiss="modal" id="">
+                                            <i class="fal fa-arrow-left"></i>
+                                        </button>                                
+                                    </div>
+                                    <div class="col-6 text-left">
+                                        <button class="btn btn-info btn-xl btn-circle hand shadow waves-effect waves-themed" id="btnUpdateTablaCostos">
+                                            <i class="fal fa-sync"></i>
+                                        </button>                                
+                                    </div>
+                                </div>
+                            
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>`
+        },
     }
 
     root.innerHTML = view.body();
