@@ -47,8 +47,9 @@ function getView(){
                             </div>
                             <div class="row">
                                 <div class="col-6" align="left" id="scene2">
-                                
-                                    <small data-depth="0.8" class="text-secondary negrita">${versionapp}</small>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="$('#modal_log').modal('show')">
+                                        <i class="fal fa-list"></i>${versionapp}
+                                    </button>
                                 </div>
                                 <div class="col-6" align="right">
                                     <button class="btn btn-base btn-xl shadow btn-circle" id="btnIniciar">
@@ -57,21 +58,7 @@ function getView(){
                                 </div>
                             </div>
 
-                            <div class="row hidden">
-                                
-                                <div class="card col-12">
-                                    <div clas="card-body p-4">
-                                        <button class="btn btn-danger hand" id="btnGuatex">
-                                            Guatex
-                                        </button>
-                                        <div id="root_guatex">
-                                        
-                                        </div>
-
-                                    </div>
-                                </div>
-
-                            </div>
+                           
                            
                         </div>
                     </div>
@@ -168,6 +155,7 @@ function addListeners(){
         });
 
 
+        get_log();
 
 };
 

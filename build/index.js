@@ -49,6 +49,34 @@ F.instalationHandlers('btnInstalarApp');
 
 
 
+function get_log(){
+
+    let log = [
+      {FECHA:'20-08-2025',DESCRIPCION:'AGREGADO INPUT BUSQUEDA DE DOCUMENTOS EN ARCHIVO/DOCUMENTOS'},
+      {FECHA:'21-08-2025',DESCRIPCION:'AGREGADO CARGA DE COSTOS EN COMPRAS'},
+      {FECHA:'21-08-2025',DESCRIPCION:'SE QUITO PROVISIONALMENTE LA EDICION DE CANTIDAD EN PEDIDOS VENDEDOR'},
+      {FECHA:'21-08-2025',DESCRIPCION:'SE AGREGO LA VENTANA DE GOLES A MODULO GERENCIA EN INICIO'},
+      {FECHA:'',DESCRIPCION:''},
+      {FECHA:'',DESCRIPCION:''},
+      {FECHA:'',DESCRIPCION:''},
+    ]
+
+
+    let container = document.getElementById('root_log');
+    let str = '';
+
+    log.map((r)=>{
+        str+= `<tr>
+                  <td>${r.FECHA}</td>
+                  <td>${r.DESCRIPCION}</td>
+              </tr>`
+    })
+    container.innerHTML = str;
+    
+
+};
+
+
 Navegar.login();
 
 

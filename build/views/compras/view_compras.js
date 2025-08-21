@@ -398,10 +398,7 @@ function getView(){
 
                             <br>
 
-                            <div class="form-group">
-                                <label class="text-secondary">Observaciones</label>
-                                <textarea class="form-control negrita col-12" rows="4" value="" id="txtObs"></textarea>   
-                            </div>
+                            
 
                             <div class="row">
                                
@@ -423,14 +420,25 @@ function getView(){
                                             </div>
                                         </div>
                                 </div>
-                                
-
-                                        
 
                                 
+                               
+                            </div>
+                            <br>
+                                <div class="form-group">
+                                    <button class="btn btn-primary btn-md form-control col-12 shadow hand"
+                                    id="btnCargarCostos">
+                                        <i class="fal fa-sync"></i>&nbsp Cargar Costos
+                                    </button>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="text-secondary">Observaciones</label>
+                                    <textarea class="form-control negrita col-12" rows="2" value="" id="txtObs"></textarea>   
+                                </div>
+
                                 <h2 class="negrita text-danger hidden" style="font-size:280%" id="lbPosCobroTotalPagar">Q 0.00</h2>
                             
-                            </div>  
 
                         </div>
                     </div>
@@ -753,9 +761,83 @@ function addListeners(){
 
     document.getElementById('txtPosCodprod').focus();
 
+
+
+    let btnCargarCostos = document.getElementById('btnCargarCostos');
+    btnCargarCostos.addEventListener('click',()=>{
+
+        F.Confirmacion('¿Está seguro que desea ACTUALIZAR los costos de su catálogo con los costos registrados en la compra?')
+        .then((value)=>{
+            if(value==true){
+
+                    btnCargarCostos.disabled = true;
+                    btnCargarCostos.innerHTML = `<i class="fal fa-sync fa-spin"></i>`;
+
+                    update_costos()
+                    .then(()=>{
+                        F.Aviso('Proceso finalizado exitosamente!!');
+                        btnCargarCostos.disabled = false;
+                        btnCargarCostos.innerHTML = `<i class="fal fa-sync"></i>&nbsp Cargar Costos`;
+                    }) 
+                    .catch(()=>{
+                        F.AvisoError('No se pudo actualizar costos');
+                        btnCargarCostos.disabled = false;
+                        btnCargarCostos.innerHTML = `<i class="fal fa-sync"></i>&nbsp Cargar Costos`;
+                    });   
+                        
+
+
+            }
+        })
+     
+
+    });
+
+
+
 };
 
+function update_costos(){
 
+            return new Promise((resolve,reject)=>{
+
+                db_compra.selectTempVentasPOS(GlobalEmpnit)
+                .then((data)=>{
+
+                        let json_costos = JSON.stringify(data);
+                    
+                         axios.post(GlobalUrlCalls + '/compras/update_costos_compra', {
+                                                                                sucursal:GlobalEmpnit,
+                                                                                json_costos:json_costos
+                                                                            })
+                        .then((response) => {
+                            if(response.status.toString()=='200'){
+                                let data = response.data;
+                                if(data.toString()=="error"){
+                                    reject();
+                                }else{
+                                    if(Number(data.rowsAffected[0])>0){
+                                        resolve(data);             
+                                    }else{
+                                        reject();
+                                    } 
+                                }       
+                            }else{
+                                reject();
+                            }                   
+                        }, (error) => {
+                            reject();
+                        });
+                    
+                })
+                .catch(()=>{
+                    reject();
+                })
+
+               
+            }) 
+
+}
 
 function listener_coddoc(){
 

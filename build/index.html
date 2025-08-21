@@ -429,7 +429,57 @@
         </div> <!-- END Page Settings -->
         
 
-        <!-- MODAL MENU -->
+        <!-- MODAL LOG ACTULIZACIONES -->
+        <div class="modal fade  modal-backdrop-transparent modal-with-scroll" 
+            tabindex="-1" role="dialog" aria-hidden="true" 
+            id="modal_log">
+            <div class="modal-dialog modal-dialog-right modal-xl">
+                <div class="modal-content">
+                    <div class="dropdown-header bg-base d-flex justify-content-center align-items-center w-100">
+                        <h4 class="m-0 text-center color-white" id="">
+                            Registro de Cambios / Log
+                        </h4>
+                    </div>
+                    <div class="modal-body p-2">
+                        
+                        <div class="card card-rounded">
+                            <div class="card-body p-2">
+
+                                
+                                <div class="table-responsive">
+                                    <input type="text" class="form-control text-sm"
+                                    oninput="F.FiltrarTabla('tblLog','txtBuscarLog')"
+                                    id="txtBuscarLog"
+                                    placeholder="Buscar...">
+
+                                    <table class="table h-full col-12" id="tblLog">
+                                        <thead class="bg-base text-white">
+                                            <tr>
+                                                <td>FECHA</td>
+                                                <td>DESCRIPCION</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="root_log"></tbody>
+                                    </table>
+
+
+                                </div>
+                            
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
+                            <i class="fal fa-arrow-left"></i>
+                        </button>
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+
+         <!-- MODAL MENU -->
         <div class="modal fade  modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true" id="modal_menu">
             <div class="modal-dialog modal-dialog-right modal-xl">
                 <div class="modal-content">

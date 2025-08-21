@@ -4,6 +4,46 @@ const router = express.Router();
 
 
 
+router.post("/update_costos_compra", async(req,res)=>{
+   
+
+    const { token,sucursal,json_costos} = req.body;
+
+    let qry ='';
+
+    let data_costos = JSON.parse(json_costos);
+
+    let qry_productos=''; let qry_precios='';
+
+    data_costos.map((r)=>{
+
+        let costo = Number(r.COSTO)/Number(r.EQUIVALE);
+        let costo_promedio = costo/Number(r.EXISTENCIA);
+
+        qry_productos += `
+            UPDATE PRODUCTOS SET 
+                    COSTO_ULTIMO=${costo}, 
+                    COSTO_PROMEDIO=${costo_promedio},
+                    COSTO_ANTERIOR=${costo}
+            WHERE CODPROD='${r.CODPROD}';
+            `
+        qry_precios += `
+            UPDATE PRECIOS SET COSTO=${Number(r.COSTO)}
+            WHERE CODPROD='${r.CODPROD}' AND CODMEDIDA='${r.CODMEDIDA}';
+        `
+    })
+    
+    qry = qry_productos + qry_precios;
+
+    console.log(qry);
+
+    res.send('error');
+    
+    //execute.QueryToken(res,qry,token);
+     
+});
+
+
 router.post("/update_sell_out_productos", async(req,res)=>{
    
 

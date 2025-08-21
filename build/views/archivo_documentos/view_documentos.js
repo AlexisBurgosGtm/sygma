@@ -62,7 +62,20 @@ function getView(){
                     </div>
                     <hr class="solid">
 
+
                     <div class="table-responsive col-12">
+
+                        <div class="form-group">
+                            <div class="input-group">
+                                <input type="text" 
+                                class="border-info text-info form-control" 
+                                placeholder="Escriba para buscar..."
+                                oninput="F.FiltrarTabla('tblDocumentos','txtBuscarDoc')"
+                                id="txtBuscarDoc">
+                                <h3 class="negrita text-danger" id="lbTotalItems">Conteo: 0</h3>
+                            </div>
+                        </div>
+
                         <table class="table table-hover col-12 h-full" id="tblDocumentos">
                             <thead class="bg-base text-white">
                                 <tr>
@@ -222,11 +235,15 @@ function get_documentos(){
     GlobalEntSal = get_tipo_movinv_documento(tipo);
 
 
+    let varTotalItems = 0;
 
     GF.get_data_documentos(tipo,mes,anio)
     .then((data)=>{
         let str = '';
         data.recordset.map((r)=>{
+            
+            varTotalItems+=1;
+
             let btnEliminar = `btnEliminar${r.CODDOC}-${r.CORRELATIVO}`
             str += `
                 <tr class="hand">
@@ -259,9 +276,11 @@ function get_documentos(){
             `
         })
         container.innerHTML = str;
+        document.getElementById('lbTotalItems').innerText = ` Conteo: ${varTotalItems}`;
     })
     .catch(()=>{
         container.innerHTML = 'No se cargaron datos...';
+        document.getElementById('lbTotalItems').innerText = 'Conteo: 0';
     })
 
 
