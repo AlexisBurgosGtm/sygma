@@ -141,6 +141,18 @@ router.post("/empleados_tipo", async(req,res)=>{
 
     let qry = `SELECT CODEMPLEADO, CODPUESTO, NOMEMPLEADO,
         DIRECCION,CLAVE FROM EMPLEADOS 
+        WHERE EMPNIT LIKE '%${sucursal}%' AND CODPUESTO=${tipo} AND ACTIVO='SI'
+        ORDER BY NOMEMPLEADO;`
+    
+    execute.QueryToken(res,qry,token); 
+     
+});
+router.post("/BACKUP_empleados_tipo", async(req,res)=>{
+   
+    const { token, sucursal, tipo } = req.body;
+
+    let qry = `SELECT CODEMPLEADO, CODPUESTO, NOMEMPLEADO,
+        DIRECCION,CLAVE FROM EMPLEADOS 
         WHERE EMPNIT='${sucursal}' AND CODPUESTO=${tipo} AND ACTIVO='SI'
         ORDER BY NOMEMPLEADO;`
     

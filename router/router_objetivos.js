@@ -37,6 +37,38 @@ router.post("/goles_resumen_vendedor", async(req,res)=>{
     let qry = '';
     if(codemp=='TODOS'){
         qry = `
+        SELECT CODPROD, DESPROD, COUNT(CODCLIENTE) AS CONTEO
+        FROM     view_rpt_goles_productos_cliente
+        WHERE  (ANIO = ${anio}) AND (MES = ${mes}) 
+        AND (EMPNIT LIKE '%${sucursal}%')
+        GROUP BY CODPROD, DESPROD
+        ORDER BY CODPROD`
+    }else{
+        qry = `
+        SELECT CODPROD, DESPROD, COUNT(CODCLIENTE) AS CONTEO, EMPNIT, CODEMP
+        FROM     view_rpt_goles_productos_cliente
+        WHERE  (ANIO = ${anio}) AND (MES = ${mes}) 
+        AND (CODEMP=${Number(codemp)}) AND (EMPNIT LIKE '%${sucursal}%')
+        GROUP BY CODPROD, DESPROD, EMPNIT, CODEMP
+        ORDER BY CODPROD
+        `;
+    }
+
+    
+
+    console.log(qry)
+
+    execute.QueryToken(res,qry,token);
+     
+});
+//ANTES DE PONER EL COMODIN EN EMPRESAS
+router.post("/BACKUP_goles_resumen_vendedor", async(req,res)=>{
+   
+    const { token, sucursal,codemp, mes,anio} = req.body;
+
+    let qry = '';
+    if(codemp=='TODOS'){
+        qry = `
         SELECT CODPROD, DESPROD, COUNT(CODCLIENTE) AS CONTEO, EMPNIT
         FROM     view_rpt_goles_productos_cliente
         WHERE  (ANIO = ${anio}) AND (MES = ${mes}) 

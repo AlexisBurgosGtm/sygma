@@ -11,7 +11,7 @@ function getView(){
                     </div>
                     <div class="col-sm-6 col-lg-3 col-xl-3 col-md-3">
                       
-                         ${view.menu_cobertura()}
+                         ${view.menu_goles()}
                     </div>
                     <div class="col-sm-6 col-lg-3 col-xl-3 col-md-3">
                         ${view.menu_inventarios()}
@@ -25,7 +25,7 @@ function getView(){
                             ${view.tab_objetivos()}
                         </div>                        
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
-                            ${view.tab_cobertura()}                                           
+                            ${view.tab_goles()}                                           
                         </div>
                         <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
                             ${view.tab_inventario()}
@@ -183,17 +183,17 @@ function getView(){
             </div>
             `
         },
-        menu_cobertura:()=>{
+        menu_goles:()=>{
             return `
             <div class="card card-rounded shadow hand col-12 border-success" id="btnMenuCobertura">
                 <div class="card-body">
-                    <h5 class="text-success negrita">COBERTURA</h5>
+                    <h5 class="text-success negrita">GOLES P&G</h5>
                     
-                    <small class="negrita text-secondary">Logrado:</small>
-                    <div class="input-group" id="lbCoberturaLogrado"></div>
+                    <small class="negrita text-secondary"></small>
+                    <div class="input-group" id="lbGolesLogrado"></div>
                     <br>
-                    <small class="negrita text-secondary">Faltan:</small>
-                    <div class="input-group" id="lbCoberturaFalta"></div>
+                    <small class="negrita text-secondary"></small>
+                    <div class="input-group" id="lbGolesFalta"></div>
                 </div>
             </div>
             `
@@ -473,14 +473,78 @@ function getView(){
             </div>
             `
         },
-        tab_cobertura:()=>{
+        tab_goles:()=>{
             return `
-            <div class="card card-rounded col-12 shadow">
-                <div class="card-body p-2">
-                
-                
+             <div class="card card-rounded col-12">
+                <div class="card-body p-4">
+                                
+                    <div class="row">
+                        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                            <h4 class="negrita text-base">LOGRO DE GOLES POR MES</h4>               
+                        </div>
+                        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                            <div class="form-group">
+                                <label>Vendedor</label>
+                                <select class="form-control negrita" id="cmbEmpleado">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                   
+                    <br>
+                    <div class="row">
+                        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                            <div class="form-group">
+                                <label>Seleccione Mes y Año</label>
+                                <div class="input-group">
+                                    <select class="form-control negrita" id="cmbMesGoles">
+                                    </select>
+                                    <select class="form-control negrita" id="cmbAnioGoles">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                            <h5>Total Goles:</h5>
+                            <h1 class="negrita text-danger" id="lbTotalGoles"></h1>
+                        </div>
+                    </div>
+
+                       
+
+                    <hr class="solid">
+
+                    <div class="table-responsive">
+
+                        <div class="form-group">
+                            <input type="text" class="form-control border-info text-info"
+                            id="txtBuscarGoles"
+                            placeholder="Escriba para buscar..." 
+                            oninput="F.FiltrarTabla('tblGoles','txtBuscarGoles')"
+                            >
+                        </div>
+
+                        <table class="table h-full table-hover table-bordered" id="tblGoles">
+                            <thead class="bg-primary text-white">
+                                <tr>
+                                    <td>PRODUCTO</td>
+                                    <td>GOLES</td>
+                                    <td>UNIVERSO</td>
+                                    <td>OPORTUNIDAD</td>
+                                    <td></td>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataGoles">
+                            </tbody>
+
+                        </table>
+
+                    </div>
+            
                 </div>
             </div>
+
+        
             `
         }
     }
@@ -520,6 +584,8 @@ function addListeners(){
             })
             cmbSucursal.innerHTML = str;
 
+              
+
             get_grid();
            
     })
@@ -530,7 +596,7 @@ function addListeners(){
 
     cmbSucursal.addEventListener('change',()=>{
         try {
-           
+          
             get_grid();
 
         } catch (error) {
@@ -561,7 +627,7 @@ function addListeners(){
 
 
     listeners_objetivos();
-    listeners_cobertura();
+    listeners_goles();
     listeners_inventario();
 
 
@@ -577,8 +643,17 @@ function get_grid(){
             get_reportes();
             break;
     
-        case 'COBERTURA':
-            tbl_cobertura();
+        case 'GOLES':
+                
+                get_empleados()
+                .then(()=>{
+                    rpt_goles_resumen();
+                })
+                .catch(()=>{
+                    F.AvisoError('No se cargaron los vendedores');
+                });
+
+            
             break;
     
         case 'INVENTARIOS':
@@ -593,17 +668,45 @@ function get_grid(){
     }
 };
 
-function listeners_cobertura(){
+function listeners_goles(){
 
         document.getElementById('btnMenuCobertura').addEventListener('click',()=>{
 
-            selected_tab = 'COBERTURA';
+            selected_tab = 'GOLES';
 
             document.getElementById('tab-dos').click();
-
-            tbl_cobertura();
+       
+            get_grid();
 
         });
+
+
+
+    document.getElementById('cmbEmpleado').addEventListener('change',()=>{
+        try {
+            rpt_goles_resumen(selected_universo_clientes_sucursal);
+        } catch (error) {
+            
+        }
+    })
+
+    document.getElementById('cmbMesGoles').innerHTML = F.ComboMeses();
+    document.getElementById('cmbMesGoles').value = F.get_mes_curso();
+    document.getElementById('cmbMesGoles').addEventListener('change',()=>{
+
+        rpt_goles_resumen(selected_universo_clientes_sucursal);
+
+    });
+
+    document.getElementById('cmbAnioGoles').innerHTML = F.ComboAnio();
+    document.getElementById('cmbAnioGoles').value = F.get_anio_curso();
+    document.getElementById('cmbAnioGoles').addEventListener('change',()=>{
+          
+            rpt_goles_resumen(selected_universo_clientes_sucursal);
+        
+    });
+
+
 
 };
 
@@ -1274,13 +1377,111 @@ function tbl_detalle_vendedor(codemp){
 // OBJETIVOS
 
 
-//COBERTURA
 
-function tbl_cobertura(){
+
+
+//GOLES
+//---------------------
+
+function get_empleados(){
+
+    return new Promise((resolve,reject)=>{
+
+            let sucursal = document.getElementById('cmbSucursal').value;
+
+            GF.get_data_empleados_tipo_emp(3,sucursal)
+            .then((data)=>{
+                let str = `<option value='TODOS'>TODOS</option>`;
+                data.recordset.map((r)=>{
+                    str += `<option value='${r.CODEMPLEADO}'>${r.NOMEMPLEADO}</option>`
+                })
+                document.getElementById('cmbEmpleado').innerHTML = str;
+                resolve();
+            })
+            .catch(()=>{
+                document.getElementById('cmbEmpleado').innerHTML = '';
+                reject();
+            })
+            
+    })
+
+};
+
+function rpt_goles_resumen(){
+
+    let sucursal = document.getElementById('cmbSucursal').value;
+    let codemp = document.getElementById('cmbEmpleado').value;
+    let mes = document.getElementById('cmbMesGoles').value;
+    let anio = document.getElementById('cmbAnioGoles').value;
+
+    
+    F.showToast('Cargando total universo clientes');
+            
+
+    if(codemp=='TODOS'){
+
+            GF.get_data_universo_clientes_sucursal(sucursal)
+            .then((universo)=>{
+                rpt_tbl_goles_resumen(sucursal,codemp,mes,anio,universo);
+            })
+            .catch(()=>{
+                rpt_tbl_goles_resumen(sucursal,codemp,mes,anio,0);
+            })
+    }else{
+
+            GF.get_data_universo_clientes_empleado(sucursal,codemp)
+            .then((universo)=>{
+                rpt_tbl_goles_resumen(sucursal,codemp,mes,anio,universo);
+            })
+            .catch(()=>{
+                rpt_tbl_goles_resumen(sucursal,codemp,mes,anio,0);
+            })
+
+    }
+
+
+   
+
 
 
 
 };
+function rpt_tbl_goles_resumen(sucursal,codemp,mes,anio,universo){
+
+    let container = document.getElementById('tblDataGoles');
+    container.innerHTML = GlobalLoader;
+
+    let varTotal = 0;
+
+    GF.get_data_goles_resumen_mes(sucursal,codemp,mes,anio)
+    .then((data)=>{
+        let str = '';
+        data.recordset.map((r)=>{
+            varTotal += Number(r.CONTEO);
+            str+= `
+            <tr>
+                <td>${r.DESPROD}
+                    <br>
+                    <small>${r.CODPROD}</small>
+                </td>
+                <td>${r.CONTEO}</td>
+                <td>${universo}</td>
+                <td>${Number(universo)-Number(r.CONTEO)}</td>
+                <td></td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
+        document.getElementById('lbTotalGoles').innerText = varTotal;
+    })
+    .catch(()=>{
+        container.innerHTML = 'No se cargaron datos....';
+        document.getElementById('lbTotalGoles').innerText = '';
+    })
+}
 
 
-//COBERTURA
+//---------------------
+//GOLES
+
+
