@@ -60,7 +60,7 @@ function getView(){
             </button>
 
             
-            ${view.modal_listado_facturas()}
+            ${view.modal_listado_facturas() + view.modal_editar_cantidad()}
 
             `
         },
@@ -186,6 +186,74 @@ function getView(){
 
           
             `
+        },
+        modal_editar_cantidad:()=>{
+            return `
+            <div class="modal" id="modal_editar_cantidad" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+
+                        <div class="modal-header bg-base">
+                            <label class="modal-title text-white h3" id="lbCantidadDesprodE">Cantidad de producto</label>
+                        </div>
+            
+                        <div class="modal-body p-4">
+                            <div class="row">
+                                <div class="col-4 text-center">
+                                    <img src="./favicon.png" width="120px" height="100px">
+                                </div>
+                                <div class="col-8">
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary">Cantidad:</label>
+                                        <input type="number" style="font-size:140%" class="form-control negrita text-info border-base shadow col-10" id="txtMCCantidadE">
+                                    </div>   
+                                    
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary">Precio ${GlobalSignoMoneda}:</label>
+                                        <input disabled="true" type="number" style="font-size:140%" class="form-control negrita text-info border-base shadow col-10" id="txtMCPrecioE">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary">Subtotal ${GlobalSignoMoneda}:</label>
+                                        <input type="number" style="font-size:150%" class="form-control negrita text-danger border-base shadow col-10" id="txtMCTotalPrecioE" disabled>
+                                    </div>
+
+
+                                    <div class="form-group hidden">
+                                        <label class="negrita text-secondary">Descuento ${GlobalSignoMoneda}:</label>
+                                        <input type="number" style="font-size:140%" class="form-control negrita text-info border-base shadow col-10" id="txtMCDescuentoE" oninput="calcular_descuento('txtMCDescuentoE','txtMCTotalPrecioE','txtMCTotalPrecioDescuentoE')">
+                                    </div>
+                                    
+                                    <div class="form-group hidden">
+                                        <label class="negrita text-secondary">Importe ${GlobalSignoMoneda}:</label>
+                                        <input type="number" style="font-size:150%" class="form-control negrita text-danger border-base shadow col-10" id="txtMCTotalPrecioDescuentoE" disabled>
+                                    </div>
+
+
+                                </div>            
+                            </div>
+                                
+                            <br>
+        
+                            <div class="row">
+                                    <div class="col-5 text-right">
+                                        <button class="btn btn-secondary btn-xl btn-circle hand shadow waves-effect waves-themed" data-dismiss="modal" id="">
+                                            <i class="fal fa-arrow-left"></i>
+                                        </button>                                
+                                    </div>
+        
+                                    <div class="col-1"></div>
+        
+                                    <div class="col-5 text-right">
+                                        <button class="btn btn-base btn-xl btn-circle hand shadow waves-effect waves-themed" id="btnMCGuardarE">
+                                            <i class="fal fa-check mr-1"></i>
+                                        </button>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`
         },
         modal_listado_facturas:()=>{
             return `
@@ -439,8 +507,77 @@ function addListeners(){
 
 
 
-    })
+    });
 
+
+
+
+    //--------------------------------
+    //modal editar cantidad
+    //---------------------------
+    let btnMCGuardarE = document.getElementById('btnMCGuardarE');
+    btnMCGuardarE.addEventListener('click',()=>{
+
+        let cantidad = Number(document.getElementById('txtMCCantidadE').value || 1);
+        let preciounitario = Number(document.getElementById('txtMCPrecioE').value||0);
+        let descuento =Number(document.getElementById('txtMCDescuentoE').value||0);
+
+            
+
+
+        let nuevacantidad = Number(cantidad);
+        db_devoluciones.update_row(Number(Selected_id),nuevacantidad,preciounitario,descuento)
+        .then(()=>{
+            $("#modal_editar_cantidad").modal('hide');
+
+            F.showToast('Producto agregado ' + Selected_desprod);
+            get_grid_productos();
+
+            
+        })
+        .catch(()=>{
+            F.AvisoError('No se pudo agregar');
+        })
+
+
+
+    });
+    document.getElementById('txtMCCantidadE').addEventListener('input',()=>{
+        CalcularTotalPrecioEditar();  
+    });
+    document.getElementById('txtMCCantidadE').addEventListener('keyup',(e)=>{
+        if (e.code === 'Enter') { 
+            //document.getElementById('txtMCPrecioE').focus();
+            document.getElementById('btnMCGuardarE').focus();
+        };
+        if (e.keyCode === 13 && !e.shiftKey) {
+            //document.getElementById('txtMCPrecioE').focus();
+            document.getElementById('btnMCGuardarE').focus();
+        };  
+    });
+    document.getElementById('txtMCPrecioE').addEventListener('input',()=>{
+        CalcularTotalPrecioEditar();  
+    });
+    document.getElementById('txtMCPrecioE').addEventListener('keyup',(e)=>{
+        if (e.code === 'Enter') { 
+            document.getElementById('btnMCGuardarE').focus();
+        };
+        if (e.keyCode === 13 && !e.shiftKey) {
+            document.getElementById('btnMCGuardarE').focus();
+        };  
+    });
+    document.getElementById('txtMCDescuentoE').addEventListener('keyup',(e)=>{
+        if (e.code === 'Enter') { 
+            document.getElementById('btnMCGuardarE').focus();
+        };
+        if (e.keyCode === 13 && !e.shiftKey) {
+            document.getElementById('btnMCGuardarE').focus();
+        };  
+    });
+
+    //--------------------------------
+    //modal editar cantidad
+    //--------------------------------
 
 
 };
@@ -547,7 +684,9 @@ function get_listado_factura(){
                 <td>${F.convertDateNormal(r.FECHA)}</td>
                 <td>${r.CODDOC}-${r.CORRELATIVO}</td>
                 <td>${F.limpiarTexto(r.NOMBRE)}</td>
-                <td>${r.EMPLEADO}</td>
+                <td>${r.EMPLEADO}
+                    <br><small>${r.CODEMBARQUE}</small>
+                </td>
                 <td>${F.setMoneda(r.TOTALVENTA,'Q')}</td>
                 <td></td>
             </tr>
@@ -678,7 +817,8 @@ function get_grid_productos(){
                 <td>${F.setMoneda(r.PRECIO,'Q')}</td>
                 <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
                 <td>
-                    <button class="btn btn-info btn-md btn-circle hand shadow">
+                    <button class="btn btn-info btn-md btn-circle hand shadow"
+                    onclick="edit_item('${r.ID}','${r.CODPROD}','${r.DESPROD}','${r.CODMEDIDA}','${r.EQUIVALE}','${r.CANTIDAD}','${r.COSTO}','${r.PRECIO}','${r.TIPOPROD}','${r.EXENTO}','${r.EXISTENCIA}','${r.BONO}','${r.DESCUENTO}')">
                         <i class="fal fa-edit"></i>
                     </button>
                 </td>
@@ -700,6 +840,7 @@ function get_grid_productos(){
 };
 
 
+
 function delete_item(id){
 
     F.Confirmacion('¿Está seguro que desea Quitar este item?')
@@ -714,7 +855,41 @@ function delete_item(id){
         }
     })
 
-}
+};
+function edit_item(id,codprod,desprod,codmedida,equivale,cantidad,costo,precio,tipoprod,exento,existencia,bono,descuento){
+
+    $("#modal_editar_cantidad").modal('show');
+
+    Selected_id = id;
+    Selected_codprod = codprod;
+    Selected_desprod = desprod;
+    Selected_codmedida = codmedida;
+    Selected_equivale = Number(equivale);
+    Selected_costo = Number(costo);
+    Selected_precio = Number(precio);
+    Selected_tipoprod = tipoprod;
+    Selected_exento = Number(exento);
+    Selected_existencia = Number(existencia);
+    Selected_bono = Number(bono)
+
+    document.getElementById('lbCantidadDesprodE').innerText = `${desprod} (${codmedida} - Eq: ${equivale})`;
+
+    document.getElementById('txtMCCantidadE').value = cantidad;
+    document.getElementById('txtMCPrecioE').value = precio;
+    document.getElementById('txtMCDescuentoE').value = descuento;
+
+    CalcularTotalPrecioEditar();
+
+    document.getElementById('txtMCCantidadE').focus();
+};
+function CalcularTotalPrecioEditar(){
+
+    let cantidad = document.getElementById('txtMCCantidadE').value || 1;
+    let precio = document.getElementById('txtMCPrecioE').value;
+    
+    document.getElementById('txtMCTotalPrecioE').value = (Number(cantidad)*Number(precio));
+
+};
 
 
 
@@ -837,6 +1012,10 @@ function clean_data(){
         .catch((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
 
 
+        db_devoluciones.deleteTempVenta_pos()
+        .then(()=>{
+            get_grid_productos();
+        })
 
         document.getElementById('txtCodembarque').value='';
     

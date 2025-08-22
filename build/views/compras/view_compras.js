@@ -36,7 +36,7 @@ function getView(){
                         </div>
 
                         <div class="tab-pane fade" id="documento" role="tabpanel" aria-labelledby="home-tab">
-                            ${view.documento() + view.modal_lista_clientes()}
+                            ${view.documento() + view.modal_lista_clientes() + view.modal_actualizar_costos()}
                         </div>
                     </div>
 
@@ -816,6 +816,12 @@ function addListeners(){
     let btnCargarCostos = document.getElementById('btnCargarCostos');
     btnCargarCostos.addEventListener('click',()=>{
 
+
+        $("#modal_actualizar_costos").modal('show');
+
+
+        return;
+
         F.Confirmacion('¿Está seguro que desea ACTUALIZAR los costos de su catálogo con los costos registrados en la compra?')
         .then((value)=>{
             if(value==true){
@@ -846,6 +852,7 @@ function addListeners(){
 
 
 };
+
 
 function update_costos(){
 

@@ -998,7 +998,7 @@ let db_compra = {
 // --------------------------------
 
 let db_devoluciones = {
-    gettempDocproductos_pos:(usuario)=>{
+    gettempDocproductos_pos:()=>{
     
         return new Promise(async(resolve,reject)=>{
             var response = await connection.select({
@@ -1013,7 +1013,7 @@ let db_devoluciones = {
         })
         
     },
-    selectTempVentasPOS:(sucursal)=>{
+    selectTempVentasPOS:()=>{
 
         return new Promise(async(resolve,reject)=>{
             var response = await connection.select({
@@ -1051,7 +1051,7 @@ let db_devoluciones = {
             if(rowsDeleted>0){resolve()}else{reject()}
         })            
     },
-    selectDataRowVentaPOS:(id,nuevacantidad,nuevoprecio,descuento)=>{
+    update_row:(id,nuevacantidad,nuevoprecio,descuento)=>{
     
         let costo = 0; let precio = 0; let equivale =0; let exento=0; let cantidad= nuevacantidad;
         
@@ -1105,6 +1105,64 @@ let db_devoluciones = {
                 from: "temp_devoluciones"
             });
             if(rowsDeleted>0){resolve()}else{resolve()}
+        })            
+    }
+}
+
+// --------------------------------
+// NOTAS DE CREDITO
+// --------------------------------
+
+
+
+// --------------------------------
+// NOTAS DE CREDITO - DEVOLUCIONES
+// --------------------------------
+
+let db_costos = {
+    tbl_temp:()=>{
+    
+        return new Promise(async(resolve,reject)=>{
+            var response = await connection.select({
+                from: "temp_carga_costos",
+                order: { by: 'ID', type: 'asc' }
+            })
+            if(Number(response.length)>0){
+                resolve(response);
+            }else{
+                reject('No hay productos agregados');
+            }
+        })
+        
+    },
+    json_tbl_temp:()=>{
+
+        return new Promise(async(resolve,reject)=>{
+            var response = await connection.select({
+                from: "temp_carga_costos",
+                order: { by: 'ID', type: 'desc' }
+            });
+            let datos = JSON.stringify(response);
+            datos = datos.replace('[','');
+            datos = datos.replace(']','');
+            let result = '[' + datos + ']';
+            let data = JSON.parse(result);
+            resolve(data);
+        });
+    },
+    insert_temp_costo:(datos)=>{
+        return new Promise((resolve,reject)=>{
+            connection.insert({
+                into: "temp_carga_costos",
+                values: [datos] //you can insert multiple values at a time
+            })
+            resolve();    
+        }) 
+    },
+    delete_tbl_temp:()=>{
+        return new Promise(async(resolve,reject)=>{
+            var rowsDeleted = await connection.clear("temp_carga_costos");
+            resolve();
         })            
     }
 }
