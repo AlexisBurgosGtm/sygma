@@ -421,11 +421,11 @@ router.post("/select_logro_vendedores_categorias", async(req,res)=>{
      
 });
 
-router.post("/BACKUP_select_logro_vendedores_categorias", async(req,res)=>{
+router.post("/select_logro_vendedores_categorias_todas", async(req,res)=>{
    
     const { token, codemp, sucursal, mes, anio} = req.body;
 
-    let qry = `
+    let qryx = `
 	SELECT view_data_objetivos_vendedor.EMPNIT, view_data_objetivos_vendedor.EMPRESA, 
 				view_data_objetivos_vendedor.CODEMP, 
 				view_data_objetivos_vendedor.EMPLEADO, 
@@ -445,6 +445,19 @@ GROUP BY view_data_objetivos_vendedor.EMPNIT, view_data_objetivos_vendedor.EMPRE
 HAVING (view_data_objetivos_vendedor.CODEMP = ${codemp})
         `;
     
+        let qry = `
+        SELECT view_data_objetivos_vendedor.EMPNIT, view_data_objetivos_vendedor.EMPRESA, view_data_objetivos_vendedor.CODEMP, view_data_objetivos_vendedor.EMPLEADO, view_data_objetivos_vendedor.CODCATEGORIA, 
+                  view_data_objetivos_vendedor.CATEGORIA, view_data_objetivos_vendedor.OBJETIVO, ISNULL(view_rpt_objetivos_vendedores_categorias_resumen.TOTALUNIDADES, 0) AS TOTALUNIDADES, 
+                  ISNULL(view_rpt_objetivos_vendedores_categorias_resumen.TOTALCOSTO, 0) AS TOTALCOSTO, ISNULL(view_rpt_objetivos_vendedores_categorias_resumen.TOTALPRECIO, 0) AS LOGRO
+FROM     view_rpt_objetivos_vendedores_categorias_resumen RIGHT OUTER JOIN
+                  view_data_objetivos_vendedor ON view_rpt_objetivos_vendedores_categorias_resumen.ANIO = view_data_objetivos_vendedor.ANIO AND 
+                  view_rpt_objetivos_vendedores_categorias_resumen.MES = view_data_objetivos_vendedor.MES AND view_rpt_objetivos_vendedores_categorias_resumen.CODIGO_CATEGORIA = view_data_objetivos_vendedor.CODCATEGORIA AND 
+                  view_rpt_objetivos_vendedores_categorias_resumen.CODIGO_VENDEDOR = view_data_objetivos_vendedor.CODEMP AND 
+                  view_rpt_objetivos_vendedores_categorias_resumen.EMPNIT = view_data_objetivos_vendedor.EMPNIT
+WHERE  (view_data_objetivos_vendedor.MES = ${mes}) 
+        AND (view_data_objetivos_vendedor.ANIO = ${anio}) 
+        AND (view_data_objetivos_vendedor.CODEMP = ${codemp})
+        `
 
     execute.QueryToken(res,qry,token);
      

@@ -1286,7 +1286,7 @@ function get_data_vendedor(codemp,mes,anio){
 
     return new Promise((resolve,reject)=>{
 
-            axios.post(GlobalUrlCalls + '/objetivos/select_logro_vendedores_categorias', {
+            axios.post(GlobalUrlCalls + '/objetivos/select_logro_vendedores_categorias_todas', {
                     token:TOKEN,
                     codemp:codemp,
                     mes:mes,
