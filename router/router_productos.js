@@ -108,12 +108,12 @@ router.post("/insert_producto", async(req,res)=>{
         ${bono} AS BONO,'${lastupdate}' AS LASTUPDATE;
     INSERT INTO PRECIOS 
         (CODPROD,CODMEDIDA,EQUIVALE,COSTO,PRECIO, PRECIO_A, PRECIO_B, PRECIO_C, 
-        PRECIO_D, PRECIO_E, PRECIO_F, PESO, LASTUPDATE)
+        PRECIO_D, PRECIO_E, PRECIO_F, PESO, LASTUPDATE,HABILITADO)
     SELECT '${codprod}' AS CODPROD, CODMEDIDA, 
         EQUIVALE, COSTO, 
         PRECIO, PRECIO_A, PRECIO_B, PRECIO_C, 
         PRECIO_D, PRECIO_E, PRECIO_F,
-        PESO, '${lastupdate}' AS LASTUPDATE
+        PESO, '${lastupdate}' AS LASTUPDATE,'SI' AS HABILITADO
     FROM TEMP_PRECIOS;
     INSERT INTO INVSALDO (EMPNIT, CODPROD,
         ENTRADAS, SALIDAS,
@@ -389,10 +389,10 @@ router.post("/insert_precio", async(req,res)=>{
 
     let qry = `
     INSERT INTO PRECIOS 
-    (CODPROD,CODMEDIDA,EQUIVALE,COSTO,PRECIO,PRECIO_A,PRECIO_B,PRECIO_C,PRECIO_D,PRECIO_E,PRECIO_F,PESO,LASTUPDATE) 
+    (CODPROD,CODMEDIDA,EQUIVALE,COSTO,PRECIO,PRECIO_A,PRECIO_B,PRECIO_C,PRECIO_D,PRECIO_E,PRECIO_F,PESO,LASTUPDATE,HABILITADO) 
     VALUES 
     ('${codprod}','${codmedida}',${equivale},${costo},${preciop},${precioa},${preciob},
-    ${precioc},${preciod},${precioe},${preciof},${peso},'${lastupdate}');
+    ${precioc},${preciod},${precioe},${preciof},${peso},'${lastupdate}','SI');
     `
    
     execute.QueryToken(res,qry,token);
@@ -466,7 +466,8 @@ router.post("/lista_precios", async(req,res)=>{
     PRECIO_F, ISNULL(MARGEN_F,0) AS MARGENF, ISNULL(BONO_PRECIO_F,0) AS BONOPRECIOF,
 	ISNULL(MAYORISTA,0) AS MAYORISTA, ISNULL(CRITERIO_MAYORISTA,0) AS CRITERIO_MAYORISTA,
     PESO,
-    LASTUPDATE
+    LASTUPDATE,
+    HABILITADO
     FROM
     PRECIOS WHERE CODPROD='${codprod}';
     `

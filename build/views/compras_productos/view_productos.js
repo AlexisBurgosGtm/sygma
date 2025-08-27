@@ -174,6 +174,7 @@ function getView(){
                                     <table class="table table-responsive h-full">
                                         <thead class="bg-base text-white">
                                             <tr>
+                                                <td></td>
                                                 <td>MEDIDA</td>
                                                 <td>EQ</td>
                                                 <td>COSTO</td>
@@ -2827,6 +2828,7 @@ function get_tbl_precios_producto(codprod,idcontainer){
                     let idbtnE = `btnE${r.ID}`;
                     str += `
                         <tr>
+                            <td>${r.HABILITADO}</td>
                             <td>${r.CODMEDIDA}</td>
                             <td>${r.EQUIVALE}</td>
                             <td>${F.setMoneda(r.COSTO,'Q')}</td>
@@ -2838,7 +2840,9 @@ function get_tbl_precios_producto(codprod,idcontainer){
                             <td>${F.setMoneda(r.PRECIO_E,'Q')}</td>
                             <td>${F.setMoneda(r.PRECIO_F,'Q')}</td>
                             <td>
-                                <button class="btn-md btn-circle btn-danger hand shadow" id="${idbtnE}" onclick="delete_precio('${idbtnE}','${r.ID}','${codprod}')">
+                                <button class="btn-md btn-circle btn-danger hand shadow" 
+                                    id="${idbtnE}" 
+                                    onclick="delete_precio('${idbtnE}','${r.ID}','${codprod}')">
                                     <i class="fal fa-trash"></i>
                                 </button>
                             </td>
