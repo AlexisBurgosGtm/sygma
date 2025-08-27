@@ -470,14 +470,24 @@ router.post("/productos_filtro", async(req,res)=>{
                          view_invsaldo ON PRODUCTOS.CODPROD = view_invsaldo.CODPROD LEFT OUTER JOIN
                          MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA LEFT OUTER JOIN
                          PRECIOS ON PRODUCTOS.CODPROD = PRECIOS.CODPROD
-                    WHERE (PRODUCTOS.HABILITADO = 'SI') AND (PRODUCTOS.DESPROD LIKE '%${filtro}%') 
-                        AND (PRECIOS.CODMEDIDA IS NOT NULL) AND (view_invsaldo.EMPNIT = '${sucursal}') 
-                        OR
-                        (PRODUCTOS.HABILITADO = 'SI') AND (PRECIOS.CODMEDIDA IS NOT NULL) 
-                        AND (view_invsaldo.EMPNIT = '${sucursal}') AND (PRODUCTOS.CODPROD = '${filtro}')
-                        OR
-                        (PRODUCTOS.HABILITADO = 'SI') AND (PRECIOS.CODMEDIDA IS NOT NULL) 
-                        AND (view_invsaldo.EMPNIT = '${sucursal}') AND (PRODUCTOS.CODPROD2 = '${filtro}')
+                    WHERE 
+                        (PRODUCTOS.HABILITADO = 'SI') AND 
+                        (PRODUCTOS.DESPROD LIKE '%${filtro}%') AND 
+                        (PRECIOS.CODMEDIDA IS NOT NULL) AND
+                        (PRECIOS.HABILITADO<>'NO') AND 
+                        (view_invsaldo.EMPNIT = '${sucursal}') 
+                            OR
+                        (PRODUCTOS.HABILITADO = 'SI') AND 
+                        (PRECIOS.CODMEDIDA IS NOT NULL) AND
+                        (PRECIOS.HABILITADO<>'NO') AND 
+                        (view_invsaldo.EMPNIT = '${sucursal}') AND 
+                        (PRODUCTOS.CODPROD = '${filtro}')
+                            OR
+                        (PRODUCTOS.HABILITADO = 'SI') AND 
+                        (PRECIOS.CODMEDIDA IS NOT NULL) AND
+                        (PRECIOS.HABILITADO<>'NO') AND 
+                        (view_invsaldo.EMPNIT = '${sucursal}') AND 
+                        (PRODUCTOS.CODPROD2 = '${filtro}')
                     `
     
                 
@@ -485,7 +495,6 @@ router.post("/productos_filtro", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
-
 router.post("/BACKUP_productos_filtro", async(req,res)=>{
    
     const { token, sucursal, filtro, tipoprecio } = req.body;
@@ -496,7 +505,7 @@ router.post("/BACKUP_productos_filtro", async(req,res)=>{
                     MARCAS.DESMARCA, PRODUCTOS.TIPOPROD, 
                     PRECIOS.CODMEDIDA, PRECIOS.EQUIVALE, PRECIOS.COSTO, 
                     PRECIOS.${tipoprecio} AS PRECIO, view_invsaldo.EMPNIT, 
-                    (ISNULL(view_invsaldo.TOTALUNIDADES,0)/PRECIOS.EQUIVALE) AS EXISTENCIA, 
+                    ISNULL(view_invsaldo.TOTALUNIDADES,0) AS EXISTENCIA, 
                     COLORES.COLOR, PRODUCTOS.EXENTO, 
                     ISNULL(PRECIOS.BONO_${tipoprecio}, 0) AS BONO
                     FROM PRODUCTOS LEFT OUTER JOIN
@@ -519,6 +528,8 @@ router.post("/BACKUP_productos_filtro", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+
+
 
 
 router.post("/productos_precio", async(req,res)=>{

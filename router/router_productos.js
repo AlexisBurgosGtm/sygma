@@ -467,7 +467,7 @@ router.post("/lista_precios", async(req,res)=>{
 	ISNULL(MAYORISTA,0) AS MAYORISTA, ISNULL(CRITERIO_MAYORISTA,0) AS CRITERIO_MAYORISTA,
     PESO,
     LASTUPDATE,
-    HABILITADO
+    ISNULL(HABILITADO,'SI') AS HABILITADO
     FROM
     PRECIOS WHERE CODPROD='${codprod}';
     `
@@ -483,6 +483,19 @@ router.post("/delete_precio", async(req,res)=>{
    
     let qry = `
     DELETE FROM PRECIOS WHERE ID=${id};
+    `
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/habilitar_precio", async(req,res)=>{
+   
+    const {token,sucursal,codprod,id,st} = req.body;
+
+   
+    let qry = `
+    UPDATE PRECIOS SET HABILITADO='${st}' 
+    WHERE ID=${id} AND CODPROD='${codprod}';
     `
 
     execute.QueryToken(res,qry,token);

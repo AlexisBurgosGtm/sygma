@@ -174,7 +174,7 @@ function getView(){
                                     <table class="table table-responsive h-full">
                                         <thead class="bg-base text-white">
                                             <tr>
-                                                <td></td>
+                                                <td>ACTIVO</td>
                                                 <td>MEDIDA</td>
                                                 <td>EQ</td>
                                                 <td>COSTO</td>
@@ -2826,9 +2826,19 @@ function get_tbl_precios_producto(codprod,idcontainer){
                 
                 data.recordset.map((r)=>{
                     let idbtnE = `btnE${r.ID}`;
+                    let idbtnA = `btnA${r.ID}`;
+                    let strClassHab = '';
+                    if(r.HABILITADO=='SI'){strClassHab='btn-success';}else{strClassHab='btn-danger';};
+                    
                     str += `
                         <tr>
-                            <td>${r.HABILITADO}</td>
+                            <td>
+                                <button class="btn-md btn-circle ${strClassHab} hand shadow" 
+                                    id="${idbtnA}" 
+                                    onclick="habilitar_precio('${idbtnA}','${r.ID}','${codprod}','${r.HABILITADO}')">
+                                    <i class="fal fa-sync"></i>
+                                </button><small>${r.HABILITADO}</small>
+                            </td>
                             <td>${r.CODMEDIDA}</td>
                             <td>${r.EQUIVALE}</td>
                             <td>${F.setMoneda(r.COSTO,'Q')}</td>
@@ -2909,7 +2919,6 @@ function insert_precio(codprod,codmedida,equivale,peso,costo,preciop,precioa,pre
     }) 
 
 };
-
 function delete_precio(idbtn,id,codprod){
 
     let btn = document.getElementById(idbtn);
@@ -2958,6 +2967,52 @@ function delete_precio(idbtn,id,codprod){
       
 
 };
+function habilitar_precio(idbtn,precioId,codprod,st){
+
+    let btn = document.getElementById(idbtn);
+
+    let strMsn = '';
+    let newSt = '';
+
+    if(st=='SI'){
+        //esta habilitado, entonces se deshabilita
+        strMsn = "¿Está seguro que desea DESHABILITAR este precio?";
+        newSt='NO';
+    }else{
+        //esta deshabilitado, entonces se habilita
+     strMsn = "¿Está seguro que desea HABILITAR este precio?";
+        newSt='SI';
+    }
+
+    F.Confirmacion(strMsn)
+    .then((value)=>{
+        if(value==true){
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fal fa-spin fa-sync"></i>`;
+
+            GF.update_status_precio(GlobalEmpnit,codprod,precioId,newSt)
+            .then(()=>{
+                    get_tbl_precios_producto(codprod,'tblDataPreciosProd');
+   
+            })
+            .catch(()=>{
+                F.AvisoError('No se pudo actualizar este precio');
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fal fa-sync"></i>`;
+            })
+
+
+        }
+    })
+
+
+
+
+
+};
+
+
 
 function delete_producto(codprod){
     
