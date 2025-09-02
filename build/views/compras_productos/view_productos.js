@@ -5,7 +5,7 @@ function getView(){
                 <div class="col-12 p-0 bg-white">
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
-                            ${view.vista_listado() + view.modal_opciones_producto()}
+                            ${view.vista_listado() + view.modal_opciones_producto() + view.modal_opciones_producto_deshabilitar_medidas()}
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
                             ${view.vista_ficha_producto() + view.modal_nuevo_precio() + view.modal_medidas() + view.modal_sucursales_precio() + view.modal_marcas()}
@@ -151,9 +151,9 @@ function getView(){
                                             </button>  <b class="text-base hand">Ventas por Fechas</b>
                                         
                                         <hr class="solid">
-                                            <button class="btn btn-circle btn-base" id="btnProdMenCompras">
-                                                <i class="fal fa-box"></i>
-                                            </button>  <b class="text-base hand">Compras por Fechas</b>
+                                            <button class="btn btn-circle btn-outline-success" onclick="habilitar_medida_precio()">
+                                                <i class="fal fa-dollar-sign"></i>
+                                            </button>  <b class="text-success hand">Deshabilitar medidas Sucursales</b>
                                         
                                         <hr class="solid">
                                             <button class="btn btn-circle btn-warning" id="btnProdMenActivar">
@@ -174,7 +174,6 @@ function getView(){
                                     <table class="table table-responsive h-full">
                                         <thead class="bg-base text-white">
                                             <tr>
-                                                <td>ACTIVO</td>
                                                 <td>MEDIDA</td>
                                                 <td>EQ</td>
                                                 <td>COSTO</td>
@@ -189,6 +188,55 @@ function getView(){
                                             </tr>
                                         </thead>
                                         <tbody id="tblDataPreciosProd"></tbody>
+                                    </table>
+
+                                </div>
+                            </div>
+
+                           
+                           
+                        </div>
+                        <div class="modal-footer text-left">
+
+                            <button class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
+                                <i class="fal fa-arrow-left"></i>
+                            </button>
+
+                        </div>
+                       
+                    </div>
+                </div>
+            </div>
+
+            
+            `
+        },
+        modal_opciones_producto_deshabilitar_medidas:()=>{
+            return `
+            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true" 
+                id="modal_menu_producto_deshabilitar_medida">
+                <div class="modal-dialog modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-success d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white">
+                                 Medidas Deshabilitadas en otras Sedes
+                            </h4>
+                        </div>
+                        <div class="modal-body p-4">
+                        
+
+                            <div class="card card-rounded p-2">
+                                <div class="card-body">
+
+                                    <table class="table table-bordered h-full">
+                                        <thead class="bg-success text-white">
+                                            <tr>
+                                                <td>SEDE</td>
+                                                <td>ACTUAL</td>
+                                                <td>CAMBIAR A</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblDataDeshabilitarMedidas"></tbody>
                                     </table>
 
                                 </div>
@@ -2828,6 +2876,67 @@ function get_tbl_precios_producto(codprod,idcontainer){
                     let idbtnE = `btnE${r.ID}`;
                     let idbtnA = `btnA${r.ID}`;
                     let strClassHab = '';
+                
+                    if(r.HABILITADO=='SI'){strClassHab='btn-success';}else{strClassHab='btn-danger';};
+                    
+                    str += `
+                        <tr>
+
+                            <td>${r.CODMEDIDA}</td>
+                            <td>${r.EQUIVALE}</td>
+                            <td>${F.setMoneda(r.COSTO,'Q')}</td>
+                            <td>${F.setMoneda(r.PRECIO,'Q')}</td>
+                            <td>${F.setMoneda(r.PRECIO_A,'Q')}</td>
+                            <td>${F.setMoneda(r.PRECIO_B,'Q')}</td>
+                            <td>${F.setMoneda(r.PRECIO_C,'Q')}</td>
+                            <td>${F.setMoneda(r.PRECIO_D,'Q')}</td>
+                            <td>${F.setMoneda(r.PRECIO_E,'Q')}</td>
+                            <td>${F.setMoneda(r.PRECIO_F,'Q')}</td>
+                            <td>
+                                <button class="btn-md btn-circle btn-danger hand shadow" 
+                                    id="${idbtnE}" 
+                                    onclick="delete_precio('${idbtnE}','${r.ID}','${codprod}')">
+                                    <i class="fal fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `
+                })
+                container.innerHTML = str;             
+            }else{
+                rootErrores.innerHTML = 'No hay filas para mostrar...';
+                container.innerHTML = 'No se cargaron datos...';
+            }            
+        }else{
+            container.innerHTML = 'No se cargaron datos...';
+        }             
+    }, (error) => {
+        rootErrores.innerHTML = error;
+        container.innerHTML = 'No se cargaron datos...';
+    });
+ 
+};
+function BACKUP_get_tbl_precios_producto(codprod,idcontainer){
+
+    let container = document.getElementById(idcontainer);
+    container.innerHTML = GlobalLoader;
+
+    axios.post(GlobalUrlCalls + '/productos/lista_precios',
+        {
+            sucursal:GlobalEmpnit,
+            token:TOKEN,
+            codprod:codprod
+        })
+    .then((response) => {
+        if(response.status.toString()=='200'){
+            let data = response.data;
+            if(Number(data.rowsAffected[0])>0){
+                let str = '';
+                
+                data.recordset.map((r)=>{
+                    let idbtnE = `btnE${r.ID}`;
+                    let idbtnA = `btnA${r.ID}`;
+                    let strClassHab = '';
                     if(r.HABILITADO=='SI'){strClassHab='btn-success';}else{strClassHab='btn-danger';};
                     
                     str += `
@@ -2835,9 +2944,9 @@ function get_tbl_precios_producto(codprod,idcontainer){
                             <td>
                                 <button class="btn-md btn-circle ${strClassHab} hand shadow" 
                                     id="${idbtnA}" 
-                                    onclick="habilitar_precio('${idbtnA}','${r.ID}','${codprod}','${r.HABILITADO}')">
+                                    onclick="habilitar_medida_precio('${codprod}','${r.CODMEDIDA}')">
                                     <i class="fal fa-sync"></i>
-                                </button><small>${r.HABILITADO}</small>
+                                </button>
                             </td>
                             <td>${r.CODMEDIDA}</td>
                             <td>${r.EQUIVALE}</td>
@@ -2873,6 +2982,66 @@ function get_tbl_precios_producto(codprod,idcontainer){
     });
  
 };
+function habilitar_medida_precio(){
+
+    
+    $("#modal_menu_producto_deshabilitar_medida").modal('show');
+
+    get_lista_medidas_deshabilitadas_empresas(GlobalSelected_Codprod);
+
+
+};
+function get_lista_medidas_deshabilitadas_empresas(codprod){
+
+    let strCodmedidas = `<option value=''></option>`;
+
+    document.getElementById('tblDataDeshabilitarMedidas').innerHTML = GlobalLoader;
+
+
+    GF.get_data_precios_producto(codprod)
+    .then((data)=>{
+
+        data.recordset.map((r)=>{
+            strCodmedidas += `<option value='${r.CODMEDIDA}'>${r.CODMEDIDA}</option>`
+        });
+
+            GF.data_medida_deshabilitada_empresas_producto(codprod)
+            .then((data)=>{
+
+
+                let str = '';
+                data.recordset.map((r)=>{
+                    let idcombocambiar = `idcombocambiar${r.EMPNIT}-${codprod}`;
+                    str += `
+                        <tr>
+                            <td>${r.EMPRESA}</td>
+                            <td>${r.CODMEDIDA_DESHABILITADA}</td>
+                            <td>
+                                <select class="form-control negrita text-danger" 
+                                    value="${r.CODMEDIDA_DESHABILITADA}"
+                                    id="${idcombocambiar}"
+                                    onchange="deshabilitar_medida_empresa('${r.EMPNIT}','${codprod}','${idcombocambiar}')">
+                                        ${strCodmedidas}
+                                </select>
+                            </td>
+                            
+                        </tr>
+                    `
+                })
+                
+
+                document.getElementById('tblDataDeshabilitarMedidas').innerHTML = str;
+
+            })
+            .catch(()=>{
+                document.getElementById('tblDataDeshabilitarMedidas').innerHTML = 'No se cargaron datos...';
+            })
+
+    })
+    .catch(()=>{
+        document.getElementById('tblDataDeshabilitarMedidas').innerHTML = 'No se cargaron datos...';   
+    });
+}
 
 function insert_precio(codprod,codmedida,equivale,peso,costo,preciop,precioa,preciob,precioc,preciod,precioe,preciof){
 
@@ -3008,6 +3177,30 @@ function habilitar_precio(idbtn,precioId,codprod,st){
 
 
 
+
+
+};
+function deshabilitar_medida_empresa(empnit,codprod,idvalor){
+
+    let btn = document.getElementById(idvalor);
+    let valor = document.getElementById(idvalor).value;
+
+    btn.disabled = true;
+    F.showToast('Actualizando...');
+
+    GF.update_codmedida_deshabilitada_empresa(empnit,codprod,valor)
+    .then(()=>{
+
+        F.Aviso('Medida actualizada');
+        btn.disabled = false;
+
+        get_lista_medidas_deshabilitadas_empresas(codprod);
+
+    })
+    .catch(()=>{
+        F.AvisoError('No se pudo actualizar la medida')
+        btn.disabled = false;
+    })
 
 
 };

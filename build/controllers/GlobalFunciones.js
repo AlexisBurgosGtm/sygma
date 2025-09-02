@@ -2793,5 +2793,65 @@ let GF = {
     
         })
     },
+    data_medida_deshabilitada_empresas_producto:(codprod)=>{
+    return new Promise((resolve,reject)=>{
+
+            axios.post(GlobalUrlCalls + '/productos/lista_precios_deshabilitados',{TOKEN:TOKEN,codprod:codprod})
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        }) 
+    },
+    update_codmedida_deshabilitada_empresa: (sucursal,codprod,codmedida)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:sucursal,
+                codprod:codprod,
+                codmedida:codmedida
+            };
+    
+            axios.post(`/productos/habilitar_codmedida_empresa`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }             
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
 };
 

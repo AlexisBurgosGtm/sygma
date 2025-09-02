@@ -1970,8 +1970,10 @@ function get_buscar_producto(filtro){
                 let existencia = Number(EXISTENCIA);
                 if(existencia<=0){strClassExistencia='bg-danger text-white'};
 
-                
-                str += `
+                if(r.CODMEDIDA.toString()==r.CODMEDIDA_DESHABILITADA.toString()){
+                    //si la medida es igual al precio, no aparece
+                }else{
+                    str += `
                     <tr class="hand" onclick="get_producto('${r.CODPROD}','${r.DESPROD}','${r.CODMEDIDA}','${r.EQUIVALE}','${r.COSTO}','${r.PRECIO}','${r.TIPOPROD}','${r.EXENTO}','${EXISTENCIA}','${r.BONO}')">
                         
                         <td><b style="color:${r.COLOR}">${r.DESPROD}</b>
@@ -1984,8 +1986,11 @@ function get_buscar_producto(filtro){
                         <td>${r.DESMARCA}</td>
                         <td>${r.TIPOPROD}</td>
                     </tr>
-                `
-            })
+                    `
+                }
+                
+                
+                        })
             container.innerHTML = str;
             
             document.getElementById('btnBuscarProd').innerHTML = '<i class="fal fa-search"></i>';

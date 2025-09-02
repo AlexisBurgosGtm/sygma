@@ -501,6 +501,43 @@ router.post("/habilitar_precio", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+router.post("/lista_precios_deshabilitados", async(req,res)=>{
+   
+    const {token,codprod} = req.body;
+
+   
+    let qry = `
+        SELECT 
+            EMPRESAS.EMPNIT,
+            EMPRESAS.NOMBRE AS EMPRESA, 
+            T.CODPROD, 
+            T.CODMEDIDA_DESHABILITADA 
+        FROM EMPRESAS INNER JOIN 
+            (SELECT EMPNIT,CODPROD,
+            ISNULL(CODMEDIDA_DESHABILITADA,'') AS CODMEDIDA_DESHABILITADA 
+            FROM INVSALDO WHERE CODPROD='${codprod}') T 
+            ON EMPRESAS.EMPNIT=T.EMPNIT;
+        `
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/habilitar_codmedida_empresa", async(req,res)=>{
+   
+    const {token,sucursal,codprod,codmedida} = req.body;
+   
+    let qry = `
+    UPDATE INVSALDO 
+        SET CODMEDIDA_DESHABILITADA='${codmedida}' 
+    WHERE EMPNIT='${sucursal}' AND CODPROD='${codprod}';
+    `
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+
 
 
 
