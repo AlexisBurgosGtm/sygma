@@ -2993,7 +2993,7 @@ function habilitar_medida_precio(){
 };
 function get_lista_medidas_deshabilitadas_empresas(codprod){
 
-    let strCodmedidas = `<option value=''></option>`;
+    let strCodmedidas = `<option value=''>Seleccione una...</option><option value=''>NINGUNA</option>`;
 
     document.getElementById('tblDataDeshabilitarMedidas').innerHTML = GlobalLoader;
 
