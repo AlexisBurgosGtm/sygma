@@ -814,6 +814,13 @@ function getView(){
                     
 
                     <div class="table-responsive">
+                        <div class="form-group">
+                            <input type="text" class="form-control col-12 border-info text-info" 
+                                id="txt_buscar_facturas_embarque" 
+                                oninput="F.FiltrarTabla('tblFFacturas','txt_buscar_facturas_embarque')"
+                                placeholder="Escriba para buscar..."
+                            >
+                        </div>
 
                          <table class="table h-full table-bordered col-12" id="tblFFacturas">
                                 <thead class="bg-success text-white negrita">
