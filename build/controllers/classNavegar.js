@@ -45,7 +45,8 @@ let Navegar = {
                 Navegar.inicio_vendedor();
                 break;
             case 4: //REPARTIDOR
-                
+                GF.fcn_load_navbar('REPARTIDOR','js-nav-menu_repartidor','js-primary-nav')
+               
                 Navegar.inicio_despacho();
                 break;
             case 5: //DIGITADOR
@@ -60,6 +61,8 @@ let Navegar = {
                 
                 break;
             case 7: //proveedor
+                GF.fcn_load_navbar('PROVEEDOR','js-nav-menu_proveedor','js-primary-nav')
+               
                 Navegar.inicio_proveedor();
                 break;
             case 8: //VENDEDOR COMODIN

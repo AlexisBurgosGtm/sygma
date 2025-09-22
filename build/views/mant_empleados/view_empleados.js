@@ -369,7 +369,7 @@ function initView(){
 
 function get_coddoc(){
 
-    GF.get_data_tipodoc_coddoc('FAC')
+    GF.get_data_tipodoc_coddoc('FAC-DEV')
         .then((data)=>{
                     let coddoc = '<option value="">NO ASIGNADO</option>'
                     data.recordset.map((r)=>{

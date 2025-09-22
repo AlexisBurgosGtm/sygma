@@ -26,6 +26,9 @@ let GF = {
             case 'GERENCIA':
                 strMenu = botones_menu.inicio_gerente();
                 break;
+            case 'REPARTIDOR':
+                strMenu = '';
+                break;
                     
             default:
                 strMenu = '';

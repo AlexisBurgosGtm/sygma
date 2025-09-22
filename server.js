@@ -38,9 +38,10 @@ var router_proveedores = require('./router/router_proveedores.js');
 var router_tipodocumentos = require('./router/router_tipodocumentos');
 var router_cajas = require('./router/router_cajas');
 var router_documentos = require('./router/router_documentos');
-var router_bi = require('./router/router_bi')
-var router_clasificaciones = require('./router/router_clasificaciones')
-var router_usuarios = require('./router/router_usuarios.js')
+var router_bi = require('./router/router_bi');
+var router_clasificaciones = require('./router/router_clasificaciones');
+var router_repartidor = require('./router/router_repartidor.js');
+var router_usuarios = require('./router/router_usuarios.js');
 
 
 
@@ -441,7 +442,7 @@ app.use('/tipodocumentos', router_tipodocumentos);
 app.use('/documentos', router_documentos);
 app.use('/bi', router_bi);
 app.use('/clasificaciones', router_clasificaciones);
-
+app.use('/repartidor', router_repartidor);
 
 
 
