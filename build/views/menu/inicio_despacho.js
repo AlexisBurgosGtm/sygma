@@ -17,7 +17,7 @@ function getView(){
                             ${view.vista_mapa()}
                         </div>  
                         <div class="tab-pane fade" id="cinco" role="tabpanel" aria-labelledby="home-tab">
-                            ${view.vista_devolucion()}
+                            ${view.vista_devolucion() + view.modal_editar_cantidad()}
                         </div>    
                     </div>
 
@@ -154,15 +154,215 @@ function getView(){
             return `
             <div class="card card-rounded shadow">
                 <div class="card-body p-2">
-                    
+                
+                            <div class="row">
+                                <div class="col-6">
+                                    <h5 class="negrita text-base">Productos devueltos</h5>
+                        
+                                </div>
+                                <div class="col-6 text-right">
+                                    <h2 class="negrita text-danger" id="lbTotal"></h2>
+                                </div>
+
+                            </div>
+
+                             <div class="row">
+                                <div class="col-6">
+                                  
+                        
+                                </div>
+                                <div class="col-6 text-right">
+                                  
+
+                                </div>
+
+                            </div>
+
+                        
+                            <div class="table-responsive col-12">
+                                <table class="table table-responsive table-hover h-full col-12">
+                                    <thead class="bg-base text-white">
+                                        <tr>
+                                            <td>PRODUCTO</td>
+                                            <td>MEDIDA</td>
+                                            <td>CANTIDAD</td>
+                                            <td>PRECIO</td>
+                                            <td>IMPORTE</td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDataProductos">
+                                    </tbody>
+                                </table>
+                            </div>
+
                     
                 </div>
             </div>
 
+            ${view.frag_encabezado()}
+
             <button class="btn btn-secondary btn-bottom-l btn-xl btn-circle hand shadow"
-            onclick="document.getElementById('tab-dos').click()">
+                onclick="document.getElementById('tab-dos').click()">
                 <i class="fal fa-arrow-left"></i>
             </button>
+
+            
+            <button class="btn btn-bottom-r btn-info btn-circle btn-xl hand shadow" id="btnGuardar">
+                <i class="fal fa-save"></i>
+            </button>
+
+            `
+        },
+        modal_editar_cantidad:()=>{
+            return `
+            <div class="modal" id="modal_editar_cantidad" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+
+                        <div class="modal-header bg-base">
+                            <label class="modal-title text-white h3" id="lbCantidadDesprodE">Cantidad de producto</label>
+                        </div>
+            
+                        <div class="modal-body p-4">
+                            <div class="row">
+                                <div class="col-4 text-center">
+                                    <img src="./favicon.png" width="120px" height="100px">
+                                </div>
+                                <div class="col-8">
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary">Cantidad:</label>
+                                        <input type="number" style="font-size:140%" class="form-control negrita text-info border-base shadow col-10" id="txtMCCantidadE">
+                                    </div>   
+                                    
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary">Precio ${GlobalSignoMoneda}:</label>
+                                        <input disabled="true" type="number" style="font-size:140%" class="form-control negrita text-info border-base shadow col-10" id="txtMCPrecioE">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary">Subtotal ${GlobalSignoMoneda}:</label>
+                                        <input type="number" style="font-size:150%" class="form-control negrita text-danger border-base shadow col-10" id="txtMCTotalPrecioE" disabled>
+                                    </div>
+
+
+                                    <div class="form-group hidden">
+                                        <label class="negrita text-secondary">Descuento ${GlobalSignoMoneda}:</label>
+                                        <input type="number" style="font-size:140%" class="form-control negrita text-info border-base shadow col-10" id="txtMCDescuentoE" oninput="calcular_descuento('txtMCDescuentoE','txtMCTotalPrecioE','txtMCTotalPrecioDescuentoE')">
+                                    </div>
+                                    
+                                    <div class="form-group hidden">
+                                        <label class="negrita text-secondary">Importe ${GlobalSignoMoneda}:</label>
+                                        <input type="number" style="font-size:150%" class="form-control negrita text-danger border-base shadow col-10" id="txtMCTotalPrecioDescuentoE" disabled>
+                                    </div>
+
+
+                                </div>            
+                            </div>
+                                
+                            <br>
+        
+                            <div class="row">
+                                    <div class="col-5 text-right">
+                                        <button class="btn btn-secondary btn-xl btn-circle hand shadow waves-effect waves-themed" data-dismiss="modal" id="">
+                                            <i class="fal fa-arrow-left"></i>
+                                        </button>                                
+                                    </div>
+        
+                                    <div class="col-1"></div>
+        
+                                    <div class="col-5 text-right">
+                                        <button class="btn btn-base btn-xl btn-circle hand shadow waves-effect waves-themed" id="btnMCGuardarE">
+                                            <i class="fal fa-check mr-1"></i>
+                                        </button>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`
+        },
+        frag_encabezado:()=>{
+            return `
+            <div class="card card-rounded shadow col-12">
+                <div class="card-body p-4">
+
+                    <h3 class="negrita text-danger text-center">INGRESO DE DEVOLUCIONES</h3>
+
+                    <div class="form-group">
+                        <label class="negrita text-base">Sucursal</label>
+                        <select class="form-control negrita text-danger" id="cmbSucursal">
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-group">
+                            <select class="form-control negrita text-danger" id="cmbCoddoc">
+                            </select>
+                            <input type="number" id="txtCorrelativo" class="form-control negrita text-secondary" disabled="true">
+                            <input type="date" id="txtFecha" class="form-control negrita text-secondary">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <select class="form-control negrita text-secondary" id="cmbCaja">
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="negrita text-base">Cliente</label>
+                        <h5 class="negrita text-danger" id="lbNomclie">CLIENTE</h5>
+                        <small class="negrita text-secondary" id="lbDirclie"></small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="negrita text-base">Factura</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="cmbCoddocFac" disabled="true">
+                            <input type="text" class="form-control" id="cmbCorrelativoFac" disabled="true">
+                            <button class="btn btn-md btn-success shadow hand" id="btnNuevo">
+                                <i class="fal fa-plus"></i>
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <div class="form-group">
+                        <label class="negrita text-base">Embarque / Picking</label>
+                        <input type="text" class="form-control negrita text-secondary" id="txtCodembarque" disabled="true">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="negrita text-base">Vendedor</label>
+                        <select class="form-control negrita text-secondary" id="cmbEmpleados">
+                        </select>
+                    </div>
+
+                     <div class="form-group">
+                        <label class="negrita text-base">Motivo</label>
+                        <select class="form-control negrita text-secondary" id="cmbObs">
+                            <option value='DEVOLUCION PARCIAL'>DEVOLUCION PARCIAL</option>
+                            <option value='SIN DINERO'>SIN DINERO</option>
+                            <option value='CERRADO'>CERRADO</option>
+                            <option value='CLIENTE NO RECIBIO'>CLIENTE NO RECIBIO</option>
+                            <option value='PASO BLOQUEADO'>PASO BLOQUEADO</option>
+                            <option value='MALA NEGOCIACION'>MALA NEGOCIACION</option>
+                            <option value='CLIENTE NUNCA RECIBE'>CLIENTE NUNCA RECIBE</option>
+                        </select>
+                    </div>
+
+
+
+                    <input class="hidden" type="number" id="txtCodclie" disabled="true">  
+                   
+                    <input class="hidden" type="text" id="txtNit" disabled="true">  
+                                      
+                
+                                  
+                </div>
+            </div>
+         
             `
         },
     }
@@ -176,6 +376,8 @@ function addListeners(){
       
     get_tbl_embarques_pendientes();
 
+    listeners_devolucion();
+
 
     F.slideAnimationTabs();
 };
@@ -187,6 +389,223 @@ function initView(){
 
 };
 
+function listeners_devolucion(){
+
+
+
+    GF.get_data_tipodoc_coddoc_sucursal(GlobalEmpnit,'DEV')
+    .then((data)=>{
+
+        let strCoddoc = ''
+        data.recordset.map((r)=>{
+            strCoddoc += `<option value="${r.CODDOC}">${r.CODDOC}</option>`
+        })        
+        document.getElementById('cmbCoddoc').innerHTML = strCoddoc;
+
+
+        GF.get_data_coddoc_correlativo_sucursal(GlobalEmpnit,document.getElementById('cmbCoddoc').value)
+        .then((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
+        .catch((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
+
+
+    })
+    .catch(()=>{
+
+        document.getElementById('cmbCoddoc').innerHTML = `<option value=''></option>`;
+        document.getElementById('txtCorrelativo').value = '0'
+    
+    })
+
+
+    document.getElementById('cmbCoddoc').addEventListener('change',()=>{
+        GF.get_data_coddoc_correlativo_sucursal(sucursal,document.getElementById('cmbCoddoc').value)
+        .then((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
+        .catch((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
+    })
+
+    
+    //carga cajas
+     GF.get_data_cajas_sucursal(GlobalEmpnit)
+    .then((data)=>{
+        let str = '';
+        data.recordset.map((r)=>{
+            str += `<option value="${r.CODCAJA}">${r.DESCAJA}</option>`
+        });
+        document.getElementById('cmbCaja').innerHTML = str;
+    })
+    .catch(()=>{
+        F.AvisoError('No se cargaron las cajas');
+        document.getElementById('cmbCaja').innerHTML ='<option value="1">SIN CAJA</option>';
+    })
+
+    //carga empleados
+     GF.get_data_empleados_tipo_emp(3,GlobalEmpnit)
+    .then((data)=>{
+            let str = '';
+            data.recordset.map((r)=>{
+                str += `<option value="${r.CODEMPLEADO}">${r.NOMEMPLEADO}</option>`
+            });
+            document.getElementById('cmbEmpleados').innerHTML = str;
+        })
+    .catch(()=>{
+            F.AvisoError('No se cargaron los vendedores');
+            document.getElementById('cmbEmpleados').innerHTML ='<option value="1">SIN VENDEDOR</option>';
+    })
+
+
+    document.getElementById('txtFecha').value = F.getFecha();
+
+
+  
+
+     //--------------------------------
+    //modal editar cantidad
+    //---------------------------
+    let btnMCGuardarE = document.getElementById('btnMCGuardarE');
+    btnMCGuardarE.addEventListener('click',()=>{
+
+        let cantidad = Number(document.getElementById('txtMCCantidadE').value || 1);
+        let preciounitario = Number(document.getElementById('txtMCPrecioE').value||0);
+        let descuento =Number(document.getElementById('txtMCDescuentoE').value||0);
+
+            
+
+
+        let nuevacantidad = Number(cantidad);
+        db_devoluciones.update_row(Number(Selected_id),nuevacantidad,preciounitario,descuento)
+        .then(()=>{
+            $("#modal_editar_cantidad").modal('hide');
+
+            F.showToast('Producto agregado ' + Selected_desprod);
+            get_grid_productos();
+
+            
+        })
+        .catch(()=>{
+            F.AvisoError('No se pudo agregar');
+        })
+
+
+
+    });
+    document.getElementById('txtMCCantidadE').addEventListener('input',()=>{
+        CalcularTotalPrecioEditar();  
+    });
+    document.getElementById('txtMCCantidadE').addEventListener('keyup',(e)=>{
+        if (e.code === 'Enter') { 
+            //document.getElementById('txtMCPrecioE').focus();
+            document.getElementById('btnMCGuardarE').focus();
+        };
+        if (e.keyCode === 13 && !e.shiftKey) {
+            //document.getElementById('txtMCPrecioE').focus();
+            document.getElementById('btnMCGuardarE').focus();
+        };  
+    });
+    document.getElementById('txtMCPrecioE').addEventListener('input',()=>{
+        CalcularTotalPrecioEditar();  
+    });
+    document.getElementById('txtMCPrecioE').addEventListener('keyup',(e)=>{
+        if (e.code === 'Enter') { 
+            document.getElementById('btnMCGuardarE').focus();
+        };
+        if (e.keyCode === 13 && !e.shiftKey) {
+            document.getElementById('btnMCGuardarE').focus();
+        };  
+    });
+    document.getElementById('txtMCDescuentoE').addEventListener('keyup',(e)=>{
+        if (e.code === 'Enter') { 
+            document.getElementById('btnMCGuardarE').focus();
+        };
+        if (e.keyCode === 13 && !e.shiftKey) {
+            document.getElementById('btnMCGuardarE').focus();
+        };  
+    });
+
+    //--------------------------------
+    //modal editar cantidad
+    //--------------------------------
+
+
+    let btnGuardar = document.getElementById('btnGuardar');
+    btnGuardar.addEventListener('click',()=>{
+
+        F.Aviso('esperameee...')
+        return;
+
+            get_grid_productos();
+          
+
+            F.Confirmacion('¿Está seguro que desea GUARDAR este Documento?')
+            .then((value)=>{
+                if(value==true){
+                    
+                    if(global_var_total_precio==0){F.AvisoError('Agregue productos al documento');return;};
+                    let codclie = document.getElementById('txtCodclie').value || '';
+                    if(codclie.toString()==''){F.AvisoError('No se selecciono una Factura');return;}
+
+                    let sucursal = document.getElementById('cmbSucursal').value;
+                    let coddoc = document.getElementById('cmbCoddoc').value;
+
+                    btnGuardar.disabled = true;
+                    btnGuardar.innerHTML = `<i class="fal fa-save fa-spin"></i>`;
+
+                    F.showToast('Obteniendo el correlativo del documento a generar');
+
+                    GF.get_data_coddoc_correlativo_sucursal(sucursal,coddoc)
+                    .then((correlativo)=>{
+        
+                                document.getElementById('txtCorrelativo').value = correlativo;
+                    
+                                insert_documento()
+                                .then(()=>{
+
+                                    F.Aviso('Documento Creado Exitosamente!!');
+
+                                    btnGuardar.disabled = false;
+                                    btnGuardar.innerHTML = `<i class="fal fa-save"></i>`;
+
+                                    clean_data();
+
+                                    
+                                    get_grid_productos();
+
+                                })
+                                .catch((error)=>{
+                                    
+                                    console.log(error);
+
+                                    F.AvisoError('No se pudo crear el documento');
+
+                                    btnGuardar.disabled = false;
+                                    btnGuardar.innerHTML = `<i class="fal fa-save"></i>`;
+
+                                })
+                    })
+                    .catch((correlativo)=>{
+
+                        document.getElementById('txtCorrelativo').value = correlativo;
+                        F.AvisoError('No se logro obtener el correlativo');
+
+                        btnGuardar.disabled = false;
+                        btnGuardar.innerHTML = `<i class="fal fa-save"></i>`;
+
+                    })
+
+                  
+                   
+                   
+
+
+                }
+            })
+
+
+
+
+    });
+
+
+};
 
 
 function get_data_embarques_pendientes(){
@@ -345,7 +764,7 @@ function get_tbl_documentos_embarque(codembarque){
                         </div>
                         <div class="col-6">
                             <button class="btn btn-primary btn-md hand shadow col-12"
-                            onclick="get_devolucion_factura('${r.CODDOC}','${r.CORRELATIVO}','${r.TIPONEGOCIO}','${r.NEGOCIO}','${r.CLIENTE}')">
+                            onclick="get_devolucion_factura('${codembarque}','${r.CODDOC}','${r.CORRELATIVO}','${r.TIPONEGOCIO}','${r.NEGOCIO}','${r.CLIENTE}')">
                                 <i class="fal fa-download"></i>&nbsp Devolucion
                             </button>
                         </div>
@@ -530,8 +949,174 @@ function clientes_embarque(codembarque,idContenedor, lt, lg){
 
 
 
-function get_devolucion_factura(coddoc,correlativo,tiponegocio,negocio,cliente){
+function get_devolucion_factura(codembarque,coddoc,correlativo,tiponegocio,negocio,cliente){
 
-    F.Aviso('En proceso');
+    document.getElementById('tab-cinco').click();
+
+    document.getElementById('txtCodembarque').value = codembarque;
+    document.getElementById('cmbCoddocFac').value = coddoc;
+    document.getElementById('cmbCorrelativoFac').value = correlativo;
+
+    load_grid_productos(GlobalEmpnit,coddoc,correlativo)
+
+
 
 };
+
+function load_grid_productos(sucursal,codoc,correlativo){
+
+
+    F.showToast('Eliminando datos anteriores');
+
+    db_devoluciones.deleteTempVenta_pos()
+    .then(()=>{
+
+        GF.get_data_detalle_documento(sucursal,codoc,correlativo)
+        .then((data)=>{
+            
+            F.showToast('Cargando datos...')
+
+            data.recordset.map((r)=>{
+
+                    let datos = 
+                    {
+                        CODSUCURSAL: sucursal.toString(),
+                        EMPNIT: sucursal.toString(),
+                        USUARIO:'',
+                        CODPROD: r.CODPROD.toString(),
+                        DESPROD: r.DESPROD.toString(),
+                        CODMEDIDA: r.CODMEDIDA.toString(),
+                        EQUIVALE: Number(r.EQUIVALE),
+                        COSTO: Number(r.COSTO),
+                        TOTALCOSTO: Number(r.TOTALCOSTO),
+                        PRECIO: Number(r.PRECIO),
+                        CANTIDAD: Number(r.CANTIDAD),
+                        TOTALUNIDADES: Number(r.TOTALUNIDADES),
+                        TOTALPRECIO: Number(r.TOTALPRECIO),
+                        EXENTO: Number(0),
+                        TIPOPROD: r.TIPOPROD,
+                        TIPOPRECIO: r.TIPOPRECIO,
+                        EXISTENCIA: Number(r.EXISTENCIA),
+                        BONO: Number(0),
+                        DESCUENTO: Number(r.DESCUENTO)
+                    };
+
+
+                    db_devoluciones.insertTempVentasPOS(datos);
+
+            })
+
+            get_grid_productos();
+
+        })
+        .catch(()=>{
+            F.AvisoError('No se cargaron datos');
+        })
+
+
+    })
+
+        
+
+
+};
+
+function get_grid_productos(){
+
+    let container = document.getElementById('tblDataProductos');
+    container.innerHTML = GlobalLoader;
+
+    document.getElementById('lbTotal').innerText = '---';
+    let varTotal = 0;
+    let varTotalCosto = 0;
+
+    db_devoluciones.selectTempVentasPOS()
+    .then((datos)=>{
+
+        let str = '';
+        datos.map((r)=>{
+
+            varTotal += Number(r.TOTALPRECIO);
+            varTotalCosto += Number(r.TOTALCOSTO);
+            str += `
+            <tr>
+                <td>${r.DESPROD}
+                    <br>
+                    <small class="negrita text-danger">${r.CODPROD}</small>
+                </td>
+                <td>${r.CODMEDIDA}</td>
+                <td>${r.CANTIDAD}</td>
+                <td>${F.setMoneda(r.PRECIO,'Q')}</td>
+                <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                <td>
+                    <button class="btn btn-info btn-md btn-circle hand shadow"
+                    onclick="edit_item('${r.ID}','${r.CODPROD}','${r.DESPROD}','${r.CODMEDIDA}','${r.EQUIVALE}','${r.CANTIDAD}','${r.COSTO}','${r.PRECIO}','${r.TIPOPROD}','${r.EXENTO}','${r.EXISTENCIA}','${r.BONO}','${r.DESCUENTO}')">
+                        <i class="fal fa-edit"></i>
+                    </button>
+                </td>
+                <td>
+                    <button class="btn btn-danger btn-md btn-circle hand shadow"
+                    onclick="delete_item('${r.ID}')">
+                        <i class="fal fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
+        document.getElementById('lbTotal').innerText = F.setMoneda(varTotal,'Q');
+        global_var_total_costo = Number(varTotalCosto);
+        global_var_total_precio = Number(varTotal);
+    })
+
+};
+function delete_item(id){
+
+    F.Confirmacion('¿Está seguro que desea Quitar este item?')
+    .then((value)=>{
+        if(value==true){
+
+            db_devoluciones.deleteItemVentaPOS(id)
+            .then(()=>{
+                get_grid_productos();
+            })
+
+        }
+    })
+
+};
+function edit_item(id,codprod,desprod,codmedida,equivale,cantidad,costo,precio,tipoprod,exento,existencia,bono,descuento){
+
+    $("#modal_editar_cantidad").modal('show');
+
+    Selected_id = id;
+    Selected_codprod = codprod;
+    Selected_desprod = desprod;
+    Selected_codmedida = codmedida;
+    Selected_equivale = Number(equivale);
+    Selected_costo = Number(costo);
+    Selected_precio = Number(precio);
+    Selected_tipoprod = tipoprod;
+    Selected_exento = Number(exento);
+    Selected_existencia = Number(existencia);
+    Selected_bono = Number(bono)
+
+    document.getElementById('lbCantidadDesprodE').innerText = `${desprod} (${codmedida} - Eq: ${equivale})`;
+
+    document.getElementById('txtMCCantidadE').value = cantidad;
+    document.getElementById('txtMCPrecioE').value = precio;
+    document.getElementById('txtMCDescuentoE').value = descuento;
+
+    CalcularTotalPrecioEditar();
+
+    document.getElementById('txtMCCantidadE').focus();
+};
+function CalcularTotalPrecioEditar(){
+
+    let cantidad = document.getElementById('txtMCCantidadE').value || 1;
+    let precio = document.getElementById('txtMCPrecioE').value;
+    
+    document.getElementById('txtMCTotalPrecioE').value = (Number(cantidad)*Number(precio));
+
+};
+
