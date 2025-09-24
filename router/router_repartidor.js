@@ -29,15 +29,69 @@ router.post("/embarque_documentos", async(req,res)=>{
             
     let qry ='';
 
-    qry = `SELECT DOCUMENTOS.FECHA, DOCUMENTOS.CODDOC, 
-            DOCUMENTOS.CORRELATIVO, DOCUMENTOS.DOC_NIT AS NIT, 
-            CLIENTES.NOMBRE AS CLIENTE,
-            CLIENTES.TIPONEGOCIO, CLIENTES.NEGOCIO, 
-            DOCUMENTOS.DOC_DIRCLIE AS DIRECCION,
+    qry = `
+       SELECT 
+            DOCUMENTOS.FECHA, 
+            DOCUMENTOS.CODDOC, 
+            DOCUMENTOS.CORRELATIVO, 
+            DOCUMENTOS.CODCLIENTE, 
+            DOCUMENTOS.DOC_NIT AS NIT, 
+            CLIENTES.NOMBRE AS CLIENTE, 
+            CLIENTES.TIPONEGOCIO, 
+            CLIENTES.NEGOCIO, 
+            DOCUMENTOS.DOC_DIRCLIE AS DIRECCION, 
             CLIENTES.REFERENCIA, 
-                  MUNICIPIOS.DESMUN AS MUNICIPIO, 
-                  CLIENTES.LATITUD AS LAT, CLIENTES.LONGITUD AS LONG, DOCUMENTOS.TOTALPRECIO AS IMPORTE, DOCUMENTOS.DIRENTREGA, DOCUMENTOS.OBS, DOCUMENTOS.CODEMP AS CODVEN, 
-                  EMPLEADOS.NOMEMPLEADO AS VENDEDOR, DOCUMENTOS.STATUS AS ST
+            MUNICIPIOS.DESMUN AS MUNICIPIO, 
+            CLIENTES.LATITUD AS LAT, 
+            CLIENTES.LONGITUD AS LONG, 
+            DOCUMENTOS.TOTALPRECIO AS IMPORTE, 
+            DOCUMENTOS.DIRENTREGA,
+            DOCUMENTOS.OBS, 
+            DOCUMENTOS.CODEMP AS CODVEN, 
+            EMPLEADOS.NOMEMPLEADO AS VENDEDOR, 
+            DOCUMENTOS.STATUS AS ST, 
+            ISNULL(view_rpt_devoluciones_embarque.DEVUELTO,0) AS DEVUELTO
+        FROM     TIPODOCUMENTOS RIGHT OUTER JOIN
+                  DOCUMENTOS LEFT OUTER JOIN
+                  view_rpt_devoluciones_embarque ON DOCUMENTOS.EMPNIT = view_rpt_devoluciones_embarque.EMPNIT AND DOCUMENTOS.CORRELATIVO = view_rpt_devoluciones_embarque.CORRELATIVO_ORIGEN AND 
+                  DOCUMENTOS.CODDOC = view_rpt_devoluciones_embarque.CODDOC_ORIGEN AND DOCUMENTOS.CODEMBARQUE = view_rpt_devoluciones_embarque.CODEMBARQUE ON 
+                  TIPODOCUMENTOS.CODDOC = DOCUMENTOS.CODDOC AND TIPODOCUMENTOS.EMPNIT = DOCUMENTOS.EMPNIT LEFT OUTER JOIN
+                  EMPLEADOS ON DOCUMENTOS.CODEMP = EMPLEADOS.CODEMPLEADO LEFT OUTER JOIN
+                  MUNICIPIOS RIGHT OUTER JOIN
+                  CLIENTES ON MUNICIPIOS.CODMUN = CLIENTES.CODMUN ON DOCUMENTOS.CODCLIENTE = CLIENTES.CODCLIENTE
+        WHERE  (DOCUMENTOS.CODEMBARQUE = '${codembarque}') AND 
+                (DOCUMENTOS.EMPNIT = '${sucursal}') AND 
+                (TIPODOCUMENTOS.TIPODOC IN ('FAC', 'FCP', 'FEC', 'FEF', 'FES')) AND 
+                (DOCUMENTOS.STATUS <> 'A')
+        ORDER BY VENDEDOR
+        `;     
+  
+    execute.QueryToken(res,qry,token);
+    
+});
+router.post("/BACKUP_embarque_documentos", async(req,res)=>{
+    
+    const { sucursal, codembarque,token} = req.body;
+            
+    let qry ='';
+
+    qry = `SELECT DOCUMENTOS.FECHA, DOCUMENTOS.CODDOC, 
+                DOCUMENTOS.CORRELATIVO, 
+                DOCUMENTOS.CODCLIENTE,
+                DOCUMENTOS.DOC_NIT AS NIT, 
+                CLIENTES.NOMBRE AS CLIENTE,
+                CLIENTES.TIPONEGOCIO, CLIENTES.NEGOCIO, 
+                DOCUMENTOS.DOC_DIRCLIE AS DIRECCION,
+                CLIENTES.REFERENCIA, 
+                MUNICIPIOS.DESMUN AS MUNICIPIO, 
+                CLIENTES.LATITUD AS LAT, 
+                CLIENTES.LONGITUD AS LONG, 
+                DOCUMENTOS.TOTALPRECIO AS IMPORTE, 
+                DOCUMENTOS.DIRENTREGA, 
+                DOCUMENTOS.OBS, 
+                DOCUMENTOS.CODEMP AS CODVEN, 
+                EMPLEADOS.NOMEMPLEADO AS VENDEDOR, 
+                DOCUMENTOS.STATUS AS ST
             FROM MUNICIPIOS RIGHT OUTER JOIN
                   CLIENTES ON MUNICIPIOS.CODMUN = CLIENTES.CODMUN RIGHT OUTER JOIN
                   DOCUMENTOS LEFT OUTER JOIN
@@ -51,6 +105,31 @@ router.post("/embarque_documentos", async(req,res)=>{
 });
 
 router.post("/mapaembarque", async(req,res)=>{
+    
+    const { sucursal, embarque,token} = req.body;
+            
+    let qry ='';
+
+     qry = `SELECT DOCUMENTOS.FECHA, DOCUMENTOS.CODDOC, 
+            DOCUMENTOS.CORRELATIVO, DOCUMENTOS.DOC_NIT AS NIT, 
+            CLIENTES.NOMBRE AS CLIENTE,
+            CLIENTES.TIPONEGOCIO, CLIENTES.NEGOCIO, 
+            DOCUMENTOS.DOC_DIRCLIE AS DIRECCION,
+            CLIENTES.REFERENCIA, 
+                  MUNICIPIOS.DESMUN AS MUNICIPIO, 
+                  CLIENTES.LATITUD AS LAT, CLIENTES.LONGITUD AS LONG, DOCUMENTOS.TOTALPRECIO AS IMPORTE, DOCUMENTOS.DIRENTREGA, DOCUMENTOS.OBS, DOCUMENTOS.CODEMP AS CODVEN, 
+                  EMPLEADOS.NOMEMPLEADO AS VENDEDOR, DOCUMENTOS.STATUS AS ST
+          FROM MUNICIPIOS RIGHT OUTER JOIN
+                  CLIENTES ON MUNICIPIOS.CODMUN = CLIENTES.CODMUN RIGHT OUTER JOIN
+                  DOCUMENTOS LEFT OUTER JOIN
+                  EMPLEADOS ON DOCUMENTOS.CODEMP = EMPLEADOS.CODEMPLEADO ON CLIENTES.CODCLIENTE = DOCUMENTOS.CODCLIENTE
+            WHERE (DOCUMENTOS.CODEMBARQUE = '${codembarque}') AND (DOCUMENTOS.EMPNIT = '${sucursal}')`;  
+  
+    execute.QueryToken(res,qry,token);
+    
+
+});
+router.post("/BACKUP_mapaembarque", async(req,res)=>{
     
     const { sucursal, embarque,token} = req.body;
             

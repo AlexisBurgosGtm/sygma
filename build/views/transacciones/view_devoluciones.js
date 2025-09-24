@@ -123,13 +123,7 @@ function getView(){
                      <div class="form-group">
                         <label class="negrita text-base">Motivo</label>
                         <select class="form-control negrita text-secondary" id="cmbObs">
-                            <option value='DEVOLUCION PARCIAL'>DEVOLUCION PARCIAL</option>
-                            <option value='SIN DINERO'>SIN DINERO</option>
-                            <option value='CERRADO'>CERRADO</option>
-                            <option value='CLIENTE NO RECIBIO'>CLIENTE NO RECIBIO</option>
-                            <option value='PASO BLOQUEADO'>PASO BLOQUEADO</option>
-                            <option value='MALA NEGOCIACION'>MALA NEGOCIACION</option>
-                            <option value='CLIENTE NUNCA RECIBE'>CLIENTE NUNCA RECIBE</option>
+                           
                         </select>
                     </div>
 
@@ -370,6 +364,9 @@ function addListeners(){
     
     let cmbSucursal = document.getElementById('cmbSucursal');
 
+    
+    document.getElementById('cmbObs').innerHTML = F.ComboMotivosDevolucion();
+
     GF.get_data_empresas()
     .then((data)=>{
             let str = '';
@@ -469,10 +466,13 @@ function addListeners(){
                                     btnGuardar.disabled = false;
                                     btnGuardar.innerHTML = `<i class="fal fa-save"></i>`;
 
+                                  
                                     clean_data();
 
                                     
                                     get_grid_productos();
+
+                                  
 
                                 })
                                 .catch((error)=>{
@@ -768,7 +768,8 @@ function load_grid_productos(sucursal,codoc,correlativo){
                         TIPOPRECIO: r.TIPOPRECIO,
                         EXISTENCIA: Number(r.EXISTENCIA),
                         BONO: Number(0),
-                        DESCUENTO: Number(r.DESCUENTO)
+                        DESCUENTO: Number(r.DESCUENTO),
+                        CANTIDADORIGINAL: Number(r.CANTIDAD)
                     };
 
 

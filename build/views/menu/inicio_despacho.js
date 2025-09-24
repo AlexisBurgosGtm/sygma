@@ -190,6 +190,7 @@ function getView(){
                                             <td>IMPORTE</td>
                                             <td></td>
                                             <td></td>
+                                            <td>CANT.ORIGINAL</td>
                                         </tr>
                                     </thead>
                                     <tbody id="tblDataProductos">
@@ -285,20 +286,35 @@ function getView(){
         },
         frag_encabezado:()=>{
             return `
+            <br>
             <div class="card card-rounded shadow col-12">
                 <div class="card-body p-4">
 
-                    <h3 class="negrita text-danger text-center">INGRESO DE DEVOLUCIONES</h3>
+                
+                    <div class="form-group">
+                        <label class="negrita text-base">Cliente</label>
+                        <h5 class="negrita text-danger" id="lbNomclie"></h5>
+                        <small class="negrita text-danger" id="lbNegocio"></small>
+                        <br>
+                        <small class="negrita text-secondary" id="lbDirclie"></small>
+                    </div>
 
                     <div class="form-group">
-                        <label class="negrita text-base">Sucursal</label>
-                        <select class="form-control negrita text-danger" id="cmbSucursal">
+                        <label class="negrita text-base">Motivo</label>
+                        <select class="form-control negrita text-secondary" id="cmbObs">
+                           
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="negrita text-base">Vendedor</label>
+                        <select class="form-control negrita text-secondary" id="cmbEmpleados" disabled="true">
                         </select>
                     </div>
 
                     <div class="form-group">
                         <div class="input-group">
-                            <select class="form-control negrita text-danger" id="cmbCoddoc">
+                            <select class="form-control negrita text-danger" id="cmbCoddoc"  disabled="true">
                             </select>
                             <input type="number" id="txtCorrelativo" class="form-control negrita text-secondary" disabled="true">
                             <input type="date" id="txtFecha" class="form-control negrita text-secondary">
@@ -311,19 +327,11 @@ function getView(){
                     </div>
 
                     <div class="form-group">
-                        <label class="negrita text-base">Cliente</label>
-                        <h5 class="negrita text-danger" id="lbNomclie">CLIENTE</h5>
-                        <small class="negrita text-secondary" id="lbDirclie"></small>
-                    </div>
-
-                    <div class="form-group">
                         <label class="negrita text-base">Factura</label>
                         <div class="input-group">
                             <input type="text" class="form-control" id="cmbCoddocFac" disabled="true">
                             <input type="text" class="form-control" id="cmbCorrelativoFac" disabled="true">
-                            <button class="btn btn-md btn-success shadow hand" id="btnNuevo">
-                                <i class="fal fa-plus"></i>
-                            </button>
+                           
                         </div>
 
                     </div>
@@ -332,26 +340,6 @@ function getView(){
                         <label class="negrita text-base">Embarque / Picking</label>
                         <input type="text" class="form-control negrita text-secondary" id="txtCodembarque" disabled="true">
                     </div>
-
-                    <div class="form-group">
-                        <label class="negrita text-base">Vendedor</label>
-                        <select class="form-control negrita text-secondary" id="cmbEmpleados">
-                        </select>
-                    </div>
-
-                     <div class="form-group">
-                        <label class="negrita text-base">Motivo</label>
-                        <select class="form-control negrita text-secondary" id="cmbObs">
-                            <option value='DEVOLUCION PARCIAL'>DEVOLUCION PARCIAL</option>
-                            <option value='SIN DINERO'>SIN DINERO</option>
-                            <option value='CERRADO'>CERRADO</option>
-                            <option value='CLIENTE NO RECIBIO'>CLIENTE NO RECIBIO</option>
-                            <option value='PASO BLOQUEADO'>PASO BLOQUEADO</option>
-                            <option value='MALA NEGOCIACION'>MALA NEGOCIACION</option>
-                            <option value='CLIENTE NUNCA RECIBE'>CLIENTE NUNCA RECIBE</option>
-                        </select>
-                    </div>
-
 
 
                     <input class="hidden" type="number" id="txtCodclie" disabled="true">  
@@ -373,6 +361,7 @@ function getView(){
 
 function addListeners(){
 
+    document.getElementById('cmbObs').innerHTML = F.ComboMotivosDevolucion();
       
     get_tbl_embarques_pendientes();
 
@@ -401,7 +390,7 @@ function listeners_devolucion(){
             strCoddoc += `<option value="${r.CODDOC}">${r.CODDOC}</option>`
         })        
         document.getElementById('cmbCoddoc').innerHTML = strCoddoc;
-
+        document.getElementById('cmbCoddoc').value = Selected_coddoc_env;
 
         GF.get_data_coddoc_correlativo_sucursal(GlobalEmpnit,document.getElementById('cmbCoddoc').value)
         .then((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
@@ -489,6 +478,10 @@ function listeners_devolucion(){
 
     });
     document.getElementById('txtMCCantidadE').addEventListener('input',()=>{
+        
+        let cantidad = Number(document.getElementById('txtMCCantidadE').value || 0);
+        if(cantidad>Number(Selected_cantidad_original)){document.getElementById('txtMCCantidadE').value=Selected_cantidad_original};
+
         CalcularTotalPrecioEditar();  
     });
     document.getElementById('txtMCCantidadE').addEventListener('keyup',(e)=>{
@@ -529,9 +522,6 @@ function listeners_devolucion(){
     let btnGuardar = document.getElementById('btnGuardar');
     btnGuardar.addEventListener('click',()=>{
 
-        F.Aviso('esperameee...')
-        return;
-
             get_grid_productos();
           
 
@@ -543,7 +533,7 @@ function listeners_devolucion(){
                     let codclie = document.getElementById('txtCodclie').value || '';
                     if(codclie.toString()==''){F.AvisoError('No se selecciono una Factura');return;}
 
-                    let sucursal = document.getElementById('cmbSucursal').value;
+                    let sucursal = GlobalEmpnit;  //document.getElementById('cmbSucursal').value;
                     let coddoc = document.getElementById('cmbCoddoc').value;
 
                     btnGuardar.disabled = true;
@@ -556,6 +546,8 @@ function listeners_devolucion(){
         
                                 document.getElementById('txtCorrelativo').value = correlativo;
                     
+                                console.log('aqui 1');
+
                                 insert_documento()
                                 .then(()=>{
 
@@ -568,6 +560,11 @@ function listeners_devolucion(){
 
                                     
                                     get_grid_productos();
+
+                                    document.getElementById('tab-dos').click();
+
+                                    get_tbl_documentos_embarque(selected_codembarque);
+
 
                                 })
                                 .catch((error)=>{
@@ -696,8 +693,9 @@ function get_data_embarque(codembarque){
 
     document.getElementById('lbEmbarque').innerText = codembarque;
 
+    selected_codembarque = codembarque;
 
-    get_tbl_documentos_embarque(codembarque);
+    get_tbl_documentos_embarque(selected_codembarque);
 
 
 };
@@ -731,7 +729,6 @@ function get_data_documentos_embarque(codembarque){
     })
 
 };
-
 function get_tbl_documentos_embarque(codembarque){
 
     let container = document.getElementById('tblDataDocumentos');
@@ -742,6 +739,8 @@ function get_tbl_documentos_embarque(codembarque){
     .then((data)=>{
         let str = '';
         data.recordset.map((r)=>{
+            let strBtnDevuelto = '';
+            if(Number(r.DEVUELTO)==0){strBtnDevuelto = ''}else{strBtnDevuelto = 'hidden'};
             str += `
             <tr>
                 <td>
@@ -749,7 +748,7 @@ function get_tbl_documentos_embarque(codembarque){
                     <br>
                     <small class="negrita text-info">${r.CLIENTE}</small>
                     <br>
-                    <small>${r.DIRECCION},${r.MUNICIPIO}</small>
+                    <small>${F.limpiarTexto(r.DIRECCION)},${r.MUNICIPIO}</small>
                     <br>
                     <small class="text-info">Doc:${r.CODDOC}-${r.CORRELATIVO}</small>
                     <br>
@@ -763,8 +762,8 @@ function get_tbl_documentos_embarque(codembarque){
                             </button>
                         </div>
                         <div class="col-6">
-                            <button class="btn btn-primary btn-md hand shadow col-12"
-                            onclick="get_devolucion_factura('${codembarque}','${r.CODDOC}','${r.CORRELATIVO}','${r.TIPONEGOCIO}','${r.NEGOCIO}','${r.CLIENTE}')">
+                            <button class="${strBtnDevuelto} btn btn-primary btn-md hand shadow col-12"
+                            onclick="get_devolucion_factura('${codembarque}','${r.CODDOC}','${r.CORRELATIVO}','${r.CODVEN}','${r.CODCLIENTE}','${r.NIT}','${r.TIPONEGOCIO}','${r.NEGOCIO}','${r.CLIENTE}','${F.limpiarTexto(r.DIRECCION)}')">
                                 <i class="fal fa-download"></i>&nbsp Devolucion
                             </button>
                         </div>
@@ -949,7 +948,7 @@ function clientes_embarque(codembarque,idContenedor, lt, lg){
 
 
 
-function get_devolucion_factura(codembarque,coddoc,correlativo,tiponegocio,negocio,cliente){
+function get_devolucion_factura(codembarque,coddoc,correlativo,codven,codclie,nitclie,tiponegocio,negocio,cliente,dirclie){
 
     document.getElementById('tab-cinco').click();
 
@@ -957,8 +956,17 @@ function get_devolucion_factura(codembarque,coddoc,correlativo,tiponegocio,negoc
     document.getElementById('cmbCoddocFac').value = coddoc;
     document.getElementById('cmbCorrelativoFac').value = correlativo;
 
-    load_grid_productos(GlobalEmpnit,coddoc,correlativo)
+    
+    document.getElementById('txtCodclie').value = codclie;
+    document.getElementById('txtNit').value = nitclie;
+    document.getElementById('lbNomclie').innerText = cliente;
+    document.getElementById('lbDirclie').innerText = dirclie;
+    document.getElementById('lbNegocio').innerText = `${tiponegocio} ${negocio}`;
+       
+    document.getElementById('cmbEmpleados').value = codven;
 
+
+    load_grid_productos(GlobalEmpnit,coddoc,correlativo)
 
 
 };
@@ -998,7 +1006,8 @@ function load_grid_productos(sucursal,codoc,correlativo){
                         TIPOPRECIO: r.TIPOPRECIO,
                         EXISTENCIA: Number(r.EXISTENCIA),
                         BONO: Number(0),
-                        DESCUENTO: Number(r.DESCUENTO)
+                        DESCUENTO: Number(r.DESCUENTO),
+                        CANTIDADORIGINAL: Number(r.CANTIDAD)
                     };
 
 
@@ -1022,6 +1031,7 @@ function load_grid_productos(sucursal,codoc,correlativo){
 };
 
 function get_grid_productos(){
+
 
     let container = document.getElementById('tblDataProductos');
     container.innerHTML = GlobalLoader;
@@ -1050,7 +1060,7 @@ function get_grid_productos(){
                 <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
                 <td>
                     <button class="btn btn-info btn-md btn-circle hand shadow"
-                    onclick="edit_item('${r.ID}','${r.CODPROD}','${r.DESPROD}','${r.CODMEDIDA}','${r.EQUIVALE}','${r.CANTIDAD}','${r.COSTO}','${r.PRECIO}','${r.TIPOPROD}','${r.EXENTO}','${r.EXISTENCIA}','${r.BONO}','${r.DESCUENTO}')">
+                    onclick="edit_item('${r.ID}','${r.CODPROD}','${r.DESPROD}','${r.CODMEDIDA}','${r.EQUIVALE}','${r.CANTIDAD}','${r.COSTO}','${r.PRECIO}','${r.TIPOPROD}','${r.EXENTO}','${r.EXISTENCIA}','${r.BONO}','${r.DESCUENTO}','${r.CANTIDADORIGINAL}')">
                         <i class="fal fa-edit"></i>
                     </button>
                 </td>
@@ -1060,6 +1070,7 @@ function get_grid_productos(){
                         <i class="fal fa-trash"></i>
                     </button>
                 </td>
+                <td class="text-center negrita text-success">${r.CANTIDADORIGINAL}</td>
             </tr>
             `
         })
@@ -1085,7 +1096,7 @@ function delete_item(id){
     })
 
 };
-function edit_item(id,codprod,desprod,codmedida,equivale,cantidad,costo,precio,tipoprod,exento,existencia,bono,descuento){
+function edit_item(id,codprod,desprod,codmedida,equivale,cantidad,costo,precio,tipoprod,exento,existencia,bono,descuento,cantidadoriginal){
 
     $("#modal_editar_cantidad").modal('show');
 
@@ -1099,7 +1110,8 @@ function edit_item(id,codprod,desprod,codmedida,equivale,cantidad,costo,precio,t
     Selected_tipoprod = tipoprod;
     Selected_exento = Number(exento);
     Selected_existencia = Number(existencia);
-    Selected_bono = Number(bono)
+    Selected_bono = Number(bono);
+    Selected_cantidad_original = Number(cantidadoriginal);
 
     document.getElementById('lbCantidadDesprodE').innerText = `${desprod} (${codmedida} - Eq: ${equivale})`;
 
@@ -1120,3 +1132,140 @@ function CalcularTotalPrecioEditar(){
 
 };
 
+
+function insert_documento(){
+
+
+        let sucursal = GlobalEmpnit; //document.getElementById('cmbSucursal').value;
+        let coddoc = document.getElementById('cmbCoddoc').value;
+        let correlativo = document.getElementById('txtCorrelativo').value;
+        let codemp = document.getElementById('cmbEmpleados').value;
+        let caja = document.getElementById('cmbCaja').value;
+
+
+        let codembarque = document.getElementById('txtCodembarque').value;
+    
+        let codclie = document.getElementById('txtCodclie').value || '';
+        let nomclie = document.getElementById('lbNomclie').innerText;
+        let nit = document.getElementById('txtNit').value;
+        let dirclie = document.getElementById('lbDirclie').innerText;
+        let obs = document.getElementById('cmbObs').value;
+
+
+        let coddoc_origen = document.getElementById('cmbCoddocFac').value || '';
+        let correlativo_origen = document.getElementById('cmbCorrelativoFac').value;
+
+    
+        let anio = 0;
+        let mes = 0;
+        let fecha = F.devuelveFecha('txtFecha');
+        let hora = F.getHora();
+
+        return new Promise((resolve, reject)=>{
+
+
+                db_devoluciones.gettempDocproductos_pos(GlobalUsuario)
+                .then((response)=>{
+              
+                        axios.post('/documentos/insert_devolucion', {
+                                jsondocproductos:JSON.stringify(response),
+                                sucursal:sucursal,
+                                codembarque:codembarque,
+                                coddoc:coddoc,
+                                correlativo: correlativo,
+                                serie_fac:coddoc,
+                                numero_fac:correlativo,
+                                coddoc_origen:coddoc_origen,
+                                correlativo_origen:correlativo_origen,
+                                anio:anio,
+                                mes:mes,
+                                fecha:fecha,
+                                fechaentrega:fecha,
+                                formaentrega:'',
+                                codbodega:'0',
+                                codcaja:caja,
+                                codcliente: codclie, 
+                                nomclie:nomclie,
+                                totalcosto:global_var_total_costo,
+                                totalprecio:global_var_total_precio,
+                                totaldescuento:0,
+                                nitclie:nit,
+                                dirclie:dirclie,
+                                obs:F.limpiarTexto(obs),
+                                direntrega:'',
+                                usuario:GlobalUsuario,
+                                codven:codemp,
+                                lat:'0',
+                                long:'0',
+                                hora:hora,
+                                tipo_pago:'CON',
+                                tipo_doc:'DEV',
+                                entrega_contacto:'',
+                                entrega_telefono:'',
+                                entrega_direccion:'',
+                                entrega_referencia:'',
+                                entrega_lat:'0',
+                                entrega_long:'0',
+                                iva:GlobalConfigIVA,
+                                etiqueta:'BAJA'
+                        })
+                        .then((response) => {
+
+                                if(response.status.toString()=='200'){
+                                    let data = response.data;
+                                    if(data.toString()=="error"){
+                                        reject('error');
+                                    }else{
+                                    
+                                        if(data.rowsAffected[0].toString()=='0'){
+                                            reject('sin filas');           
+                                        }else{
+                                            resolve();  
+                                        } 
+                                    }       
+                                }else{
+                                    reject('error');
+                                }          
+                                
+                        }, (error) => {
+                            reject(error);
+                        });  
+                })
+            
+        })
+
+        
+
+
+
+
+};
+function clean_data(){
+
+
+        let sucursal = GlobalEmpnit; //document.getElementById('cmbSucursal').value;
+        
+        GF.get_data_coddoc_correlativo_sucursal(sucursal,document.getElementById('cmbCoddoc').value)
+        .then((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
+        .catch((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
+
+
+        db_devoluciones.deleteTempVenta_pos()
+        .then(()=>{
+            get_grid_productos();
+        })
+
+        document.getElementById('txtCodembarque').value='';
+    
+        document.getElementById('txtCodclie').value='';
+        document.getElementById('lbNomclie').innerText='';
+        document.getElementById('lbNegocio').innerText = '';
+        document.getElementById('txtNit').value='';
+        document.getElementById('lbDirclie').innerText='';
+        
+        document.getElementById('cmbCoddocFac').value='';
+        document.getElementById('cmbCorrelativoFac').value='';
+
+
+
+};

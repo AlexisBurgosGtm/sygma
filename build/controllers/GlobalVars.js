@@ -87,6 +87,7 @@ let Selected_exento =0;
 let Selected_tipoprod = '';
 let Selected_existencia = 0;
 let Selected_bono = 0;
+let Selected_cantidad_original = 0;
 
 let GlobalSelectedCodclie = 0;
 let selected_cod_cliente = 0;
@@ -109,6 +110,8 @@ let Selected_coddoc_cot = '';
 let selected_ped_coddoc = '';
 let selected_ped_correlativo = '';
 let selected_ped_codembarque = '';
+let selected_codembarque = '';
+
 
 let selected_id_element = '';
 

@@ -795,6 +795,27 @@ let F = {
                 <option value='2045'>2045</option>`
       return str;
       },
+      ComboMotivosDevolucion:()=>{
+
+            let motivos = [
+                          {valor:"DEVOLUCION PARCIAL",descripcion:"DEVOLUCION PARCIAL"},
+                          {valor:"SIN DINERO",descripcion:"SIN DINERO"},
+                          {valor:"CERRADO",descripcion:"CERRADO"},
+                          {valor:"CLIENTE NO RECIBIO",descripcion:"CLIENTE NO RECIBIO"},
+                          {valor:"PASO BLOQUEADO",descripcion:"PASO BLOQUEADO"},
+                          {valor:"MALA NEGOCIACION",descripcion:"MALA NEGOCIACION"},
+                          {valor:"CLIENTE NUNCA RECIBE",descripcion:"CLIENTE NUNCA RECIBE"}
+            ];
+
+            let strCombo = '';
+
+            motivos.map((r)=>{
+                strCombo += `<option value='${r.valor}'>${r.descripcion}</option>`
+            });
+
+            return strCombo;
+
+      },
       get_mes_curso:()=>{
         
         let mes = 0;
