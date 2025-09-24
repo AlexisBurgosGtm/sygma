@@ -18,6 +18,9 @@ function getView(){
                         </div>  
                         <div class="tab-pane fade" id="cinco" role="tabpanel" aria-labelledby="home-tab">
                             ${view.vista_devolucion() + view.modal_editar_cantidad()}
+                        </div>
+                        <div class="tab-pane fade" id="seis" role="tabpanel" aria-labelledby="home-tab">
+                           ${view.vista_documentos_devoluciones()}
                         </div>    
                     </div>
 
@@ -41,7 +44,11 @@ function getView(){
                         <li class="nav-item">
                             <a class="nav-link negrita text-danger" id="tab-cinco" data-toggle="tab" href="#cinco" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
-                        </li>         
+                        </li>
+                         <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-seis" data-toggle="tab" href="#seis" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>
+                        </li>            
                     </ul>
                 </div>
                
@@ -68,6 +75,7 @@ function getView(){
             return `
             <div class="card card-rounded shadow col-12">
                 <div class="card-body p-2">
+                    <h5 class="negrita text-base">FACTURAS</h5>
                     <h5 class="negrita text-danger" id="lbEmbarque"></h5>
 
                     <div class="form-group">
@@ -85,6 +93,40 @@ function getView(){
                                 </tr>
                             </thead>
                             <tbody id="tblDataDocumentos"></tbody>
+                        </table>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <button class="btn btn-secondary btn-bottom-l btn-xl btn-circle hand shadow"
+            onclick="document.getElementById('tab-uno').click()">
+                <i class="fal fa-arrow-left"></i>
+            </button>
+            `
+        },
+        vista_documentos_devoluciones:()=>{
+            return `
+            <div class="card card-rounded shadow col-12">
+                <div class="card-body p-2">
+                    <h5 class="negrita text-base">DEVOLUCIONES</h5>
+                    <h5 class="negrita text-danger" id="lbEmbarqueDev"></h5>
+
+                    <div class="form-group">
+                        <input type="text" class="form-control negrita text-danger border-primary"
+                        placeholder="Escriba para buscar..."
+                        oninput="F.FiltrarTabla('tblDocumentosDev','txtBuscarDocumentoDev')" id="txtBuscarDocumentoDev">
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table h-full col-12 table-striped table-bordered" id="tblDocumentosDev">
+                            <thead class="bg-base text-white">
+                                <tr>
+                                    <td>DEVOLUCION</td>
+                                    <td>IMPORTE</td>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataDocumentosDev"></tbody>
                         </table>
                     </div>
                     
@@ -128,9 +170,17 @@ function getView(){
             </div>
 
             <button class="btn btn-secondary btn-bottom-l btn-xl btn-circle hand shadow"
+            id="btn_atras_facturas"
             onclick="document.getElementById('tab-dos').click()">
                 <i class="fal fa-arrow-left"></i>
             </button>
+
+            <button class="btn btn-secondary btn-bottom-l btn-xl btn-circle hand shadow"
+            id="btn_atras_devoluciones"
+            onclick="document.getElementById('tab-seis').click()">
+                <i class="fal fa-arrow-left"></i>
+            </button>
+
             `
         },
         vista_mapa:()=>{
@@ -659,14 +709,20 @@ function get_tbl_embarques_pendientes(){
                     <h5 class="negrita text-info">${r.RUTA}</h5>    
                     <h5>${r.CODEMBARQUE}</h5>
                     <label class="negrita text-danger">Fecha: ${F.convertDateNormal(r.FECHA)}</label>
+                    <br>
                     <div class="row">
-                        <div class="col-6">
-                            <button class="btn btn-secondary btn-lg hand shadow" onclick="get_mapa_embarque('${r.CODEMBARQUE}')">
+                        <div class="col-4">
+                            <button class="btn btn-secondary btn-md hand shadow" onclick="get_mapa_embarque('${r.CODEMBARQUE}')">
                                 <i class="fal fa-map"></i> Mapa
                             </button>
                         </div>
-                        <div class="col-6">
-                            <button class="btn btn-info btn-lg hand shadow" onclick="get_data_embarque('${r.CODEMBARQUE}')">
+                        <div class="col-4">
+                            <button class="btn btn-primary btn-md hand shadow" onclick="get_data_embarque_devoluciones('${r.CODEMBARQUE}')">
+                                <i class="fal fa-flag"></i> Devoluciones
+                            </button>
+                        </div>
+                        <div class="col-4">
+                            <button class="btn btn-info btn-md hand shadow" onclick="get_data_embarque('${r.CODEMBARQUE}')">
                                 <i class="fal fa-list"></i> Facturas
                             </button>
                         </div>
@@ -699,7 +755,20 @@ function get_data_embarque(codembarque){
 
 
 };
+function get_data_embarque_devoluciones(codembarque){
 
+    document.getElementById('tab-seis').click();
+
+    document.getElementById('lbEmbarqueDev').innerText = codembarque;
+
+    selected_codembarque = codembarque;
+
+    get_tbl_documentos_embarque_devoluciones(selected_codembarque);
+
+
+};
+
+//FACTURAS
 function get_data_documentos_embarque(codembarque){
 
     return new Promise((resolve,reject)=>{
@@ -757,7 +826,7 @@ function get_tbl_documentos_embarque(codembarque){
                     <div class="row">
                         <div class="col-6">
                             <button class="btn btn-base btn-md hand shadow col-12"
-                            onclick="get_detalle_factura('${r.CODDOC}','${r.CORRELATIVO}','${r.TIPONEGOCIO}','${r.NEGOCIO}','${r.CLIENTE}')">
+                            onclick="get_detalle_factura('${r.CODDOC}','${r.CORRELATIVO}','${r.TIPONEGOCIO}','${r.NEGOCIO}','${r.CLIENTE}','FAC')">
                                 <i class="fal fa-list"></i>&nbsp Ver Detalle
                             </button>
                         </div>
@@ -775,6 +844,8 @@ function get_tbl_documentos_embarque(codembarque){
                     onclick="F.gotoGoogleMaps('${r.LAT}','${r.LONG}')">
                         <i class="fal fa-map-marker"></i>
                     </button>
+                    <br>
+                    <small class="text-danger negrita">Dev: ${F.setMoneda(r.DEVUELTO,'Q')}</small>
                 </td>
             </tr>
             `
@@ -786,13 +857,131 @@ function get_tbl_documentos_embarque(codembarque){
     })
 };
 
+//DEVOLUCIONES
+function get_data_documentos_embarque_devoluciones(codembarque){
 
-function get_detalle_factura(coddoc,correlativo,tiponegocio,negocio,cliente){
+    return new Promise((resolve,reject)=>{
+        
+        axios.post('/repartidor/embarque_documentos_devoluciones',{
+            sucursal:GlobalEmpnit,
+            codembarque:codembarque
+         })
+         .then((response) => {
+             console.log('pasa por aqui...')
+             let data = response.data;
+             /*
+             if(Number(data.rowsAffected[0])>0){
+                 resolve(data);             
+             }else{
+                 reject();
+             } */            
+             if(response=='error'){reject()}else{resolve(data)}
+         }, (error) => {
+            console.log('error en solicitud')
+            console.log(error);
+             reject();
+         });
 
+
+    })
+
+};
+function get_tbl_documentos_embarque_devoluciones(codembarque){
+
+    let container = document.getElementById('tblDataDocumentosDev');
+    container.innerHTML = GlobalLoader;
+
+
+    get_data_documentos_embarque_devoluciones(codembarque)
+    .then((data)=>{
+        let str = '';
+        data.recordset.map((r)=>{
+            let idbtnEliminar = `btnEliminar${r.CODDOC}-${r.CORRELATIVO}`;
+            str += `
+            <tr>
+                <td>
+                    ${r.TIPONEGOCIO} ${r.NEGOCIO}
+                    <br>
+                    <small class="negrita text-info">${r.CLIENTE}</small>
+                    <br>
+                    <small>${F.limpiarTexto(r.DIRECCION)},${r.MUNICIPIO}</small>
+                    <br>
+                    <small class="text-info">Doc:${r.CODDOC}-${r.CORRELATIVO}</small>
+                    <br>
+                    <small class="text-danger negrita">${r.VENDEDOR.toUpperCase()}</small>
+                    <br>
+                    <div class="row">
+                        <div class="col-6">
+                            <button class="btn btn-base btn-md hand shadow col-12"
+                            onclick="get_detalle_factura('${r.CODDOC}','${r.CORRELATIVO}','${r.TIPONEGOCIO}','${r.NEGOCIO}','${r.CLIENTE}','DEV')">
+                                <i class="fal fa-list"></i>&nbsp Ver Detalle
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button class="btn btn-danger btn-md hand shadow col-12"
+                            id="${idbtnEliminar}"
+                            onclick="eliminar_devolucion('${r.CODDOC}','${r.CORRELATIVO}','${idbtnEliminar}')">
+                                <i class="fal fa-trash"></i>&nbsp ELIMINAR
+                            </button>
+                        </div>
+                    </div>
+                </td>
+                <td>${F.setMoneda(r.IMPORTE,'Q')}</td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
+    })
+    .catch(()=>{
+        container.innerHTML = 'No hay datos...';
+    })
+};
+function eliminar_devolucion(coddoc,correlativo,idbtn){
+
+    let btn = document.getElementById(idbtn);
+
+    F.Confirmacion('¿Está seguro que desea ELIMINAR esta Devolución?')
+    .then((value)=>{
+        if(value==true){
+
+            btn.disabled = true;
+            F.showToast('Eliminado documento...');
+
+            GF.get_data_eliminar_documento(GlobalEmpnit,coddoc,correlativo)
+            .then(()=>{
+                
+                btn.disabled = false;
+                F.showToast('Documento eliminado exitosamente!!');
+                get_tbl_documentos_embarque_devoluciones(selected_codembarque);
+                
+            })
+            .catch(()=>{
+                btn.disabled = false;
+                F.AvisoError('No se pudo Eliminar');
+            })
+
+
+        }
+    })
+
+};
+
+
+function get_detalle_factura(coddoc,correlativo,tiponegocio,negocio,cliente,fac_dev){
+
+    if(fac_dev=='FAC'){
+        document.getElementById('btn_atras_facturas').style='visibility:visible';
+        document.getElementById('btn_atras_devoluciones').style='visibility:hidden';
+
+    }else{
+        document.getElementById('btn_atras_facturas').style='visibility:hidden';
+        document.getElementById('btn_atras_devoluciones').style='visibility:visible';
+    }
+   
     document.getElementById('tab-tres').click();
 
 
-      let container = document.getElementById('tblDataDetalle');
+    let container = document.getElementById('tblDataDetalle');
     container.innerHTML = GlobalLoader;
 
     let varTotal = 0;
