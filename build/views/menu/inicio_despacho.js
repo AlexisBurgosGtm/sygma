@@ -916,7 +916,7 @@ function get_tbl_documentos_embarque(codembarque){
                         </div>
                         <div class="col-6">
                             <button class="${strBtnDevuelto} btn btn-primary btn-md hand shadow col-12"
-                            onclick="get_devolucion_factura('${codembarque}','${r.CODDOC}','${r.CORRELATIVO}','${r.CODVEN}','${r.CODCLIENTE}','${r.NIT}','${r.TIPONEGOCIO}','${r.NEGOCIO}','${r.CLIENTE}','${F.limpiarTexto(r.DIRECCION)}')">
+                            onclick="get_devolucion_factura('${codembarque}','${r.CODDOC}','${r.CORRELATIVO}','${r.CODVEN}','${r.CODCLIENTE}','${r.NIT}','${r.TIPONEGOCIO}','${r.NEGOCIO}','${r.CLIENTE}','${F.limpiarTexto(r.DIRECCION)}','${r.FECHA.replace('T00:00:00.000Z','')}')">
                                 <i class="fal fa-download"></i>&nbsp Devolucion
                             </button>
                         </div>
@@ -1289,7 +1289,7 @@ function clientes_embarque(codembarque,idContenedor, lt, lg){
 
 
 
-function get_devolucion_factura(codembarque,coddoc,correlativo,codven,codclie,nitclie,tiponegocio,negocio,cliente,dirclie){
+function get_devolucion_factura(codembarque,coddoc,correlativo,codven,codclie,nitclie,tiponegocio,negocio,cliente,dirclie,fecha){
 
     document.getElementById('tab-cinco').click();
 
@@ -1305,6 +1305,9 @@ function get_devolucion_factura(codembarque,coddoc,correlativo,codven,codclie,ni
     document.getElementById('lbNegocio').innerText = `${tiponegocio} ${negocio}`;
        
     document.getElementById('cmbEmpleados').value = codven;
+
+    document.getElementById('txtFecha').value = fecha;
+
 
 
     load_grid_productos(GlobalEmpnit,coddoc,correlativo)
