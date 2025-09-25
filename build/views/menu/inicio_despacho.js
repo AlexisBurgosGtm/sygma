@@ -85,6 +85,12 @@ function getView(){
                     <h3 class="negrita text-danger" id="lbTotalEmbarque"></h3>
 
                     <div class="form-group">
+                        <label class="negrita text-base">Vendedor</label>
+                        <select class="form-control negrita text-secondary" id="cmbEmpleadosFac">
+                        </select>
+                    </div>
+
+                    <div class="form-group">
                         <input type="text" class="form-control negrita text-danger border-primary"
                         placeholder="Escriba para buscar..."
                         oninput="F.FiltrarTabla('tblDocumentos','txtBuscarDocumento')" id="txtBuscarDocumento">
@@ -536,16 +542,24 @@ function listeners_devolucion(){
                 str += `<option value="${r.CODEMPLEADO}">${r.NOMEMPLEADO}</option>`
             });
             document.getElementById('cmbEmpleados').innerHTML = str;
+            document.getElementById('cmbEmpleadosFac').innerHTML = `<option value='TODOS'>TODOS</OPTION>` + str;
+                
+                document.getElementById('cmbEmpleadosFac').addEventListener('change',()=>{
+                    get_tbl_documentos_embarque(selected_codembarque);
+                })
         })
     .catch(()=>{
             F.AvisoError('No se cargaron los vendedores');
             document.getElementById('cmbEmpleados').innerHTML ='<option value="1">SIN VENDEDOR</option>';
     })
 
+ 
+
 
     document.getElementById('txtFecha').value = F.getFecha();
 
 
+   
   
 
      //--------------------------------
@@ -832,14 +846,15 @@ function get_data_embarque_devoluciones(codembarque){
 };
 
 //FACTURAS
-function get_data_documentos_embarque(codembarque){
+function get_data_documentos_embarque(codembarque,codemp){
 
     return new Promise((resolve,reject)=>{
-        console.log('intenta cargar...')
+       
 
         axios.post('/repartidor/embarque_documentos',{
             sucursal:GlobalEmpnit,
-            codembarque:codembarque
+            codembarque:codembarque,
+            codemp:codemp
          })
          .then((response) => {
              console.log('pasa por aqui...')
@@ -868,7 +883,11 @@ function get_tbl_documentos_embarque(codembarque){
 
     let varTotal = 0;
 
-    get_data_documentos_embarque(codembarque)
+    let codemp = document.getElementById('cmbEmpleadosFac').value;
+
+    
+
+    get_data_documentos_embarque(codembarque,codemp)
     .then((data)=>{
         let str = '';
         data.recordset.map((r)=>{

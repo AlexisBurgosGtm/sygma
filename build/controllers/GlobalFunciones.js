@@ -383,6 +383,35 @@ let GF = {
             });
         })     
     },
+    get_data_empleados_tipo_emp_embarque:(sucursal,codembarque)=>{
+        return new Promise((resolve,reject)=>{
+    
+            axios.post(GlobalUrlCalls + '/repartidor/empleados_embarque',
+                {
+                    sucursal:sucursal,
+                    token:TOKEN,
+                    codembarque:codembarque
+                })
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        })     
+    },
     get_data_marcas:()=>{
         return new Promise((resolve,reject)=>{
                 axios.post(GlobalUrlCalls + '/productos/listado_marcas',
