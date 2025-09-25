@@ -459,6 +459,12 @@ app.use("*",function(req,res){
 // SOCKET HANDLER
 io.on('connection', function(socket){
 
+
+      socket.on('nueva_devolucion_reparto', (codemp,cliente,importe)=>{
+
+          io.emit('nueva_devolucion_reparto', codemp,cliente,importe);
+      });
+
       socket.on('MODO_SAT', (clave)=>{
         execute.Query_system(`UPDATE SYSTEM_CONFIG SET ACTIVO='SI' WHERE CODIGO='MODO_SAT';`);
         io.emit('MODO_SAT', clave);

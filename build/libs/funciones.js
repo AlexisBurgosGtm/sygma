@@ -368,6 +368,18 @@ let F = {
               
           }
       },
+      AvisoNotificacion: function(msn){
+          swal(msn, {
+              timer: 2500,
+              icon: "warning"
+              });
+
+          try {
+              navigator.vibrate(600);
+          } catch (error) {
+              
+          }
+      },
       AvisoError: function(msn){
           swal(msn, {
               timer: 1500,

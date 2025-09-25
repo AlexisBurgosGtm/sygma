@@ -21,6 +21,9 @@ function getView(){
                         </div>
                         <div class="tab-pane fade" id="seis" role="tabpanel" aria-labelledby="home-tab">
                            ${view.vista_documentos_devoluciones()}
+                        </div>
+                        <div class="tab-pane fade" id="siete" role="tabpanel" aria-labelledby="home-tab">
+                           ${view.vista_devoluciones_productos()}
                         </div>    
                     </div>
 
@@ -45,8 +48,12 @@ function getView(){
                             <a class="nav-link negrita text-danger" id="tab-cinco" data-toggle="tab" href="#cinco" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
                         </li>
-                         <li class="nav-item">
+                        <li class="nav-item">
                             <a class="nav-link negrita text-danger" id="tab-seis" data-toggle="tab" href="#seis" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>
+                        </li> 
+                        <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-siete" data-toggle="tab" href="#siete" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
                         </li>            
                     </ul>
@@ -63,11 +70,9 @@ function getView(){
                 </div>
             </div>
             <br>
-            <div class="card card-rounded col-12">
-                <div class="card-body p-1" id="tblEmbarques">
+            
+            <div class="col-12" id="tblEmbarques">
                     
-                    
-                </div>
             </div>
             `
         },
@@ -77,6 +82,7 @@ function getView(){
                 <div class="card-body p-2">
                     <h5 class="negrita text-base">FACTURAS</h5>
                     <h5 class="negrita text-danger" id="lbEmbarque"></h5>
+                    <h3 class="negrita text-danger" id="lbTotalEmbarque"></h3>
 
                     <div class="form-group">
                         <input type="text" class="form-control negrita text-danger border-primary"
@@ -111,6 +117,7 @@ function getView(){
                 <div class="card-body p-2">
                     <h5 class="negrita text-base">DEVOLUCIONES</h5>
                     <h5 class="negrita text-danger" id="lbEmbarqueDev"></h5>
+                    <h3 class="negrita text-danger" id="lbTotalEmbarqueDev"></h3>
 
                     <div class="form-group">
                         <input type="text" class="form-control negrita text-danger border-primary"
@@ -403,6 +410,50 @@ function getView(){
          
             `
         },
+        vista_devoluciones_productos:()=>{
+            return `
+            <div class="card card-rounded shadow col-12">
+                <div class="card-body p-2">
+
+                    <h5 class="negrita text-base">PRODUCTOS DEVUELTOS</h5>
+                    <h5 class="negrita text-danger" id="lbEmbarqueDeProd"></h5>
+                    <h3 class="negrita text-danger" id="lbTotalDevProd"></h3>
+
+                    <div class="form-group">
+                        <input type="text" class="form-control negrita text-danger border-primary"
+                        placeholder="Escriba para buscar..."
+                        oninput="F.FiltrarTabla('tblDocumentosDevProd','txtBuscarDocumentoDevProd')" id="txtBuscarDocumentoDevProd">
+                    </div>
+
+                   
+                     <div class="table-responsive">
+
+                         <table class="table h-full table-bordered col-12" id="tblDocumentosDevProd">
+                                <thead class="bg-primary text-white negrita">
+                                    <tr>
+                                        <td>PRODUCTO</td>
+                                        <td>UXC</td>
+                                        <td>CAJAS</td>
+                                        <td>UNIDADES</td>
+                                        <td>IMPORTE</td>
+                                        <td></td>
+                                    </tr>
+                                </thead>
+                                <tbody id="tblDataDocumentosDevProd"></tbody>
+
+                            </table>
+
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <button class="btn btn-secondary btn-bottom-l btn-xl btn-circle hand shadow"
+            onclick="document.getElementById('tab-uno').click()">
+                <i class="fal fa-arrow-left"></i>
+            </button>
+            `
+        },
     }
 
     root.innerHTML = view.body();
@@ -606,6 +657,12 @@ function listeners_devolucion(){
                                     btnGuardar.disabled = false;
                                     btnGuardar.innerHTML = `<i class="fal fa-save"></i>`;
 
+                                    
+                                    let codemp = document.getElementById('cmbEmpleados').value;
+                                    let nomclie = document.getElementById('lbNomclie').innerText;
+                                    let total = document.getElementById('lbTotal').innerText;
+                                    socket.emit('nueva_devolucion_reparto', codemp,nomclie,total)
+
                                     clean_data();
 
                                     
@@ -698,35 +755,41 @@ function get_tbl_embarques_pendientes(){
     .then((data)=>{
         let str = ''; let strClassFinalizado = '';
         data.recordset.map((r)=>{
-            if(r.FINALIZADO=='SI'){
-                strClassFinalizado='border-danger bg-danger text-white'
-            }else{
-                strClassFinalizado='border-info'
-            }
             str += `
-            <div class="card card-rounded ${strClassFinalizado} col-12 hand shadow">
+            <div class="card card-rounded border-base col-12 hand shadow">
                 <div class="card-body p-4 text-center" id="">
                     <h5 class="negrita text-info">${r.RUTA}</h5>    
                     <h5>${r.CODEMBARQUE}</h5>
                     <label class="negrita text-danger">Fecha: ${F.convertDateNormal(r.FECHA)}</label>
                     <br>
                     <div class="row">
-                        <div class="col-4">
-                            <button class="btn btn-secondary btn-md hand shadow" onclick="get_mapa_embarque('${r.CODEMBARQUE}')">
-                                <i class="fal fa-map"></i> Mapa
-                            </button>
-                        </div>
-                        <div class="col-4">
-                            <button class="btn btn-primary btn-md hand shadow" onclick="get_data_embarque_devoluciones('${r.CODEMBARQUE}')">
+                       
+                        <div class="col-6">
+                            <button class="col-12 btn btn-primary btn-md hand shadow" onclick="get_data_embarque_devoluciones('${r.CODEMBARQUE}')">
                                 <i class="fal fa-flag"></i> Devoluciones
                             </button>
                         </div>
-                        <div class="col-4">
-                            <button class="btn btn-info btn-md hand shadow" onclick="get_data_embarque('${r.CODEMBARQUE}')">
+                        <div class="col-6">
+                            <button class="col-12 btn btn-info btn-md hand shadow" onclick="get_data_embarque('${r.CODEMBARQUE}')">
                                 <i class="fal fa-list"></i> Facturas
                             </button>
                         </div>
                     </div>
+
+                    <br>
+                    <div class="row">
+                        <div class="col-6">
+                           <button class="col-12 btn btn-outline-primary btn-md hand shadow" onclick="get_data_embarque_devoluciones_productos('${r.CODEMBARQUE}')">
+                                <i class="fal fa-box"></i> Prod.Devueltos
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button class="col-12 btn btn-secondary btn-md hand shadow" onclick="get_mapa_embarque('${r.CODEMBARQUE}')">
+                                <i class="fal fa-map"></i> Mapa
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
             <br>
@@ -803,6 +866,7 @@ function get_tbl_documentos_embarque(codembarque){
     let container = document.getElementById('tblDataDocumentos');
     container.innerHTML = GlobalLoader;
 
+    let varTotal = 0;
 
     get_data_documentos_embarque(codembarque)
     .then((data)=>{
@@ -810,6 +874,7 @@ function get_tbl_documentos_embarque(codembarque){
         data.recordset.map((r)=>{
             let strBtnDevuelto = '';
             if(Number(r.DEVUELTO)==0){strBtnDevuelto = ''}else{strBtnDevuelto = 'hidden'};
+            varTotal += Number(r.IMPORTE);
             str += `
             <tr>
                 <td>
@@ -851,9 +916,11 @@ function get_tbl_documentos_embarque(codembarque){
             `
         })
         container.innerHTML = str;
+        document.getElementById('lbTotalEmbarque').innerText = `Total: ${F.setMoneda(varTotal,'Q')}`;
     })
     .catch(()=>{
         container.innerHTML = 'No hay datos...';
+        document.getElementById('lbTotalEmbarque').innerText = '';
     })
 };
 
@@ -891,11 +958,13 @@ function get_tbl_documentos_embarque_devoluciones(codembarque){
     let container = document.getElementById('tblDataDocumentosDev');
     container.innerHTML = GlobalLoader;
 
+    let varTotal = 0;
 
     get_data_documentos_embarque_devoluciones(codembarque)
     .then((data)=>{
         let str = '';
         data.recordset.map((r)=>{
+            varTotal+= Number(r.IMPORTE);
             let idbtnEliminar = `btnEliminar${r.CODDOC}-${r.CORRELATIVO}`;
             str += `
             <tr>
@@ -931,9 +1000,12 @@ function get_tbl_documentos_embarque_devoluciones(codembarque){
             `
         })
         container.innerHTML = str;
+        document.getElementById('lbTotalEmbarqueDev').innerText = `Total: ${F.setMoneda(varTotal,'Q')}`;
+
     })
     .catch(()=>{
         container.innerHTML = 'No hay datos...';
+        document.getElementById('lbTotalEmbarqueDev').innerText = '';
     })
 };
 function eliminar_devolucion(coddoc,correlativo,idbtn){
@@ -1018,6 +1090,67 @@ function get_detalle_factura(coddoc,correlativo,tiponegocio,negocio,cliente,fac_
 
 
 };
+
+
+//----------------------------------
+//boton productos devueltos
+//----------------------------------
+function get_data_embarque_devoluciones_productos(codembarque){
+
+    document.getElementById('tab-siete').click();
+
+    document.getElementById('lbEmbarqueDeProd').innerText = codembarque;
+    selected_codembarque = codembarque;
+
+    get_tbl_productos_embarque_devueltos(codembarque);
+
+};
+function get_tbl_productos_embarque_devueltos(codembarque){
+
+    let container = document.getElementById('tblDataDocumentosDevProd');
+    container.innerHTML = GlobalLoader;
+
+    let contador = 0;
+    let varTotal = 0;
+
+    GF.get_data_embarque_productos_devueltos(GlobalEmpnit,codembarque)
+    .then((data)=>{
+
+        let str = '';
+
+        data.recordset.map((r)=>{
+         
+            contador +=1;
+            varTotal += Number(r.IMPORTE);
+            str += `
+                <tr>
+                    <td>${r.DESPROD}
+                        <br>
+                        <small class="text-danger negrita">${r.CODPROD}</small>
+                    </td>
+                    <td>${r.UXC}</td>
+                    <td>${r.CAJAS}</td>
+                    <td>${r.UNIDADES}</td>
+                    <td>${F.setMoneda(r.IMPORTE,'Q')}</td>
+                    <td></td>
+                </tr>
+                `
+        })
+        container.innerHTML = str;
+        document.getElementById('lbTotalDevProd').innerText =`Total: ${F.setMoneda(varTotal,'Q')}`;
+
+    })
+    .catch((error)=>{
+        container.innerHTML = 'No se cargaron datos....';
+        document.getElementById('lbTotalDevProd').innerText = '';
+    })
+
+};
+//----------------------------------
+//boton productos devueltos
+//----------------------------------
+
+
 
 
 function get_mapa_embarque(codembarque){

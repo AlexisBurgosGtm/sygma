@@ -13,6 +13,32 @@ const socket = io({
 });
 
 
+
+socket.on('nueva_devolucion_reparto', function(codemp,cliente,importe){
+  
+    if(Number(codemp)==Number(GlobalCodUsuario)){
+          let msn = `Devolucion del cliente ${cliente}, total: ${F.setMoneda(Number(importe),'Q')}`;
+          try {
+            F.AvisoNotificacion(msn);
+          } catch (error) {
+            console.log('Previo: ' +  error);
+          }
+    }
+
+    
+      
+});
+
+
+
+
+
+
+
+
+
+
+
 socket.on('MODO_SAT', function(clave){
   try {
       //Navegar.login();

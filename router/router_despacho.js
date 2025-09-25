@@ -581,6 +581,37 @@ router.post("/pedidos_pendientes_embarque_productos_bonif", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+router.post("/pedidos_pendientes_embarque_productos_devueltos", async(req,res)=>{
+   
+    const { token, sucursal, codembarque } = req.body;
+
+    let qry = `
+            SELECT DOCPRODUCTOS.CODPROD, PRODUCTOS.DESPROD, 
+                    PRODUCTOS.UXC, 
+                    SUM(DOCPRODUCTOS.TOTALUNIDADES) AS TOTALUNIDADES, 
+                    (SUM(DOCPRODUCTOS.TOTALUNIDADES) /  PRODUCTOS.UXC) AS FACTOR_CAJAS,
+                    FLOOR((SUM(DOCPRODUCTOS.TOTALUNIDADES) /  PRODUCTOS.UXC)) AS CAJAS,
+                    ROUND(((SUM(DOCPRODUCTOS.TOTALUNIDADES) /  PRODUCTOS.UXC) - FLOOR((SUM(DOCPRODUCTOS.TOTALUNIDADES) /  PRODUCTOS.UXC))) * PRODUCTOS.UXC,0) AS UNIDADES,
+                    SUM(DOCPRODUCTOS.TOTALPRECIO) AS IMPORTE, 
+                    MARCAS.DESMARCA
+            FROM     TIPODOCUMENTOS RIGHT OUTER JOIN
+                  DOCUMENTOS LEFT OUTER JOIN
+                  PRODUCTOS LEFT OUTER JOIN
+                  MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA RIGHT OUTER JOIN
+                  DOCPRODUCTOS ON PRODUCTOS.CODPROD = DOCPRODUCTOS.CODPROD ON DOCUMENTOS.CORRELATIVO = DOCPRODUCTOS.CORRELATIVO AND DOCUMENTOS.CODDOC = DOCPRODUCTOS.CODDOC AND 
+                  DOCUMENTOS.EMPNIT = DOCPRODUCTOS.EMPNIT ON TIPODOCUMENTOS.CODDOC = DOCUMENTOS.CODDOC AND TIPODOCUMENTOS.EMPNIT = DOCUMENTOS.EMPNIT
+            WHERE  (DOCUMENTOS.EMPNIT = '${sucursal}')
+            AND (DOCUMENTOS.CODEMBARQUE = '${codembarque}')
+            AND (DOCUMENTOS.STATUS<>'A') 
+            AND (TIPODOCUMENTOS.TIPODOC IN('DEV','FNC'))
+            GROUP BY DOCPRODUCTOS.CODPROD, PRODUCTOS.DESPROD, PRODUCTOS.UXC, MARCAS.DESMARCA
+            ORDER BY DOCPRODUCTOS.CODPROD, PRODUCTOS.DESPROD;
+            `;
+    
+          
+    execute.QueryToken(res,qry,token);
+     
+});
 
 
 router.post("/pedidos_pendientes_embarque_productos_vendedor", async(req,res)=>{
