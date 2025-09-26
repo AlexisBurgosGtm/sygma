@@ -424,6 +424,12 @@ function getView(){
                     <h5 class="negrita text-base">PRODUCTOS DEVUELTOS</h5>
                     <h5 class="negrita text-danger" id="lbEmbarqueDeProd"></h5>
                     <h3 class="negrita text-danger" id="lbTotalDevProd"></h3>
+                
+                     <div class="form-group">
+                        <label class="negrita text-base">Vendedor</label>
+                        <select class="form-control negrita text-secondary" id="cmbEmpleadosDev">
+                        </select>
+                    </div>
 
                     <div class="form-group">
                         <input type="text" class="form-control negrita text-danger border-primary"
@@ -542,7 +548,7 @@ function listeners_devolucion(){
                 str += `<option value="${r.CODEMPLEADO}">${r.NOMEMPLEADO}</option>`
             });
             document.getElementById('cmbEmpleados').innerHTML = str;
-            document.getElementById('cmbEmpleadosFac').innerHTML = `<option value='TODOS'>TODOS</OPTION>` + str;
+            document.getElementById('cmbEmpleadosFac').innerHTML = `<option value='TODOS'>TODOS</OPTION>`;
                 
                 document.getElementById('cmbEmpleadosFac').addEventListener('change',()=>{
                     get_tbl_documentos_embarque(selected_codembarque);
@@ -828,6 +834,9 @@ function get_data_embarque(codembarque){
 
     selected_codembarque = codembarque;
 
+    document.getElementById('cmbEmpleadosFac').innerHTML = `<option value='TODOS'>TODOS</option>`;
+    document.getElementById('cmbEmpleadosFac').value = 'TODOS';
+
     get_tbl_documentos_embarque(selected_codembarque);
 
 
@@ -885,12 +894,16 @@ function get_tbl_documentos_embarque(codembarque){
 
     let codemp = document.getElementById('cmbEmpleadosFac').value;
 
-    
+    let empleados = [];
+
 
     get_data_documentos_embarque(codembarque,codemp)
     .then((data)=>{
         let str = '';
         data.recordset.map((r)=>{
+            
+            empleados.push({codemp:r.CODVEN, nombre:r.VENDEDOR});
+
             let strBtnDevuelto = '';
             if(Number(r.DEVUELTO)==0){strBtnDevuelto = ''}else{strBtnDevuelto = 'hidden'};
             varTotal += Number(r.IMPORTE);
@@ -936,12 +949,44 @@ function get_tbl_documentos_embarque(codembarque){
         })
         container.innerHTML = str;
         document.getElementById('lbTotalEmbarque').innerText = `Total: ${F.setMoneda(varTotal,'Q')}`;
+
+
+        //OBTENER LA LISTA UNICA DE EMPLEADOS DEL PICKING
+        let strComboEmpleados = `<option value='TODOS'>TODOS</option>`;
+        
+        let empleados_lista = [];
+        empleados_lista = obtener_lista_no_duplicada(empleados);
+
+        empleados_lista.map((r)=>{
+            strComboEmpleados += `<option value='${r.codemp}'>${r.nombre}</option>`
+        });
+        document.getElementById('cmbEmpleadosFac').innerHTML = strComboEmpleados;
+       
+        
+                
     })
     .catch(()=>{
         container.innerHTML = 'No hay datos...';
         document.getElementById('lbTotalEmbarque').innerText = '';
     })
 };
+
+function obtener_lista_no_duplicada(json_original){
+
+        let personasNoDuplicadas = [];
+
+        // Vamos iterando por las personas
+        json_original.forEach(p => {
+            if(personasNoDuplicadas.findIndex(pd => pd.codemp === p.codemp) === -1) {
+                // No existe; al detectar que no existe el mismo nombre, "la copiamos"
+                personasNoDuplicadas.push(p);
+            }
+        });
+
+        return personasNoDuplicadas;
+
+};
+
 
 //DEVOLUCIONES
 function get_data_documentos_embarque_devoluciones(codembarque){
@@ -953,7 +998,6 @@ function get_data_documentos_embarque_devoluciones(codembarque){
             codembarque:codembarque
          })
          .then((response) => {
-             console.log('pasa por aqui...')
              let data = response.data;
              /*
              if(Number(data.rowsAffected[0])>0){
