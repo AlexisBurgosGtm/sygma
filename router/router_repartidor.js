@@ -153,6 +153,31 @@ router.post("/embarque_documentos_devoluciones", async(req,res)=>{
     execute.QueryToken(res,qry,token);
     
 });
+router.post("/embarque_documentos_devoluciones_resumen", async(req,res)=>{
+    
+    const { sucursal, codembarque,token} = req.body;
+            
+    let qry ='';
+
+    qry = `
+            SELECT DOCUMENTOS.CODEMP, 
+                EMPLEADOS.NOMEMPLEADO AS EMPLEADO, 
+                COUNT(DOCUMENTOS.CODDOC) AS CONTEO, 
+                SUM(DOCUMENTOS.TOTALPRECIO) AS IMPORTE
+            FROM TIPODOCUMENTOS RIGHT OUTER JOIN
+                DOCUMENTOS ON TIPODOCUMENTOS.CODDOC = DOCUMENTOS.CODDOC AND TIPODOCUMENTOS.EMPNIT = DOCUMENTOS.EMPNIT LEFT OUTER JOIN
+                EMPLEADOS ON DOCUMENTOS.CODEMP = EMPLEADOS.CODEMPLEADO
+            WHERE  (DOCUMENTOS.CODEMBARQUE = '${codembarque}') AND 
+                (DOCUMENTOS.EMPNIT = '${sucursal}') AND 
+                (TIPODOCUMENTOS.TIPODOC IN ('DEV', 'FNC')) AND 
+                (DOCUMENTOS.STATUS <> 'A')
+            GROUP BY DOCUMENTOS.CODEMP, EMPLEADOS.NOMEMPLEADO
+            ORDER BY EMPLEADO
+            `;     
+  
+    execute.QueryToken(res,qry,token);
+    
+});
 
 router.post("/mapaembarque", async(req,res)=>{
     

@@ -16,8 +16,9 @@ const socket = io({
 
 socket.on('nueva_devolucion_reparto', function(codemp,cliente,importe){
   
+ 
     if(Number(codemp)==Number(GlobalCodUsuario)){
-          let msn = `Devolucion del cliente ${cliente}, total: ${F.setMoneda(Number(importe),'Q')}`;
+          let msn = `Devolucion del cliente ${cliente}, total: ${importe}`;
           try {
             F.AvisoNotificacion(msn);
           } catch (error) {

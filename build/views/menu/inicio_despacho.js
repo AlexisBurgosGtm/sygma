@@ -125,6 +125,22 @@ function getView(){
                     <h5 class="negrita text-danger" id="lbEmbarqueDev"></h5>
                     <h3 class="negrita text-danger" id="lbTotalEmbarqueDev"></h3>
 
+                        <div class="table-responsive">
+                            <table class="table table-bordered h-full col-12" style="font-size:80%">
+                                <thead class="bg-secondary text-white">
+                                    <tr>
+                                        <td>VENDEDOR</td>
+                                        <td>DEV</td>
+                                        <td>IMPORTE</td>
+                                    </tr>
+                                </thead>
+                                <tbody id="tblDataResumenDevoluciones"></tbody>
+                            </table>
+                        </div>
+
+                        <hr class="solid">
+
+                    
                     <div class="form-group">
                         <input type="text" class="form-control negrita text-danger border-primary"
                         placeholder="Escriba para buscar..."
@@ -425,12 +441,7 @@ function getView(){
                     <h5 class="negrita text-danger" id="lbEmbarqueDeProd"></h5>
                     <h3 class="negrita text-danger" id="lbTotalDevProd"></h3>
                 
-                     <div class="form-group">
-                        <label class="negrita text-base">Vendedor</label>
-                        <select class="form-control negrita text-secondary" id="cmbEmpleadosDev">
-                        </select>
-                    </div>
-
+                   
                     <div class="form-group">
                         <input type="text" class="form-control negrita text-danger border-primary"
                         placeholder="Escriba para buscar..."
@@ -681,6 +692,7 @@ function listeners_devolucion(){
                                     let codemp = document.getElementById('cmbEmpleados').value;
                                     let nomclie = document.getElementById('lbNomclie').innerText;
                                     let total = document.getElementById('lbTotal').innerText;
+                                    
                                     socket.emit('nueva_devolucion_reparto', codemp,nomclie,total)
 
                                     clean_data();
@@ -851,6 +863,7 @@ function get_data_embarque_devoluciones(codembarque){
 
     get_tbl_documentos_embarque_devoluciones(selected_codembarque);
 
+    get_tbl_documentos_embarque_devoluciones_resumen(selected_codembarque);
 
 };
 
@@ -970,7 +983,6 @@ function get_tbl_documentos_embarque(codembarque){
         document.getElementById('lbTotalEmbarque').innerText = '';
     })
 };
-
 function obtener_lista_no_duplicada(json_original){
 
         let personasNoDuplicadas = [];
@@ -1071,6 +1083,61 @@ function get_tbl_documentos_embarque_devoluciones(codembarque){
         document.getElementById('lbTotalEmbarqueDev').innerText = '';
     })
 };
+function get_data_documentos_embarque_devoluciones_resumen(codembarque){
+
+    return new Promise((resolve,reject)=>{
+        
+        axios.post('/repartidor/embarque_documentos_devoluciones_resumen',{
+            sucursal:GlobalEmpnit,
+            codembarque:codembarque
+         })
+         .then((response) => {
+             let data = response.data;
+             /*
+             if(Number(data.rowsAffected[0])>0){
+                 resolve(data);             
+             }else{
+                 reject();
+             } */            
+             if(response=='error'){reject()}else{resolve(data)}
+         }, (error) => {
+            console.log('error en solicitud')
+            console.log(error);
+             reject();
+         });
+
+
+    })
+
+};
+function get_tbl_documentos_embarque_devoluciones_resumen(codembarque){
+
+    let container = document.getElementById('tblDataResumenDevoluciones');
+    container.innerHTML = GlobalLoader;
+
+   
+
+    get_data_documentos_embarque_devoluciones_resumen(codembarque)
+    .then((data)=>{
+        let str = '';
+        data.recordset.map((r)=>{
+            str += `
+            <tr>
+                <td>${r.EMPLEADO}</td>
+                <td>${r.CONTEO}</td>
+                <td>${F.setMoneda(r.IMPORTE,'Q')}</td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
+    
+    })
+    .catch(()=>{
+        container.innerHTML = 'No hay datos...';
+    })
+};
+
+
 function eliminar_devolucion(coddoc,correlativo,idbtn){
 
     let btn = document.getElementById(idbtn);
@@ -1100,7 +1167,6 @@ function eliminar_devolucion(coddoc,correlativo,idbtn){
     })
 
 };
-
 
 function get_detalle_factura(coddoc,correlativo,tiponegocio,negocio,cliente,fac_dev){
 
