@@ -128,7 +128,7 @@ function getView(){
                         <table class="table h-full table-hover table-bordered" id="tblGoles">
                             <thead class="bg-primary text-white">
                                 <tr>
-                                    <td>PRODUCTO</td>
+                                    <td>CODIGO DUN</td>
                                     <td>GOLES</td>
                                     <td>UNIVERSO</td>
                                     <td>OPORTUNIDAD</td>
@@ -315,6 +315,36 @@ function rpt_tbl_goles_resumen(sucursal,codemp,mes,anio,universo){
             varTotal += Number(r.CONTEO);
             str+= `
             <tr>
+                <td>${r.CODPROD}</td>
+                <td>${r.CONTEO}</td>
+                <td>${universo}</td>
+                <td>${Number(universo)-Number(r.CONTEO)}</td>
+                <td></td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
+        document.getElementById('lbTotalGoles').innerText = varTotal;
+    })
+    .catch(()=>{
+        container.innerHTML = 'No se cargaron datos....';
+        document.getElementById('lbTotalGoles').innerText = '';
+    })
+};
+function BACKUP_rpt_tbl_goles_resumen(sucursal,codemp,mes,anio,universo){
+
+    let container = document.getElementById('tblDataGoles');
+    container.innerHTML = GlobalLoader;
+
+    let varTotal = 0;
+
+    GF.get_data_goles_resumen_mes(sucursal,codemp,mes,anio)
+    .then((data)=>{
+        let str = '';
+        data.recordset.map((r)=>{
+            varTotal += Number(r.CONTEO);
+            str+= `
+            <tr>
                 <td>${r.DESPROD}
                     <br>
                     <small>${r.CODPROD}</small>
@@ -333,5 +363,5 @@ function rpt_tbl_goles_resumen(sucursal,codemp,mes,anio,universo){
         container.innerHTML = 'No se cargaron datos....';
         document.getElementById('lbTotalGoles').innerText = '';
     })
-}
+};
 

@@ -37,6 +37,36 @@ router.post("/goles_resumen_vendedor", async(req,res)=>{
     let qry = '';
     if(codemp=='TODOS'){
         qry = `
+        SELECT CODPROD, '' AS DESPROD, COUNT(CODCLIENTE) AS CONTEO
+        FROM     view_rpt_goles_productos_cliente_2
+        WHERE  (ANIO = ${anio}) AND (MES = ${mes}) 
+        AND (EMPNIT LIKE '%${sucursal}%')
+        GROUP BY CODPROD
+        ORDER BY CODPROD`
+    }else{
+        qry = `
+        SELECT CODPROD, ''AS DESPROD, COUNT(CODCLIENTE) AS CONTEO, EMPNIT, CODEMP
+        FROM     view_rpt_goles_productos_cliente_2
+        WHERE  (ANIO = ${anio}) AND (MES = ${mes}) 
+        AND (CODEMP=${Number(codemp)}) AND (EMPNIT LIKE '%${sucursal}%')
+        GROUP BY CODPROD, EMPNIT, CODEMP
+        ORDER BY CODPROD
+        `;
+    }
+
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/BACKUP_goles_resumen_vendedor", async(req,res)=>{
+   
+    const { token, sucursal,codemp, mes,anio} = req.body;
+
+    let qry = '';
+    if(codemp=='TODOS'){
+        qry = `
         SELECT CODPROD, DESPROD, COUNT(CODCLIENTE) AS CONTEO
         FROM     view_rpt_goles_productos_cliente
         WHERE  (ANIO = ${anio}) AND (MES = ${mes}) 
@@ -49,50 +79,18 @@ router.post("/goles_resumen_vendedor", async(req,res)=>{
         FROM     view_rpt_goles_productos_cliente
         WHERE  (ANIO = ${anio}) AND (MES = ${mes}) 
         AND (CODEMP=${Number(codemp)}) AND (EMPNIT LIKE '%${sucursal}%')
-        GROUP BY CODPROD, DESPROD, EMPNIT, CODEMP
+        GROUP BY CODPROD, DESPROD,EMPNIT, CODEMP
         ORDER BY CODPROD
         `;
     }
 
     
-
-    console.log(qry)
 
     execute.QueryToken(res,qry,token);
      
 });
 //ANTES DE PONER EL COMODIN EN EMPRESAS
-router.post("/BACKUP_goles_resumen_vendedor", async(req,res)=>{
-   
-    const { token, sucursal,codemp, mes,anio} = req.body;
 
-    let qry = '';
-    if(codemp=='TODOS'){
-        qry = `
-        SELECT CODPROD, DESPROD, COUNT(CODCLIENTE) AS CONTEO, EMPNIT
-        FROM     view_rpt_goles_productos_cliente
-        WHERE  (ANIO = ${anio}) AND (MES = ${mes}) 
-        AND (EMPNIT='${sucursal}')
-        GROUP BY CODPROD, DESPROD, EMPNIT
-        ORDER BY CODPROD`
-    }else{
-        qry = `
-        SELECT CODPROD, DESPROD, COUNT(CODCLIENTE) AS CONTEO, EMPNIT, CODEMP
-        FROM     view_rpt_goles_productos_cliente
-        WHERE  (ANIO = ${anio}) AND (MES = ${mes}) 
-        AND (CODEMP=${Number(codemp)}) AND (EMPNIT='${sucursal}')
-        GROUP BY CODPROD, DESPROD, EMPNIT, CODEMP
-        ORDER BY CODPROD
-        `;
-    }
-
-    
-
-    console.log(qry)
-
-    execute.QueryToken(res,qry,token);
-     
-});
 
 router.post("/universo_clientes_empleado", async(req,res)=>{
    
