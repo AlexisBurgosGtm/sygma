@@ -1019,7 +1019,7 @@ function getView(){
                         </div>
                         <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
                             <br>
-                            <button class="btn btn-success btn-md hand shadow" onclick="F.exportTableToExcel('tblSellout','SellOut')">
+                            <button class="btn btn-success btn-md hand shadow" id="btnExportarSellOut">
                                 <i class="fal fa-share"></i> Exportar Excel
                             </button>
                         </div>
@@ -1121,6 +1121,44 @@ function addListeners(){
 
         document.getElementById('tab-siete').click();
         tbl_rpt_sellout();
+
+    });
+
+
+    document.getElementById('btnExportarSellOut').addEventListener('click',()=>{
+
+        F.showToast('Cargando datos...');
+
+            let fi = F.devuelveFecha('txtSFechaInicial');
+            let ff = F.devuelveFecha('txtSFechaFinal');
+
+
+            let sucursal = GlobalEmpnit; //document.getElementById('cmbSucursal').value;
+
+
+            document.getElementById('btnExportarSellOut').disabled = false;
+            document.getElementById('btnExportarSellOut').innerHTML = `<i class="fal fa-share fa-spin"></i>`;
+
+        
+            RPT.data_sellout_export(sucursal,fi,ff)
+            .then((data)=>{
+
+                let datos = data.recordset;
+                F.export_json_to_xlsx(datos,'SellOut');
+
+                document.getElementById('btnExportarSellOut').disabled = false;
+                document.getElementById('btnExportarSellOut').innerHTML = `<i class="fal fa-share"></i> Exportar Excel`;
+
+            })
+            .catch(()=>{
+                F.AvisoError('No se pudo cargar');
+                document.getElementById('btnExportarSellOut').disabled = false;
+                document.getElementById('btnExportarSellOut').innerHTML = `<i class="fal fa-share"></i> Exportar Excel`;
+
+            })
+
+      
+        
 
     });
 

@@ -5,9 +5,6 @@ function get_conf_token(token){
 		//token = empresa que manda la solicitud (puede cambiarse entre empresas)
 		//let config = [];
 
-
-
-		
 		let config = {
 			user: process.env.DB_USER,
 			password: process.env.DB_PWD,
@@ -19,11 +16,9 @@ function get_conf_token(token){
     			trustServerCertificate: true // change to true for local dev / self-signed certs
   			}
 		};
-
 	
 
-		return config;
-		
+		return config;		
 
 }
 

@@ -68,7 +68,16 @@ function getView(){
                         
                         <div class"form-group">
                                 <label class="negrita text-secondary">Escriba para buscar...</label>
-                                <input type="text" class="negrita text-info form-control" placeholder="Escriba para filtrar..." id="txtBuscar" oninput="F.FiltrarTabla('tblClientes','txtBuscar')">
+                                <div class="input-group">
+                                    <input type="text" class="negrita text-info form-control" 
+                                        placeholder="Escriba para filtrar..." 
+                                        id="txtBuscar" 
+                                        oninput="F.FiltrarTabla('tblClientes','txtBuscar')">
+                                    <button class="btn btn-md btn-success hand"
+                                        id="btnExportar">
+                                        <i class="fal fa-share"></i>
+                                    </button>
+                                </div>
                         </div>
 
                         <br>
@@ -354,6 +363,34 @@ function addListeners(){
         tbl_clientes();
 
 
+        document.getElementById('btnExportar').addEventListener('click',()=>{
+
+            F.showToast('Cargando datos...');
+
+                let st = document.getElementById('cmbTipo').value;
+
+                document.getElementById('btnExportar').disabled = true;
+                document.getElementById('btnExportar').innerHTML = `<i class="fal fa-share fa-spin"></i>`;
+         
+                GF.get_data_clientes_listado_export(GlobalEmpnit,st)
+                .then((data)=>{
+                   
+                    let datos = data.recordset;
+
+                    F.export_json_to_xlsx(datos,'Lista_clientes')
+
+                    document.getElementById('btnExportar').disabled = false;
+                    document.getElementById('btnExportar').innerHTML = `<i class="fal fa-share"></i>`;
+
+                })
+                .catch(()=>{
+                    F.AvisoError('No se pudo cargar')
+                    document.getElementById('btnExportar').disabled = false;
+                    document.getElementById('btnExportar').innerHTML = `<i class="fal fa-share"></i>`;
+
+                })
+
+        });
 
 
         document.getElementById('btnNuevo').addEventListener('click',()=>{

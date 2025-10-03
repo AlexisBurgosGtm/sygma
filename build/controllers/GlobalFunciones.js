@@ -2234,6 +2234,39 @@ let GF = {
 
 
     },
+    get_data_clientes_listado_export:(empnit,st)=>{
+
+        return new Promise((resolve,reject)=>{
+
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                st:st
+            }
+
+            axios.post(GlobalUrlCalls + '/clientes/lista_clientes_general_export', data)
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        }) 
+
+
+    },
     data_clientes_visitados:(empnit,codemp,fi,ff)=>{
 
         return new Promise((resolve,reject)=>{
