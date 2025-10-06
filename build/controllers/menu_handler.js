@@ -413,5 +413,16 @@ let Menu = {
         }else{
             F.AvisoError('No tiene permitido entrar a esta sección');
         }   
-    }
+    },
+    objetivos_logro_procter:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/bi_objetivos/view_avance_procter_vendedor.js','root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        }   
+    },
 }

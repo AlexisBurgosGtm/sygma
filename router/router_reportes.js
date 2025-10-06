@@ -10,7 +10,8 @@ router.post("/rpt_sellout", async(req,res)=>{
     const { token, sucursal, fi, ff } = req.body;
 
     let qry = `
-    SELECT EMPNIT,RELOP,ANIO,MES,FECHA,
+    SELECT EMPNIT,RELOP,ANIO,MES,
+        convert(varchar, FECHA, 105) AS FECHA,
         ISNULL(CODIGO_CLIENTE,0) AS CODIGO_CLIENTE,
         ISNULL(TIPONEGOCIO,'SN') AS TIPONEGOCIO,
         ISNULL(NEGOCIO,'SN') AS NEGOCIO,
