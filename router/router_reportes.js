@@ -11,7 +11,7 @@ router.post("/rpt_sellout", async(req,res)=>{
 
     let qry = `
     SELECT EMPNIT,RELOP,ANIO,MES,
-        convert(varchar, FECHA, 105) AS FECHA,
+        FECHA,
         ISNULL(CODIGO_CLIENTE,0) AS CODIGO_CLIENTE,
         ISNULL(TIPONEGOCIO,'SN') AS TIPONEGOCIO,
         ISNULL(NEGOCIO,'SN') AS NEGOCIO,
@@ -56,7 +56,7 @@ router.post("/rpt_sellout_export", async(req,res)=>{
     SELECT 
         RELOP,
         TRANSACCION,
-        FECHA,
+        convert(varchar, FECHA, 105) AS FECHA,
         ISNULL(CODIGO_CLIENTE,0) AS CODIGO_CLIENTE,
         CONCAT(ISNULL(TIPONEGOCIO,'SN'), ' ',  ISNULL(NEGOCIO,'SN'), ' - ', ISNULL(CLIENTE,'SN')) AS CLIENTE,
         'DETALLE' AS TIPO_CLIENTE,
