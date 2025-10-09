@@ -463,22 +463,6 @@ let F = {
           return resultado; //.replace('-','');
 
       },
-      BACKUP_setMoneda: function(num,signo) {
-          num = num.toString().replace(/\$|\,/g, '');
-          if (isNaN(num)) num = "0";
-          let sign = (num == (num = Math.abs(num)));
-          num = Math.floor(num * 100 + 0.50000000001);
-          let cents = num % 100;
-          num = Math.floor(num / 100).toString();
-          if (cents < 10) cents = "0" + cents;
-          for (var i = 0; i < Math.floor((num.length - (1 + i)) / 3); i++)
-              num = num.substring(0, num.length - (4 * i + 3)) + ',' + num.substring(num.length - (4 * i + 3));
-          let resultado = ((((sign) ? '' : '-') + signo + ' ' + num + ((cents == "00") ? '' : '.' + cents)).toString());
-          
-          if(resultado.includes('.')){}else{resultado = resultado + ".00"}
-          
-          return resultado.replace('-','');
-      },
       setMargen: function(num,signo) {
         
         num = num.toString().replace(/\$|\,/g, '');
@@ -760,6 +744,41 @@ let F = {
             break;
         }
       },
+      get_combo_dias_30:()=>{
+        let str =`
+                <option value='1'>1</option>
+                <option value='2'>2</option>
+                <option value='3'>3</option>
+                <option value='4'>4</option>
+                <option value='5'>5</option>
+                <option value='6'>6</option>
+                <option value='7'>7</option>
+                <option value='8'>8</option>
+                <option value='9'>9</option>
+                <option value='10'>10</option>
+                <option value='11'>11</option>
+                <option value='12'>12</option>
+                <option value='13'>13</option>
+                <option value='14'>14</option>
+                <option value='15'>15</option>
+                <option value='16'>16</option>
+                <option value='17'>17</option>
+                <option value='18'>18</option>
+                <option value='19'>19</option>
+                <option value='20'>20</option>
+                <option value='21'>21</option>
+                <option value='22'>22</option>
+                <option value='23'>23</option>
+                <option value='24'>24</option>
+                <option value='25'>25</option>
+                <option value='26'>26</option>
+                <option value='27'>27</option>
+                <option value='28'>28</option>
+                <option value='29'>29</option>
+                <option value='30'>30</option>
+                `
+      return str;
+      },
       ComboMeses: ()=>{
       let str =`<option value='1'>Enero</option>
                 <option value='2'>Febrero</option>
@@ -807,6 +826,22 @@ let F = {
                 <option value='2045'>2045</option>`
       return str;
       },
+      get_mes_curso:()=>{
+        
+        let mes = 0;
+        let f = new Date();
+        mes = f.getUTCMonth()+1;
+        return mes;
+
+      },
+      get_anio_curso:()=>{
+        
+        let anio = 0;
+        let f = new Date();
+        anio = f.getFullYear();
+        return anio;
+
+      },
       ComboMotivosDevolucion:()=>{
 
             let motivos = [
@@ -826,22 +861,6 @@ let F = {
             });
 
             return strCombo;
-
-      },
-      get_mes_curso:()=>{
-        
-        let mes = 0;
-        let f = new Date();
-        mes = f.getUTCMonth()+1;
-        return mes;
-
-      },
-      get_anio_curso:()=>{
-        
-        let anio = 0;
-        let f = new Date();
-        anio = f.getFullYear();
-        return anio;
 
       },
       get_mes_anio_fecha:(idFecha)=>{
@@ -1041,22 +1060,6 @@ let F = {
             //triggering the function
             downloadLink.click();
         }
-      },
-      BACKUP_exportTableToExcel: (tableID, filename)=>{
-
-        const $tabla = document.querySelector("#" + tableID);
-
-            let tableExport = new TableExport($tabla, {
-              exportButtons: false, // No queremos botones
-              filename: "Reporte de prueba", //Nombre del archivo de Excel
-              sheetname: "Reporte de prueba", //Título de la hoja
-          });
-          let datos = tableExport.getExportData();
-          let preferenciasDocumento = datos.tabla.xlsx;
-          tableExport.export2file(preferenciasDocumento.data, preferenciasDocumento.mimeType, preferenciasDocumento.filename, preferenciasDocumento.fileExtension, preferenciasDocumento.merges, preferenciasDocumento.RTL, preferenciasDocumento.sheetname);
-      
-
-
       },
       getHora:()=>{
         let hoy = new Date();

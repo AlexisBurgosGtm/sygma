@@ -3,6 +3,75 @@ const express = require('express');
 const router = express.Router();
 
 
+// ---------------------------
+// LOGRO PROCTER
+// --------------------------
+router.post("/procter_logro_vendedor", async(req,res)=>{
+   
+    const { token, sucursal,codemp,mes,anio} = req.body;
+
+    let qryx = `
+        SELECT 
+            rpt_procter_logro_resumen.EMPNIT, 
+            rpt_procter_logro_resumen.MES, 
+            rpt_procter_logro_resumen.ANIO, 
+            rpt_procter_logro_resumen.CODEMP, 
+            rpt_procter_logro_resumen.CODMARCA, 
+            rpt_procter_logro_resumen.DESMARCA, 
+            ISNULL(rpt_procter_logro_objetivos_marcas.OBJETIVO, 0) AS OBJETIVO, 
+            rpt_procter_logro_resumen.UNIDADES_VENTA, 
+            rpt_procter_logro_resumen.UNIDADES_DEVOLUCION, 
+            rpt_procter_logro_resumen.VENTA, 
+            rpt_procter_logro_resumen.DEVOLUCION
+        FROM  rpt_procter_logro_resumen LEFT OUTER JOIN
+            rpt_procter_logro_objetivos_marcas ON rpt_procter_logro_resumen.CODMARCA = rpt_procter_logro_objetivos_marcas.CODMARCA AND rpt_procter_logro_resumen.CODEMP = rpt_procter_logro_objetivos_marcas.CODEMP AND 
+            rpt_procter_logro_resumen.MES = rpt_procter_logro_objetivos_marcas.MES AND rpt_procter_logro_resumen.ANIO = rpt_procter_logro_objetivos_marcas.ANIO AND 
+            rpt_procter_logro_resumen.EMPNIT = rpt_procter_logro_objetivos_marcas.EMPNIT
+        WHERE  
+            (rpt_procter_logro_resumen.EMPNIT = '${sucursal}') AND 
+            (rpt_procter_logro_resumen.MES = ${mes}) AND 
+            (rpt_procter_logro_resumen.ANIO = ${anio}) AND 
+            (rpt_procter_logro_resumen.CODEMP = ${codemp});
+            `;
+
+
+            let qry = `
+            SELECT rpt_procter_logro_resumen.EMPNIT, 
+                    rpt_procter_logro_resumen.MES, 
+                    rpt_procter_logro_resumen.ANIO, 
+                    rpt_procter_logro_resumen.CODEMP, 
+                    rpt_procter_logro_resumen.CODMARCA, 
+                    rpt_procter_logro_resumen.DESMARCA, 
+                    ISNULL(rpt_procter_logro_objetivos_marcas.OBJETIVO, 0) AS OBJETIVO, 
+                    rpt_procter_logro_resumen.UNIDADES_VENTA, 
+                    rpt_procter_logro_resumen.UNIDADES_DEVOLUCION, 
+                    rpt_procter_logro_resumen.VENTA, 
+                  rpt_procter_logro_resumen.DEVOLUCION
+            FROM rpt_procter_logro_resumen RIGHT OUTER JOIN
+                  rpt_procter_logro_objetivos_marcas ON rpt_procter_logro_resumen.CODMARCA = rpt_procter_logro_objetivos_marcas.CODMARCA AND rpt_procter_logro_resumen.CODEMP = rpt_procter_logro_objetivos_marcas.CODEMP AND 
+                  rpt_procter_logro_resumen.MES = rpt_procter_logro_objetivos_marcas.MES AND rpt_procter_logro_resumen.ANIO = rpt_procter_logro_objetivos_marcas.ANIO AND 
+                  rpt_procter_logro_resumen.EMPNIT = rpt_procter_logro_objetivos_marcas.EMPNIT
+            WHERE  
+                (rpt_procter_logro_resumen.EMPNIT = '${sucursal}') AND 
+                (rpt_procter_logro_resumen.MES = ${mes}) AND 
+                (rpt_procter_logro_resumen.ANIO = ${anio}) AND 
+                (rpt_procter_logro_resumen.CODEMP = ${codemp})
+            ORDER BY rpt_procter_logro_resumen.CODMARCA;
+                `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+// ---------------------------
+// LOGRO PROCTER
+// --------------------------
+
+
+
+
 // ----------------------
 // GOLES P&G
 // ----------------------
@@ -164,7 +233,8 @@ router.post("/update_cobertura_clientes", async(req,res)=>{
                 AND ANIO=${anio} 
                 AND MES=${mes}
                 AND STATUS<>'A')
-                WHERE CLIENTES.EMPNIT='${sucursal}';
+                WHERE CLIENTES.EMPNIT='${sucursal}'
+                ;
         `;
     
 
@@ -181,7 +251,7 @@ router.post("/cobertura_vendedores_sucursal", async(req,res)=>{
             SUM(CASE WHEN ISNULL(IMPORTE, 0) = 0 THEN 0 ELSE 1 END) AS ALCANCE
         FROM  CLIENTES LEFT OUTER JOIN
             EMPLEADOS ON CLIENTES.CODEMPLEADO = EMPLEADOS.CODEMPLEADO
-        WHERE (CLIENTES.EMPNIT = '${sucursal}')
+        WHERE (CLIENTES.EMPNIT = '${sucursal}') AND (CLIENTES.HABILITADO='SI')
         GROUP BY CLIENTES.CODEMPLEADO, EMPLEADOS.NOMEMPLEADO
         `;
     

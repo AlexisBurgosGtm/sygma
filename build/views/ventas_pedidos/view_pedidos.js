@@ -523,6 +523,12 @@ function getView(){
                     <i class="fal fa-folder"></i>  
                 </button>
 
+                
+                <button class="btn btn-circle btn-xl btn-secondary btn-bottom-l hand shadow"
+                    onclick="Navegar.inicio()">
+                        <i class="fal fa-home"></i>
+                </button>
+
 
                 <button class="btn btn-danger btn-xl btn-bottom-r btn-circle shadow hand" id="btnCameraQR">
                     <i class="fal fa-camera"></i>  

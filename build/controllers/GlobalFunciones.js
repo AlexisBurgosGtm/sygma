@@ -2948,5 +2948,42 @@ let GF = {
     
         })
     },
+    get_data_logro_procter_vendedor: (sucursal,codemp,mes,anio)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:sucursal,
+                codemp:codemp,
+                mes:mes,
+                anio:anio
+            };
+    
+            axios.post(`/objetivos/procter_logro_vendedor`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }             
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
 };
 

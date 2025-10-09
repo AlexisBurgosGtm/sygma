@@ -17,7 +17,6 @@ function get_conf_token(token){
   			}
 		};
 	
-
 		return config;		
 
 }
