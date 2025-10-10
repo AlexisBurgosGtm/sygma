@@ -58,12 +58,13 @@ function getView(){
             <br>
 
             <div class="row">
-                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                <div class="col-sm-12 col-md-5 col-lg-5 col-xl-5">
+                    ${view.frag_logro_cobertura_goles()}
+                </div>   
+                <div class="col-sm-12 col-md-7 col-lg-7 col-xl-7">
                     ${view.frag_logro_marcas()}
                 </div>
-                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                    ${view.frag_logro_cobertura_goles()}
-                </div>
+               
             </div>
 
 
@@ -86,6 +87,13 @@ function getView(){
                                     </select>
                                 </div>
                             </div>
+                            <div class="form-group">
+                                <label>Vendedor</label>
+                                <div class="input-group">
+                                    <select class="form-control negrita" id="cmbEmpleado">
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                             <div class="form-group">
@@ -100,35 +108,43 @@ function getView(){
                         </div>
                     </div>
 
-                    <br>
-                    <h5 class="text-base negrita">% NECESARIO</h5>
-                    <h1 class="text-success negrita">0%</h1>
+                    
             `
         },
         frag_parametros_dias:()=>{
             return `
-            <table class="table table-responsive h-full col-12">
-                <tbody>
-                    <tr>
-                        <td>DIAS LABORALES</td>
-                        <td>
-                            <select class="negrita text-danger form-control" id="cmbDiasLaborales">
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>DIAS TRABAJADOS</td>
-                        <td>
-                            <select class="negrita text-danger form-control" id="cmbDiasTrabajados">
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>DIAS FALTANTES</td>
-                        <td id="lbDiasFaltantes">0</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="row">
+                <div class="col-8">
+                        <table class="table table-responsive h-full col-12">
+                            <tbody>
+                                <tr>
+                                    <td>DIAS LABORALES</td>
+                                    <td>
+                                        <select class="negrita text-base form-control" id="cmbDiasLaborales">
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>DIAS TRABAJADOS</td>
+                                    <td>
+                                        <select class="negrita text-base form-control" id="cmbDiasTrabajados">
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>DIAS FALTANTES</td>
+                                    <td id="lbDiasFaltantes" class="negrita h4 text-danger">0</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                </div>
+                <div class="col-4">
+                    <br>
+                    <h5 class="text-base negrita">% NECESARIO</h5>
+                    <h1 class="text-success negrita" id="lbPorcentajeNecesario">0%</h1>
+                </div>
+            </div>
+            
             `
         },
         frag_logro_cobertura_goles:()=>{
@@ -137,28 +153,28 @@ function getView(){
                 <div class="card-body p-4">
 
                     <div class="row">
-                        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                        <div class="col-6">
 
                             <h5 class="text-base negrita">COBERTURA</h5>
                             <table class="table table-responsive h-full col-12">
                                 <tbody>
                                     <tr>
                                         <td>OBJETIVO</td>
-                                        <td>0</td>
+                                        <td id="lbTotalClientesEmpleado" class="negrita text-danger h4">0</td>
                                     </tr>
                                     <tr>
                                         <td>LOGRO</td>
-                                        <td>0</td>
+                                        <td id="lbTotalClientesvisitado" class="negrita text-success h4">0</td>
                                     </tr>
                                     <tr>
                                         <td>FALTA</td>
-                                        <td>0</td>
+                                        <td id="lbTotalClientesFalta" class="negrita text-base h4">0</td>
                                     </tr>
                                 </tbody>
                             </table>
 
                         </div>
-                        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                        <div class="col-6">
 
                             <h5 class="text-base negrita">GOLES</h5>
                             <table class="table table-responsive h-full col-12">
@@ -273,6 +289,7 @@ function addListeners(){
 
         cmbMes.addEventListener('change',()=>{
             tbl_rpt_logro();
+            rpt_cobertura();
         });
 
         let cmbAnio = document.getElementById('cmbAnio');
@@ -280,9 +297,11 @@ function addListeners(){
 
         cmbAnio.addEventListener('change',()=>{
             tbl_rpt_logro();
+            rpt_cobertura();
         });
 
         let cmbSucursal = document.getElementById('cmbSucursal');
+        let cmbEmpleado = document.getElementById('cmbEmpleado');
 
         GF.get_data_empresas()
         .then((data)=>{
@@ -298,11 +317,49 @@ function addListeners(){
                 cmbSucursal.disabled = true;
             };
 
-            tbl_rpt_logro();
+            GF.get_data_empleados_tipo_emp(3,cmbSucursal.value)
+            .then((data)=>{
+
+                let str = '';
+                data.recordset.map((r)=>{
+                    str += `<option value='${r.CODEMPLEADO}'>${r.NOMEMPLEADO}</option>`
+                })
+
+                cmbEmpleado.innerHTML = str;
+                
+                
+                if(Number(GlobalNivelUsuario)==1){
+                }else{
+                    cmbEmpleado.value = GlobalCodUsuario;
+                    cmbEmpleado.disabled = true;
+                };
+
+                tbl_rpt_logro();
+                rpt_cobertura();
+
+            })
+            .catch(()=>{
+
+
+            })
+
+          
         })
         .catch(()=>{
             cmbSucursal.innerHTML = `<option value=''>NO SE CARGARON</option>`
+        });
+
+
+
+        document.getElementById('cmbDiasLaborales').addEventListener('input',()=>{
+            calcular_porcentaje();
         })
+
+        document.getElementById('cmbDiasTrabajados').addEventListener('input',()=>{
+            calcular_porcentaje();
+        })
+
+        
 
 
 
@@ -313,6 +370,31 @@ function initView(){
 
     getView();
     addListeners();
+
+};
+
+function calcular_porcentaje(){
+
+    let dias_laborales = Number(document.getElementById('cmbDiasLaborales').value);
+    let dias_trabajados = Number(document.getElementById('cmbDiasTrabajados').value);
+    
+    let varNecesario = 0;
+    
+    try {
+        let faltan = dias_laborales-dias_trabajados;
+        document.getElementById('lbDiasFaltantes').innerText = faltan;
+
+        varNecesario = ((dias_trabajados / dias_laborales)*100);
+
+        document.getElementById('lbPorcentajeNecesario').innerText = `${varNecesario.toFixed(2)} %`;
+    } catch (error) {
+
+        varNecesario = 0;
+        document.getElementById('lbDiasFaltantes').innerText = '--';
+        document.getElementById('lbPorcentajeNecesario').innerText = '0 %';
+    }
+    
+
 
 };
 
@@ -327,7 +409,7 @@ function tbl_rpt_logro(){
         let sucursal = document.getElementById('cmbSucursal').value;
         let mes = document.getElementById('cmbMes').value;
         let anio = document.getElementById('cmbAnio').value;
-        let codemp = GlobalCodUsuario;
+        let codemp = document.getElementById('cmbEmpleado').value; //GlobalCodUsuario;
 
         let varTotalObjetivo=0;
         let varTotalVenta=0;
@@ -395,5 +477,55 @@ function tbl_rpt_logro(){
 
         })
 
+
+};
+
+function rpt_cobertura(){
+
+    let container_objetivo = document.getElementById('lbTotalClientesEmpleado');
+    let container_visitado = document.getElementById('lbTotalClientesvisitado');
+    let container_falta = document.getElementById('lbTotalClientesFalta');
+
+    let sucursal = document.getElementById('cmbSucursal').value;
+    let mes = document.getElementById('cmbMes').value;
+    let anio = document.getElementById('cmbAnio').value;
+     
+    let codemp = document.getElementById('cmbEmpleado').value;  //GlobalCodUsuario;
+
+    let varObjetivo = 0; let varVisitados = 0;
+
+
+    GF.get_data_universo_clientes_empleado(sucursal,codemp)
+    .then((universo)=>{
+
+       
+
+        varObjetivo = Number(universo);
+        container_objetivo.innerHTML = varObjetivo;
+
+       
+        GF.get_data_universo_clientes_empleado_visitado_mes(sucursal,codemp,mes,anio)
+        .then((universo)=>{
+
+            varVisitados = Number(universo);
+            container_visitado.innerHTML = varVisitados;
+
+            container_falta.innerHTML = Number(varObjetivo-varVisitados);
+
+        })
+        .catch(()=>{
+            container_falta.innerHTML = '---';
+        });
+
+    })
+    .catch((err)=>{
+        console.log(err);
+        container_objetivo.innerHTML = '---';
+    });
+
+
+    
+
+    
 
 };
