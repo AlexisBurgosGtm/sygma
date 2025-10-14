@@ -33,7 +33,9 @@ function getView(){
                     
                 </div>
 
-               
+               <button class="btn btn-outline-primary btn-xl btn-bottom-r hand shadow" onclick="window.print()">
+                    <i class="fal fa-print"></i>
+               </button>
                
             `
         },
