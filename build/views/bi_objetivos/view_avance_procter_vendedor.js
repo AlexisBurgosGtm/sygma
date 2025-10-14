@@ -181,15 +181,15 @@ function getView(){
                                 <tbody>
                                     <tr>
                                         <td>OBJETIVO</td>
-                                        <td>0</td>
+                                        <td id="lbTotalClientesEmpleadoGoles" class="negrita text-danger h4">0</td>
                                     </tr>
                                     <tr>
                                         <td>LOGRO</td>
-                                        <td>0</td>
+                                        <td id="lbTotalClientesvisitadoGoles" class="negrita text-success h4">0</td>
                                     </tr>
                                     <tr>
                                         <td>FALTA</td>
-                                        <td>0</td>
+                                        <td id="lbTotalClientesFaltaGoles" class="negrita text-base h4">0</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -295,13 +295,19 @@ function addListeners(){
         let cmbAnio = document.getElementById('cmbAnio');
         cmbAnio.innerHTML = F.ComboAnio(); cmbAnio.value = F.get_anio_curso();
 
+        let cmbSucursal = document.getElementById('cmbSucursal');
+        let cmbEmpleado = document.getElementById('cmbEmpleado');
+
         cmbAnio.addEventListener('change',()=>{
             tbl_rpt_logro();
             rpt_cobertura();
         });
+        cmbEmpleado.addEventListener('change',()=>{
+            tbl_rpt_logro();
+            rpt_cobertura();
+        });
 
-        let cmbSucursal = document.getElementById('cmbSucursal');
-        let cmbEmpleado = document.getElementById('cmbEmpleado');
+        
 
         GF.get_data_empresas()
         .then((data)=>{
@@ -311,11 +317,24 @@ function addListeners(){
             })
             cmbSucursal.innerHTML = str;
 
-            if(Number(GlobalNivelUsuario)==1){
-            }else{
-                cmbSucursal.value = GlobalEmpnit;
-                cmbSucursal.disabled = true;
-            };
+            switch (Number(GlobalNivelUsuario)) {
+                case 3: //vendedor
+                    cmbSucursal.value = GlobalEmpnit;
+                    cmbSucursal.disabled = true;
+                    break;
+                case 5: //digitador
+                    cmbSucursal.value = GlobalEmpnit;
+                    break;
+                case 2: //supervisor
+                    cmbSucursal.value = GlobalEmpnit;
+                    cmbSucursal.disabled = true;
+                    break;
+            
+                default:
+
+                    break;
+            }
+
 
             GF.get_data_empleados_tipo_emp(3,cmbSucursal.value)
             .then((data)=>{
@@ -328,8 +347,7 @@ function addListeners(){
                 cmbEmpleado.innerHTML = str;
                 
                 
-                if(Number(GlobalNivelUsuario)==1){
-                }else{
+                if(Number(GlobalNivelUsuario)==3){
                     cmbEmpleado.value = GlobalCodUsuario;
                     cmbEmpleado.disabled = true;
                 };
@@ -348,6 +366,34 @@ function addListeners(){
         .catch(()=>{
             cmbSucursal.innerHTML = `<option value=''>NO SE CARGARON</option>`
         });
+
+
+        cmbSucursal.addEventListener('change',()=>{
+            GF.get_data_empleados_tipo_emp(3,cmbSucursal.value)
+            .then((data)=>{
+
+                let str = '';
+                data.recordset.map((r)=>{
+                    str += `<option value='${r.CODEMPLEADO}'>${r.NOMEMPLEADO}</option>`
+                })
+
+                cmbEmpleado.innerHTML = str;
+                
+                
+                if(Number(GlobalNivelUsuario)==3){
+                    cmbEmpleado.value = GlobalCodUsuario;
+                    cmbEmpleado.disabled = true;
+                };
+
+                tbl_rpt_logro();
+                rpt_cobertura();
+
+            })
+            .catch(()=>{
+
+
+            })
+        })
 
 
 
@@ -482,46 +528,65 @@ function tbl_rpt_logro(){
 
 function rpt_cobertura(){
 
-    let container_objetivo = document.getElementById('lbTotalClientesEmpleado');
-    let container_visitado = document.getElementById('lbTotalClientesvisitado');
-    let container_falta = document.getElementById('lbTotalClientesFalta');
+
 
     let sucursal = document.getElementById('cmbSucursal').value;
     let mes = document.getElementById('cmbMes').value;
     let anio = document.getElementById('cmbAnio').value;
-     
     let codemp = document.getElementById('cmbEmpleado').value;  //GlobalCodUsuario;
 
-    let varObjetivo = 0; let varVisitados = 0;
+
+    //containers cobertura
+    let container_objetivo = document.getElementById('lbTotalClientesEmpleado');
+    let container_visitado = document.getElementById('lbTotalClientesvisitado');
+    let container_falta = document.getElementById('lbTotalClientesFalta');
+
+    //container goles
+    let container_objetivo_goles = document.getElementById('lbTotalClientesEmpleadoGoles');
+    let container_visitado_goles = document.getElementById('lbTotalClientesvisitadoGoles');
+    let container_falta_goles = document.getElementById('lbTotalClientesFaltaGoles');
 
 
-    GF.get_data_universo_clientes_empleado(sucursal,codemp)
-    .then((universo)=>{
+    let varObjetivoCobertura = 0; let varVisitados = 0;
+    let varObjetivoGoles = 0;
 
-       
 
-        varObjetivo = Number(universo);
-        container_objetivo.innerHTML = varObjetivo;
+    GF.get_data_logro_procter_objetivo_goles_cobertura(sucursal,codemp,mes,anio)
+    .then((data)=>{
 
-       
+        data.recordset.map((r)=>{
+            varObjetivoCobertura = Number(r.COBERTURA);
+            varObjetivoGoles = Number(r.GOLES);
+        })
+
+        container_objetivo.innerHTML = varObjetivoCobertura;
+        container_objetivo_goles.innerHTML = varObjetivoGoles;
+        
+        //------------------------
+        // COBERTURA CLIENTES
+        //------------------------
         GF.get_data_universo_clientes_empleado_visitado_mes(sucursal,codemp,mes,anio)
         .then((universo)=>{
 
             varVisitados = Number(universo);
             container_visitado.innerHTML = varVisitados;
 
-            container_falta.innerHTML = Number(varObjetivo-varVisitados);
+            container_falta.innerHTML = Number(varObjetivoCobertura-varVisitados);
 
         })
         .catch(()=>{
             container_falta.innerHTML = '---';
         });
+        //------------------------
+        // COBERTURA CLIENTES
+        //------------------------
+
 
     })
-    .catch((err)=>{
-        console.log(err);
-        container_objetivo.innerHTML = '---';
-    });
+    .catch(()=>{
+        //container_falta.innerHTML = 'No hay objetivos';
+    })
+
 
 
     

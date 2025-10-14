@@ -161,6 +161,26 @@ function getView(){
             <div class="row">
                 <div class="col-sm-12 col-md-3 col-xl-3 col-lg-3">
                 
+                    <div class="card card-rounded border-danger  bg-white shadow col-12 hand" id="btnMenuObjetivosLogro">
+                        <div class="card-body p-4">
+
+                            <h4 class="text-danger">LOGRO P&G</h4>
+                          
+                             <div class="row">
+                                <div class="col-6">
+                                </div>
+                                <div class="col-6 text-right">
+                                    <i class="fal fa-loader negrita text-danger" style="font-size:250%"></i>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                
+                
+                </div>
+                <div class="col-sm-12 col-md-3 col-xl-3 col-lg-3">
+                
                     <div class="card card-rounded border-base  bg-white shadow col-12 hand" id="btnMenuObjetivos">
                         <div class="card-body p-4">
 
@@ -179,6 +199,7 @@ function getView(){
                 
                 
                 </div>
+               
             </div>
             `
         },
@@ -1061,6 +1082,11 @@ function addListeners(){
 
      // inventarios
 
+     document.getElementById('btnMenuObjetivosLogro').addEventListener('click',()=>{
+
+        Menu.objetivos_logro_procter();
+
+     })
 
 
      listeners_objetivos();

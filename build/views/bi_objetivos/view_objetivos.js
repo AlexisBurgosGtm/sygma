@@ -6,7 +6,7 @@ function getView(){
                 <div class="col-12 p-0 bg-white">
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
-                            ${view.vista_objetivo_general() + view.modal_objetivo_general() + view.modal_objetivo_vendedor()}
+                            ${view.vista_objetivo_general() + view.modal_objetivo_GC() + view.modal_objetivo_vendedor()}
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
                            
@@ -79,13 +79,18 @@ function getView(){
                 
                 </div>
                  <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
-                
-                    ${view.frag_objetivo_todos_vendedores()}
+                  
+                    ${view.frag_objetivo_vendedores_goles_cobertura()}
                 
                 </div>
                 <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
                 
                     ${view.frag_objetivo_marca()}
+                    
+                    <br>
+
+                    ${view.frag_objetivo_todos_vendedores()}
+
 
                 </div>
 
@@ -108,9 +113,7 @@ function getView(){
                                     <h5 class="negrita text-danger" id="lbTotalGeneral"></h5>
                                 </div>
                                 <div class="col-6 text-right hidden">
-                                    <button class="btn btn-success hand shadow" id="btnNuevoGeneral">
-                                        <i class="fal fa-plus"></i> Agregar Nuevo
-                                    </button>
+                                   
                                 </div>
                             </div>
 
@@ -188,7 +191,7 @@ function getView(){
             <div class="card card-rounded shadow col-12">
                         <div class="card-body p-2">
 
-                            <h5 class="negrita text-secondary">RESUMEN VENDEDORES</h5>
+                            <h5 class="negrita text-secondary">RESUMEN VENDEDORES CATEGORIAS</h5>
 
                             <div class="row">
                                 <div class="col-6">
@@ -217,14 +220,52 @@ function getView(){
                     </div>
             `
         },
-        modal_objetivo_general:()=>{
+        frag_objetivo_vendedores_goles_cobertura:()=>{
             return `
-              <div id="modal_general" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="card card-rounded shadow col-12">
+                        <div class="card-body p-2">
+
+                            <h5 class="negrita text-secondary">OBJETIVOS COBERTURA Y GOLES</h5>
+
+                            <div class="row">
+                                <div class="col-6">
+                                    <h5 class="negrita text-danger" id="lbTotalVendedoresTodosGC"></h5>
+                                </div>
+                                <div class="col-6 text-right">
+                                      <button class="btn btn-success hand shadow" id="btnNuevoObjetivoGC">
+                                        <i class="fal fa-plus"></i> Agregar Nuevo
+                                        </button>
+                                </div>
+                            </div>
+
+                            <br>
+                         
+                            <div class="table-responsive col-12">
+                                <table class="table table-hover h-full">
+                                    <thead class="bg-primary text-white">
+                                        <tr>
+                                            <td>VENDEDOR</td>
+                                            <td>OBJ_GOLES</td>
+                                            <td>OBJ_COBERTURA</td>
+                                            <td></td>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDataVendedorGC">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+            `
+        },
+        modal_objetivo_GC:()=>{
+            return `
+              <div id="modal_gc" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
                 <div class="modal-dialog modal-dialog modal-lg">
                     <div class="modal-content">
-                        <div class="dropdown-header bg-danger d-flex justify-content-center align-items-center w-100">
+                        <div class="dropdown-header bg-primary d-flex justify-content-center align-items-center w-100">
                             <h4 class="m-0 text-center color-white" id="">
-                                NUEVO OBJETIVO GENERAL
+                                NUEVO OBJETIVO GOLES Y COBERTURA
                             </h4>
                         </div>
                         <div class="modal-body p-4">
@@ -233,15 +274,30 @@ function getView(){
                                 <div class="card-body p-4">
                                 
                                     <div class="form-group">
-                                        <label class="negrita">Categoría</label>
-                                        <select class="negrita form-control" id="cmbGenMarca">
+                                        <label class="negrita">Vendedor</label>
+                                        <select class="negrita form-control" id="cmbVendedorGC">
                                         </select>
                                     </div>
 
-                                    <div class="form-group">
-                                        <label class="negrita">Objetivo</label>
-                                        <input type="number" class="negrita form-control text-danger" id="txtGenObjetivo">
+                                    <br>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="form-group">
+                                                <label class="negrita">Objetivo Goles</label>
+                                                <input type="number" class="negrita form-control text-danger" id="txtObjGoles" value=0>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="form-group">
+                                                <label class="negrita">Objetivo Clientes (cobertura)</label>
+                                                <input type="number" class="negrita form-control text-danger" id="txtObjCobertura" value=0>
+                                            </div>
+                                        </div>
                                     </div>
+
+                                    <br><br>
+                                   
 
 
                                     <div class="row">
@@ -251,7 +307,7 @@ function getView(){
                                             </button>
                                         </div>
                                         <div class="col-6">
-                                            <button class="btn btn-info btn-circle btn-xl hand shadow" id="btnGenGuardar">
+                                            <button class="btn btn-info btn-circle btn-xl hand shadow" id="btnGCGuardar">
                                                 <i class="fal fa-save"></i>
                                             </button>
                                         </div>
@@ -375,16 +431,14 @@ function addListeners(){
     get_combo_marcas();
 
     
-    document.getElementById('btnNuevoGeneral').addEventListener('click',()=>{
-        $("#modal_general").modal('show');
-        limpiar_datos_general();
-    });
+   
 
 
     document.getElementById('cmbMes').addEventListener('change',()=>{
          tbl_objetivos_generales();    
         tbl_objetivos_vendedores();
         tbl_objetivos_vendedores_resumen();
+        tbl_objetivos_vendedores_gc();
     });
 
     document.getElementById('cmbAnio').addEventListener('change',()=>{
@@ -392,57 +446,17 @@ function addListeners(){
         tbl_objetivos_generales();    
         tbl_objetivos_vendedores();
         tbl_objetivos_vendedores_resumen();
+        tbl_objetivos_vendedores_gc();
 
     });
 
-
-    let btnGenGuardar =document.getElementById('btnGenGuardar');
-    btnGenGuardar.addEventListener('click',()=>{
-
-        F.Confirmacion('¿Está seguro que desea guardar este nuevo objetivo?')
-        .then((value)=>{
-            if(value==true){
-
-                btnGenGuardar.disabled = true;
-                btnGenGuardar.innerHTML = `<i class="fal fa-spin fa-save"></i>`;
-
-                insert_objetivo_general_marca()
-                .then(()=>{
-
-                    btnGenGuardar.disabled = false;
-                    btnGenGuardar.innerHTML = `<i class="fal fa-save"></i>`;
-                    
-                    F.Aviso('Objetivo agregado exitosamente!!');
-
-                    tbl_objetivos_generales();
-
-                    $("#modal_general").modal('hide');
-     
-
-                })
-                .catch(()=>{
-                  
-                    F.AvisoError('No se pudo agregar el Objetivo');
-
-                    btnGenGuardar.disabled = false;
-                    btnGenGuardar.innerHTML = `<i class="fal fa-save"></i>`;
-                    
-
-                })
-
-            }
-        })
-
-
-
-    });
 
     
 
 
     document.getElementById('btnNuevoVendedor').addEventListener('click',()=>{
         $("#modal_vendedor").modal('show');
-        limpiar_datos_general();
+       
     });
 
 
@@ -495,6 +509,65 @@ function addListeners(){
 
 
 
+    let btnNuevoObjetivoGC = document.getElementById('btnNuevoObjetivoGC');
+    btnNuevoObjetivoGC.addEventListener('click',()=>{
+
+        $("#modal_gc").modal('show');
+
+
+        document.getElementById('txtObjGoles').value = '';
+        document.getElementById('txtObjCobertura').value = '';
+
+
+
+    });
+
+
+
+    let btnGCGuardar = document.getElementById('btnGCGuardar');
+    btnGCGuardar.addEventListener('click',()=>{
+
+        F.Confirmacion('¿Está seguro que desea Guardar este objetivo?')
+        .then((value)=>{
+            if(value==true){
+
+                let empleado = document.getElementById('cmbVendedorGC').value;
+                let goles =  document.getElementById('txtObjGoles').value || '0';
+                let cobertura = document.getElementById('txtObjCobertura').value || '0';
+
+
+                btnGCGuardar.disabled = true;
+                btnGCGuardar.innerHTML = `<i class="fal fa-spin fa-save"></i>`;
+
+                insert_objetivo_general_gc(empleado,goles,cobertura)
+                .then(()=>{
+
+                    F.Aviso('Objetivo agregado!!');
+
+                    btnGCGuardar.disabled = false;
+                    btnGCGuardar.innerHTML = `<i class="fal fa-save"></i>`;
+
+                    $("#modal_gc").modal('hide');
+
+                    tbl_objetivos_vendedores_gc();
+
+
+
+                })
+                .catch(()=>{
+                    F.AvisoError('No se pudo agregar este objetivo, revise que no exista con este empleado, mes y año')
+                
+                    btnGCGuardar.disabled = false;
+                    btnGCGuardar.innerHTML = `<i class="fal fa-save"></i>`;
+                })
+
+
+            }
+        })
+
+    });
+
+
 };
 
 function initView(){
@@ -514,6 +587,8 @@ function get_grid(){
                         str += `<option value="${r.CODEMPLEADO}">${r.NOMEMPLEADO}</option>`
                     })
                     document.getElementById('cmbVenVendedor').innerHTML = str;
+                    document.getElementById('cmbVendedorGC').innerHTML = str;
+
                 })
                 .catch(()=>{
 
@@ -525,17 +600,11 @@ function get_grid(){
 
             tbl_objetivos_vendedores_resumen();
 
+            tbl_objetivos_vendedores_gc();
+
 
 };
 
-function limpiar_datos_general(){
-
-
-    //document.getElementById('cmbGenMarca').value
-    document.getElementById('txtGenObjetivo').value = '0'
-    document.getElementById('txtVenObjetivo').value = '0'
-
-};
 
 
 //se cambio de marcas a clasificacions TIPO
@@ -564,50 +633,7 @@ function get_combo_marcas(){
 
 
 
-function insert_objetivo_general_marca(){
 
-    return new Promise((resolve,reject)=>{
-
-
-        let mes = Number(document.getElementById('cmbMes').value);
-        let anio = Number(document.getElementById('cmbAnio').value);
-        let codmarca = Number(document.getElementById('cmbGenMarca').value || 0);
-        let objetivo = Number(document.getElementById('txtGenObjetivo').value || 0);
-        let sucursal = document.getElementById('cmbSucursal').value;
-        
-
-        axios.post(GlobalUrlCalls + '/objetivos/insert_objetivo_general_marca',
-            {
-                sucursal:sucursal,
-                token:TOKEN,
-                mes:mes,
-                anio:anio,
-                codmarca:codmarca,
-                objetivo:objetivo
-            })
-        .then((response) => {
-                if(response.status.toString()=='200'){
-                    let data = response.data;
-                    if(data.toString()=="error"){
-                        reject();
-                    }else{
-                        if(Number(data.rowsAffected[0])>0){
-                            resolve(data);             
-                        }else{
-                            reject();
-                        } 
-                    }       
-                }else{
-                    reject();
-                }        
-        }, (error) => {
-             reject();
-        });
-
-    })
-
-      
-};
 
 
 
@@ -1060,3 +1086,207 @@ function tbl_objetivos_vendedores_resumen(){
 
 
 };
+
+
+
+
+
+function delete_objetivos_empleado_gc(id){
+
+    return new Promise((resolve,reject)=>{
+
+
+        let sucursal = document.getElementById('cmbSucursal').value;
+        
+        axios.post(GlobalUrlCalls + '/objetivos/delete_objetivo_vendedor_goles_cobertura',
+            {
+                sucursal:sucursal,
+                token:TOKEN,
+                id:id
+            })
+        .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }        
+        }, (error) => {
+             reject();
+        });
+
+    })
+
+};
+function eliminar_objetivo_gc(idobjetivo,idbtn){
+
+    let btn = document.getElementById(idbtn);
+
+    F.Confirmacion('¿Está seguro que desea ELIMINAR este objetivo?')
+    .then((value)=>{
+        if(value==true){
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fal fa-trash fa-spin"></i>`;
+
+            
+            delete_objetivos_empleado_gc(idobjetivo)
+            .then(()=>{
+
+                F.Aviso('Objetivo eliminado exitosamente!!');
+
+                tbl_objetivos_vendedores_gc();
+
+            })
+            .catch(()=>{
+                F.AvisoError('No se pudo eliminar');
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fal fa-trash"></i>`;                
+            })
+
+
+
+
+        }
+    })
+
+
+};
+function insert_objetivo_general_gc(codemp,goles,cobertura){
+
+    return new Promise((resolve,reject)=>{
+
+
+        let mes = Number(document.getElementById('cmbMes').value);
+        let anio = Number(document.getElementById('cmbAnio').value);
+        let sucursal = document.getElementById('cmbSucursal').value;
+       
+        //se cambio de marcas a clasificaciones TIPO
+        axios.post(GlobalUrlCalls + '/objetivos/insert_objetivo_vendedor_goles_cobertura',
+            {
+                sucursal:sucursal,
+                token:TOKEN,
+                codemp:codemp,
+                mes:mes,
+                anio:anio,
+                goles:goles,
+                cobertura:cobertura
+            })
+        .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }        
+        }, (error) => {
+             reject();
+        });
+
+    })
+
+};
+function data_objetivos_empleado_gc(){
+
+    return new Promise((resolve,reject)=>{
+
+
+        let mes = Number(document.getElementById('cmbMes').value);
+        let anio = Number(document.getElementById('cmbAnio').value);
+       
+        let sucursal = document.getElementById('cmbSucursal').value;
+        
+        axios.post(GlobalUrlCalls + '/objetivos/select_objetivo_vendedor_goles_cobertura',
+            {
+                sucursal:sucursal,
+                token:TOKEN,
+                mes:mes,
+                anio:anio
+            })
+        .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }        
+        }, (error) => {
+             reject();
+        });
+
+    })
+
+};
+function tbl_objetivos_vendedores_gc(){
+
+
+    let container = document.getElementById('tblDataVendedorGC');
+    container.innerHTML = GlobalLoader;
+
+    let varTotalGoles = 0;
+    let varTotalCobertura = 0;
+
+    data_objetivos_empleado_gc()
+    .then((data)=>{
+
+        let str = '';
+        data.recordset.map((r)=>{
+
+            
+            let btnE = `btnE${r.ID}`;
+            varTotalGoles += Number(r.GOLES);
+            varTotalCobertura += Number(r.COBERTURA);
+            
+            str += `
+            <tr>
+                <td>${r.NOMBRE}</td>
+                <td>${r.GOLES}</td>
+                <td>${r.COBERTURA}</td>
+                <td>
+                    <button class="btn btn-md btn-circle btn-danger hand shadow"
+                    id="${btnE}"
+                    onclick="eliminar_objetivo_gc('${r.ID}','${btnE}')">
+                        <i class="fal fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
+        document.getElementById('lbTotalVendedoresTodosGC').innerText = `Goles: ${varTotalGoles} - Cobertura: ${varTotalCobertura}`;
+        
+    })
+    .catch(()=>{
+        container.innerHTML = 'No se cargaron datos...';
+
+        document.getElementById('lbTotalVendedoresTodosGC').innerText = '';
+
+    })
+
+
+};
+

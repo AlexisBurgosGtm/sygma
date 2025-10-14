@@ -130,7 +130,77 @@ router.post("/goles_resumen_vendedor_total", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+router.post("/insert_objetivo_vendedor_goles_cobertura", async(req,res)=>{
+   
+    const { token, sucursal,codemp,mes,anio,goles,cobertura} = req.body;
 
+    let qry = `
+      INSERT INTO OBJETIVOS_EMPLEADO_INDIVIDUAL (EMPNIT,CODEMP,MES,ANIO,GOLES,COBERTURA)
+      SELECT '${sucursal}' AS EMPNIT, ${codemp} AS CODEMP, ${mes} AS MES, 
+      ${anio} AS ANIO, ${goles} AS GOLES, ${cobertura} AS COBERTURA;
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/select_objetivo_vendedor_goles_cobertura", async(req,res)=>{
+   
+    const { token, sucursal,mes,anio} = req.body;
+
+    let qry = `
+    SELECT
+        OBJETIVOS_EMPLEADO_INDIVIDUAL.ID,
+        OBJETIVOS_EMPLEADO_INDIVIDUAL.CODEMP, 
+        EMPLEADOS.NOMEMPLEADO AS NOMBRE, 
+        OBJETIVOS_EMPLEADO_INDIVIDUAL.GOLES, 
+        OBJETIVOS_EMPLEADO_INDIVIDUAL.COBERTURA,
+        OBJETIVOS_EMPLEADO_INDIVIDUAL.MES,
+        OBJETIVOS_EMPLEADO_INDIVIDUAL.ANIO
+    FROM OBJETIVOS_EMPLEADO_INDIVIDUAL LEFT OUTER JOIN
+        EMPLEADOS ON OBJETIVOS_EMPLEADO_INDIVIDUAL.CODEMP = EMPLEADOS.CODEMPLEADO AND OBJETIVOS_EMPLEADO_INDIVIDUAL.EMPNIT = EMPLEADOS.EMPNIT
+    WHERE  
+        (OBJETIVOS_EMPLEADO_INDIVIDUAL.EMPNIT = '${sucursal}') AND 
+        (OBJETIVOS_EMPLEADO_INDIVIDUAL.MES = ${mes}) AND 
+        (OBJETIVOS_EMPLEADO_INDIVIDUAL.ANIO = ${anio})
+    ORDER BY EMPLEADOS.NOMEMPLEADO;
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/delete_objetivo_vendedor_goles_cobertura", async(req,res)=>{
+   
+    const { token, id} = req.body;
+
+    let qry = `
+        DELETE FROM 
+            OBJETIVOS_EMPLEADO_INDIVIDUAL 
+        WHERE ID=${id};
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/select_objetivo_vendedor_goles_cobertura_empleado", async(req,res)=>{
+   
+    const { token, sucursal,codemp,mes,anio} = req.body;
+
+    let qry = `
+    SELECT GOLES,COBERTURA FROM
+        OBJETIVOS_EMPLEADO_INDIVIDUAL
+    WHERE EMPNIT = '${sucursal}' AND 
+        MES = ${mes} AND 
+        ANIO = ${anio} AND
+        CODEMP=${codemp};
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
 
 //ANTES DE PONER EL COMODIN EN EMPRESAS
 

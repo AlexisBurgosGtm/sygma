@@ -3025,5 +3025,42 @@ let GF = {
     
         })
     },
+    get_data_logro_procter_objetivo_goles_cobertura:(sucursal,codemp,mes,anio)=>{
+       
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:sucursal,
+                codemp:codemp,
+                mes:mes,
+                anio:anio
+            };
+    
+            axios.post(`/objetivos/select_objetivo_vendedor_goles_cobertura_empleado`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }             
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    }
 };
 
