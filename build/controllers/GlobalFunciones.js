@@ -2786,6 +2786,47 @@ let GF = {
     
         })
     },
+    get_data_goles_total_mes_vendedor: (sucursal,codemp,mes,anio)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:sucursal,
+                codemp:codemp,
+                mes:mes,
+                anio:anio
+            };
+    
+            axios.post(`/objetivos/goles_resumen_vendedor_total`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            let conteo = 0;
+                            data.recordset.map((r)=>{
+                                conteo = Number(r.CONTEO);
+                            })
+                            resolve(conteo);             
+                        }else{
+                            reject();
+                        } 
+                    }             
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
     update_cobertura_empleados: (sucursal,mes,anio)=>{
         
         return new Promise((resolve, reject)=>{

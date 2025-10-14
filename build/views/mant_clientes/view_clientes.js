@@ -75,7 +75,7 @@ function getView(){
                                         oninput="F.FiltrarTabla('tblClientes','txtBuscar')">
                                     <button class="btn btn-md btn-success hand"
                                         id="btnExportar">
-                                        <i class="fal fa-share"></i>
+                                        <i class="fal fa-share"></i>Excel
                                     </button>
                                 </div>
                         </div>
@@ -380,13 +380,13 @@ function addListeners(){
                     F.export_json_to_xlsx(datos,'Lista_clientes')
 
                     document.getElementById('btnExportar').disabled = false;
-                    document.getElementById('btnExportar').innerHTML = `<i class="fal fa-share"></i>`;
+                    document.getElementById('btnExportar').innerHTML = `<i class="fal fa-share"></i>Excel`;
 
                 })
                 .catch(()=>{
                     F.AvisoError('No se pudo cargar')
                     document.getElementById('btnExportar').disabled = false;
-                    document.getElementById('btnExportar').innerHTML = `<i class="fal fa-share"></i>`;
+                    document.getElementById('btnExportar').innerHTML = `<i class="fal fa-share"></i>Excel`;
 
                 })
 

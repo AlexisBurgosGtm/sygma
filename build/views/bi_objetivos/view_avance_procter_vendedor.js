@@ -476,6 +476,86 @@ function tbl_rpt_logro(){
                 let neto = Number(r.VENTA)-Number(r.DEVOLUCION);
                 let objetivo = Number(r.OBJETIVO);
                 let falta = Number(objetivo)-Number(neto);
+                if(Number(falta)<0){falta=0};
+                let alcance = (Number(neto)/Number(objetivo))*100;
+
+                conteomarcas += 1;
+                varTotalObjetivo += Number(objetivo);
+                varTotalVenta += Number(r.VENTA);
+                varTotalDevolucion += Number(r.DEVOLUCION);
+                varTotalNeto += Number(neto);
+                varTotalFalta += Number(falta);
+                varTotalAlcance += Number(alcance);
+
+                str += `
+                <tr>
+                    <td>${r.DESMARCA}</td>
+                    <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
+                    <td>${F.setMoneda(r.VENTA,'Q')}</td>
+                    <td>${F.setMoneda(r.DEVOLUCION,'Q')}</td>
+                    <td>${F.setMoneda(neto,'Q')}</td>
+                    <td>${F.setMoneda(falta,'Q')}</td>
+                    <td>${alcance.toFixed(2)} %</td>
+                </tr>
+                `;
+
+            })
+            container.innerHTML = str;
+
+            document.getElementById('lbTotalObjetivo').innerHTML = F.setMoneda(varTotalObjetivo,'Q');
+            document.getElementById('lbTotalVenta').innerHTML = F.setMoneda(varTotalVenta,'Q');
+            document.getElementById('lbTotalDevolucion').innerHTML = F.setMoneda(varTotalDevolucion,'Q');
+            document.getElementById('lbTotalVentaNeta').innerHTML = F.setMoneda(varTotalNeto,'Q');
+            document.getElementById('lbTotalFalta').innerHTML = F.setMoneda(varTotalFalta,'Q');
+            document.getElementById('lbTotalObjetivoPorcentaje').innerHTML = `<h5>${((Number(varTotalNeto)/Number(varTotalObjetivo))*100).toFixed(2)} % </h5><small>P:${(varTotalAlcance/conteomarcas).toFixed(2)}%</small>`
+
+
+        })
+        .catch((err)=>{
+             container.innerHTML = 'No se cargaron datos. Error: ' + err.toString();
+
+            document.getElementById('lbTotalObjetivo').innerHTML = '';
+            document.getElementById('lbTotalVenta').innerHTML = '';
+            document.getElementById('lbTotalDevolucion').innerHTML = '';
+            document.getElementById('lbTotalVentaNeta').innerHTML = '';
+            document.getElementById('lbTotalFalta').innerHTML = '';
+            document.getElementById('lbTotalObjetivoPorcentaje').innerHTML = '';
+
+
+        })
+
+
+};
+function BACKUP_tbl_rpt_logro(){
+
+
+        let container = document.getElementById('tbl_data_logro');
+        container.innerHTML = GlobalLoader;
+
+        let sucursal = document.getElementById('cmbSucursal').value;
+        let mes = document.getElementById('cmbMes').value;
+        let anio = document.getElementById('cmbAnio').value;
+        let codemp = document.getElementById('cmbEmpleado').value; //GlobalCodUsuario;
+
+        let varTotalObjetivo=0;
+        let varTotalVenta=0;
+        let varTotalDevolucion=0;
+        let varTotalNeto=0;
+        let varTotalFalta=0;
+        let varTotalAlcance=0;
+        let conteomarcas = 0;
+
+        GF.get_data_logro_procter_vendedor(sucursal,codemp,mes,anio)
+        .then((data)=>{
+            
+            let str = '';
+            data.recordset.map((r)=>{
+
+                
+                
+                let neto = Number(r.VENTA)-Number(r.DEVOLUCION);
+                let objetivo = Number(r.OBJETIVO);
+                let falta = Number(objetivo)-Number(neto);
                 let alcance = (Number(neto)/Number(objetivo))*100;
 
                 conteomarcas += 1;
@@ -548,7 +628,7 @@ function rpt_cobertura(){
 
 
     let varObjetivoCobertura = 0; let varVisitados = 0;
-    let varObjetivoGoles = 0;
+    let varObjetivoGoles = 0; let varObjetivoGolesVisitados = 0;
 
 
     GF.get_data_logro_procter_objetivo_goles_cobertura(sucursal,codemp,mes,anio)
@@ -575,11 +655,37 @@ function rpt_cobertura(){
 
         })
         .catch(()=>{
+            container_visitado.innerHTML = '0';
             container_falta.innerHTML = '---';
         });
         //------------------------
         // COBERTURA CLIENTES
         //------------------------
+
+        //-------------------------
+        // LOGRO GOLES MES
+        //-------------------------
+        GF.get_data_goles_total_mes_vendedor(sucursal,codemp,mes,anio)
+        .then((conteo)=>{
+
+            varObjetivoGolesVisitados = Number(conteo);
+            container_visitado_goles.innerHTML = varObjetivoGolesVisitados;
+
+            container_falta_goles.innerHTML = Number(varObjetivoGoles-varObjetivoGolesVisitados);
+
+        })
+        .catch(()=>{
+            container_visitado_goles.innerHTML = '0';
+            container_falta_goles.innerHTML = '---'
+
+        })
+
+
+
+
+        //-------------------------
+        // LOGRO GOLES MES
+        //-------------------------
 
 
     })
