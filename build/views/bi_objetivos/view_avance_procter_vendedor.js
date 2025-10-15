@@ -255,6 +255,7 @@ function getView(){
                                     <td>VENTA NETA</td>
                                     <td>FALTA</td>
                                     <td>ALCANCE</td>
+                                    <td>PROYECCION</td>
                                 </tr>
                             </thead>
                             <tbody id="tbl_data_logro">
@@ -269,6 +270,7 @@ function getView(){
                                     <td id="lbTotalVentaNeta"></td>
                                     <td id="lbTotalFalta"></td>
                                     <td id="lbTotalObjetivoPorcentaje"></td>
+                                    <td></td>
                                 </tr>
                             </tfoot>
 
@@ -347,6 +349,10 @@ function addListeners(){
         });
 
 
+        btnAceptarParametros.disabled = true;
+        btnAceptarParametros.innerHTML = `<i class="fal fa-spin fa-arrow-right"></i>`;
+
+        F.showToast('Cargando datos...');
 
         let cmbMes = document.getElementById('cmbMes');
         cmbMes.innerHTML = F.ComboMeses(); cmbMes.value= F.get_mes_curso();
@@ -416,6 +422,8 @@ function addListeners(){
                     cmbEmpleado.disabled = true;
                 };
 
+                btnAceptarParametros.disabled = false;
+                btnAceptarParametros.innerHTML = `<i class="fal fa-arrow-right"></i>`;
               
 
             })
@@ -537,6 +545,10 @@ function tbl_rpt_logro(){
         let anio = document.getElementById('cmbAnio').value;
         let codemp = document.getElementById('cmbEmpleado').value; //GlobalCodUsuario;
 
+        let laborales = document.getElementById('cmbDiasLaborales').value;
+        let trabajados = document.getElementById('cmbDiasTrabajados').value;
+
+
         let varTotalObjetivo=0;
         let varTotalVenta=0;
         let varTotalDevolucion=0;
@@ -558,6 +570,9 @@ function tbl_rpt_logro(){
                 let falta = Number(objetivo)-Number(neto);
                 if(Number(falta)<0){falta=0};
                 let alcance = (Number(neto)/Number(objetivo))*100;
+                
+                let porc_proyeccion = ((Number(alcance)/trabajados)*laborales);
+                let strClassColor = get_color_logro_pg(Number(alcance),laborales,trabajados);
 
                 conteomarcas += 1;
                 varTotalObjetivo += Number(objetivo);
@@ -568,7 +583,7 @@ function tbl_rpt_logro(){
                 varTotalAlcance += Number(alcance);
 
                 str += `
-                <tr>
+                <tr class="${strClassColor}">
                     <td>${r.DESMARCA}</td>
                     <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
                     <td>${F.setMoneda(r.VENTA,'Q')}</td>
@@ -576,6 +591,7 @@ function tbl_rpt_logro(){
                     <td>${F.setMoneda(neto,'Q')}</td>
                     <td>${F.setMoneda(falta,'Q')}</td>
                     <td>${alcance.toFixed(2)} %</td>
+                    <td>${porc_proyeccion.toFixed(2)} %</td>
                 </tr>
                 `;
 
@@ -606,85 +622,7 @@ function tbl_rpt_logro(){
 
 
 };
-function BACKUP_tbl_rpt_logro(){
 
-
-        let container = document.getElementById('tbl_data_logro');
-        container.innerHTML = GlobalLoader;
-
-        let sucursal = document.getElementById('cmbSucursal').value;
-        let mes = document.getElementById('cmbMes').value;
-        let anio = document.getElementById('cmbAnio').value;
-        let codemp = document.getElementById('cmbEmpleado').value; //GlobalCodUsuario;
-
-        let varTotalObjetivo=0;
-        let varTotalVenta=0;
-        let varTotalDevolucion=0;
-        let varTotalNeto=0;
-        let varTotalFalta=0;
-        let varTotalAlcance=0;
-        let conteomarcas = 0;
-
-        GF.get_data_logro_procter_vendedor(sucursal,codemp,mes,anio)
-        .then((data)=>{
-            
-            let str = '';
-            data.recordset.map((r)=>{
-
-                
-                
-                let neto = Number(r.VENTA)-Number(r.DEVOLUCION);
-                let objetivo = Number(r.OBJETIVO);
-                let falta = Number(objetivo)-Number(neto);
-                let alcance = (Number(neto)/Number(objetivo))*100;
-
-                conteomarcas += 1;
-                varTotalObjetivo += Number(objetivo);
-                varTotalVenta += Number(r.VENTA);
-                varTotalDevolucion += Number(r.DEVOLUCION);
-                varTotalNeto += Number(neto);
-                varTotalFalta += Number(falta);
-                varTotalAlcance += Number(alcance);
-
-                str += `
-                <tr>
-                    <td>${r.DESMARCA}</td>
-                    <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
-                    <td>${F.setMoneda(r.VENTA,'Q')}</td>
-                    <td>${F.setMoneda(r.DEVOLUCION,'Q')}</td>
-                    <td>${F.setMoneda(neto,'Q')}</td>
-                    <td>${F.setMoneda(falta,'Q')}</td>
-                    <td>${alcance.toFixed(2)} %</td>
-                </tr>
-                `;
-
-            })
-            container.innerHTML = str;
-
-            document.getElementById('lbTotalObjetivo').innerHTML = F.setMoneda(varTotalObjetivo,'Q');
-            document.getElementById('lbTotalVenta').innerHTML = F.setMoneda(varTotalVenta,'Q');
-            document.getElementById('lbTotalDevolucion').innerHTML = F.setMoneda(varTotalDevolucion,'Q');
-            document.getElementById('lbTotalVentaNeta').innerHTML = F.setMoneda(varTotalNeto,'Q');
-            document.getElementById('lbTotalFalta').innerHTML = F.setMoneda(varTotalFalta,'Q');
-            document.getElementById('lbTotalObjetivoPorcentaje').innerHTML = `${(varTotalAlcance/conteomarcas).toFixed(2)} %`
-
-
-        })
-        .catch((err)=>{
-             container.innerHTML = 'No se cargaron datos. Error: ' + err.toString();
-
-            document.getElementById('lbTotalObjetivo').innerHTML = '';
-            document.getElementById('lbTotalVenta').innerHTML = '';
-            document.getElementById('lbTotalDevolucion').innerHTML = '';
-            document.getElementById('lbTotalVentaNeta').innerHTML = '';
-            document.getElementById('lbTotalFalta').innerHTML = '';
-            document.getElementById('lbTotalObjetivoPorcentaje').innerHTML = '';
-
-
-        })
-
-
-};
 
 function rpt_cobertura(){
 
