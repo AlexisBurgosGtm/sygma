@@ -6,10 +6,10 @@ function getView(){
                 <div class="col-12 p-0 bg-white">
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
-                            ${view.vista_listado()}
+                            ${view.vista_parametros_dias()}
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
-                           
+                            ${view.vista_listado()}
                         </div>
                         <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
                             
@@ -33,10 +33,65 @@ function getView(){
                     
                 </div>
 
-               <button class="btn btn-outline-primary btn-xl btn-bottom-r hand shadow" onclick="window.print()">
+               <button class="btn btn-outline-primary btn-circle btn-xl btn-bottom-r hand shadow" onclick="window.print()">
                     <i class="fal fa-print"></i>
                </button>
                
+            `
+        },
+        vista_parametros_dias:()=>{
+            return `
+            <div class="card card-rounded col-lg-6 col-xl-6 col-md-6 col-sm-12 shadow">
+                <div class="card-body p-4">
+
+                    <img src="./img/logopg.png" width="100px" height="100px">
+                    <br><br>
+                    <h3 class="negrita text-info">Seleccione los días laborales</h3>
+                    <br>
+                    <br>
+
+                    <div class="row">
+                        <div class="col-8">
+                            <table class="table table-responsive h-full col-12">
+                                <tbody>
+                                    <tr>
+                                        <td>DIAS LABORALES</td>
+                                        <td>
+                                            <select class="negrita text-base form-control" id="cmbDiasLaborales">
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>DIAS TRABAJADOS</td>
+                                        <td>
+                                            <select class="negrita text-base form-control" id="cmbDiasTrabajados">
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>DIAS FALTANTES</td>
+                                        <td id="lbDiasFaltantes" class="negrita h4 text-danger">0</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-4">
+                            <br><br><br><br>
+                            <button class="btn btn-base btn-xl btn-circle hand shadow" id="btnAceptarParametros">
+                                <i class="fal fa-arrow-right"></i> 
+                            </button>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+            
+
+            <button class="btn btn-circle btn-xl btn-secondary btn-bottom-l hand shadow"
+                onclick="Navegar.inicio()">
+                    <i class="fal fa-home"></i>
+            </button>
+
             `
         },
         vista_listado:()=>{
@@ -60,21 +115,22 @@ function getView(){
             <br>
 
             <div class="row">
-                <div class="col-sm-12 col-md-5 col-lg-5 col-xl-5">
+                <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
                     ${view.frag_logro_cobertura_goles()}
                 </div>   
-                <div class="col-sm-12 col-md-7 col-lg-7 col-xl-7">
+                <div class="col-sm-12 col-md-8 col-lg-8 col-xl-8">
                     ${view.frag_logro_marcas()}
                 </div>
                
             </div>
 
 
-
             <button class="btn btn-circle btn-xl btn-secondary btn-bottom-l hand shadow"
-                onclick="Navegar.inicio()">
-                    <i class="fal fa-home"></i>
+                onclick="document.getElementById('tab-uno').click()">
+                    <i class="fal fa-arrow-left"></i>
             </button>
+
+           
 
             `
         },
@@ -89,13 +145,7 @@ function getView(){
                                     </select>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label>Vendedor</label>
-                                <div class="input-group">
-                                    <select class="form-control negrita" id="cmbEmpleado">
-                                    </select>
-                                </div>
-                            </div>
+                           
                         </div>
                         <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                             <div class="form-group">
@@ -117,28 +167,14 @@ function getView(){
             return `
             <div class="row">
                 <div class="col-8">
-                        <table class="table table-responsive h-full col-12">
-                            <tbody>
-                                <tr>
-                                    <td>DIAS LABORALES</td>
-                                    <td>
-                                        <select class="negrita text-base form-control" id="cmbDiasLaborales">
-                                        </select>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>DIAS TRABAJADOS</td>
-                                    <td>
-                                        <select class="negrita text-base form-control" id="cmbDiasTrabajados">
-                                        </select>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>DIAS FALTANTES</td>
-                                    <td id="lbDiasFaltantes" class="negrita h4 text-danger">0</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                       <div class="form-group">
+                            <label>Vendedor</label>
+                            <div class="input-group">
+                                <select class="form-control negrita" id="cmbEmpleado">
+                                </select>
+                            </div>
+                        </div>
+                        <label class="text-danger negrita" id="lbParametrosDias"></label>  
                 </div>
                 <div class="col-4">
                     <br>
@@ -282,9 +318,35 @@ function getView(){
 
 function addListeners(){
 
+        F.slideAnimationTabs();
+
         document.getElementById('cmbDiasLaborales').innerHTML = F.get_combo_dias_30();
         document.getElementById('cmbDiasTrabajados').innerHTML = F.get_combo_dias_30();
         
+         document.getElementById('cmbDiasLaborales').addEventListener('input',()=>{
+            calcular_porcentaje();
+        })
+
+        document.getElementById('cmbDiasTrabajados').addEventListener('input',()=>{
+            calcular_porcentaje();
+        })
+
+        get_parametros();
+        calcular_porcentaje();
+
+        let btnAceptarParametros = document.getElementById('btnAceptarParametros');
+        btnAceptarParametros.addEventListener('click',()=>{
+
+            document.getElementById('tab-dos').click();
+
+            guardar_parametros();
+
+            tbl_rpt_logro();
+            rpt_cobertura();
+
+        });
+
+
 
         let cmbMes = document.getElementById('cmbMes');
         cmbMes.innerHTML = F.ComboMeses(); cmbMes.value= F.get_mes_curso();
@@ -354,8 +416,7 @@ function addListeners(){
                     cmbEmpleado.disabled = true;
                 };
 
-                tbl_rpt_logro();
-                rpt_cobertura();
+              
 
             })
             .catch(()=>{
@@ -399,20 +460,37 @@ function addListeners(){
 
 
 
-        document.getElementById('cmbDiasLaborales').addEventListener('input',()=>{
-            calcular_porcentaje();
-        })
-
-        document.getElementById('cmbDiasTrabajados').addEventListener('input',()=>{
-            calcular_porcentaje();
-        })
+       
 
         
 
 
 
 
+
 };
+
+function get_parametros(){
+
+    let diaslaborales = localStorage.getItem('dias_laborales');
+    let diastrabajados = localStorage.getItem('dias_trabajados');
+
+    document.getElementById('cmbDiasLaborales').value = diaslaborales;
+    document.getElementById('cmbDiasTrabajados').value = diastrabajados;
+
+};
+function guardar_parametros(){
+
+    let laborales = document.getElementById('cmbDiasLaborales').value;
+    let trabajados = document.getElementById('cmbDiasTrabajados').value;
+
+    F.localStorage_dias_trabajados(trabajados);
+    F.localStorage_dias_laborales(laborales);
+
+    document.getElementById('lbParametrosDias').innerText = `Laborales: ${laborales} - Trabajados: ${trabajados}`;
+
+};
+
 
 function initView(){
 

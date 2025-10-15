@@ -1226,6 +1226,16 @@ let F = {
         localStorage.setItem('lastTab', '#' + tabinicio.toString());
 
       },
+      localStorage_dias_laborales: (dias)=>{
+
+        localStorage.setItem('dias_laborales', dias.toString());
+
+      },
+      localStorage_dias_trabajados: (dias)=>{
+
+        localStorage.setItem('dias_trabajados', dias.toString());
+
+      },
       get_existencia:(totalunidades,equivale)=>{
          
           let saldo = 0;
