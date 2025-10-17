@@ -32,6 +32,39 @@ router.post("/historial_cliente", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+router.post("/historial_cliente_mes", async(req,res)=>{
+   
+    const { token, sucursal , codclie, mes, anio} = req.body;
+
+    let qry = `
+        SELECT 
+            DOCUMENTOS.EMPNIT, 
+            DOCUMENTOS.FECHA, 
+            DOCUMENTOS.CODDOC, 
+            DOCUMENTOS.CORRELATIVO, 
+            DOCPRODUCTOS.CODPROD, 
+            DOCPRODUCTOS.DESPROD, 
+            DOCPRODUCTOS.CODMEDIDA, 
+            DOCPRODUCTOS.CANTIDAD, 
+            DOCPRODUCTOS.PRECIO, 
+            DOCPRODUCTOS.TOTALPRECIO
+        FROM  DOCUMENTOS LEFT OUTER JOIN
+            DOCPRODUCTOS ON DOCUMENTOS.CORRELATIVO = DOCPRODUCTOS.CORRELATIVO AND 
+            DOCUMENTOS.CODDOC = DOCPRODUCTOS.CODDOC AND 
+            DOCUMENTOS.EMPNIT = DOCPRODUCTOS.EMPNIT
+        WHERE  
+            (DOCUMENTOS.EMPNIT = '${sucursal}') AND 
+            (DOCUMENTOS.STATUS <> 'A') AND 
+            (DOCUMENTOS.MES = ${mes}) AND
+            (DOCUMENTOS.ANIO = ${anio}) AND 
+            (DOCUMENTOS.CODCLIENTE = ${codclie})
+    `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
 
 
 router.post("/listado_clientes_visitados", async(req,res)=>{

@@ -721,7 +721,7 @@ function getView(){
                         </div>
                         <div class="modal-body p-4">
                             
-                            <div class="card card-rounded" id="print_qr">
+                            <div class="card card-rounded" id="">
                                 <div class="card-body p-4">
 
                                    
@@ -731,13 +731,13 @@ function getView(){
                                     <h5 class="negrita text-danger" id="lbCodclieHistorial"></h5>
 
                                     <div class="form-group">
-                                        <label>Fecha Inicio y Final</label>
+                                        <label class="text-secondary">Seleccione Mes y Año</label>
                                         <div class="row">
                                             <div class="col-6">
-                                                <input type="date" class="form-control" id="txtFechaInicial">
+                                                <select class="form-control" id="cmbMesHistorial"></select>
                                             </div>
                                             <div class="col-6">
-                                                <input type="date" class="form-control" id="txtFechaFinal">
+                                                <select type="date" class="form-control" id="cmbAnioHistorial"></select>
                                             </div>
                                         </div>
                                     </div>
@@ -865,14 +865,26 @@ function addListeners(){
     document.getElementById('cmbDiaCliente').value = F.getDiaSemana(f.getDay());
 
 
-    document.getElementById('txtFechaInicial').value = F.getFecha();
-    document.getElementById('txtFechaFinal').value = F.getFecha();
-    document.getElementById('txtFechaInicial').addEventListener('change',()=>{
+    //-----------------------------
+    //HISTORIAL
+    //-----------------------------
+
+    document.getElementById('cmbMesHistorial').innerHTML = F.ComboMeses(); document.getElementById('cmbMesHistorial').value = F.get_mes_curso();
+    document.getElementById('cmbAnioHistorial').innerHTML = F.ComboAnio(); document.getElementById('cmbAnioHistorial').value = F.get_anio_curso();
+    document.getElementById('cmbMesHistorial').addEventListener('change',()=>{
         tbl_historial_cliente();
     })
-    document.getElementById('txtFechaFinal').addEventListener('change',()=>{
+    document.getElementById('cmbAnioHistorial').addEventListener('change',()=>{
         tbl_historial_cliente();
     })
+
+
+
+    //-----------------------------
+    //HISTORIAL
+    //-----------------------------
+    
+
 
     //REINICIA EL HANDLE DE LA EMPRESA
     //cmbEmpresa.removeEventListener('change', handle_empresa_change)
@@ -1595,6 +1607,45 @@ function get_historial_cliente(codclie,nomclie,tiponegocio,negocio){
 
 };
 function tbl_historial_cliente(){
+
+    let container = document.getElementById('tblDataHistorial');
+    container.innerHTML = GlobalLoader;
+
+    
+    let mes = document.getElementById('cmbMesHistorial').value;
+    let anio = document.getElementById('cmbAnioHistorial').value;
+
+    
+
+    GF.data_cliente_historial_mes(GlobalEmpnit,selected_cod_cliente,mes,anio)
+    .then((data)=>{
+
+        let str = '';
+        data.recordset.map((r)=>{
+            str += `
+            <tr>
+                <td>${F.convertDateNormal(r.FECHA)}</td>
+                <td>${r.DESPROD}
+                    <br>
+                    <small>${r.CODPROD}</small>
+                </td>
+                <td>${r.CANTIDAD}
+                    <br>
+                    <small>${r.CODMEDIDA}</small>
+                </td>
+                <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+            </tr>
+            `
+        })
+        container.innerHTML = str; 
+
+    })
+    .catch(()=>{
+        container.innerHTML = 'No se cargaron datos...';
+    })
+
+};
+function BACKUP_tbl_historial_cliente(){
 
     let container = document.getElementById('tblDataHistorial');
     container.innerHTML = GlobalLoader;
