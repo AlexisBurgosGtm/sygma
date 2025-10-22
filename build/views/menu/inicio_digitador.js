@@ -478,6 +478,8 @@ function getView(){
                                     <td>FECHA</td>
                                     <td>EMBARQUE</td>
                                     <td>REPARTIDOR</td>
+                                    <td>IMPORTE</td>
+                                    <td>DEVOLUCIONES</td>
                                     <td></td>
                                     <td></td>
                                     <td></td>
@@ -2481,6 +2483,8 @@ function tbl_embarques(idContainer,status,mes,anio){
                         <small>${r.RUTEO}</small>
                     </td>
                     <td>${r.NOMEMPLEADO}</td>
+                    <td>${F.setMoneda(r.IMPORTE,'Q')}</td>
+                    <td>${F.setMoneda(r.DEVOLUCIONES,'Q')}</td>
                     <td>
                         <buttton id="${idbtnF}" class="btn btn-md btn-circle hand shadow btn-success"
                         onclick="finalizar_embarque('${r.CODEMBARQUE}','${idbtnF}')">

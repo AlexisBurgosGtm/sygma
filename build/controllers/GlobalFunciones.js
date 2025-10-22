@@ -1989,6 +1989,7 @@ let GF = {
                 anio:anio
             };
     
+            //axios.post(`/despacho/embarques_lista`, data)
             axios.post(`/despacho/embarques_lista`, data)
             .then(res => {
                 

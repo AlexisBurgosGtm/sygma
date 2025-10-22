@@ -996,7 +996,7 @@ router.post("/embarques_lista", async(req,res)=>{
    
     const { token, sucursal, status, mes, anio } = req.body;
 
-    let qry = `
+    let qryx = `
             SELECT EMBARQUES.ID,
                 EMBARQUES.FECHA, 
                 EMBARQUES.CODEMBARQUE, 
@@ -1016,6 +1016,31 @@ router.post("/embarques_lista", async(req,res)=>{
             AND (EMBARQUES.EMPNIT = '${sucursal}') 
             AND (EMBARQUES.MES=${mes}) 
             AND (EMBARQUES.ANIO=${anio})    
+            `;
+
+        let qry = `
+            SELECT 
+                EMBARQUES.ID, 
+                EMBARQUES.FECHA, 
+                EMBARQUES.CODEMBARQUE, 
+                EMBARQUES.DESCRIPCION, 
+                EMBARQUES.RUTEO, 
+                EMBARQUES.CODEMPLEADO, 
+                EMPLEADOS.NOMEMPLEADO, 
+                EMBARQUES.F_TOTALCOSTO, 
+                EMBARQUES.F_TOTALPRECIO, 
+                EMBARQUES.F_DEVOLUCIONES, 
+                EMBARQUES.F_REPORTADO, 
+                EMBARQUES.FINALIZADO, 
+                view_rpt_embarques_importes_resumen.IMPORTE, 
+                view_rpt_embarques_importes_resumen.DEVOLUCIONES
+FROM        EMBARQUES LEFT OUTER JOIN
+                view_rpt_embarques_importes_resumen ON EMBARQUES.CODEMBARQUE = view_rpt_embarques_importes_resumen.CODEMBARQUE AND EMBARQUES.EMPNIT = view_rpt_embarques_importes_resumen.EMPNIT LEFT OUTER JOIN
+                EMPLEADOS ON EMBARQUES.EMPNIT = EMPLEADOS.EMPNIT AND EMBARQUES.CODEMPLEADO = EMPLEADOS.CODEMPLEADO
+            WHERE  (EMBARQUES.FINALIZADO LIKE '%${status}%') 
+                AND (EMBARQUES.EMPNIT = '${sucursal}') 
+                AND (EMBARQUES.MES=${mes}) 
+                AND (EMBARQUES.ANIO=${anio})    
             `;
     
           
