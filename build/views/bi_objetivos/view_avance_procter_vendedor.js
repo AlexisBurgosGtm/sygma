@@ -443,7 +443,8 @@ function addListeners(){
             GF.get_data_empleados_tipo_emp(3,cmbSucursal.value)
             .then((data)=>{
 
-                let str = '';
+                let str = `<option value='0'>TODOS</option>`;
+                
                 data.recordset.map((r)=>{
                     str += `<option value='${r.CODEMPLEADO}'>${r.NOMEMPLEADO}</option>`
                 })
