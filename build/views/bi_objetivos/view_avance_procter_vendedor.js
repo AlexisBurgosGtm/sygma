@@ -245,7 +245,7 @@ function getView(){
             <div class="card card-rounded shadow">
                 <div class="card-body p-2">
                     <div class="table-responsive col-12">
-                        <table class="table table-responsive table-hover col-12">
+                        <table class="table table-responsive h-full col-12">
                             <thead class="bg-base text-white">
                                 <tr>
                                     <td>MARCA</td>
@@ -409,7 +409,7 @@ function addListeners(){
             GF.get_data_empleados_tipo_emp(3,cmbSucursal.value)
             .then((data)=>{
 
-                let str = '';
+                let str = `<option value='0'>TODOS</option>`;
                 data.recordset.map((r)=>{
                     str += `<option value='${r.CODEMPLEADO}'>${r.NOMEMPLEADO}</option>`
                 })
@@ -562,8 +562,6 @@ function tbl_rpt_logro(){
             
             let str = '';
             data.recordset.map((r)=>{
-
-                
                 
                 let neto = Number(r.VENTA)-Number(r.DEVOLUCION);
                 let objetivo = Number(r.OBJETIVO);
@@ -608,7 +606,8 @@ function tbl_rpt_logro(){
 
         })
         .catch((err)=>{
-             container.innerHTML = 'No se cargaron datos. Error: ' + err.toString();
+
+            container.innerHTML = 'No se cargaron datos. Error: ' + err.toString();
 
             document.getElementById('lbTotalObjetivo').innerHTML = '';
             document.getElementById('lbTotalVenta').innerHTML = '';

@@ -10,6 +10,69 @@ router.post("/procter_logro_vendedor", async(req,res)=>{
    
     const { token, sucursal,codemp,mes,anio} = req.body;
 
+    let qry = '';
+
+    if(Number(codemp)==0){
+        qry = `
+            SELECT 
+                rpt_procter_logro_objetivos_marcas.EMPNIT, 
+                rpt_procter_logro_objetivos_marcas.MES, 
+                rpt_procter_logro_objetivos_marcas.ANIO, 
+                rpt_procter_logro_objetivos_marcas.CODMARCA, 
+                rpt_procter_logro_objetivos_marcas.DESMARCA, 
+                SUM(ISNULL(rpt_procter_logro_objetivos_marcas.OBJETIVO, 0)) AS OBJETIVO, 
+                SUM(ISNULL(rpt_procter_logro_resumen.UNIDADES_VENTA, 0)) AS UNIDADES_VENTA, 
+                SUM(ISNULL(rpt_procter_logro_resumen.UNIDADES_DEVOLUCION, 0)) AS UNIDADES_DEVOLUCION, 
+                SUM(ISNULL(rpt_procter_logro_resumen.VENTA, 0)) AS VENTA, 
+                SUM(ISNULL(rpt_procter_logro_resumen.DEVOLUCION, 0)) AS DEVOLUCION
+            FROM  rpt_procter_logro_resumen RIGHT OUTER JOIN
+                rpt_procter_logro_objetivos_marcas ON rpt_procter_logro_resumen.CODMARCA = rpt_procter_logro_objetivos_marcas.CODMARCA AND rpt_procter_logro_resumen.CODEMP = rpt_procter_logro_objetivos_marcas.CODEMP AND 
+                rpt_procter_logro_resumen.MES = rpt_procter_logro_objetivos_marcas.MES AND rpt_procter_logro_resumen.ANIO = rpt_procter_logro_objetivos_marcas.ANIO AND 
+                rpt_procter_logro_resumen.EMPNIT = rpt_procter_logro_objetivos_marcas.EMPNIT
+            GROUP BY rpt_procter_logro_objetivos_marcas.EMPNIT, rpt_procter_logro_objetivos_marcas.MES, rpt_procter_logro_objetivos_marcas.ANIO, rpt_procter_logro_objetivos_marcas.CODMARCA, 
+                rpt_procter_logro_objetivos_marcas.DESMARCA
+            HAVING 
+                (rpt_procter_logro_objetivos_marcas.EMPNIT = '${sucursal}') AND 
+                (rpt_procter_logro_objetivos_marcas.MES = ${mes}) AND 
+                (rpt_procter_logro_objetivos_marcas.ANIO = ${anio})
+            ORDER BY rpt_procter_logro_objetivos_marcas.CODMARCA
+        `
+    }else{
+         qry = `
+            SELECT rpt_procter_logro_objetivos_marcas.EMPNIT, 
+                    rpt_procter_logro_objetivos_marcas.MES, 
+                    rpt_procter_logro_objetivos_marcas.ANIO, 
+                    rpt_procter_logro_objetivos_marcas.CODEMP, 
+                    rpt_procter_logro_objetivos_marcas.CODMARCA, 
+                    rpt_procter_logro_objetivos_marcas.DESMARCA, 
+                    ISNULL(rpt_procter_logro_objetivos_marcas.OBJETIVO, 0) AS OBJETIVO, 
+                    ISNULL(rpt_procter_logro_resumen.UNIDADES_VENTA,0) AS UNIDADES_VENTA, 
+                    ISNULL(rpt_procter_logro_resumen.UNIDADES_DEVOLUCION,0) AS UNIDADES_DEVOLUCION, 
+                    ISNULL(rpt_procter_logro_resumen.VENTA,0) AS VENTA, 
+                  ISNULL(rpt_procter_logro_resumen.DEVOLUCION,0) AS DEVOLUCION
+            FROM rpt_procter_logro_resumen RIGHT OUTER JOIN
+                  rpt_procter_logro_objetivos_marcas ON rpt_procter_logro_resumen.CODMARCA = rpt_procter_logro_objetivos_marcas.CODMARCA AND rpt_procter_logro_resumen.CODEMP = rpt_procter_logro_objetivos_marcas.CODEMP AND 
+                  rpt_procter_logro_resumen.MES = rpt_procter_logro_objetivos_marcas.MES AND rpt_procter_logro_resumen.ANIO = rpt_procter_logro_objetivos_marcas.ANIO AND 
+                  rpt_procter_logro_resumen.EMPNIT = rpt_procter_logro_objetivos_marcas.EMPNIT
+            WHERE  
+                (rpt_procter_logro_objetivos_marcas.EMPNIT = '${sucursal}') AND 
+                (rpt_procter_logro_objetivos_marcas.MES = ${mes}) AND 
+                (rpt_procter_logro_objetivos_marcas.ANIO = ${anio}) AND 
+                (rpt_procter_logro_objetivos_marcas.CODEMP = ${codemp})
+            ORDER BY rpt_procter_logro_objetivos_marcas.CODMARCA;
+                `;
+    }
+
+   
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/BACKUP_procter_logro_vendedor", async(req,res)=>{
+   
+    const { token, sucursal,codemp,mes,anio} = req.body;
+
 
     let qry = `
             SELECT rpt_procter_logro_objetivos_marcas.EMPNIT, 
@@ -109,6 +172,44 @@ router.post("/goles_resumen_vendedor_total", async(req,res)=>{
     const { token, sucursal,codemp, mes,anio} = req.body;
 
     let qry = '';
+
+    switch (codemp.toString()) {
+        case 'TODOS':
+            qry = `
+                SELECT COUNT(CODCLIENTE) AS CONTEO
+                FROM     view_rpt_goles_productos_cliente_2
+                WHERE  (ANIO = ${anio}) AND (MES = ${mes}) 
+                AND (EMPNIT LIKE '%${sucursal}%')
+                `    
+            break;
+        case '0':
+            qry = `
+                SELECT COUNT(CODCLIENTE) AS CONTEO
+                FROM     view_rpt_goles_productos_cliente_2
+                WHERE  (ANIO = ${anio}) AND (MES = ${mes}) 
+                AND (EMPNIT LIKE '%${sucursal}%')
+                `    
+            break;
+        default:
+            qry = `
+                SELECT COUNT(CODCLIENTE) AS CONTEO
+                FROM     view_rpt_goles_productos_cliente_2
+                WHERE  (ANIO = ${anio}) AND (MES = ${mes}) 
+                AND (CODEMP=${Number(codemp)}) AND (EMPNIT LIKE '%${sucursal}%');
+                `;
+            break;
+    }
+
+       
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/BACKUP_goles_resumen_vendedor_total", async(req,res)=>{
+   
+    const { token, sucursal,codemp, mes,anio} = req.body;
+
+    let qry = '';
     if(codemp=='TODOS'){
         qry = `
         SELECT COUNT(CODCLIENTE) AS CONTEO
@@ -186,6 +287,39 @@ router.post("/delete_objetivo_vendedor_goles_cobertura", async(req,res)=>{
 });
 router.post("/select_objetivo_vendedor_goles_cobertura_empleado", async(req,res)=>{
    
+    const { token, sucursal, codemp, mes, anio } = req.body;
+
+    let qry = '';
+
+    if(Number(codemp)==0){
+       qry = `
+            SELECT 
+                SUM(ISNULL(GOLES,0)) AS GOLES,
+                SUM(ISNULL(COBERTURA,0)) AS COBERTURA 
+            FROM
+                OBJETIVOS_EMPLEADO_INDIVIDUAL
+            WHERE EMPNIT = '${sucursal}' AND 
+                MES = ${mes} AND 
+                ANIO = ${anio};
+                `;
+    }else{
+        qry = `
+            SELECT GOLES,COBERTURA FROM
+                OBJETIVOS_EMPLEADO_INDIVIDUAL
+            WHERE EMPNIT = '${sucursal}' AND 
+                MES = ${mes} AND 
+                ANIO = ${anio} AND
+                CODEMP=${codemp};
+                `;
+    };
+    
+
+    execute.QueryToken(res,qry,token);
+     
+
+});
+router.post("/BACKUP_select_objetivo_vendedor_goles_cobertura_empleado", async(req,res)=>{
+   
     const { token, sucursal,codemp,mes,anio} = req.body;
 
     let qry = `
@@ -222,6 +356,43 @@ router.post("/universo_clientes_empleado", async(req,res)=>{
      
 });
 router.post("/universo_clientes_empleado_visitado_mes", async(req,res)=>{
+   
+    const { token, sucursal,codemp,mes,anio} = req.body;
+
+    if(Number(codemp)==0){
+        qry = `
+            SELECT COUNT(DISTINCT DOCUMENTOS.CODCLIENTE) AS CONTEO
+                FROM  DOCUMENTOS LEFT OUTER JOIN
+                    TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND 
+                    DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+                WHERE  (DOCUMENTOS.STATUS <> 'A') AND 
+                    (DOCUMENTOS.ANIO = ${anio}) AND 
+                    (DOCUMENTOS.MES = ${mes}) AND 
+                    (DOCUMENTOS.EMPNIT = '${sucursal}') AND 
+                    (TIPODOCUMENTOS.TIPODOC IN('FAC','FCP','FEC','FEF','FES'));`
+    }else{
+        qry = `
+            SELECT COUNT(DISTINCT DOCUMENTOS.CODCLIENTE) AS CONTEO
+                FROM  DOCUMENTOS LEFT OUTER JOIN
+                    TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND 
+                    DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+                WHERE  (DOCUMENTOS.STATUS <> 'A') AND 
+                    (DOCUMENTOS.ANIO = ${anio}) AND 
+                    (DOCUMENTOS.MES = ${mes}) AND 
+                    (DOCUMENTOS.EMPNIT = '${sucursal}') AND 
+                    (TIPODOCUMENTOS.TIPODOC IN('FAC','FCP','FEC','FEF','FES'))
+                GROUP BY DOCUMENTOS.CODEMP
+                HAVING (DOCUMENTOS.CODEMP = ${codemp});
+        `;
+    }
+
+ 
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/BACKUP_universo_clientes_empleado_visitado_mes", async(req,res)=>{
    
     const { token, sucursal,codemp,mes,anio} = req.body;
 
