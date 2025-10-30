@@ -406,7 +406,7 @@ function addListeners(){
             }
 
 
-            GF.get_data_empleados_tipo_emp(3,cmbSucursal.value)
+            GF.get_data_empleados_tipo_emp(300,cmbSucursal.value)
             .then((data)=>{
 
                 let str = `<option value='0'>TODOS</option>`;
@@ -440,7 +440,7 @@ function addListeners(){
 
 
         cmbSucursal.addEventListener('change',()=>{
-            GF.get_data_empleados_tipo_emp(3,cmbSucursal.value)
+            GF.get_data_empleados_tipo_emp(300,cmbSucursal.value)
             .then((data)=>{
 
                 let str = `<option value='0'>TODOS</option>`;

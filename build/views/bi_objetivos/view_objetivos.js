@@ -579,7 +579,7 @@ function initView(){
 
 function get_grid(){
 
-            GF.get_data_empleados_tipo_emp(3,cmbSucursal.value)
+            GF.get_data_empleados_tipo_emp(300,cmbSucursal.value)
                 .then((data)=>{
                 
                     let str = '';

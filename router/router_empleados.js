@@ -139,11 +139,27 @@ router.post("/empleados_tipo", async(req,res)=>{
    
     const { token, sucursal, tipo } = req.body;
 
-    let qry = `SELECT CODEMPLEADO, CODPUESTO, NOMEMPLEADO,
-        DIRECCION,CLAVE FROM EMPLEADOS 
-        WHERE EMPNIT LIKE '%${sucursal}%' AND CODPUESTO=${tipo} AND ACTIVO='SI'
-        ORDER BY NOMEMPLEADO;`
+    let qry = '';
+
+    switch (Number(tipo)) {
+        case 300: //ventas
+            qry = `SELECT CODEMPLEADO, CODPUESTO, NOMEMPLEADO,
+                        DIRECCION,CLAVE FROM EMPLEADOS 
+                    WHERE EMPNIT LIKE '%${sucursal}%' AND CODPUESTO IN(2,3,8) AND ACTIVO='SI'
+                    ORDER BY NOMEMPLEADO;`
+          
+            break;
     
+        default:
+            qry = `SELECT CODEMPLEADO, CODPUESTO, NOMEMPLEADO,
+                    DIRECCION,CLAVE FROM EMPLEADOS 
+                    WHERE EMPNIT LIKE '%${sucursal}%' AND CODPUESTO=${tipo} AND ACTIVO='SI'
+                    ORDER BY NOMEMPLEADO;`
+  
+        break;
+    }
+
+      
     execute.QueryToken(res,qry,token); 
      
 });

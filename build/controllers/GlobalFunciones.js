@@ -355,6 +355,9 @@ let GF = {
         })     
     },
     get_data_empleados_tipo_emp:(tipo,sucursal)=>{
+
+        //300= VENDEDOR 3, SUPERVISOR 2, COMODIN 8
+
         return new Promise((resolve,reject)=>{
     
             axios.post(GlobalUrlCalls + '/empleados/empleados_tipo',
