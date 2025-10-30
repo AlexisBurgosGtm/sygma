@@ -1032,8 +1032,8 @@ router.post("/embarques_lista", async(req,res)=>{
                 EMBARQUES.F_DEVOLUCIONES, 
                 EMBARQUES.F_REPORTADO, 
                 EMBARQUES.FINALIZADO, 
-                view_rpt_embarques_importes_resumen.IMPORTE, 
-                view_rpt_embarques_importes_resumen.DEVOLUCIONES
+                ISNULL(view_rpt_embarques_importes_resumen.IMPORTE,0) AS IMPORTE, 
+                ISNULL(view_rpt_embarques_importes_resumen.DEVOLUCIONES,0) AS DEVOLUCIONES
 FROM        EMBARQUES LEFT OUTER JOIN
                 view_rpt_embarques_importes_resumen ON EMBARQUES.CODEMBARQUE = view_rpt_embarques_importes_resumen.CODEMBARQUE AND EMBARQUES.EMPNIT = view_rpt_embarques_importes_resumen.EMPNIT LEFT OUTER JOIN
                 EMPLEADOS ON EMBARQUES.EMPNIT = EMPLEADOS.EMPNIT AND EMBARQUES.CODEMPLEADO = EMPLEADOS.CODEMPLEADO
