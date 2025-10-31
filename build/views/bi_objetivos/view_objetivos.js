@@ -413,8 +413,6 @@ function addListeners(){
             cmbSucursal.value = GlobalEmpnit;
 
             get_grid();
-            
-
            
     })
     .catch(()=>{
@@ -424,14 +422,9 @@ function addListeners(){
 
     cmbSucursal.addEventListener('change',()=>{
         get_grid();
-    })
-
-
+    });
 
     get_combo_marcas();
-
-    
-   
 
 
     document.getElementById('cmbMes').addEventListener('change',()=>{
@@ -450,17 +443,10 @@ function addListeners(){
 
     });
 
-
-    
-
-
     document.getElementById('btnNuevoVendedor').addEventListener('click',()=>{
         $("#modal_vendedor").modal('show');
        
     });
-
-
-  
 
     let btnVenGuardar =document.getElementById('btnVenGuardar');
     btnVenGuardar.addEventListener('click',()=>{
@@ -507,8 +493,6 @@ function addListeners(){
 
     });
 
-
-
     let btnNuevoObjetivoGC = document.getElementById('btnNuevoObjetivoGC');
     btnNuevoObjetivoGC.addEventListener('click',()=>{
 
@@ -521,8 +505,6 @@ function addListeners(){
 
 
     });
-
-
 
     let btnGCGuardar = document.getElementById('btnGCGuardar');
     btnGCGuardar.addEventListener('click',()=>{
@@ -567,7 +549,6 @@ function addListeners(){
 
     });
 
-
 };
 
 function initView(){
@@ -610,7 +591,7 @@ function get_grid(){
 //se cambio de marcas a clasificacions TIPO
 function get_combo_marcas(){
 
-        let container = document.getElementById('cmbGenMarca');
+        //let container = document.getElementById('cmbGenMarca');
         let container2 = document.getElementById('cmbVenMarca');
         
 
@@ -620,11 +601,16 @@ function get_combo_marcas(){
             data.recordset.map((r)=>{
                 str += `<option value='${r.CODIGO}'>${r.DESCRIPCION}</option>`
             })
-            container.innerHTML = str;
-            container2.innerHTML = str
+
+           
+            //container.innerHTML = str;
+            container2.innerHTML = str;
         })
-        .catch(()=>{
-            container.innerHTML = `<option value='SN'>No se cargó la clasificacion</option>`;
+        .catch((error)=>{
+            
+            console.log(error)
+
+            //container.innerHTML = `<option value='SN'>No se cargó la clasificacion</option>`;
             container2.innerHTML = `<option value='SN'>No se cargó la clasificacion</option>`;
         })
     
