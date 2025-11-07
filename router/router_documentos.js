@@ -466,8 +466,6 @@ router.post("/eliminar_documento", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
-
-
 router.post("/anular_documento", async(req,res)=>{
    
     const { token, sucursal, coddoc,correlativo} = req.body;
@@ -478,8 +476,6 @@ router.post("/anular_documento", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
-
-
 router.post("/desanular_documento", async(req,res)=>{
    
     const { token, sucursal, coddoc,correlativo} = req.body;
@@ -491,23 +487,56 @@ router.post("/desanular_documento", async(req,res)=>{
      
 });
 
+router.post("/update_empleado_documento", async(req,res)=>{
+   
+    const { token, sucursal, coddoc,correlativo,codemp,fecha} = req.body;
+
+    let qry = `UPDATE DOCUMENTOS 
+                    SET CODEMP=${codemp}, LASTUPDATE='${fecha}'
+                    WHERE EMPNIT='${sucursal}' AND 
+                        CODDOC='${coddoc}' AND 
+                        CORRELATIVO=${correlativo};    
+                `
+    
+    execute.QueryToken(res,qry,token);
+     
+});
+
 
 router.post("/listado_documentos", async(req,res)=>{
    
     const { token, sucursal, anio, mes, tipo} = req.body;
 
-    let qry = `SELECT  DOCUMENTOS.FECHA, DOCUMENTOS.CODDOC, DOCUMENTOS.CORRELATIVO, 
-    DOCUMENTOS.DOC_NIT AS NIT, DOCUMENTOS.DOC_NOMCLIE AS NOMBRE, 
-    DOCUMENTOS.DOC_DIRCLIE AS DIRECCION, 
-                DOCUMENTOS.TOTALCOSTO, DOCUMENTOS.TOTALVENTA, DOCUMENTOS.STATUS, DOCUMENTOS.USUARIO, DOCUMENTOS.CONCRE, 
-                DOCUMENTOS.CODCAJA, DOCUMENTOS.NOCORTE, DOCUMENTOS.LAT, 
-                DOCUMENTOS.LONG, DOCUMENTOS.ENTREGADO, TIPODOCUMENTOS.TIPODOC,
-                DOCUMENTOS.ETIQUETA, DOCUMENTOS.EMPNIT_DESTINO, DOCUMENTOS.OBS,
-                DOCUMENTOS.CODDOC_ORIGEN, DOCUMENTOS.CORRELATIVO_ORIGEN
-        FROM  DOCUMENTOS LEFT OUTER JOIN
-                         TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
-    WHERE (DOCUMENTOS.EMPNIT = '${sucursal}') AND (DOCUMENTOS.ANIO = ${anio}) AND (DOCUMENTOS.MES = ${mes}) 
-    AND (TIPODOCUMENTOS.TIPODOC = '${tipo}')`
+    let qry = `SELECT 
+                    DOCUMENTOS.FECHA, 
+                    DOCUMENTOS.CODDOC, 
+                    DOCUMENTOS.CORRELATIVO, 
+                    DOCUMENTOS.DOC_NIT AS NIT, 
+                    DOCUMENTOS.DOC_NOMCLIE AS NOMBRE, 
+                    DOCUMENTOS.DOC_DIRCLIE AS DIRECCION, 
+                    DOCUMENTOS.TOTALCOSTO, 
+                    DOCUMENTOS.TOTALVENTA, 
+                    DOCUMENTOS.STATUS, 
+                    DOCUMENTOS.USUARIO, 
+                    DOCUMENTOS.CONCRE, 
+                    DOCUMENTOS.CODCAJA, 
+                    DOCUMENTOS.NOCORTE, 
+                    DOCUMENTOS.LAT, 
+                    DOCUMENTOS.LONG, 
+                    DOCUMENTOS.ENTREGADO, 
+                    TIPODOCUMENTOS.TIPODOC, 
+                    DOCUMENTOS.ETIQUETA, 
+                    DOCUMENTOS.EMPNIT_DESTINO, 
+                    DOCUMENTOS.OBS, 
+                    DOCUMENTOS.CODDOC_ORIGEN, 
+                    DOCUMENTOS.CORRELATIVO_ORIGEN, 
+                    EMPLEADOS.NOMEMPLEADO AS EMPLEADO,
+                    ISNULL(DOCUMENTOS.LASTUPDATE,'2000-01-01') AS LASTUPDATE
+            FROM  DOCUMENTOS LEFT OUTER JOIN
+                  EMPLEADOS ON DOCUMENTOS.CODEMP = EMPLEADOS.CODEMPLEADO AND DOCUMENTOS.EMPNIT = EMPLEADOS.EMPNIT LEFT OUTER JOIN
+                  TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+            WHERE (DOCUMENTOS.EMPNIT = '${sucursal}') AND (DOCUMENTOS.ANIO = ${anio}) AND (DOCUMENTOS.MES = ${mes}) 
+                    AND (TIPODOCUMENTOS.TIPODOC = '${tipo}')`
     
     execute.QueryToken(res,qry,token);
      

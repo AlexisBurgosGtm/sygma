@@ -5,7 +5,7 @@ function getView(){
                 <div class="col-12 p-0 bg-white">
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
-                            ${view.vista_listado() + view.modal_detalle_documento()}
+                            ${view.vista_listado() + view.modal_detalle_documento() + view.modal_opciones_documento()}
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
                            
@@ -44,8 +44,13 @@ function getView(){
                         <div class="col-6">
                             <div class="form-group">
                                 <label class="negrita text-base">Tipo Documento</label>
-                                <select class="form-control" id="cmbTipos">
-                                </select>
+                                <div class="input-group">
+                                    <select class="form-control" id="cmbTipos">
+                                    </select>
+                                    <button class="btn btn-md btn-success hand" id="btnRecargar">
+                                        <i class="fal fa-sync"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div class="col-6">
@@ -86,6 +91,7 @@ function getView(){
                                     <td>IMPORTE</td>
                                     <td>FPAGO</td>
                                     <td>ST</td>
+                                    <td></td>
                                     <td></td>
                                     <td></td>
                                     <td></td>
@@ -157,6 +163,66 @@ function getView(){
                 </div>
             </div>
             `
+        },
+        modal_opciones_documento:()=>{
+            return `
+            <div id="modal_opciones_documento" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-right modal-xl">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-base d-flex justify-content-center align-items-center w-100">
+                           
+                        </div>
+                        <div class="modal-body p-4">
+                            
+                            <h3 class="text-center color-danger negrita">
+                                Opciones del Documento
+                            </h3>
+                            <label id="lbDocumento" class="negrita text-danger"></label>
+
+                            <div class="card card-rounded">
+                                <div class="card-body p-4">
+
+                                    <div class="row">
+                                        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                                            <div class="form-group">
+                                                <label class="text-secondary">Cambiar Empleado</label>
+                                                <div class="input-group">
+                                                    <select class="form-control negrita border-info" id="cmbEmpleado">
+                                                    </select>
+                                                    <button class="btn btn-md btn-info hand" id="btnOpcionesCambiarEmpleado">
+                                                        <i class="fal fa-save"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                                        
+                                        </div>
+                                    </div>
+                                    <hr>
+
+                                    
+                                     
+
+                                </div>
+                            </div>
+
+                                
+                           
+
+                        </div>
+                        <div class="modal-footer">
+                            <div class="row">
+                                <button class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
+                                    <i class="fal fa-arrow-left"></i>
+                                </button>
+                            </div>
+                        </div>
+                    
+                    </div>
+                </div>
+            </div>
+            `
         }
     }
 
@@ -166,50 +232,110 @@ function getView(){
 
 function addListeners(){
 
-    document.title = "Documentos";
 
-   
-    document.getElementById('cmbMes').innerHTML = F.ComboMeses();
-    document.getElementById('cmbAnio').innerHTML = F.ComboAnio();
+        document.title = "Documentos";
 
-    let f = new Date();
-    document.getElementById('cmbMes').value = f.getMonth()+1;
-    document.getElementById('cmbAnio').value = f.getFullYear();
+    
+        document.getElementById('cmbMes').innerHTML = F.ComboMeses();
+        document.getElementById('cmbAnio').innerHTML = F.ComboAnio();
+
+        let f = new Date();
+        document.getElementById('cmbMes').value = f.getMonth()+1;
+        document.getElementById('cmbAnio').value = f.getFullYear();
 
 
-     // CARGA COMBO TIPO DOCUMENTOS
-     classTipodocumentos.get_data_tipos()
-     .then((data)=>{
-        let str = '';
-        data.recordset.map((r)=>{
-             str += `
-                 <option value="${r.TIPODOC}">(${r.TIPODOC}) ${r.DESCRIPCION}</option>
-             `
+        // CARGA COMBO TIPO DOCUMENTOS
+        classTipodocumentos.get_data_tipos()
+        .then((data)=>{
+            let str = '';
+            data.recordset.map((r)=>{
+                str += `
+                    <option value="${r.TIPODOC}">(${r.TIPODOC}) ${r.DESCRIPCION}</option>
+                `
+            })
+            document.getElementById('cmbTipos').innerHTML = str;
+            //carga la lista de documentos
+            get_documentos();
+
         })
-        document.getElementById('cmbTipos').innerHTML = str;
-        //carga la lista de documentos
-        get_documentos();
-
-     })
-     .catch(()=>{
-         document.getElementById('cmbTipos').innerHTML = '';
-     })
+        .catch(()=>{
+            document.getElementById('cmbTipos').innerHTML = '';
+        });
 
 
-   
+        document.getElementById('cmbTipos').addEventListener('change',()=>{
+            get_documentos();
+        });
 
-    document.getElementById('cmbTipos').addEventListener('change',()=>{
-        get_documentos();
-    });
+        document.getElementById('cmbMes').addEventListener('change',()=>{
+            get_documentos();
+        });
 
-    document.getElementById('cmbMes').addEventListener('change',()=>{
-        get_documentos();
-    });
+        document.getElementById('cmbAnio').addEventListener('change',()=>{
+            get_documentos();
+        });
 
-    document.getElementById('cmbAnio').addEventListener('change',()=>{
-        get_documentos();
-    });
+        document.getElementById('btnRecargar').addEventListener('click',()=>{
+            F.showToast('Recargando lista...')
+            get_documentos();
+        });
 
+
+        //-----------------------------------
+        //opciones documento
+        //-----------------------------------
+
+        GF.get_data_empleados_tipo_emp(400,GlobalEmpnit)
+        .then((data)=>{
+                    
+                        let str = '';
+                        data.recordset.map((r)=>{
+                            str += `<option value="${r.CODEMPLEADO}"><small>(${r.PUESTO})</small> ${r.NOMEMPLEADO}</option>`
+                        })
+                        document.getElementById('cmbEmpleado').innerHTML = str;
+                    
+        })
+        .catch(()=>{
+            document.getElementById('cmbEmpleado').innerHTML = `<option value='0'>SIN EMPLEADO</option>`
+        });
+
+        let btnOpcionesCambiarEmpleado = document.getElementById('btnOpcionesCambiarEmpleado');
+        btnOpcionesCambiarEmpleado.addEventListener('click',()=>{
+
+            let codemp = document.getElementById('cmbEmpleado').value;
+            if(codemp=='0'){F.AvisoError('Seleccione un Empleado valido!!');return};
+
+            F.Confirmacion('Esta seguro que desea cambiar el EMPLEADO a este documento?')
+            .then((value)=>{
+                if(value==true){
+
+                    btnOpcionesCambiarEmpleado.disabled = true;
+                    btnOpcionesCambiarEmpleado.innerHTML = `<i class="fal fa-save fa-spin"></i>`;
+
+
+                        GF.documento_update_empleado(GlobalEmpnit,codemp,selected_coddoc,selected_correlativo)
+                        .then(()=>{
+                            F.Aviso('Empleado actualizado en documento!!, recargue la lista');
+
+                            btnOpcionesCambiarEmpleado.disabled = false;
+                            btnOpcionesCambiarEmpleado.innerHTML = `<i class="fal fa-save"></i>`;
+                        })
+                        .catch(()=>{
+                            F.AvisoError('No se pudo actualizar al empleado');
+
+                            btnOpcionesCambiarEmpleado.disabled = false;
+                            btnOpcionesCambiarEmpleado.innerHTML = `<i class="fal fa-save"></i>`;
+                        })
+
+                }
+            });
+
+
+        });
+
+        //-----------------------------------
+        //opciones documento
+        //-----------------------------------
 
 };
 
@@ -247,13 +373,25 @@ function get_documentos(){
             let btnEliminar = `btnEliminar${r.CODDOC}-${r.CORRELATIVO}`
             str += `
                 <tr class="hand">
-                    <td>${F.convertDateNormal(r.FECHA)}</td>
+                    <td>${F.convertDateNormal(r.FECHA)}
+                        <br>
+                        <small class="text-danger">Editado:${F.convertDateNormal(r.LASTUPDATE)}</small>
+                    </td>
                     <td>${r.CODDOC}-${r.CORRELATIVO}</td>
                     <td>${r.NIT}</td>
-                    <td>${r.NOMBRE}</td>
+                    <td>${r.NOMBRE}
+                        <br>
+                        <small>Emp: ${r.EMPLEADO}</small>
+                    </td>
                     <td>${F.setMoneda(r.TOTALVENTA,'Q')}</td>
                     <td>${r.CONCRE}</td>
                     <td>${r.STATUS}</td>
+                    <td>
+                        <button class="btn btn-md btn-circle hand shadow btn-base" 
+                            onclick="get_opciones('${r.CODDOC}','${r.CORRELATIVO}')">
+                            <i class="fal fa-cog"></i>
+                        </button>
+                    </td>
                     <td>
                         <button class="btn btn-md btn-circle hand shadow btn-warning" 
                             onclick="get_detalle_tomar_datos('${r.CODDOC}','${r.CORRELATIVO}','${r.NOMBRE}','${r.ETIQUETA}','${r.OBS}')">
@@ -287,7 +425,7 @@ function get_documentos(){
 
    
 
-}
+};
 
 
 
@@ -375,6 +513,21 @@ function fcn_eliminar_factura(coddoc,correlativo,idbtn){
     })
 
 
+
+
+};
+
+
+function get_opciones(coddoc,correlativo){
+
+
+    $("#modal_opciones_documento").modal('show');
+
+
+    selected_coddoc = coddoc;
+    selected_correlativo = Number(correlativo);
+
+    document.getElementById('lbDocumento').innerText = `${coddoc}-${correlativo}`;
 
 
 };

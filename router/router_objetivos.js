@@ -318,18 +318,46 @@ router.post("/select_objetivo_vendedor_goles_cobertura_empleado", async(req,res)
      
 
 });
-router.post("/BACKUP_select_objetivo_vendedor_goles_cobertura_empleado", async(req,res)=>{
+router.post("/goles_marcas_resumen_vendedor", async(req,res)=>{
    
-    const { token, sucursal,codemp,mes,anio} = req.body;
+    const { token, sucursal,codemp, mes,anio} = req.body;
 
-    let qry = `
-    SELECT GOLES,COBERTURA FROM
-        OBJETIVOS_EMPLEADO_INDIVIDUAL
-    WHERE EMPNIT = '${sucursal}' AND 
-        MES = ${mes} AND 
-        ANIO = ${anio} AND
-        CODEMP=${codemp};
+    let qry = '';
+    if(codemp=='TODOS'){
+        qry = `
+        SELECT 
+            MARCAS.DESMARCA, 
+            COUNT(view_rpt_goles_productos_cliente_2.CODCLIENTE) AS CONTEO, 
+            SUM(ISNULL(view_rpt_goles_productos_cliente_2.IMPORTE, 0) * - 1) AS IMPORTE
+        FROM  view_rpt_goles_productos_cliente_2 LEFT OUTER JOIN
+            PRODUCTOS ON view_rpt_goles_productos_cliente_2.CODPROD = PRODUCTOS.CODPROD2 LEFT OUTER JOIN
+            MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA
+        WHERE  
+            (view_rpt_goles_productos_cliente_2.ANIO = ${anio}) AND 
+            (view_rpt_goles_productos_cliente_2.MES = ${mes}) AND 
+            (view_rpt_goles_productos_cliente_2.EMPNIT LIKE '%${sucursal}%')
+        GROUP BY MARCAS.DESMARCA
+        `
+    }else{
+        qry = `
+        SELECT 
+            view_rpt_goles_productos_cliente_2.CODEMP, 
+            MARCAS.DESMARCA, 
+            COUNT(view_rpt_goles_productos_cliente_2.CODCLIENTE) AS CONTEO, 
+            SUM(ISNULL(view_rpt_goles_productos_cliente_2.IMPORTE, 0) * - 1) AS IMPORTE
+        FROM view_rpt_goles_productos_cliente_2 LEFT OUTER JOIN
+            PRODUCTOS ON view_rpt_goles_productos_cliente_2.CODPROD = PRODUCTOS.CODPROD2 LEFT OUTER JOIN
+            MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA
+        WHERE  
+            (view_rpt_goles_productos_cliente_2.ANIO = ${anio}) AND 
+            (view_rpt_goles_productos_cliente_2.MES = ${mes}) AND 
+            (view_rpt_goles_productos_cliente_2.EMPNIT LIKE '%${sucursal}%')
+        GROUP BY MARCAS.DESMARCA, view_rpt_goles_productos_cliente_2.CODEMP
+        HAVING (view_rpt_goles_productos_cliente_2.CODEMP = ${codemp})
+
         `;
+    }
+
     
 
     execute.QueryToken(res,qry,token);

@@ -106,6 +106,9 @@ let GlobalTotalItems = 0;
 let Selected_coddoc_env = '';
 let Selected_coddoc_cot = '';
 
+let selected_coddoc = '';
+let selected_correlativo = 0;
+
 
 let selected_ped_coddoc = '';
 let selected_ped_correlativo = '';

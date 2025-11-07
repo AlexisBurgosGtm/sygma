@@ -87,6 +87,7 @@ function getView(){
                         <thead class="bg-base text-white f-med">
                             <tr>
                                 <td>CÓDIGO</td>
+                                 <td>CÓDIGO DUN</td>
                                 <td>DESCRIPCIÓN</td>
                                 <td>COSTO ULTIMO</td>
                                 <td>COSTO ANTERIOR</td>
@@ -2647,6 +2648,7 @@ function get_tbl_productos(){
                 <tr class="hand border-bottom border-base" 
                 onclick="get_detalle_producto('${r.CODPROD}','${r.DESPROD}','${r.DESPROD2}','${F.setMoneda(r.COSTO,'Q')}','${F.convertDateNormal(r.LASTUPDATE)}','${r.HABILITADO}')">
                     <td>${r.CODPROD}</td>
+                    <td>${r.CODPROD2}</td>
                     <td>${r.DESPROD}</td>
                     <td>${F.setMoneda(r.COSTO,'Q')}</td>
                      <td>${F.setMoneda(r.COSTO_ANTERIOR,'Q')}</td>
@@ -2882,72 +2884,6 @@ function get_tbl_precios_producto(codprod,idcontainer){
                     str += `
                         <tr>
 
-                            <td>${r.CODMEDIDA}</td>
-                            <td>${r.EQUIVALE}</td>
-                            <td>${F.setMoneda(r.COSTO,'Q')}</td>
-                            <td>${F.setMoneda(r.PRECIO,'Q')}</td>
-                            <td>${F.setMoneda(r.PRECIO_A,'Q')}</td>
-                            <td>${F.setMoneda(r.PRECIO_B,'Q')}</td>
-                            <td>${F.setMoneda(r.PRECIO_C,'Q')}</td>
-                            <td>${F.setMoneda(r.PRECIO_D,'Q')}</td>
-                            <td>${F.setMoneda(r.PRECIO_E,'Q')}</td>
-                            <td>${F.setMoneda(r.PRECIO_F,'Q')}</td>
-                            <td>
-                                <button class="btn-md btn-circle btn-danger hand shadow" 
-                                    id="${idbtnE}" 
-                                    onclick="delete_precio('${idbtnE}','${r.ID}','${codprod}')">
-                                    <i class="fal fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `
-                })
-                container.innerHTML = str;             
-            }else{
-                rootErrores.innerHTML = 'No hay filas para mostrar...';
-                container.innerHTML = 'No se cargaron datos...';
-            }            
-        }else{
-            container.innerHTML = 'No se cargaron datos...';
-        }             
-    }, (error) => {
-        rootErrores.innerHTML = error;
-        container.innerHTML = 'No se cargaron datos...';
-    });
- 
-};
-function BACKUP_get_tbl_precios_producto(codprod,idcontainer){
-
-    let container = document.getElementById(idcontainer);
-    container.innerHTML = GlobalLoader;
-
-    axios.post(GlobalUrlCalls + '/productos/lista_precios',
-        {
-            sucursal:GlobalEmpnit,
-            token:TOKEN,
-            codprod:codprod
-        })
-    .then((response) => {
-        if(response.status.toString()=='200'){
-            let data = response.data;
-            if(Number(data.rowsAffected[0])>0){
-                let str = '';
-                
-                data.recordset.map((r)=>{
-                    let idbtnE = `btnE${r.ID}`;
-                    let idbtnA = `btnA${r.ID}`;
-                    let strClassHab = '';
-                    if(r.HABILITADO=='SI'){strClassHab='btn-success';}else{strClassHab='btn-danger';};
-                    
-                    str += `
-                        <tr>
-                            <td>
-                                <button class="btn-md btn-circle ${strClassHab} hand shadow" 
-                                    id="${idbtnA}" 
-                                    onclick="habilitar_medida_precio('${codprod}','${r.CODMEDIDA}')">
-                                    <i class="fal fa-sync"></i>
-                                </button>
-                            </td>
                             <td>${r.CODMEDIDA}</td>
                             <td>${r.EQUIVALE}</td>
                             <td>${F.setMoneda(r.COSTO,'Q')}</td>

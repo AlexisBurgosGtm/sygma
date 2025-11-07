@@ -944,6 +944,38 @@ let GF = {
             });
         })     
     },
+    documento_update_empleado:(sucursal,codemp,coddoc,correlativo)=>{
+        return new Promise((resolve,reject)=>{
+    
+            axios.post(GlobalUrlCalls + '/documentos/update_empleado_documento',
+                {
+                    sucursal:sucursal,
+                    token:TOKEN,
+                    codemp:codemp,
+                    coddoc:coddoc,
+                    correlativo:correlativo,
+                    fecha:F.getFecha()
+                })
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        })     
+    },
     get_clasificaciones_listado:(tipo)=>{
         return new Promise((resolve,reject)=>{
 
@@ -2801,6 +2833,43 @@ let GF = {
             };
     
             axios.post(`/objetivos/goles_resumen_vendedor`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }             
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
+    get_data_goles_marcas_resumen_mes: (sucursal,codemp,mes,anio)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:sucursal,
+                codemp:codemp,
+                mes:mes,
+                anio:anio
+            };
+    
+            axios.post(`/objetivos/goles_marcas_resumen_vendedor`, data)
             .then(res => {
                 
                 if(res.status.toString()=='200'){

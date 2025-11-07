@@ -115,32 +115,78 @@ function getView(){
 
                     <hr class="solid">
 
-                    <div class="table-responsive">
+                    <div class="row">
+                        <div class="col-sm-12 col-xl-6 col-lg-6 col-md-6">
+                        
+                            <div class="table-responsive">
 
-                        <div class="form-group">
-                            <input type="text" class="form-control border-info text-info"
-                            id="txtBuscarGoles"
-                            placeholder="Escriba para buscar..." 
-                            oninput="F.FiltrarTabla('tblGoles','txtBuscarGoles')"
-                            >
+                                <div class="form-group">
+                                    <input type="text" class="form-control border-info text-info"
+                                    id="txtBuscarGoles"
+                                    placeholder="Escriba para buscar..." 
+                                    oninput="F.FiltrarTabla('tblGoles','txtBuscarGoles')"
+                                    >
+                                </div>
+
+                                <table class="table h-full table-hover table-bordered" id="tblGoles">
+                                    <thead class="bg-primary text-white">
+                                        <tr>
+                                            <td>CODIGO DUN</td>
+                                            <td>GOLES</td>
+                                            <td>UNIVERSO</td>
+                                            <td>OPORTUNIDAD</td>
+                                            <td></td>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDataGoles">
+                                    </tbody>
+                                    <tfoot class="bg-primary text-white">
+                                        <tr>
+                                            <td></td>
+                                            <td class="negrita" id="lbGolesListaConteo"></td>
+                                            <td></td>
+                                            <td class="negrita" id="lbGolesListaOportunidad"></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+
+                                </table>
+
+                            </div>
+
                         </div>
+                        <div class="col-sm-12 col-xl-6 col-lg-6 col-md-6">
 
-                        <table class="table h-full table-hover table-bordered" id="tblGoles">
-                            <thead class="bg-primary text-white">
-                                <tr>
-                                    <td>CODIGO DUN</td>
-                                    <td>GOLES</td>
-                                    <td>UNIVERSO</td>
-                                    <td>OPORTUNIDAD</td>
-                                    <td></td>
-                                </tr>
-                            </thead>
-                            <tbody id="tblDataGoles">
-                            </tbody>
+                            <div class="table-responsive">
 
-                        </table>
+                              
+                                <table class="table h-full table-hover table-bordered" id="tblGolesMarcas">
+                                    <thead class="bg-secondary text-white">
+                                        <tr>
+                                            <td>MARCA</td>
+                                            <td>GOLES</td>
+                                            <td>IMPORTE</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDataGolesMarcas">
+                                    </tbody>
+                                     <tfoot class="bg-secondary text-white">
+                                        <tr>
+                                            <td></td>
+                                            <td class="negrita" id="lbGolesMarcasConteo"></td>
+                                            <td class="negrita" id="lbGolesMarcasImporte"></td>
+                                        </tr>
+                                    </tfoot>
 
+                                </table>
+
+                            </div>
+
+
+                        </div>
                     </div>
+
+                   
             
                 </div>
             </div>
@@ -170,7 +216,11 @@ function addListeners(){
             if(Number(GlobalNivelUsuario)==2){
                 cmbSucursal.disabled = true;
                 cmbSucursal.value = GlobalEmpnit;
-            }
+            };
+            if(Number(GlobalNivelUsuario)==5){
+                cmbSucursal.value = GlobalEmpnit;
+            };
+
                 
                 get_empleados()
                 .then(()=>{
@@ -278,18 +328,22 @@ function rpt_goles_resumen(){
             GF.get_data_universo_clientes_sucursal(sucursal)
             .then((universo)=>{
                 rpt_tbl_goles_resumen(sucursal,codemp,mes,anio,universo);
+                rpt_tbl_goles_resumen_marcas(sucursal,codemp,mes,anio,universo);
             })
             .catch(()=>{
                 rpt_tbl_goles_resumen(sucursal,codemp,mes,anio,0);
+                rpt_tbl_goles_resumen_marcas(sucursal,codemp,mes,anio,0);
             })
     }else{
 
             GF.get_data_universo_clientes_empleado(sucursal,codemp)
             .then((universo)=>{
                 rpt_tbl_goles_resumen(sucursal,codemp,mes,anio,universo);
+                rpt_tbl_goles_resumen_marcas(sucursal,codemp,mes,anio,universo);
             })
             .catch(()=>{
                 rpt_tbl_goles_resumen(sucursal,codemp,mes,anio,0);
+                rpt_tbl_goles_resumen_marcas(sucursal,codemp,mes,anio,0);
             })
 
     }
@@ -307,61 +361,71 @@ function rpt_tbl_goles_resumen(sucursal,codemp,mes,anio,universo){
     container.innerHTML = GlobalLoader;
 
     let varTotal = 0;
+    let varTotalOportunidad = 0;
 
     GF.get_data_goles_resumen_mes(sucursal,codemp,mes,anio)
     .then((data)=>{
         let str = '';
         data.recordset.map((r)=>{
+            let oportunidad = (Number(universo)-Number(r.CONTEO));
             varTotal += Number(r.CONTEO);
+            varTotalOportunidad += Number(oportunidad)
             str+= `
             <tr>
                 <td>${r.CODPROD}</td>
                 <td>${r.CONTEO}</td>
                 <td>${universo}</td>
-                <td>${Number(universo)-Number(r.CONTEO)}</td>
+                <td>${oportunidad}</td>
                 <td></td>
             </tr>
             `
         })
         container.innerHTML = str;
         document.getElementById('lbTotalGoles').innerText = varTotal;
+        document.getElementById('lbGolesListaConteo').innerText = varTotal;
+        document.getElementById('lbGolesListaOportunidad').innerText = F.setMoneda(varTotalOportunidad,'Q');
+
     })
     .catch(()=>{
         container.innerHTML = 'No se cargaron datos....';
         document.getElementById('lbTotalGoles').innerText = '';
+        document.getElementById('lbGolesListaConteo').innerText = '';
+        document.getElementById('lbGolesListaOportunidad').innerText = '';
+
     })
 };
-function BACKUP_rpt_tbl_goles_resumen(sucursal,codemp,mes,anio,universo){
+function rpt_tbl_goles_resumen_marcas(sucursal,codemp,mes,anio,universo){
 
-    let container = document.getElementById('tblDataGoles');
+    let container = document.getElementById('tblDataGolesMarcas');
     container.innerHTML = GlobalLoader;
 
     let varTotal = 0;
+    let varImporte = 0;
 
-    GF.get_data_goles_resumen_mes(sucursal,codemp,mes,anio)
+    GF.get_data_goles_marcas_resumen_mes(sucursal,codemp,mes,anio)
     .then((data)=>{
         let str = '';
         data.recordset.map((r)=>{
             varTotal += Number(r.CONTEO);
+            varImporte += Number(r.IMPORTE);
+
             str+= `
             <tr>
-                <td>${r.DESPROD}
-                    <br>
-                    <small>${r.CODPROD}</small>
-                </td>
+                <td>${r.DESMARCA}</td>
                 <td>${r.CONTEO}</td>
-                <td>${universo}</td>
-                <td>${Number(universo)-Number(r.CONTEO)}</td>
-                <td></td>
+                <td>${F.setMoneda(r.IMPORTE,'Q')}</td>
             </tr>
             `
         })
         container.innerHTML = str;
-        document.getElementById('lbTotalGoles').innerText = varTotal;
+        document.getElementById('lbGolesMarcasConteo').innerText = varTotal;
+        document.getElementById('lbGolesMarcasImporte').innerText = F.setMoneda(varImporte,'Q');
     })
     .catch(()=>{
         container.innerHTML = 'No se cargaron datos....';
-        document.getElementById('lbTotalGoles').innerText = '';
+        document.getElementById('lbGolesMarcasConteo').innerText = '';
+        document.getElementById('lbGolesMarcasImporte').innerText = '';
     })
 };
+
 

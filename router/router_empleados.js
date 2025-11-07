@@ -142,14 +142,22 @@ router.post("/empleados_tipo", async(req,res)=>{
     let qry = '';
 
     switch (Number(tipo)) {
-        case 300: //ventas
+        case 300: //VENDEDOR, SUPERVISOR
             qry = `SELECT CODEMPLEADO, CODPUESTO, NOMEMPLEADO,
                         DIRECCION,CLAVE FROM EMPLEADOS 
                     WHERE EMPNIT LIKE '%${sucursal}%' AND CODPUESTO IN(2,3,8) AND ACTIVO='SI'
                     ORDER BY NOMEMPLEADO;`
           
             break;
-    
+        case 400: //VENDEDOR, SUPERVISOR, DIGITADOR, BODEGUERO
+            qry = `SELECT EMPLEADOS.CODEMPLEADO, EMPLEADOS.CODPUESTO, EMPLEADOS.NOMEMPLEADO, EMPLEADOS.DIRECCION, EMPLEADOS.CLAVE, 
+            EMPLEADOS_PUESTOS.NOMPUESTO AS PUESTO
+                FROM  EMPLEADOS LEFT OUTER JOIN
+                                EMPLEADOS_PUESTOS ON EMPLEADOS.CODPUESTO = EMPLEADOS_PUESTOS.CODPUESTO
+                WHERE  (EMPLEADOS.EMPNIT LIKE '%${sucursal}%') AND (EMPLEADOS.CODPUESTO IN (2, 3, 4, 5, 8)) AND (EMPLEADOS.ACTIVO = 'SI')
+                ORDER BY  EMPLEADOS_PUESTOS.NOMPUESTO,EMPLEADOS.NOMEMPLEADO;`
+
+            break;
         default:
             qry = `SELECT CODEMPLEADO, CODPUESTO, NOMEMPLEADO,
                     DIRECCION,CLAVE FROM EMPLEADOS 
