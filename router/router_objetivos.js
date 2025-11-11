@@ -325,34 +325,28 @@ router.post("/goles_marcas_resumen_vendedor", async(req,res)=>{
     let qry = '';
     if(codemp=='TODOS'){
         qry = `
-        SELECT 
-            MARCAS.DESMARCA, 
-            COUNT(view_rpt_goles_productos_cliente_2.CODCLIENTE) AS CONTEO, 
-            SUM(ISNULL(view_rpt_goles_productos_cliente_2.IMPORTE, 0) * - 1) AS IMPORTE
+        SELECT param_marca_codigos_dun.DESMARCA, COUNT(view_rpt_goles_productos_cliente_2.CODCLIENTE) AS CONTEO, SUM(ISNULL(view_rpt_goles_productos_cliente_2.IMPORTE, 0) * - 1) AS IMPORTE
         FROM  view_rpt_goles_productos_cliente_2 LEFT OUTER JOIN
-            PRODUCTOS ON view_rpt_goles_productos_cliente_2.CODPROD = PRODUCTOS.CODPROD2 LEFT OUTER JOIN
-            MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA
+                param_marca_codigos_dun ON view_rpt_goles_productos_cliente_2.CODPROD = param_marca_codigos_dun.CODIGO_DUN
         WHERE  
             (view_rpt_goles_productos_cliente_2.ANIO = ${anio}) AND 
             (view_rpt_goles_productos_cliente_2.MES = ${mes}) AND 
             (view_rpt_goles_productos_cliente_2.EMPNIT LIKE '%${sucursal}%')
-        GROUP BY MARCAS.DESMARCA
+        GROUP BY param_marca_codigos_dun.DESMARCA
         `
     }else{
         qry = `
         SELECT 
-            view_rpt_goles_productos_cliente_2.CODEMP, 
-            MARCAS.DESMARCA, 
-            COUNT(view_rpt_goles_productos_cliente_2.CODCLIENTE) AS CONTEO, 
-            SUM(ISNULL(view_rpt_goles_productos_cliente_2.IMPORTE, 0) * - 1) AS IMPORTE
-        FROM view_rpt_goles_productos_cliente_2 LEFT OUTER JOIN
-            PRODUCTOS ON view_rpt_goles_productos_cliente_2.CODPROD = PRODUCTOS.CODPROD2 LEFT OUTER JOIN
-            MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA
+                param_marca_codigos_dun.DESMARCA, 
+                COUNT(view_rpt_goles_productos_cliente_2.CODCLIENTE) AS CONTEO, 
+                SUM(ISNULL(view_rpt_goles_productos_cliente_2.IMPORTE, 0) * - 1) AS IMPORTE
+        FROM  view_rpt_goles_productos_cliente_2 LEFT OUTER JOIN
+                param_marca_codigos_dun ON view_rpt_goles_productos_cliente_2.CODPROD = param_marca_codigos_dun.CODIGO_DUN
         WHERE  
             (view_rpt_goles_productos_cliente_2.ANIO = ${anio}) AND 
             (view_rpt_goles_productos_cliente_2.MES = ${mes}) AND 
             (view_rpt_goles_productos_cliente_2.EMPNIT LIKE '%${sucursal}%')
-        GROUP BY MARCAS.DESMARCA, view_rpt_goles_productos_cliente_2.CODEMP
+        GROUP BY param_marca_codigos_dun.DESMARCA, view_rpt_goles_productos_cliente_2.CODEMP
         HAVING (view_rpt_goles_productos_cliente_2.CODEMP = ${codemp})
 
         `;

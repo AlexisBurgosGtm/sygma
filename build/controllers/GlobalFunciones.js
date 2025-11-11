@@ -262,6 +262,39 @@ let GF = {
         
     
     },
+    data_listado_productos_export(sucursal,st){
+    
+  
+        return new Promise((resolve,reject)=>{
+    
+            axios.post(GlobalUrlCalls + '/productos/listado_export',
+                {
+                    sucursal:sucursal,
+                    token:TOKEN,
+                    habilitado:st
+                })
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        })   
+        
+    
+    },
     get_data_precios_producto(codprod){
     
   

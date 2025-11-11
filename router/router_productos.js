@@ -431,6 +431,31 @@ router.post("/listado", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+router.post("/listado_export", async(req,res)=>{
+   
+    const { token, sucursal, habilitado } = req.body;
+
+    let qry = `
+        SELECT PRODUCTOS.CODPROD, PRODUCTOS.CODPROD2,
+            PRODUCTOS.DESPROD, PRODUCTOS.DESPROD2, PRODUCTOS.DESPROD3, 
+            PRODUCTOS.UXC, 
+            PRODUCTOS.COSTO_ULTIMO AS COSTO,
+            PRODUCTOS.COSTO_ANTERIOR, 
+            PRODUCTOS.CODMARCA, MARCAS.DESMARCA, 
+            PRODUCTOS.TIPOPROD, 
+            ISNULL(PRODUCTOS.LASTUPDATE,'2020-01-01') AS LASTUPDATE, 
+            PRODUCTOS.HABILITADO,
+            PRODUCTOS.BONO
+        FROM PRODUCTOS LEFT OUTER JOIN
+        MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA
+        ORDER BY PRODUCTOS.CODPROD
+    `
+  
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
 
 
 router.post("/get_cantidad_productos", async(req,res)=>{

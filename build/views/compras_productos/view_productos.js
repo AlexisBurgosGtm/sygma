@@ -81,7 +81,12 @@ function getView(){
 
                     <div class="form-group">
                         <label>Búsqueda de productos</label>
-                        <input type="text" class="form-control border-base negrita text-base" placeholder="Escriba para filtrar..." id="txtBuscar" autocomplete="off">
+                        <div class="input-group">
+                            <input type="text" class="form-control border-base negrita text-base" placeholder="Escriba para filtrar..." id="txtBuscar" autocomplete="off">
+                            <button class="btn btn-success btn-md hand" id="btnExportar">
+                                <i class="fal fa-share"></i>Excel
+                            </button>
+                        </div>
                     </div>
                     <table class="table table-responsive h-full" id="tblProductos">
                         <thead class="bg-base text-white f-med">
@@ -1093,6 +1098,7 @@ function addListeners(){
     })
     
 
+   
 
     get_combos_producto();
 
@@ -1498,6 +1504,34 @@ function listeners_listado(){
 
     //cmbEmpresa.removeEventListener('change', handle_empresa_change)
     //cmbEmpresa.addEventListener('change', handle_empresa_change)
+    document.getElementById('btnExportar').addEventListener('click',()=>{
+
+                F.showToast('Cargando datos...');
+
+                let st = 'SI' //document.getElementById('cmbTipo').value;
+
+                document.getElementById('btnExportar').disabled = true;
+                document.getElementById('btnExportar').innerHTML = `<i class="fal fa-share fa-spin"></i>`;
+         
+                GF.data_listado_productos_export(GlobalEmpnit,st)
+                .then((data)=>{
+                   
+                    let datos = data.recordset;
+
+                    F.export_json_to_xlsx(datos,'Lista_productos')
+
+                    document.getElementById('btnExportar').disabled = false;
+                    document.getElementById('btnExportar').innerHTML = `<i class="fal fa-share"></i>Excel`;
+
+                })
+                .catch(()=>{
+                    F.AvisoError('No se pudo cargar')
+                    document.getElementById('btnExportar').disabled = false;
+                    document.getElementById('btnExportar').innerHTML = `<i class="fal fa-share"></i>Excel`;
+
+                })
+
+    });
 
     document.getElementById('cmbTipoLista').addEventListener('change',()=>{
         get_tbl_productos();
