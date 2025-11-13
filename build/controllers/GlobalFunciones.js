@@ -2045,6 +2045,65 @@ let GF = {
     
         })
     },
+    data_inventarios_general_export: (empnit,st)=>{
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                st:st  
+            };
+    
+            axios.post(`/compras/select_inventario_general_export`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
+    get_data_inventarios_general_retroactivo: (sucursal,fecha,st)=>{
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:sucursal,
+                fecha:fecha,
+                st:st  
+            };
+    
+            axios.post(`/compras/select_inventario_general_retroactivo`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
     get_data_embarques_listado: (empnit,status,mes,anio)=>{
         
         return new Promise((resolve, reject)=>{

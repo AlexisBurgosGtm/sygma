@@ -191,6 +191,133 @@ router.post("/select_inventario_general", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+router.post("/select_inventario_general_export", async(req,res)=>{
+   
+    const {token,sucursal,st} = req.body;
+
+    
+    let qry = '';
+
+    if(sucursal=='%'){
+        qry = `
+        SELECT  view_invsaldo.CODPROD, 
+                view_invsaldo.CODPROD2, 
+                view_invsaldo.DESPROD3 AS CODPROD3, 
+                view_invsaldo.DESPROD AS PRODUCTO,   
+                SUM(view_invsaldo.EXISTENCIA) AS EXISTENCIA,
+                SUM(view_invsaldo.TOTALCOSTO) AS TOTALCOSTO, 
+                MARCAS.DESMARCA AS MARCA
+        FROM     PRODUCTOS RIGHT OUTER JOIN
+                  view_invsaldo ON PRODUCTOS.CODPROD = view_invsaldo.CODPROD LEFT OUTER JOIN
+                  MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA
+        GROUP BY view_invsaldo.CODPROD, 
+                view_invsaldo.CODPROD2, 
+                view_invsaldo.DESPROD3, 
+                view_invsaldo.DESPROD,  
+                  MARCAS.DESMARCA
+        HAVING (view_invsaldo.HABILITADO = '${st}')
+        ORDER BY view_invsaldo.CODPROD
+        `
+    }else{
+        qry = `
+        SELECT view_invsaldo.CODPROD, 
+                view_invsaldo.CODPROD2, 
+                view_invsaldo.DESPROD3 AS CODPROD3, 
+                view_invsaldo.DESPROD AS PRODUCTO,   
+                SUM(view_invsaldo.EXISTENCIA) AS EXISTENCIA,
+                SUM(view_invsaldo.TOTALCOSTO) AS TOTALCOSTO, 
+                MARCAS.DESMARCA AS MARCA
+        FROM     PRODUCTOS RIGHT OUTER JOIN
+                  view_invsaldo ON PRODUCTOS.CODPROD = view_invsaldo.CODPROD LEFT OUTER JOIN
+                  MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA
+        WHERE (view_invsaldo.EMPNIT = '${sucursal}') AND (view_invsaldo.HABILITADO='${st}')
+         GROUP BY view_invsaldo.CODPROD, 
+                view_invsaldo.CODPROD2, 
+                view_invsaldo.DESPROD3, 
+                view_invsaldo.DESPROD,  
+                  MARCAS.DESMARCA
+        ORDER BY view_invsaldo.CODPROD;
+        `
+
+    }
+   
+    
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/select_inventario_general_retroactivo", async(req,res)=>{
+   
+    const {token,sucursal,fecha,st} = req.body;
+
+    
+    let qry = '';
+
+    if(sucursal=='%'){
+        qry = `
+       SELECT 
+                EMPRESAS.NOMBRE AS SUCURSAL, 
+                view_invsaldo_movimientos_retroactivo.CODPROD, 
+                view_invsaldo_movimientos_retroactivo.CODPROD2, 
+                view_invsaldo_movimientos_retroactivo.DESPROD, 
+                SUM(view_invsaldo_movimientos_retroactivo.TOTALUNIDADES) AS EXISTENCIA, 
+                SUM(view_invsaldo_movimientos_retroactivo.TOTALCOSTO) AS TOTALCOSTO, 
+                MARCAS.DESMARCA,
+                PRODUCTOS.UXC,
+                PRODUCTOS.HABILITADO
+        FROM     MARCAS RIGHT OUTER JOIN
+                PRODUCTOS ON MARCAS.CODMARCA = PRODUCTOS.CODMARCA RIGHT OUTER JOIN
+                view_invsaldo_movimientos_retroactivo ON PRODUCTOS.CODPROD = view_invsaldo_movimientos_retroactivo.CODPROD LEFT OUTER JOIN
+                EMPRESAS ON view_invsaldo_movimientos_retroactivo.EMPNIT = EMPRESAS.EMPNIT
+        WHERE  
+                (view_invsaldo_movimientos_retroactivo.FECHA <= '${fecha}') AND
+                (PRODUCTOS.HABILITADO='${st}')
+        GROUP BY view_invsaldo_movimientos_retroactivo.CODPROD, 
+                view_invsaldo_movimientos_retroactivo.CODPROD2, 
+                view_invsaldo_movimientos_retroactivo.DESPROD, 
+                EMPRESAS.NOMBRE, 
+                PRODUCTOS.DESPROD, 
+                MARCAS.DESMARCA,
+                PRODUCTOS.UXC,
+                PRODUCTOS.HABILITADO
+        ORDER BY view_invsaldo_movimientos_retroactivo.CODPROD
+        `
+    }else{
+        qry = `
+        SELECT 
+                EMPRESAS.NOMBRE AS SUCURSAL, 
+                view_invsaldo_movimientos_retroactivo.CODPROD, 
+                view_invsaldo_movimientos_retroactivo.CODPROD2, 
+                view_invsaldo_movimientos_retroactivo.DESPROD, 
+                SUM(view_invsaldo_movimientos_retroactivo.TOTALUNIDADES) AS EXISTENCIA, 
+                SUM(view_invsaldo_movimientos_retroactivo.TOTALCOSTO) AS TOTALCOSTO, 
+                MARCAS.DESMARCA,
+                PRODUCTOS.UXC,
+                PRODUCTOS.HABILITADO
+        FROM     MARCAS RIGHT OUTER JOIN
+                PRODUCTOS ON MARCAS.CODMARCA = PRODUCTOS.CODMARCA RIGHT OUTER JOIN
+                view_invsaldo_movimientos_retroactivo ON PRODUCTOS.CODPROD = view_invsaldo_movimientos_retroactivo.CODPROD LEFT OUTER JOIN
+                EMPRESAS ON view_invsaldo_movimientos_retroactivo.EMPNIT = EMPRESAS.EMPNIT
+        WHERE  
+                (view_invsaldo_movimientos_retroactivo.FECHA <= '${fecha}') AND 
+                (view_invsaldo_movimientos_retroactivo.EMPNIT = '${sucursal}') AND
+                (PRODUCTOS.HABILITADO='${st}')
+        GROUP BY view_invsaldo_movimientos_retroactivo.CODPROD, 
+                view_invsaldo_movimientos_retroactivo.CODPROD2, 
+                view_invsaldo_movimientos_retroactivo.DESPROD, 
+                EMPRESAS.NOMBRE, 
+                PRODUCTOS.DESPROD, 
+                MARCAS.DESMARCA,
+                PRODUCTOS.UXC,
+                PRODUCTOS.HABILITADO
+        ORDER BY view_invsaldo_movimientos_retroactivo.CODPROD
+        `
+
+    }
+   
+    
+    execute.QueryToken(res,qry,token);
+     
+});
 
 
 router.post("/insertcompra", async(req,res)=>{

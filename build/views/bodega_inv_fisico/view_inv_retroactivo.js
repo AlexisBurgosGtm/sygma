@@ -40,7 +40,7 @@ function getView(){
             <div class="card card-rounded shadow">
                 <div class="card-body p-3">
                     
-                    <h3 class="negrita text-danger">INVENTARIO ACTUAL</h3>
+                    <h3 class="negrita text-danger">INVENTARIO RETROACTIVO</h3>
                     <br>
                     <div class="row">
                         <div class="col-8">
@@ -48,9 +48,10 @@ function getView(){
                                 <select class="form-control negrita text-base" id="cmbSucursal">
                                 </select>
                                 <select class="form-control negrita text-danger" id="cmbSt">
-                                    <option value="SI">PRODUCTOS HABILITADOS</option>
-                                    <option value="NO">PRODUCTOS NO HABILITADOS</option>
+                                    <option value="SI">HABILITADOS</option>
+                                    <option value="NO">NO HABILITADOS</option>
                                 </select>
+                                <input type="date" class="form-control negrita text-danger border-danger" id="txtFecha">
                             </div>                            
                         </div>
                         <div class="col-4">
@@ -67,7 +68,6 @@ function getView(){
                                 <tr>
                                     <td>CODIGO</td>
                                     <td>CODIGO 2</td>
-                                    <td>CODIGO 3</td>
                                     <td>PRODUCTO</td>
                                     <td>MARCA</td>
                                     <td>TOTALCOSTO</td>
@@ -163,6 +163,11 @@ function addListeners(){
     cmbSucursal.addEventListener('change',()=>{
         tbl_inventario();
     });
+
+    document.getElementById('txtFecha').value = F.getFecha();
+    document.getElementById('txtFecha').addEventListener('change',()=>{
+         tbl_inventario();
+    })
     
 
     let btnExportarInventario = document.getElementById('btnExportarInventario');
@@ -172,18 +177,19 @@ function addListeners(){
 
         let st = document.getElementById('cmbSt').value;
         let sucursal = document.getElementById('cmbSucursal').value;
+        let fecha = F.devuelveFecha('txtFecha');
 
         btnExportarInventario.disabled = true;
         btnExportarInventario.innerHTML = `<i class="fal fa-share fa-spin"></i>`;
 
-        GF.data_inventarios_general_export(sucursal,st)
+        GF.get_data_inventarios_general_retroactivo(sucursal,fecha,st)
         .then((data)=>{
 
             btnExportarInventario.disabled = false;
             btnExportarInventario.innerHTML = `<i class="fal fa-share"></i> Exportar Excel`;
         
             let datos = data.recordset;
-            F.export_json_to_xlsx(datos,`Inventario ${F.getFecha().replace('/','.')}`)
+            F.export_json_to_xlsx(datos,`Inventario Retroactivo ${fecha.replace('/','.')}`)
 
         })
         .catch(()=>{
@@ -222,23 +228,23 @@ function tbl_inventario(){
 
         let sucursal = document.getElementById('cmbSucursal').value;
         let st = document.getElementById('cmbSt').value;
+        let fecha = F.devuelveFecha('txtFecha');
 
-        GF.get_data_inventarios_general(sucursal,st)
+        GF.get_data_inventarios_general_retroactivo(sucursal,fecha,st)
         .then((data)=>{
 
             let str = '';
             data.recordset.map((r)=>{
-                let totalunidades = Number(r.TOTALUNIDADES);
+                let totalunidades = Number(r.EXISTENCIA);
                 let cajas = totalunidades / Number(r.UXC);
                 str += `
                 <tr>
                     <td>${r.CODPROD}</td>
                     <td>${r.CODPROD2}</td>
-                    <td>${r.DESPROD3}</td>
                     <td>${r.DESPROD}</td>
                     <td>${r.DESMARCA}</td>
                     <td>${F.setMoneda(r.TOTALCOSTO,'Q')}</td>
-                    <td>${r.TOTALUNIDADES}</td>
+                    <td>${r.EXISTENCIA}</td>
                     <td>${F.setMoneda(cajas,'')}</td>
                 </tr>
                 `

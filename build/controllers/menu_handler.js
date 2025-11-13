@@ -217,6 +217,17 @@ let Menu = {
             F.AvisoError('No tiene permitido entrar a esta sección');
         }
     },
+    bodega_inv_retroactivo:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/bodega_inv_fisico/view_inv_retroactivo.js','root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        }
+    },
     bodega_lista_precios:()=>{
         if(Menu.verify()==true){
             Menu.salidaMenu();

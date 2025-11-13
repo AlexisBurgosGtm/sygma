@@ -91,6 +91,11 @@ let botones_menu = {
                                             <span class="nav-link-text" data-i18n="nav.application_intel_introduction">INVENTARIO FISICO</span>
                                         </a>
                                     </li>
+                                     <li>
+                                        <a href="#" title="Introduction" data-filter-tags="application intel introduction"  onclick="Menu.bodega_inv_retroactivo()">
+                                            <span class="nav-link-text" data-i18n="nav.application_intel_introduction">INVENTARIO RETROACTIVO</span>
+                                        </a>
+                                    </li>
                                     
                                     <li>
                                         <a href="#" title="Introduction" data-filter-tags="application intel introduction"  onclick="Menu.bodega_lista_precios()">
@@ -431,6 +436,12 @@ let botones_menu = {
                                     <li>
                                         <a href="#" title="Introduction" data-filter-tags="application intel introduction"  onclick="Menu.bodega_inv_fisico()">
                                             <span class="nav-link-text" data-i18n="nav.application_intel_introduction">INVENTARIO FISICO</span>
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a href="#" title="Introduction" data-filter-tags="application intel introduction"  onclick="Menu.bodega_inv_retroactivo()">
+                                            <span class="nav-link-text" data-i18n="nav.application_intel_introduction">INVENTARIO RETROACTIVO</span>
                                         </a>
                                     </li>
                                     
