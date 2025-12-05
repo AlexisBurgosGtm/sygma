@@ -518,6 +518,30 @@ router.post("/cobertura_vendedores_sucursal", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+router.post("/cobertura_marcas_sucursal", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio} = req.body;
+
+    let qry = `
+		    SELECT  
+                CODMARCA, DESMARCA, 
+                COUNT(CODCLIENTE) AS CONTEO, 
+                SUM(TOTALUNIDADES) AS TOTALUNIDADES, 
+                SUM(TOTALCOSTO) AS TOTALCOSTO, 
+                SUM(TOTALPRECIO) AS TOTALPRECIO
+            FROM  view_rpt_cobertura_marcas
+            WHERE 
+                (EMPNIT = '${sucursal}') AND 
+                (MES = ${mes}) AND 
+                (ANIO = ${anio})
+            GROUP BY CODMARCA, DESMARCA
+            ORDER BY CODMARCA
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
 router.post("/cobertura_vendedores_clientes_no_visitados", async(req,res)=>{
    
     const { token, sucursal,codemp} = req.body;

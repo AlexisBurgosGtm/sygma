@@ -73,23 +73,62 @@ function getView(){
 
                     <hr class="solid">
 
-
-                    <div class="table-responsive col-12">
-                        <table class="table h-full table-bordered col-12">
-                            <thead class="bg-base text-white">
-                                <tr>
-                                    <td>VENDEDOR</td>
-                                    <td>UNIVERSO</td>
-                                    <td>VISITADOS</td>
-                                    <td>FALTAN</td>
-                                    <td>LOGRADO</td>
-                                    <td></td>
-                                </tr>
-                            </thead>
-                            <tbody id="tblDataClientes">
-                            </tbody>
-                        </table>
+                    <div class="row">
+                        <div class="col-sm-12 col-xl-6 col-lg-6 col-md-6">
+                            <div class="table-responsive col-12">
+                                <table class="table h-full table-bordered col-12">
+                                    <thead class="bg-base text-white">
+                                        <tr>
+                                            <td>VENDEDOR</td>
+                                            <td>UNIVERSO</td>
+                                            <td>VISITADOS</td>
+                                            <td>FALTAN</td>
+                                            <td>LOGRADO</td>
+                                            <td></td>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDataClientes">
+                                    </tbody>
+                                    <tfoot class="bg-base text-white">
+                                        <tr>
+                                            <td></td>
+                                            <td></td>
+                                            <td id="lbTotalVendedorVisitados"></td>
+                                            <td id="lbTotalVendedorFaltan"></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-xl-6 col-lg-6 col-md-6">
+                            <div class="table-responsive col-12">
+                                <table class="table h-full table-bordered col-12">
+                                    <thead class="bg-primary text-white">
+                                        <tr>
+                                            <td>MARCA</td>
+                                            <td>VISITADOS</td>
+                                            <td>IMPORTE</td>
+                                            <td></td>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDataMarcas">
+                                    </tbody>
+                                     <tfoot class="bg-primary text-white">
+                                        <tr>
+                                            <td></td>
+                                            <td id="lbTotalMarcaVisitados"></td>
+                                            <td id="lbTotalMarcaImporte"></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
                     </div>
+
+                    
                 </div>
             </div>
             `
@@ -201,8 +240,12 @@ function addListeners(){
                     cmbSucursal.disabled = true;
                     cmbSucursal.value = GlobalEmpnit;
                 };
+                if(Number(GlobalNivelUsuario)==5){
+                    cmbSucursal.value = GlobalEmpnit;
+                };
         
                 rpt_cobertura_vendedores();
+                rpt_cobertura_marcas();
         })
         .catch(()=>{
             cmbSucursal.innerHTML = "<option value=''>NO SE CARGARON LAS SEDES</option>"
@@ -212,12 +255,14 @@ function addListeners(){
         document.getElementById('cmbMes').value = F.get_mes_curso();
         document.getElementById('cmbMes').addEventListener('change',()=>{
             rpt_cobertura_vendedores();
+            rpt_cobertura_marcas();
         });
 
         document.getElementById('cmbAnio').innerHTML = F.ComboAnio();
         document.getElementById('cmbAnio').value = F.get_anio_curso();
         document.getElementById('cmbAnio').addEventListener('change',()=>{
-            rpt_cobertura_vendedores();        
+            rpt_cobertura_vendedores();  
+            rpt_cobertura_marcas();      
         });
 
 
@@ -225,6 +270,10 @@ function addListeners(){
             document.getElementById('tab-uno').click();
             document.getElementById('tblDataEmpleado').innerHTML = '';
         })
+        document.getElementById('cmbSucursal').addEventListener('change',()=>{
+            rpt_cobertura_vendedores();
+            rpt_cobertura_marcas();        
+        });
 
 };
 
@@ -248,6 +297,9 @@ function rpt_cobertura_vendedores(){
     container.innerHTML = GlobalLoader;
 
 
+    let varTotalConteo = 0;
+    let varTotalFaltan = 0;
+
     GF.update_cobertura_empleados(sucursal,mes,anio)
     .then(()=>{
 
@@ -257,12 +309,16 @@ function rpt_cobertura_vendedores(){
                 let str = '';
                 data.recordset.map((r)=>{
                     let logrado = (Number(r.ALCANCE)/Number(r.UNIVERSO))*100;
+                    let faltan = (Number(r.UNIVERSO)-Number(r.ALCANCE));
+
+                    varTotalConteo += Number(r.ALCANCE);
+                    varTotalFaltan += Number(faltan);
                     str+=`
                     <tr>
                         <td>${r.NOMEMPLEADO}</td>
                         <td>${r.UNIVERSO}</td>
                         <td>${r.ALCANCE}</td>
-                        <td>${Number(r.UNIVERSO)-Number(r.ALCANCE)}</td>
+                        <td>${faltan}</td>
                         <td>
                             <progress class="form-control" value="${logrado}" max="100"></progress><b class="text-success">${logrado.toFixed(2)}%</b>
                         </td>
@@ -276,9 +332,13 @@ function rpt_cobertura_vendedores(){
                     `
                 })
                 container.innerHTML = str;
+                document.getElementById('lbTotalVendedorVisitados').innerText = varTotalConteo;
+                document.getElementById('lbTotalVendedorFaltan').innerText = varTotalFaltan;
             })
             .catch(()=>{
                 container.innerHTML = 'No se cargaron datos...';
+                document.getElementById('lbTotalVendedorVisitados').innerText = '';
+                document.getElementById('lbTotalVendedorFaltan').innerText = '';
             })
             
     })
@@ -288,8 +348,6 @@ function rpt_cobertura_vendedores(){
 
 
 };
-
-
 function get_logro_empleado(codemp,nombre){
 
 
@@ -352,5 +410,56 @@ function tbl_clientes_empleado(codemp){
 
 
 
+
+};
+
+
+function rpt_cobertura_marcas(){
+
+    let sucursal = document.getElementById('cmbSucursal').value;
+    let mes = document.getElementById('cmbMes').value;
+    let anio = document.getElementById('cmbAnio').value;
+
+
+    let container = document.getElementById('tblDataMarcas');
+    container.innerHTML = GlobalLoader;
+
+        let varTotalConteo = 0;
+        let varTotalImporte = 0;
+
+            GF.data_cobertura_marcas(sucursal,mes,anio)
+            .then((data)=>{
+
+                let str = '';
+                data.recordset.map((r)=>{
+                    varTotalConteo += Number(r.CONTEO);
+                    varTotalImporte += Number(r.TOTALPRECIO);
+                    str+=`
+                    <tr>
+                        <td>${r.DESMARCA}</td>
+                        <td>${r.CONTEO}</td>
+                        <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                        <td>
+                            <button class="btn btn-md btn-circle btn-primary hand shadow"
+                            onclick="">
+                                <i class="fal fa-list"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    `
+                })
+                container.innerHTML = str;
+                document.getElementById('lbTotalMarcaVisitados').innerText = varTotalConteo;
+                document.getElementById('lbTotalMarcaImporte').innerText = F.setMoneda(varTotalImporte,'Q');
+                
+            })
+            .catch(()=>{
+                container.innerHTML = 'No se cargaron datos...';
+                document.getElementById('lbTotalMarcaVisitados').innerText = '';
+                document.getElementById('lbTotalMarcaImporte').innerText = '';
+            })
+
+  
+   
 
 };
