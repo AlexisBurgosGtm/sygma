@@ -3133,6 +3133,43 @@ let GF = {
     
         })
     },
+    data_cobertura_marcas_empleado: (sucursal,mes,anio,codemp)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:sucursal,
+                mes:mes,
+                anio:anio,
+                codemp:codemp
+            };
+    
+            axios.post(`/objetivos/cobertura_marcas_empleado`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }             
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
     data_clientes_no_visitados_empleado: (sucursal,codemp)=>{
         
         return new Promise((resolve, reject)=>{

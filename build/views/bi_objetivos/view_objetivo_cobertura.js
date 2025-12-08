@@ -147,31 +147,67 @@ function getView(){
                         </div>
                     </div>
 
-                    
                     <br>
-                    <div class="form-group">
-                        <input type="text"
-                        id="txtBuscarEmpleado"
-                        class="form-control border-info"
-                        placeholder="Escriba para buscar..."
-                        oninput="F.FiltrarTabla('tblEmpleado','txtBuscarEmpleado')">
+
+                    <div class="row">
+                        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                        
+                                <div class="form-group">
+                                    <input type="text"
+                                    id="txtBuscarEmpleado"
+                                    class="form-control border-info"
+                                    placeholder="Escriba para buscar..."
+                                    oninput="F.FiltrarTabla('tblEmpleado','txtBuscarEmpleado')">
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-bordered h-full col-12" id="tblEmpleado">
+                                        <thead class="bg-base text-white">
+                                            <tr>
+                                                <td>VISITA</td>
+                                                <td>CLIENTE</td>
+                                                <td>DIRECCION</td>
+                                                <td>ULTIMA_V</td>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblDataEmpleado"></tbody>
+                                    </table>
+                                </div>
+                        
+                        </div>
+                        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                        
+                            <div class="table-responsive col-12">
+                                <table class="table h-full table-bordered col-12">
+                                    <thead class="bg-primary text-white">
+                                        <tr>
+                                            <td>MARCA</td>
+                                            <td>VISITADOS</td>
+                                            <td>IMPORTE</td>
+                                            <td></td>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDataMarcasEmpleado">
+                                    </tbody>
+                                     <tfoot class="bg-primary text-white">
+                                        <tr>
+                                            <td></td>
+                                            <td id="lbTotalMarcaVisitadosEmpleado"></td>
+                                            <td id="lbTotalMarcaImporteEmpleado"></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                        </div>
                     </div>
 
-                    <div class="table-responsive">
-                        <table class="table table-bordered h-full col-12" id="tblEmpleado">
-                            <thead class="bg-base text-white">
-                                <tr>
-                                    <td>VISITA</td>
-                                    <td>CLIENTE</td>
-                                    <td>DIRECCION</td>
-                                    <td>ULTIMA_V</td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                            </thead>
-                            <tbody id="tblDataEmpleado"></tbody>
-                        </table>
-                    </div>
+                    
+                    
+                    
                 
                 </div>
             </div>
@@ -356,6 +392,7 @@ function get_logro_empleado(codemp,nombre){
     document.getElementById('tab-dos').click();
 
     tbl_clientes_empleado(codemp);
+    rpt_cobertura_marcas_empleado(codemp);
 
 
 };
@@ -401,7 +438,7 @@ function tbl_clientes_empleado(codemp){
             `
         })
          container.innerHTML = str;
-        document.getElementById('lbEmpleadoTotal').innerText = `Faltan: ${varTotal}`;
+        document.getElementById('lbEmpleadoTotal').innerText = `Visitados: ${varTotal}`;
     })
     .catch(()=>{
         container.innerHTML = 'No se cargaron datos...';
@@ -410,6 +447,55 @@ function tbl_clientes_empleado(codemp){
 
 
 
+
+};
+function rpt_cobertura_marcas_empleado(codemp){
+
+    let sucursal = document.getElementById('cmbSucursal').value;
+    let mes = document.getElementById('cmbMes').value;
+    let anio = document.getElementById('cmbAnio').value;
+
+
+    let container = document.getElementById('tblDataMarcasEmpleado');
+    container.innerHTML = GlobalLoader;
+
+        let varTotalConteo = 0;
+        let varTotalImporte = 0;
+
+            GF.data_cobertura_marcas_empleado(sucursal,mes,anio,codemp)
+            .then((data)=>{
+
+                let str = '';
+                data.recordset.map((r)=>{
+                    varTotalConteo += Number(r.CONTEO);
+                    varTotalImporte += Number(r.TOTALPRECIO);
+                    str+=`
+                    <tr>
+                        <td>${r.DESMARCA}</td>
+                        <td>${r.CONTEO}</td>
+                        <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                        <td>
+                            <button class="btn btn-md btn-circle btn-primary hand shadow"
+                            onclick="">
+                                <i class="fal fa-list"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    `
+                })
+                container.innerHTML = str;
+                document.getElementById('lbTotalMarcaVisitadosEmpleado').innerText = varTotalConteo;
+                document.getElementById('lbTotalMarcaImporteEmpleado').innerText = F.setMoneda(varTotalImporte,'Q');
+                
+            })
+            .catch(()=>{
+                container.innerHTML = 'No se cargaron datos...';
+                document.getElementById('lbTotalMarcaVisitadosEmpleado').innerText = '';
+                document.getElementById('lbTotalMarcaImporteEmpleado').innerText = '';
+            })
+
+  
+   
 
 };
 
