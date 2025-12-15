@@ -94,10 +94,11 @@ function getView(){
                                 <td>CÓDIGO</td>
                                  <td>CÓDIGO DUN</td>
                                 <td>DESCRIPCIÓN</td>
-                                <td>COSTO ULTIMO</td>
-                                <td>COSTO ANTERIOR</td>
+                                <td>DESCRIPCIÓN 2</td>
                                 <td>MARCA</td>
-                                <td>TIPO</td>
+                                <td>TIPO PROD</td>
+                                <td>COSTO ULTIMO/ANTERIOR</td>
+                                <td>B/S</td>
                                 <td>ACT</td>
                             </tr>
                         </thead>
@@ -1629,6 +1630,11 @@ function listeners_precios(){
 
             document.getElementById('txtPrePublico').value = '';
             document.getElementById('txtPreMayoreoA').value = '';
+            document.getElementById('txtPreMayoreoB').value = '';
+            document.getElementById('txtPreMayoreoC').value = '';
+            document.getElementById('txtPreMayoreoD').value = '';
+            document.getElementById('txtPreMayoreoE').value = '';
+            document.getElementById('txtPreMayoreoF').value = '';
 
             $("#modal_nuevo_precio").modal('show');
 
@@ -2684,9 +2690,12 @@ function get_tbl_productos(){
                     <td>${r.CODPROD}</td>
                     <td>${r.CODPROD2}</td>
                     <td>${r.DESPROD}</td>
-                    <td>${F.setMoneda(r.COSTO,'Q')}</td>
-                     <td>${F.setMoneda(r.COSTO_ANTERIOR,'Q')}</td>
+                    <td>${r.DESPROD2}</td>
                     <td>${r.DESMARCA}</td>
+                    <td>${r.DESTIPO}</td>
+                    <td>${F.setMoneda(r.COSTO,'Q')}
+                        <br>
+                     <small>${F.setMoneda(r.COSTO_ANTERIOR,'Q')}</small></td>
                     <td>${r.TIPOPROD}</td>
                     <td>${F.convertDateNormal(r.LASTUPDATE)}</td>
                 </tr>
@@ -3080,11 +3089,11 @@ function delete_precio(idbtn,id,codprod){
                         let data = response.data;
                         if(Number(data.rowsAffected[0])>0){
                             F.Aviso('Precio eliminado exitosamente!!');
-                            if(GlobalBolEditando==false){
+                            //if(GlobalBolEditando==false){
                                 get_tbl_precios_producto(codprod,'tblDataPreciosProd');           
-                            }else{
+                            //}else{
                                 get_tbl_precios_producto(codprod,'tblDataPrecios');           
-                            }
+                            //}
                             
                         }else{
                             btn.innerHTML = `<i class="fal fa-trash"></i>`;

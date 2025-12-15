@@ -83,6 +83,11 @@ function getView(){
                 </div>
             </div>
 
+            <button class="btn btn-secondary btn-bottom-r btn-xl btn-circle hand shadow"
+            onclick="Navegar.inicio()">
+                <i class="fal fa-home"></i>
+            </button>
+
             <button class="btn btn-success btn-bottom-r btn-xl btn-circle hand shadow" id="btnNuevo">
                 <i class="fal fa-plus"></i>
             </button>

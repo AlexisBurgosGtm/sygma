@@ -74,14 +74,6 @@ function getView(){
             </div>
 
             <br>
-                <div class="form-group">
-                    <label class="negrita">Seleccione Mes y Año</label>
-                    <div class="input-group">
-                        <select class="form-control negrita border-base text-base" id="cmbMes"></select>
-                        <select class="form-control negrita border-base text-base" id="cmbAnio"></select>
-                    </div>
-                </div>
-            <br>
 
        
 
@@ -239,7 +231,7 @@ function getView(){
                     <div class="card card-rounded   bg-white shadow col-12 hand" id="btnMenuRptGoles">
                         <div class="card-body p-4">
 
-                            <h4 class="">REPORTE DE GOLES Y COBERTURA</h4>
+                            <h4 class="">REPORTE DE GOLES</h4>
                           
                              <div class="row">
                                 <div class="col-6">
@@ -254,10 +246,10 @@ function getView(){
                 </div>
                 <div class="col-sm-12 col-md-4 col-xl-4 col-lg-4 p-2">
                     
-                    <div class="card card-rounded   bg-white shadow col-12 hand" id="btnMenuRptHistorial">
+                    <div class="card card-rounded   bg-white shadow col-12 hand" id="btnMenuRptCobertura">
                         <div class="card-body p-4">
 
-                            <h4 class="">REPORTE HISTORIAL CLIENTES</h4>
+                            <h4 class="">REPORTE COBERTURA CLIENTES</h4>
                           
                              <div class="row">
                                 <div class="col-6">
@@ -403,7 +395,13 @@ function getView(){
                         <div class="col-6">
                             <h4 class="negrita text-base">Logro por Categoria</h4>
 
-                           
+                            <div class="form-group">
+                                <label class="negrita">Seleccione Mes y Año</label>
+                                <div class="input-group">
+                                    <select class="form-control negrita text-base" id="cmbMes"></select>
+                                    <select class="form-control negrita text-base" id="cmbAnio"></select>
+                                </div>
+                            </div>
 
                            
                             <br>
@@ -589,12 +587,20 @@ function getView(){
              <div class="card card-rounded col-12">
                 <div class="card-body p-4">
             
-                    <h4 class="negrita text-base">LOGRO DE GOLES Y COBERTURA DEL MES</h4>
+                    <h4 class="negrita text-base">LOGRO DE GOLES POR MES</h4>
                    
                     <br>
                     <div class="row">
                         <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                          
+                            <div class="form-group">
+                                <label>Seleccione Mes y Año</label>
+                                <div class="input-group">
+                                    <select class="form-control negrita" id="cmbMesGoles">
+                                    </select>
+                                    <select class="form-control negrita" id="cmbAnioGoles">
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                             <h5>Total Goles:</h5>
@@ -606,67 +612,29 @@ function getView(){
 
                     <hr class="solid">
 
-                    <div class="row">
-                        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        
-                            <div class="table-responsive col-12">
-                                <table class="table h-full table-bordered col-12">
-                                    <thead class="bg-primary text-white">
-                                        <tr>
-                                            <td>MARCA</td>
-                                            <td>VISITADOS</td>
-                                            <td>GOLES</td>
-                                            <td>IMPORTE</td>
-                                            <td></td>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tblDataMarcasEmpleadoCobertura">
-                                    </tbody>
-                                     <tfoot class="bg-primary text-white">
-                                        <tr>
-                                            <td></td>
-                                            <td id="lbTotalMarcaVisitadosEmpleado"></td>
-                                            <td id="lbTotalMarcaGolesEmpleado"></td>
-                                            <td id="lbTotalMarcaImporteEmpleado"></td>
-                                            <td></td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-                        
+                    <div class="table-responsive">
+
+                        <div class="form-group">
+                            <input type="text" class="form-control border-info text-info"
+                            id="txtBuscarGoles"
+                            placeholder="Escriba para buscar..." 
+                            oninput="F.FiltrarTabla('tblGoles','txtBuscarGoles')"
+                            >
                         </div>
-                        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        
-                            <div class="table-responsive col-12">
 
-                                <div class="form-group">
-                                    <input type="text" class="form-control border-info text-info"
-                                    id="txtBuscarGoles"
-                                    placeholder="Escriba para buscar..." 
-                                    oninput="F.FiltrarTabla('tblGoles','txtBuscarGoles')"
-                                    >
-                                </div>
+                        <table class="table h-full table-hover table-bordered" id="tblGoles">
+                            <thead class="bg-primary text-white">
+                                <tr>
+                                    <td>PRODUCTO</td>
+                                    <td>GOLES</td>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataGoles">
+                            </tbody>
 
-                                <table class="table h-full table-hover table-bordered" id="tblGoles">
-                                    <thead class="bg-primary text-white">
-                                        <tr>
-                                            <td>PRODUCTO</td>
-                                            <td>GOLES</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tblDataGoles">
-                                    </tbody>
+                        </table>
 
-                                </table>
-
-                            </div>
-                        
-                        </div>
                     </div>
-
-                            
-
-                    
             
                 </div>
             </div>
@@ -710,7 +678,7 @@ function getView(){
         },
         rpt_cobertura:()=>{
             return `
-            <h4 class="negrita text-base">HISTORIAL DE CLIENTES VISITADOS MES</h4>
+            <h4 class="negrita text-base">COBERTURA DE CLIENTES</h4>
                    
                     <br>
                 
@@ -731,18 +699,33 @@ function getView(){
                     <div class="row">
                         <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                         
-                           
+                            <div class="table-responsive col-12">
+                                <table class="table h-full table-bordered col-12">
+                                    <thead class="bg-primary text-white">
+                                        <tr>
+                                            <td>MARCA</td>
+                                            <td>VISITADOS</td>
+                                            <td>IMPORTE</td>
+                                            <td></td>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDataMarcasEmpleadoCobertura">
+                                    </tbody>
+                                     <tfoot class="bg-primary text-white">
+                                        <tr>
+                                            <td></td>
+                                            <td id="lbTotalMarcaVisitadosEmpleado"></td>
+                                            <td id="lbTotalMarcaImporteEmpleado"></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
 
                         </div>
                         <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                         
-                              
-                        
-                        </div>
-                      
-                    </div>
-
-                      <div class="form-group">
+                                <div class="form-group">
                                     <input type="text"
                                     id="txtBuscarEmpleado"
                                     class="form-control border-info"
@@ -765,6 +748,10 @@ function getView(){
                                         <tbody id="tblDataEmpleado"></tbody>
                                     </table>
                                 </div>
+                        
+                        </div>
+                      
+                    </div>
 
                     
                     
@@ -789,11 +776,7 @@ function getView(){
 function addListeners(){
 
 
-
     F.slideAnimationTabs();
-
-    selected_tab = '';
-
 
     document.title = `Vendedor - ${GlobalNomEmpresa}`;
     
@@ -816,26 +799,20 @@ function addListeners(){
     document.getElementById('btnMenuRptProductos').addEventListener('click',()=>{
 
             document.getElementById('tab-tres').click();
-            selected_tab = 'PRODUCTOS';
-            cargar_grid();
+            rpt_tbl_productos_embarque();
     })
 
     document.getElementById('btnMenuRptDocumentos').addEventListener('click',()=>{
 
         document.getElementById('tab-dos').click();
-        selected_tab = 'DOCUMENTOS';
-        cargar_grid();
-        
+        rpt_tbl_documentos_embarque();
     })
 
     
     document.getElementById('btnMenuRptMarcas').addEventListener('click',()=>{
 
-
         document.getElementById('tab-cuatro').click();
-        selected_tab = 'MARCAS';
-        cargar_grid();
-        
+        rpt_tbl_marcas();
     })
 
 
@@ -843,18 +820,17 @@ function addListeners(){
     document.getElementById('btnMenuRptCategorias').addEventListener('click',()=>{
 
         document.getElementById('tab-cinco').click();
-        selected_tab = 'CATEGORIAS';
-        cargar_grid();
-
+        //tbl_detalle_vendedor(GlobalCodUsuario);
+        tbl_logro_marcas(GlobalEmpnit);
         
     })
 
-    document.getElementById('btnMenuRptHistorial').addEventListener('click',()=>{
+    document.getElementById('btnMenuRptCobertura').addEventListener('click',()=>{
 
-        document.getElementById('tab-siete').click();
-        selected_tab = 'HISTORIAL';
-        cargar_grid();
-        
+         document.getElementById('tab-siete').click();
+
+        get_logro_empleado(GlobalCodUsuario,GlobalUsuario);
+
     });
     document.getElementById('btnAtrasCoberturaEmpleado').addEventListener('click',()=>{
         document.getElementById('tab-uno').click();
@@ -923,22 +899,21 @@ function addListeners(){
         
         document.getElementById('tab-seis').click();
      
-        selected_tab = 'GOLES-COBERTURA';
-        cargar_grid();
+        rpt_goles_resumen();
         
 
     });
-    document.getElementById('cmbMes').innerHTML = F.ComboMeses();
-    document.getElementById('cmbMes').value = F.get_mes_curso();
-    document.getElementById('cmbMes').addEventListener('change',()=>{
+    document.getElementById('cmbMesGoles').innerHTML = F.ComboMeses();
+    document.getElementById('cmbMesGoles').value = F.get_mes_curso();
+    document.getElementById('cmbMesGoles').addEventListener('change',()=>{
 
         rpt_goles_resumen();
 
     });
 
-    document.getElementById('cmbAnio').innerHTML = F.ComboAnio();
-    document.getElementById('cmbAnio').value = F.get_anio_curso();
-    document.getElementById('cmbAnio').addEventListener('change',()=>{
+    document.getElementById('cmbAnioGoles').innerHTML = F.ComboAnio();
+    document.getElementById('cmbAnioGoles').value = F.get_anio_curso();
+    document.getElementById('cmbAnioGoles').addEventListener('change',()=>{
           
             rpt_goles_resumen();
         
@@ -960,39 +935,6 @@ function initView(){
 };
 
 
-function cargar_grid(){
-
-    switch (selected_tab) {
-        case 'MARCAS':
-            rpt_tbl_marcas();
-            
-            break;
-        case 'CATEGORIAS':
-             tbl_logro_marcas(GlobalEmpnit);
-            
-             break;
-        case 'DOCUMENTOS':
-            rpt_tbl_documentos_embarque();
-            
-            break;
-        case 'PRODUCTOS':
-            rpt_tbl_productos_embarque();
-            
-            break;
-        case 'GOLES-COBERTURA':
-            rpt_goles_resumen();
-            rpt_cobertura_marcas_empleado(GlobalCodUsuario);
-
-            break;
-        case 'HISTORIAL':
-            get_logro_empleado(GlobalCodUsuario,GlobalUsuario);
-
-            break;
-        default:
-            document.getElementById('tab-uno').click();
-            break;
-    }
-};
 
 function rpt_tbl_documentos_embarque(){
    
@@ -1275,8 +1217,8 @@ function tbl_detalle_vendedor(codemp){
 
 function rpt_goles_resumen(){
 
-    let mes = document.getElementById('cmbMes').value;
-    let anio = document.getElementById('cmbAnio').value;
+    let mes = document.getElementById('cmbMesGoles').value;
+    let anio = document.getElementById('cmbAnioGoles').value;
 
     let container = document.getElementById('tblDataGoles');
     container.innerHTML = GlobalLoader;
@@ -1570,7 +1512,7 @@ function get_logro_empleado(codemp,nombre){
 
    
     tbl_clientes_empleado(codemp);
-    
+    rpt_cobertura_marcas_empleado(codemp);
 
 
 };
@@ -1639,22 +1581,19 @@ function rpt_cobertura_marcas_empleado(codemp){
 
         let varTotalConteo = 0;
         let varTotalImporte = 0;
-        let varTotalGoles = 0;
 
-            GF.data_cobertura_goles_marcas_empleado(sucursal,mes,anio,codemp)
+            GF.data_cobertura_marcas_empleado(sucursal,mes,anio,codemp)
             .then((data)=>{
 
                 let str = '';
                 data.recordset.map((r)=>{
-                    varTotalConteo += Number(r.COBERTURA);
-                    varTotalGoles += Number(r.GOLES);
-                    varTotalImporte += Number(r.COBERTURA_IMPORTE);
+                    varTotalConteo += Number(r.CONTEO);
+                    varTotalImporte += Number(r.TOTALPRECIO);
                     str+=`
                     <tr>
                         <td>${r.DESMARCA}</td>
-                        <td>${r.COBERTURA}</td>
-                        <td>${r.GOLES}</td>
-                        <td>${F.setMoneda(r.COBERTURA_IMPORTE,'Q')}</td>
+                        <td>${r.CONTEO}</td>
+                        <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
                         <td>
                             <button class="hidden btn btn-md btn-circle btn-primary hand shadow"
                             onclick="">
@@ -1666,9 +1605,6 @@ function rpt_cobertura_marcas_empleado(codemp){
                 })
                 container.innerHTML = str;
                 document.getElementById('lbTotalMarcaVisitadosEmpleado').innerText = varTotalConteo;
-                
-                document.getElementById('lbTotalMarcaGolesEmpleado').innerText = varTotalGoles;
-                
                 document.getElementById('lbTotalMarcaImporteEmpleado').innerText = F.setMoneda(varTotalImporte,'Q');
                 
             })
@@ -1676,7 +1612,6 @@ function rpt_cobertura_marcas_empleado(codemp){
                 console.log(err);
                 container.innerHTML = 'No se cargaron datos...';
                 document.getElementById('lbTotalMarcaVisitadosEmpleado').innerText = '';
-                document.getElementById('lbTotalMarcaGolesEmpleado').innerText = '';
                 document.getElementById('lbTotalMarcaImporteEmpleado').innerText = '';
             })
 

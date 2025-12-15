@@ -357,6 +357,45 @@ router.post("/goles_marcas_resumen_vendedor", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+router.post("/BACKUP_goles_marcas_resumen_vendedor", async(req,res)=>{
+   
+    const { token, sucursal,codemp, mes,anio} = req.body;
+
+    let qry = '';
+    if(codemp=='TODOS'){
+        qry = `
+        SELECT param_marca_codigos_dun.DESMARCA, COUNT(view_rpt_goles_productos_cliente_2.CODCLIENTE) AS CONTEO, SUM(ISNULL(view_rpt_goles_productos_cliente_2.IMPORTE, 0) * - 1) AS IMPORTE
+        FROM  view_rpt_goles_productos_cliente_2 LEFT OUTER JOIN
+                param_marca_codigos_dun ON view_rpt_goles_productos_cliente_2.CODPROD = param_marca_codigos_dun.CODIGO_DUN
+        WHERE  
+            (view_rpt_goles_productos_cliente_2.ANIO = ${anio}) AND 
+            (view_rpt_goles_productos_cliente_2.MES = ${mes}) AND 
+            (view_rpt_goles_productos_cliente_2.EMPNIT LIKE '%${sucursal}%')
+        GROUP BY param_marca_codigos_dun.DESMARCA
+        `
+    }else{
+        qry = `
+        SELECT 
+                param_marca_codigos_dun.DESMARCA, 
+                COUNT(view_rpt_goles_productos_cliente_2.CODCLIENTE) AS CONTEO, 
+                SUM(ISNULL(view_rpt_goles_productos_cliente_2.IMPORTE, 0) * - 1) AS IMPORTE
+        FROM  view_rpt_goles_productos_cliente_2 LEFT OUTER JOIN
+                param_marca_codigos_dun ON view_rpt_goles_productos_cliente_2.CODPROD = param_marca_codigos_dun.CODIGO_DUN
+        WHERE  
+            (view_rpt_goles_productos_cliente_2.ANIO = ${anio}) AND 
+            (view_rpt_goles_productos_cliente_2.MES = ${mes}) AND 
+            (view_rpt_goles_productos_cliente_2.EMPNIT LIKE '%${sucursal}%')
+        GROUP BY param_marca_codigos_dun.DESMARCA, view_rpt_goles_productos_cliente_2.CODEMP
+        HAVING (view_rpt_goles_productos_cliente_2.CODEMP = ${codemp})
+
+        `;
+    }
+
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
 
 //ANTES DE PONER EL COMODIN EN EMPRESAS
 
@@ -571,6 +610,35 @@ router.post("/cobertura_marcas_empleado", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+router.post("/BACKUP_cobertura_marcas_empleado", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio, codemp} = req.body;
+
+    let qry = `
+		    SELECT 
+                CODEMP,
+                CODMARCA, 
+                DESMARCA, 
+                COUNT(CODCLIENTE) AS CONTEO, 
+                SUM(TOTALUNIDADES) AS TOTALUNIDADES, 
+                SUM(TOTALCOSTO) AS TOTALCOSTO, 
+                SUM(TOTALPRECIO) AS TOTALPRECIO
+            FROM  view_rpt_cobertura_marcas_empleado
+            WHERE 
+                (EMPNIT = '${sucursal}') AND 
+                (MES = ${mes}) AND 
+                (ANIO = ${anio}) AND 
+                (CODEMP=${codemp}) AND
+                (DESMARCA IS NOT NULL)
+            GROUP BY CODEMP,CODMARCA, DESMARCA
+            ORDER BY CODMARCA
+
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
 router.post("/cobertura_vendedores_clientes_no_visitados", async(req,res)=>{
    
     const { token, sucursal,codemp} = req.body;
@@ -598,6 +666,35 @@ router.post("/cobertura_vendedores_clientes_no_visitados", async(req,res)=>{
                 (CLIENTES.HABILITADO = 'SI') AND 
                 (CLIENTES.CODEMPLEADO = ${codemp})
         ORDER BY CLIENTES.LASTSALE
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/cobertura_marcas_goles_empleado", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio, codemp} = req.body;
+
+    let qry = `
+		SELECT  
+            view_rpt_cobertura_marcas_empleado_resumen.CODMARCA, 
+            view_rpt_cobertura_marcas_empleado_resumen.DESMARCA, 
+            view_rpt_cobertura_marcas_empleado_resumen.CONTEO AS COBERTURA, 
+            view_rpt_cobertura_marcas_empleado_resumen.TOTALPRECIO AS COBERTURA_IMPORTE, 
+            view_rpt_goles_marca_vendedor_resumen.CONTEO AS GOLES, 
+            view_rpt_goles_marca_vendedor_resumen.IMPORTE AS GOLES_IMPORTE
+        FROM  view_rpt_cobertura_marcas_empleado_resumen LEFT OUTER JOIN
+            view_rpt_goles_marca_vendedor_resumen ON view_rpt_cobertura_marcas_empleado_resumen.CODMARCA = view_rpt_goles_marca_vendedor_resumen.CODMARCA AND 
+            view_rpt_cobertura_marcas_empleado_resumen.CODEMP = view_rpt_goles_marca_vendedor_resumen.CODEMP AND 
+            view_rpt_cobertura_marcas_empleado_resumen.ANIO = view_rpt_goles_marca_vendedor_resumen.ANIO AND view_rpt_cobertura_marcas_empleado_resumen.MES = view_rpt_goles_marca_vendedor_resumen.MES AND 
+            view_rpt_cobertura_marcas_empleado_resumen.EMPNIT = view_rpt_goles_marca_vendedor_resumen.EMPNIT
+        WHERE 
+            (view_rpt_cobertura_marcas_empleado_resumen.EMPNIT = '${sucursal}') AND 
+            (view_rpt_cobertura_marcas_empleado_resumen.MES = ${mes}) AND 
+            (view_rpt_cobertura_marcas_empleado_resumen.ANIO = ${anio}) AND 
+            (view_rpt_cobertura_marcas_empleado_resumen.CODEMP = ${codemp})
         `;
     
 

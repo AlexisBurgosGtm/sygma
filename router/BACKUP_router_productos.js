@@ -406,30 +406,6 @@ router.post("/listado", async(req,res)=>{
     const { token, sucursal, filtro, habilitado } = req.body;
 
     let qry = `
-        SELECT        TOP (70) PRODUCTOS.CODPROD, PRODUCTOS.CODPROD2, PRODUCTOS.DESPROD, PRODUCTOS.DESPROD2, PRODUCTOS.DESPROD3, PRODUCTOS.UXC, PRODUCTOS.COSTO_ULTIMO AS COSTO, 
-                         PRODUCTOS.COSTO_ANTERIOR, PRODUCTOS.CODMARCA, MARCAS.DESMARCA, PRODUCTOS.TIPOPROD, ISNULL(PRODUCTOS.LASTUPDATE, '2020-01-01') AS LASTUPDATE, PRODUCTOS.HABILITADO, PRODUCTOS.BONO, 
-                         CLASIFICACIONES_GENERALES.DESCRIPCION AS DESTIPO
-FROM            PRODUCTOS INNER JOIN
-                         CLASIFICACIONES_GENERALES ON PRODUCTOS.CLASIF_TIPO = CLASIFICACIONES_GENERALES.CODIGO LEFT OUTER JOIN
-                         MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA
-        WHERE (PRODUCTOS.CODPROD='${filtro}') 
-            AND (PRODUCTOS.HABILITADO='${habilitado}')
-            OR
-            (PRODUCTOS.DESPROD LIKE '%${filtro}%') 
-            AND (PRODUCTOS.HABILITADO='${habilitado}')
-        ORDER BY PRODUCTOS.CODPROD
-    `
-  
-    
-
-    execute.QueryToken(res,qry,token);
-     
-});
-router.post("/BACKUP_listado", async(req,res)=>{
-   
-    const { token, sucursal, filtro, habilitado } = req.body;
-
-    let qry = `
         SELECT TOP 50 PRODUCTOS.CODPROD, PRODUCTOS.CODPROD2,
             PRODUCTOS.DESPROD, PRODUCTOS.DESPROD2, PRODUCTOS.DESPROD3, 
             PRODUCTOS.UXC, 
@@ -657,7 +633,7 @@ router.post("/insert_marca", async(req,res)=>{
 
    
     let qry = `
-    INSERT INTO MARCAS (CODMARCA,DESMARCA,PORCENTAJE,OBJETIVO) VALUES (${codmarca},'${desmarca}',0,0);
+    INSERT INTO MARCAS (DESMARCA,PORCENTAJE,OBJETIVO) VALUES ('${desmarca}',0,0);
     `
 
     let qryxxx = `
