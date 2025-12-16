@@ -800,17 +800,10 @@ function addListeners(){
 
     document.getElementById('cmbMes').innerHTML = F.ComboMeses();
     document.getElementById('cmbMes').value = F.get_mes_curso();
-    document.getElementById('cmbMes').addEventListener('change',()=>{
-        //tbl_detalle_vendedor(GlobalCodUsuario);
-        tbl_logro_marcas(GlobalEmpnit);
-    });
-
+   
     document.getElementById('cmbAnio').innerHTML = F.ComboAnio();
     document.getElementById('cmbAnio').value = F.get_anio_curso();
-    document.getElementById('cmbAnio').addEventListener('change',()=>{
-        //tbl_detalle_vendedor(GlobalCodUsuario);
-        tbl_logro_marcas(GlobalEmpnit);
-    });
+
     
 
     document.getElementById('btnMenuRptProductos').addEventListener('click',()=>{
@@ -928,21 +921,7 @@ function addListeners(){
         
 
     });
-    document.getElementById('cmbMes').innerHTML = F.ComboMeses();
-    document.getElementById('cmbMes').value = F.get_mes_curso();
-    document.getElementById('cmbMes').addEventListener('change',()=>{
-
-        rpt_goles_resumen();
-
-    });
-
-    document.getElementById('cmbAnio').innerHTML = F.ComboAnio();
-    document.getElementById('cmbAnio').value = F.get_anio_curso();
-    document.getElementById('cmbAnio').addEventListener('change',()=>{
-          
-            rpt_goles_resumen();
-        
-    });
+  
     // -------------------------------
     // GOLES 
     // -------------------------------
