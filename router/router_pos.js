@@ -493,6 +493,10 @@ router.post("/productos_filtro", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+
+
+
+
 router.post("/BACKUP_CAMPO_HABILITADO_MEDIDA_GENERAL_productos_filtro", async(req,res)=>{
    
     const { token, sucursal, filtro, tipoprecio } = req.body;

@@ -1281,5 +1281,26 @@ let F = {
           XLSX.utils.book_append_sheet(wb, ws, "rpt"); 
           XLSX.writeFile(wb,filename); 
 
+      },
+      get_tipo_precio:(campo)=>{
+         
+            let str = '';
+            
+            switch (campo) {
+              case 'PRECIO':
+                str = 'PUBLICO';
+                break;
+              case 'PRECIO_B':
+                str = 'MAYORISTA';
+                break;
+              case 'PRECIO_A':
+                str = 'SEMI-MAYORISTA';
+                break;
+              default:
+                str = campo;
+                break;
+            };
+
+            return str;
       }
 };

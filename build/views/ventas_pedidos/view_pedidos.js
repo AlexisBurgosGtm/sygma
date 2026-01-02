@@ -80,7 +80,12 @@ function getView(){
                                     <div class="form-group">
                                         <div class="input-group">
                                            
-                                            <input type="text" autocomplete="off" class="form-control border-base negrita col-12" placeholder='Escriba para buscar...' id="txtPosCodprod">
+                                            <input type="text" autocomplete="off" class="form-control col-12 border-base negrita col-12" placeholder='Escriba para buscar...' id="txtPosCodprod">
+                                            <select class="border-danger negrita text-danger" id="cmb_tipo_precio">
+                                                <option value="PRECIO">PUBLICO</option>
+                                                <option value="PRECIO_A">SEMI</option>
+                                                <option value="PRECIO_B">MAYORISTA</option>
+                                            </select>
                                             <button class="btn btn-base hand col-1" id="btnBuscarProd">
                                                 <i class="fal fa-search"></i>
                                             </button>
@@ -1189,8 +1194,9 @@ function listener_vista_pedido(){
             return;
         };
 
+        let TipoP = document.getElementById('cmb_tipo_precio').value; //data_empresa_config.TIPO_PRECIO
 
-        insert_producto_pedido(Selected_codprod,Selected_desprod,Selected_codmedida,Selected_equivale,Selected_costo,preciounitario,cantidad, Selected_exento, Selected_tipoprod, data_empresa_config.TIPO_PRECIO, Selected_existencia,Selected_bono,descuento)
+        insert_producto_pedido(Selected_codprod,Selected_desprod,Selected_codmedida,Selected_equivale,Selected_costo,preciounitario,cantidad, Selected_exento, Selected_tipoprod, TipoP, Selected_existencia,Selected_bono,descuento)
         .then(()=>{
             
             $("#modal_cantidad").modal('hide');
@@ -1645,44 +1651,7 @@ function tbl_historial_cliente(){
     })
 
 };
-function BACKUP_tbl_historial_cliente(){
 
-    let container = document.getElementById('tblDataHistorial');
-    container.innerHTML = GlobalLoader;
-
-    let fi = F.devuelveFecha('txtFechaInicial');
-    let ff = F.devuelveFecha('txtFechaFinal');
-    
-    
-
-    GF.data_cliente_historial(GlobalEmpnit,selected_cod_cliente,fi,ff)
-    .then((data)=>{
-
-        let str = '';
-        data.recordset.map((r)=>{
-            str += `
-            <tr>
-                <td>${F.convertDateNormal(r.FECHA)}</td>
-                <td>${r.DESPROD}
-                    <br>
-                    <small>${r.CODPROD}</small>
-                </td>
-                <td>${r.CANTIDAD}
-                    <br>
-                    <small>${r.CODMEDIDA}</small>
-                </td>
-                <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
-            </tr>
-            `
-        })
-        container.innerHTML = str; 
-
-    })
-    .catch(()=>{
-        container.innerHTML = 'No se cargaron datos...';
-    })
-
-};
 
 
 
@@ -2004,11 +1973,13 @@ function get_buscar_producto(filtro){
 
     let idf = 'first-element'; let i =0;
 
+    let tipoP = document.getElementById('cmb_tipo_precio').value;
+
     axios.post('/pos/productos_filtro', {
         sucursal: GlobalEmpnit,
         token:TOKEN,
         filtro:filtro,
-        tipoprecio:data_empresa_config.TIPO_PRECIO
+        tipoprecio: tipoP //data_empresa_config.TIPO_PRECIO
     })
     .then((response) => {        
         if(response=='error'){
@@ -2350,7 +2321,7 @@ function get_tbl_pedido(){
             return `
             <tr class="border-base border-left-0 border-right-0 border-top-0">
                 <td class="text-left">
-                    ${rows.DESPROD}
+                    ${rows.DESPROD} (<small>${F.get_tipo_precio(rows.TIPOPRECIO)}</small>)
                     <br>
                     <small class="negrita"><b>${rows.CODPROD}</b></small>
                     <br>
