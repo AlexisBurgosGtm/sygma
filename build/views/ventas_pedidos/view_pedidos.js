@@ -1189,9 +1189,18 @@ function listener_vista_pedido(){
             return;
         };
 
+
+      
+
+
         if(Number(preciounitario)<Number(Selected_costo)){
-            F.AvisoError('Precio menor al costo');
-            return;
+
+            //PERMITE VENDER ABAJO DEL COSTO
+            if(data_config_general[5].VALOR.toString()=="NO"){
+                F.AvisoError('Precio menor al costo');
+                return;
+            }
+            
         };
 
         let TipoP = document.getElementById('cmb_tipo_precio').value; //data_empresa_config.TIPO_PRECIO
@@ -2255,10 +2264,13 @@ function insert_producto_pedido(codprod,desprod,codmedida,equivale,costo,precio,
         let varTotalUnidades = Number(cantidad * equivale);
         let varExistencia = Number(existencia * equivale);
 
-        console.log(varTotalUnidades)
-        console.log(varExistencia);
     
-        if(varTotalUnidades > Number(varExistencia)){F.AvisoError('Existencia menor a la cantidad pedida');return;}
+        //PERMITE VENTAS SIN EXISTENCIA
+        if(data_config_general[0].VALOR.toString()=="NO"){
+            if(varTotalUnidades > Number(varExistencia)){F.AvisoError('Existencia menor a la cantidad pedida');return;}
+        };
+
+      
     
 
     let datos = 

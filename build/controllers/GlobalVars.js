@@ -24,6 +24,14 @@ let GlobalBolEditando = false;
 let GlobalSignoMoneda = 'Q'
 
 let data_config_general = [];
+//0 = 1) permite venta sin existencia (sino)
+//
+//
+//
+//
+//
+//
+
 let data_empresa_config = [];
 let data_usuario_config = [];
 

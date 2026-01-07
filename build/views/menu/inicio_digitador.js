@@ -669,6 +669,7 @@ function getView(){
                                 <option value='BONIFICACIONES'>PRODUCTOS BONIFICADOS EMBARQUE</option>
                                 <option value='VENDEDORES'>RESUMEN VENDEDOR</option>
                                 <option value='ANULADAS'>FACTURAS ANULADAS</option>
+                                <option value='TIPOPRECIO'>PRODUCTOS CON PRECIOS ESPECIALES</option>
                             </select>
 
                         </div>
@@ -697,6 +698,9 @@ function getView(){
                         </div>
                         <div class="tab-pane fade" id="Fseis" role="tabpanel" aria-labelledby="home-tab">
                             ${view.facturacion_embarque_productos_bonif()}
+                        </div>   
+                        <div class="tab-pane fade" id="Fsiete" role="tabpanel" aria-labelledby="home-tab">
+                            ${view.facturacion_tipo_precios()}
                         </div>    
                     </div>
 
@@ -723,6 +727,10 @@ function getView(){
                         </li>  
                         <li class="nav-item">
                             <a class="nav-link negrita text-danger" id="tab-Fseis" data-toggle="tab" href="#Fseis" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-Fsiete" data-toggle="tab" href="#Fsiete" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
                         </li>           
                     </ul>
@@ -951,6 +959,11 @@ function getView(){
             <button class="btn btn-info btn-xl btn-circle hand shadow btn-bottom-r" onclick="F.imprimirSelec('rpt_productos_embarqueB')">
                 <i class="fal fa-print"></i>
             </button>
+            `
+        },
+        facturacion_tipo_precios:()=>{
+            return `
+            
             `
         },
         facturacion_vendedores:()=>{
@@ -1253,7 +1266,8 @@ function listeners_pedidos_pendientes(){
                 tbl_resumen_embarque(codembarque);
 
                 break;
-           
+            
+    
         
         }
         
@@ -1313,6 +1327,13 @@ function listeners_pedidos_pendientes(){
                 tbl_pedidos_pendientes_anulados('tblDataPedidosAnulados');
 
                 break;
+            case 'TIPOPRECIO':
+                document.getElementById('tab-Fsiete').click();
+
+                
+
+                break;
+           
         }
 
     });

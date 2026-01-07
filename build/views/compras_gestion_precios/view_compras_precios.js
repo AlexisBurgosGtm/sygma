@@ -666,7 +666,6 @@ function update_precio_medida(tipo,idprecio,idbono,idmargen,idbtn){
 
     
 
-
     GF.update_precio_medida(GlobalSelected_Codprod,tipo,codmedida,equivale,precio,bono,margen)
     .then(()=>{
         F.Aviso('Precio actualizado exitosamente!!');
