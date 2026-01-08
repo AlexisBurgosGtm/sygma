@@ -184,7 +184,7 @@ function addListeners(){
         btnExportarInventario.disabled = true;
         btnExportarInventario.innerHTML = `<i class="fal fa-share fa-spin"></i>`;
 
-        GF.get_data_inventarios_general_retroactivo(sucursal,fecha,st)
+        GF.get_data_inventarios_general_retroactivo_export(sucursal,fecha,st)
         .then((data)=>{
 
             btnExportarInventario.disabled = false;

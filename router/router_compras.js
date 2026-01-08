@@ -318,6 +318,81 @@ router.post("/select_inventario_general_retroactivo", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+router.post("/select_inventario_general_retroactivo_export", async(req,res)=>{
+   
+    const {token,sucursal,fecha,st} = req.body;
+
+    
+    let qry = '';
+
+    if(sucursal=='%'){
+        qry = `
+       SELECT 
+                EMPRESAS.NOMBRE AS SUCURSAL, 
+                view_invsaldo_movimientos_retroactivo.CODPROD, 
+                view_invsaldo_movimientos_retroactivo.CODPROD2, 
+                view_invsaldo_movimientos_retroactivo.DESPROD,
+                PRODUCTOS.UXC, 
+                CASE WHEN SUM(view_invsaldo_movimientos_retroactivo.TOTALUNIDADES)<0 THEN 0 ELSE SUM(view_invsaldo_movimientos_retroactivo.TOTALUNIDADES) END AS EXISTENCIA, 
+                ROUND(CASE WHEN SUM(view_invsaldo_movimientos_retroactivo.TOTALUNIDADES)<0 THEN 0 ELSE SUM(view_invsaldo_movimientos_retroactivo.TOTALCOSTO) END,2) AS TOTALCOSTO, 
+                ROUND(CASE WHEN SUM(view_invsaldo_movimientos_retroactivo.TOTALUNIDADES)<0 THEN 0 ELSE (SUM(view_invsaldo_movimientos_retroactivo.TOTALUNIDADES)/PRODUCTOS.UXC) END,3) AS CAJAS,
+                MARCAS.DESMARCA,               
+                PRODUCTOS.HABILITADO
+        FROM     MARCAS RIGHT OUTER JOIN
+                PRODUCTOS ON MARCAS.CODMARCA = PRODUCTOS.CODMARCA RIGHT OUTER JOIN
+                view_invsaldo_movimientos_retroactivo ON PRODUCTOS.CODPROD = view_invsaldo_movimientos_retroactivo.CODPROD LEFT OUTER JOIN
+                EMPRESAS ON view_invsaldo_movimientos_retroactivo.EMPNIT = EMPRESAS.EMPNIT
+        WHERE  
+                (view_invsaldo_movimientos_retroactivo.FECHA <= '${fecha}') AND
+                (PRODUCTOS.HABILITADO='${st}')
+        GROUP BY view_invsaldo_movimientos_retroactivo.CODPROD, 
+                view_invsaldo_movimientos_retroactivo.CODPROD2, 
+                view_invsaldo_movimientos_retroactivo.DESPROD, 
+                EMPRESAS.NOMBRE, 
+                PRODUCTOS.DESPROD, 
+                MARCAS.DESMARCA,
+                PRODUCTOS.UXC,
+                PRODUCTOS.HABILITADO
+        ORDER BY view_invsaldo_movimientos_retroactivo.CODPROD
+        `
+    }else{
+        qry = `
+        SELECT 
+                EMPRESAS.NOMBRE AS SUCURSAL, 
+                view_invsaldo_movimientos_retroactivo.CODPROD, 
+                view_invsaldo_movimientos_retroactivo.CODPROD2, 
+                view_invsaldo_movimientos_retroactivo.DESPROD, 
+                PRODUCTOS.UXC,
+                CASE WHEN SUM(view_invsaldo_movimientos_retroactivo.TOTALUNIDADES)<0 THEN 0 ELSE SUM(view_invsaldo_movimientos_retroactivo.TOTALUNIDADES) END AS EXISTENCIA, 
+                ROUND(CASE WHEN SUM(view_invsaldo_movimientos_retroactivo.TOTALUNIDADES)<0 THEN 0 ELSE SUM(view_invsaldo_movimientos_retroactivo.TOTALCOSTO) END,2) AS TOTALCOSTO, 
+                ROUND(CASE WHEN SUM(view_invsaldo_movimientos_retroactivo.TOTALUNIDADES)<0 THEN 0 ELSE (SUM(view_invsaldo_movimientos_retroactivo.TOTALUNIDADES)/PRODUCTOS.UXC) END,3) AS CAJAS,
+                MARCAS.DESMARCA,
+                PRODUCTOS.HABILITADO
+        FROM     MARCAS RIGHT OUTER JOIN
+                PRODUCTOS ON MARCAS.CODMARCA = PRODUCTOS.CODMARCA RIGHT OUTER JOIN
+                view_invsaldo_movimientos_retroactivo ON PRODUCTOS.CODPROD = view_invsaldo_movimientos_retroactivo.CODPROD LEFT OUTER JOIN
+                EMPRESAS ON view_invsaldo_movimientos_retroactivo.EMPNIT = EMPRESAS.EMPNIT
+        WHERE  
+                (view_invsaldo_movimientos_retroactivo.FECHA <= '${fecha}') AND 
+                (view_invsaldo_movimientos_retroactivo.EMPNIT = '${sucursal}') AND
+                (PRODUCTOS.HABILITADO='${st}')
+        GROUP BY view_invsaldo_movimientos_retroactivo.CODPROD, 
+                view_invsaldo_movimientos_retroactivo.CODPROD2, 
+                view_invsaldo_movimientos_retroactivo.DESPROD, 
+                EMPRESAS.NOMBRE, 
+                PRODUCTOS.DESPROD, 
+                MARCAS.DESMARCA,
+                PRODUCTOS.UXC,
+                PRODUCTOS.HABILITADO
+        ORDER BY view_invsaldo_movimientos_retroactivo.CODPROD
+        `
+
+    }
+   
+    
+    execute.QueryToken(res,qry,token);
+     
+});
 
 
 router.post("/insertcompra", async(req,res)=>{
