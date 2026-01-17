@@ -4,6 +4,54 @@ const router = express.Router();
 
 
 
+router.post("/update_costos_documento", async(req,res)=>{
+   
+
+        const { token,sucursal,coddoc,correlativo} = req.body;
+
+
+            let qry = `
+                SELECT 
+                    CODPROD, 
+                    DESPROD,
+                    EQUIVALE, 
+                    (COSTO/EQUIVALE) AS COSTO_UN, 
+                    COSTO 
+                FROM DOCPRODUCTOS 
+                WHERE 
+                    EMPNIT='${sucursal}' AND 
+                    CODDOC='${coddoc}' AND 
+                    CORRELATIVO=${correlativo};
+                    `;
+
+            let qryDocproductos = '';
+
+
+            execute.get_data_qry(qry,token)
+            .then((data)=>{
+                
+          
+
+                data.recordset.map((r)=>{
+                    qryDocproductos += `
+                                     UPDATE PRODUCTOS SET 
+                                            COSTO_ULTIMO=${Number(r.COSTO_UN).toFixed(4)}
+                                    WHERE CODPROD='${r.CODPROD}';`
+
+                })
+
+                execute.QueryToken(res,qryDocproductos,token);
+  
+            })
+            .catch(()=>{
+                res.send('error');
+
+            })            
+    
+     
+});
+
+
 router.post("/update_costos_compra", async(req,res)=>{
    
 
@@ -153,7 +201,8 @@ router.post("/select_inventario_general", async(req,res)=>{
                 SUM(view_invsaldo.MAXIMO) AS MAXIMO, 
                 SUM(view_invsaldo.EXISTENCIA) AS EXISTENCIA, 
                 view_invsaldo.HABILITADO, 
-                view_invsaldo.COSTO_ULTIMO, 
+                view_invsaldo.COSTO_ULTIMO,
+                PRODUCTOS.COSTO_ULTIMO AS COSTO, 
                 view_invsaldo.COSTO_ANTERIOR, 
                 view_invsaldo.COSTO_PROMEDIO, 
                 PRODUCTOS.CODMARCA, 
@@ -165,7 +214,7 @@ router.post("/select_inventario_general", async(req,res)=>{
                   MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA
         GROUP BY view_invsaldo.CODPROD, view_invsaldo.CODPROD2, view_invsaldo.DESPROD3, view_invsaldo.DESPROD, view_invsaldo.HABILITADO, view_invsaldo.COSTO_ULTIMO, view_invsaldo.COSTO_ANTERIOR, 
                   view_invsaldo.COSTO_PROMEDIO, PRODUCTOS.CODMARCA, 
-                  MARCAS.DESMARCA, PRODUCTOS.UXC,PRODUCTOS.SELLOUT
+                  MARCAS.DESMARCA, PRODUCTOS.UXC,PRODUCTOS.SELLOUT,PRODUCTOS.COSTO_ULTIMO
         HAVING (view_invsaldo.HABILITADO = '${st}')
         ORDER BY view_invsaldo.CODPROD
         `
@@ -173,7 +222,8 @@ router.post("/select_inventario_general", async(req,res)=>{
         qry = `
         SELECT view_invsaldo.CODPROD, view_invsaldo.CODPROD2, view_invsaldo.DESPROD3, 
                 view_invsaldo.DESPROD, view_invsaldo.TOTALUNIDADES, view_invsaldo.TOTALCOSTO, view_invsaldo.MINIMO, view_invsaldo.MAXIMO, 
-                view_invsaldo.EXISTENCIA, view_invsaldo.HABILITADO, view_invsaldo.COSTO_ULTIMO, 
+                view_invsaldo.EXISTENCIA, view_invsaldo.HABILITADO, view_invsaldo.COSTO_ULTIMO,
+                 PRODUCTOS.COSTO_ULTIMO AS COSTO,  
                 view_invsaldo.COSTO_ANTERIOR, view_invsaldo.COSTO_PROMEDIO, 
                 PRODUCTOS.CODMARCA, MARCAS.DESMARCA,
                 PRODUCTOS.UXC,

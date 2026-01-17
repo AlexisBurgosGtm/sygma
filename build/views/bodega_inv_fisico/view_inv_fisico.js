@@ -237,7 +237,7 @@ function tbl_inventario(){
                     <td>${r.DESPROD3}</td>
                     <td>${r.DESPROD}</td>
                     <td>${r.DESMARCA}</td>
-                    <td>${F.setMoneda(r.TOTALCOSTO,'Q')}</td>
+                    <td>${F.setMoneda((Number(r.COSTO)*Number(r.TOTALUNIDADES)),'Q')}</td>
                     <td>${r.TOTALUNIDADES}</td>
                     <td>${F.setMoneda(cajas,'')}</td>
                 </tr>

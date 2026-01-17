@@ -589,6 +589,7 @@ function getView(){
                                     <td>CODIGO 3</td>
                                     <td>PRODUCTO</td>
                                     <td>MARCA</td>
+                                    <td>TOTALCOSTO</td>
                                     <td>EXISTENCIA (CAJAS)</td>
                                     <td>SELLOUT</td>
                                     <td>MESES_INV</td>
@@ -1478,7 +1479,9 @@ function tbl_inventario(){
                 <td>${r.DESPROD3}</td>
                 <td>${r.DESPROD}</td>
                 <td>${r.DESMARCA}</td>
+                <td>${F.setMoneda((Number(r.TOTALUNIDADES)*Number(r.COSTO)),'Q')}</td>
                 <td>${CAJAS}</td>
+
                 <td>${SELLOUT}</td>
                 <td>${F.get_existencia(Number(CAJAS),Number(SELLOUT)).toFixed(2)}</td>
             </tr>

@@ -493,6 +493,52 @@ router.post("/productos_filtro", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+router.post("/productos_filtro_movinv", async(req,res)=>{
+   
+    const { token, sucursal, filtro, tipoprecio } = req.body;
+
+
+        let qry = `SELECT TOP 70 PRODUCTOS.CODPROD, PRODUCTOS.CODPROD2, PRODUCTOS.DESPROD, 
+                    PRODUCTOS.DESPROD2, PRODUCTOS.DESPROD3, PRODUCTOS.CODMARCA, 
+                    MARCAS.DESMARCA, PRODUCTOS.TIPOPROD, 
+                    PRECIOS.CODMEDIDA, PRECIOS.EQUIVALE, PRECIOS.COSTO, 
+                    PRECIOS.${tipoprecio} AS PRECIO, view_invsaldo.EMPNIT, 
+                    ISNULL(view_invsaldo.TOTALUNIDADES,0) AS EXISTENCIA, 
+                    COLORES.COLOR, PRODUCTOS.EXENTO, 
+                    ISNULL(PRECIOS.BONO_${tipoprecio}, 0) AS BONO,
+                    ISNULL(view_invsaldo.CODMEDIDA_DESHABILITADA,'') AS CODMEDIDA_DESHABILITADA
+                    FROM PRODUCTOS LEFT OUTER JOIN
+                         COLORES ON PRODUCTOS.NF = COLORES.NF LEFT OUTER JOIN
+                         view_invsaldo ON PRODUCTOS.CODPROD = view_invsaldo.CODPROD LEFT OUTER JOIN
+                         MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA LEFT OUTER JOIN
+                         PRECIOS ON PRODUCTOS.CODPROD = PRECIOS.CODPROD
+                    WHERE 
+                        (PRODUCTOS.HABILITADO = 'SI') AND 
+                        (PRODUCTOS.DESPROD LIKE '%${filtro}%') AND
+                        (PRECIOS.CODMEDIDA IS NOT NULL) AND 
+                        (view_invsaldo.EMPNIT = '${sucursal}') 
+                            OR
+                        (PRODUCTOS.HABILITADO = 'SI') AND 
+                        (PRODUCTOS.DESPROD2 LIKE '%${filtro}%') AND
+                        (PRECIOS.CODMEDIDA IS NOT NULL) AND 
+                        (view_invsaldo.EMPNIT = '${sucursal}') 
+                            OR
+                        (PRODUCTOS.HABILITADO = 'SI') AND 
+                        (PRECIOS.CODMEDIDA IS NOT NULL) AND
+                        (view_invsaldo.EMPNIT = '${sucursal}') AND 
+                        (PRODUCTOS.CODPROD = '${filtro}')
+                            OR
+                        (PRODUCTOS.HABILITADO = 'SI') AND 
+                        (PRECIOS.CODMEDIDA IS NOT NULL) AND
+                        (view_invsaldo.EMPNIT = '${sucursal}') AND 
+                        (PRODUCTOS.CODPROD2 = '${filtro}')
+                    `
+    
+                
+
+    execute.QueryToken(res,qry,token);
+     
+});
 
 
 

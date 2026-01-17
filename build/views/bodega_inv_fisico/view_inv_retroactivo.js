@@ -63,6 +63,14 @@ function getView(){
                     <br>
 
                     <div class="table-responsive col-12">
+                        
+                        <div class="form-group">
+                            <label>Escriba para buscar...</label>
+                            <input type="text" class="form-control col-12" id="txtBuscar"
+                            placeholder="Escriba para buscar..."
+                            oninput="F.FiltrarTabla('tblInventario','txtBuscar')">
+                        </div>
+
                         <table class="table h-full table-hover col-12" id="tblInventario">
                             <thead class="bg-base text-white">
                                 <tr>

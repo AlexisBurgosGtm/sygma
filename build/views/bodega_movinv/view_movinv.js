@@ -92,6 +92,7 @@ function getView(){
                                         <thead class="bg-verde text-white">
                                             <tr>
                                                 <td>PRODUCTO</td>
+                                                <td>DESCRIPCION 2</td>
                                                 <td>MEDIDA</td>
                                                 <td>CANTIDAD</td>
                                                 <td>COSTO</td>
@@ -133,12 +134,20 @@ function getView(){
                         <div class="modal-body p-4">
                             <label class="modal-title text-base h3" id="">Buscar producto</label>
 
+                                    <div class="form-group">
+                                        <label>Escriba para buscar...</label>
+                                        <input type="text" class="form-control border-danger" placeholder="Escriba para buscar..."
+                                        oninput="F.FiltrarTabla('tblProductos','txtBuscarProdLista')" id="txtBuscarProdLista">
+                                    </div>
+
                                     <table class="table table-responsive  table-hover table-bordered h-full" id="tblProductos">
                                         <thead class="bg-base text-white">
                                             <tr>
-                                                <td>MARCA</td>
+                                                <td>CODIGO</td>
                                                 <td>PRODUCTO</td>
+                                                <td>DESCRIPCION 2</td>
                                                 <td>MEDIDA</td>
+                                                <td>MARCA</td>
                                                 <td>COSTO</td>
                                                 <td>EXISTENCIA</td>
                                                 <td>TIPO</td>
@@ -863,7 +872,7 @@ function listener_vista_pedido(){
         };
 
 
-        insert_producto_pedido(Selected_codprod,Selected_desprod,Selected_codmedida,Selected_equivale,Selected_costo,preciounitario,cantidad, Selected_exento, Selected_tipoprod, data_empresa_config.TIPO_PRECIO, Selected_existencia,Selected_bono,descuento)
+        insert_producto_pedido(Selected_codprod,Selected_desprod,Selected_desprod2,Selected_codmedida,Selected_equivale,Selected_costo,preciounitario,cantidad, Selected_exento, Selected_tipoprod, data_empresa_config.TIPO_PRECIO, Selected_existencia,Selected_bono,descuento)
         .then(()=>{
             
             $("#modal_cantidad").modal('hide');
@@ -1327,6 +1336,8 @@ function get_buscar_producto(filtro){
 
     $("#modal_lista_precios").modal('show');
 
+    document.getElementById('txtBuscarProdLista').value = '';
+
     let container = document.getElementById('tblDataProductos');
     container.innerHTML = GlobalLoader;
 
@@ -1337,7 +1348,7 @@ function get_buscar_producto(filtro){
 
     let idf = 'first-element'; let i =0;
 
-    axios.post('/pos/productos_filtro', {
+    axios.post('/pos/productos_filtro_movinv', {
         sucursal: GlobalEmpnit,
         token:TOKEN,
         filtro:filtro,
@@ -1356,13 +1367,12 @@ function get_buscar_producto(filtro){
                 if(existencia<=0){strClassExistencia='bg-danger text-white'};
 
                 str += `
-                    <tr class="hand" onclick="get_producto('${r.CODPROD}','${r.DESPROD}','${r.CODMEDIDA}','${r.EQUIVALE}','${r.COSTO}','${r.COSTO}','${r.TIPOPROD}','${r.EXENTO}','${r.EXISTENCIA}','${r.BONO}')">
-                        <td>${r.DESMARCA}</td>
-                        <td><b style="color:${r.COLOR}">${r.DESPROD}</b>
-                            <br>
-                            <small class="negrita text-danger">Cód:${r.CODPROD}</small>
-                        </td>
+                    <tr class="hand" onclick="get_producto('${r.CODPROD}','${r.DESPROD}','${r.DESPROD2}','${r.CODMEDIDA}','${r.EQUIVALE}','${r.COSTO}','${r.COSTO}','${r.TIPOPROD}','${r.EXENTO}','${r.EXISTENCIA}','${r.BONO}')">
+                        <td>${r.CODPROD}</td>
+                        <td><b style="color:${r.COLOR}">${r.DESPROD}</b></td>
+                        <td>${r.DESPROD2}</td>
                         <td>${r.CODMEDIDA} (Eq:${r.EQUIVALE})</td>
+                        <td>${r.DESMARCA}</td>
                         <td>${F.setMoneda(r.COSTO,'Q')}</td>
                         <td class="${strClassExistencia}">${r.EXISTENCIA}</td>
                         <td>${r.TIPOPROD}</td>
@@ -1505,7 +1515,7 @@ function get_tbl_productos_clasificacion(codigo){
 };
 
 
-function get_producto(codprod,desprod,codmedida,equivale,costo,precio,tipoprod,exento,existencia,bono){
+function get_producto(codprod,desprod,desprod2,codmedida,equivale,costo,precio,tipoprod,exento,existencia,bono){
 
             $("#modal_lista_precios").modal('hide');
             
@@ -1524,6 +1534,7 @@ function get_producto(codprod,desprod,codmedida,equivale,costo,precio,tipoprod,e
 
             Selected_codprod = codprod;
             Selected_desprod = desprod;
+            Selected_desprod2 = desprod2;
             Selected_codmedida = codmedida;
             Selected_equivale = Number(equivale);
             Selected_costo = Number(costo);
@@ -1593,7 +1604,7 @@ function calcular_descuento(idDescuento,idTotalPrecio,idTotalPrecioDescuento){
 };
 
 
-function insert_producto_pedido(codprod,desprod,codmedida,equivale,costo,precio,cantidad,exento,tipoprod,tipoprecio,existencia,bono,descuento){
+function insert_producto_pedido(codprod,desprod,desprod2,codmedida,equivale,costo,precio,cantidad,exento,tipoprod,tipoprecio,existencia,bono,descuento){
     
     let datos = 
         {
@@ -1602,6 +1613,7 @@ function insert_producto_pedido(codprod,desprod,codmedida,equivale,costo,precio,
             USUARIO:'',
             CODPROD:codprod.toString(),
             DESPROD:desprod.toString(),
+            DESPROD2:desprod2.toString(),
             CODMEDIDA:codmedida.toString(),
             EQUIVALE:Number(equivale),
             COSTO:Number(costo),
@@ -1661,6 +1673,7 @@ function get_tbl_pedido(){
                         </div>
                     </div>
                 </td>
+                <td>${rows.DESPROD2}</td>
                 <td>
                     ${rows.CODMEDIDA} (eq: ${rows.EQUIVALE})
                 </td>
@@ -1670,7 +1683,7 @@ function get_tbl_pedido(){
                 <td class="negrita">${F.setMoneda(rows.PRECIO,'Q')}</td>
                 <td class="negrita h4">${F.setMoneda(rows.TOTALPRECIO,'Q')}</td>
                 <td>
-                    <button class="btn btn-md btn-circle btn-info shadow hand" onclick="edit_item_pedido('${rows.ID}','${rows.CODPROD}','${rows.DESPROD}','${rows.CODMEDIDA}','${rows.EQUIVALE}','${rows.CANTIDAD}','${rows.COSTO}','${rows.PRECIO}','${rows.TIPOPROD}','${rows.EXENTO}','${rows.EXISTENCIA}','${rows.BONO}','${rows.DESCUENTO}')">
+                    <button class="btn btn-md btn-circle btn-info shadow hand" onclick="edit_item_pedido('${rows.ID}','${rows.CODPROD}','${rows.DESPROD}','${rows.DESPROD2}','${rows.CODMEDIDA}','${rows.EQUIVALE}','${rows.CANTIDAD}','${rows.COSTO}','${rows.PRECIO}','${rows.TIPOPROD}','${rows.EXENTO}','${rows.EXISTENCIA}','${rows.BONO}','${rows.DESCUENTO}')">
                         <i class="fal fa-edit"></i>
                     </button>
                 </td> 
@@ -1712,13 +1725,14 @@ function get_tbl_pedido(){
 
 };
 
-function edit_item_pedido(id,codprod,desprod,codmedida,equivale,cantidad,costo,precio,tipoprod,exento,existencia,bono,descuento){
+function edit_item_pedido(id,codprod,desprod,desprod2,codmedida,equivale,cantidad,costo,precio,tipoprod,exento,existencia,bono,descuento){
 
     $("#modal_editar_cantidad").modal('show');
 
     Selected_id = id;
     Selected_codprod = codprod;
     Selected_desprod = desprod;
+    Selected_desprod2 = desprod2;
     Selected_codmedida = codmedida;
     Selected_equivale = Number(equivale);
     Selected_costo = Number(costo);

@@ -88,6 +88,7 @@ let GlobalSelected_empnit = '';
 let GlobalSelected_codmedida = '';
 let GlobalSelected_Codprod = '';
 let GlobalSelected_Desprod = '';
+let GlobalSelected_Desprod2 = '';
 let GlobalSelected_Costo = 0;
 let GlobalSelected_Status = '';
 
@@ -123,6 +124,8 @@ let selected_ped_correlativo = '';
 let selected_ped_codembarque = '';
 let selected_codembarque = '';
 
+
+let Selected_desprod2 = '';
 
 let selected_id_element = '';
 

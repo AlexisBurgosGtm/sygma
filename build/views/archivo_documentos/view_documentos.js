@@ -196,10 +196,21 @@ function getView(){
                                             </div>
                                         </div>
                                         <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                                        
+
+                                            <div class="card card-rounded hand shadow col-auto" id="btnCargarCostosDocumento">
+                                                <div class="card-body p-4 text-center">
+                                                    <img src="./img/cog.png" width="50px" height="50px">
+                                                    <h3 class="text-info negrita">Cargar Costos</h3>
+                                                </div>
+                                            </div>
+
                                         </div>
                                     </div>
                                     <hr>
+
+                                    <div class="row">
+                                      
+                                    </div>
 
                                     
                                      
@@ -333,9 +344,43 @@ function addListeners(){
 
         });
 
+
+        let btnCargarCostosDocumento = document.getElementById('btnCargarCostosDocumento');
+        btnCargarCostosDocumento.addEventListener('click',()=>{
+
+            F.Confirmacion('¿Está seguro que desea cargar los costos de este documento?')
+            .then((value)=>{
+                if(value==true){
+
+                    btnCargarCostosDocumento.disabled = true;
+                    F.showToast('Actualizando...');
+
+                    GF.update_costos_documento(selected_coddoc,selected_correlativo)
+                    .then(()=>{
+
+                        btnCargarCostosDocumento.disabled = false;    
+                        
+                        F.Aviso('Costos actualizados exitosamente!!');
+
+
+                    }) 
+                    .catch(()=>{
+                        F.AvisoError('No se pudo actualizar');
+
+                        btnCargarCostosDocumento.disabled = false;   
+                    })
+
+                }
+            })
+
+        })
+
         //-----------------------------------
         //opciones documento
         //-----------------------------------
+
+
+
 
 };
 
@@ -528,6 +573,21 @@ function get_opciones(coddoc,correlativo){
     selected_correlativo = Number(correlativo);
 
     document.getElementById('lbDocumento').innerText = `${coddoc}-${correlativo}`;
+
+    let tipo = document.getElementById('cmbTipos').value;
+
+    switch (tipo) {
+        case 'COM':
+            document.getElementById('btnCargarCostosDocumento').disabled=false;
+            break;
+        case 'COP':
+            document.getElementById('btnCargarCostosDocumento').disabled=false;
+            break;
+    
+        default:
+            document.getElementById('btnCargarCostosDocumento').disabled=true;
+            break;
+    }
 
 
 };

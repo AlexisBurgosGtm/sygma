@@ -1,4 +1,4 @@
-const DbName = "posdb_r9";
+const DbName = "posdb_r10";
 
 var tblDocumentos = {
     name: 'documentos',
@@ -49,6 +49,7 @@ var tblTempventas = {
         CODDOC:{dataType: "string"},
         CODPROD:{dataType: "string"},
         DESPROD:{dataType: "string"},
+        DESPROD2:{dataType: "string"},
         CODMEDIDA:{dataType: "string"},
         EQUIVALE:{dataType: "number"},
         CANTIDAD:{dataType: "number"},
@@ -73,6 +74,7 @@ var tblTempventasPos = {
         CODDOC:{dataType: "string"},
         CODPROD:{dataType: "string"},
         DESPROD:{dataType: "string"},
+        DESPROD2:{dataType: "string"},
         CODMEDIDA:{dataType: "string"},
         EQUIVALE:{dataType: "number"},
         CANTIDAD:{dataType: "number"},
@@ -102,6 +104,7 @@ var tblTempCompras = {
         CODDOC:{dataType: "string"},
         CODPROD:{dataType: "string"},
         DESPROD:{dataType: "string"},
+        DESPROD2:{dataType: "string"},
         CODMEDIDA:{dataType: "string"},
         EQUIVALE:{dataType: "number"},
         CANTIDAD:{dataType: "number"},
@@ -131,6 +134,7 @@ var tblTempventasMovinv = {
         CODDOC:{dataType: "string"},
         CODPROD:{dataType: "string"},
         DESPROD:{dataType: "string"},
+        DESPROD2:{dataType: "string"},
         CODMEDIDA:{dataType: "string"},
         EQUIVALE:{dataType: "number"},
         CANTIDAD:{dataType: "number"},
@@ -160,6 +164,7 @@ var tblTempventasMovinvBod = {
         CODDOC:{dataType: "string"},
         CODPROD:{dataType: "string"},
         DESPROD:{dataType: "string"},
+        DESPROD2:{dataType: "string"},
         CODMEDIDA:{dataType: "string"},
         EQUIVALE:{dataType: "number"},
         CANTIDAD:{dataType: "number"},
@@ -189,6 +194,7 @@ var tblTempDevoluciones = {
         CODDOC:{dataType: "string"},
         CODPROD:{dataType: "string"},
         DESPROD:{dataType: "string"},
+        DESPROD2:{dataType: "string"},
         CODMEDIDA:{dataType: "string"},
         EQUIVALE:{dataType: "number"},
         CANTIDAD:{dataType: "number"},

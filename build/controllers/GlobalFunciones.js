@@ -3442,6 +3442,37 @@ let GF = {
             })
     
         })
+    },
+    update_costos_documento:(coddoc,correlativo)=>{
+
+        return new Promise((resolve,reject)=>{
+    
+            axios.post(GlobalUrlCalls + '/compras/update_costos_documento',
+                {
+                    sucursal:GlobalEmpnit,
+                    token:TOKEN,
+                    coddoc:coddoc,
+                    correlativo:correlativo
+                })
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        })     
     }
 };
 
