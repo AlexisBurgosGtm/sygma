@@ -36,7 +36,8 @@ router.post("/update_costos_documento", async(req,res)=>{
                     qryDocproductos += `
                                      UPDATE PRODUCTOS SET 
                                             COSTO_ULTIMO=${Number(r.COSTO_UN).toFixed(4)}
-                                    WHERE CODPROD='${r.CODPROD}';`
+                                    WHERE CODPROD='${r.CODPROD}';
+                                    `
 
                 })
 
@@ -54,6 +55,9 @@ router.post("/update_costos_documento", async(req,res)=>{
 
 router.post("/update_costos_compra", async(req,res)=>{
    
+
+    res.send('error')
+    return;
 
     const { token,sucursal,json_costos} = req.body;
 
@@ -250,13 +254,14 @@ router.post("/select_inventario_general_export", async(req,res)=>{
 
     if(sucursal=='%'){
         qry = `
-        SELECT  view_invsaldo.CODPROD, 
-                view_invsaldo.CODPROD2, 
+        SELECT  view_invsaldo.CODPROD AS CODIGO, 
+                view_invsaldo.CODPROD2 AS CODIGO_DUN, 
                 view_invsaldo.DESPROD3 AS CODPROD3, 
                 view_invsaldo.DESPROD AS PRODUCTO,   
-                SUM(view_invsaldo.EXISTENCIA) AS EXISTENCIA,
-                SUM(view_invsaldo.TOTALCOSTO) AS TOTALCOSTO, 
-                MARCAS.DESMARCA AS MARCA
+                SUM(view_invsaldo.EXISTENCIA) AS EXISTENCIA_UNS,
+                (ISNULL(PRODUCTOS.COSTO_ULTIMO,0) * SUM(view_invsaldo.EXISTENCIA)) AS TOTALCOSTO,
+                MARCAS.DESMARCA AS MARCA,
+                (SUM(view_invsaldo.EXISTENCIA) / ISNULL(PRODUCTOS.UXC,1)) AS EXISTENCIA_FARDOS
         FROM     PRODUCTOS RIGHT OUTER JOIN
                   view_invsaldo ON PRODUCTOS.CODPROD = view_invsaldo.CODPROD LEFT OUTER JOIN
                   MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA
@@ -264,19 +269,22 @@ router.post("/select_inventario_general_export", async(req,res)=>{
                 view_invsaldo.CODPROD2, 
                 view_invsaldo.DESPROD3, 
                 view_invsaldo.DESPROD,  
-                  MARCAS.DESMARCA
+                  MARCAS.DESMARCA,
+                  PRODUCTOS.COSTO_ULTIMO,
+                  PRODUCTOS.UXC
         HAVING (view_invsaldo.HABILITADO = '${st}')
         ORDER BY view_invsaldo.CODPROD
         `
     }else{
         qry = `
-        SELECT view_invsaldo.CODPROD, 
-                view_invsaldo.CODPROD2, 
+        SELECT view_invsaldo.CODPROD AS CODIGO, 
+                view_invsaldo.CODPROD2 AS CODIGO_DUN, 
                 view_invsaldo.DESPROD3 AS CODPROD3, 
                 view_invsaldo.DESPROD AS PRODUCTO,   
                 SUM(view_invsaldo.EXISTENCIA) AS EXISTENCIA,
-                SUM(view_invsaldo.TOTALCOSTO) AS TOTALCOSTO, 
-                MARCAS.DESMARCA AS MARCA
+                (ISNULL(PRODUCTOS.COSTO_ULTIMO,0) * SUM(view_invsaldo.EXISTENCIA)) AS TOTALCOSTO, 
+                MARCAS.DESMARCA AS MARCA,
+                (SUM(view_invsaldo.EXISTENCIA) / ISNULL(PRODUCTOS.UXC,1)) AS EXISTENCIA_FARDOS
         FROM     PRODUCTOS RIGHT OUTER JOIN
                   view_invsaldo ON PRODUCTOS.CODPROD = view_invsaldo.CODPROD LEFT OUTER JOIN
                   MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA
@@ -285,7 +293,9 @@ router.post("/select_inventario_general_export", async(req,res)=>{
                 view_invsaldo.CODPROD2, 
                 view_invsaldo.DESPROD3, 
                 view_invsaldo.DESPROD,  
-                  MARCAS.DESMARCA
+                  MARCAS.DESMARCA,
+                  PRODUCTOS.COSTO_ULTIMO,
+                  PRODUCTOS.UXC
         ORDER BY view_invsaldo.CODPROD;
         `
 

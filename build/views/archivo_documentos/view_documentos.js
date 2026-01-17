@@ -578,14 +578,14 @@ function get_opciones(coddoc,correlativo){
 
     switch (tipo) {
         case 'COM':
-            document.getElementById('btnCargarCostosDocumento').disabled=false;
+            document.getElementById('btnCargarCostosDocumento').style="visibility:visible";
             break;
         case 'COP':
-            document.getElementById('btnCargarCostosDocumento').disabled=false;
+            document.getElementById('btnCargarCostosDocumento').style="visibility:visible";
             break;
     
         default:
-            document.getElementById('btnCargarCostosDocumento').disabled=true;
+            document.getElementById('btnCargarCostosDocumento').style="visibility:hidden";
             break;
     }
 

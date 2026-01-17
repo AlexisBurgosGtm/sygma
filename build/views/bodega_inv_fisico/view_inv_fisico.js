@@ -66,7 +66,7 @@ function getView(){
                             <thead class="bg-base text-white">
                                 <tr>
                                     <td>CODIGO</td>
-                                    <td>CODIGO 2</td>
+                                    <td>CODIGO_DUN</td>
                                     <td>CODIGO 3</td>
                                     <td>PRODUCTO</td>
                                     <td>MARCA</td>

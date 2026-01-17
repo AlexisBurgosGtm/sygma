@@ -2693,9 +2693,10 @@ function get_tbl_productos(){
                     <td>${r.DESPROD2}</td>
                     <td>${r.DESMARCA}</td>
                     <td>${r.DESTIPO}</td>
-                    <td>${F.setMoneda(r.COSTO,'Q')}
+                    <td>UN: ${F.setMoneda(r.COSTO,'Q')}
                         <br>
-                     <small>${F.setMoneda(r.COSTO_ANTERIOR,'Q')}</small></td>
+                        C: ${F.setMoneda((Number(r.COSTO)*Number(r.UXC)),'Q')}
+                    </td>
                     <td>${r.TIPOPROD}</td>
                     <td>${F.convertDateNormal(r.LASTUPDATE)}</td>
                 </tr>
