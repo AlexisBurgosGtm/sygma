@@ -963,7 +963,38 @@ function getView(){
         },
         facturacion_tipo_precios:()=>{
             return `
-            
+                <div class="card card-rounded col-12">
+                    <div class="card-body p-2">
+
+                        <div class="table-responsive">
+                            
+                            <div class="form-group">
+                                <label>Escriba para buscar</label>
+                                <input type="text" class="form-control border-warning text-secondary"
+                                id="txtFBuscarTipoPrecio"
+                                oninput="F.FiltrarTabla('tblFTipoPrecio','txtFBuscarTipoPrecio')">
+                            </div>
+
+                            <table class="table table-borderd h-full col-12" id="tblFTipoPrecio">
+                                <thead class="negrita bg-secondary text-white">
+                                    <tr>
+                                        <td>VENDEDOR</td>
+                                        <td>DOCUMENTO</td>
+                                        <td>CLIENTE</td>
+                                        <td>PRODUCTO</td>
+                                        <td>CANTIDAD</td>
+                                        <td>PRECIO</td>
+                                        <td>TIPOPRE</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                </thead>
+                                <tbody id="data_tblFTipoPrecio"></tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
             `
         },
         facturacion_vendedores:()=>{
@@ -1261,17 +1292,24 @@ function listeners_pedidos_pendientes(){
                 break;
                 
             case 'VENDEDORES':
+
                 document.getElementById('tab-Fcuatro').click();
 
                 tbl_resumen_embarque(codembarque);
 
                 break;
-            
-    
-        
-        }
-        
 
+            case 'TIPOPRECIO':
+                document.getElementById('tab-Fsiete').click();
+
+                tbl_facturas_tipo_precio();
+                
+
+                break;
+           
+        
+        };
+        
     });
 
 
@@ -1330,6 +1368,7 @@ function listeners_pedidos_pendientes(){
             case 'TIPOPRECIO':
                 document.getElementById('tab-Fsiete').click();
 
+                tbl_facturas_tipo_precio();
                 
 
                 break;
@@ -2753,3 +2792,70 @@ function tbl_rpt_sellout(){
 //------------
 // SELL OUT
 //------------
+
+
+
+
+
+//----------------------
+//  TIPO PRECIO PICKING
+//----------------------
+
+
+
+function tbl_facturas_tipo_precio(){
+
+    let container = document.getElementById('data_tblFTipoPrecio');
+    container.innerHTML = GlobalLoader;
+
+
+    let codembarque = document.getElementById('cmbFEmbarques').value;
+    
+    GF.get_data_embarque_tipo_precios(GlobalEmpnit,codembarque)
+    .then((data)=>{
+        let str = '';
+
+        data.recordset.map((r)=>{
+            str += `
+                <tr>
+                    <td>${r.NOMEMPLEADO}</td>
+                    <td>${r.CODDOC}-${r.CORRELATIVO}</td>
+                    <td>${r.NOMCLIE}</td>
+                    <td>${r.DESPROD}</td>
+                    <td>${r.CANTIDAD} ${r.CODMEDIDA}</td>
+                    <td>${F.setMoneda(r.PRECIO,'Q')}</td>
+                    <td class="negrita text-danger">${r.TIPOPRECIO}</td>
+                    <td>
+                        <button class="btn btn-md btn-circle btn-warning hand shadow"
+                        onclick="get_detalle_pedido('${r.CODDOC}','${r.CORRELATIVO}')">
+                            <i class="fal fa-list"></i>
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn btn-md btn-circle btn-info hand shadow"
+                        onclick="fcn_editar_factura('${r.CODDOC}','${r.CORRELATIVO}','${r.NOMCLIE}','${r.DIRCLIE}')">
+                            <i class="fal fa-edit"></i>
+                        </button>
+                    </td>
+                </tr>
+                    `
+        })
+        container.innerHTML = str;
+
+    })
+    .catch(()=>{
+        container.innerHTML = 'No se cargaron datos...';
+    })
+
+
+
+
+};
+
+
+
+
+
+//----------------------
+//  TIPO PRECIO PICKING
+//----------------------

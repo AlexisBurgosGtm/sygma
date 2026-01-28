@@ -2359,6 +2359,36 @@ let GF = {
     
         })
     },
+    get_data_embarque_tipo_precios: (empnit,codembarque)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                codembarque:codembarque
+            };
+    
+            axios.post(`/despacho/embarques_tipoprecio`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
     get_data_clientes_listado:(empnit,st)=>{
 
         return new Promise((resolve,reject)=>{

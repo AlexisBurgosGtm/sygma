@@ -1128,6 +1128,43 @@ router.post("/embarques_status", async(req,res)=>{
 });
 
 
+router.post("/embarques_tipoprecio", async(req,res)=>{
+   
+    const {  token,sucursal,codembarque} = req.body;
+
+    let qry = `
+        SELECT  
+            DOCUMENTOS.FECHA, 
+            DOCUMENTOS.CODDOC, 
+            DOCUMENTOS.CORRELATIVO, 
+            DOCUMENTOS.DOC_NOMCLIE AS NOMCLIE,
+            DOCUMENTOS.DOC_DIRCLIE AS DIRCLIE, 
+            EMPLEADOS.NOMEMPLEADO, 
+            DOCPRODUCTOS.CODPROD, 
+            DOCPRODUCTOS.DESPROD, 
+            DOCPRODUCTOS.CODMEDIDA, 
+            DOCPRODUCTOS.CANTIDAD, 
+            DOCPRODUCTOS.PRECIO, 
+            DOCPRODUCTOS.TOTALPRECIO, 
+            DOCPRODUCTOS.TIPOPRECIO
+        FROM DOCUMENTOS LEFT OUTER JOIN
+            EMPLEADOS ON DOCUMENTOS.CODEMP = EMPLEADOS.CODEMPLEADO LEFT OUTER JOIN
+            DOCPRODUCTOS ON DOCUMENTOS.CORRELATIVO = DOCPRODUCTOS.CORRELATIVO AND DOCUMENTOS.CODDOC = DOCPRODUCTOS.CODDOC AND DOCUMENTOS.EMPNIT = DOCPRODUCTOS.EMPNIT LEFT OUTER JOIN
+            TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+        WHERE 
+            (DOCUMENTOS.EMPNIT = '${sucursal}') AND 
+            (TIPODOCUMENTOS.TIPODOC IN('FAC','FCP','FEC','FEF','FES','FPC')) AND 
+            (DOCUMENTOS.STATUS <> 'A') AND 
+            (DOCUMENTOS.CODEMBARQUE = '${codembarque}') AND
+            (DOCPRODUCTOS.TIPOPRECIO<>'PRECIO')
+            ;
+            `;
+
+            
+    execute.QueryToken(res,qry,token);
+     
+});
+
 
 
 

@@ -1221,6 +1221,9 @@ function listeners_menu_productos(){
                                 btnGuardarProducto.disabled = false;
                     
                                 delete_lista_temp_precios();
+                                
+                                document.getElementById('tblDataPrecios').innerHTML = '';
+
                                 document.getElementById('tab-uno').click();
                                 get_tbl_productos();
 
