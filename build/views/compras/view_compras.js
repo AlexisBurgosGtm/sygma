@@ -426,7 +426,7 @@ function getView(){
                             </div>
                             <br>
                                 <div class="form-group">
-                                    <button class="btn btn-primary btn-md form-control col-12 shadow hand"
+                                    <button class="btn btn-primary btn-md form-control col-12 shadow hand hidden"
                                     id="btnCargarCostos">
                                         <i class="fal fa-sync"></i>&nbsp Cargar Costos
                                     </button>
@@ -2155,9 +2155,28 @@ function finalizar_pedido(){
                         F.Aviso('Generado Exitosamente !!!')
                         btnGuardarFactura.disabled = false;
                         btnGuardarFactura.innerHTML = `<i class="fal fa-save"></i>`;
+
     
                         db_compra.deleteTempVenta_pos(GlobalUsuario);
-    
+
+                           F.showToast('Actualizando...');
+
+                    
+                        //------------------
+                        //CARGA DE COSTOS
+                        //------------------
+                        F.showToast('Cargando costos del documento...');
+                        GF.update_costos_documento(coddoc,correlativoDoc)
+                        .then(()=>{
+                            F.Aviso('Costos actualizados exitosamente!!');
+                        }) 
+                        .catch(()=>{
+                            F.AvisoError('No se pudieron cargar los costos');
+                        })
+                        //------------------
+                        //CARGA DE COSTOS
+                        //------------------
+                        
                         fcnNuevoPedido();
                     }
                 }, (error) => {
