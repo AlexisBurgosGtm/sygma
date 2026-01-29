@@ -13,6 +13,8 @@ let GlobalEmpnitBodega = '';
 
 let GlobalEmpnit ='';
 let GlobalNomEmpresa = '';
+let Global_latitud_empresa = 0;
+let Global_longitud_empresa = 0;
 
 
 let GlobalUsuario = '';

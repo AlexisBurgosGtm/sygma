@@ -19,7 +19,8 @@ router.post("/data_empresa_config", async(req,res)=>{
             EMISOR_FRASE, EMISOR_ESCENARIO, EMISOR_FRASE2,
             EMISOR_ESCENARIO2, NIT_RESOLUCION, NIT_FECHA_RESOLUCION,
             ADENDA_VENDEDOR, ADENDA_TELSUCURSAL, ADENDA_SUPERVISOR, 
-            EMP_LAT, EMP_LONG
+            ISNULL(EMP_LAT,0) AS EMP_LAT, 
+            ISNULL(EMP_LONG,0) AS EMP_LONG
         FROM EMPRESAS
         WHERE EMPNIT='${sucursal}';
         `     

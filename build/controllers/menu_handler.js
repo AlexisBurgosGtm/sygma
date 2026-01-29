@@ -315,6 +315,17 @@ let Menu = {
             F.AvisoError('No tiene permitido entrar a esta sección');
         } 
     },
+    empleados_gps:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/mant_empleados/view_empleados_gps.js','root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        } 
+    },
     bi_notificaciones:()=>{
         if(Menu.verify()==true){
             Menu.salidaMenu();

@@ -1,4 +1,4 @@
-const DbName = "posdb_r10";
+const DbName = "posdb_r11";
 
 var tblDocumentos = {
     name: 'documentos',
@@ -242,10 +242,28 @@ var tblTempCargaCostos = {
     }
 };
 
+var tbl_temp_cxc = {
+    name: 'temp_cxc',
+    columns: {
+        ID:{ primaryKey: true, autoIncrement: true },
+        CODSUCURSAL:{dataType: "string"},
+        CODDOC:{dataType: "string"},
+        CORRELATIVO:{dataType: "number"},
+        FECHA:{dataType: "string"},
+        VENCE:{dataType: "string"},
+        IMPORTE:{dataType: "number"},
+        SALDO:{dataType: "number"},
+        ABONO:{dataType: "number"},
+        FEL_SERIE:{dataType: "string"},
+        FEL_NUMERO:{dataType: "string"}
+    }
+};
+
+
 
 var database = {
     name: DbName,
-    tables: [tblDocumentos,tblTempventas,tblTempventasPos,tblTempCompras,tblTempventasMovinv,tblTempventasMovinvBod,tblTempDevoluciones,tblTempCargaCostos,tblCredenciales]
+    tables: [tbl_temp_cxc,tblDocumentos,tblTempventas,tblTempventasPos,tblTempCompras,tblTempventasMovinv,tblTempventasMovinvBod,tblTempDevoluciones,tblTempCargaCostos,tblCredenciales]
 };
  
 // initiate jsstore connection

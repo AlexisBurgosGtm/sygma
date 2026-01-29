@@ -104,8 +104,6 @@ function addListeners(){
             GF.login_empleado('',usuario,clave)
             .then((data)=>{
                 
-                
-
                 data.recordset.map((r)=>{
                     GlobalEmpnit = r.EMPNIT;
                     GlobalNomEmpresa = r.EMPRESA;
@@ -116,8 +114,6 @@ function addListeners(){
                     Selected_coddoc_cot = r.CODDOC_COT;
                 })
                 
-                //cmbEmpresa.value = GlobalEmpnit;
-
                 GF.get_data_empresa_config(GlobalEmpnit)
                 .then((data)=>{
                     
@@ -140,6 +136,18 @@ function addListeners(){
                     btnIniciar.innerHTML = `<i class="fal fa-lock"></i>`;
                 })
 
+                //ACTUALIZA LA UBICACION DEL EMPLEADO
+                F.ObtenerUbicacion()
+                .then((location)=>{
+                    let latitud = location.latitude;
+                    let longitud = location.longitude;
+                    GF.update_ubicacion_empleado(GlobalEmpnit,GlobalCodUsuario,latitud,longitud);
+                })
+                .catch(()=>{
+                    GF.update_ubicacion_empleado(GlobalEmpnit,GlobalCodUsuario,0,0);
+                })
+                
+
             })
             .catch((error)=>{
                 
@@ -156,6 +164,9 @@ function addListeners(){
 
 
         get_log();
+
+
+        //F.ObtenerUbicacion().then((location)=>{console.log('ubicacion:');console.log(location.latitude);console.log(location.longitude);})
 
 };
 

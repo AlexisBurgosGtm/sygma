@@ -199,7 +199,7 @@ function getView(){
                 
                 
                 </div>
-                 <div class="col-sm-12 col-md-3 col-xl-3 col-lg-3">
+                <div class="col-sm-12 col-md-3 col-xl-3 col-lg-3">
                 
                     <div class="card card-rounded border-secondary  bg-white shadow col-12 hand" id="btnMenuInventarioRetroactivo">
                         <div class="card-body p-4">
@@ -217,6 +217,22 @@ function getView(){
                         </div>
                     </div>
                 
+                
+                </div>
+                <div class="col-sm-12 col-md-3 col-xl-3 col-lg-3">
+                
+                    <div class="card card-rounded border-base  bg-white shadow col-12 hand" id="btnMenuGps">
+                        <div class="card-body p-4">
+                            <h4 class="text-base">LOCALIZACION VENDEDORES (GPS)</h4>
+                            <div class="row">
+                                <div class="col-6">
+                                </div>
+                                <div class="col-6 text-right">
+                                    <i class="fal fa-map negrita text-base" style="font-size:250%"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 
                 </div>
                
@@ -1111,6 +1127,12 @@ function addListeners(){
 
      document.getElementById('btnMenuInventarioRetroactivo').addEventListener('click',()=>{
         Menu.bodega_inv_retroactivo();
+     })
+
+
+    // empleados gps
+    document.getElementById('btnMenuGps').addEventListener('click',()=>{
+        Menu.empleados_gps();
      })
 
      listeners_objetivos();

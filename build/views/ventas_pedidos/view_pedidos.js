@@ -929,7 +929,22 @@ function addListeners(){
         .then((value)=>{
             if(value==true){
 
-                finalizar_pedido()
+                F.showToast('Obteniendo datos...');
+                
+                F.ObtenerUbicacion()
+                .then((location)=>{
+                    
+                    let latitud = location.latitude.toString();
+                    let longitud = location.longitude.toString();
+                    
+                    finalizar_pedido(latitud,longitud);
+                })
+                .catch(()=>{
+               
+                     finalizar_pedido(0,0)
+                })
+
+               
                
             }
         })
@@ -2489,7 +2504,7 @@ function get_correlativo_coddoc(coddoc){
 
 
 
-function finalizar_pedido(){
+function finalizar_pedido(latitud,longitud){
 
 
     let btnGuardarFactura = document.getElementById('btnGuardarFactura');
@@ -2541,8 +2556,8 @@ function finalizar_pedido(){
     
     
        
-        let latdoc = '0';
-        let longdoc = '0';
+        let latdoc = latitud;
+        let longdoc = longitud;
     
         let tipo_pago = 'CON'; 
         let tipo_doc = '';

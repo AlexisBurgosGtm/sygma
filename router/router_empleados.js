@@ -3,6 +3,38 @@ const express = require('express');
 const router = express.Router();
 
 
+router.post("/empleados_localizacion", async(req,res)=>{
+   
+    const { token, sucursal } = req.body;
+
+
+    let qry = `
+        SELECT NOMEMPLEADO AS EMPLEADO, 
+            ISNULL(TELEFONO,'') AS TELEFONO, 
+            ISNULL(LATITUD,0) AS LATITUD, ISNULL(LONGITUD,0) AS LONGITUD
+        FROM EMPLEADOS WHERE EMPNIT='${sucursal}' AND CODPUESTO=3 AND LATITUD<>0;   
+    `
+    
+    execute.QueryToken(res,qry,token); 
+     
+});
+router.post("/empleados_login_ubicacion", async(req,res)=>{
+   
+    const { token, sucursal, codemp,lat,long,fecha,hora } = req.body;
+
+
+    let qry = `
+        INSERT INTO EMPLEADOS_LOCALIZACIONES
+            (EMPNIT,CODEMP,FECHA,HORA,LATITUD,LONGITUD)
+        SELECT '${sucursal}' AS EMPNIT, ${codemp} AS CODEMP,
+            '${fecha}' AS FECHA, '${hora}' AS HORA,
+            ${lat} AS LATITUD, ${long} AS LONGITUD; `
+    
+    execute.QueryToken(res,qry,token); 
+     
+});
+
+
 router.post("/empleados_edit", async(req,res)=>{
    
     const { token, sucursal, codemp,codpuesto, nombre, direccion, telefono, clave,usuario,coddoc_env, coddoc_cot } = req.body;

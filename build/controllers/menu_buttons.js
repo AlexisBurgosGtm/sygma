@@ -139,6 +139,11 @@ let botones_menu = {
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">LOGRO P&G</span>
                                         </a>
                                     </li>
+                                     <li>
+                                        <a href="#" title="How it works" data-filter-tags="theme settings how it works"  onclick="Menu.empleados_gps()">
+                                            <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">UBICACIONES EMPLEADOS (GPS)</span>
+                                        </a>
+                                    </li>
                                 </ul>
                             </li>
                             <li>
@@ -343,6 +348,11 @@ let botones_menu = {
                                     <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">LOGRO P&G</span>
                                 </a>
                             </li>
+                            <li>
+                                        <a href="#" title="How it works" data-filter-tags="theme settings how it works"  onclick="Menu.empleados_gps()">
+                                            <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">UBICACIONES EMPLEADOS (GPS)</span>
+                                        </a>
+                                    </li>
                         </ul>
         `
     },
@@ -484,6 +494,11 @@ let botones_menu = {
                                     <li>
                                         <a href="#" title="How it works" data-filter-tags="theme settings how it works"  onclick="Menu.objetivos_logro_procter()">
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">LOGRO P&G</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" title="How it works" data-filter-tags="theme settings how it works"  onclick="Menu.empleados_gps()">
+                                            <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">UBICACIONES EMPLEADOS (GPS)</span>
                                         </a>
                                     </li>
                                 </ul>
