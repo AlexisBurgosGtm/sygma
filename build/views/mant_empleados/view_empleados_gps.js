@@ -242,7 +242,7 @@ function get_empleados(){
 
     document.getElementById('mapa').innerHTML = '';
 
-    document.getElementById('mapa').innerHTML = `<div class="mapcontainer4" id="mapcontainer"></div>`;
+    document.getElementById('mapa').innerHTML = `<div class="mapcontainer_localizaciones" id="mapcontainer"></div>`;
     
     try {
         navigator.geolocation.getCurrentPosition(function (location) {

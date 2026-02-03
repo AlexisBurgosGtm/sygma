@@ -396,6 +396,31 @@ router.post("/BACKUP_goles_marcas_resumen_vendedor", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+router.post("/select_objetivo_skus_tienda", async(req,res)=>{
+   
+    const { token, sucursal, codemp, mes, anio } = req.body;
+
+    let qry = '';
+
+    if(Number(codemp)==0){
+       qry = `
+        SELECT EMPNIT,ANIO,MES,CLIENTES,PRODUCTOS,SKUS
+        FROM PG_VENDEDOR_SKUS_POR_TIENDA_RESUMEN_SUCURSAL
+        WHERE MES=${mes} AND ANIO=${anio} AND EMPNIT='${sucursal}';
+        `;
+    }else{
+        qry = `
+        SELECT EMPNIT,CODEMP,ANIO,MES,CLIENTES,PRODUCTOS,SKUS
+        FROM PG_VENDEDOR_SKUS_POR_TIENDA_RESUMEN_VENDEDOR
+        WHERE MES=${mes} AND ANIO=${anio} AND EMPNIT='${sucursal}' AND CODEMP=${codemp};   
+                `;
+    };
+    
+
+    execute.QueryToken(res,qry,token);
+     
+
+});
 
 //ANTES DE PONER EL COMODIN EN EMPRESAS
 

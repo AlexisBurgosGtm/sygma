@@ -48,11 +48,13 @@ F.instalationHandlers('btnInstalarApp');
 
 
 
-let versionapp = "M.28.01.2026:2"
+let versionapp = "M.03.02.2026:0"
 
 function get_log(){
 
     let log = [
+      {FECHA:'',DESCRIPCION:''},
+      {FECHA:'',DESCRIPCION:''},
       {FECHA:'20-08-2025',DESCRIPCION:'AGREGADO INPUT BUSQUEDA DE DOCUMENTOS EN ARCHIVO/DOCUMENTOS'},
       {FECHA:'21-08-2025',DESCRIPCION:'AGREGADO CARGA DE COSTOS EN COMPRAS'},
       {FECHA:'21-08-2025',DESCRIPCION:'SE QUITO PROVISIONALMENTE LA EDICION DE CANTIDAD EN PEDIDOS VENDEDOR'},
@@ -96,9 +98,7 @@ function get_log(){
       {FECHA:'28-01-2026',DESCRIPCION:'LISTADO DE PRODUCTOS VENDIDOS A PRECIOS MAYORISTAS EN DIGITADORES'},
       {FECHA:'28-01-2026',DESCRIPCION:'CARGA DE COSTOS AL FINALIZAR COMPRA'},
       {FECHA:'28-01-2026',DESCRIPCION:'AGREGA LA UBICACION DEL EMPLEADO AL HACER LOGIN'},
-      {FECHA:'',DESCRIPCION:''},
-      {FECHA:'',DESCRIPCION:''},
-      {FECHA:'',DESCRIPCION:''},
+      {FECHA:'03-02-2026',DESCRIPCION:'AGREGADO SKUS POR TIENDA EN REPORTE LOGRO P&G'},
       {FECHA:'',DESCRIPCION:'IMPEDIR QUE VENDEDORES PUEDAN EXCEDER EXISTENCIAS AL VENDER'},
     ]
 
@@ -106,7 +106,9 @@ function get_log(){
     let container = document.getElementById('root_log');
     let str = '';
 
-    log.map((r)=>{
+    let lectura = log.reverse();
+
+    lectura.map((r)=>{
         str+= `<tr>
                   <td>${r.FECHA}</td>
                   <td>${r.DESCRIPCION}</td>

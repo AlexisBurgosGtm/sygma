@@ -1,6 +1,12 @@
 
 //data_empresa_config.TIPO_PRECIO
 
+let data_objetivos = {
+    skus_tienda:()=>{
+        return 6
+    }
+};
+
 
 let tipo_precios =[
                 {tipo:"PRECIO",nombre:"PUBLICO"},

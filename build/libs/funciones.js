@@ -463,6 +463,28 @@ let F = {
           return resultado; //.replace('-','');
 
       },
+      setNumero: function(num) {
+          
+          let signo = '';
+
+          num = num.toString().replace(/\$|\,/g, '');
+          if (isNaN(num)) num = "0";
+          let sign = (num == (num = Math.abs(num)));
+          num = Math.floor(num * 100 + 0.50000000001);
+          let cents = num % 100;
+          num = Math.floor(num / 100).toString();
+          if (cents < 10) cents = "0" + cents;
+          for (var i = 0; i < Math.floor((num.length - (1 + i)) / 3); i++)
+              num = num.substring(0, num.length - (4 * i + 3)) + ',' + num.substring(num.length - (4 * i + 3));
+          let resultado = ((((sign) ? '' : '-') + signo + ' ' + num + ((cents == "00") ? '' : '.' + cents)).toString());
+          
+          
+          let valorfinal = resultado; //Number(resultado);
+          //valorfinal = valorfinal.toFixed(Number(decimales));
+          
+          return valorfinal; //.replace('-','');
+
+      },
       setMargen: function(num,signo) {
         
         num = num.toString().replace(/\$|\,/g, '');

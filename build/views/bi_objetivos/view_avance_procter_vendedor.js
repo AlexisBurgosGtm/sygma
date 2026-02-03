@@ -191,7 +191,7 @@ function getView(){
                 <div class="card-body p-4">
 
                     <div class="row">
-                        <div class="col-6">
+                        <div class="col-sm-12 col-md-12 col-lg-12 col-xl-6">
 
                             <h5 class="text-base negrita">COBERTURA</h5>
                             <table class="table table-responsive h-full col-12">
@@ -212,7 +212,7 @@ function getView(){
                             </table>
 
                         </div>
-                        <div class="col-6">
+                        <div class="col-sm-12 col-md-12 col-lg-12 col-xl-6">
 
                             <h5 class="text-base negrita">GOLES</h5>
                             <table class="table table-responsive h-full col-12">
@@ -234,6 +234,28 @@ function getView(){
 
                         </div>
                       
+                    </div>
+
+                    <div class="row">
+                    
+                            <h5 class="text-base negrita">SKUS POR TIENDA</h5>
+                            <table class="table table-responsive h-full col-12">
+                                <tbody>
+                                    <tr>
+                                        <td>OBJETIVO</td>
+                                        <td id="" class="negrita text-danger h4">${data_objetivos.skus_tienda()}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>LOGRO</td>
+                                        <td id="lbTotalSkusTienda" class="negrita text-success h4">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>FALTA</td>
+                                        <td id="lbTotalSkusTiendaFaltan" class="negrita text-base h4">0</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
                     </div>
 
                 </div>
@@ -657,8 +679,8 @@ function rpt_cobertura(){
             varObjetivoGoles = Number(r.GOLES);
         })
 
-        container_objetivo.innerHTML = varObjetivoCobertura;
-        container_objetivo_goles.innerHTML = varObjetivoGoles;
+        container_objetivo.innerHTML = F.setNumero(varObjetivoCobertura);
+        container_objetivo_goles.innerHTML = F.setNumero(varObjetivoGoles);
         
         //------------------------
         // COBERTURA CLIENTES
@@ -667,9 +689,9 @@ function rpt_cobertura(){
         .then((universo)=>{
 
             varVisitados = Number(universo);
-            container_visitado.innerHTML = varVisitados;
+            container_visitado.innerHTML = F.setNumero(varVisitados);
 
-            container_falta.innerHTML = Number(varObjetivoCobertura-varVisitados);
+            container_falta.innerHTML = F.setNumero(Number(varObjetivoCobertura-varVisitados));
 
         })
         .catch(()=>{
@@ -687,9 +709,9 @@ function rpt_cobertura(){
         .then((conteo)=>{
 
             varObjetivoGolesVisitados = Number(conteo);
-            container_visitado_goles.innerHTML = varObjetivoGolesVisitados;
+            container_visitado_goles.innerHTML = F.setNumero(varObjetivoGolesVisitados);
 
-            container_falta_goles.innerHTML = Number(varObjetivoGoles-varObjetivoGolesVisitados);
+            container_falta_goles.innerHTML = F.setNumero(Number(varObjetivoGoles-varObjetivoGolesVisitados));
 
         })
         .catch(()=>{
@@ -710,6 +732,44 @@ function rpt_cobertura(){
     .catch(()=>{
         //container_falta.innerHTML = 'No hay objetivos';
     })
+
+
+    //-----------------------------
+    //CARGA DE SKUS POR TIENDA
+    //-----------------------------
+    
+    document.getElementById('lbTotalSkusTienda').innerText = '';
+    document.getElementById('lbTotalSkusTiendaFaltan').innerText = '';
+
+    GF.get_data_logro_procter_skus_tienda(sucursal,codemp,mes,anio)
+    .then((data)=>{
+
+        let logrado = 0;
+
+        data.recordset.map((r)=>{
+            logrado = Number(r.SKUS);
+        })
+
+        document.getElementById('lbTotalSkusTienda').innerText = F.setNumero(logrado.toFixed(2));
+        let faltan = Number(data_objetivos.skus_tienda()) - logrado;
+        document.getElementById('lbTotalSkusTiendaFaltan').innerText = F.setNumero(faltan.toFixed(2)); 
+        
+    })
+    .catch(()=>{
+        //container_falta.innerHTML = 'No hay objetivos';
+        document.getElementById('lbTotalSkusTienda').innerText = '';
+        document.getElementById('lbTotalSkusTiendaFaltan').innerText = '';
+    })
+    
+
+    //-----------------------------
+    //CARGA DE SKUS POR TIENDA
+    //-----------------------------
+    
+
+
+   
+
 
 
 
