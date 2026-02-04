@@ -5,7 +5,7 @@ function getView(){
                 <div class="col-12 p-0">
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="dias-tab">
-                            ${view.lista_clientes() + view.modal_qr() + view.modal_camara() + view.modal_visita() + view.modal_historial_cliente() + view.modal_goles()}
+                            ${view.modal_lista_clientes() + view.modal_qr() + view.modal_camara() + view.modal_visita() + view.modal_historial_cliente() + view.modal_goles()}
                         </div> 
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="clientes-tab">
                             ${view.pedido() + view.modal_lista_precios() + view.modal_cantidad() + view.modal_editar_cantidad()}
@@ -15,9 +15,6 @@ function getView(){
                         </div>
                         <div class="tab-pane fade" id="cuatro" role="tabpanel" aria-labelledby="clientes-tab">
                             ${view.modal_lista_documentos()}
-                        </div>
-                        <div class="tab-pane fade" id="cinco" role="tabpanel" aria-labelledby="clientes-tab">
-                            ${view.lista_clientes_mapa() + view.modal_visita_mapa()}
                         </div>
                     </div>
 
@@ -36,10 +33,6 @@ function getView(){
                         </li> 
                         <li class="nav-item">
                             <a class="nav-link negrita text-info" id="tab-cuatro" data-toggle="tab" href="#cuatro" role="tab" aria-controls="home" aria-selected="true">
-                                <i class="fal fa-edit"></i></a>Finalizar
-                        </li>    
-                        <li class="nav-item">
-                            <a class="nav-link negrita text-info" id="tab-cinco" data-toggle="tab" href="#cinco" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-edit"></i></a>Finalizar
                         </li>                           
                     </ul>
@@ -477,7 +470,7 @@ function getView(){
                     </div>
             `   
         },
-        lista_clientes:()=>{
+        modal_lista_clientes:()=>{
             return `
                     <div class="card card-rounded col-12 shadow">            
                         <div class="card-body p-4">
@@ -541,163 +534,12 @@ function getView(){
                         <i class="fal fa-home"></i>
                 </button>
 
-                <button class="btn btn-circle btn-xl btn-info btn-bottom-middle hand shadow"
-                    id="btnMapaClientes">
-                        <i class="fal fa-map"></i>
-                </button>
-
 
                 <button class="btn btn-danger btn-xl btn-bottom-r btn-circle shadow hand" id="btnCameraQR">
                     <i class="fal fa-camera"></i>  
                 </button>
 
                     `
-        },
-        lista_clientes_mapa:()=>{
-            return `
-                    <div class="card card-rounded col-12 shadow">            
-                        <div class="card-body p-4">
-                            <div class="row">
-                                <select class="form-control negrita text-danger border-danger" id="cmbDiaClienteMapa">
-                                            <option value="LUNES">LUNES</option>
-                                            <option value="MARTES">MARTES</option>
-                                            <option value="MIERCOLES">MIERCOLES</option>
-                                            <option value="JUEVES">JUEVES</option>
-                                            <option value="VIERNES">VIERNES</option>
-                                            <option value="SABADO">SABADO</option>
-                                            <option value="DOMINGO">DOMINGO</option>
-                                            <option value="OTROS">OTROS</option>
-                                </select>
-                                <div class="form-group col-12">
-                                    <label class="text-secondary">Búsqueda de Clientes</label>
-                                    <div class="input-group">
-                                        <input disabled type="search" autocomplete="off" class="form-control border-base negrita col-12" id="txtBuscarClieMapa">
-                                       
-                                        <button class="btn btn-base hand text-white" id="btnBuscarClieMapa">
-                                            <i class="fal fa-search"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                
-                               
-                            </div>
-                            <br>
-                            <div class="row">
-                                    <div class="col-6">
-                                        <h5 class="negrita text-success" id="lbTVisitadosMapa"></h5>
-                                    </div>
-                                    <div class="col-6">
-                                        <h5 class="negrita text-danger" id="lbTNoVisitadosMapa"></h5>
-                                    </div>
-                            </div>
-                            
-                            <div id="container_mapa">
-
-                            
-
-
-                            </div>
-                          
-                        </div>
-                    </div>
-
-         
-                
-                <button class="btn btn-circle btn-xl btn-secondary btn-bottom-l hand shadow"
-                    onclick="document.getElementById('tab-uno').click()">
-                        <i class="fal fa-arrow-left"></i>
-                </button>
-
-
-
-                    `
-        },
-        modal_visita_mapa:()=>{
-            return `
-            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" 
-                role="dialog" aria-hidden="true" 
-                id="modal_visita_mapa">
-                <div class="modal-dialog modal-dialog-right modal-xl">
-                    <div class="modal-content">
-                        <div class="dropdown-header bg-warning d-flex justify-content-center align-items-center w-100">
-                            <h4 class="m-0 text-center color-white" id="">
-                                Motivo por el que no se le Vendio al Cliente
-                            </h4>
-                        </div>
-                        <div class="modal-body p-4">
-                            
-                            <div class="card card-rounded" id="print_qr">
-                                <div class="card-body p-4">
-
-                                   
-                                    <h5 class="negrita text-danger" id="lbNegocioclieVisitaMapa"></h5>
-                                    <h5 class="negrita text-danger" id="lbNomclieVisitaMapa"></h5>
-                                   
-                                    <div class="row">
-                                        <div class="col-6">
-                                            <small>CODIGO:</small>
-                                            <h5 class="negrita text-danger" id="lbCodclieVisitaMapa"></h5>
-                                        </div>
-                                        <div class="col-6">
-                                            <small>NIT:</small>
-                                            <h5 class="negrita text-danger" id="lbNitclieVisitaMapa"></h5>
-                                        </div>
-                                    </div>
-
-                                    <br>                                   
-                                    <small class="negrita text-danger" id="lbDirclieVisitaMapa"></small>
-                                    <br>
-                                    <small class="negrita">TELEFONO: </small><small class="negrita text-danger" id="lbTelclieVisitaMapa"></small>
-
-
-                                    <hr>
-                                    <div class="form-group">
-                                        <button class="btn btn-lg col-12 hand btn-success shadow" id="btnVenderMapa">
-                                            <i class="fal fa-shopping-cart"></i> NUEVA VENTA
-                                        </button>
-                                    </div>
-                                    <hr>
-                                    
-                                    <h5>REGISTRAR VISITA</h5>
-
-                                    <div class="form-group">
-                                        <label class="negrita text-secondary">Motivo</label>
-                                        <select class="form-control negrita text-danger" id="cmbMotivoNoVisitaMapa">
-                                            <option value='NO DINERO'>NO DINERO</option>
-                                            <option value='NEGOCIO CERRADO'>NEGOCIO CERRADO</option>
-                                            <option value='NO ESTA EL ENCARGADO'>NO ESTA EL ENCARGADO</option>
-                                            <option value='TIENE PRODUCTO'>TIENE PRODUCTO</option>
-                                            <option value='PASO CERRADO'>PASO CERRADO</option>
-                                            <option value='TIENDA NO EXISTE'>TIENDA NO EXISTE</option>
-                                        </select>
-                                    </div>
-
-                                    <br>
-                                    <div class="row">
-                                        <div class="col-6">
-                                            <button class="btn btn-xl btn-secondary btn-circle hand shadow" data-dismiss="modal">
-                                                <i class="fal fa-arrow-left"></i>
-                                            </button>
-                                        </div>
-                                        <div class="col-6">
-                                            <button class="btn btn-xl btn-info btn-circle hand shadow" id="btnGuardarVisita">
-                                                <i class="fal fa-paper-plane"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-
-
-                                </div>                                
-                                
-                            </div>                              
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            
-            `
         },
         modal_lista_documentos:()=>{
             return `
@@ -1026,7 +868,6 @@ function addListeners(){
 
     let f = new Date();
     document.getElementById('cmbDiaCliente').value = F.getDiaSemana(f.getDay());
-    document.getElementById('cmbDiaClienteMapa').value = F.getDiaSemana(f.getDay());
 
 
     //-----------------------------
@@ -1120,37 +961,6 @@ function addListeners(){
         iniciar_barcode();
 
     });
-
-
-    let btnMapaClientes = document.getElementById('btnMapaClientes');
-    btnMapaClientes.addEventListener('click',()=>{
-
-        document.getElementById('tab-cinco').click();
-        
-        tbl_clientes_mapa('');
-
-    });
-    document.getElementById('cmbDiaClienteMapa').addEventListener('change',()=>{
-        tbl_clientes_mapa('');
-    });
-    document.getElementById('btnVenderMapa').addEventListener('click',()=>{
-
-
-        $("#modal_visita_mapa").modal('hide');
-
-
-
-        let nomclie = document.getElementById('lbNomclieVisitaMapa').innerText;
-        let codclie = document.getElementById('lbCodclieVisitaMapa').innerText;
-        let nit = document.getElementById('lbNitclieVisitaMapa').innerText;
-        let dirclie = document.getElementById('lbDirclieVisitaMapa').innerText;
-        let telefono = document.getElementById('lbTelclieVisitaMapa').innerText;
-
-
-        get_datos_cliente(codclie,nit,nomclie,dirclie,telefono);
-
-    })
-
 
 
     let btnGuardarVisita = document.getElementById('btnGuardarVisita');
@@ -1685,137 +1495,6 @@ function initView(){
 
 
 
-function tbl_clientes_mapa(filtro){
-   
-  
-    let container = document.getElementById('container_mapa');
-    container.innerHTML = '';
-    container.innerHTML = `<div class="mapcontainer5" id="mapcontainer"></div>`;
-
-    let dia = document.getElementById('cmbDiaClienteMapa').value;
-
-    let varTotalVisitados = 0;
-    let varTotalNoVisitados = 0;
-    let contador = 0;
-    let latInicial =0, longInicial = 0;
-
-    try {
-        navigator.geolocation.getCurrentPosition(function (location) {
-            lat = location.coords.latitude.toString();
-            long = location.coords.longitude.toString();
-
-            var map = L.map('mapcontainer').setView([Number(lat), Number(long)], 15);
-
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
-
-
-            //personalizacion de marcadores
-           
-            //clase con opciones del icono
-            var LeafIcon = L.Icon.extend({
-                options: {
-                        shadowUrl: './libs/leaflet/images/marker-shadow.png',
-                        iconSize: [18, 35],
-                        shadowSize: [0, 0],
-                        iconAnchor: [20, 92],
-                        shadowAnchor: [4, 62],
-                        popupAnchor: [-3, -76]
-                }
-            });
-
-            //iconSize: [38, 95]
-            //iconAnchor: [22, 94]
-
-            var greenIcon = new LeafIcon({iconUrl: './libs/leaflet/images/marker-icon-green.png'}),
-                redIcon = new LeafIcon({iconUrl: './libs/leaflet/images/marker-icon-red.png'}),
-                blueIcon = new LeafIcon({iconUrl: './libs/leaflet/images/marker-icon.png'});
-
-
-            //agrega los marcadores al mapa
-
-
-            buscar_cliente_vendedor(dia,filtro)
-            .then((data)=>{
-
-                data.recordset.map((r)=>{
-                    
-                    contador+=1;
-                    if(Number(contador)==1){latInicial = Number(r.LATITUD); longInicial=Number(r.LONGITUD)};
-
-                    let icono;
-                    
-             
-                    if(F.convertir_fecha(r.LASTSALE,'-').toString()==F.getFechaNormal().toString()){
-                        varTotalVisitados+=1
-                         icono = greenIcon;
-                    }else{
-                        varTotalNoVisitados +=1;
-                        icono = redIcon;
-                    };
-
-                    
-                         L.marker([Number(r.LATITUD), Number(r.LONGITUD)],{icon: icono})
-                            .addTo(map)
-                            .bindPopup(`${r.TIPONEGOCIO}-${r.NEGOCIO}, ${r.NOMBRE}<br><small>${F.limpiarTexto(r.DIRECCION)}</small>`, {closeOnClick: false, autoClose: false})
-                            .on('click', function(e){
-                                get_visita_cliente_mapa(r.CODCLIENTE,r.NOMBRE,r.TIPONEGOCIO,r.NEGOCIO,r.NIT,F.limpiarTexto(r.DIRECCION),r.TELEFONO)
-                            })
-                            //.openPopup();
-
-                  
-
-                })
-
-                document.getElementById('lbTVisitadosMapa').innerText = `Visitados: ${varTotalVisitados}`;
-                document.getElementById('lbTNoVisitadosMapa').innerText = `Pendientes: ${varTotalNoVisitados}`;
-
-
-                
-
-                //map.invalidateSize(true);
-                setTimeout(function(){ map.invalidateSize();map.flyTo([latInicial,longInicial],15);}, 400)
-
-            })
-            .catch(()=>{
-                container.innerHTML = 'No se cargaron datos...';
-                 document.getElementById('lbTVisitadosMapa').innerText = ``;
-                document.getElementById('lbTNoVisitadosMapa').innerText = ``;
-            })
-
-
-             
-
-                               
-        })
-    } catch (error) {
-            F.AvisoError(error.toString());
-    };
-
-
-
-};
-function get_visita_cliente_mapa(codclie,nomclie,tiponegocio,negocio,nit,dirclie,telclie){
-
-    $("#modal_visita_mapa").modal('show');
-  
-    selected_cod_cliente = codclie;
-    
-
-    document.getElementById('lbNegocioclieVisitaMapa').innerText = `${tiponegocio}-${negocio}`;
-    document.getElementById('lbNomclieVisitaMapa').innerText = nomclie;
-    document.getElementById('lbCodclieVisitaMapa').innerText = codclie;
-
-    document.getElementById('lbNitclieVisitaMapa').innerText = nit;
-    document.getElementById('lbDirclieVisitaMapa').innerText = dirclie;
-    document.getElementById('lbTelclieVisitaMapa').innerText = telclie;
-  
-    document.getElementById('cmbMotivoNoVisitaMapa').value = 'NO DINERO';
-
-
-
-};
 
 function tbl_clientes(filtro,qr){
    
@@ -1998,45 +1677,6 @@ function tbl_historial_cliente(){
 };
 
 
-function buscar_cliente_vendedor(dia,filtro){
-
-    return new Promise((resolve, reject) => {
-        
-
-            axios.post('/clientes/buscar_cliente_vendedor', {
-                token:TOKEN,
-                sucursal: GlobalEmpnit,
-                filtro:filtro,
-                codven:GlobalCodUsuario,
-                dia:dia,
-                fecha:F.getFecha()
-            })
-             .then(res => {
-                
-                if(res.status.toString()=='200'){
-                    let data = res.data;
-
-                    if(data.toString()=="error"){
-                        reject();
-                    }else{
-                        if(Number(data.rowsAffected[0])>0){
-                            resolve(data);             
-                        }else{
-                            reject();
-                        } 
-                    }             
-                }else{
-                    reject();
-                } 
-            })
-            .catch(()=>{
-                reject();
-            })
-   
-
-    })
-
-}
 
 
 

@@ -243,7 +243,7 @@ function getView(){
                                 <tbody>
                                     <tr>
                                         <td>OBJETIVO</td>
-                                        <td id="" class="negrita text-danger h4">${data_objetivos.skus_tienda()}</td>
+                                        <td id="lbTotalSkusObjetivo" class="negrita text-danger h4"></td>
                                     </tr>
                                     <tr>
                                         <td>LOGRO</td>
@@ -737,7 +737,7 @@ function rpt_cobertura(){
     //-----------------------------
     //CARGA DE SKUS POR TIENDA
     //-----------------------------
-    
+    document.getElementById('lbTotalSkusObjetivo').innerText = data_objetivos.skus_tienda(sucursal);
     document.getElementById('lbTotalSkusTienda').innerText = '';
     document.getElementById('lbTotalSkusTiendaFaltan').innerText = '';
 
@@ -751,7 +751,7 @@ function rpt_cobertura(){
         })
 
         document.getElementById('lbTotalSkusTienda').innerText = F.setNumero(logrado.toFixed(2));
-        let faltan = Number(data_objetivos.skus_tienda()) - logrado;
+        let faltan = Number(data_objetivos.skus_tienda(sucursal)) - logrado;
         document.getElementById('lbTotalSkusTiendaFaltan').innerText = F.setNumero(faltan.toFixed(2)); 
         
     })

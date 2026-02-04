@@ -36,6 +36,39 @@ router.post("/insertventa_factura", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+router.post("/BACKUP_insertventa_factura", async(req,res)=>{
+   
+
+    const { token,jsondocproductos,sucursal,
+            coddoc,correlativo,anio,mes,fecha,fechaentrega,formaentrega,
+            codbodega,codcliente,nomclie,totalcosto,totalprecio,totaldescuento,
+            nitclie, dirclie, obs, direntrega, usuario,
+            codven, lat, long, hora, tipo_pago, tipo_doc,
+            entrega_contacto, entrega_telefono, entrega_direccion,
+            entrega_referencia, entrega_lat, entrega_long,
+            codcaja, iva, etiqueta } = req.body;
+
+    let qryDocumentos = str_qry_documentos(jsondocproductos,sucursal,
+        coddoc,correlativo,anio,mes,fecha,fechaentrega,formaentrega,
+        codbodega,codcliente,nomclie,totalcosto,totalprecio,totaldescuento,
+        nitclie, dirclie, obs, direntrega, usuario,
+        codven, lat, long, hora, tipo_pago, tipo_doc,
+        entrega_contacto, entrega_telefono, entrega_direccion,
+        entrega_referencia, entrega_lat, entrega_long,
+        codcaja, iva,etiqueta);
+
+    let qryDocproductos = str_qry_docproductos(sucursal,coddoc,correlativo,anio,mes,iva,codbodega,fecha,jsondocproductos);
+   
+    let nuevoCorrelativo = Number(correlativo) + 1;
+    let qryTipodocumentos = `UPDATE TIPODOCUMENTOS SET CORRELATIVO=${nuevoCorrelativo} WHERE EMPNIT='${sucursal}' AND CODDOC='${coddoc}';`;
+    let qry_last_sale_cliente = `UPDATE CLIENTES SET LASTSALE='${fecha}' WHERE CODCLIENTE=${codcliente};`
+    
+    let qry = qryDocumentos + qryDocproductos + qryTipodocumentos + qry_last_sale_cliente;
+
+    
+    execute.QueryToken(res,qry,token);
+     
+});
 
 
 router.post("/insertventa_pedido", async(req,res)=>{
