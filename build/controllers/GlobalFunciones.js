@@ -640,6 +640,34 @@ let GF = {
         })
    
     },
+    corregir_correlativo_documento:(sucursal,coddoc)=>{
+
+        return new Promise((resolve, reject)=>{
+            axios.post('/tipodocumentos/update_correlativo_auto', {
+                sucursal: sucursal,
+                coddoc:coddoc
+            })
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }
+            }, (error) => {
+                reject();
+            });
+        })
+   
+    },
     get_data_tipodoc_coddoc_sucursal:(sucursal,tipodoc)=>{
 
         return new Promise((resolve, reject)=>{

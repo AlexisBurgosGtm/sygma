@@ -556,8 +556,8 @@ function getView(){
         lista_clientes_mapa:()=>{
             return `
                     <div class="card card-rounded col-12 shadow">            
-                        <div class="card-body p-4">
-                            <div class="row">
+                        <div class="card-body p-0">
+                            <div class="row p-4">
                                 <select class="form-control negrita text-danger border-danger" id="cmbDiaClienteMapa">
                                             <option value="LUNES">LUNES</option>
                                             <option value="MARTES">MARTES</option>
@@ -568,17 +568,6 @@ function getView(){
                                             <option value="DOMINGO">DOMINGO</option>
                                             <option value="OTROS">OTROS</option>
                                 </select>
-                                <div class="form-group col-12">
-                                    <label class="text-secondary">Búsqueda de Clientes</label>
-                                    <div class="input-group">
-                                        <input disabled type="search" autocomplete="off" class="form-control border-base negrita col-12" id="txtBuscarClieMapa">
-                                       
-                                        <button class="btn btn-base hand text-white" id="btnBuscarClieMapa">
-                                            <i class="fal fa-search"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                
                                
                             </div>
                             <br>
@@ -619,14 +608,14 @@ function getView(){
                 id="modal_visita_mapa">
                 <div class="modal-dialog modal-dialog-right modal-xl">
                     <div class="modal-content">
-                        <div class="dropdown-header bg-warning d-flex justify-content-center align-items-center w-100">
+                        <div class="dropdown-header bg-secondary d-flex justify-content-center align-items-center w-100">
                             <h4 class="m-0 text-center color-white" id="">
-                                Motivo por el que no se le Vendio al Cliente
+                                Opciones del Cliente
                             </h4>
                         </div>
                         <div class="modal-body p-4">
                             
-                            <div class="card card-rounded" id="print_qr">
+                            <div class="card card-rounded">
                                 <div class="card-body p-4">
 
                                    
@@ -649,14 +638,25 @@ function getView(){
                                     <br>
                                     <small class="negrita">TELEFONO: </small><small class="negrita text-danger" id="lbTelclieVisitaMapa"></small>
 
+                                </div>
+                            </div>
+                            <br>
 
-                                    <hr>
+                            <div class="card card-rounded">
+                                <div class="card-body p-4">
+                                    
                                     <div class="form-group">
                                         <button class="btn btn-lg col-12 hand btn-success shadow" id="btnVenderMapa">
                                             <i class="fal fa-shopping-cart"></i> NUEVA VENTA
                                         </button>
                                     </div>
-                                    <hr>
+                                   
+                                </div>
+                            </div>
+                            <br>
+
+                            <div class="card card-rounded">
+                                <div class="card-body p-4">
                                     
                                     <h5>REGISTRAR VISITA</h5>
 
@@ -672,24 +672,13 @@ function getView(){
                                         </select>
                                     </div>
 
-                                    <br>
-                                    <div class="row">
-                                        <div class="col-6">
-                                            <button class="btn btn-xl btn-secondary btn-circle hand shadow" data-dismiss="modal">
-                                                <i class="fal fa-arrow-left"></i>
-                                            </button>
-                                        </div>
-                                        <div class="col-6">
-                                            <button class="btn btn-xl btn-info btn-circle hand shadow" id="btnGuardarVisita">
-                                                <i class="fal fa-paper-plane"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-
+                                    <button class="btn btn-xl btn-info hand shadow" id="btnGuardarVisitaMapa">
+                                        <i class="fal fa-paper-plane"></i> Registrar visita
+                                    </button>
 
                                 </div>                                
-                                
                             </div>                              
+
 
                         </div>
                     </div>
@@ -1016,10 +1005,12 @@ function addListeners(){
 
     //document.title = "Ventas";
     document.title = `Vendedor - ${GlobalNomEmpresa}`;
+    selected_tab = '';
     
 
 
     document.getElementById('tab-uno').click();
+    selected_tab = 'tab_lista';
 
     F.slideAnimationTabs();
 
@@ -1126,6 +1117,7 @@ function addListeners(){
     btnMapaClientes.addEventListener('click',()=>{
 
         document.getElementById('tab-cinco').click();
+        selected_tab = 'tab_mapa';
         
         tbl_clientes_mapa('');
 
@@ -1149,7 +1141,69 @@ function addListeners(){
 
         get_datos_cliente(codclie,nit,nomclie,dirclie,telefono);
 
-    })
+    });
+    let btnGuardarVisitaMapa = document.getElementById('btnGuardarVisitaMapa');
+    btnGuardarVisitaMapa.addEventListener('click',()=>{
+
+                let motivo = document.getElementById('cmbMotivoNoVisitaMapa').value;
+
+                F.Confirmacion('¿Está seguro que desea reportar esta NO VISITA?')
+                .then((value)=>{
+                    if(value==true){
+
+                        btnGuardarVisitaMapa.disabled = true;
+                        btnGuardarVisitaMapa.innerHTML = `<i class="fal fa-paper-plane fa-spin"></i>`;
+
+                            F.showToast('Obteniendo la ubicacion actual...');
+                            
+                            F.ObtenerUbicacion()
+                            .then((location)=>{
+
+                                let latitud = location.latitude.toString();
+                                let longitud = location.longitude.toString();
+
+                                insert_visita(selected_cod_cliente,motivo,latitud,longitud)
+                                .then(()=>{
+                                    F.Aviso('Visita registrada exitosamente!!');
+                                    $("#modal_visita_mapa").modal('hide');
+
+                                    btnGuardarVisitaMapa.disabled = false;
+                                    btnGuardarVisitaMapa.innerHTML = `<i class="fal fa-paper-plane"></i> Registrar visita`;
+                        
+                                })
+                                .catch(()=>{
+                                    F.AvisoError('No se pudo enviar');
+                                     btnGuardarVisitaMapa.disabled = false;
+                                    btnGuardarVisitaMapa.innerHTML = `<i class="fal fa-paper-plane"></i> Registrar visita`;
+                                })
+
+                            })
+                            .catch(()=>{
+                                
+                                let latitud = 0;   //location.latitude.toString();
+                                let longitud = 0;   //location.longitude.toString();
+
+                                insert_visita(selected_cod_cliente,motivo,latitud,longitud)
+                                .then(()=>{
+                                    F.Aviso('Visita registrada exitosamente!!');
+                                    $("#modal_visita_mapa").modal('hide');
+                                     btnGuardarVisitaMapa.disabled = false;
+                                    btnGuardarVisitaMapa.innerHTML = `<i class="fal fa-paper-plane"></i> Registrar visita`;
+                                })
+                                .catch(()=>{
+                                    F.AvisoError('No se pudo enviar');
+                                     btnGuardarVisitaMapa.disabled = false;
+                                    btnGuardarVisitaMapa.innerHTML = `<i class="fal fa-paper-plane"></i> Registrar visita`;
+                                })
+
+                            })
+
+
+
+                    }
+                })
+
+    });
 
 
 

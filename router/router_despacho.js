@@ -18,7 +18,8 @@ router.post("/insert_visita", async(req,res)=>{
                 ${codemp} AS CODEMP, 
                 '${motivo}' AS MOTIVO, 
                 ${lat} AS LATITUD,
-                ${long} AS LONGITUD
+                ${long} AS LONGITUD;
+        UPDATE CLIENTES SET LASTSALE='${fecha}' WHERE CODCLIENTE=${codclie};
             `;
     
           

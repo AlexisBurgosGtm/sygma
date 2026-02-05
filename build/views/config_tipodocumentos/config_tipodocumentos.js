@@ -59,6 +59,7 @@ function getView(){
                                     <td>DESCRIPCION</td>
                                     <td>F.CONTA CON</td>
                                     <td>F.CONTA CRE</td>
+                                    <td>UPD_CORREL</td>
                                     <td>STATUS</td>
                                     <td>EDITAR</td>
                                     <td></td>
@@ -369,7 +370,9 @@ function get_tbl_documentos(){
 
             let strClassHabilitado = ""; if(r.HABILITADO=='SI'){strClassHabilitado='btn-success'}else{strClassHabilitado='btn-danger'};
             let idBtnStatus = `btnStatus${r.CODDOC}${r.TIPODOC}`;
-            let idBtnEliminar = `btnEliminar${r.ID}`
+            let idBtnEliminar = `btnEliminar${r.ID}`;
+            let idBtnCorrel = `btnCorrel${r.ID}`;
+
             str += `
                     <tr>
                         <td>${r.TIPODOC}</td>
@@ -379,7 +382,14 @@ function get_tbl_documentos(){
                         <td>${r.CONTA_CON}</td>
                         <td>${r.CONTA_CRE}</td>
                         <td>
-                            <button id='${idBtnStatus}' class="btn ${strClassHabilitado} btn-circle btn-md hand shadow" onclick="fcn_set_tipo_status('${r.CODDOC}','${r.HABILITADO}','${idBtnStatus}')">
+                            <button id="${idBtnCorrel}" class="btn btn-primary btn-circle btn-md hand shadow" 
+                            onclick="update_correlativo('${r.CODDOC}','${idBtnCorrel}')">
+                                <i class="fal fa-spinner"></i>
+                            </button>
+                        </td>
+                        <td>
+                            <button id='${idBtnStatus}' class="btn ${strClassHabilitado} btn-circle btn-md hand shadow" 
+                                onclick="fcn_set_tipo_status('${r.CODDOC}','${r.HABILITADO}','${idBtnStatus}')">
                                 <i class="fal fa-sync"></i>
                             </button>
                         </td>
@@ -389,7 +399,7 @@ function get_tbl_documentos(){
                                 <i class="fal fa-edit"></i>
                             </button>
                         </td>
-                         <td>
+                        <td>
                             <button id="${idBtnEliminar}" class="btn btn-danger btn-circle btn-md hand shadow" 
                             onclick="eliminar_documento('${r.CODDOC}','${idBtnEliminar}')">
                                 <i class="fal fa-trash"></i>
@@ -506,6 +516,35 @@ function editar_documento(tipodoc,coddoc,correlativo,descripcion,contacon,contac
     document.getElementById('cmbFContaCre').value = contacre;
 
     $("#modal_nuevo").modal("show");
+
+
+};
+
+
+function update_correlativo(coddoc,idbtn){
+
+    F.showToast('Corrigiendo correlativo...');
+
+    let btn = document.getElementById(idbtn);
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fal fa-spin fa-spinner"></i>`;
+
+    GF.corregir_correlativo_documento(GlobalEmpnit,coddoc)
+    .then(()=>{
+        F.Aviso('Correlativo corregido exitosamente!!');
+        
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fal fa-spinner"></i>`;
+        
+        get_tbl_documentos();
+
+    })
+    .catch(()=>{
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fal fa-spinner"></i>`;
+        F.AvisoError('No se logro corregir.. Intentelo de nuevo');
+
+    })
 
 
 };
