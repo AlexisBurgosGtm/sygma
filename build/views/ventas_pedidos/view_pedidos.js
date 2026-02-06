@@ -5,7 +5,7 @@ function getView(){
                 <div class="col-12 p-0">
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="dias-tab">
-                            ${view.lista_clientes() + view.modal_qr() + view.modal_camara() + view.modal_visita() + view.modal_historial_cliente() + view.modal_goles()}
+                            ${view.lista_clientes() + view.modal_qr() + view.modal_camara() + view.modal_visita() + view.modal_goles()}
                         </div> 
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="clientes-tab">
                             ${view.pedido() + view.modal_lista_precios() + view.modal_cantidad() + view.modal_editar_cantidad()}
@@ -44,6 +44,8 @@ function getView(){
                         </li>                           
                     </ul>
                 </div>
+
+                ${view.modal_historial_cliente()}
             `
         },
         pedido:()=>{
@@ -130,7 +132,8 @@ function getView(){
             </div>
 
             
-            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
+            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" 
+                id="btnAtrasVentasClientes">
                 <i class="fal fa-arrow-left"></i>
             </button>
             
@@ -632,9 +635,8 @@ function getView(){
                                             <h5 class="negrita text-danger" id="lbNitclieVisitaMapa"></h5>
                                         </div>
                                     </div>
-
-                                    <br>                                   
-                                    <small class="negrita text-danger" id="lbDirclieVisitaMapa"></small>
+                                                                  
+                                    <small class="negrita text-secondary" id="lbDirclieVisitaMapa"></small>
                                     <br>
                                     <small class="negrita">TELEFONO: </small><small class="negrita text-danger" id="lbTelclieVisitaMapa"></small>
 
@@ -658,27 +660,48 @@ function getView(){
                             <div class="card card-rounded">
                                 <div class="card-body p-4">
                                     
+                                    <div class="form-group">
+                                        <button class="btn btn-lg col-12 hand btn-secondary shadow" id="btnHistorialMapa">
+                                            <i class="fal fa-book"></i> HISTORIAL CLIENTE
+                                        </button>
+                                    </div>
+                                   
+                                </div>
+                            </div>
+                            <br>
+
+                            
+
+                            <div class="card card-rounded">
+                                <div class="card-body p-4">
+                                    
                                     <h5>REGISTRAR VISITA</h5>
 
                                     <div class="form-group">
                                         <label class="negrita text-secondary">Motivo</label>
-                                        <select class="form-control negrita text-danger" id="cmbMotivoNoVisitaMapa">
-                                            <option value='NO DINERO'>NO DINERO</option>
-                                            <option value='NEGOCIO CERRADO'>NEGOCIO CERRADO</option>
-                                            <option value='NO ESTA EL ENCARGADO'>NO ESTA EL ENCARGADO</option>
-                                            <option value='TIENE PRODUCTO'>TIENE PRODUCTO</option>
-                                            <option value='PASO CERRADO'>PASO CERRADO</option>
-                                            <option value='TIENDA NO EXISTE'>TIENDA NO EXISTE</option>
-                                        </select>
+                                        <div class="input-group">
+                                            <select class="form-control negrita text-danger" id="cmbMotivoNoVisitaMapa">
+                                                <option value='NO DINERO'>NO DINERO</option>
+                                                <option value='NEGOCIO CERRADO'>NEGOCIO CERRADO</option>
+                                                <option value='NO ESTA EL ENCARGADO'>NO ESTA EL ENCARGADO</option>
+                                                <option value='TIENE PRODUCTO'>TIENE PRODUCTO</option>
+                                                <option value='PASO CERRADO'>PASO CERRADO</option>
+                                                <option value='TIENDA NO EXISTE'>TIENDA NO EXISTE</option>
+                                            </select>
+                                            <button class="btn btn-md btn-info hand shadow" id="btnGuardarVisitaMapa">
+                                                <i class="fal fa-paper-plane"></i> Registrar visita
+                                            </button>
+                                        </div>
                                     </div>
 
-                                    <button class="btn btn-xl btn-info hand shadow" id="btnGuardarVisitaMapa">
-                                        <i class="fal fa-paper-plane"></i> Registrar visita
-                                    </button>
+                                   
 
                                 </div>                                
                             </div>                              
 
+                            <button class="btn btn-bottom-l btn-xl btn-info btn-circle hand shadow" data-dismiss="modal">
+                                <i class="fal fa-arrow-left"></i>
+                            </button>
 
                         </div>
                     </div>
@@ -1139,7 +1162,9 @@ function addListeners(){
         let telefono = document.getElementById('lbTelclieVisitaMapa').innerText;
 
 
-        get_datos_cliente(codclie,nit,nomclie,dirclie,telefono);
+
+
+        get_datos_cliente_mapa(codclie,nit,nomclie,dirclie,telefono);
 
     });
     let btnGuardarVisitaMapa = document.getElementById('btnGuardarVisitaMapa');
@@ -1202,6 +1227,17 @@ function addListeners(){
 
                     }
                 })
+
+    });
+    document.getElementById('btnHistorialMapa').addEventListener('click',()=>{
+
+        let nomclie = document.getElementById('lbNomclieVisitaMapa').innerText;
+        let codclie = document.getElementById('lbCodclieVisitaMapa').innerText;
+        
+        let negocio = document.getElementById('lbNegocioclieVisitaMapa').innerText;
+        let tiponegocio = '';
+
+        get_historial_cliente(selected_cod_cliente,nomclie,tiponegocio,negocio);
 
     });
 
@@ -1271,7 +1307,23 @@ function addListeners(){
 
 
     });
-    
+
+    document.getElementById('btnAtrasVentasClientes').addEventListener('click',()=>{
+
+        switch (selected_tab) {
+            case 'tab_lista':
+                document.getElementById('tab-uno').click();
+                break;
+            case 'tab_mapa':
+                document.getElementById('tab-cinco').click();
+                break;
+            default:
+                document.getElementById('tab-uno').click();
+                break;
+        }
+
+
+    })
 
 };
 
@@ -1755,6 +1807,7 @@ function tbl_clientes_mapa(filtro){
 
     try {
         navigator.geolocation.getCurrentPosition(function (location) {
+            
             lat = location.coords.latitude.toString();
             long = location.coords.longitude.toString();
 
@@ -2357,6 +2410,7 @@ function fcn_buscar_cliente(nit){
 
 };
 
+//IR AL PEDIDO
 function get_datos_cliente(nitclie,nit,nomclie,dirclie,telefono){
 
     //$("#modal_lista_clientes").modal('hide');
@@ -2370,6 +2424,30 @@ function get_datos_cliente(nitclie,nit,nomclie,dirclie,telefono){
     document.getElementById('txtBuscarClie').value=''; //limpio el filtro a la hora de vender
     
    
+    selected_tab = 'tab_lista';
+
+    
+    document.getElementById('tab-dos').click();
+
+    document.getElementById('txtPosCodprod').focus();
+
+
+};
+function get_datos_cliente_mapa(nitclie,nit,nomclie,dirclie,telefono){
+
+    //$("#modal_lista_clientes").modal('hide');
+
+    document.getElementById('txtPosCobroNit').value = nit;
+    document.getElementById('txtPosCobroNitclie').value = nitclie;
+    document.getElementById('txtPosCobroNombre').value = nomclie;
+    document.getElementById('txtPosCobroDireccion').value = dirclie;
+    document.getElementById('txtPosCobroTelefono').value = telefono;
+    
+    document.getElementById('txtBuscarClie').value=''; //limpio el filtro a la hora de vender
+    
+   
+    selected_tab = 'tab_mapa';
+
     
     document.getElementById('tab-dos').click();
 
