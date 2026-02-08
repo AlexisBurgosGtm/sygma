@@ -447,4 +447,15 @@ let Menu = {
             F.AvisoError('No tiene permitido entrar a esta sección');
         }   
     },
+    objetivos_visitas_gps:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/bi_objetivos/view_visitas_vendedores_gps.js','root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        }   
+    },
 }

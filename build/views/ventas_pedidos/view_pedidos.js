@@ -45,7 +45,7 @@ function getView(){
                     </ul>
                 </div>
 
-                ${view.modal_historial_cliente()}
+                ${view.modal_historial_cliente() + view.modal_marcas_cliente()}
             `
         },
         pedido:()=>{
@@ -659,12 +659,23 @@ function getView(){
 
                             <div class="card card-rounded">
                                 <div class="card-body p-4">
-                                    
-                                    <div class="form-group">
-                                        <button class="btn btn-lg col-12 hand btn-secondary shadow" id="btnHistorialMapa">
-                                            <i class="fal fa-book"></i> HISTORIAL CLIENTE
-                                        </button>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="form-group">
+                                                <button class="btn btn-lg col-12 hand btn-secondary shadow" id="btnHistorialMapa">
+                                                    <i class="fal fa-book"></i> HISTORIAL CLIENTE
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="form-group">
+                                                <button class="btn btn-lg col-12 hand btn-warning shadow" id="btnMarcasMapa">
+                                                    <i class="fal fa-list"></i> MARCAS MES
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
+                                    
                                    
                                 </div>
                             </div>
@@ -947,6 +958,61 @@ function getView(){
                                 </div>                                
                                 
                             </div>                              
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            `
+        },
+        modal_marcas_cliente:()=>{
+            return `
+            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" 
+                role="dialog" aria-hidden="true" 
+                id="modal_marcas_cliente">
+                <div class="modal-dialog modal-dialog-right modal-xl">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-base d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white" id="">
+                                Marcas del Mes
+                            </h4>
+                        </div>
+                        <div class="modal-body p-2">
+                            
+                            <div class="card card-rounded">
+                                <div class="card-body p-2">
+
+                                    <h5 class="text-danger" id="lbNomclieMarca"></h5>
+                                    <h5 class="negrita text-danger" id="lbCodclieMarca"></h5>
+
+                                    <h5 class="text-secondary">Marcas compradas por el cliente Mes en Curso</h5>
+
+                                    <div class="table-responsive">
+
+                                        <small>Total: </small>
+                                        <h5 class="text-danger negrita" id="lbTotalClienteMarca"></h5>
+
+                                        <table class="table table-striped h-full col-12">
+                                            <thead class="bg-secondary text-white">
+                                                <tr>
+                                                    <td>MARCA</td>
+                                                    <td>TOTAL VENDIDO</td>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tbl_data_marcas_cliente">
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <button class="btn btn-bottom-l btn-xl btn-secondary btn-circle hand shadow" data-dismiss="modal">
+                                <i class="fal fa-arrow-left"></i>
+                            </button>                              
 
                         </div>
                     </div>
@@ -1240,6 +1306,17 @@ function addListeners(){
         get_historial_cliente(selected_cod_cliente,nomclie,tiponegocio,negocio);
 
     });
+    document.getElementById('btnMarcasMapa').addEventListener('click',()=>{
+
+        let nomclie = document.getElementById('lbNomclieVisitaMapa').innerText;
+        let codclie = document.getElementById('lbCodclieVisitaMapa').innerText;
+        
+     
+        get_marcas_cliente(codclie, nomclie);
+      
+
+    });
+    
 
 
 
@@ -1805,20 +1882,8 @@ function tbl_clientes_mapa(filtro){
     let contador = 0;
     let latInicial =0, longInicial = 0;
 
-    try {
-        navigator.geolocation.getCurrentPosition(function (location) {
-            
-            lat = location.coords.latitude.toString();
-            long = location.coords.longitude.toString();
-
-            var map = L.map('mapcontainer').setView([Number(lat), Number(long)], 15);
-
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
-
-
-            //personalizacion de marcadores
+    //-----------------------------------------------
+    //personalizacion de marcadores
            
             //clase con opciones del icono
             var LeafIcon = L.Icon.extend({
@@ -1837,7 +1902,30 @@ function tbl_clientes_mapa(filtro){
 
             var greenIcon = new LeafIcon({iconUrl: './libs/leaflet/images/marker-icon-green.png'}),
                 redIcon = new LeafIcon({iconUrl: './libs/leaflet/images/marker-icon-red.png'}),
-                blueIcon = new LeafIcon({iconUrl: './libs/leaflet/images/marker-icon.png'});
+                blueIcon = new LeafIcon({iconUrl: './libs/leaflet/images/marker-icon.png'}),
+                userIcon = new LeafIcon({iconUrl: './libs/leaflet/images/marker-user.png'});
+        
+        //-----------------------------------------------
+        //-----------------------------------------------
+
+
+    try {
+        navigator.geolocation.getCurrentPosition(function (location) {
+            
+            lat = location.coords.latitude.toString();
+            long = location.coords.longitude.toString();
+
+            var map = L.map('mapcontainer').setView([Number(lat), Number(long)], 15);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            //agrego la ubicacion del usuario
+            L.marker([Number(lat), Number(long)],{icon: userIcon})
+                .addTo(map)
+                .bindPopup(`${GlobalUsuario}`, {closeOnClick: false, autoClose: false})
+                .openPopup();
 
 
             //agrega los marcadores al mapa
@@ -1875,8 +1963,8 @@ function tbl_clientes_mapa(filtro){
 
                 })
 
-                document.getElementById('lbTVisitadosMapa').innerText = `Visitados: ${varTotalVisitados}`;
-                document.getElementById('lbTNoVisitadosMapa').innerText = `Pendientes: ${varTotalNoVisitados}`;
+                document.getElementById('lbTVisitadosMapa').innerText = `Vendido: ${varTotalVisitados}`;
+                document.getElementById('lbTNoVisitadosMapa').innerText = `No Vendido: ${varTotalNoVisitados}`;
 
 
                 
@@ -2036,8 +2124,8 @@ function tbl_clientes(filtro,qr){
                 `
             })
             container.innerHTML = str;
-            document.getElementById('lbTVisitados').innerText = `Visitados: ${varTotalVisitados}`;
-            document.getElementById('lbTNoVisitados').innerText = `Pendientes: ${varTotalNoVisitados}`;
+            document.getElementById('lbTVisitados').innerText = `Vendido: ${varTotalVisitados}`;
+            document.getElementById('lbTNoVisitados').innerText = `No Vendido: ${varTotalNoVisitados}`;
         }
     }, (error) => {
         F.AvisoError('Error en la solicitud');
@@ -2101,6 +2189,49 @@ function tbl_historial_cliente(){
     .catch(()=>{
         container.innerHTML = 'No se cargaron datos...';
     })
+
+};
+function get_marcas_cliente(codclie, nomclie){
+
+    
+    $("#modal_marcas_cliente").modal('show');
+
+    document.getElementById('lbNomclieMarca').innerText = nomclie;
+    document.getElementById('lbCodclieMarca').innerText = codclie;
+    
+
+    let container = document.getElementById('tbl_data_marcas_cliente');
+    container.innerHTML = GlobalLoader;
+
+    let varTotal = 0;
+
+    GF.get_data_marcas_cliente(GlobalEmpnit,codclie,F.getFecha())
+    .then((data)=>{
+
+        let str = '';
+        data.recordset.map((r)=>{
+            let strClass = '';
+            if(Number(r.TOTALPRECIO)==0){strClass='bg-danger text-white'}else{strClass='bg-success text-white'};
+            varTotal += Number(r.TOTALPRECIO);
+            str += `
+                <tr class="${strClass}">
+                    <td>${r.DESMARCA}</td>
+                    <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                </tr>
+            `
+        })
+        container.innerHTML = str;
+        document.getElementById('lbTotalClienteMarca').innerText = F.setMoneda(varTotal,'Q');
+
+    })
+    .catch(()=>{
+        container.innerHTML = 'No se cargaron datos...';
+        document.getElementById('lbTotalClienteMarca').innerText = 'Q 0.00';
+    })
+
+    
+
+
 
 };
 

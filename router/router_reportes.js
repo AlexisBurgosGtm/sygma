@@ -219,6 +219,34 @@ router.post("/rpt_ventas_vendedor_marcas", async(req,res)=>{
 
 });
 
+router.post("/rpt_marcas_cliente_mes", async(req,res)=>{
+   
+    const { token, sucursal, codclie, fecha } = req.body;
+
+    let qry = `    
+            SELECT 
+                MARCAS.CODMARCA, 
+                MARCAS.DESMARCA, 
+                ISNULL(B.TOTALUNIDADES,0) AS TOTALUNIDADES,
+                ISNULL(B.TOTALPRECIO,0) AS TOTALPRECIO
+            FROM  MARCAS LEFT OUTER JOIN
+                (SELECT CODIGO_MARCA, ISNULL(TOTALUNIDADES,0) AS TOTALUNIDADES, 
+                        ISNULL(TOTALPRECIO,0) AS TOTALPRECIO
+                    FROM view_rpt_marcas_cliente_mes_data
+                    WHERE 
+                        (CODIGO_CLIENTE = ${codclie}) AND 
+                        (MES = MONTH('${fecha}')) AND 
+                        (ANIO = YEAR('${fecha}'))
+                        ) AS B 
+                    ON MARCAS.CODMARCA = B.CODIGO_MARCA
+                `;
+    
+   
+    console.log(qry);
+
+    execute.QueryToken(res,qry,token);
+     
+});
 
 
 

@@ -1,6 +1,6 @@
 
 // &nbsp
-
+  
 let map; //mapa de leaflet
 
 
@@ -57,15 +57,15 @@ let navmenu = document.getElementById('js-nav-menu');
 
 let GlobalLoader = `
                 <div>
-                    <div  class="spinner-border" role="status">
+                    <div  class="spinner-grow" role="status">
                         <img src="./favicon.png" width="30" height="30">
                     </div>
-                    <div  class="spinner-border" role="status">
+                    <div  class="spinner-grow" role="status">
                         <img src="./favicon.png" width="30" height="30">
                     </div>
-                    <div class="spinner-border text-base" role="status"><span class="sr-only">Loading...</span></div>
-                    <div class="spinner-border text-base" role="status"><span class="sr-only">Loading...</span></div>
-                    <div class="spinner-border text-base" role="status"><span class="sr-only">Loading...</span></div>
+                    <div class="spinner-grow text-base" role="status"><span class="sr-only">Loading...</span></div>
+                    <div class="spinner-grow text-base" role="status"><span class="sr-only">Loading...</span></div>
+                    <div class="spinner-grow text-base" role="status"><span class="sr-only">Loading...</span></div>
                 </div>
                 `
                
@@ -73,7 +73,7 @@ function get_button_loader(texto){
     let str = '';
 
     str = `${texto}<div>
-                <div class="spinner-grow text-base" role="status"><span class="sr-only">Loading...</span></div>
+                <div class="spinner-border text-base" role="status"><span class="sr-only">Loading...</span></div>
                 <div class="spinner-grow text-base" role="status"><span class="sr-only">Loading...</span></div>
                 <div class="spinner-grow text-base" role="status"><span class="sr-only">Loading...</span></div>
             </div>`

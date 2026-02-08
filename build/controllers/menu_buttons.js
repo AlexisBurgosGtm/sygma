@@ -144,6 +144,11 @@ let botones_menu = {
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">UBICACIONES EMPLEADOS (GPS)</span>
                                         </a>
                                     </li>
+                                    <li>
+                                        <a href="#" title="How it works" data-filter-tags="theme settings how it works"  onclick="Menu.objetivos_visitas_gps()">
+                                            <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">VISITAS VENDEDORES GPS</span>
+                                        </a>
+                                    </li>
                                 </ul>
                             </li>
                             <li>
@@ -349,10 +354,17 @@ let botones_menu = {
                                 </a>
                             </li>
                             <li>
-                                        <a href="#" title="How it works" data-filter-tags="theme settings how it works"  onclick="Menu.empleados_gps()">
-                                            <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">UBICACIONES EMPLEADOS (GPS)</span>
-                                        </a>
-                                    </li>
+                                <a href="#" title="How it works" data-filter-tags="theme settings how it works"  onclick="Menu.empleados_gps()">
+                                    <i class="fal fa-map"></i>
+                                    <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">UBICACIONES EMPLEADOS (GPS)</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" title="How it works" data-filter-tags="theme settings how it works"  onclick="Menu.objetivos_visitas_gps()">
+                                    <i class="fal fa-map-signs"></i>
+                                    <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">VISITAS VENDEDOR MAPA</span>
+                                </a>
+                            </li>
                         </ul>
         `
     },
@@ -499,6 +511,11 @@ let botones_menu = {
                                     <li>
                                         <a href="#" title="How it works" data-filter-tags="theme settings how it works"  onclick="Menu.empleados_gps()">
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">UBICACIONES EMPLEADOS (GPS)</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" title="How it works" data-filter-tags="theme settings how it works"  onclick="Menu.objetivos_visitas_gps()">
+                                            <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">VISITAS VENDEDORES GPS</span>
                                         </a>
                                     </li>
                                 </ul>

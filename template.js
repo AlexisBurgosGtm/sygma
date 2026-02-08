@@ -108,3 +108,14 @@ function initView(){
 };
 
 
+
+
+
+
+SUBQUERY
+
+SELECT MARCAS.CODMARCA, MARCAS.DESMARCA, B.TOTALUNIDADES, B.TOTALPRECIO
+FROM  MARCAS LEFT OUTER JOIN
+                             (SELECT        CODIGO_MARCA, TOTALUNIDADES, TOTALPRECIO
+                               FROM            view_rpt_marcas_cliente_mes_data
+                               WHERE        (CODIGO_CLIENTE = 100) AND (MES = 1) AND (ANIO = 2026)) AS B ON MARCAS.CODMARCA = B.CODIGO_MARCA

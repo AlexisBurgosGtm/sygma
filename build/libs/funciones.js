@@ -1037,11 +1037,13 @@ let F = {
 
       },
       devuelveFecha: (idInputFecha)=>{
+
           let fe = new Date(document.getElementById(idInputFecha).value);
           let ae = fe.getFullYear();
           let me = fe.getUTCMonth()+1;
           let de = fe.getUTCDate() 
           let fret = ae + '-' + me + '-' + de;
+
           return fret;
       },
       devuelveFechaV: (idInputFecha)=>{
@@ -1051,6 +1053,24 @@ let F = {
           let de = fe.getUTCDate() 
           let fret =  de + '/' + me + '/' + ae;
           return fret;
+      },
+      devuelveFecha2: (idInputFecha)=>{
+
+          let fe = new Date(document.getElementById(idInputFecha).value);
+          let ae = fe.getFullYear();
+          let me = fe.getUTCMonth()+1;
+          let de = fe.getUTCDate() 
+
+          let dia = de.toString();
+          let mes = me.toString();
+
+          if(dia.toString().length>1){}else{dia = '0' + dia};
+          if(mes.toString().length>1){}else{mes = '0' + mes};
+
+          let fret =  dia + '-' + mes + '-' + ae;
+
+          return fret;
+
       },
       showToast: (text)=>{
           //depente de la libreria noty

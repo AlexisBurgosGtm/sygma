@@ -742,17 +742,6 @@ router.post("/buscar_cliente_vendedor", async(req,res)=>{
             (CLIENTES.CODEMPLEADO=${codven}) AND
             (CLIENTES.DIAVISITA='${dia}') AND
             (CLIENTES.HABILITADO='SI')
-
-        OR 
-            (CLIENTES.EMPNIT='${sucursal}') AND 
-            (CLIENTES.CODEMPLEADO=${codven}) AND
-            (CLIENTES.DIAVISITA='${dia}') AND
-            (CLIENTES.HABILITADO='SI')
-        OR 
-            (CLIENTES.EMPNIT='${sucursal}') AND 
-            (CLIENTES.CODEMPLEADO=${codven}) AND
-            (CLIENTES.DIAVISITA='${dia}') AND
-            (CLIENTES.HABILITADO='SI')
         ORDER BY CLIENTES.LASTSALE;
         `
     
@@ -844,6 +833,71 @@ router.post("/buscar_cliente_vendedor", async(req,res)=>{
             `
         }
     };
+
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/buscar_cliente_vendedor_supervisor", async(req,res)=>{
+   
+    const { token, sucursal, codven, fecha,dia} = req.body;
+
+
+    let qry = '';
+
+  
+    if(codven.toString()=='TODOS'){
+    qry = `
+        SELECT CLIENTES.CODCLIENTE, CLIENTES.NIT,
+            CLIENTES.TIPONEGOCIO, CLIENTES.NEGOCIO, 
+            CLIENTES.NOMBRE, CLIENTES.DIRECCION, 
+            CLIENTES.CODMUN, MUNICIPIOS.DESMUN, 
+            CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
+            CLIENTES.TELEFONO, CLIENTES.LATITUD, 
+            CLIENTES.LONGITUD, CLIENTES.SALDO, 
+            CLIENTES.HABILITADO, CLIENTES.LASTSALE,
+            CONCAT(MONTH(CLIENTES.LASTSALE),'-',YEAR(CLIENTES.LASTSALE)) AS MES_ULTIMO,
+            CONCAT(MONTH('${fecha}'),'-',YEAR('${fecha}')) AS MES_CURSO,
+            CLIENTES.DIASCREDITO, CLIENTES.REFERENCIA,
+            CLIENTES.DIAVISITA AS VISITA
+        FROM CLIENTES LEFT OUTER JOIN
+            DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO LEFT OUTER JOIN
+            MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+        WHERE
+            (CLIENTES.EMPNIT='${sucursal}') AND 
+            (CLIENTES.DIAVISITA='${dia}') AND
+            (CLIENTES.HABILITADO='SI')
+        ORDER BY CLIENTES.LASTSALE;
+        `
+    }else{
+    qry = `
+        SELECT CLIENTES.CODCLIENTE, CLIENTES.NIT,
+            CLIENTES.TIPONEGOCIO, CLIENTES.NEGOCIO, 
+            CLIENTES.NOMBRE, CLIENTES.DIRECCION, 
+            CLIENTES.CODMUN, MUNICIPIOS.DESMUN, 
+            CLIENTES.CODDEPTO, DEPARTAMENTOS.DESDEPTO, 
+            CLIENTES.TELEFONO, CLIENTES.LATITUD, 
+            CLIENTES.LONGITUD, CLIENTES.SALDO, 
+            CLIENTES.HABILITADO, CLIENTES.LASTSALE,
+            CONCAT(MONTH(CLIENTES.LASTSALE),'-',YEAR(CLIENTES.LASTSALE)) AS MES_ULTIMO,
+            CONCAT(MONTH('${fecha}'),'-',YEAR('${fecha}')) AS MES_CURSO,
+            CLIENTES.DIASCREDITO, CLIENTES.REFERENCIA,
+            CLIENTES.DIAVISITA AS VISITA
+        FROM CLIENTES LEFT OUTER JOIN
+            DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO LEFT OUTER JOIN
+            MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+        WHERE
+            (CLIENTES.EMPNIT='${sucursal}') AND 
+            (CLIENTES.CODEMPLEADO=${codven}) AND
+            (CLIENTES.DIAVISITA='${dia}') AND
+            (CLIENTES.HABILITADO='SI')
+        ORDER BY CLIENTES.LASTSALE;
+        `
+    }
+
+      
+    
+   
 
 
     execute.QueryToken(res,qry,token);
