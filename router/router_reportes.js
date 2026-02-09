@@ -239,11 +239,9 @@ router.post("/rpt_marcas_cliente_mes", async(req,res)=>{
                         (ANIO = YEAR('${fecha}'))
                         ) AS B 
                     ON MARCAS.CODMARCA = B.CODIGO_MARCA
-                `;
+            ORDER BY B.TOTALPRECIO DESC; `;
     
-   
-    console.log(qry);
-
+  
     execute.QueryToken(res,qry,token);
      
 });

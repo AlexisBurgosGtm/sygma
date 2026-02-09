@@ -7,6 +7,12 @@ function getView(){
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
                             ${view.vista_inicio() + view.modal_marcas_cliente()}
+
+                            
+                            <button class="btn btn-bottom-l btn-xl btn-circle btn-primary hand shadow"
+                            onclick="Navegar.inicio()">
+                                <i class="fal fa-home"></i>
+                            </button>
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
                            
@@ -32,6 +38,7 @@ function getView(){
                     </ul>
                     
                 </div>
+
                
             `
         },
@@ -135,7 +142,7 @@ function getView(){
                                         <small>Total: </small>
                                         <h5 class="text-danger negrita" id="lbTotalClienteMarca"></h5>
 
-                                        <table class="table table-striped h-full col-12">
+                                        <table class="table table-bordered h-full col-12">
                                             <thead class="bg-secondary text-white">
                                                 <tr>
                                                     <td>MARCA</td>
@@ -491,13 +498,15 @@ function get_marcas_cliente(codclie, nomclie){
 
     let varTotal = 0;
 
-    GF.get_data_marcas_cliente(GlobalEmpnit,codclie,F.getFecha())
+    let fecha = F.devuelveFecha('txtFecha');
+
+    GF.get_data_marcas_cliente(GlobalEmpnit,codclie,fecha)
     .then((data)=>{
 
         let str = '';
         data.recordset.map((r)=>{
             let strClass = '';
-            if(Number(r.TOTALPRECIO)==0){strClass='bg-danger text-white'}else{strClass='bg-success text-white'};
+            if(Number(r.TOTALPRECIO)==0){strClass='bg-nologrado'}else{strClass='bg-logrado'};
             varTotal += Number(r.TOTALPRECIO);
             str += `
                 <tr class="${strClass}">

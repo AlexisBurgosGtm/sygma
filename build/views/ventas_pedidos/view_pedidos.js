@@ -994,7 +994,7 @@ function getView(){
                                         <small>Total: </small>
                                         <h5 class="text-danger negrita" id="lbTotalClienteMarca"></h5>
 
-                                        <table class="table table-striped h-full col-12">
+                                        <table class="table table-bordered h-full col-12">
                                             <thead class="bg-secondary text-white">
                                                 <tr>
                                                     <td>MARCA</td>
@@ -2212,7 +2212,7 @@ function get_marcas_cliente(codclie, nomclie){
         let str = '';
         data.recordset.map((r)=>{
             let strClass = '';
-            if(Number(r.TOTALPRECIO)==0){strClass='bg-danger text-white'}else{strClass='bg-success text-white'};
+            if(Number(r.TOTALPRECIO)==0){strClass='bg-nologrado'}else{strClass='bg-logrado'};
             varTotal += Number(r.TOTALPRECIO);
             str += `
                 <tr class="${strClass}">

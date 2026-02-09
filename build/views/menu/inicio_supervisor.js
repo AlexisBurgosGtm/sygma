@@ -167,6 +167,23 @@ function getView(){
                 
                 <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
 
+                    <div class="card card-rounded   bg-white shadow col-12 hand" id="btnMenuRptVisitasMapa">
+                        <div class="card-body p-4">
+
+                            <h4 class="">VISITAS VENDEDOR MAPA</h4>
+                          
+                             <div class="row">
+                                <div class="col-6">
+                                </div>
+                                <div class="col-6 text-right">
+                                    <i class="fal fa-map-signs negrita text-secondary" style="font-size:250%"></i>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <br>
+
                     <div class="card card-rounded   bg-white shadow col-12 hand" id="btnMenuRptInventario">
                         <div class="card-body p-4">
 
@@ -1093,6 +1110,15 @@ function addListeners(){
         rpt_tbl_productos();
     });
 
+
+
+    
+  
+    document.getElementById('btnMenuRptVisitasMapa').addEventListener('click',()=>{
+
+        Menu.objetivos_visitas_gps();
+
+    });
 
     document.getElementById('btnMenuRptInventario').addEventListener('click',()=>{
 
