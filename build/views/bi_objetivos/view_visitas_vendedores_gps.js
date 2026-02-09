@@ -93,6 +93,8 @@ function getView(){
 
                         </div>
                         <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                            <div class="form-group">
+                                <label>Fecha</label>
                                 <select class="form-control negrita text-danger border-danger" id="cmbDiaCliente">
                                             <option value="LUNES">LUNES</option>
                                             <option value="MARTES">MARTES</option>
@@ -103,6 +105,7 @@ function getView(){
                                             <option value="DOMINGO">DOMINGO</option>
                                             <option value="OTROS">OTROS</option>
                                 </select>
+                            </div>
                         </div>
                     </div>
                     <br>
