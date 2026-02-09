@@ -1938,6 +1938,7 @@ function tbl_clientes_mapa(filtro){
                     
                     contador+=1;
                     if(Number(contador)==1){latInicial = Number(r.LATITUD); longInicial=Number(r.LONGITUD)};
+                    if(latInicial==0){contador= contador-1};
 
                     let icono;
                     

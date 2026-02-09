@@ -6,7 +6,7 @@ function getView(){
                 <div class="col-12 p-0 bg-white">
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
-                            ${view.vista_inicio()}
+                            ${view.vista_inicio() + view.modal_marcas_cliente()}
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
                            
@@ -58,15 +58,8 @@ function getView(){
                 </div>
             </div>
             <br>
-
-            <div class="row">
-                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                    ${view.frag_mapa_visitas_vendedor()}
-                </div>
-                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                    ${view.frag_marcas_cliente()}
-                </div>
-            </div>
+          
+                ${view.frag_mapa_visitas_vendedor()}
             `
         },
         frag_mapa_visitas_vendedor:()=>{
@@ -115,15 +108,59 @@ function getView(){
             </div>
             `
         },
-         frag_marcas_cliente:()=>{
+        modal_marcas_cliente:()=>{
             return `
-            <div class="card card-rounded shadow">
-                <div class="card-body p-4" id="container_mapa">
-                    
-                    
-                
+            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" 
+                role="dialog" aria-hidden="true" 
+                id="modal_marcas_cliente">
+                <div class="modal-dialog modal-dialog-right modal-xl">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-base d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white" id="">
+                                Marcas del Mes
+                            </h4>
+                        </div>
+                        <div class="modal-body p-2">
+                            
+                            <div class="card card-rounded">
+                                <div class="card-body p-2">
+
+                                    <h5 class="text-danger" id="lbNomclieMarca"></h5>
+                                    <h5 class="negrita text-danger" id="lbCodclieMarca"></h5>
+
+                                    <h5 class="text-secondary">Marcas compradas por el cliente Mes en Curso</h5>
+
+                                    <div class="table-responsive">
+
+                                        <small>Total: </small>
+                                        <h5 class="text-danger negrita" id="lbTotalClienteMarca"></h5>
+
+                                        <table class="table table-striped h-full col-12">
+                                            <thead class="bg-secondary text-white">
+                                                <tr>
+                                                    <td>MARCA</td>
+                                                    <td>TOTAL VENDIDO</td>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tbl_data_marcas_cliente">
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <button class="btn btn-bottom-l btn-xl btn-secondary btn-circle hand shadow" data-dismiss="modal">
+                                <i class="fal fa-arrow-left"></i>
+                            </button>                              
+
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            
             `
         },
         modal:()=>{
@@ -222,7 +259,12 @@ function addListeners(){
         get_reportes();
     });
 
+    document.getElementById('txtFecha').addEventListener('change',()=>{
+        document.getElementById('cmbDiaCliente').value = F.devuelve_dia_semana('txtFecha');
+        get_reportes();
+    })
 
+    
 
 };
 
@@ -342,6 +384,7 @@ function get_visitas_dia_vendedor(){
                     
                     contador+=1;
                     if(Number(contador)==1){latInicial = Number(r.LATITUD); longInicial=Number(r.LONGITUD)};
+                    if(latInicial==0){contador= contador-1};
 
                     let icono;
                     
@@ -358,7 +401,7 @@ function get_visitas_dia_vendedor(){
                             .addTo(map)
                             .bindPopup(`${r.TIPONEGOCIO}-${r.NEGOCIO}, ${r.NOMBRE}<br><small>${F.limpiarTexto(r.DIRECCION)}</small>`, {closeOnClick: false, autoClose: true})
                             .on('click', function(e){
-                                get_visita_cliente_mapa(r.CODCLIENTE,r.NOMBRE,r.TIPONEGOCIO,r.NEGOCIO,r.NIT,F.limpiarTexto(r.DIRECCION),r.TELEFONO)
+                                get_marcas_cliente(r.CODCLIENTE,r.NOMBRE)
                             })
                             //.openPopup();
 
@@ -432,4 +475,48 @@ function data_visitas_vendedor(codven,fecha,dia){
 
     })
 
-}
+};
+
+function get_marcas_cliente(codclie, nomclie){
+
+    
+    $("#modal_marcas_cliente").modal('show');
+
+    document.getElementById('lbNomclieMarca').innerText = nomclie;
+    document.getElementById('lbCodclieMarca').innerText = codclie;
+    
+
+    let container = document.getElementById('tbl_data_marcas_cliente');
+    container.innerHTML = GlobalLoader;
+
+    let varTotal = 0;
+
+    GF.get_data_marcas_cliente(GlobalEmpnit,codclie,F.getFecha())
+    .then((data)=>{
+
+        let str = '';
+        data.recordset.map((r)=>{
+            let strClass = '';
+            if(Number(r.TOTALPRECIO)==0){strClass='bg-danger text-white'}else{strClass='bg-success text-white'};
+            varTotal += Number(r.TOTALPRECIO);
+            str += `
+                <tr class="${strClass}">
+                    <td>${r.DESMARCA}</td>
+                    <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                </tr>
+            `
+        })
+        container.innerHTML = str;
+        document.getElementById('lbTotalClienteMarca').innerText = F.setMoneda(varTotal,'Q');
+
+    })
+    .catch(()=>{
+        container.innerHTML = 'No se cargaron datos...';
+        document.getElementById('lbTotalClienteMarca').innerText = 'Q 0.00';
+    })
+
+    
+
+
+
+};

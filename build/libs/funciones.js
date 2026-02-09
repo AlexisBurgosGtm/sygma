@@ -777,6 +777,40 @@ let F = {
             break;
         }
       },
+      devuelve_dia_semana:(idInput)=>{
+
+        const input = document.getElementById(idInput);
+        const fecha = new Date(input.value + 'T00:00'); // 'T00:00' evita zona horaria UTC
+        const diaSemana = fecha.getDay(); // 0 (Dom) - 6 (Sab)
+
+
+        switch (diaSemana) {
+          case 0:
+            return 'DOMINGO';
+            break;
+          case 1:
+            return 'LUNES';
+            break;
+          case 2:
+            return 'MARTES';
+            break;
+          case 3:
+            return 'MIERCOLES';
+            break;
+          case 4:
+            return 'JUEVES';
+            break;
+          case 5:
+            return 'VIERNES';
+            break;
+          case 6:
+            return 'SABADO';
+            break;
+        
+          default:
+            break;
+        }
+      },
       get_combo_dias_30:()=>{
         let str =`
                 <option value='1'>1</option>

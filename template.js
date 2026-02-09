@@ -111,6 +111,21 @@ function initView(){
 
 
 
+  .btn {            
+                background-color: #007bff;            
+                color: white;            
+                padding: 15px 30px;            
+                border: none;            
+                border-radius: 5px;            
+                font-size: 16px;            
+                cursor: pointer;            
+                transition: transform 0.5s ease;        
+                }        
+                .btn:hover {            
+                    transform: scale(1.5);        
+                    }    
+                    
+
 
 SUBQUERY
 
