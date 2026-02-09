@@ -148,7 +148,7 @@ function getView(){
                     id="btnMenuObjetivos">
                         <div class="card-body p-4">
 
-                            <h4 class="text-info">OBJETIVOS</h4>
+                            <h4 class="text-info">LOGRO OBJETIVOS P&G</h4>
                           
                              <div class="row">
                                 <div class="col-6">
@@ -1604,8 +1604,9 @@ function listeners_objetivos(){
 
     document.getElementById('btnMenuObjetivos').addEventListener('click',()=>{
 
-         document.getElementById('tab-ocho').click();
-        get_reportes();
+        //document.getElementById('tab-ocho').click();
+        //get_reportes();
+        Menu.objetivos_logro_procter();
     });
 
 
