@@ -236,6 +236,8 @@ function addListeners(){
             case 5: //digitador
                 cmbSucursal.value = GlobalEmpnit;
                 break;
+            case 7: //proveedor
+                break;
         
             default:
                 cmbSucursal.value = GlobalEmpnit;
