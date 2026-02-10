@@ -29,8 +29,12 @@ router.post("/insertventa_factura", async(req,res)=>{
     let nuevoCorrelativo = Number(correlativo) + 1;
     let qryTipodocumentos = `UPDATE TIPODOCUMENTOS SET CORRELATIVO=${nuevoCorrelativo} WHERE EMPNIT='${sucursal}' AND CODDOC='${coddoc}';`;
     let qry_last_sale_cliente = `UPDATE CLIENTES SET LASTSALE='${fecha}' WHERE CODCLIENTE=${codcliente};`
+    let qry_visita = `INSERT INTO CLIENTES_VISITAS (EMPNIT,CODCLIENTE,FECHA,HORA,CODEMP,MOTIVO,LATITUD,LONGITUD)
+                    SELECT '${sucursal}' AS EMPNIT,${codcliente} AS CODCLIENTE,
+                    '${fecha}' AS FECHA,'${hora}' AS HORA,${codven} AS CODEMP,
+                    'VENTA' AS MOTIVO,${Number(entrega_lat)} AS LATITUD,${Number(entrega_long)} AS LONGITUD; `
     
-    let qry = qryDocumentos + qryDocproductos + qryTipodocumentos + qry_last_sale_cliente;
+    let qry = qryDocumentos + qryDocproductos + qryTipodocumentos + qry_last_sale_cliente + qry_visita;
 
     
     execute.QueryToken(res,qry,token);

@@ -223,7 +223,7 @@ function addListeners(){
     GF.get_data_empresas()
     .then((data)=>{
 
-        let str = `<option value="%">TODAS</option>`;
+        let str = ``;
 
         data.recordset.map((r)=>{
             str += `<option value="${r.EMPNIT}">${r.NOMBRE}</option>`;
@@ -452,12 +452,15 @@ function get_visitas_dia_vendedor(){
 
 function data_visitas_vendedor(codven,fecha,dia){
 
+     let cmbSucursal = document.getElementById('cmbSucursal').value;
+   
+
     return new Promise((resolve, reject) => {
         
 
             axios.post('/clientes/buscar_cliente_vendedor_supervisor', {
                 token:TOKEN,
-                sucursal: GlobalEmpnit,
+                sucursal: cmbSucursal,
                 dia:dia,
                 codven:codven,
                 fecha:fecha
