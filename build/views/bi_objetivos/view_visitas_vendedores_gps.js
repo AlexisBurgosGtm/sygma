@@ -262,7 +262,13 @@ function addListeners(){
     document.getElementById('txtFecha').value = F.getFecha();
 
     cmbSucursal.addEventListener('change',()=>{
-        get_reportes();
+         get_empleados()
+        .then(()=>{
+             get_reportes(); 
+        })
+        .catch(()=>{
+
+        })
     });
     document.getElementById('cmbEmpleado').addEventListener('change',()=>{
         get_reportes();
