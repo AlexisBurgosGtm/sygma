@@ -145,7 +145,40 @@ router.post("/lista_clientes_general", async(req,res)=>{
     const { token, sucursal, st} = req.body;
 
     let qry = '';
-    qry = `
+
+    if(st=='NOGPS'){
+        qry = `
+        SELECT 
+                CLIENTES.CODEMPLEADO,
+                CLIENTES.CODCLIENTE, 
+                CLIENTES.NIT, 
+                CLIENTES.NOMBRE, 
+                CLIENTES.TIPONEGOCIO, 
+                CLIENTES.NEGOCIO,
+                CLIENTES.CATEGORIA,
+                CLIENTES.DIRECCION, 
+                CLIENTES.CODMUN, 
+                MUNICIPIOS.DESMUN, 
+                CLIENTES.CODDEPTO, 
+                DEPARTAMENTOS.DESDEPTO,
+                CLIENTES.CODSECTOR, 
+                SECTORES.DESSECTOR, 
+                CLIENTES.TELEFONO, 
+                CLIENTES.LATITUD, CLIENTES.LONGITUD, 
+                CLIENTES.SALDO, CLIENTES.HABILITADO, 
+                CLIENTES.LASTSALE, CLIENTES.DIASCREDITO, 
+                CLIENTES.REFERENCIA, EMPLEADOS.NOMEMPLEADO,
+                CLIENTES.DIAVISITA AS VISITA
+        FROM CLIENTES LEFT OUTER JOIN
+               EMPLEADOS ON CLIENTES.CODEMPLEADO = EMPLEADOS.CODEMPLEADO LEFT OUTER JOIN
+               SECTORES ON CLIENTES.CODSECTOR = SECTORES.CODSECTOR LEFT OUTER JOIN
+               DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO LEFT OUTER JOIN
+               MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+        WHERE (CLIENTES.EMPNIT = '${sucursal}')       
+         AND (ISNULL(CLIENTES.LATITUD,'0')='0');
+            `
+    }else{
+        qry = `
         SELECT 
                 CLIENTES.CODEMPLEADO,
                 CLIENTES.CODCLIENTE, 
@@ -175,6 +208,9 @@ router.post("/lista_clientes_general", async(req,res)=>{
         WHERE (CLIENTES.EMPNIT = '${sucursal}')       
          AND (CLIENTES.HABILITADO='${st}')
         `
+    }
+
+    
 
 
 

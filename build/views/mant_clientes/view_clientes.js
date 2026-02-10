@@ -9,7 +9,7 @@ function getView(){
                             ${view.vista_listado() + view.modal_qr()}
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
-                           ${view.vista_datos_cliente()}
+                           ${view.vista_datos_cliente() + view.modal_mapa()}
                         </div>
                         <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
                             
@@ -55,7 +55,7 @@ function getView(){
                                     <option value="NA">CENSO</option>
                                     <option value="SI">ACTIVOS</option>
                                     <option value="NO">DESACTIVADOS</option>
-                                    
+                                    <option value="NOGPS">SIN UBICACION GPS</option>
                                 </select>
                             </div>
                         
@@ -343,7 +343,45 @@ function getView(){
 
             
             `
-        }   
+        },
+        modal_mapa:()=>{
+            return `
+            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" 
+                role="dialog" aria-hidden="true" 
+                id="modal_mapa">
+                <div class="modal-dialog modal-dialog-right modal-xl">
+                    <div class="modal-content">
+                        <div class="dropdown-header negrita bg-secondary d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white" id="">
+                                INDIQUE LA UBICACION GPS DEL CLIENTE
+                            </h4>
+                        </div>
+                        <div class="modal-body p-4">
+                            
+                            <div class="card card-rounded" id="">
+                                <div class="card-body p-2">
+
+                                    <div class="" id="container_mapa">
+
+                                    </div>
+
+                                </div>
+
+                                <br>
+                                
+                                <button class="btn btn-xl btn-secondary btn-circle hand shadow" data-dismiss="modal">
+                                    <i class="fal fa-arrow-left"></i>
+                                </button>
+                            </div>                              
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            `
+        },   
     }
 
     root.innerHTML = view.body();
@@ -569,6 +607,13 @@ function addListeners(){
         });
 
 
+        document.getElementById('btnUbicacion').addEventListener('click',()=>{
+           
+            $("#modal_mapa").modal('show');
+
+            get_mapa();
+
+        })
 
 };
 
@@ -1169,5 +1214,69 @@ function create_qr_code(codigo,nomclie){
     document.getElementById('lbCodclieQR').innerText = `Codigo: ${codigo}`
 
     F.create_qr_code(codigo,'container_qr');
+
+};
+
+
+function get_mapa(){
+
+    let latitud = document.getElementById('txtLatitud').innerText;
+    let longitud = document.getElementById('txtLongitud').innerText;
+
+
+    let lat = 0; let long = 0;
+
+    let container = document.getElementById('container_mapa');
+    container.innerHTML = '';
+    container.innerHTML = `<div class="mapcontainer5" id="mapcontainer"></div>`;
+
+
+
+    try {
+        navigator.geolocation.getCurrentPosition(function (location) {
+            
+
+            if(latitud.toString()=='0'){
+                lat = location.coords.latitude.toString();
+                long = location.coords.longitude.toString();  
+            }else{
+                lat = Number(latitud);
+                long = Number(longitud);
+            }
+
+                      
+            var map = L.map('mapcontainer').setView([Number(lat), Number(long)], 15);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            //agrego la ubicacion del usuario
+            L.marker([Number(lat), Number(long)],{icon: userIcon, draggable:'true'})
+                .addTo(map)
+                .bindPopup(`Mueveme al lugar correcto`, {closeOnClick: false, autoClose: false})
+                .openPopup()
+                .on("dragend",function(e) {
+                    this.openPopup();
+                    var position = e.target._latlng;
+                    //console.log(e.target._latlng);
+                    //obtiene la posición del evento
+                    document.getElementById('txtLatitud').innerText = position.lat;
+                    document.getElementById('txtLongitud').innerText = position.lng;
+                });
+
+
+                //map.invalidateSize(true);
+                setTimeout(function(){ 
+                    map.invalidateSize();
+                    //map.flyTo([latInicial,longInicial],15);
+                }, 400)
+             
+                               
+        })
+    } catch (error) {
+            F.AvisoError(error.toString());
+    };
+
 
 };

@@ -1882,32 +1882,7 @@ function tbl_clientes_mapa(filtro){
     let contador = 0;
     let latInicial =0, longInicial = 0;
 
-    //-----------------------------------------------
-    //personalizacion de marcadores
-           
-            //clase con opciones del icono
-            var LeafIcon = L.Icon.extend({
-                options: {
-                        shadowUrl: './libs/leaflet/images/marker-shadow.png',
-                        iconSize: [18, 35],
-                        shadowSize: [0, 0],
-                        iconAnchor: [20, 92],
-                        shadowAnchor: [4, 62],
-                        popupAnchor: [-3, -76]
-                }
-            });
-
-            //iconSize: [38, 95]
-            //iconAnchor: [22, 94]
-
-            var greenIcon = new LeafIcon({iconUrl: './libs/leaflet/images/marker-icon-green.png'}),
-                redIcon = new LeafIcon({iconUrl: './libs/leaflet/images/marker-icon-red.png'}),
-                blueIcon = new LeafIcon({iconUrl: './libs/leaflet/images/marker-icon.png'}),
-                userIcon = new LeafIcon({iconUrl: './libs/leaflet/images/marker-user.png'});
-        
-        //-----------------------------------------------
-        //-----------------------------------------------
-
+   
 
     try {
         navigator.geolocation.getCurrentPosition(function (location) {
