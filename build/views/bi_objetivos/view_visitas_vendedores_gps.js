@@ -6,16 +6,16 @@ function getView(){
                 <div class="col-12 p-0 bg-white">
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
-                            ${view.vista_inicio() + view.modal_marcas_cliente()}
+                            ${view.vista_inicio()}
 
-                            
                             <button class="btn btn-bottom-l btn-xl btn-circle btn-primary hand shadow"
                             onclick="Navegar.inicio()">
                                 <i class="fal fa-home"></i>
                             </button>
+                           
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
-                           
+                            ${view.vista_datos_cliente()}
                         </div>
                         <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
                             
@@ -118,6 +118,94 @@ function getView(){
             </div>
             `
         },
+        vista_datos_cliente:()=>{
+            return `
+            <div class="card card-rounded col-12">
+                <div class="card-body p-4">
+
+                    <h5 class="negrita text-danger" id="lbNomclieMarca"></h5>
+                    <small>CODIGO CLIENTE: </small>
+                    <h5 class="text-secondary" id="lbCodclieMarca"></h5>
+
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                    ${view.frag_rpt_marcas_cliente()}
+                </div>
+                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                    ${view.frag_rpt_productos_cliente()}
+                </div>
+            </div>
+            
+            
+            <button class="btn btn-bottom-l btn-xl btn-secondary btn-circle hand shadow"
+            id="btnAtrasDatosCliente" onclick="document.getElementById('tab-uno').click()">
+                <i class="fal fa-arrow-left"></i>
+            </button>                              
+            
+            `
+        },
+        frag_rpt_marcas_cliente:()=>{
+            return `
+            <div class="card card-rounded">
+                <div class="card-body p-4">
+                    
+                    <h5 class="text-secondary">Marcas compradas por el cliente Mes en Curso</h5>
+
+                    <div class="table-responsive">
+
+                        <small>Total: </small>
+                        <h5 class="text-danger negrita" id="lbTotalClienteMarca"></h5>
+
+                        <table class="table table-bordered h-full col-12">
+                            <thead class="bg-secondary text-white">
+                                <tr>
+                                    <td>MARCA</td>
+                                    <td>TOTAL VENDIDO</td>
+                                </tr>
+                            </thead>
+                            <tbody id="tbl_data_marcas_cliente">
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                </div>
+            </div>
+            `
+        },
+        frag_rpt_productos_cliente:()=>{
+            return `
+            <div class="card card-rounded">
+                <div class="card-body p-4">
+                    
+                    <h5 class="text-secondary">Productos comprados por el cliente</h5>
+
+                    <div class="table-responsive">
+
+                        <small>Total: </small>
+                        <h5 class="text-danger negrita" id="lbTotalClienteProductos"></h5>
+
+                        <table class="table table-bordered h-full col-12">
+                            <thead class="bg-primary text-white">
+                                <tr>
+                                    <td>PRODUCTO</td>
+                                    <td>TOTALUNIDADES</td>
+                                    <td>IMPORTE</td>
+                                </tr>
+                            </thead>
+                            <tbody id="tbl_data_productos_cliente">
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                </div>
+            </div>
+            `
+        },
         modal_marcas_cliente:()=>{
             return `
             <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" 
@@ -171,38 +259,6 @@ function getView(){
             </div>
 
             
-            `
-        },
-        modal:()=>{
-            return `
-              <div id="modal_" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-right modal-xl">
-                    <div class="modal-content">
-                        <div class="dropdown-header bg-secondary d-flex justify-content-center align-items-center w-100">
-                            <h4 class="m-0 text-center color-white" id="">
-                                TITULO
-                            </h4>
-                        </div>
-                        <div class="modal-body p-4">
-                            
-                            <div class="card card-rounded">
-                                <div class="card-body p-2">
-
-                                </div>
-                            </div>
-
-                                
-                            <div class="row">
-                                <button class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
-                                    <i class="fal fa-arrow-left"></i>
-                                </button>
-                            </div>
-
-                        </div>
-                    
-                    </div>
-                </div>
-            </div>
             `
         }
     }
@@ -419,7 +475,7 @@ function get_visitas_dia_vendedor(){
                             .addTo(map)
                             .bindPopup(`${r.TIPONEGOCIO}-${r.NEGOCIO}, ${r.NOMBRE}<br><small>${F.limpiarTexto(r.DIRECCION)}</small>`, {closeOnClick: false, autoClose: true})
                             .on('click', function(e){
-                                get_marcas_cliente(r.CODCLIENTE,r.NOMBRE)
+                                get_datos_cliente(r.CODCLIENTE,r.NOMBRE)
                             })
                             //.openPopup();
 
@@ -458,7 +514,7 @@ function get_visitas_dia_vendedor(){
 
 function data_visitas_vendedor(codven,fecha,dia){
 
-     let cmbSucursal = document.getElementById('cmbSucursal').value;
+     let sucursal = document.getElementById('cmbSucursal').value;
    
 
     return new Promise((resolve, reject) => {
@@ -466,7 +522,7 @@ function data_visitas_vendedor(codven,fecha,dia){
 
             axios.post('/clientes/buscar_cliente_vendedor_supervisor', {
                 token:TOKEN,
-                sucursal: cmbSucursal,
+                sucursal: sucursal,
                 dia:dia,
                 codven:codven,
                 fecha:fecha
@@ -498,11 +554,17 @@ function data_visitas_vendedor(codven,fecha,dia){
 
 };
 
+function get_datos_cliente(codclie,nomclie){
+
+    document.getElementById('tab-dos').click();
+    get_marcas_cliente(codclie, nomclie);
+    get_productos_clientes(codclie);
+
+};
 function get_marcas_cliente(codclie, nomclie){
 
     
-    $("#modal_marcas_cliente").modal('show');
-
+    
     document.getElementById('lbNomclieMarca').innerText = nomclie;
     document.getElementById('lbCodclieMarca').innerText = codclie;
     
@@ -514,7 +576,10 @@ function get_marcas_cliente(codclie, nomclie){
 
     let fecha = F.devuelveFecha('txtFecha');
 
-    GF.get_data_marcas_cliente(GlobalEmpnit,codclie,fecha)
+    let sucursal = document.getElementById('cmbSucursal').value;
+   
+
+    GF.get_data_marcas_cliente(sucursal,codclie,fecha)
     .then((data)=>{
 
         let str = '';
@@ -541,5 +606,46 @@ function get_marcas_cliente(codclie, nomclie){
     
 
 
+
+};
+
+function get_productos_clientes(codclie){
+
+    
+
+    let container = document.getElementById('tbl_data_productos_cliente');
+    container.innerHTML = GlobalLoader;
+
+    let varTotal = 0;
+
+    let fecha = F.devuelveFecha('txtFecha');
+
+    let sucursal = document.getElementById('cmbSucursal').value;
+
+    GF.get_data_productos_cliente(sucursal,codclie,fecha)
+    .then((data)=>{
+
+        let str = '';
+        data.recordset.map((r)=>{
+         
+            varTotal += Number(r.TOTALPRECIO);
+            str += `
+                <tr>
+                    <td>${r.DESPROD}</td>
+                    <td>${r.TOTALUNIDADES}</td>
+                    <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                </tr>
+            `
+        })
+        container.innerHTML = str;
+        document.getElementById('lbTotalClienteProductos').innerText = F.setMoneda(varTotal,'Q');
+
+    })
+    .catch(()=>{
+        container.innerHTML = 'No se cargaron datos...';
+        document.getElementById('lbTotalClienteProductos').innerText = 'Q 0.00';
+    })
+
+    
 
 };

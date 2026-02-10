@@ -1736,6 +1736,38 @@ let GF = {
     
         })
     },
+    get_data_productos_cliente: (sucursal,codclie,fecha)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:sucursal,
+                codclie:codclie,
+                fecha:fecha
+            };
+    
+            axios.post(`/reportes/rpt_productos_cliente_mes`, data)
+            .then(res => {
+               
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    }            
+                }else{
+                    reject();
+                } 
+            })
+            .catch((error)=>{
+              
+                reject();
+            })
+    
+        })
+    },
     get_data_embarque_facturas: (empnit,codembarque)=>{
         
         return new Promise((resolve, reject)=>{

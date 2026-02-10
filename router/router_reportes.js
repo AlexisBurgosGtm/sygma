@@ -245,6 +245,31 @@ router.post("/rpt_marcas_cliente_mes", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+router.post("/rpt_productos_cliente_mes", async(req,res)=>{
+   
+    const { token, sucursal, codclie, fecha } = req.body;
+
+    let qry = `    
+        SELECT 
+            ANIO, MES, 
+            PRODUCTO AS CODPROD, 
+            DESCRIPCION_PRODUCTO AS DESPROD, 
+            SUM((TOTALUNIDADES*(INV*-1))) AS TOTALUNIDADES, 
+            SUM((TOTALPRECIO*(INV*-1))) AS TOTALPRECIO
+        FROM  view_rpt_general
+        WHERE
+            (EMPNIT='${sucursal}') AND 
+            (CODIGO_CLIENTE = ${codclie}) AND 
+            (MES=MONTH('${fecha}')) AND 
+            (ANIO=YEAR('${fecha}'))
+        GROUP BY EMPNIT, ANIO, MES, PRODUCTO,DESCRIPCION_PRODUCTO
+        ORDER BY SUM((TOTALPRECIO*(INV*-1))) DESC;   
+        `;
+    
+  
+    execute.QueryToken(res,qry,token);
+     
+});
 
 
 
