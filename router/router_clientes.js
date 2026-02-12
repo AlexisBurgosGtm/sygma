@@ -437,6 +437,9 @@ router.post("/censo_delete_cliente", async(req,res)=>{
      
 });
 
+//----------------------
+//municipios
+
 router.post("/municipios", async(req,res)=>{
 
     const {coddepto} = req.body;
@@ -449,8 +452,15 @@ router.post("/municipios", async(req,res)=>{
      
 });
 
-router.post("/departamentos", async(req,res)=>{
+//municipios
+//----------------------
 
+
+
+//----------------------
+//departamentos
+
+router.post("/departamentos", async(req,res)=>{
 
     let qry = `SELECT CODDEPTO AS CODIGO, 
                 DESDEPTO AS DESCRIPCION  
@@ -459,6 +469,29 @@ router.post("/departamentos", async(req,res)=>{
      execute.QueryToken(res,qry,'');
      
 });
+router.post("/insert_departamento", async(req,res)=>{
+
+    const {descripcion} = req.body;
+
+    let qry = `INSERT INTO DEPARTAMENTOS (DESDEPTO) 
+        SELECT '${descripcion}' AS DESDEPTO; `
+
+     execute.QueryToken(res,qry,'');
+     
+});
+router.post("/delete_departamento", async(req,res)=>{
+
+    const {codigo} = req.body;
+
+    let qry = `DELETE FROM DEPARTAMENTOS WHERE CODDEPTO=${codigo}; `
+
+     execute.QueryToken(res,qry,'');
+     
+});
+
+//departamentos
+//----------------------
+
 
 router.post("/sectores", async(req,res)=>{
 
@@ -471,6 +504,10 @@ router.post("/sectores", async(req,res)=>{
      execute.QueryToken(res,qry,'');
      
 });
+
+
+
+
 
 
 

@@ -203,6 +203,11 @@ let botones_menu = {
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">RUTAS CLIENTES</span>
                                         </a>
                                     </li>
+                                    <li>
+                                        <a href="#" title="How it works" data-filter-tags="theme settings how it works"  onclick="Menu.municipios_departamentos()">
+                                            <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">MUNICIPIOS/DEPARTAMENTOS</span>
+                                        </a>
+                                    </li>
                                      <li>
                                         <a href="#" title="Layout Options" data-filter-tags="theme settings layout options"  onclick="Menu.empleados()">
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_layout_options">EMPLEADOS</span>
@@ -571,6 +576,11 @@ let botones_menu = {
                                     <li>
                                         <a href="#" title="How it works" data-filter-tags="theme settings how it works"  onclick="Menu.clientes_rutas()">
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">RUTAS CLIENTES</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" title="How it works" data-filter-tags="theme settings how it works"  onclick="Menu.municipios_departamentos()">
+                                            <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">MUNICIPIOS/DEPARTAMENTOS</span>
                                         </a>
                                     </li>
                                      <li>

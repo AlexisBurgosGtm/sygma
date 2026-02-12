@@ -304,6 +304,17 @@ let Menu = {
             F.AvisoError('No tiene permitido entrar a esta sección');
         } 
     },
+    municipios_departamentos:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/mant_mundeptos/view_mun_deptos.js','root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        } 
+    },
     empleados:()=>{
         if(Menu.verify()==true){
             Menu.salidaMenu();
