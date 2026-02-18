@@ -11,7 +11,10 @@ router.post("/empleados_localizacion", async(req,res)=>{
     let qry = `
         SELECT NOMEMPLEADO AS EMPLEADO, 
             ISNULL(TELEFONO,'') AS TELEFONO, 
-            ISNULL(LATITUD,0) AS LATITUD, ISNULL(LONGITUD,0) AS LONGITUD
+            ISNULL(LATITUD,0) AS LATITUD, 
+            ISNULL(LONGITUD,0) AS LONGITUD,
+            ISNULL(HORA,'00:00') AS HORA,
+            ISNULL(FECHA, GETDATE()) AS FECHA
         FROM EMPLEADOS WHERE EMPNIT='${sucursal}' AND CODPUESTO=3 AND LATITUD<>0;   
     `
     

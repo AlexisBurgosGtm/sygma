@@ -360,6 +360,8 @@ function addListeners(){
                     btnGuardarDepartamento.innerHTML = `<i class="fal fa-save"></i>`;
                     F.Aviso('Creado exitosamente!!');
 
+                    $("#modal_departamento").modal('hide');
+
                     tbl_departamentos();
 
                 })

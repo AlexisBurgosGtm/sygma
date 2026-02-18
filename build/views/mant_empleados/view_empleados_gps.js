@@ -264,7 +264,7 @@ function get_empleados(){
 
                 L.marker([Number(r.LATITUD), Number(r.LONGITUD)])
                     .addTo(map)
-                    .bindPopup(`${r.EMPLEADO} - TEL: ${r.TELEFONO}`, {closeOnClick: false, autoClose: false})
+                    .bindPopup(`${r.EMPLEADO} - HORA: ${r.HORA} FECHA: ${F.convertir_fecha(r.FECHA,'/')}`, {closeOnClick: false, autoClose: false})
                     .openPopup();
 
                 })
