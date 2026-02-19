@@ -101,20 +101,18 @@ function getView(){
                     <h5 class="negrita text-info">MUNICIPIOS</h5>
 
                     <div class="table-responsive col-12">
-                        <div class="row">
-                            <div class="col-8">
+
                                 <div class="form-group">
                                     <label>Seleccione un Departamento</label>
-                                    <select class="negrita form-control" id="cmbDepartamentos">
-                                    </select>
+                                    <div class="input-group">
+                                        <select class="negrita form-control" id="cmbDepartamentos">
+                                        </select>
+                                        <button class="btn btn-success btn-md hand shadow" id="btnNuevoMunicipio">
+                                            <i class="fal fa-plus"></i> Nuevo
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-4">
-                                <button class="btn btn-success btn-xl btn-circle hand shadow" id="btnNuevoMunicipio">
-                                    <i class="fal fa-plus"></i>
-                                </button>
-                            </div>
-                        </div>
+                     
                         <br>
                         <table class="table h-full table-hover col-12">
                             <thead class="bg-info text-white">
@@ -141,20 +139,18 @@ function getView(){
                     <h5 class="negrita text-secondary">SECTORES (ALDEAS)</h5>
 
                     <div class="table-responsive col-12">
-                        <div class="row">
-                            <div class="col-8">
-                                <div class="form-group">
-                                    <label>Seleccione un Municipio</label>
+                        
+                            <div class="form-group">
+                                <label>Seleccione un Municipio</label>
+                                <div class="input-group">
                                     <select class="negrita form-control" id="cmbMunicipios">
                                     </select>
+                                    <button class="btn btn-success btn-md hand shadow" id="btnNuevoSector">
+                                        <i class="fal fa-plus"></i> Nuevo
+                                    </button>
                                 </div>
                             </div>
-                            <div class="col-4">
-                                <button class="btn btn-success btn-xl btn-circle hand shadow" id="btnNuevoSector">
-                                    <i class="fal fa-plus"></i>
-                                </button>
-                            </div>
-                        </div>
+
                         <br>
                         <table class="table h-full table-hover col-12">
                             <thead class="bg-secondary text-white">
@@ -232,7 +228,7 @@ function getView(){
                     <div class="modal-content">
                         <div class="dropdown-header bg-info d-flex justify-content-center align-items-center w-100">
                             <h4 class="m-0 text-center color-white" id="">
-                                DATOS DEL DEPARTAMENTO
+                                DATOS DEL MUNICIPIO
                             </h4>
                         </div>
                         <div class="modal-body p-4">
@@ -240,13 +236,16 @@ function getView(){
                             <div class="card card-rounded">
                                 <div class="card-body p-4">
 
+                                    <label>Departamento:</label>
+                                    <h5 class="negrita text-danger" id="lbDesDepto"></h5>
+
                                     <div class="form-group">
-                                        <label></label>
-                                        <input type="text" class="form-control" id="txtCodDepto">
+                                        <label>Codigo Municipio</label>
+                                        <input type="text" class="form-control" id="txtCodMun" disabled="true">
                                     </div>
                                     <div class="form-group">
-                                        <label></label>
-                                        <input type="text" class="form-control" id="txtDesDepto">
+                                        <label>Nombre del Municipio</label>
+                                        <input type="text" class="form-control" id="txtDesMun">
                                     </div>
 
 
@@ -260,7 +259,7 @@ function getView(){
                                     </button>
                                 </div>
                                 <div class="col-6">
-                                    <button class="btn btn-base btn-circle btn-xl hand shadow" id="btnGuardarDepartamento">
+                                    <button class="btn btn-base btn-circle btn-xl hand shadow" id="btnGuardarMunicipio">
                                         <i class="fal fa-save"></i>
                                     </button>
                                 </div>
@@ -283,7 +282,7 @@ function getView(){
                     <div class="modal-content">
                         <div class="dropdown-header bg-secondary d-flex justify-content-center align-items-center w-100">
                             <h4 class="m-0 text-center color-white" id="">
-                                DATOS DEL DEPARTAMENTO
+                                DATOS DEL SECTOR
                             </h4>
                         </div>
                         <div class="modal-body p-4">
@@ -291,13 +290,16 @@ function getView(){
                             <div class="card card-rounded">
                                 <div class="card-body p-4">
 
+                                    <label>Municipio:</label>
+                                    <h5 class="negrita text-danger" id="lbDesMunicipio"></h5>
+
                                     <div class="form-group">
-                                        <label></label>
-                                        <input type="text" class="form-control" id="txtCodDepto">
+                                        <label>Codigo Sector</label>
+                                        <input type="text" class="form-control" id="txtCodSector" disabled="true">
                                     </div>
                                     <div class="form-group">
-                                        <label></label>
-                                        <input type="text" class="form-control" id="txtDesDepto">
+                                        <label>Nombre del Sector</label>
+                                        <input type="text" class="form-control" id="txtDesSector">
                                     </div>
 
 
@@ -311,7 +313,7 @@ function getView(){
                                     </button>
                                 </div>
                                 <div class="col-6">
-                                    <button class="btn btn-base btn-circle btn-xl hand shadow" id="btnGuardarDepartamento">
+                                    <button class="btn btn-base btn-circle btn-xl hand shadow" id="btnGuardarSector">
                                         <i class="fal fa-save"></i>
                                     </button>
                                 </div>
@@ -343,34 +345,59 @@ function addListeners(){
     let btnGuardarDepartamento = document.getElementById('btnGuardarDepartamento');
     btnGuardarDepartamento.addEventListener('click',()=>{
 
-        F.Confirmacion('Esta seguro que desea Crear este nuevo Departamento?')
+        F.Confirmacion('Esta seguro que desea guardar estos datos?')
         .then((value)=>{
             if(value==true){
 
                 let nombre = document.getElementById('txtDesDepto').value || '';
                 if(nombre==''){F.AvisoError('Indique un nombre');return;}
 
+                let codigo = document.getElementById('txtCodDepto').value || '';
+
                 btnGuardarDepartamento.disabled = true;
                 btnGuardarDepartamento.innerHTML = `<i class="fal fa-save fa-spin"></i>`;
 
-                GF.insert_departamento(nombre)
-                .then(()=>{
+                if(codigo==''){ // NUEVO
+                        GF.insert_departamento(nombre)
+                        .then(()=>{
 
-                    btnGuardarDepartamento.disabled = false;
-                    btnGuardarDepartamento.innerHTML = `<i class="fal fa-save"></i>`;
-                    F.Aviso('Creado exitosamente!!');
+                            btnGuardarDepartamento.disabled = false;
+                            btnGuardarDepartamento.innerHTML = `<i class="fal fa-save"></i>`;
+                            F.Aviso('Creado exitosamente!!');
 
-                    $("#modal_departamento").modal('hide');
+                            $("#modal_departamento").modal('hide');
 
-                    tbl_departamentos();
+                            tbl_departamentos();
 
-                })
-                .catch(()=>{
-                    F.AvisoError('No se pudo crear');
-                    btnGuardarDepartamento.disabled = false;
-                    btnGuardarDepartamento.innerHTML = `<i class="fal fa-save"></i>`;
- 
-                })
+                        })
+                        .catch(()=>{
+                            F.AvisoError('No se pudo crear');
+                            btnGuardarDepartamento.disabled = false;
+                            btnGuardarDepartamento.innerHTML = `<i class="fal fa-save"></i>`;
+        
+                        })
+                }else{ // EDICION
+                        GF.edit_departamento(codigo,nombre)
+                        .then(()=>{
+
+                            btnGuardarDepartamento.disabled = false;
+                            btnGuardarDepartamento.innerHTML = `<i class="fal fa-save"></i>`;
+                            F.Aviso('Actualizado exitosamente!!');
+
+                            $("#modal_departamento").modal('hide');
+
+                            tbl_departamentos();
+
+                        })
+                        .catch(()=>{
+                            F.AvisoError('No se pudo editar');
+                            btnGuardarDepartamento.disabled = false;
+                            btnGuardarDepartamento.innerHTML = `<i class="fal fa-save"></i>`;
+        
+                        })
+                }
+
+             
 
 
             }
@@ -390,12 +417,82 @@ function addListeners(){
         $("#modal_municipio").modal('show');
 
     });
-    document.getElementById('cmbDepartamentos').addEventListener('change',()=>{
-      tbl_municipios(document.getElementById('cmbDepartamentos').value);  
+    document.getElementById('cmbDepartamentos').addEventListener('change',(e)=>{
+        
+        document.getElementById('lbDesDepto').innerText = e.target.options[e.target.selectedIndex].text;
+   
+        tbl_municipios(document.getElementById('cmbDepartamentos').value);  
+
     })
+    
+    let btnGuardarMunicipio = document.getElementById('btnGuardarMunicipio');
+    btnGuardarMunicipio.addEventListener('click',()=>{
+
+        F.Confirmacion('Esta seguro que desea guardar estos datos?')
+        .then((value)=>{
+            if(value==true){
+
+                let coddepto = document.getElementById('cmbDepartamentos').value;
+
+                let nombre = document.getElementById('txtDesMun').value || '';
+                if(nombre==''){F.AvisoError('Indique un nombre');return;}
+
+                let codigo = document.getElementById('txtCodMun').value || '';
+
+                btnGuardarMunicipio.disabled = true;
+                btnGuardarMunicipio.innerHTML = `<i class="fal fa-save fa-spin"></i>`;
+
+                if(codigo==''){ // NUEVO
+                        GF.insert_municipio(nombre,coddepto)
+                        .then(()=>{
+
+                            btnGuardarMunicipio.disabled = false;
+                            btnGuardarMunicipio.innerHTML = `<i class="fal fa-save"></i>`;
+                            F.Aviso('Creado exitosamente!!');
+
+                            $("#modal_municipio").modal('hide');
+
+                            tbl_municipios(document.getElementById('cmbDepartamentos').value);  
+
+                        })
+                        .catch(()=>{
+                            F.AvisoError('No se pudo crear');
+                            btnGuardarMunicipio.disabled = false;
+                            btnGuardarMunicipio.innerHTML = `<i class="fal fa-save"></i>`;
+        
+                        })
+                }else{ // EDICION
+                        GF.edit_municipio(codigo,nombre)
+                        .then(()=>{
+
+                            btnGuardarMunicipio.disabled = false;
+                            btnGuardarMunicipio.innerHTML = `<i class="fal fa-save"></i>`;
+                            F.Aviso('Actualizado exitosamente!!');
+
+                            $("#modal_municipio").modal('hide');
+
+                            tbl_municipios(document.getElementById('cmbDepartamentos').value);  
+
+                        })
+                        .catch(()=>{
+                            F.AvisoError('No se pudo editar');
+                            btnGuardarMunicipio.disabled = false;
+                            btnGuardarMunicipio.innerHTML = `<i class="fal fa-save"></i>`;
+        
+                        })
+                }
+
+             
+
+
+            }
+        })
+
+    });
 
 
     //-------------------------------------------------------------
+
 
 
     document.getElementById('btnNuevoSector').addEventListener('click',()=>{
@@ -403,13 +500,81 @@ function addListeners(){
 
         $("#modal_sector").modal('show');
 
+    });
+    document.getElementById('cmbMunicipios').addEventListener('change',(e)=>{
+
+        document.getElementById('lbDesMunicipio').innerText = e.target.options[e.target.selectedIndex].text;
+        tbl_sectores(document.getElementById('cmbMunicipios').value);
 
     });
-    document.getElementById('cmbMunicipios').addEventListener('change',()=>{
-        tbl_sectores(document.getElementById('cmbMunicipios').value);
+
+    let btnGuardarSector = document.getElementById('btnGuardarSector');
+    btnGuardarSector.addEventListener('click',()=>{
+
+        F.Confirmacion('Esta seguro que desea guardar estos datos?')
+        .then((value)=>{
+            if(value==true){
+
+                let codmun = document.getElementById('cmbMunicipios').value;
+
+                let nombre = document.getElementById('txtDesSector').value || '';
+                if(nombre==''){F.AvisoError('Indique un nombre');return;}
+
+                let codigo = document.getElementById('txtCodSector').value || '';
+
+                btnGuardarSector.disabled = true;
+                btnGuardarSector.innerHTML = `<i class="fal fa-save fa-spin"></i>`;
+
+                if(codigo==''){ // NUEVO
+                        GF.insert_sector(nombre,codmun)
+                        .then(()=>{
+
+                            btnGuardarSector.disabled = false;
+                            btnGuardarSector.innerHTML = `<i class="fal fa-save"></i>`;
+                            F.Aviso('Creado exitosamente!!');
+
+                            $("#modal_sector").modal('hide');
+
+                            tbl_sectores(document.getElementById('cmbMunicipios').value);  
+
+                        })
+                        .catch(()=>{
+                            F.AvisoError('No se pudo crear');
+                            btnGuardarSector.disabled = false;
+                            btnGuardarSector.innerHTML = `<i class="fal fa-save"></i>`;
+        
+                        })
+                }else{ // EDICION
+                        GF.edit_sector(codigo,nombre)
+                        .then(()=>{
+
+                            btnGuardarSector.disabled = false;
+                            btnGuardarSector.innerHTML = `<i class="fal fa-save"></i>`;
+                            F.Aviso('Actualizado exitosamente!!');
+
+                            $("#modal_sector").modal('hide');
+
+                            tbl_sectores(document.getElementById('cmbMunicipios').value);  
+
+                        })
+                        .catch(()=>{
+                            F.AvisoError('No se pudo editar');
+                            btnGuardarSector.disabled = false;
+                            btnGuardarSector.innerHTML = `<i class="fal fa-save"></i>`;
+        
+                        })
+                }
+
+             
+
+
+            }
+        })
+
     });
         
 
+  
 
 };
 
@@ -423,11 +588,17 @@ function initView(){
 
 function clean_data(){
 
-    
+    //limpia modal departamento
     document.getElementById('txtCodDepto').value = '';
     document.getElementById('txtDesDepto').value = '';
 
+    //limpia modal municipios
+    document.getElementById('txtCodMun').value = '';
+    document.getElementById('txtDesMun').value = '';
 
+    //limpia modal sectores
+    document.getElementById('txtCodSector').value = '';
+    document.getElementById('txtDesSector').value = '';
 
 };
 
@@ -444,20 +615,27 @@ function tbl_departamentos(){
     .then((data)=>{
 
         let str = ''; let strCombo = '';
+        let conteo = 0; let primerdepartamento = '';
+
         data.recordset.map((r)=>{
+            conteo+=1;
+            if(Number(conteo)==1){primerdepartamento=r.DESCRIPCION};
+
+            let idbtnE = `btnEDepto${r.CODIGO}`;
             str += `
                 <tr>
                     <td>${r.CODIGO}</td>
                     <td>${r.DESCRIPCION}</td>
                     <td>
                         <button class="btn btn-md btn-circle btn-info hand shadow"
-                        onclick="">
+                        onclick="editar_departamento('${r.CODIGO}','${r.DESCRIPCION}')">
                             <i class="fal fa-edit"></i>
                         </button>
                     </td>
                     <td>
                         <button class="btn btn-md btn-circle btn-danger hand shadow"
-                        onclick="">
+                        id="${idbtnE}"
+                        onclick="eliminar_departamento('${r.CODIGO}','${idbtnE}')">
                             <i class="fal fa-trash"></i>
                         </button>
                     </td>
@@ -468,13 +646,59 @@ function tbl_departamentos(){
 
         container.innerHTML = str;
         document.getElementById('cmbDepartamentos').innerHTML = strCombo;
+        document.getElementById('lbDesDepto').innerText = primerdepartamento;
+
         tbl_municipios(document.getElementById('cmbDepartamentos').value);
 
     })
     .catch(()=>{
+        document.getElementById('lbDesDepto').innerText = '';
         container.innerHTML = 'No se cargaron datos...';
     })
 };
+function eliminar_departamento(codigo,idbtn){
+
+    let btn = document.getElementById(idbtn);
+    
+    F.Confirmacion('¿Está seguro que desea ELIMINAR este DEPARTAMENTO?')
+    .then((value)=>{
+
+        if(value==true){
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fal fa-trash fa-spin"></i>`;
+
+            GF.delete_departamento(codigo)
+            .then(()=>{
+
+                F.Aviso('Departamento Eliminado Exitosamente!!');
+
+                tbl_departamentos();
+
+            })
+            .catch(()=>{
+                F.AvisoError('No se pudo Eliminar. Revise si hay Clientes son este Departamento asignado');
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fal fa-trash"></i>`;
+            })
+
+        }
+
+    })
+
+};
+function editar_departamento(codigo,descripcion){
+
+    clean_data();
+    $("#modal_departamento").modal('show');
+
+    document.getElementById('txtCodDepto').value = codigo;
+    document.getElementById('txtDesDepto').value = descripcion;
+    
+
+};
+
+
 
 function tbl_municipios(coddepto){
     
@@ -484,21 +708,29 @@ function tbl_municipios(coddepto){
     GF.data_municipios(coddepto)
     .then((data)=>{
 
+        let conteo = 0; let primernombre = '';
+
         let str = ''; let strCombo = '';
         data.recordset.map((r)=>{
+            
+            conteo+=1;
+            if(Number(conteo)==1){primernombre=r.DESCRIPCION};
+
+            let idbtnE = `btnEMuni${r.CODIGO}`;
             str += `
                 <tr>
                     <td>${r.CODIGO}</td>
                     <td>${r.DESCRIPCION}</td>
                     <td>
                         <button class="btn btn-md btn-circle btn-info hand shadow"
-                        onclick="">
+                        onclick="editar_municipio('${r.CODIGO}','${r.DESCRIPCION}')">
                             <i class="fal fa-edit"></i>
                         </button>
                     </td>
                     <td>
                         <button class="btn btn-md btn-circle btn-danger hand shadow"
-                        onclick="">
+                        id="${idbtnE}"
+                        onclick="eliminar_municipio('${r.CODIGO}','${idbtnE}')">
                             <i class="fal fa-trash"></i>
                         </button>
                     </td>
@@ -508,14 +740,56 @@ function tbl_municipios(coddepto){
         })
         container.innerHTML = str;
         document.getElementById('cmbMunicipios').innerHTML = strCombo;
+        document.getElementById('lbDesMunicipio').innerText = primernombre;
         tbl_sectores(document.getElementById('cmbMunicipios').value);
 
     })
     .catch(()=>{
+        document.getElementById('lbDesMunicipio').innerText = '';
         container.innerHTML = 'No se cargaron datos...';
     })
 
 };
+function editar_municipio(codigo,descripcion){
+    clean_data();
+    $("#modal_municipio").modal('show');
+    document.getElementById('txtCodMun').value = codigo;
+    document.getElementById('txtDesMun').value = descripcion;
+};
+function eliminar_municipio(codigo,idbtn){
+
+    let btn = document.getElementById(idbtn);
+    
+    F.Confirmacion('¿Está seguro que desea ELIMINAR este MUNICIPIO?')
+    .then((value)=>{
+
+        if(value==true){
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fal fa-trash fa-spin"></i>`;
+
+            GF.delete_municipio(codigo)
+            .then(()=>{
+
+                F.Aviso('Municipio Eliminado Exitosamente!!');
+
+                    tbl_municipios(document.getElementById('cmbDepartamentos').value);  
+                    
+
+            })
+            .catch(()=>{
+                F.AvisoError('No se pudo Eliminar. Revise si hay Clientes son este Municipio asignado');
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fal fa-trash"></i>`;
+            })
+
+        }
+
+    })
+
+};
+
+
 
 function tbl_sectores(codmunicipio){
 
@@ -527,19 +801,21 @@ function tbl_sectores(codmunicipio){
 
         let str = ''; let strCombo = '';
         data.recordset.map((r)=>{
+            let idbtnE = `btnESector${r.CODIGO}`;
             str += `
                 <tr>
                     <td>${r.CODIGO}</td>
                     <td>${r.DESCRIPCION}</td>
                     <td>
                         <button class="btn btn-md btn-circle btn-info hand shadow"
-                        onclick="">
+                        onclick="editar_sector('${r.CODIGO}','${r.DESCRIPCION}')">
                             <i class="fal fa-edit"></i>
                         </button>
                     </td>
                     <td>
                         <button class="btn btn-md btn-circle btn-danger hand shadow"
-                        onclick="">
+                        id="${idbtnE}"
+                        onclick="eliminar_sector('${r.CODIGO}','${idbtnE}')">
                             <i class="fal fa-trash"></i>
                         </button>
                     </td>
@@ -554,3 +830,43 @@ function tbl_sectores(codmunicipio){
     })
     
 };
+function editar_sector(codigo,descripcion){
+    clean_data();
+    $("#modal_sector").modal('show');
+    document.getElementById('txtCodSector').value = codigo;
+    document.getElementById('txtDesSector').value = descripcion;
+};
+function eliminar_sector(codigo,idbtn){
+
+    let btn = document.getElementById(idbtn);
+    
+    F.Confirmacion('¿Está seguro que desea ELIMINAR este SECTOR?')
+    .then((value)=>{
+
+        if(value==true){
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fal fa-trash fa-spin"></i>`;
+
+            GF.delete_sector(codigo)
+            .then(()=>{
+
+                F.Aviso('Sector Eliminado Exitosamente!!');
+
+                tbl_sectores(document.getElementById('cmbMunicipios').value);
+
+            })
+            .catch(()=>{
+                F.AvisoError('No se pudo Eliminar. Revise si hay Clientes son este Sector asignado');
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fal fa-trash"></i>`;
+            })
+
+        }
+
+    })
+
+};
+
+
+

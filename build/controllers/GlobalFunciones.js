@@ -2756,6 +2756,39 @@ let GF = {
 
 
     },
+    edit_departamento:(codigo,descripcion)=>{
+
+        return new Promise((resolve,reject)=>{
+
+            let data = {
+                token:TOKEN,
+                codigo:codigo,
+                descripcion:descripcion
+            }
+
+            axios.post(GlobalUrlCalls + '/clientes/edit_departamento', data)
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        }) 
+
+
+    },
     delete_departamento:(codigo)=>{
 
         return new Promise((resolve,reject)=>{
@@ -2820,6 +2853,104 @@ let GF = {
 
 
     },
+    insert_municipio:(descripcion,coddepto)=>{
+
+        return new Promise((resolve,reject)=>{
+
+            let data = {
+                token:TOKEN,
+                descripcion:descripcion,
+                coddepto:coddepto
+            }
+
+            axios.post(GlobalUrlCalls + '/clientes/insert_municipio', data)
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        }) 
+
+
+    },
+    edit_municipio:(codigo,descripcion)=>{
+
+        return new Promise((resolve,reject)=>{
+
+            let data = {
+                token:TOKEN,
+                codigo:codigo,
+                descripcion:descripcion
+            }
+
+            axios.post(GlobalUrlCalls + '/clientes/edit_municipio', data)
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        }) 
+
+
+    },
+    delete_municipio:(codigo)=>{
+
+        return new Promise((resolve,reject)=>{
+
+            let data = {
+                token:TOKEN,
+                codigo:codigo
+            }
+
+            axios.post(GlobalUrlCalls + '/clientes/delete_municipio', data)
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        }) 
+
+
+    },
     data_sectores:(codmun)=>{
 
         return new Promise((resolve,reject)=>{
@@ -2830,6 +2961,104 @@ let GF = {
             }
 
             axios.post(GlobalUrlCalls + '/clientes/sectores', data)
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        }) 
+
+
+    },
+    insert_sector:(descripcion,codmun)=>{
+
+        return new Promise((resolve,reject)=>{
+
+            let data = {
+                token:TOKEN,
+                descripcion:descripcion,
+                codmun:codmun
+            }
+
+            axios.post(GlobalUrlCalls + '/clientes/insert_sector', data)
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        }) 
+
+
+    },
+    edit_sector:(codigo,descripcion)=>{
+
+        return new Promise((resolve,reject)=>{
+
+            let data = {
+                token:TOKEN,
+                codigo:codigo,
+                descripcion:descripcion
+            }
+
+            axios.post(GlobalUrlCalls + '/clientes/edit_sector', data)
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        }) 
+
+
+    },
+    delete_sector:(codigo)=>{
+
+        return new Promise((resolve,reject)=>{
+
+            let data = {
+                token:TOKEN,
+                codigo:codigo
+            }
+
+            axios.post(GlobalUrlCalls + '/clientes/delete_sector', data)
             .then((response) => {
                 if(response.status.toString()=='200'){
                     let data = response.data;

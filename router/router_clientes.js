@@ -451,6 +451,34 @@ router.post("/municipios", async(req,res)=>{
      execute.QueryToken(res,qry,'');
      
 });
+router.post("/insert_municipio", async(req,res)=>{
+
+    const {descripcion,coddepto} = req.body;
+
+    let qry = `INSERT INTO MUNICIPIOS (DESMUN,CODDEPTO) 
+        SELECT '${descripcion}' AS DESMUN, ${coddepto} AS CODDEPTO; `
+
+     execute.QueryToken(res,qry,'');
+     
+});
+router.post("/edit_municipio", async(req,res)=>{
+
+    const {codigo,descripcion} = req.body;
+
+    let qry = `UPDATE MUNICIPIOS SET DESMUN='${descripcion}' WHERE CODMUN=${codigo}; `
+
+     execute.QueryToken(res,qry,'');
+     
+});
+router.post("/delete_municipio", async(req,res)=>{
+
+    const {codigo} = req.body;
+
+    let qry = `DELETE FROM MUNICIPIOS WHERE CODMUN=${codigo}; `
+
+     execute.QueryToken(res,qry,'');
+     
+});
 
 //municipios
 //----------------------
@@ -479,6 +507,15 @@ router.post("/insert_departamento", async(req,res)=>{
      execute.QueryToken(res,qry,'');
      
 });
+router.post("/edit_departamento", async(req,res)=>{
+
+    const {codigo,descripcion} = req.body;
+
+    let qry = `UPDATE DEPARTAMENTOS SET DESDEPTO='${descripcion}' WHERE CODDEPTO=${codigo}; `
+
+     execute.QueryToken(res,qry,'');
+     
+});
 router.post("/delete_departamento", async(req,res)=>{
 
     const {codigo} = req.body;
@@ -500,6 +537,34 @@ router.post("/sectores", async(req,res)=>{
     let qry = `SELECT CODSECTOR AS CODIGO, 
                 DESSECTOR AS DESCRIPCION  
                 FROM SECTORES WHERE CODMUN=${codmun}; `
+
+     execute.QueryToken(res,qry,'');
+     
+});
+router.post("/insert_sector", async(req,res)=>{
+
+    const {descripcion,codmun} = req.body;
+
+    let qry = `INSERT INTO SECTORES (DESSECTOR,CODMUN) 
+        SELECT '${descripcion}' AS DESSECTOR, ${codmun} AS CODMUN; `
+
+     execute.QueryToken(res,qry,'');
+     
+});
+router.post("/edit_sector", async(req,res)=>{
+
+    const {codigo,descripcion} = req.body;
+
+    let qry = `UPDATE SECTORES SET DESSECTOR='${descripcion}' WHERE CODSECTOR=${codigo}; `
+
+     execute.QueryToken(res,qry,'');
+     
+});
+router.post("/delete_sector", async(req,res)=>{
+
+    const {codigo} = req.body;
+
+    let qry = `DELETE FROM SECTORES WHERE CODSECTOR=${codigo}; `
 
      execute.QueryToken(res,qry,'');
      
