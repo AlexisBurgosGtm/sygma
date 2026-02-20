@@ -9,7 +9,7 @@ function getView(){
                             ${view.vista_listado() + view.modal_departamento() + view.modal_municipio() + view.modal_sector()}
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
-                           
+                           ${view.frag_mapa()}
                         </div>
                         <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
                             
@@ -328,6 +328,26 @@ function getView(){
             </div>
             `
         },
+        frag_mapa:()=>{
+            return `
+            <div class="card card-rounded col-12">
+                <div class="card-body p-2">
+                                    
+                    <div id="container_mapa"></div>   
+
+                </div>
+            </div>
+                                
+            <button class="btn btn-secondary btn-bottom-l btn-circle btn-xl hand shadow" id="btnAtrasMapa">
+                <i class="fal fa-arrow-left"></i>
+            </button>
+                                    
+            <button class="btn btn-base btn-bottom-r btn-circle btn-xl hand shadow" id="btnGuardarUbicacion">                        
+                <i class="fal fa-save"></i>
+            </button>
+
+            `
+        },
     }
 
     root.innerHTML = view.body();
@@ -335,6 +355,8 @@ function getView(){
 };
 
 function addListeners(){
+
+    F.slideAnimationTabs();
 
     //-------------------------------------------------------------
     document.getElementById('btnNuevoDepartamento').addEventListener('click',()=>{
@@ -574,6 +596,66 @@ function addListeners(){
     });
         
 
+
+
+    //-----------------------------------
+    selected_latitud = 0;
+    selected_longitud = 0;
+
+    document.getElementById('btnAtrasMapa').addEventListener('click',()=>{
+        
+        document.getElementById('container_mapa').innerHTML = '';
+
+        document.getElementById('tab-uno').click();
+
+
+    })
+
+    let btnGuardarUbicacion = document.getElementById('btnGuardarUbicacion');
+    btnGuardarUbicacion.addEventListener('click',()=>{
+        
+
+        F.Confirmacion('¿Está seguro que desea actualizar la ubicación de este municipio?')
+        .then((value)=>{
+            if(value==true){
+
+                F.showToast('Actualizando...');
+
+                btnGuardarUbicacion.disabled = true;
+                btnGuardarUbicacion.innerHTML = `<i class="fal fa-save fa-spin"></i>`;
+
+                GF.update_gps_municipio(selected_codigo,selected_latitud,selected_longitud)
+                .then(()=>{
+
+                    F.Aviso('Actualizado exitosamente!!');
+
+                    btnGuardarUbicacion.disabled = false;
+                    btnGuardarUbicacion.innerHTML = `<i class="fal fa-save"></i>`;
+
+                    document.getElementById('tab-uno').click();
+
+                    tbl_municipios(document.getElementById('cmbDepartamentos').value);  
+
+                })
+                .catch(()=>{
+                    F.AvisoError('No se pudo actualizar...');
+
+                    btnGuardarUbicacion.disabled = false;
+                    btnGuardarUbicacion.innerHTML = `<i class="fal fa-save"></i>`;
+                })
+                
+
+            }
+        })
+
+        
+
+
+
+    })
+
+
+    //-----------------------------------
   
 
 };
@@ -719,8 +801,13 @@ function tbl_municipios(coddepto){
             let idbtnE = `btnEMuni${r.CODIGO}`;
             str += `
                 <tr>
-                    <td>${r.CODIGO}</td>
-                    <td>${r.DESCRIPCION}</td>
+                    <td>
+                        <button class="btn btn-md btn-circle btn-warning hand shadow"
+                        onclick="get_mapa('${r.CODIGO}','${r.DESCRIPCION}','${r.LATITUD}','${r.LONGITUD}')">
+                            <i class="fal fa-map"></i>
+                        </button>
+                    </td>
+                    <td>${r.DESCRIPCION} (<small>${r.CODIGO}</small>)</td>
                     <td>
                         <button class="btn btn-md btn-circle btn-info hand shadow"
                         onclick="editar_municipio('${r.CODIGO}','${r.DESCRIPCION}')">
@@ -870,3 +957,62 @@ function eliminar_sector(codigo,idbtn){
 
 
 
+function get_mapa(codmun,municipio,latitud,longitud){
+
+    selected_codigo = Number(codmun);
+
+    document.getElementById('tab-dos').click();
+
+    let container = document.getElementById('container_mapa');
+    container.innerHTML = '';
+    container.innerHTML = `<div class="mapcontainer5" id="mapcontainer"></div>`;
+
+    let lat = 0;
+    let long = 0;
+
+    try {
+        navigator.geolocation.getCurrentPosition(function (location) {
+            
+            if(Number(latitud)==0){
+                lat = Number(location.coords.latitude.toString());
+                long = Number(location.coords.longitude.toString());
+
+            }else{
+                lat = Number(latitud);
+                long = Number(longitud);
+            }
+           
+            var map = L.map('mapcontainer').setView([Number(lat), Number(long)], 15);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            //agrego la ubicacion del usuario
+            L.marker([Number(lat), Number(long)],{icon: redIcon,draggable:'true'})
+                .addTo(map)
+                .bindPopup(`${municipio}`, {closeButton: false,closeOnClick: false, autoClose: false})
+                .openPopup()
+                .on("dragend",function(e) {
+                    this.openPopup();
+                    var position = e.target._latlng;
+                    //obtiene la posición del evento
+                    selected_latitud = Number(position.lat);
+                    selected_longitud = Number(position.lng);
+           });
+
+            //map.invalidateSize(true);
+            setTimeout(function(){ 
+                map.invalidateSize();
+                //map.flyTo([latInicial,longInicial],15);
+            }, 400)
+
+
+                               
+        })
+    } catch (error) {
+            F.AvisoError(error.toString());
+    };
+
+
+}

@@ -2951,6 +2951,40 @@ let GF = {
 
 
     },
+    update_gps_municipio:(codigo,latitud,longitud)=>{
+
+        return new Promise((resolve,reject)=>{
+
+            let data = {
+                token:TOKEN,
+                codigo:codigo,
+                latitud:latitud,
+                longitud:longitud
+            }
+
+            axios.post(GlobalUrlCalls + '/clientes/update_gps_municipio', data)
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        }) 
+
+
+    },
     data_sectores:(codmun)=>{
 
         return new Promise((resolve,reject)=>{

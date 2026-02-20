@@ -445,7 +445,9 @@ router.post("/municipios", async(req,res)=>{
     const {coddepto} = req.body;
 
 
-    let qry = `SELECT CODMUN AS CODIGO, DESMUN AS DESCRIPCION
+    let qry = `SELECT CODMUN AS CODIGO, DESMUN AS DESCRIPCION,
+                ISNULL(LATITUD,0) AS LATITUD,
+                ISNULL(LONGITUD,0) AS LONGITUD
                 FROM MUNICIPIOS WHERE CODDEPTO=${coddepto}; `
 
      execute.QueryToken(res,qry,'');
@@ -475,6 +477,20 @@ router.post("/delete_municipio", async(req,res)=>{
     const {codigo} = req.body;
 
     let qry = `DELETE FROM MUNICIPIOS WHERE CODMUN=${codigo}; `
+
+     execute.QueryToken(res,qry,'');
+     
+});
+router.post("/update_gps_municipio", async(req,res)=>{
+
+    const {codigo,latitud,longitud} = req.body;
+
+    let qry = `UPDATE MUNICIPIOS 
+                    SET 
+                        LATITUD=${latitud},
+                        LONGITUD=${longitud} 
+                WHERE 
+                    CODMUN=${codigo}; `
 
      execute.QueryToken(res,qry,'');
      

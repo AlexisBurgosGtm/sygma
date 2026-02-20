@@ -16,6 +16,10 @@ let GlobalNomEmpresa = '';
 let Global_latitud_empresa = 0;
 let Global_longitud_empresa = 0;
 
+let selected_latitud = 0;
+let selected_longitud = 0;
+
+let selected_codigo = 0;
 
 let GlobalUsuario = '';
 let GlobalPass = '';
