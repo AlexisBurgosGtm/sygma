@@ -1106,6 +1106,17 @@ let F = {
           return fret;
 
       },
+      showToastNew: (text)=>{
+        //depente de la libreria noty
+        new Noty({
+          type: 'warning', //info, alert, notificacion, warning, error, information, success
+          layout: 'topRight',
+          timeout: '1000',
+          theme: 'relax', //relax, metroui, mint, sunset,bootstrap-v3,
+          progressBar: true, //true false
+          text,
+        }).show();
+      },
       showToast: (text)=>{
           //depente de la libreria noty
           new Noty({
