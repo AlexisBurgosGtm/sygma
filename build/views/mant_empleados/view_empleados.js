@@ -40,9 +40,26 @@ function getView(){
             <div class="card card-rounded shadow">
                 <div class="card-body p-4">
 
+                    <h3 class="negrita text-base">LISTADO DE EMPLEADOS</h3>
+
                     <div class="row">
                         <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
-                            <h3 class="negrita text-base">LISTADO DE EMPLEADOS</h3>
+                            
+                            <div class="form-group">
+                                <label>Sucursal / Tipo lista</label>
+                                <div class="input-group">
+                                    <select class="form-control negrita" id="cmbSucursal">
+                                    </select>
+                                    <select class="form-control negrita text-base" id="cmbStatus">
+                                        <option value='SI'>ACTIVOS</option>
+                                        <option value='NO'>DESACTIVADOS</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                                                        
                             <div class="form-group">
                                 <label>Escriba para buscar:</label>
                                 <input type="text" 
@@ -51,27 +68,13 @@ function getView(){
                                     oninput="F.FiltrarTabla('tblEmpleados','txtBuscar')"
                                     placeholder="Escriba para buscar...">
                             </div>
-                        </div>
-                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
-                            
-                            <div class="form-group">
-                                <select class="form-control negrita" id="cmbSucursal">
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label>Tipo lista</label>
-                                <select class="form-control negrita text-base" id="cmbStatus">
-                                    <option value='SI'>ACTIVOS</option>
-                                    <option value='NO'>DESACTIVADOS</option>
-                                </select>
-                            </div>
+  
                         </div>
                     </div>
                     <br>
 
                     <div class="table-responsive col-12">
-                        <table class="table table-responsive table-hover col-12" id="tblEmpleados">
+                        <table class="table table-bordered col-12" id="tblEmpleados">
                             <thead class="bg-base text-white">
                                 <tr>
                                     <td>TIPO</td>
@@ -79,6 +82,7 @@ function getView(){
                                     <td>TELEFONO</td>
                                     <td>USUARIO</td>
                                     <td>DOCUMENTOS</td>
+                                    <td>RUTA</td>
                                     <td></td>
                                     <td></td>
                                     <td></td>
@@ -440,22 +444,29 @@ function tbl_empleados(){
                         <br>
                         <small class="negrita text-base">Cot: ${r.CODDOC_COT}</small>
                     </td>
+                    <td>${r.DESRUTA}</td>
                     <td>
-                        <button class="btn btn-md btn-circle btn-info hand shadow"
-                        onclick="datos_empleado('${r.CODEMPLEADO}','${r.CODPUESTO}','${r.NOMEMPLEADO}','${r.DIRECCION}','${r.TELEFONO}','${r.USUARIO}','${r.CLAVE}','${r.CODDOC_ENV}','${r.CODDOC_COT}')">
-                            <i class="fal fa-edit"></i>
+                        <button 
+                            title="Editar cliente..."
+                            class="btn btn-md btn-circle btn-info hand shadow"
+                            onclick="datos_empleado('${r.CODEMPLEADO}','${r.CODPUESTO}','${r.NOMEMPLEADO}','${r.DIRECCION}','${r.TELEFONO}','${r.USUARIO}','${r.CLAVE}','${r.CODDOC_ENV}','${r.CODDOC_COT}')">
+                                <i class="fal fa-edit"></i>
                         </button>
                     </td>
                     <td>
-                        <button id='${btnAct}' class="btn btn-md btn-circle btn-outline-info hand shadow"
-                        onclick="update_status_empleado('${r.CODEMPLEADO}','${r.ACTIVO}','${btnAct}')">
-                            <i class="fal fa-sync"></i>
+                        <button id='${btnAct}' 
+                            title="Cambiar Status (desactivar/activar)..."
+                            class="btn btn-md btn-circle btn-outline-info hand shadow"
+                            onclick="update_status_empleado('${r.CODEMPLEADO}','${r.ACTIVO}','${btnAct}')">
+                                <i class="fal fa-sync"></i>
                         </button>
                     </td>
                     <td>
-                        <button class="btn btn-md btn-circle btn-danger hand shadow" id="${btnE}"
-                        onclick="eliminar_empleado('${r.CODEMPLEADO}','${r.NOMEMPLEADO}','${btnE}')">
-                            <i class="fal fa-trash"></i>
+                        <button
+                            title="ELIMINAR cliente..." 
+                            class="btn btn-md btn-circle btn-danger hand shadow" id="${btnE}"
+                            onclick="eliminar_empleado('${r.CODEMPLEADO}','${r.NOMEMPLEADO}','${btnE}')">
+                                <i class="fal fa-trash"></i>
                         </button>
                     </td>
                 </tr>
