@@ -4124,6 +4124,38 @@ let GF = {
                 reject();
             });
         })     
+    },
+    update_fecha_documento:(sucursal,coddoc,correlativo,nuevafecha)=>{
+
+        return new Promise((resolve,reject)=>{
+    
+            axios.post(GlobalUrlCalls + '/documentos/update_fecha_documento',
+                {
+                    sucursal:sucursal,
+                    token:TOKEN,
+                    coddoc:coddoc,
+                    correlativo:correlativo,
+                    fecha:nuevafecha
+                })
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        })     
     }
 };
 

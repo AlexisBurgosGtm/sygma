@@ -501,6 +501,31 @@ router.post("/update_empleado_documento", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+router.post("/update_fecha_documento", async(req,res)=>{
+   
+    const { token, sucursal, coddoc,correlativo,fecha} = req.body;
+
+    let qry = `UPDATE DOCUMENTOS 
+                    SET 
+                        FECHA='${fecha}', 
+                        LASTUPDATE='${fecha}',
+                        MES=MONTH('${fecha}'),
+                        ANIO=YEAR('${fecha}')
+                    WHERE EMPNIT='${sucursal}' AND 
+                        CODDOC='${coddoc}' AND 
+                        CORRELATIVO=${correlativo};
+                UPDATE DOCPRODUCTOS 
+                    SET 
+                        MES=MONTH('${fecha}'),
+                        ANIO=YEAR('${fecha}')
+                    WHERE EMPNIT='${sucursal}' AND 
+                        CODDOC='${coddoc}' AND 
+                        CORRELATIVO=${correlativo};
+                `
+    
+    execute.QueryToken(res,qry,token);
+     
+});
 
 
 router.post("/listado_documentos", async(req,res)=>{
@@ -529,7 +554,8 @@ router.post("/listado_documentos", async(req,res)=>{
                     DOCUMENTOS.EMPNIT_DESTINO, 
                     DOCUMENTOS.OBS, 
                     DOCUMENTOS.CODDOC_ORIGEN, 
-                    DOCUMENTOS.CORRELATIVO_ORIGEN, 
+                    DOCUMENTOS.CORRELATIVO_ORIGEN,
+                    DOCUMENTOS.CODEMP, 
                     EMPLEADOS.NOMEMPLEADO AS EMPLEADO,
                     ISNULL(DOCUMENTOS.LASTUPDATE,'2000-01-01') AS LASTUPDATE
             FROM  DOCUMENTOS LEFT OUTER JOIN

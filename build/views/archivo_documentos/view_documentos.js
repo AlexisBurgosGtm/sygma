@@ -185,7 +185,7 @@ function getView(){
                                     <div class="row">
                                         <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                                             <div class="form-group">
-                                                <label class="text-secondary">Cambiar Empleado</label>
+                                                <label class="text-secondary">Cambiar Empleado Documento</label>
                                                 <div class="input-group">
                                                     <select class="form-control negrita border-info" id="cmbEmpleado">
                                                     </select>
@@ -194,6 +194,17 @@ function getView(){
                                                     </button>
                                                 </div>
                                             </div>
+
+                                            <div class="form-group">
+                                                <label class="text-secondary">Cambiar Fecha Documento</label>
+                                                <div class="input-group">
+                                                    <input type="date" class="form-control negrita border-info" id="txtFechaDocumentoUpdate">
+                                                    <button class="btn btn-md btn-info hand" id="btnOpcionesCambiarFecha">
+                                                        <i class="fal fa-save"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+
                                         </div>
                                         <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
 
@@ -344,6 +355,42 @@ function addListeners(){
 
         });
 
+        let btnOpcionesCambiarFecha = document.getElementById('btnOpcionesCambiarFecha');
+        btnOpcionesCambiarFecha.addEventListener('click',()=>{
+
+            F.Confirmacion('Esta seguro que desea cambiar la fecha de este documento?')
+            .then((value)=>{
+                if(value==true){
+
+                    let nuevafecha = F.devuelveFecha('txtFechaDocumentoUpdate');
+
+                    btnOpcionesCambiarFecha.disabled = true;
+                    btnOpcionesCambiarFecha.innerHTML = `<i class="fal fa-save fa-spin"></i>`;
+
+
+                    GF.update_fecha_documento(GlobalEmpnit,selected_coddoc,selected_correlativo,nuevafecha)
+                    .then(()=>{
+
+                        F.Aviso('Fecha cambiada exitosamente!!')
+                        btnOpcionesCambiarFecha.disabled = false;
+                        btnOpcionesCambiarFecha.innerHTML = `<i class="fal fa-save"></i>`;
+
+                    })
+                    .catch(()=>{
+                        F.AvisoError('No se pudo cambiar la fecha')
+                        btnOpcionesCambiarFecha.disabled = false;
+                        btnOpcionesCambiarFecha.innerHTML = `<i class="fal fa-save"></i>`;
+                    })
+
+
+                }
+            })
+
+            
+
+                     
+
+        })
 
         let btnCargarCostosDocumento = document.getElementById('btnCargarCostosDocumento');
         btnCargarCostosDocumento.addEventListener('click',()=>{
@@ -433,7 +480,7 @@ function get_documentos(){
                     <td>${r.STATUS}</td>
                     <td>
                         <button class="btn btn-md btn-circle hand shadow btn-base" 
-                            onclick="get_opciones('${r.CODDOC}','${r.CORRELATIVO}')">
+                            onclick="get_opciones('${r.CODDOC}','${r.CORRELATIVO}','${r.CODEMP}','${r.FECHA}')">
                             <i class="fal fa-cog"></i>
                         </button>
                     </td>
@@ -563,7 +610,7 @@ function fcn_eliminar_factura(coddoc,correlativo,idbtn){
 };
 
 
-function get_opciones(coddoc,correlativo){
+function get_opciones(coddoc,correlativo,codemp,fecha){
 
 
     $("#modal_opciones_documento").modal('show');
@@ -588,6 +635,12 @@ function get_opciones(coddoc,correlativo){
             document.getElementById('btnCargarCostosDocumento').style="visibility:hidden";
             break;
     }
+
+
+    
+    document.getElementById('txtFechaDocumentoUpdate').value = fecha.replace('T00:00:00.000Z','');
+    document.getElementById('cmbEmpleado').value = codemp;
+
 
 
 };

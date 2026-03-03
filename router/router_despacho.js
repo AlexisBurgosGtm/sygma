@@ -66,6 +66,165 @@ router.post("/fix_documento", async(req,res)=>{
             let fecha = helpers.getFecha();
             let iva = 1.12;
 
+            let var_totalcosto = 0; let var_totalprecio = 0; let var_totaldescuento = 0;
+
+            data.recordset.map((r)=>{
+                productos = JSON.parse(r.JSONDOCPRODUCTOS);
+                mes = r.MES;
+                anio = r.ANIO;
+            })
+
+            let qryDocproductos ='';
+
+            productos.map((r)=>{
+                
+                var_totalcosto += Number(r.TOTALCOSTO);
+                var_totalprecio += Number(r.TOTALPRECIO);
+                var_totaldescuento += Number(r.DESCUENTO);
+
+                //QRY HACIA DOCPRODUCTOS
+                qryDocproductos += `
+                INSERT INTO DOCPRODUCTOS (
+                    EMPNIT,
+                    ANIO,
+                    MES,
+                    CODDOC,
+                    CORRELATIVO,
+                    CODPROD,
+                    DESPROD,
+                    CODMEDIDA,
+                    CANTIDAD,
+                    CANTIDADBONIF,
+                    EQUIVALE,
+                    TOTALUNIDADES,
+                    TOTALBONIF,
+                    COSTO,
+                    PRECIO,
+                    TOTALCOSTO,
+                    DESCUENTO,
+                    TOTALPRECIO,
+                    ENTREGADOS_TOTALUNIDADES,
+                    COSTOANTERIOR,
+                    COSTOPROMEDIO,
+                    CODBODEGA,
+                    NOSERIE,
+                    EXENTO,
+                    OBS,
+                    TIPOPROD,
+                    TIPOPRECIO,
+                    LASTUPDATE,
+                    TOTALUNIDADES_DEVUELTAS,
+                    POR_IVA,
+                    EXISTENCIA,
+                    BONO,
+                    TOTALBONO
+                    )
+                SELECT 
+                    '${sucursal}' AS EMPNIT,
+                    ${anio} AS ANIO,
+                    ${mes} AS MES,
+                    '${coddoc}' AS CODDOC,
+                    ${correlativo} AS CORRELATIVO,
+                    '${r.CODPROD}' AS CODPROD,
+                    '${r.DESPROD}' AS DESPROD,
+                    '${r.CODMEDIDA}' AS CODMEDIDA,
+                    ${r.CANTIDAD} AS CANTIDAD,
+                    0 AS CANTIDADBONIF,
+                    ${r.EQUIVALE} AS EQUIVALE,
+                    ${r.TOTALUNIDADES} AS TOTALUNIDADES,
+                    0 AS TOTALBONIF,
+                    ${r.COSTO} AS COSTO,
+                    ${r.PRECIO} AS PRECIO,
+                    ${r.TOTALCOSTO} AS TOTALCOSTO,
+                    ${r.DESCUENTO} AS DESCUENTO,
+                    ${r.TOTALPRECIO} AS TOTALPRECIO,
+                    0 AS ENTREGADOS_TOTALUNIDADES,
+                    ${r.COSTO} AS COSTOANTERIOR,
+                    ${r.COSTO} AS COSTOPROMEDIO,
+                    ${codbodega} AS CODBODEGA,
+                    '' AS NOSERIE,
+                    ${r.EXENTO} AS EXENTO,
+                    '' AS OBS,
+                    '${r.TIPOPROD}' AS TIPOPROD,
+                    '${r.TIPOPRECIO}' AS TIPOPRECIO,
+                    '${fecha}' AS LASTUPDATE,
+                    0 AS TOTALUNIDADES_DEVUELTAS,
+                    ${iva} AS POR_IVA,
+                    ${r.EXISTENCIA} AS EXISTENCIA,
+                    ${r.BONO} AS BONO,
+                    ${Number(r.BONO) * Number(r.CANTIDAD)} AS TOTALBONO;
+                `
+        
+            })
+
+            let qryDocumentos = `UPDATE DOCUMENTOS SET 
+                                            TOTALCOSTO=${var_totalcosto}, 
+                                            TOTALPRECIO=${var_totalprecio} 
+                                        WHERE 
+                                            EMPNIT='${sucursal}' AND 
+                                            CODDOC='${coddoc}' AND 
+                                            CORRELATIVO=${correlativo};`
+        
+            execute.QueryToken(res, qryDocumentos + qryDocproductos,token);
+         
+    
+        })
+        .catch((err)=>{
+            console.log(err)
+            res.send('error');
+    
+        })
+
+
+    })
+    .catch((err)=>{
+        console.log(err)
+        res.send('error');
+
+    })
+
+    
+   
+   
+
+    
+     
+});
+
+router.post("/BACKUP_fix_documento", async(req,res)=>{
+   
+    const { token, sucursal, coddoc,correlativo } = req.body;
+
+   
+
+
+    let qrydel = ` DELETE FROM DOCPRODUCTOS 
+            WHERE EMPNIT='${sucursal}' 
+            AND CODDOC='${coddoc}' 
+            AND CORRELATIVO=${correlativo};`
+    execute.get_data_qry(qrydel,'')
+    .then(()=>{
+
+       
+        let qry = `
+        SELECT MES, ANIO, FECHA, JSONDOCPRODUCTOS FROM DOCUMENTOS 
+             WHERE EMPNIT='${sucursal}' 
+             AND CODDOC='${coddoc}' 
+             AND CORRELATIVO=${correlativo};
+       
+        `;
+
+        execute.get_data_qry(qry,'')
+        .then((data)=>{
+    
+
+            let productos;
+            let mes = 0; let anio = 0;
+
+            let codbodega = '01';
+            let fecha = helpers.getFecha();
+            let iva = 1.12;
+
             data.recordset.map((r)=>{
                 productos = JSON.parse(r.JSONDOCPRODUCTOS);
                 mes = r.MES;
