@@ -3814,6 +3814,43 @@ let GF = {
     
         })
     },
+    data_cobertura_empleados_marca: (sucursal,codmarca,mes,anio)=>{
+        
+        return new Promise((resolve, reject)=>{
+            
+            let data = {
+                token:TOKEN,
+                sucursal:sucursal,
+                mes:mes,
+                anio:anio,
+                codmarca:codmarca
+            };
+    
+            axios.post(`/objetivos/cobertura_empleados_marca`, data)
+            .then(res => {
+                
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }             
+                }else{
+                    reject();
+                } 
+            })
+            .catch(()=>{
+                reject();
+            })
+    
+        })
+    },
     data_cobertura_goles_marcas_empleado: (sucursal,mes,anio,codemp)=>{
         
         return new Promise((resolve, reject)=>{

@@ -6,7 +6,7 @@ function getView(){
                 <div class="col-12 p-0 bg-white">
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
-                            ${view.vista_listado()}
+                            ${view.vista_listado() + view.modal_cobertura_marca_empleados()}
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
                             ${view.vista_empleado()}
@@ -217,6 +217,64 @@ function getView(){
             id="btnAtrasEmpleado">
                 <i class="fal fa-arrow-left"></i>
             </button>
+            `
+        },
+        modal_cobertura_marca_empleados:()=>{
+            return `
+              <div id="modal_marca_empleados" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-right modal-xl">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-primary d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white" id="">
+                                COBERTURA MARCA EMPLEADOS
+                            </h4>
+                        </div>
+                        <div class="modal-body p-4">
+                            
+                            <div class="card card-rounded">
+                                <div class="card-body p-2">
+
+                                    <h4 class="negrita text-danger" id="lbDesmarca"></h4>
+
+                                    <div class="table-responsive">
+                                        
+                                        <table class="table table-bordered col-12 h-full">
+                                            <thead class="bg-primary text-white">
+                                                <tr>
+                                                    <td>EMPLEADO</td>
+                                                    <td>COBERTURA</td>
+                                                    <td>IMPORTE</td>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="data_tbl_empleados_marca">
+                                            </tbody>
+                                            <tfoot class="bg-primary text-white">
+                                                <tr>
+                                                    <td></td>
+                                                    <td class="negrita" id="lbTotalEmpMarcaCobertura"></td>
+                                                    <td class="negrita" id="lbTotalEmpMarcaImporte"></td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+
+                                    </div>
+                                    
+
+                                </div>
+                            </div>
+
+                                
+                            <div class="row">
+                                <button class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
+                                    <i class="fal fa-arrow-left"></i>
+                                </button>
+                            </div>
+
+                        </div>
+                    
+                    </div>
+                </div>
+            </div>
             `
         },
         modal:()=>{
@@ -527,7 +585,7 @@ function rpt_cobertura_marcas(){
                         <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
                         <td>
                             <button class="btn btn-md btn-circle btn-primary hand shadow"
-                            onclick="">
+                            onclick="get_empleados_marca('${r.CODMARCA}','${r.DESMARCA}')">
                                 <i class="fal fa-list"></i>
                             </button>
                         </td>
@@ -543,6 +601,64 @@ function rpt_cobertura_marcas(){
                 container.innerHTML = 'No se cargaron datos...';
                 document.getElementById('lbTotalMarcaVisitados').innerText = '';
                 document.getElementById('lbTotalMarcaImporte').innerText = '';
+            })
+
+  
+   
+
+};
+function get_empleados_marca(codmarca,desmarca){
+
+
+    document.getElementById('lbDesmarca').innerText = desmarca;
+
+    $("#modal_marca_empleados").modal('show');
+
+    rpt_cobertura_empleados_marca(codmarca);
+
+
+};
+function rpt_cobertura_empleados_marca(codmarca){
+
+    let sucursal = document.getElementById('cmbSucursal').value;
+    let mes = document.getElementById('cmbMes').value;
+    let anio = document.getElementById('cmbAnio').value;
+
+
+    let container = document.getElementById('data_tbl_empleados_marca');
+    container.innerHTML = GlobalLoader;
+
+    document.getElementById('lbTotalEmpMarcaCobertura').innerHTML = '';
+    document.getElementById('lbTotalEmpMarcaImporte').innerHTML = '';
+
+        let varTotalConteo = 0;
+        let varTotalImporte = 0;
+
+            GF.data_cobertura_empleados_marca(sucursal,codmarca,mes,anio)
+            .then((data)=>{
+
+                let str = '';
+                data.recordset.map((r)=>{
+                    varTotalConteo += Number(r.CONTEO);
+                    varTotalImporte += Number(r.TOTALPRECIO);
+                    str+=`
+                    <tr>
+                        <td>${r.EMPLEADO}</td>
+                        <td>${r.CONTEO}</td>
+                        <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                    </tr>
+                    `
+                })
+                container.innerHTML = str;
+
+                document.getElementById('lbTotalEmpMarcaCobertura').innerHTML = varTotalConteo;
+                document.getElementById('lbTotalEmpMarcaImporte').innerHTML = F.setMoneda(varTotalImporte,'Q');
+                           
+            })
+            .catch(()=>{
+                container.innerHTML = 'No se cargaron datos...';
+                document.getElementById('lbTotalEmpMarcaCobertura').innerHTML = '';
+                document.getElementById('lbTotalEmpMarcaImporte').innerHTML = '';
             })
 
   
