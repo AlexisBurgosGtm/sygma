@@ -126,12 +126,12 @@ function getView(){
             
                     <div class="row">
                         <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                            ${view.frag_grafica_marcas_municipio()}
+                        </div>
+                        <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
                             ${view.frag_rpt_ventas_marcas_municipio()}
                         </div>
                         <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
-                            ${view.frag_rpt_ventas_vendedor_municipio()}
-                        </div>
-                         <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
                             ${view.frag_rpt_ventas_producto_municipio()}
                         </div>
                     </div>
@@ -161,6 +161,12 @@ function getView(){
                     <tbody id="data_tbl_marcas_municipio"></tbody>
                 </table>
             </div>
+
+            `
+        },
+        frag_grafica_marcas_municipio:()=>{
+            return `
+            <div id="containerGraf1"></div>
             `
         },
         frag_rpt_ventas_vendedor_municipio:()=>{
@@ -501,6 +507,10 @@ function tbl_marcas_municipio(codmun){
 
         container.innerHTML = str;
 
+
+        let datos = data.recordset;
+        chart_marcas_municipio(datos);
+
     })
     .catch((err)=>{
         console.log(err)
@@ -508,11 +518,9 @@ function tbl_marcas_municipio(codmun){
     })
        
 
- 
 
 };
-
-function getPieMarcasMunicipio(data){
+function chart_marcas_municipio(data){
    
     let container = document.getElementById('containerGraf1');
     container.innerHTML = '';
@@ -595,117 +603,3 @@ function getPieMarcasMunicipio(data){
 
 
 
-
-function BACKUP_mapaCobertura(idContenedor, lt, lg){
-
-    let container = document.getElementById(idContenedor);
-    container.innerHTML = GlobalLoader;
-    
-    let tbl = `<div class="mapcontainer4" id="mapcontainer"></div>`;  
-    
-    let containerTabla = document.getElementById('containerMunicipios');
-    containerTabla.innerHTML = GlobalLoader;
-    let str = '';
-    
-    container.innerHTML = tbl;
-    
-    let mapcargado = 0;
-    var map;
-    map = F.Lmap(lt, lg);
-
-    getDataCobertura()
-    .then((datos) => {
-        const data = datos;
-
-        let totalventa = 0;
-        data.map((r)=>{
-            totalventa += Number(r.TOTALPRECIO);
-        });
-
-        data.map((rows)=>{
-                //Carga el marker en el mapa
-                L.marker([rows.LAT, rows.LONG])
-                .addTo(map)
-                .bindPopup(`${rows.MUNICIPIO} <br><small>Vendido: ${F.setMoneda(rows.TOTALPRECIO,'Q')}</small>`, {closeOnClick: true, autoClose: true})   
-                .on('click', function(e){
-                    console.log(e);
-                    getMenuMunicipio(rows.CODSUCURSAL.toString(),rows.CODMUNICIPIO, rows.MUNICIPIO, rows.CODDEPTO, rows.TOTALPRECIO)
-                    //console.log(e.sourceTarget._leaflet_id);
-                    //GlobalMarkerId = Number(e.sourceTarget._leaflet_id);
-                    //getMenuCliente(rows.CODIGO,rows.NOMCLIE,rows.DIRCLIE,rows.TELEFONO,rows.LAT,rows.LONG,rows.NIT);
-                });
-                //dibuja la table
-                str += `<tr class="hand" onclick="getMenuMunicipio('${rows.CODSUCURSAL}','${rows.CODMUNICIPIO}', '${rows.MUNICIPIO}', '${rows.CODDEPTO}', '${rows.TOTALPRECIO}')">
-                            <td>${rows.MUNICIPIO}
-                                <br>
-                                <small class="negrita">${rows.DEPARTAMENTO}</small>
-                            </td>
-                            <td class="currSign">${F.setMoneda(rows.TOTALPRECIO,'')}</td>
-                            <td>${F.getParticipacion(Number(rows.TOTALPRECIO), totalventa)}</td>
-                        </tr>`
-        })
-
-        //carga la tabla
-        let tablamun = `
-                        <table class="table table-responsive table-hover" id="tblMunicipiosDep">
-                            <thead>
-                                <tr>
-                                    <td>Municipio</td>
-                                    <td>Importe</td>
-                                    <td>Part</td>
-                                </tr>
-                            </thead>
-                            <tbody id="">${str}</tbody>
-                        </table>
-        `
-        containerTabla.innerHTML = tablamun;
-        try {
-            var table = $('#tblMunicipiosDep').DataTable({
-                paging: false, 
-                bFilter:true
-            });    
-        } catch (error) {
-            
-        }
-        
-
-        //RE-AJUSTA EL MAPA A LA PANTALLA
-        setTimeout(function () {
-            console.log('timer mapa 1')
-            try {
-                map.invalidateSize();    
-            } catch (error) {
-                
-            }
-        }, 500);
-
-    }, (error) => {
-        F.AvisoError('Error en la solicitud');
-        container.innerHTML = '';
-    })
-    .catch((error)=>{
-        console.log('Error al cargar mapa..')
-        console.log(error);
-    })
-       
-};
-
-
-function BACKUP_getDataCobertura(){
-
-    return new Promise((resolve, reject)=>{
-      
-        axios.post(`/objetivos/get_cobertura`, {empresas: parametrosEmpresas, anio:parametrosAnio, mes:parametrosMes})
-        .then(res => {
-            const datos = res.data.recordset;
-            resolve(datos);
-        })
-        .catch(()=>{
-            reject();
-        })
-
-
-    })
-     
-
-};
