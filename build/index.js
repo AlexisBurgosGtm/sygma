@@ -48,7 +48,7 @@ F.instalationHandlers('btnInstalarApp');
 
 
 
-let versionapp = "M.06.03.2026:0"
+let versionapp = "M.10.03.2026:0"
 
 function get_log(){
 

@@ -1,4 +1,26 @@
 let F = {
+      Lmap: (lat,long)=>{
+        //INICIALIZACION DEL MAPA            
+          var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          osmAttrib = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          osm = L.tileLayer(osmUrl, {center: [lat, long],maxZoom: 20, attribution: osmAttrib});    
+          map = L.map('mapcontainer').setView([lat, long], 7).addLayer(osm);
+
+       
+          return map;
+      },
+      ajustarMapa:()=>{
+
+          //RE-AJUSTA EL MAPA A LA PANTALLA
+          setTimeout(function () {
+              try {
+                  map.invalidateSize();    
+              } catch (error) {
+                  
+              }
+          }, 500);
+
+      },
       phone_call: (telefono)=>{
       
       let llamar = telefono.replace(" ","");
@@ -1437,5 +1459,13 @@ let F = {
             };
 
             return str;
-      }
+      },
+      getMargenUtilidad:(venta,costo)=>{
+        let utilidad = venta-costo;
+        return Number((utilidad/venta) * 100).toFixed(2) + '%'
+      },
+      getParticipacion:(valor,total)=>{
+        let peso = (valor / total) * 100;
+        return peso.toFixed(2) + '%'
+      },
 };

@@ -2,6 +2,14 @@
   width: 100%
 };
 
+.centrado {
+   display: flex;
+  justify-content: center; /* Centrado horizontal */
+  align-items: center;     /* Centrado vertical */
+ 
+}
+
+
 .f-med{
   font-size: 80%;
 }

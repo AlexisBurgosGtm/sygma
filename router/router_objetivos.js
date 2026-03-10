@@ -69,39 +69,6 @@ router.post("/procter_logro_vendedor", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
-router.post("/BACKUP_procter_logro_vendedor", async(req,res)=>{
-   
-    const { token, sucursal,codemp,mes,anio} = req.body;
-
-
-    let qry = `
-            SELECT rpt_procter_logro_objetivos_marcas.EMPNIT, 
-                    rpt_procter_logro_objetivos_marcas.MES, 
-                    rpt_procter_logro_objetivos_marcas.ANIO, 
-                    rpt_procter_logro_objetivos_marcas.CODEMP, 
-                    rpt_procter_logro_objetivos_marcas.CODMARCA, 
-                    rpt_procter_logro_objetivos_marcas.DESMARCA, 
-                    ISNULL(rpt_procter_logro_objetivos_marcas.OBJETIVO, 0) AS OBJETIVO, 
-                    ISNULL(rpt_procter_logro_resumen.UNIDADES_VENTA,0) AS UNIDADES_VENTA, 
-                    ISNULL(rpt_procter_logro_resumen.UNIDADES_DEVOLUCION,0) AS UNIDADES_DEVOLUCION, 
-                    ISNULL(rpt_procter_logro_resumen.VENTA,0) AS VENTA, 
-                  ISNULL(rpt_procter_logro_resumen.DEVOLUCION,0) AS DEVOLUCION
-            FROM rpt_procter_logro_resumen RIGHT OUTER JOIN
-                  rpt_procter_logro_objetivos_marcas ON rpt_procter_logro_resumen.CODMARCA = rpt_procter_logro_objetivos_marcas.CODMARCA AND rpt_procter_logro_resumen.CODEMP = rpt_procter_logro_objetivos_marcas.CODEMP AND 
-                  rpt_procter_logro_resumen.MES = rpt_procter_logro_objetivos_marcas.MES AND rpt_procter_logro_resumen.ANIO = rpt_procter_logro_objetivos_marcas.ANIO AND 
-                  rpt_procter_logro_resumen.EMPNIT = rpt_procter_logro_objetivos_marcas.EMPNIT
-            WHERE  
-                (rpt_procter_logro_objetivos_marcas.EMPNIT = '${sucursal}') AND 
-                (rpt_procter_logro_objetivos_marcas.MES = ${mes}) AND 
-                (rpt_procter_logro_objetivos_marcas.ANIO = ${anio}) AND 
-                (rpt_procter_logro_objetivos_marcas.CODEMP = ${codemp})
-            ORDER BY rpt_procter_logro_objetivos_marcas.CODMARCA;
-                `;
-    
-
-    execute.QueryToken(res,qry,token);
-     
-});
 
 
 // ---------------------------
@@ -473,28 +440,6 @@ router.post("/universo_clientes_empleado_visitado_mes", async(req,res)=>{
     }
 
  
-    
-
-    execute.QueryToken(res,qry,token);
-     
-});
-router.post("/BACKUP_universo_clientes_empleado_visitado_mes", async(req,res)=>{
-   
-    const { token, sucursal,codemp,mes,anio} = req.body;
-
-    let qry = `
-            SELECT COUNT(DISTINCT DOCUMENTOS.CODCLIENTE) AS CONTEO
-                FROM  DOCUMENTOS LEFT OUTER JOIN
-                    TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND 
-                    DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
-                WHERE  (DOCUMENTOS.STATUS <> 'A') AND 
-                    (DOCUMENTOS.ANIO = ${anio}) AND 
-                    (DOCUMENTOS.MES = ${mes}) AND 
-                    (DOCUMENTOS.EMPNIT = '${sucursal}') AND 
-                    (TIPODOCUMENTOS.TIPODOC IN('FAC','FCP','FEC','FEF','FES'))
-                GROUP BY DOCUMENTOS.CODEMP
-                HAVING (DOCUMENTOS.CODEMP = ${codemp})
-        `;
     
 
     execute.QueryToken(res,qry,token);
@@ -1163,6 +1108,89 @@ router.post("/delete_objetivo_vendedor_marca", async(req,res)=>{
 
 
 
+//-----------------------------
+// COBERTURA MUNICIPIOS
+//-----------------------------
+
+router.post('/get_clientes_efectivos', async function(req,res){
+
+    
+
+    const {token,empresas, anio, mes} = req.body;
+  
+    let qry = `SELECT BI_RPT_GENERAL.CODSUCURSAL, 
+                COUNT(DISTINCT BI_RPT_GENERAL.CODIGO) AS CONTEO, 
+                AVG(BI_EMPRESAS_RESUMEN.UNIVERSO) AS UNIVERSO,
+                SUM(TOTALPRECIO) AS TOTALPRECIO
+    FROM            BI_RPT_GENERAL LEFT OUTER JOIN
+                             BI_EMPRESAS_RESUMEN ON BI_RPT_GENERAL.MES = BI_EMPRESAS_RESUMEN.MES AND BI_RPT_GENERAL.ANIO = BI_EMPRESAS_RESUMEN.ANIO AND 
+                             BI_RPT_GENERAL.CODSUCURSAL = BI_EMPRESAS_RESUMEN.CODSUCURSAL
+    WHERE  (BI_RPT_GENERAL.CODSUCURSAL IN (${empresas})) 
+        AND (BI_RPT_GENERAL.ANIO IN (${anio})) 
+        AND (BI_RPT_GENERAL.MES IN (${mes})) 
+        AND (BI_RPT_GENERAL.TIPO = 'FAC')
+    GROUP BY BI_RPT_GENERAL.CODSUCURSAL
+    ORDER BY BI_RPT_GENERAL.CODSUCURSAL`
+
+     execute.QueryToken(res,qry,token);
+    
+});
+router.post('/get_cobertura', async function(req,res){
+
+    const {token,sucursal, anio, mes} = req.body;
+
+    let qry = '';
+
+        qry = `
+        SELECT
+            DOCUMENTOS.EMPNIT AS SUCURSAL,  
+            MUNICIPIOS.CODMUN AS CODMUNICIPIO, 
+            MUNICIPIOS.DESMUN AS MUNICIPIO, 
+            ISNULL(MUNICIPIOS.LATITUD,0) AS LAT, 
+            ISNULL(MUNICIPIOS.LONGITUD,0) AS LONG, 
+            FORMAT(SUM(DOCUMENTOS.TOTALCOSTO), '##.##') AS TOTALCOSTO, 
+            FORMAT(SUM(DOCUMENTOS.TOTALPRECIO), '##.##') AS TOTALPRECIO
+        FROM DOCUMENTOS LEFT OUTER JOIN
+            TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT LEFT OUTER JOIN
+            CLIENTES ON DOCUMENTOS.CODCLIENTE = CLIENTES.CODCLIENTE LEFT OUTER JOIN
+            MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+        WHERE  
+            (DOCUMENTOS.STATUS <> 'A') AND 
+            (TIPODOCUMENTOS.TIPODOC IN ('FAC', 'FCP', 'FEC', 'FEF', 'FES', 'FPC')) AND 
+            (DOCUMENTOS.ANIO = ${anio}) AND 
+            (DOCUMENTOS.MES = ${mes}) AND 
+            (DOCUMENTOS.EMPNIT = '${sucursal}')
+        GROUP BY DOCUMENTOS.EMPNIT,MUNICIPIOS.CODMUN, MUNICIPIOS.DESMUN, MUNICIPIOS.LATITUD, MUNICIPIOS.LONGITUD
+        ORDER BY SUM(DOCUMENTOS.TOTALPRECIO) DESC;
+        `
+            
+ 
+
+     execute.QueryToken(res,qry,token);
+    
+});
+router.post('/get_marcas_municipio', async function(req,res){
+
+    const {token,empresas,anio,mes,codmun, coddepto} = req.body;
+    let qry = '';
+
+        qry = `SELECT CODMARCA, DESMARCA, 
+                ROUND(SUM(ISNULL(TOTALCOSTO,0)),2) AS TOTALCOSTO, 
+                ROUND(SUM(ISNULL(TOTALPRECIO,0)),2) AS TOTALPRECIO,
+				COUNT(CODIGO) AS CLIENTES
+        FROM BI_RPT_GENERAL
+        WHERE (CODSUCURSAL = '${empresas}') AND (ANIO = ${anio}) AND (MES = ${mes}) AND (CODMUN = ${codmun})
+        GROUP BY CODMARCA, DESMARCA
+        ORDER BY SUM(TOTALPRECIO) DESC`
+  
+    
+      execute.QueryToken(res,qry,token);
+    
+});
+
+//-----------------------------
+// COBERTURA MUNICIPIOS
+//-----------------------------
 
 
 module.exports = router;

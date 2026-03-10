@@ -469,4 +469,15 @@ let Menu = {
             F.AvisoError('No tiene permitido entrar a esta sección');
         }   
     },
+    objetivos_cobertura_municipios:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/bi_objetivos/view_cobertura_municipios_mapa.js','root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        }   
+    },
 }
