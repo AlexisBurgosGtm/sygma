@@ -153,7 +153,6 @@ function getView(){
                     <thead class="bg-base text-white">
                         <tr>
                             <td>MARCA</td>
-                            <td>CLIENTES</td>
                             <td>IMPORTE</td>
                             <td>PART</td>
                         </tr>
@@ -496,13 +495,13 @@ function tbl_marcas_municipio(codmun){
             str += `
                     <tr class="">
                         <td>${r.DESMARCA}</td>
-                        <td>${r.CONTEO}</td>
                         <td >${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
                         <td>${F.getParticipacion(Number(r.TOTALPRECIO), totalventa)}</td>
                     </tr>
                     `
         })
       
+        //<td>${r.CONTEO}</td>
 
         container.innerHTML = str;
 
