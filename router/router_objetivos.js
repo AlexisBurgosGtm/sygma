@@ -1148,21 +1148,25 @@ router.post('/get_cobertura', async function(req,res){
             MUNICIPIOS.DESMUN AS MUNICIPIO, 
             ISNULL(MUNICIPIOS.LATITUD, 0) AS LAT, 
             ISNULL(MUNICIPIOS.LONGITUD, 0) AS LONG, 
-            FORMAT(SUM(DOCUMENTOS.TOTALCOSTO), '##.##') AS TOTALCOSTO, 
-            FORMAT(SUM(DOCUMENTOS.TOTALPRECIO), '##.##') AS TOTALPRECIO, 
+            FORMAT((SUM(DOCUMENTOS.TOTALCOSTO * CONFIG_TIPODOCUMENTOS.INV) * -1), '##.##') AS TOTALCOSTO, 
+			FORMAT((SUM(DOCUMENTOS.TOTALPRECIO * CONFIG_TIPODOCUMENTOS.INV) * -1), '##.##') AS TOTALPRECIO, 
+            COUNT(DOCUMENTOS.CODCLIENTE) AS CONTEO, 
             param_municipio_universo_clientes.UNIVERSO
-        FROM  param_municipio_universo_clientes RIGHT OUTER JOIN
-            MUNICIPIOS ON param_municipio_universo_clientes.CODMUN = MUNICIPIOS.CODMUN RIGHT OUTER JOIN
-            DOCUMENTOS LEFT OUTER JOIN
-            TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT LEFT OUTER JOIN
-            CLIENTES ON DOCUMENTOS.CODCLIENTE = CLIENTES.CODCLIENTE ON MUNICIPIOS.CODMUN = CLIENTES.CODMUN
+        FROM CLIENTES RIGHT OUTER JOIN
+            CONFIG_TIPODOCUMENTOS RIGHT OUTER JOIN
+            TIPODOCUMENTOS ON CONFIG_TIPODOCUMENTOS.TIPODOC = TIPODOCUMENTOS.TIPODOC RIGHT OUTER JOIN
+            DOCUMENTOS ON TIPODOCUMENTOS.CODDOC = DOCUMENTOS.CODDOC AND TIPODOCUMENTOS.EMPNIT = DOCUMENTOS.EMPNIT ON 
+            CLIENTES.CODCLIENTE = DOCUMENTOS.CODCLIENTE LEFT OUTER JOIN
+            param_municipio_universo_clientes RIGHT OUTER JOIN
+            MUNICIPIOS ON param_municipio_universo_clientes.CODMUN = MUNICIPIOS.CODMUN ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
         WHERE  
             (DOCUMENTOS.STATUS <> 'A') AND 
-            (TIPODOCUMENTOS.TIPODOC IN ('FAC', 'FCP', 'FEC', 'FEF', 'FES', 'FPC')) AND 
+            (TIPODOCUMENTOS.TIPODOC IN ('FAC', 'FCP', 'FEC', 'FEF', 'FES', 'FPC','DEV','FNC')) AND
             (DOCUMENTOS.ANIO = ${anio}) AND 
             (DOCUMENTOS.MES = ${mes}) AND 
             (DOCUMENTOS.EMPNIT = '${sucursal}')
-        GROUP BY DOCUMENTOS.EMPNIT, MUNICIPIOS.CODMUN, MUNICIPIOS.DESMUN, MUNICIPIOS.LATITUD, MUNICIPIOS.LONGITUD, param_municipio_universo_clientes.UNIVERSO
+        GROUP BY DOCUMENTOS.EMPNIT, MUNICIPIOS.CODMUN, MUNICIPIOS.DESMUN, 
+            MUNICIPIOS.LATITUD, MUNICIPIOS.LONGITUD, param_municipio_universo_clientes.UNIVERSO
         ORDER BY SUM(DOCUMENTOS.TOTALPRECIO) DESC
        
         `
@@ -1174,18 +1178,29 @@ router.post('/get_cobertura', async function(req,res){
 });
 router.post('/get_marcas_municipio', async function(req,res){
 
-    const {token,empresas,anio,mes,codmun, coddepto} = req.body;
+    const {token,sucursal,anio,mes,codmun} = req.body;
     let qry = '';
 
-        qry = `SELECT CODMARCA, DESMARCA, 
-                ROUND(SUM(ISNULL(TOTALCOSTO,0)),2) AS TOTALCOSTO, 
-                ROUND(SUM(ISNULL(TOTALPRECIO,0)),2) AS TOTALPRECIO,
-				COUNT(CODIGO) AS CLIENTES
-        FROM BI_RPT_GENERAL
-        WHERE (CODSUCURSAL = '${empresas}') AND (ANIO = ${anio}) AND (MES = ${mes}) AND (CODMUN = ${codmun})
-        GROUP BY CODMARCA, DESMARCA
-        ORDER BY SUM(TOTALPRECIO) DESC`
+        qry = `
+        SELECT 
+            CODIGO_MUNICIPIO AS CODMUN, 
+			CODIGO_MARCA AS CODMARCA, 
+			MARCA AS DESMARCA, 
+			(SUM(TOTALCOSTO * INV) *-1) AS TOTALCOSTO, 
+			(SUM(TOTALPRECIO * INV) *-1) AS TOTALPRECIO,
+			 0 AS CONTEO
+        FROM view_rpt_general
+        WHERE 
+            (EMPNIT = '${sucursal}') AND 
+            (ANIO = ${anio}) AND 
+            (MES = ${mes}) AND 
+            CODIGO_MUNICIPIO=${codmun}
+        GROUP BY CODIGO_MUNICIPIO,  CODIGO_MARCA, MARCA
+        ORDER BY CODIGO_MARCA
+        `
   
+       
+        //COUNT(CODIGO_CLIENTE)
     
       execute.QueryToken(res,qry,token);
     

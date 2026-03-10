@@ -107,10 +107,11 @@ function getView(){
             
             <div class="row">
                 <div class="col-6">
-                    <h5 class="negrita text-danger" id="lbMunicipioDetalle"></h5>
+                    <h3 class="negrita text-danger" id="lbMunicipioDetalle"></h3>
                 </div>
                 <div class="col-2">
-                    <h3 class="text-center text-danger negrita" id="lbUniverso">0</h3>
+                    <h5 class="text-center text-danger negrita" id="lbUniverso">0</h5>
+                    <h5 class="text-center text-success negrita" id="lbVisitados">0</h5>
                 </div>
                  <div class="col-4">
                     <h3 class="text-center text-danger negrita" id="lbTotalVenta">0</h3>
@@ -124,11 +125,14 @@ function getView(){
                 <div class="card-body p-4">
             
                     <div class="row">
-                        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                                VENTAS POR MRARCA
+                        <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                            ${view.frag_rpt_ventas_marcas_municipio()}
                         </div>
-                        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                            VENTAS POR VENDEDOR
+                        <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                            ${view.frag_rpt_ventas_vendedor_municipio()}
+                        </div>
+                         <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                            ${view.frag_rpt_ventas_producto_municipio()}
                         </div>
                     </div>
 
@@ -139,6 +143,60 @@ function getView(){
                 onclick="document.getElementById('tab-uno').click()">
                 <i class="fal fa-arrow-left"></i>
             </button>
+            `
+        },
+        frag_rpt_ventas_marcas_municipio:()=>{
+            return `
+            <div class="table-responsive">
+                <h5 class="text-base">VENTAS POR MARCAS</h5>
+                <table class="table table-bordered h-full col-12">
+                    <thead class="bg-base text-white">
+                        <tr>
+                            <td>MARCA</td>
+                            <td>CLIENTES</td>
+                            <td>IMPORTE</td>
+                            <td>PART</td>
+                        </tr>
+                    </thead>
+                    <tbody id="data_tbl_marcas_municipio"></tbody>
+                </table>
+            </div>
+            `
+        },
+        frag_rpt_ventas_vendedor_municipio:()=>{
+            return `
+            <div class="table-responsive">
+                <h5 class="text-secondary">VENTAS POR VENDEDOR</h5>
+                <table class="table table-bordered h-full col-12">
+                    <thead class="bg-secondary text-white">
+                        <tr>
+                            <td>VENDEDOR</td>
+                            <td>CLIENTES</td>
+                            <td>IMPORTE</td>
+                        </tr>
+                    </thead>
+                    <tbody id=""></tbody>
+                </table>
+            </div>
+            `
+        },
+        frag_rpt_ventas_producto_municipio:()=>{
+            return `
+            <div class="table-responsive">
+                <h5 class="text-info">VENTAS POR PRODUCTO</h5>
+                <table class="table table-bordered h-full col-12">
+                    <thead class="bg-info text-white">
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </thead>
+                    <tbody id=""></tbody>
+                </table>
+            </div>
             `
         },
         modalMunicipio:()=>{
@@ -302,11 +360,11 @@ function mapaCobertura(idContenedor, lt, lg){
                 .bindPopup(`${rows.MUNICIPIO} <br><small>Vendido: ${F.setMoneda(rows.TOTALPRECIO,'Q')}</small>`, {closeOnClick: true, autoClose: true})   
                 .on('click', function(e){
                     console.log(e);
-                    getMenuMunicipio(rows.CODMUNICIPIO, rows.MUNICIPIO, rows.TOTALPRECIO,rows.UNIVERSO)
+                    getMenuMunicipio(rows.CODMUNICIPIO, rows.MUNICIPIO, rows.TOTALPRECIO,rows.UNIVERSO,rows.CONTEO)
                    
                 });
                 //dibuja la table
-                str += `<tr class="hand" onclick="getMenuMunicipio('${rows.CODMUNICIPIO}', '${rows.MUNICIPIO}', '${rows.TOTALPRECIO}','${rows.UNIVERSO}')">
+                str += `<tr class="hand" onclick="getMenuMunicipio('${rows.CODMUNICIPIO}', '${rows.MUNICIPIO}', '${rows.TOTALPRECIO}','${rows.UNIVERSO}','${rows.CONTEO}')">
                             <td>${rows.MUNICIPIO}</td>
                             <td class="currSign">${F.setMoneda(rows.TOTALPRECIO,'')}</td>
                             <td>${F.getParticipacion(Number(rows.TOTALPRECIO), totalventa)}</td>
@@ -361,36 +419,39 @@ function getDataCobertura(sucursal,mes,anio){
 
 
 
-function getMenuMunicipio(codmun, desmun,venta,universo){
+function getMenuMunicipio(codmun, desmun,venta,universo,visitados){
 
-    //$('#modalResumenMunicipio').modal('show');
+
     document.getElementById('tab-dos').click();
 
     
    
     document.getElementById('lbMunicipioDetalle').innerText = `Resumen: ${desmun}` ;
     document.getElementById('lbUniverso').innerText = `Universo: ${universo}`;
+    document.getElementById('lbVisitados').innerText = `Visitados: ${visitados}`;
     document.getElementById('lbTotalVenta').innerText = F.setMoneda(venta,'Q');
 
+
+    tbl_marcas_municipio(codmun);
 
     
 
 };
 
 
-function getDataMunicipio(codmun,coddepto,sucursal){
+//marcas del municipio
+function data_marcas_municipio(sucursal,codmun,mes,anio){
 
     return new Promise((resolve, reject)=>{
       
         axios.post(`/objetivos/get_marcas_municipio`, {
-                                                        empresas: sucursal, 
-                                                        anio:parametrosAnio, 
-                                                        mes:parametrosMes,
-                                                        codmun:codmun,
-                                                        coddepto:coddepto})
+                                                        sucursal: sucursal, 
+                                                        anio:anio, 
+                                                        mes:mes,
+                                                        codmun:codmun})
         .then(res => {
-            const datos = res.data.recordset;
-            resolve(datos);
+            const data = res.data;
+            resolve(data);
         })
         .catch(()=>{
             reject();
@@ -401,57 +462,52 @@ function getDataMunicipio(codmun,coddepto,sucursal){
      
 
 };
+function tbl_marcas_municipio(codmun){
 
-function getTblMarcasMunicipio(datos){
+    let container = document.getElementById('data_tbl_marcas_municipio');
+    container.innerHTML = GlobalLoader;
 
-    let container = document.getElementById('containerTblMarcas');
-    container.innerHTML = getLoader();
+    let sucursal = document.getElementById('cmbSucursal').value;
+    let mes =  document.getElementById('cmbMes').value;
+    let anio =  document.getElementById('cmbAnio').value;
 
 
     let str = '';
     
     let totalventa = 0;
    
-        datos.map((r)=>{
+    data_marcas_municipio(sucursal,codmun,mes,anio)
+    .then((data)=>{
+        
+
+        data.recordset.map((r)=>{
             totalventa += Number(r.TOTALPRECIO);
         })
 
-        datos.map((r)=>{
+        data.recordset.map((r)=>{
+            
+            console.log(r)
+
             str += `
-                    <tr class="fontsmall hand">
+                    <tr class="">
                         <td>${r.DESMARCA}</td>
-                        <td>${r.CLIENTES}</td>
-                        <td class="currSign">${F.setMoneda(r.TOTALPRECIO,'')}</td>
-                        <td class="currSign">${F.setMoneda(Number(r.TOTALPRECIO)-Number(r.TOTALCOSTO),'')}</td>
-                        <td>${F.getParticipacion(Number(r.TOTALPRECIO),totalventa)}</td>
+                        <td>${r.CONTEO}</td>
+                        <td >${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                        <td>${F.getParticipacion(Number(r.TOTALPRECIO), totalventa)}</td>
                     </tr>
                     `
         })
-        let tablemarcas = ` <table class="table table-responsive table-hover" id="tblMarcasMunicipio">
-                                <thead class="bg-trans-gradient text-white fontsmall">
-                                    <tr>
-                                        <td>MARCA</td>
-                                        <td>CLI</td>
-                                        <td>VENTA</td>
-                                        <td>UTIL</td>
-                                        <td>PART</td>
-                                    </tr>
-                                </thead>
-                                <tbody class="fontsmall">
-                                    ${str}                
-                                </tbody>
-                            </table>`;
+      
 
-        container.innerHTML = tablemarcas;
+        container.innerHTML = str;
 
-        try {
-            var table = $('#tblMarcasMunicipio').DataTable({
-                paging: false, 
-                bFilter:true
-            });    
-        } catch (error) {
-            
-        }
+    })
+    .catch((err)=>{
+        console.log(err)
+        container.innerHTML = 'No se cargaron datos...';
+    })
+       
+
  
 
 };
