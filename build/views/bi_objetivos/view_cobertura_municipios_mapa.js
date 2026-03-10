@@ -193,14 +193,13 @@ function getView(){
                 <table class="table table-bordered h-full col-12">
                     <thead class="bg-info text-white">
                         <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td>PRODUCTO</td>
+                            <td>UNIDADES</td>
+                            <td>IMPORTE</td>
+                            <td>PART</td>
                         </tr>
                     </thead>
-                    <tbody id=""></tbody>
+                    <tbody id="data_tbl_productos"></tbody>
                 </table>
             </div>
             `
@@ -440,7 +439,7 @@ function getMenuMunicipio(codmun, desmun,venta,universo,visitados){
 
     tbl_marcas_municipio(codmun);
 
-    
+    tbl_productos_municipio(codmun);
 
 };
 
@@ -599,6 +598,84 @@ function chart_marcas_municipio(data){
 
 };
 
+
+//productos
+function data_productos_municipio(sucursal,codmun,mes,anio){
+
+    return new Promise((resolve, reject)=>{
+      
+        axios.post(`/objetivos/get_productos_municipio`, {
+                                                        sucursal: sucursal, 
+                                                        anio:anio, 
+                                                        mes:mes,
+                                                        codmun:codmun})
+        .then(res => {
+            const data = res.data;
+            resolve(data);
+        })
+        .catch(()=>{
+            reject();
+        })
+
+
+    })
+     
+
+};
+function tbl_productos_municipio(codmun){
+
+    let container = document.getElementById('data_tbl_productos');
+    container.innerHTML = GlobalLoader;
+
+    let sucursal = document.getElementById('cmbSucursal').value;
+    let mes =  document.getElementById('cmbMes').value;
+    let anio =  document.getElementById('cmbAnio').value;
+
+
+    let str = '';
+    
+    let totalventa = 0;
+   
+    data_productos_municipio(sucursal,codmun,mes,anio)
+    .then((data)=>{
+        
+
+        data.recordset.map((r)=>{
+            totalventa += Number(r.TOTALPRECIO);
+        })
+
+        data.recordset.map((r)=>{
+            
+            console.log(r)
+
+            str += `
+                    <tr class="">
+                        <td>${r.DESPROD}
+                            <br><small>${r.DUN}</small>
+                        </td>
+                        <td>${r.TOTALUNIDADES}</td>
+                        <td >${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                        <td>${F.getParticipacion(Number(r.TOTALPRECIO), totalventa)}</td>
+                    </tr>
+                    `
+        })
+      
+
+        container.innerHTML = str;
+
+
+        //let datos = data.recordset;
+        //chart_marcas_municipio(datos);
+
+    })
+    .catch((err)=>{
+        console.log(err)
+        container.innerHTML = 'No se cargaron datos...';
+    })
+       
+
+
+};
 
 
 

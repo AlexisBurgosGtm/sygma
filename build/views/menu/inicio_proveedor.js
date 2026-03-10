@@ -1176,6 +1176,12 @@ function addListeners(){
         Menu.empleados_gps();
      })
 
+     document.getElementById('btnMenuCoberturaMunicipios').addEventListener('click',()=>{
+        Menu.objetivos_cobertura_municipios()
+     })
+
+     
+
      listeners_objetivos();
 
 };

@@ -1112,25 +1112,27 @@ router.post("/delete_objetivo_vendedor_marca", async(req,res)=>{
 // COBERTURA MUNICIPIOS
 //-----------------------------
 
-router.post('/get_clientes_efectivos', async function(req,res){
+router.post('/get_productos_municipio', async function(req,res){
 
     
 
-    const {token,empresas, anio, mes} = req.body;
+    const {token,sucursal,codmun, anio, mes} = req.body;
   
-    let qry = `SELECT BI_RPT_GENERAL.CODSUCURSAL, 
-                COUNT(DISTINCT BI_RPT_GENERAL.CODIGO) AS CONTEO, 
-                AVG(BI_EMPRESAS_RESUMEN.UNIVERSO) AS UNIVERSO,
-                SUM(TOTALPRECIO) AS TOTALPRECIO
-    FROM            BI_RPT_GENERAL LEFT OUTER JOIN
-                             BI_EMPRESAS_RESUMEN ON BI_RPT_GENERAL.MES = BI_EMPRESAS_RESUMEN.MES AND BI_RPT_GENERAL.ANIO = BI_EMPRESAS_RESUMEN.ANIO AND 
-                             BI_RPT_GENERAL.CODSUCURSAL = BI_EMPRESAS_RESUMEN.CODSUCURSAL
-    WHERE  (BI_RPT_GENERAL.CODSUCURSAL IN (${empresas})) 
-        AND (BI_RPT_GENERAL.ANIO IN (${anio})) 
-        AND (BI_RPT_GENERAL.MES IN (${mes})) 
-        AND (BI_RPT_GENERAL.TIPO = 'FAC')
-    GROUP BY BI_RPT_GENERAL.CODSUCURSAL
-    ORDER BY BI_RPT_GENERAL.CODSUCURSAL`
+    let qry = `
+        SELECT  
+            CODIGO_MUNICIPIO AS CODMUN, 
+            PRODUCTO AS CODPROD, 
+		    CODIGO_DUN AS DUN, 
+            DESCRIPCION_PRODUCTO AS DESPROD, 
+		    SUM(TOTALUNIDADES * INV) * - 1 AS TOTALUNIDADES,
+		    SUM(TOTALCOSTO * INV) * - 1 AS TOTALCOSTO, 
+		    SUM(TOTALPRECIO * INV) * - 1 AS TOTALPRECIO
+        FROM view_rpt_general
+        WHERE  (EMPNIT = '${sucursal}') AND (ANIO = ${anio}) AND (MES = ${mes}) AND 
+        (CODIGO_MUNICIPIO = ${codmun})
+        GROUP BY CODIGO_MUNICIPIO, PRODUCTO, CODIGO_DUN, DESCRIPCION_PRODUCTO
+        ORDER BY DESPROD
+    `
 
      execute.QueryToken(res,qry,token);
     
