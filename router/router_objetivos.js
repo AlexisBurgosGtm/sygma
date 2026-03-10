@@ -1131,7 +1131,7 @@ router.post('/get_productos_municipio', async function(req,res){
         WHERE  (EMPNIT = '${sucursal}') AND (ANIO = ${anio}) AND (MES = ${mes}) AND 
         (CODIGO_MUNICIPIO = ${codmun})
         GROUP BY CODIGO_MUNICIPIO, PRODUCTO, CODIGO_DUN, DESCRIPCION_PRODUCTO
-        ORDER BY DESPROD
+        ORDER BY TOTALPRECIO DESC;
     `
 
      execute.QueryToken(res,qry,token);
