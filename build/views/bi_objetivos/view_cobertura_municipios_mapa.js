@@ -5,6 +5,8 @@ function getView(){
             return `
             <div class="panel-content">
                 
+                <h3 class="text-base negrita">ANALISIS POR MUNICIPIO</h3>
+
                 <div class="tab-content border border-top-0 border-bottom-0 border-right-0 border-left-0 p-3">
                     <div class="tab-pane fade show active"  id="uno"  role="tabpanel">
                        ${view.mapa()}
@@ -78,6 +80,23 @@ function getView(){
                 </div>
                 <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
                     <div class="table-responsive" id="containerMunicipios">
+                        
+                        <div class="form-group">
+                            <input class="form-control border-danger text-danger" type="text" placeholder="Escriba para buscar..."
+                            id="txtBuscarMunicipio"
+                            oninput="F.FiltrarTabla('tblMunicipiosDep','txtBuscarMunicipio')">
+                        </div>
+                        <table class="sortable table h-full col-12 table-bordered" id="tblMunicipiosDep">
+                            <thead class="bg-primary text-white">
+                                <tr>
+                                    <td>Municipio</td>
+                                    <td>Importe</td>
+                                    <td>Part</td>
+                                </tr>
+                            </thead>
+                            <tbody id="tbl_data_municipios"></tbody>
+                        </table>
+
                     </div>
                 </div>
             </div>                  
@@ -85,15 +104,31 @@ function getView(){
         },
         detalles_municipio:()=>{
             return `
+            
+            <div class="row">
+                <div class="col-6">
+                    <h5 class="negrita text-danger" id="lbMunicipioDetalle"></h5>
+                </div>
+                <div class="col-2">
+                    <h3 class="text-center text-danger negrita" id="lbUniverso">0</h3>
+                </div>
+                 <div class="col-4">
+                    <h3 class="text-center text-danger negrita" id="lbTotalVenta">0</h3>
+                </div>
+            </div>
+
+            <br>
+                                       
+
             <div class="card col-12 card-rounded shadow"> 
                 <div class="card-body p-4">
             
                     <div class="row">
                         <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                            
+                                VENTAS POR MRARCA
                         </div>
                         <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-
+                            VENTAS POR VENDEDOR
                         </div>
                     </div>
 
@@ -117,8 +152,7 @@ function getView(){
                                     
                                     <div class="card-body">
                                         <h5 class="text-center text-secondary" id="lbMunicipio">Municipio</h5>
-                                        <h5 class="text-center text-danger negrita" id="lbTotalVenta">0</h5>
-                                        
+                                       
                                         <hr class="solid">
                                     </div>
                                     
@@ -230,7 +264,7 @@ function mapaCobertura(idContenedor, lt, lg){
     
     let tbl = `<div class="mapcontainer_localizaciones" id="mapcontainer"></div>`;  
     
-    let containerTabla = document.getElementById('containerMunicipios');
+    let containerTabla = document.getElementById('tbl_data_municipios');
     containerTabla.innerHTML = GlobalLoader;
     
     let str = '';
@@ -268,11 +302,11 @@ function mapaCobertura(idContenedor, lt, lg){
                 .bindPopup(`${rows.MUNICIPIO} <br><small>Vendido: ${F.setMoneda(rows.TOTALPRECIO,'Q')}</small>`, {closeOnClick: true, autoClose: true})   
                 .on('click', function(e){
                     console.log(e);
-                    getMenuMunicipio(rows.CODMUNICIPIO, rows.MUNICIPIO, rows.TOTALPRECIO)
+                    getMenuMunicipio(rows.CODMUNICIPIO, rows.MUNICIPIO, rows.TOTALPRECIO,rows.UNIVERSO)
                    
                 });
                 //dibuja la table
-                str += `<tr class="hand" onclick="getMenuMunicipio('${rows.CODMUNICIPIO}', '${rows.MUNICIPIO}', '${rows.TOTALPRECIO}')">
+                str += `<tr class="hand" onclick="getMenuMunicipio('${rows.CODMUNICIPIO}', '${rows.MUNICIPIO}', '${rows.TOTALPRECIO}','${rows.UNIVERSO}')">
                             <td>${rows.MUNICIPIO}</td>
                             <td class="currSign">${F.setMoneda(rows.TOTALPRECIO,'')}</td>
                             <td>${F.getParticipacion(Number(rows.TOTALPRECIO), totalventa)}</td>
@@ -280,30 +314,13 @@ function mapaCobertura(idContenedor, lt, lg){
         })
 
         //carga la tabla
-        let tablamun = `
-                        <div class="form-group">
-                            <input class="form-control border-danger text-danger" type="text" placeholder="Escriba para buscar..."
-                            id="txtBuscarMunicipio"
-                            oninput="F.FiltrarTabla('tblMunicipiosDep','txtBuscarMunicipio')">
-                        </div>
-                        <table class="table table-bordered" id="tblMunicipiosDep">
-                            <thead class="bg-primary text-white">
-                                <tr>
-                                    <td>Municipio</td>
-                                    <td>Importe</td>
-                                    <td>Part</td>
-                                </tr>
-                            </thead>
-                            <tbody id="">${str}</tbody>
-                        </table>
-        `
-        containerTabla.innerHTML = tablamun;
+        containerTabla.innerHTML = str;
       
         
 
         //RE-AJUSTA EL MAPA A LA PANTALLA
         setTimeout(function () {
-            console.log('timer mapa 1')
+           
             try {
                 map.invalidateSize();    
             } catch (error) {
@@ -344,16 +361,19 @@ function getDataCobertura(sucursal,mes,anio){
 
 
 
-function getMenuMunicipio(sucursal,codmun, desmun, coddepto,venta){
+function getMenuMunicipio(codmun, desmun,venta,universo){
 
     //$('#modalResumenMunicipio').modal('show');
     document.getElementById('tab-dos').click();
 
-    document.getElementById('lbMunicipio').innerText = `${desmun} - (${sucursal})`;
+    
+   
+    document.getElementById('lbMunicipioDetalle').innerText = `Resumen: ${desmun}` ;
+    document.getElementById('lbUniverso').innerText = `Universo: ${universo}`;
     document.getElementById('lbTotalVenta').innerText = F.setMoneda(venta,'Q');
 
-   
-   
+
+    
 
 };
 
