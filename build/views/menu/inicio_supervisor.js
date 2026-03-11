@@ -161,6 +161,25 @@ function getView(){
                         </div>
                     </div>
 
+                    <br>
+
+                    <div class="card border-info card-rounded  bg-white shadow col-12 hand"  
+                    id="btnMenuCoberturaMunicipio">
+                        <div class="card-body p-4">
+
+                            <h4 class="text-info">COBERTURA MUNICIPIOS</h4>
+                          
+                             <div class="row">
+                                <div class="col-6">
+                                </div>
+                                <div class="col-6 text-right">
+                                    <i class="fal fa-globe negrita text-info" style="font-size:250%"></i>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
 
                 
                 </div>
@@ -1609,6 +1628,13 @@ function listeners_objetivos(){
         Menu.objetivos_logro_procter();
     });
 
+
+    document.getElementById('btnMenuCoberturaMunicipio').addEventListener('click',()=>{
+
+        Menu.objetivos_cobertura_municipios();
+    });
+
+    
 
     
     let cmbSucursal = document.getElementById('cmbSucursal');

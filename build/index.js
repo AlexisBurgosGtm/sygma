@@ -48,11 +48,11 @@ F.instalationHandlers('btnInstalarApp');
 
 
 
-let versionapp = "M.10.03.2026:3"
+let versionapp = "M.11.03.2026:0"
 
 function get_log(){
 
-  document.getElementById('root_log').innerHTML = GlobalLoader;
+    document.getElementById('root_log').innerHTML = GlobalLoader;
 
     let log = [
       {FECHA:'20-08-2025',DESCRIPCION:'AGREGADO INPUT BUSQUEDA DE DOCUMENTOS EN ARCHIVO/DOCUMENTOS'},
@@ -114,7 +114,7 @@ function get_log(){
       {FECHA:'02-03-2026',DESCRIPCION:'OPCION PARA CAMBIAR FECHA EN DOCUMENTOS'},
       {FECHA:'06-03-2026',DESCRIPCION:'COBERTURA DE EMPLEADOS POR MARCA EN OBJETIVOS COBERTURA'},
       {FECHA:'10-03-2025',DESCRIPCION:'COBERTURA POR MUNICIPIO, REPORTE MARCAS Y PRODUCTOS'},
-      {FECHA:'',DESCRIPCION:''},
+      {FECHA:'11-03-2025',DESCRIPCION:'AGREGADO MENU DE COBERTURA MUNICIPIO A SUPERVISORES'},
       {FECHA:'',DESCRIPCION:''},
       {FECHA:'',DESCRIPCION:''},
     ]

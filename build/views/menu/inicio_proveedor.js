@@ -241,9 +241,10 @@ function getView(){
                 </div>
                 
             </div>
-
+            <br>
+            
             <div class="row">
-            <div class="col-sm-12 col-md-3 col-xl-3 col-lg-3">
+                <div class="col-sm-12 col-md-3 col-xl-3 col-lg-3">
                 
                     <div class="card card-rounded border-base  bg-white shadow col-12 hand" id="btnMenuGps">
                         <div class="card-body p-4">
