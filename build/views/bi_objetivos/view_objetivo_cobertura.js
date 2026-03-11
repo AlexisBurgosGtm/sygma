@@ -131,6 +131,11 @@ function getView(){
                     
                 </div>
             </div>
+
+            <button class="btn btn-circle btn-xl btn-secondary btn-bottom-l hand shadow"
+                onclick="Navegar.inicio()">
+                    <i class="fal fa-home"></i>
+            </button>
             `
         },
         vista_empleado:()=>{

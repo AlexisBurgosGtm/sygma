@@ -239,7 +239,11 @@ function getView(){
                 
                 
                 </div>
-                <div class="col-sm-12 col-md-3 col-xl-3 col-lg-3">
+                
+            </div>
+
+            <div class="row">
+            <div class="col-sm-12 col-md-3 col-xl-3 col-lg-3">
                 
                     <div class="card card-rounded border-base  bg-white shadow col-12 hand" id="btnMenuGps">
                         <div class="card-body p-4">
@@ -258,21 +262,39 @@ function getView(){
 
                 <div class="col-sm-12 col-md-3 col-xl-3 col-lg-3">
                 
-                    <div class="card card-rounded border-base  bg-white shadow col-12 hand" id="btnMenuCoberturaMunicipios">
+                    <div class="card card-rounded border-primary  bg-white shadow col-12 hand" id="btnMenuCoberturaMunicipios">
                         <div class="card-body p-4">
-                            <h4 class="text-base">COBERTURA MUNICIPIOS</h4>
+                            <h4 class="text-primary">COBERTURA MUNICIPIOS</h4>
                             <div class="row">
                                 <div class="col-6">
                                 </div>
                                 <div class="col-6 text-right">
-                                    <i class="fal fa-globe negrita text-base" style="font-size:250%"></i>
+                                    <i class="fal fa-globe negrita text-primary" style="font-size:250%"></i>
                                 </div>
                             </div>
                         </div>
                     </div>
                 
                 </div>
-               
+
+
+                <div class="col-sm-12 col-md-3 col-xl-3 col-lg-3">
+                
+                    <div class="card card-rounded border-secondary  bg-white shadow col-12 hand" id="btnMenuCoberturaClientes">
+                        <div class="card-body p-4">
+                            <h4 class="text-secondary">COBERTURA CLIENTES</h4>
+                            <div class="row">
+                                <div class="col-6">
+                                </div>
+                                <div class="col-6 text-right">
+                                    <i class="fal fa-users negrita text-secondary" style="font-size:250%"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                </div>
+
             </div>
             `
         },
@@ -1178,6 +1200,10 @@ function addListeners(){
 
      document.getElementById('btnMenuCoberturaMunicipios').addEventListener('click',()=>{
         Menu.objetivos_cobertura_municipios()
+     })
+
+      document.getElementById('btnMenuCoberturaClientes').addEventListener('click',()=>{
+        Menu.objetivos_cobertura()
      })
 
      
