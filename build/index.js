@@ -140,5 +140,52 @@ function get_log(){
 Navegar.login();
 
 
-  
 
+//-------------------------------------------
+// FUNCION PARA LAZY LOADING DE LAS TABLAS
+//-------------------------------------------
+
+/* 
+let bufferRows = 50;
+
+function lazyLoadNext(numRows,tableBody) {
+    numRows = Math.min(numRows, tableBody.childNodes.length);
+
+    let rowsLoaded = 0;
+    for (let i = 0; i < tableBody.childNodes.length; i++) {
+        if (tableBody.childNodes[i].style.display != "none")
+            continue;
+
+        tableBody.childNodes[i].style = "";
+
+        rowsLoaded++;
+        if (rowsLoaded >= numRows)
+            break;
+    }
+}
+
+function lazyLoadBuffer(tableBody) {
+    for (let i = tableBody.childNodes.length - 1; i >= 0; i--) {
+        if (tableBody.childNodes[i].style.display == "none")
+            continue;
+
+        let rect = tableBody.childNodes[i].getBoundingClientRect();
+        let viewHeight = window.innerHeight || document.documentElement.clientHeight;
+
+        // If we are within 3 screens of the viewport, lazy load more rows
+        if (rect.bottom <= viewHeight * 3) {
+            console.log(`Lazy loading ${bufferRows} more rows...`)
+            lazyLoadNext(bufferRows,tableBody);
+        }
+
+        break;
+    }
+}
+
+lazyLoadNext(bufferRows);
+window.onscroll = lazyLoadBuffer; 
+  */
+
+//-------------------------------------------
+// FUNCION PARA LAZY LOADING DE LAS TABLAS
+//-------------------------------------------

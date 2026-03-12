@@ -646,7 +646,7 @@ function tbl_clientes(){
 
             contador +=1;
             str += `
-            <tr>
+            <tr >
                 <td>${r.NOMEMPLEADO}
                     <br>
                     <small>${r.VISITA}</small>
@@ -1280,3 +1280,7 @@ function get_mapa(){
 
 
 };
+
+
+
+// optionally debounce
