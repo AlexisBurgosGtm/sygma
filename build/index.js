@@ -1,0 +1,195 @@
+﻿
+//inicia las view transition
+document.startViewTransition(() => updateDOM());
+
+
+function InicializarServiceWorkerNotif(){
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () =>
+   navigator.serviceWorker.register('./sw.js')
+    .then(registration => console.log('Service Worker registered'))
+    .catch(err => 'SW registration failed'));
+  };
+
+ 
+  requestPermission();
+}
+
+if ('Notification' in window) {};
+
+function requestPermission() {
+  if (!('Notification' in window)) {
+    //alert('Notification API not supported!');
+    return;
+  }
+  
+  Notification.requestPermission(function (result) {
+    //$status.innerText = result;
+  });
+}
+
+
+InicializarServiceWorkerNotif();
+
+
+Mousetrap.bind(['command+e', 'ctrl+e'], function(e) {
+  $('#modalErrores').modal('show');
+  
+  return false;
+});
+
+
+//quita los alert de error en el plugin de las datatables
+$.fn.dataTable.ext.errMode = 'none';
+
+
+F.instalationHandlers('btnInstalarApp');
+
+
+
+
+let versionapp = "M.15.04.2026:0"
+
+function get_log(){
+
+    document.getElementById('root_log').innerHTML = GlobalLoader;
+
+    let log = [
+      {FECHA:'20-08-2025',DESCRIPCION:'AGREGADO INPUT BUSQUEDA DE DOCUMENTOS EN ARCHIVO/DOCUMENTOS'},
+      {FECHA:'21-08-2025',DESCRIPCION:'AGREGADO CARGA DE COSTOS EN COMPRAS'},
+      {FECHA:'21-08-2025',DESCRIPCION:'SE QUITO PROVISIONALMENTE LA EDICION DE CANTIDAD EN PEDIDOS VENDEDOR'},
+      {FECHA:'21-08-2025',DESCRIPCION:'SE AGREGO LA VENTANA DE GOLES A MODULO GERENCIA EN INICIO'},
+      {FECHA:'22-08-2025',DESCRIPCION:'EDITAR CANTIDAD EN NOTAS DE CREDITO / DEVOLUCIONES'},
+      {FECHA:'22-08-2025',DESCRIPCION:'REVISION DE DUPLICIDAD AL CARGAR NOTA DE CREDITO / DEVOLUCION'},
+      {FECHA:'02-09-2025',DESCRIPCION:'DESHABILITAR UNA MEDIDA DE PRECIOS POR SEDE'},
+      {FECHA:'04-09-2025',DESCRIPCION:'CAJA DE BUSQUEDA EN FACTURAS ASIGNADAS A PICKING'},
+      {FECHA:'09-09-2025',DESCRIPCION:'COLUMNA PARA BONI EN PICKING'},
+      {FECHA:'22-09-2025',DESCRIPCION:'MODULO REPARTIDOR (V1)'},
+      {FECHA:'23-09-2025',DESCRIPCION:'MODULO REPARTIDOR (V2)'},
+      {FECHA:'25-09-2025',DESCRIPCION:'MODULO REPARTIDOR (V3)'},
+      {FECHA:'26-09-2025',DESCRIPCION:'SE FILTRO EL COMBO EMPLEADOS PARA QUE APAREZCAN SOLO LOS DEL PICKING'},
+      {FECHA:'26-09-2025',DESCRIPCION:'SE AGREGO RESUMEN DE DEVOLUCIONES EN MOD. REPARTIDOR'},
+      {FECHA:'04-10-2025',DESCRIPCION:'SELLOUT Y CLIENTES EXPORTAR A XLSX'},
+      {FECHA:'04-10-2025',DESCRIPCION:'RE-CREACION DE VENTANA DE LOGRO SEGUN P&G'},
+      {FECHA:'10-10-2025',DESCRIPCION:'VENTANA DE LOGRO P&G V1'},
+      {FECHA:'10-10-2025',DESCRIPCION:'DESCARGAR LISTA DE CLIENTES POR SEDE (EXCEL)'},
+      {FECHA:'14-10-2025',DESCRIPCION:'SE AGREGO LOGRO PROCTER A SUPERVISOR Y PROVEEDOR'},
+      {FECHA:'14-10-2025',DESCRIPCION:'VENTANA LOGRO P&G, OBJETIVOS GOLES Y PONER FALTANTES NEGATIVOS A CERO'},
+      {FECHA:'15-10-2025',DESCRIPCION:'MODIFICACION DE GUARDADO DE DIAS LABORALES EN LOGRO P&G'},
+      {FECHA:'15-10-2025',DESCRIPCION:'COLORES Y PROYECCION PORCENTUAL EN LOGRO P&G'},
+      {FECHA:'17-10-2025',DESCRIPCION:'HISTORIAL DE CLIENTES CAMBIADO A MES'},
+      {FECHA:'22-10-2025',DESCRIPCION:'SE AGREGARON TOTALES DE IMPORTE Y DEVOLUCION A LISTA DE EMBARQUES'},
+      {FECHA:'28-10-2025',DESCRIPCION:'RESUMEN GENERAL EN LOGRO (TODOS)'},
+      {FECHA:'30-10-2025',DESCRIPCION:'AGREGADO SUPERVISOR A LISTA DE VENDEDORES EN OBJETIVO'},
+      {FECHA:'31-10-2025',DESCRIPCION:'OPCION PARA CAMBIO DE EMPLEADO EN DOCUMENTO'},
+      {FECHA:'07-11-2025',DESCRIPCION:'REPORTE DE RESUMEN DE MARCAS EN GOLES V1'},
+      {FECHA:'11-11-2025',DESCRIPCION:'REPORTE DE RESUMEN DE MARCAS EN GOLES V2'},
+      {FECHA:'13-11-2025',DESCRIPCION:'INVENTARIO RETROACTIVO'},
+      {FECHA:'03-12-2025',DESCRIPCION:'REPORTE DE COBERTURA CLIENTES POR MARCA'},
+      {FECHA:'07-12-2025',DESCRIPCION:'REPORTE DE COBERTURA CLIENTES POR MARCA EN VENDEDOR'},
+      {FECHA:'15-12-2025',DESCRIPCION:'REPORTE DE GOLES Y COBERTURA JUNTOS EN VENDEDOR'},
+      {FECHA:'15-12-2025',DESCRIPCION:'REORGANIZAR OPCIONES EN VENDEDOR'},
+      {FECHA:'02-01-2026',DESCRIPCION:'SE AGREGO PRECIO A Y B EN PEDIDOS VENDEDOR'},
+      {FECHA:'07-01-2026',DESCRIPCION:'OPCION DE INVENTARIO RETROACTIVO PARA PROVEEDOR'},
+      {FECHA:'07-01-2026',DESCRIPCION:'OPCION EN CONFIG PARA PERMITIR VENTAS MENORES AL COSTOS'},
+      {FECHA:'08-01-2026',DESCRIPCION:'AGREGADA LA COLUMNA CAJAS EN INVENTARIO RETROACTIVO Y TOTAL COSTO'},
+      {FECHA:'15-01-2026',DESCRIPCION:'COLUMNA COSTOS AGREGADA A INVENTARIO RETROACTIVO'},
+      {FECHA:'16-01-2026',DESCRIPCION:'BOTON DE ACTUALIZACION DE COSTOS DESDE DOCUMENTOS'},
+      {FECHA:'28-01-2026',DESCRIPCION:'LISTADO DE PRODUCTOS VENDIDOS A PRECIOS MAYORISTAS EN DIGITADORES'},
+      {FECHA:'28-01-2026',DESCRIPCION:'CARGA DE COSTOS AL FINALIZAR COMPRA'},
+      {FECHA:'28-01-2026',DESCRIPCION:'AGREGA LA UBICACION DEL EMPLEADO AL HACER LOGIN'},
+      {FECHA:'03-02-2026',DESCRIPCION:'AGREGADO SKUS POR TIENDA EN REPORTE LOGRO P&G'},
+      {FECHA:'04-02-2026',DESCRIPCION:'V1 MAPA DE VISITAS VENDEDOR'},
+      {FECHA:'05-02-2026',DESCRIPCION:'FUNCION PARA ACTUALIZAR CORRELATIVO AUTOMATICAMENTES'},
+      {FECHA:'06-02-2026',DESCRIPCION:'HISTORIAL DE VENTAS DE CLIENTE EN OPCION MAPA'},
+      {FECHA:'07-02-2026',DESCRIPCION:'HISTORIAL DE MARCAS DEL MES DE CLIENTE EN OPCION MAPA'},  
+      {FECHA:'08-02-2026',DESCRIPCION:'MAPA DE VISITAS PARA SUPERVISOR'},  
+      {FECHA:'09-02-2026',DESCRIPCION:'MAPA DE VISITAS PARA SUPERVISOR, REPORTE MARCAS VENDIDAS CLIENTE'},  
+      {FECHA:'10-02-2026',DESCRIPCION:'AGREGADA QRY QUE AGREGA UN REGISTRO DE VISITA CLIENTE AL VENDER'},  
+      {FECHA:'10-02-2026',DESCRIPCION:'AGREGADA LISTA PRODUCTOS EN OPCIONES CLIENTE MAPA'},  
+      {FECHA:'18-02-2026',DESCRIPCION:'AGREGADO HORA Y FECHA A UBICACION EMPLEADOS GPS'},
+      {FECHA:'19-02-2026',DESCRIPCION:'CREACION, EDICION Y ELIMINACION DE DEPARTAMENTOS, SECTORES Y MUNICIPIOS V1'},
+      {FECHA:'19-02-2026',DESCRIPCION:'MAPA PARA UBICAR Y ACTUALIZAR MUNICIPIOS'},
+      {FECHA:'02-03-2026',DESCRIPCION:'CORRECCION DE BOTON CORREGIR DOCUMENTO EN DIGITADORES'},
+      {FECHA:'02-03-2026',DESCRIPCION:'OPCION PARA CAMBIAR FECHA EN DOCUMENTOS'},
+      {FECHA:'06-03-2026',DESCRIPCION:'COBERTURA DE EMPLEADOS POR MARCA EN OBJETIVOS COBERTURA'},
+      {FECHA:'10-03-2025',DESCRIPCION:'COBERTURA POR MUNICIPIO, REPORTE MARCAS Y PRODUCTOS'},
+      {FECHA:'11-03-2025',DESCRIPCION:'AGREGADO MENU DE COBERTURA MUNICIPIO A SUPERVISORES'},
+      {FECHA:'13-04-2025',DESCRIPCION:'TABLA DE CHECK IN Y CHECK OUT DE EMPLEADOS'},
+      {FECHA:'15-04-2025',DESCRIPCION:'FILTRO DE MARCAS EN PRODUCTOS Y PRECIOS'},
+      {FECHA:'',DESCRIPCION:''},
+      {FECHA:'',DESCRIPCION:''},
+      {FECHA:'',DESCRIPCION:''},
+      {FECHA:'',DESCRIPCION:''},
+    ]
+
+
+    let container = document.getElementById('root_log');
+    let str = '';
+
+    let lectura = log.reverse();
+
+    lectura.map((r)=>{
+        str+= `<tr>
+                  <td>${r.FECHA}</td>
+                  <td>${r.DESCRIPCION}</td>
+              </tr>`
+    })
+    container.innerHTML = str;
+    
+
+};
+
+
+Navegar.login();
+
+
+
+//-------------------------------------------
+// FUNCION PARA LAZY LOADING DE LAS TABLAS
+//-------------------------------------------
+
+/* 
+let bufferRows = 50;
+
+function lazyLoadNext(numRows,tableBody) {
+    numRows = Math.min(numRows, tableBody.childNodes.length);
+
+    let rowsLoaded = 0;
+    for (let i = 0; i < tableBody.childNodes.length; i++) {
+        if (tableBody.childNodes[i].style.display != "none")
+            continue;
+
+        tableBody.childNodes[i].style = "";
+
+        rowsLoaded++;
+        if (rowsLoaded >= numRows)
+            break;
+    }
+}
+
+function lazyLoadBuffer(tableBody) {
+    for (let i = tableBody.childNodes.length - 1; i >= 0; i--) {
+        if (tableBody.childNodes[i].style.display == "none")
+            continue;
+
+        let rect = tableBody.childNodes[i].getBoundingClientRect();
+        let viewHeight = window.innerHeight || document.documentElement.clientHeight;
+
+        // If we are within 3 screens of the viewport, lazy load more rows
+        if (rect.bottom <= viewHeight * 3) {
+            console.log(`Lazy loading ${bufferRows} more rows...`)
+            lazyLoadNext(bufferRows,tableBody);
+        }
+
+        break;
+    }
+}
+
+lazyLoadNext(bufferRows);
+window.onscroll = lazyLoadBuffer; 
+  */
+
+//-------------------------------------------
+// FUNCION PARA LAZY LOADING DE LAS TABLAS
+//-------------------------------------------
