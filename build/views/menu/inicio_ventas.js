@@ -1014,7 +1014,7 @@ function rpt_tbl_documentos_embarque(){
                         <td class="negrita text-danger text-right">${F.setMoneda(r.IMPORTE,'Q')}</td>
                         <td>
                             <button class="btn btn-info btn-md btn-circle hand shadow"
-                            onclick="fcn_editar_factura('${r.CODDOC}','${r.CORRELATIVO}','${r.NOMCLIE}','${r.DIRCLIE}')">
+                            onclick="fcn_editar_factura('${r.CODDOC}','${r.CORRELATIVO}','${r.NOMCLIE}','${r.DIRCLIE}','${r.STATUS}')">
                                     <i class="fal fa-edit"></i>
                             </button>
                         </td>

@@ -1,10 +1,18 @@
 
 let GlobalEntSal = 0;
 
-function fcn_editar_factura(coddoc,correlativo,nomclie,dirclie){
+function fcn_editar_factura(coddoc,correlativo,nomclie,dirclie,st){
 
   
+    let status = st || 'O';
 
+    if(status=='O'){
+
+    }else{
+        if(Number(GlobalNivelUsuario)==3){
+            F.AvisoError('Este documento solo puede ser editado en Oficina');return;
+        };
+    }
 
     F.Confirmacion('¿Está seguro que desea EDITAR este Documento?')
     .then((value)=>{
@@ -382,12 +390,23 @@ function addListeners_EF_Agregar_item(){
                 let existencia = Selected_existencia;
                 let bono = Selected_bono;
                 let exento = Selected_exento;
+                
+                let varExistencia = Number(existencia * equivale);
+
+
+                //PERMITE VENTAS SIN EXISTENCIA
+                if(data_config_general[0].VALOR.toString()=="NO"){
+                    if(totalunidades > Number(varExistencia)){F.AvisoError('Existencia menor a la cantidad pedida');return;}
+                };
 
 
                 EF_btnAgregarItem.disabled = true;
                 EF_btnAgregarItem.innerHTML = `<i class="fal fa-save fa-spin"></i>`;
-    
 
+             
+              
+            
+              
                 GF.get_documento_insert_item(coddoc,correlativo,codprod,desprod, 
                     codmedida,cantidad,equivale,totalunidades,costo,
                     precio,totalcosto,totalprecio,descuento,tipoprod,
