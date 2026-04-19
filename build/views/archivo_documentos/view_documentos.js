@@ -95,6 +95,7 @@ function getView(){
                                     <td></td>
                                     <td></td>
                                     <td></td>
+                                    <td></td>
                                 </tr>
                             </thead>
                             <tbody id="tblDataDocumentos">
@@ -482,6 +483,11 @@ function get_documentos(){
                         <button class="btn btn-md btn-circle hand shadow btn-base" 
                             onclick="get_opciones('${r.CODDOC}','${r.CORRELATIVO}','${r.CODEMP}','${r.FECHA}')">
                             <i class="fal fa-cog"></i>
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn btn-circle btn-primary btn-md hand shadow" onclick="PRINT.documento('${tipo}','${GlobalEmpnit}','${r.CODDOC}','${r.CORRELATIVO}')">
+                            <i class="fal fa-print"></i>
                         </button>
                     </td>
                     <td>

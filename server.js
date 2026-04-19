@@ -42,6 +42,8 @@ var router_bi = require('./router/router_bi');
 var router_clasificaciones = require('./router/router_clasificaciones');
 var router_repartidor = require('./router/router_repartidor.js');
 var router_usuarios = require('./router/router_usuarios.js');
+var router_print = require('./router/router_print.js');
+
 
 
 
@@ -144,6 +146,24 @@ app.post("/activate_config_count_rows",function(req,res){
 app.get("/login",function(req,res){
   res.redirect('/');
 }); 
+
+
+//IMPRESION DE DOCUMENTOS
+
+app.get("/print_factura",function(req,res){
+
+  const {sucursal,coddoc,correlativo} = req.query;
+
+  let factura = __dirname + '/build/print_ticket_factura.html'
+
+	res.sendFile(factura);
+
+}); 
+
+
+
+//IMPRESION DE DOCUMENTOS
+//---------------------------
 
 // DESPACHO //
 
@@ -443,6 +463,8 @@ app.use('/documentos', router_documentos);
 app.use('/bi', router_bi);
 app.use('/clasificaciones', router_clasificaciones);
 app.use('/repartidor', router_repartidor);
+app.use('/print', router_print);
+
 
 
 

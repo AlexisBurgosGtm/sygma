@@ -96,6 +96,7 @@ function getView(){
                                         <thead class="bg-verde text-white">
                                             <tr>
                                                 <td>PRODUCTO</td>
+                                                <td>DESCRIPCION 2</td>
                                                 <td>MEDIDA</td>
                                                 <td>CANTIDAD</td>
                                                 <td>PRECIO</td>
@@ -139,11 +140,18 @@ function getView(){
                         <div class="modal-body p-4">
                             <label class="modal-title text-base h3" id="">Buscar producto</label>
 
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary">Escriba para buscar...</label>
+                                        <input type="text" class="form-control" id="txtBusquedaProducto" placeholder="Escriba para buscar..."
+                                        oninput="F.FiltrarTabla('tblProductos','txtBusquedaProducto')">
+                                    </div>
+
                                     <table class="table table-responsive  table-hover table-bordered h-full" id="tblProductos">
                                         <thead class="bg-base text-white">
                                             <tr>
                                                 <td>MARCA</td>
                                                 <td>PRODUCTO</td>
+                                                <td>DESCRIPCION 2</td>
                                                 <td>MEDIDA</td>
                                                 <td>PRECIO</td>
                                                 <td>EXISTENCIA</td>
@@ -777,7 +785,7 @@ function listener_vista_pedido(){
         };
 
 
-        insert_producto_pedido(Selected_codprod,Selected_desprod,Selected_codmedida,Selected_equivale,Selected_costo,preciounitario,cantidad, Selected_exento, Selected_tipoprod, data_empresa_config.TIPO_PRECIO, Selected_existencia,Selected_bono,descuento)
+        insert_producto_pedido(Selected_codprod,Selected_desprod,Selected_desprod2,Selected_codmedida,Selected_equivale,Selected_costo,preciounitario,cantidad, Selected_exento, Selected_tipoprod, data_empresa_config.TIPO_PRECIO, Selected_existencia,Selected_bono,descuento)
         .then(()=>{
             
             $("#modal_cantidad").modal('hide');
@@ -1272,12 +1280,13 @@ function get_buscar_producto(filtro){
                 if(existencia<=0){strClassExistencia='bg-danger text-white'};
 
                 str += `
-                    <tr class="hand" onclick="get_producto('${r.CODPROD}','${r.DESPROD}','${r.CODMEDIDA}','${r.EQUIVALE}','${r.COSTO}','${r.PRECIO}','${r.TIPOPROD}','${r.EXENTO}','${r.EXISTENCIA}','${r.BONO}')">
+                    <tr class="hand" onclick="get_producto('${r.CODPROD}','${r.DESPROD}','${r.DESPROD2}','${r.CODMEDIDA}','${r.EQUIVALE}','${r.COSTO}','${r.PRECIO}','${r.TIPOPROD}','${r.EXENTO}','${r.EXISTENCIA}','${r.BONO}')">
                         <td>${r.DESMARCA}</td>
                         <td><b style="color:${r.COLOR}">${r.DESPROD}</b>
                             <br>
                             <small class="negrita text-danger">Cód:${r.CODPROD}</small>
                         </td>
+                        <td>${r.DESPROD2}</td>
                         <td>${r.CODMEDIDA} (Eq:${r.EQUIVALE})</td>
                         <td>${F.setMoneda(r.PRECIO,'Q')}</td>
                         <td class="${strClassExistencia}">${r.EXISTENCIA}</td>
@@ -1422,7 +1431,7 @@ function get_tbl_productos_clasificacion(codigo){
 };
 
 
-function get_producto(codprod,desprod,codmedida,equivale,costo,precio,tipoprod,exento,existencia,bono){
+function get_producto(codprod,desprod,desprod2,codmedida,equivale,costo,precio,tipoprod,exento,existencia,bono){
 
             $("#modal_lista_precios").modal('hide');
             
@@ -1441,6 +1450,7 @@ function get_producto(codprod,desprod,codmedida,equivale,costo,precio,tipoprod,e
 
             Selected_codprod = codprod;
             Selected_desprod = desprod;
+            Selected_desprod2 = desprod2;
             Selected_codmedida = codmedida;
             Selected_equivale = Number(equivale);
             Selected_costo = Number(costo);
@@ -1510,7 +1520,7 @@ function calcular_descuento(idDescuento,idTotalPrecio,idTotalPrecioDescuento){
 };
 
 
-function insert_producto_pedido(codprod,desprod,codmedida,equivale,costo,precio,cantidad,exento,tipoprod,tipoprecio,existencia,bono,descuento){
+function insert_producto_pedido(codprod,desprod,desprod2,codmedida,equivale,costo,precio,cantidad,exento,tipoprod,tipoprecio,existencia,bono,descuento){
     
     let datos = 
         {
@@ -1519,6 +1529,7 @@ function insert_producto_pedido(codprod,desprod,codmedida,equivale,costo,precio,
             USUARIO:'',
             CODPROD:codprod.toString(),
             DESPROD:desprod.toString(),
+            DESPROD2:desprod2.toString(),
             CODMEDIDA:codmedida.toString(),
             EQUIVALE:Number(equivale),
             COSTO:Number(costo),
@@ -1578,6 +1589,7 @@ function get_tbl_pedido(){
                         </div>
                     </div>
                 </td>
+                <td>${rows.DESPROD2}</td>
                 <td>
                     ${rows.CODMEDIDA} (eq: ${rows.EQUIVALE})
                 </td>
@@ -1909,6 +1921,7 @@ function tbl_lista_documentos(){
                                 <td>CERTIFICACION</td>
                                 <td></td>
                                 <td></td>
+                                <td></td>
                             </tr>
                         </thead>
                         <tbody id="tblListaPedidos">`;
@@ -1942,6 +1955,11 @@ function tbl_lista_documentos(){
                             <td class="${strClassAnulado}"><b>${F.setMoneda(rows.TOTALPRECIO,'Q')}</b></td>
                             <td class="negrita ${strClassAnulado}">${rows.ST}</td>
                             <td>${rows.FEL_UUDI}</td>
+                            <td>
+                                <button class="btn btn-circle btn-primary btn-md hand shadow" onclick="PRINT.factura_normal('${GlobalEmpnit}','${rows.CODDOC}','${rows.CORRELATIVO}')">
+                                    <i class="fal fa-print"></i>
+                                </button>
+                            </td>
                             <td>
                                 <button class="btn btn-circle btn-verde btn-md hand shadow" id="${idBtnDownload}" onclick="get_pdf('${rows.CODDOC}','${rows.CORRELATIVO}','${idBtnDownload}')">
                                     <i class="fal fa-download"></i>
