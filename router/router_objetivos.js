@@ -1,0 +1,1303 @@
+const execute = require('../connection');
+const express = require('express');
+const router = express.Router();
+
+
+// ---------------------------
+// LOGRO PROCTER
+// --------------------------
+router.post("/procter_logro_vendedor", async(req,res)=>{
+   
+    const { token, sucursal,codemp,mes,anio} = req.body;
+
+    let qry = '';
+
+    if(Number(codemp)==0){
+        qry = `
+            SELECT 
+                rpt_procter_logro_objetivos_marcas.EMPNIT, 
+                rpt_procter_logro_objetivos_marcas.MES, 
+                rpt_procter_logro_objetivos_marcas.ANIO, 
+                rpt_procter_logro_objetivos_marcas.CODMARCA, 
+                rpt_procter_logro_objetivos_marcas.DESMARCA, 
+                SUM(ISNULL(rpt_procter_logro_objetivos_marcas.OBJETIVO, 0)) AS OBJETIVO, 
+                SUM(ISNULL(rpt_procter_logro_resumen.UNIDADES_VENTA, 0)) AS UNIDADES_VENTA, 
+                SUM(ISNULL(rpt_procter_logro_resumen.UNIDADES_DEVOLUCION, 0)) AS UNIDADES_DEVOLUCION, 
+                SUM(ISNULL(rpt_procter_logro_resumen.VENTA, 0)) AS VENTA, 
+                SUM(ISNULL(rpt_procter_logro_resumen.DEVOLUCION, 0)) AS DEVOLUCION
+            FROM  rpt_procter_logro_resumen RIGHT OUTER JOIN
+                rpt_procter_logro_objetivos_marcas ON rpt_procter_logro_resumen.CODMARCA = rpt_procter_logro_objetivos_marcas.CODMARCA AND rpt_procter_logro_resumen.CODEMP = rpt_procter_logro_objetivos_marcas.CODEMP AND 
+                rpt_procter_logro_resumen.MES = rpt_procter_logro_objetivos_marcas.MES AND rpt_procter_logro_resumen.ANIO = rpt_procter_logro_objetivos_marcas.ANIO AND 
+                rpt_procter_logro_resumen.EMPNIT = rpt_procter_logro_objetivos_marcas.EMPNIT
+            GROUP BY rpt_procter_logro_objetivos_marcas.EMPNIT, rpt_procter_logro_objetivos_marcas.MES, rpt_procter_logro_objetivos_marcas.ANIO, rpt_procter_logro_objetivos_marcas.CODMARCA, 
+                rpt_procter_logro_objetivos_marcas.DESMARCA
+            HAVING 
+                (rpt_procter_logro_objetivos_marcas.EMPNIT = '${sucursal}') AND 
+                (rpt_procter_logro_objetivos_marcas.MES = ${mes}) AND 
+                (rpt_procter_logro_objetivos_marcas.ANIO = ${anio})
+            ORDER BY rpt_procter_logro_objetivos_marcas.CODMARCA
+        `
+    }else{
+         qry = `
+            SELECT rpt_procter_logro_objetivos_marcas.EMPNIT, 
+                    rpt_procter_logro_objetivos_marcas.MES, 
+                    rpt_procter_logro_objetivos_marcas.ANIO, 
+                    rpt_procter_logro_objetivos_marcas.CODEMP, 
+                    rpt_procter_logro_objetivos_marcas.CODMARCA, 
+                    rpt_procter_logro_objetivos_marcas.DESMARCA, 
+                    ISNULL(rpt_procter_logro_objetivos_marcas.OBJETIVO, 0) AS OBJETIVO, 
+                    ISNULL(rpt_procter_logro_resumen.UNIDADES_VENTA,0) AS UNIDADES_VENTA, 
+                    ISNULL(rpt_procter_logro_resumen.UNIDADES_DEVOLUCION,0) AS UNIDADES_DEVOLUCION, 
+                    ISNULL(rpt_procter_logro_resumen.VENTA,0) AS VENTA, 
+                  ISNULL(rpt_procter_logro_resumen.DEVOLUCION,0) AS DEVOLUCION
+            FROM rpt_procter_logro_resumen RIGHT OUTER JOIN
+                  rpt_procter_logro_objetivos_marcas ON rpt_procter_logro_resumen.CODMARCA = rpt_procter_logro_objetivos_marcas.CODMARCA AND rpt_procter_logro_resumen.CODEMP = rpt_procter_logro_objetivos_marcas.CODEMP AND 
+                  rpt_procter_logro_resumen.MES = rpt_procter_logro_objetivos_marcas.MES AND rpt_procter_logro_resumen.ANIO = rpt_procter_logro_objetivos_marcas.ANIO AND 
+                  rpt_procter_logro_resumen.EMPNIT = rpt_procter_logro_objetivos_marcas.EMPNIT
+            WHERE  
+                (rpt_procter_logro_objetivos_marcas.EMPNIT = '${sucursal}') AND 
+                (rpt_procter_logro_objetivos_marcas.MES = ${mes}) AND 
+                (rpt_procter_logro_objetivos_marcas.ANIO = ${anio}) AND 
+                (rpt_procter_logro_objetivos_marcas.CODEMP = ${codemp})
+            ORDER BY rpt_procter_logro_objetivos_marcas.CODMARCA;
+                `;
+    }
+
+   
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+// ---------------------------
+// LOGRO PROCTER
+// --------------------------
+
+
+
+
+// ----------------------
+// GOLES P&G
+// ----------------------
+router.post("/goles_cliente", async(req,res)=>{
+   
+    const { token, sucursal,codclie, fecha} = req.body;
+
+    let qry = `
+        SELECT PRODUCTOS.CODPROD, PRODUCTOS.DESPROD, 
+            (ISNULL(T.TOTALUNIDADES,0)*-1) AS TOTALUNIDADES,
+            (ISNULL(T.TOTALPRECIO,0)*-1) AS TOTALPRECIO 
+            FROM PRODUCTOS LEFT JOIN 
+            (SELECT CODPROD, SUM(UNIDADES) AS TOTALUNIDADES, SUM(IMPORTE) AS TOTALPRECIO
+            FROM     view_rpt_goles_productos_cliente
+            WHERE  (EMPNIT = '${sucursal}') AND 
+            (ANIO = YEAR('${fecha}')) AND 
+            (MES = MONTH('${fecha}')) AND 
+            (CODCLIENTE=${codclie})
+            GROUP BY CODPROD) AS T ON PRODUCTOS.CODPROD=T.CODPROD 
+            WHERE PRODUCTOS.HABILITADO='SI'
+            ORDER BY T.TOTALUNIDADES ASC;
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/goles_resumen_vendedor", async(req,res)=>{
+   
+    const { token, sucursal,codemp, mes,anio} = req.body;
+
+    let qry = '';
+    if(codemp=='TODOS'){
+        qry = `
+        SELECT CODPROD, '' AS DESPROD, COUNT(CODCLIENTE) AS CONTEO
+        FROM     view_rpt_goles_productos_cliente_2
+        WHERE  (ANIO = ${anio}) AND (MES = ${mes}) 
+        AND (EMPNIT LIKE '%${sucursal}%')
+        GROUP BY CODPROD
+        ORDER BY CODPROD`
+    }else{
+        qry = `
+        SELECT CODPROD, ''AS DESPROD, COUNT(CODCLIENTE) AS CONTEO, EMPNIT, CODEMP
+        FROM     view_rpt_goles_productos_cliente_2
+        WHERE  (ANIO = ${anio}) AND (MES = ${mes}) 
+        AND (CODEMP=${Number(codemp)}) AND (EMPNIT LIKE '%${sucursal}%')
+        GROUP BY CODPROD, EMPNIT, CODEMP
+        ORDER BY CODPROD
+        `;
+    }
+
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/goles_resumen_vendedor_total", async(req,res)=>{
+   
+    const { token, sucursal,codemp, mes,anio} = req.body;
+
+    let qry = '';
+
+    switch (codemp.toString()) {
+        case 'TODOS':
+            qry = `
+                SELECT COUNT(CODCLIENTE) AS CONTEO
+                FROM     view_rpt_goles_productos_cliente_2
+                WHERE  (ANIO = ${anio}) AND (MES = ${mes}) 
+                AND (EMPNIT LIKE '%${sucursal}%')
+                `    
+            break;
+        case '0':
+            qry = `
+                SELECT COUNT(CODCLIENTE) AS CONTEO
+                FROM     view_rpt_goles_productos_cliente_2
+                WHERE  (ANIO = ${anio}) AND (MES = ${mes}) 
+                AND (EMPNIT LIKE '%${sucursal}%')
+                `    
+            break;
+        default:
+            qry = `
+                SELECT COUNT(CODCLIENTE) AS CONTEO
+                FROM     view_rpt_goles_productos_cliente_2
+                WHERE  (ANIO = ${anio}) AND (MES = ${mes}) 
+                AND (CODEMP=${Number(codemp)}) AND (EMPNIT LIKE '%${sucursal}%');
+                `;
+            break;
+    }
+
+       
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/BACKUP_goles_resumen_vendedor_total", async(req,res)=>{
+   
+    const { token, sucursal,codemp, mes,anio} = req.body;
+
+    let qry = '';
+    if(codemp=='TODOS'){
+        qry = `
+        SELECT COUNT(CODCLIENTE) AS CONTEO
+        FROM     view_rpt_goles_productos_cliente_2
+        WHERE  (ANIO = ${anio}) AND (MES = ${mes}) 
+        AND (EMPNIT LIKE '%${sucursal}%')
+        `
+    }else{
+        qry = `
+        SELECT COUNT(CODCLIENTE) AS CONTEO
+        FROM     view_rpt_goles_productos_cliente_2
+        WHERE  (ANIO = ${anio}) AND (MES = ${mes}) 
+        AND (CODEMP=${Number(codemp)}) AND (EMPNIT LIKE '%${sucursal}%');
+        `;
+    }
+
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/insert_objetivo_vendedor_goles_cobertura", async(req,res)=>{
+   
+    const { token, sucursal,codemp,mes,anio,goles,cobertura} = req.body;
+
+    let qry = `
+      INSERT INTO OBJETIVOS_EMPLEADO_INDIVIDUAL (EMPNIT,CODEMP,MES,ANIO,GOLES,COBERTURA)
+      SELECT '${sucursal}' AS EMPNIT, ${codemp} AS CODEMP, ${mes} AS MES, 
+      ${anio} AS ANIO, ${goles} AS GOLES, ${cobertura} AS COBERTURA;
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/select_objetivo_vendedor_goles_cobertura", async(req,res)=>{
+   
+    const { token, sucursal,mes,anio} = req.body;
+
+    let qry = `
+    SELECT
+        OBJETIVOS_EMPLEADO_INDIVIDUAL.ID,
+        OBJETIVOS_EMPLEADO_INDIVIDUAL.CODEMP, 
+        EMPLEADOS.NOMEMPLEADO AS NOMBRE, 
+        OBJETIVOS_EMPLEADO_INDIVIDUAL.GOLES, 
+        OBJETIVOS_EMPLEADO_INDIVIDUAL.COBERTURA,
+        OBJETIVOS_EMPLEADO_INDIVIDUAL.MES,
+        OBJETIVOS_EMPLEADO_INDIVIDUAL.ANIO
+    FROM OBJETIVOS_EMPLEADO_INDIVIDUAL LEFT OUTER JOIN
+        EMPLEADOS ON OBJETIVOS_EMPLEADO_INDIVIDUAL.CODEMP = EMPLEADOS.CODEMPLEADO AND OBJETIVOS_EMPLEADO_INDIVIDUAL.EMPNIT = EMPLEADOS.EMPNIT
+    WHERE  
+        (OBJETIVOS_EMPLEADO_INDIVIDUAL.EMPNIT = '${sucursal}') AND 
+        (OBJETIVOS_EMPLEADO_INDIVIDUAL.MES = ${mes}) AND 
+        (OBJETIVOS_EMPLEADO_INDIVIDUAL.ANIO = ${anio})
+    ORDER BY EMPLEADOS.NOMEMPLEADO;
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/delete_objetivo_vendedor_goles_cobertura", async(req,res)=>{
+   
+    const { token, id} = req.body;
+
+    let qry = `
+        DELETE FROM 
+            OBJETIVOS_EMPLEADO_INDIVIDUAL 
+        WHERE ID=${id};
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/select_objetivo_vendedor_goles_cobertura_empleado", async(req,res)=>{
+   
+    const { token, sucursal, codemp, mes, anio } = req.body;
+
+    let qry = '';
+
+    if(Number(codemp)==0){
+       qry = `
+            SELECT 
+                SUM(ISNULL(GOLES,0)) AS GOLES,
+                SUM(ISNULL(COBERTURA,0)) AS COBERTURA 
+            FROM
+                OBJETIVOS_EMPLEADO_INDIVIDUAL
+            WHERE EMPNIT = '${sucursal}' AND 
+                MES = ${mes} AND 
+                ANIO = ${anio};
+                `;
+    }else{
+        qry = `
+            SELECT GOLES,COBERTURA FROM
+                OBJETIVOS_EMPLEADO_INDIVIDUAL
+            WHERE EMPNIT = '${sucursal}' AND 
+                MES = ${mes} AND 
+                ANIO = ${anio} AND
+                CODEMP=${codemp};
+                `;
+    };
+    
+
+    execute.QueryToken(res,qry,token);
+     
+
+});
+router.post("/goles_marcas_resumen_vendedor", async(req,res)=>{
+   
+    const { token, sucursal,codemp, mes,anio} = req.body;
+
+    let qry = '';
+    if(codemp=='TODOS'){
+        qry = `
+        SELECT param_marca_codigos_dun.DESMARCA, COUNT(view_rpt_goles_productos_cliente_2.CODCLIENTE) AS CONTEO, SUM(ISNULL(view_rpt_goles_productos_cliente_2.IMPORTE, 0) * - 1) AS IMPORTE
+        FROM  view_rpt_goles_productos_cliente_2 LEFT OUTER JOIN
+                param_marca_codigos_dun ON view_rpt_goles_productos_cliente_2.CODPROD = param_marca_codigos_dun.CODIGO_DUN
+        WHERE  
+            (view_rpt_goles_productos_cliente_2.ANIO = ${anio}) AND 
+            (view_rpt_goles_productos_cliente_2.MES = ${mes}) AND 
+            (view_rpt_goles_productos_cliente_2.EMPNIT LIKE '%${sucursal}%')
+        GROUP BY param_marca_codigos_dun.DESMARCA
+        `
+    }else{
+        qry = `
+        SELECT 
+                param_marca_codigos_dun.DESMARCA, 
+                COUNT(view_rpt_goles_productos_cliente_2.CODCLIENTE) AS CONTEO, 
+                SUM(ISNULL(view_rpt_goles_productos_cliente_2.IMPORTE, 0) * - 1) AS IMPORTE
+        FROM  view_rpt_goles_productos_cliente_2 LEFT OUTER JOIN
+                param_marca_codigos_dun ON view_rpt_goles_productos_cliente_2.CODPROD = param_marca_codigos_dun.CODIGO_DUN
+        WHERE  
+            (view_rpt_goles_productos_cliente_2.ANIO = ${anio}) AND 
+            (view_rpt_goles_productos_cliente_2.MES = ${mes}) AND 
+            (view_rpt_goles_productos_cliente_2.EMPNIT LIKE '%${sucursal}%')
+        GROUP BY param_marca_codigos_dun.DESMARCA, view_rpt_goles_productos_cliente_2.CODEMP
+        HAVING (view_rpt_goles_productos_cliente_2.CODEMP = ${codemp})
+
+        `;
+    }
+
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/BACKUP_goles_marcas_resumen_vendedor", async(req,res)=>{
+   
+    const { token, sucursal,codemp, mes,anio} = req.body;
+
+    let qry = '';
+    if(codemp=='TODOS'){
+        qry = `
+        SELECT param_marca_codigos_dun.DESMARCA, COUNT(view_rpt_goles_productos_cliente_2.CODCLIENTE) AS CONTEO, SUM(ISNULL(view_rpt_goles_productos_cliente_2.IMPORTE, 0) * - 1) AS IMPORTE
+        FROM  view_rpt_goles_productos_cliente_2 LEFT OUTER JOIN
+                param_marca_codigos_dun ON view_rpt_goles_productos_cliente_2.CODPROD = param_marca_codigos_dun.CODIGO_DUN
+        WHERE  
+            (view_rpt_goles_productos_cliente_2.ANIO = ${anio}) AND 
+            (view_rpt_goles_productos_cliente_2.MES = ${mes}) AND 
+            (view_rpt_goles_productos_cliente_2.EMPNIT LIKE '%${sucursal}%')
+        GROUP BY param_marca_codigos_dun.DESMARCA
+        `
+    }else{
+        qry = `
+        SELECT 
+                param_marca_codigos_dun.DESMARCA, 
+                COUNT(view_rpt_goles_productos_cliente_2.CODCLIENTE) AS CONTEO, 
+                SUM(ISNULL(view_rpt_goles_productos_cliente_2.IMPORTE, 0) * - 1) AS IMPORTE
+        FROM  view_rpt_goles_productos_cliente_2 LEFT OUTER JOIN
+                param_marca_codigos_dun ON view_rpt_goles_productos_cliente_2.CODPROD = param_marca_codigos_dun.CODIGO_DUN
+        WHERE  
+            (view_rpt_goles_productos_cliente_2.ANIO = ${anio}) AND 
+            (view_rpt_goles_productos_cliente_2.MES = ${mes}) AND 
+            (view_rpt_goles_productos_cliente_2.EMPNIT LIKE '%${sucursal}%')
+        GROUP BY param_marca_codigos_dun.DESMARCA, view_rpt_goles_productos_cliente_2.CODEMP
+        HAVING (view_rpt_goles_productos_cliente_2.CODEMP = ${codemp})
+
+        `;
+    }
+
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/select_objetivo_skus_tienda", async(req,res)=>{
+   
+    const { token, sucursal, codemp, mes, anio } = req.body;
+
+    let qry = '';
+
+    if(Number(codemp)==0){
+       qry = `
+        SELECT EMPNIT,ANIO,MES,CLIENTES,PRODUCTOS,SKUS
+        FROM PG_VENDEDOR_SKUS_POR_TIENDA_RESUMEN_SUCURSAL
+        WHERE MES=${mes} AND ANIO=${anio} AND EMPNIT='${sucursal}';
+        `;
+    }else{
+        qry = `
+        SELECT EMPNIT,CODEMP,ANIO,MES,CLIENTES,PRODUCTOS,SKUS
+        FROM PG_VENDEDOR_SKUS_POR_TIENDA_RESUMEN_VENDEDOR
+        WHERE MES=${mes} AND ANIO=${anio} AND EMPNIT='${sucursal}' AND CODEMP=${codemp};   
+                `;
+    };
+    
+
+    execute.QueryToken(res,qry,token);
+     
+
+});
+
+//ANTES DE PONER EL COMODIN EN EMPRESAS
+
+
+router.post("/universo_clientes_empleado", async(req,res)=>{
+   
+    const { token, sucursal,codemp} = req.body;
+
+    let qry = `
+       SELECT COUNT(CODCLIENTE) AS CONTEO
+        FROM     CLIENTES
+        WHERE  (HABILITADO = 'SI') AND 
+            (EMPNIT = '${sucursal}') AND 
+            (CODEMPLEADO = ${codemp})
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/universo_clientes_empleado_visitado_mes", async(req,res)=>{
+   
+    const { token, sucursal,codemp,mes,anio} = req.body;
+
+    if(Number(codemp)==0){
+        qry = `
+            SELECT COUNT(DISTINCT DOCUMENTOS.CODCLIENTE) AS CONTEO
+                FROM  DOCUMENTOS LEFT OUTER JOIN
+                    TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND 
+                    DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+                WHERE  (DOCUMENTOS.STATUS <> 'A') AND 
+                    (DOCUMENTOS.ANIO = ${anio}) AND 
+                    (DOCUMENTOS.MES = ${mes}) AND 
+                    (DOCUMENTOS.EMPNIT = '${sucursal}') AND 
+                    (TIPODOCUMENTOS.TIPODOC IN('FAC','FCP','FEC','FEF','FES'));`
+    }else{
+        qry = `
+            SELECT COUNT(DISTINCT DOCUMENTOS.CODCLIENTE) AS CONTEO
+                FROM  DOCUMENTOS LEFT OUTER JOIN
+                    TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND 
+                    DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+                WHERE  (DOCUMENTOS.STATUS <> 'A') AND 
+                    (DOCUMENTOS.ANIO = ${anio}) AND 
+                    (DOCUMENTOS.MES = ${mes}) AND 
+                    (DOCUMENTOS.EMPNIT = '${sucursal}') AND 
+                    (TIPODOCUMENTOS.TIPODOC IN('FAC','FCP','FEC','FEF','FES'))
+                GROUP BY DOCUMENTOS.CODEMP
+                HAVING (DOCUMENTOS.CODEMP = ${codemp});
+        `;
+    }
+
+ 
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/universo_clientes_sucursal", async(req,res)=>{
+   
+    const { token, sucursal} = req.body;
+
+    let qry = `
+       SELECT COUNT(CODCLIENTE) AS CONTEO
+        FROM     CLIENTES
+        WHERE  (HABILITADO = 'SI') AND 
+            (EMPNIT LIKE '%${sucursal}%') 
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+// ----------------------
+// GOLES P&G
+// ----------------------
+
+router.post("/cobertura_clientes_sucursal", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio} = req.body;
+
+    let qry = `
+		SELECT CLIENTES.EMPNIT,CLIENTES.CODCLIENTE, CLIENTES.NOMBRE, ISNULL(T.TOTALPRECIO,0) AS TOTALPRECIO 
+        FROM CLIENTES LEFT JOIN
+        (SELECT EMPNIT, CODCLIENTE,TOTALPRECIO
+        FROM view_data_clientes_importe_mes_resumen
+        WHERE ANIO=${anio} AND MES=${mes}) AS T ON 
+        CLIENTES.EMPNIT=T.EMPNIT AND 
+        CLIENTES.CODCLIENTE=T.CODCLIENTE 
+        WHERE CLIENTES.EMPNIT='${sucursal}';
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+
+
+
+router.post("/update_cobertura_clientes", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio} = req.body;
+
+    let qry = `
+		  UPDATE CLIENTES SET IMPORTE = (SELECT SUM(ISNULL(TOTALPRECIO,0)) 
+            FROM DOCUMENTOS 
+                WHERE EMPNIT=CLIENTES.EMPNIT 
+                AND CODCLIENTE=CLIENTES.CODCLIENTE 
+                AND ANIO=${anio} 
+                AND MES=${mes}
+                AND STATUS<>'A')
+                WHERE CLIENTES.EMPNIT='${sucursal}'
+                ;
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/cobertura_vendedores_sucursal", async(req,res)=>{
+   
+    const { token, sucursal} = req.body;
+
+    let qry = `
+		SELECT CLIENTES.CODEMPLEADO, EMPLEADOS.NOMEMPLEADO, 
+            COUNT(CLIENTES.CODCLIENTE) AS UNIVERSO, 
+            SUM(CASE WHEN ISNULL(IMPORTE, 0) = 0 THEN 0 ELSE 1 END) AS ALCANCE
+        FROM  CLIENTES LEFT OUTER JOIN
+            EMPLEADOS ON CLIENTES.CODEMPLEADO = EMPLEADOS.CODEMPLEADO
+        WHERE (CLIENTES.EMPNIT = '${sucursal}') AND (CLIENTES.HABILITADO='SI')
+        GROUP BY CLIENTES.CODEMPLEADO, EMPLEADOS.NOMEMPLEADO
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/cobertura_marcas_sucursal", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio} = req.body;
+
+    let qry = `
+		    SELECT  
+                CODMARCA, DESMARCA, 
+                COUNT(CODCLIENTE) AS CONTEO, 
+                SUM(TOTALUNIDADES) AS TOTALUNIDADES, 
+                SUM(TOTALCOSTO) AS TOTALCOSTO, 
+                SUM(TOTALPRECIO) AS TOTALPRECIO
+            FROM  view_rpt_cobertura_marcas
+            WHERE 
+                (EMPNIT = '${sucursal}') AND 
+                (MES = ${mes}) AND 
+                (ANIO = ${anio})
+            GROUP BY CODMARCA, DESMARCA
+            ORDER BY CODMARCA
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/cobertura_marcas_empleado", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio, codemp} = req.body;
+
+    let qry = `
+		    SELECT 
+                CODEMP,
+                CODMARCA, 
+                DESMARCA, 
+                COUNT(CODCLIENTE) AS CONTEO, 
+                SUM(TOTALUNIDADES) AS TOTALUNIDADES, 
+                SUM(TOTALCOSTO) AS TOTALCOSTO, 
+                SUM(TOTALPRECIO) AS TOTALPRECIO
+            FROM  view_rpt_cobertura_marcas_empleado
+            WHERE 
+                (EMPNIT = '${sucursal}') AND 
+                (MES = ${mes}) AND 
+                (ANIO = ${anio}) AND 
+                (CODEMP=${codemp}) AND
+                (DESMARCA IS NOT NULL)
+            GROUP BY CODEMP,CODMARCA, DESMARCA
+            ORDER BY CODMARCA
+
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/cobertura_empleados_marca", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio, codmarca} = req.body;
+
+    let qry = `
+		SELECT 
+            view_rpt_cobertura_marcas_empleado.CODEMP, 
+            EMPLEADOS.NOMEMPLEADO AS EMPLEADO, 
+            view_rpt_cobertura_marcas_empleado.CODMARCA, 
+            view_rpt_cobertura_marcas_empleado.DESMARCA, 
+            COUNT(view_rpt_cobertura_marcas_empleado.CODCLIENTE) AS CONTEO, 
+            SUM(view_rpt_cobertura_marcas_empleado.TOTALUNIDADES) AS TOTALUNIDADES, 
+            SUM(view_rpt_cobertura_marcas_empleado.TOTALCOSTO) AS TOTALCOSTO, 
+            SUM(view_rpt_cobertura_marcas_empleado.TOTALPRECIO) AS TOTALPRECIO
+        FROM  view_rpt_cobertura_marcas_empleado LEFT OUTER JOIN
+            EMPLEADOS ON view_rpt_cobertura_marcas_empleado.CODEMP = EMPLEADOS.CODEMPLEADO
+        WHERE 
+            (view_rpt_cobertura_marcas_empleado.EMPNIT = '${sucursal}') AND 
+            (view_rpt_cobertura_marcas_empleado.MES = ${mes}) AND 
+            (view_rpt_cobertura_marcas_empleado.ANIO = ${anio}) AND 
+            (view_rpt_cobertura_marcas_empleado.DESMARCA IS NOT NULL) AND 
+            (view_rpt_cobertura_marcas_empleado.CODMARCA = ${codmarca})
+        GROUP BY view_rpt_cobertura_marcas_empleado.CODEMP, 
+            view_rpt_cobertura_marcas_empleado.CODMARCA, 
+            view_rpt_cobertura_marcas_empleado.DESMARCA, EMPLEADOS.NOMEMPLEADO
+        ORDER BY CONTEO
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/cobertura_vendedores_clientes_no_visitados", async(req,res)=>{
+   
+    const { token, sucursal,codemp} = req.body;
+
+    let qry = `
+		SELECT CLIENTES.EMPNIT, 
+                CLIENTES.CODCLIENTE AS CODCLIE, 
+                CLIENTES.CODEMPLEADO AS CODEMP, 
+                CLIENTES.DIAVISITA AS VISITA, 
+                CLIENTES.TIPONEGOCIO, 
+                CLIENTES.NEGOCIO, 
+                CLIENTES.NOMBRE, 
+                CLIENTES.DIRECCION, 
+                MUNICIPIOS.DESMUN AS MUNICIPIO, 
+                SECTORES.DESSECTOR AS ALDEA, 
+				CLIENTES.TELEFONO, 
+                CLIENTES.LATITUD, 
+                CLIENTES.LONGITUD, 
+                CLIENTES.LASTSALE,
+				  CLIENTES.IMPORTE
+        FROM CLIENTES LEFT OUTER JOIN
+                  SECTORES ON CLIENTES.CODSECTOR = SECTORES.CODSECTOR LEFT OUTER JOIN
+                  MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+        WHERE (ISNULL(CLIENTES.IMPORTE,0) = 0) AND 
+                (CLIENTES.HABILITADO = 'SI') AND 
+                (CLIENTES.CODEMPLEADO = ${codemp})
+        ORDER BY CLIENTES.LASTSALE
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/cobertura_marcas_goles_empleado", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio, codemp} = req.body;
+
+    let qry = `
+		SELECT  
+            view_rpt_cobertura_marcas_empleado_resumen.CODMARCA, 
+            view_rpt_cobertura_marcas_empleado_resumen.DESMARCA, 
+            view_rpt_cobertura_marcas_empleado_resumen.CONTEO AS COBERTURA, 
+            view_rpt_cobertura_marcas_empleado_resumen.TOTALPRECIO AS COBERTURA_IMPORTE, 
+            view_rpt_goles_marca_vendedor_resumen.CONTEO AS GOLES, 
+            view_rpt_goles_marca_vendedor_resumen.IMPORTE AS GOLES_IMPORTE
+        FROM  view_rpt_cobertura_marcas_empleado_resumen LEFT OUTER JOIN
+            view_rpt_goles_marca_vendedor_resumen ON view_rpt_cobertura_marcas_empleado_resumen.CODMARCA = view_rpt_goles_marca_vendedor_resumen.CODMARCA AND 
+            view_rpt_cobertura_marcas_empleado_resumen.CODEMP = view_rpt_goles_marca_vendedor_resumen.CODEMP AND 
+            view_rpt_cobertura_marcas_empleado_resumen.ANIO = view_rpt_goles_marca_vendedor_resumen.ANIO AND view_rpt_cobertura_marcas_empleado_resumen.MES = view_rpt_goles_marca_vendedor_resumen.MES AND 
+            view_rpt_cobertura_marcas_empleado_resumen.EMPNIT = view_rpt_goles_marca_vendedor_resumen.EMPNIT
+        WHERE 
+            (view_rpt_cobertura_marcas_empleado_resumen.EMPNIT = '${sucursal}') AND 
+            (view_rpt_cobertura_marcas_empleado_resumen.MES = ${mes}) AND 
+            (view_rpt_cobertura_marcas_empleado_resumen.ANIO = ${anio}) AND 
+            (view_rpt_cobertura_marcas_empleado_resumen.CODEMP = ${codemp})
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+
+
+
+
+//SIN USO AUN
+router.post("/cobertura_clientes_sucursal", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio} = req.body;
+
+    let qry = `
+		SELECT CLIENTES.EMPNIT,CLIENTES.CODCLIENTE, CLIENTES.NOMBRE, ISNULL(T.TOTALPRECIO,0) AS TOTALPRECIO 
+        FROM CLIENTES LEFT JOIN
+        (SELECT EMPNIT, CODCLIENTE,TOTALPRECIO
+        FROM view_data_clientes_importe_mes_resumen
+        WHERE ANIO=${anio} AND MES=${mes}) AS T ON 
+        CLIENTES.EMPNIT=T.EMPNIT AND 
+        CLIENTES.CODCLIENTE=T.CODCLIENTE 
+        WHERE CLIENTES.EMPNIT='${sucursal}';
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/cobertura_clientes_empleado", async(req,res)=>{
+   
+    const { token, sucursal, codemp, mes, anio} = req.body;
+
+    let qry = `
+		SELECT CLIENTES.EMPNIT,CLIENTES.CODCLIENTE, CLIENTES.NOMBRE, ISNULL(T.TOTALPRECIO,0) AS TOTALPRECIO 
+        FROM CLIENTES LEFT JOIN
+        (SELECT EMPNIT, CODCLIENTE,TOTALPRECIO
+        FROM view_data_clientes_importe_mes_resumen
+        WHERE ANIO=${anio} AND MES=${mes}) AS T ON 
+        CLIENTES.EMPNIT=T.EMPNIT AND 
+        CLIENTES.CODCLIENTE=T.CODCLIENTE 
+        WHERE CLIENTES.EMPNIT='${sucursal}'
+        AND CLIENTES.CODEMPLEADO=${codemp};
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+//SIN USO AUN
+
+
+
+
+// se cambio marcas por clasificaion TIPO
+router.post("/select_logro_vendedores_detalle", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio, codemp} = req.body;
+
+    let qry = `
+       SELECT 
+                view_rpt_objetivos_vendedores_categorias.VENDEDOR, 
+                view_rpt_objetivos_vendedores_categorias.CODIGO_CATEGORIA, 
+                view_rpt_objetivos_vendedores_categorias.CATEGORIA, 
+                SUM(view_rpt_objetivos_vendedores_categorias.TOTALUNIDADES) AS TOTALUNIDADES, 
+                SUM(view_rpt_objetivos_vendedores_categorias.TOTALCOSTO) AS TOTALCOSTO, 
+                SUM(view_rpt_objetivos_vendedores_categorias.TOTALPRECIO) AS TOTALPRECIO, 
+                ISNULL(OBJETIVOS_EMPLEADO.OBJETIVO,0) AS OBJETIVO
+FROM     view_rpt_objetivos_vendedores_categorias LEFT OUTER JOIN
+                  OBJETIVOS_EMPLEADO ON view_rpt_objetivos_vendedores_categorias.CODIGO_CATEGORIA = OBJETIVOS_EMPLEADO.CODMARCA AND view_rpt_objetivos_vendedores_categorias.ANIO = OBJETIVOS_EMPLEADO.ANIO AND 
+                  view_rpt_objetivos_vendedores_categorias.MES = OBJETIVOS_EMPLEADO.MES AND view_rpt_objetivos_vendedores_categorias.EMPNIT = OBJETIVOS_EMPLEADO.EMPNIT
+WHERE  (view_rpt_objetivos_vendedores_categorias.EMPNIT LIKE '${sucursal}') 
+        AND (view_rpt_objetivos_vendedores_categorias.ANIO = ${anio}) 
+        AND (view_rpt_objetivos_vendedores_categorias.MES = ${mes}) 
+        AND (view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR = ${codemp})
+GROUP BY view_rpt_objetivos_vendedores_categorias.VENDEDOR, view_rpt_objetivos_vendedores_categorias.CODIGO_CATEGORIA, view_rpt_objetivos_vendedores_categorias.CATEGORIA, OBJETIVOS_EMPLEADO.OBJETIVO
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+
+// se cambio marcas por clasificaion TIPO
+router.post("/select_logro_marcas", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio} = req.body;
+
+    let qry = `
+		SELECT 
+            view_data_objetivos_marcas.MES, 
+            view_data_objetivos_marcas.ANIO, 
+            view_data_objetivos_marcas.OBJ_CODMARCA AS CODIGO_MARCA, 
+            view_data_objetivos_marcas.OBJ_DESMARCA AS MARCA, 
+            SUM(ISNULL(view_data_objetivos_marcas.OBJETIVO,0)) AS OBJETIVO, 
+            SUM(ISNULL(view_rpt_objetivos_marca_resumen.TOTALUNIDADES,0)) AS TOTALUNIDADES, 
+            SUM(ISNULL(view_rpt_objetivos_marca_resumen.TOTALCOSTO,0)) AS TOTALCOSTO, 
+            SUM(ISNULL(view_rpt_objetivos_marca_resumen.TOTALPRECIO,0)) AS TOTALPRECIO
+        FROM     view_rpt_objetivos_marca_resumen RIGHT OUTER JOIN
+                  view_data_objetivos_marcas ON view_rpt_objetivos_marca_resumen.CODIGO_MARCA = view_data_objetivos_marcas.OBJ_CODMARCA AND view_rpt_objetivos_marca_resumen.ANIO = view_data_objetivos_marcas.ANIO AND 
+                  view_rpt_objetivos_marca_resumen.MES = view_data_objetivos_marcas.MES AND view_rpt_objetivos_marca_resumen.EMPNIT = view_data_objetivos_marcas.EMPNIT
+        WHERE  (view_data_objetivos_marcas.EMPNIT LIKE '%${sucursal}%')
+        GROUP BY view_data_objetivos_marcas.MES, view_data_objetivos_marcas.ANIO, view_data_objetivos_marcas.OBJ_CODMARCA, view_data_objetivos_marcas.OBJ_DESMARCA
+        HAVING (view_data_objetivos_marcas.MES = ${mes}) AND 
+                (view_data_objetivos_marcas.ANIO = ${anio})
+
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+router.post("/select_logro_marcas_vendedor", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio,codemp} = req.body;
+
+    let qry = `
+            SELECT EMPNIT,CODEMP, MES, ANIO, CODIGO_MARCA, MARCA, OBJETIVO, TOTALUNIDADES, TOTALCOSTO, TOTALPRECIO
+                FROM view_OBJETIVOS_vendedores_marcas
+            WHERE  (CODEMP = ${codemp}) AND (MES = ${mes}) AND (ANIO = ${anio}) 
+            AND (EMPNIT='${sucursal}')
+		        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+
+
+router.post("/select_logro_marcas_categorias", async(req,res)=>{
+   
+    const { token, codmarca, sucursal, mes, anio} = req.body;
+
+    let qry = `
+	SELECT view_data_objetivo_categorias.CODCATEGORIA, 
+		view_data_objetivo_categorias.CATEGORIA, 
+		SUM(ISNULL(view_data_objetivo_categorias.OBJETIVO,0)) AS OBJETIVO, 
+        SUM(ISNULL(view_rpt_objetivos_categorias_resumen.TOTALUNIDADES,0)) AS TOTALUNIDADES, 
+		SUM(ISNULL(view_rpt_objetivos_categorias_resumen.TOTALCOSTO,0)) AS TOTALCOSTO, 
+		SUM(ISNULL(view_rpt_objetivos_categorias_resumen.TOTALPRECIO,0)) AS TOTALPRECIO
+    FROM     view_data_objetivo_categorias LEFT OUTER JOIN
+                  view_rpt_objetivos_categorias_resumen ON view_data_objetivo_categorias.OBJ_CODMARCA = view_rpt_objetivos_categorias_resumen.CODIGO_MARCA AND 
+                  view_data_objetivo_categorias.CODCATEGORIA = view_rpt_objetivos_categorias_resumen.CODIGO_CATEGORIA AND view_data_objetivo_categorias.ANIO = view_rpt_objetivos_categorias_resumen.ANIO AND 
+                  view_data_objetivo_categorias.MES = view_rpt_objetivos_categorias_resumen.MES AND view_data_objetivo_categorias.EMPNIT = view_rpt_objetivos_categorias_resumen.EMPNIT
+    WHERE  (view_data_objetivo_categorias.OBJ_CODMARCA = ${codmarca}) 
+        AND (view_data_objetivo_categorias.EMPNIT LIKE '%${sucursal}%')
+    GROUP BY view_data_objetivo_categorias.MES, 
+            view_data_objetivo_categorias.ANIO, 
+            view_data_objetivo_categorias.CODCATEGORIA, view_data_objetivo_categorias.CATEGORIA
+    HAVING (view_data_objetivo_categorias.MES = ${mes}) 
+        AND (view_data_objetivo_categorias.ANIO = ${anio})
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+
+router.post("/select_logro_vendedores_categorias", async(req,res)=>{
+   
+    const { token, codemp, sucursal, mes, anio,codmarca} = req.body;
+
+    console.log('por aqui... ')
+
+    let qry = `
+    SELECT 
+        SUM(ISNULL(view_rpt_objetivos_vendedores_categorias_resumen.TOTALUNIDADES, 0)) AS TOTALUNIDADES, 
+        SUM(ISNULL(view_rpt_objetivos_vendedores_categorias_resumen.TOTALCOSTO, 0)) AS TOTALCOSTO, 
+        SUM(ISNULL(view_rpt_objetivos_vendedores_categorias_resumen.TOTALPRECIO, 0)) AS TOTALPRECIO, 
+        view_data_objetivos_vendedor.EMPLEADO AS VENDEDOR, 
+        view_data_objetivos_vendedor.CODCATEGORIA AS CODIGO_CATEGORIA, 
+        view_data_objetivos_vendedor.CATEGORIA, 
+        ISNULL(view_data_objetivos_vendedor.OBJETIVO, 0) AS OBJETIVO, 
+        view_data_objetivos_vendedor.CODEMP AS CODIGO_VENDEDOR
+    FROM view_rpt_objetivos_vendedores_categorias_resumen RIGHT OUTER JOIN
+                  view_data_objetivos_vendedor ON view_rpt_objetivos_vendedores_categorias_resumen.MES = view_data_objetivos_vendedor.MES AND 
+                  view_rpt_objetivos_vendedores_categorias_resumen.ANIO = view_data_objetivos_vendedor.ANIO AND 
+                  view_rpt_objetivos_vendedores_categorias_resumen.CODIGO_CATEGORIA = view_data_objetivos_vendedor.CODCATEGORIA AND 
+                  view_rpt_objetivos_vendedores_categorias_resumen.CODIGO_VENDEDOR = view_data_objetivos_vendedor.CODEMP
+        WHERE  (view_data_objetivos_vendedor.OBJ_CODMARCA = ${codmarca})
+        GROUP BY view_data_objetivos_vendedor.ANIO, view_data_objetivos_vendedor.MES, view_data_objetivos_vendedor.OBJETIVO, view_data_objetivos_vendedor.CATEGORIA, view_data_objetivos_vendedor.CODEMP, 
+                  view_data_objetivos_vendedor.CODCATEGORIA, view_data_objetivos_vendedor.EMPLEADO
+        HAVING (view_data_objetivos_vendedor.CODEMP = ${codemp}) 
+            AND (view_data_objetivos_vendedor.ANIO = ${anio}) 
+            AND (view_data_objetivos_vendedor.MES = ${mes})
+        ORDER BY CODIGO_CATEGORIA
+        `;
+
+
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/select_logro_vendedores_categorias_todas", async(req,res)=>{
+   
+    const { token, codemp, sucursal, mes, anio} = req.body;
+
+    let qryx = `
+	SELECT view_data_objetivos_vendedor.EMPNIT, view_data_objetivos_vendedor.EMPRESA, 
+				view_data_objetivos_vendedor.CODEMP, 
+				view_data_objetivos_vendedor.EMPLEADO, 
+				view_data_objetivos_vendedor.CODCATEGORIA, 
+                 view_data_objetivos_vendedor.CATEGORIA, 
+				 view_data_objetivos_vendedor.OBJETIVO, 
+				 SUM(ISNULL(view_rpt_objetivos_vendedores_categorias.TOTALUNIDADES,0)) AS TOTALUNIDADES, 
+                 SUM(ISNULL(view_rpt_objetivos_vendedores_categorias.TOTALCOSTO,0)) AS TOTALCOSTO, 
+				 SUM(ISNULL(view_rpt_objetivos_vendedores_categorias.TOTALPRECIO,0)) AS LOGRO
+FROM     view_rpt_objetivos_vendedores_categorias RIGHT OUTER JOIN
+                  view_data_objetivos_vendedor ON view_rpt_objetivos_vendedores_categorias.CODIGO_CATEGORIA = view_data_objetivos_vendedor.CODCATEGORIA AND 
+                  view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR = view_data_objetivos_vendedor.CODEMP AND view_rpt_objetivos_vendedores_categorias.EMPNIT = view_data_objetivos_vendedor.EMPNIT
+WHERE  (view_data_objetivos_vendedor.MES = ${mes}) 
+		AND (view_data_objetivos_vendedor.ANIO = ${anio})
+GROUP BY view_data_objetivos_vendedor.EMPNIT, view_data_objetivos_vendedor.EMPRESA, view_data_objetivos_vendedor.CODEMP, view_data_objetivos_vendedor.EMPLEADO, view_data_objetivos_vendedor.CODCATEGORIA, 
+                  view_data_objetivos_vendedor.CATEGORIA, view_data_objetivos_vendedor.OBJETIVO
+HAVING (view_data_objetivos_vendedor.CODEMP = ${codemp})
+        `;
+    
+        let qry = `
+        SELECT view_data_objetivos_vendedor.EMPNIT, view_data_objetivos_vendedor.EMPRESA, view_data_objetivos_vendedor.CODEMP, view_data_objetivos_vendedor.EMPLEADO, view_data_objetivos_vendedor.CODCATEGORIA, 
+                  view_data_objetivos_vendedor.CATEGORIA, view_data_objetivos_vendedor.OBJETIVO, ISNULL(view_rpt_objetivos_vendedores_categorias_resumen.TOTALUNIDADES, 0) AS TOTALUNIDADES, 
+                  ISNULL(view_rpt_objetivos_vendedores_categorias_resumen.TOTALCOSTO, 0) AS TOTALCOSTO, ISNULL(view_rpt_objetivos_vendedores_categorias_resumen.TOTALPRECIO, 0) AS LOGRO
+FROM     view_rpt_objetivos_vendedores_categorias_resumen RIGHT OUTER JOIN
+                  view_data_objetivos_vendedor ON view_rpt_objetivos_vendedores_categorias_resumen.ANIO = view_data_objetivos_vendedor.ANIO AND 
+                  view_rpt_objetivos_vendedores_categorias_resumen.MES = view_data_objetivos_vendedor.MES AND view_rpt_objetivos_vendedores_categorias_resumen.CODIGO_CATEGORIA = view_data_objetivos_vendedor.CODCATEGORIA AND 
+                  view_rpt_objetivos_vendedores_categorias_resumen.CODIGO_VENDEDOR = view_data_objetivos_vendedor.CODEMP AND 
+                  view_rpt_objetivos_vendedores_categorias_resumen.EMPNIT = view_data_objetivos_vendedor.EMPNIT
+WHERE  (view_data_objetivos_vendedor.MES = ${mes}) 
+        AND (view_data_objetivos_vendedor.ANIO = ${anio}) 
+        AND (view_data_objetivos_vendedor.CODEMP = ${codemp})
+        `
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+router.post("/select_logro_vendedores", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio} = req.body;
+
+    let qry = `
+        SELECT view_rpt_objetivos_vendedores_categorias.RELOP AS EMPRESA, 
+					view_data_objetivos_empleado_resumen.CODEMP AS CODIGO_VENDEDOR, 
+					view_data_objetivos_empleado_resumen.NOMEMPLEADO AS VENDEDOR, 
+					SUM(ISNULL(view_rpt_objetivos_vendedores_categorias.TOTALUNIDADES,0)) AS TOTALUNIDADES, 
+					SUM(ISNULL(view_rpt_objetivos_vendedores_categorias.TOTALCOSTO,0)) AS TOTALCOSTO, 
+					SUM(ISNULL(view_rpt_objetivos_vendedores_categorias.TOTALPRECIO,0)) AS TOTALPRECIO, 
+					view_data_objetivos_empleado_resumen.OBJETIVO
+        FROM     view_rpt_objetivos_vendedores_categorias RIGHT OUTER JOIN
+                  view_data_objetivos_empleado_resumen ON view_rpt_objetivos_vendedores_categorias.MES = view_data_objetivos_empleado_resumen.MES AND 
+                  view_rpt_objetivos_vendedores_categorias.ANIO = view_data_objetivos_empleado_resumen.ANIO AND view_rpt_objetivos_vendedores_categorias.CODIGO_VENDEDOR = view_data_objetivos_empleado_resumen.CODEMP AND 
+                  view_rpt_objetivos_vendedores_categorias.EMPNIT = view_data_objetivos_empleado_resumen.EMPNIT
+        WHERE  (view_data_objetivos_empleado_resumen.EMPNIT LIKE '%${sucursal}%') AND 
+                (view_data_objetivos_empleado_resumen.ANIO = ${anio}) AND 
+                (view_data_objetivos_empleado_resumen.MES = ${mes})
+        GROUP BY view_rpt_objetivos_vendedores_categorias.RELOP, 
+                view_data_objetivos_empleado_resumen.OBJETIVO, 
+                view_data_objetivos_empleado_resumen.NOMEMPLEADO, 
+                view_data_objetivos_empleado_resumen.CODEMP
+        ORDER BY view_data_objetivos_empleado_resumen.NOMEMPLEADO
+            `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+
+
+
+
+
+router.post("/insert_objetivo_general_marca", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio, codmarca, objetivo } = req.body;
+
+    let qry = `
+        INSERT INTO OBJETIVOS_GENERAL 
+            (EMPNIT,MES,ANIO,CODMARCA,OBJETIVO) 
+        SELECT '${sucursal}' AS EMPNIT, ${mes} AS MES, ${anio} AS ANIO,
+            ${codmarca} AS CODMARCA, ${objetivo} AS OBJETIVO;
+    `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+router.post("/select_objetivo_general_marcas", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio} = req.body;
+
+    let qry = `
+       SELECT OBJETIVOS_GENERAL.EMPNIT, OBJETIVOS_GENERAL.MES, OBJETIVOS_GENERAL.ANIO, OBJETIVOS_GENERAL.CODMARCA, OBJETIVOS_GENERAL.OBJETIVO, CLASIFICACIONES_GENERALES.DESCRIPCION AS DESMARCA
+        FROM     OBJETIVOS_GENERAL LEFT OUTER JOIN
+                  CLASIFICACIONES_GENERALES ON OBJETIVOS_GENERAL.CODMARCA = CLASIFICACIONES_GENERALES.CODIGO
+        WHERE  (OBJETIVOS_GENERAL.EMPNIT = '${sucursal}') AND
+            OBJETIVOS_GENERAL.MES=${mes} AND 
+            OBJETIVOS_GENERAL.ANIO=${anio};
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/select_objetivo_general_categorias", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio} = req.body;
+
+    let qry = `
+        SELECT 
+            EMPNIT, EMPRESA, 
+            MES, ANIO, 
+            OBJ_CODMARCA, OBJ_DESMARCA, 
+            SUM(OBJETIVO) AS OBJETIVO
+        FROM view_data_objetivos_vendedor
+        GROUP BY EMPNIT, EMPRESA, MES, OBJ_CODMARCA, OBJ_DESMARCA, ANIO
+        HAVING (EMPNIT = '${sucursal}') 
+                AND (MES = ${mes}) 
+                AND (ANIO = ${anio});
+
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+router.post("/delete_objetivo_general_marca", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio, codmarca} = req.body;
+
+    let qry = `
+        DELETE FROM OBJETIVOS_GENERAL
+            WHERE  EMPNIT='${sucursal}' 
+                AND MES=${mes} 
+                AND ANIO=${anio}
+                AND CODMARCA=${codmarca};
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+
+
+router.post("/insert_objetivo_vendedor_marca", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio, codmarca, objetivo, codemp } = req.body;
+
+    let qry = `
+        INSERT INTO OBJETIVOS_EMPLEADO 
+            (EMPNIT,CODEMP,MES,ANIO,CODMARCA,OBJETIVO) 
+        SELECT '${sucursal}' AS EMPNIT, ${codemp} AS CODEMP, ${mes} AS MES, ${anio} AS ANIO,
+            ${codmarca} AS CODMARCA, ${objetivo} AS OBJETIVO;
+    `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/select_objetivo_vendedores_marcas", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio} = req.body;
+
+    let qry = `
+    SELECT OBJETIVOS_EMPLEADO.ID, OBJETIVOS_EMPLEADO.CODEMP, EMPLEADOS.NOMEMPLEADO AS NOMEMP, OBJETIVOS_EMPLEADO.MES, OBJETIVOS_EMPLEADO.ANIO, OBJETIVOS_EMPLEADO.CODMARCA, 
+                  OBJETIVOS_EMPLEADO.OBJETIVO, CLASIFICACIONES_GENERALES.DESCRIPCION AS DESMARCA
+    FROM OBJETIVOS_EMPLEADO LEFT OUTER JOIN
+                  CLASIFICACIONES_GENERALES ON OBJETIVOS_EMPLEADO.CODMARCA = CLASIFICACIONES_GENERALES.CODIGO LEFT OUTER JOIN
+                  EMPLEADOS ON OBJETIVOS_EMPLEADO.CODEMP = EMPLEADOS.CODEMPLEADO LEFT OUTER JOIN
+                  MARCAS ON OBJETIVOS_EMPLEADO.CODMARCA = MARCAS.CODMARCA
+    WHERE (OBJETIVOS_EMPLEADO.MES = ${mes}) AND 
+        (OBJETIVOS_EMPLEADO.ANIO = ${anio}) AND 
+        (OBJETIVOS_EMPLEADO.EMPNIT = '${sucursal}')
+    ORDER BY NOMEMP
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/select_objetivo_vendedores_marcas_resumen", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio} = req.body;
+
+    let qry = `
+   SELECT OBJETIVOS_EMPLEADO.CODEMP, EMPLEADOS.NOMEMPLEADO AS NOMEMP, OBJETIVOS_EMPLEADO.MES, OBJETIVOS_EMPLEADO.ANIO, SUM(OBJETIVOS_EMPLEADO.OBJETIVO) AS OBJETIVO
+FROM     OBJETIVOS_EMPLEADO LEFT OUTER JOIN
+                  EMPLEADOS ON OBJETIVOS_EMPLEADO.CODEMP = EMPLEADOS.CODEMPLEADO
+WHERE  (OBJETIVOS_EMPLEADO.EMPNIT = '${sucursal}')
+GROUP BY OBJETIVOS_EMPLEADO.CODEMP, EMPLEADOS.NOMEMPLEADO, OBJETIVOS_EMPLEADO.MES, OBJETIVOS_EMPLEADO.ANIO
+HAVING (OBJETIVOS_EMPLEADO.MES = ${mes}) 
+        AND (OBJETIVOS_EMPLEADO.ANIO = ${anio})
+ORDER BY NOMEMP
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+router.post("/delete_objetivo_vendedor_marca", async(req,res)=>{
+   
+    const { token, sucursal, id} = req.body;
+
+    let qry = `
+        DELETE FROM OBJETIVOS_EMPLEADO
+            WHERE ID=${id};
+        `;
+    
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+
+
+
+
+//-----------------------------
+// COBERTURA MUNICIPIOS
+//-----------------------------
+router.post('/get_cobertura', async function(req,res){
+
+    const {token,sucursal, anio, mes} = req.body;
+
+    let qry = '';
+
+        qry = `
+       SELECT  
+            DOCUMENTOS.EMPNIT AS SUCURSAL, 
+            MUNICIPIOS.CODMUN AS CODMUNICIPIO, 
+            MUNICIPIOS.DESMUN AS MUNICIPIO, 
+            ISNULL(MUNICIPIOS.LATITUD, 0) AS LAT, 
+            ISNULL(MUNICIPIOS.LONGITUD, 0) AS LONG, 
+            FORMAT((SUM(DOCUMENTOS.TOTALCOSTO * CONFIG_TIPODOCUMENTOS.INV) * -1), '##.##') AS TOTALCOSTO, 
+			FORMAT((SUM(DOCUMENTOS.TOTALPRECIO * CONFIG_TIPODOCUMENTOS.INV) * -1), '##.##') AS TOTALPRECIO, 
+            COUNT(DOCUMENTOS.CODCLIENTE) AS CONTEO, 
+            param_municipio_universo_clientes.UNIVERSO
+        FROM CLIENTES RIGHT OUTER JOIN
+            CONFIG_TIPODOCUMENTOS RIGHT OUTER JOIN
+            TIPODOCUMENTOS ON CONFIG_TIPODOCUMENTOS.TIPODOC = TIPODOCUMENTOS.TIPODOC RIGHT OUTER JOIN
+            DOCUMENTOS ON TIPODOCUMENTOS.CODDOC = DOCUMENTOS.CODDOC AND TIPODOCUMENTOS.EMPNIT = DOCUMENTOS.EMPNIT ON 
+            CLIENTES.CODCLIENTE = DOCUMENTOS.CODCLIENTE LEFT OUTER JOIN
+            param_municipio_universo_clientes RIGHT OUTER JOIN
+            MUNICIPIOS ON param_municipio_universo_clientes.CODMUN = MUNICIPIOS.CODMUN ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+        WHERE  
+            (DOCUMENTOS.STATUS <> 'A') AND 
+            (TIPODOCUMENTOS.TIPODOC IN ('FAC', 'FCP', 'FEC', 'FEF', 'FES', 'FPC','DEV','FNC')) AND
+            (DOCUMENTOS.ANIO = ${anio}) AND 
+            (DOCUMENTOS.MES = ${mes}) AND 
+            (DOCUMENTOS.EMPNIT = '${sucursal}')
+        GROUP BY DOCUMENTOS.EMPNIT, MUNICIPIOS.CODMUN, MUNICIPIOS.DESMUN, 
+            MUNICIPIOS.LATITUD, MUNICIPIOS.LONGITUD, param_municipio_universo_clientes.UNIVERSO
+        ORDER BY SUM(DOCUMENTOS.TOTALPRECIO) DESC
+       
+        `
+            
+ 
+
+     execute.QueryToken(res,qry,token);
+    
+});
+router.post('/BACKUP_get_cobertura', async function(req,res){
+
+    const {token,sucursal, anio, mes} = req.body;
+
+    let qry = '';
+
+        qry = `
+       SELECT  
+            DOCUMENTOS.EMPNIT AS SUCURSAL, 
+            MUNICIPIOS.CODMUN AS CODMUNICIPIO, 
+            MUNICIPIOS.DESMUN AS MUNICIPIO, 
+            ISNULL(MUNICIPIOS.LATITUD, 0) AS LAT, 
+            ISNULL(MUNICIPIOS.LONGITUD, 0) AS LONG, 
+            FORMAT((SUM(DOCUMENTOS.TOTALCOSTO * CONFIG_TIPODOCUMENTOS.INV) * -1), '##.##') AS TOTALCOSTO, 
+			FORMAT((SUM(DOCUMENTOS.TOTALPRECIO * CONFIG_TIPODOCUMENTOS.INV) * -1), '##.##') AS TOTALPRECIO, 
+            COUNT(DOCUMENTOS.CODCLIENTE) AS CONTEO, 
+            param_municipio_universo_clientes.UNIVERSO
+        FROM CLIENTES RIGHT OUTER JOIN
+            CONFIG_TIPODOCUMENTOS RIGHT OUTER JOIN
+            TIPODOCUMENTOS ON CONFIG_TIPODOCUMENTOS.TIPODOC = TIPODOCUMENTOS.TIPODOC RIGHT OUTER JOIN
+            DOCUMENTOS ON TIPODOCUMENTOS.CODDOC = DOCUMENTOS.CODDOC AND TIPODOCUMENTOS.EMPNIT = DOCUMENTOS.EMPNIT ON 
+            CLIENTES.CODCLIENTE = DOCUMENTOS.CODCLIENTE LEFT OUTER JOIN
+            param_municipio_universo_clientes RIGHT OUTER JOIN
+            MUNICIPIOS ON param_municipio_universo_clientes.CODMUN = MUNICIPIOS.CODMUN ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+        WHERE  
+            (DOCUMENTOS.STATUS <> 'A') AND 
+            (TIPODOCUMENTOS.TIPODOC IN ('FAC', 'FCP', 'FEC', 'FEF', 'FES', 'FPC','DEV','FNC')) AND
+            (DOCUMENTOS.ANIO = ${anio}) AND 
+            (DOCUMENTOS.MES = ${mes}) AND 
+            (DOCUMENTOS.EMPNIT = '${sucursal}')
+        GROUP BY DOCUMENTOS.EMPNIT, MUNICIPIOS.CODMUN, MUNICIPIOS.DESMUN, 
+            MUNICIPIOS.LATITUD, MUNICIPIOS.LONGITUD, param_municipio_universo_clientes.UNIVERSO
+        ORDER BY SUM(DOCUMENTOS.TOTALPRECIO) DESC
+       
+        `
+            
+ 
+
+     execute.QueryToken(res,qry,token);
+    
+});
+router.post('/get_productos_municipio', async function(req,res){
+
+    
+
+    const {token,sucursal,codmun, anio, mes} = req.body;
+  
+    let qry = `
+        SELECT  
+            CODIGO_MUNICIPIO AS CODMUN, 
+            PRODUCTO AS CODPROD, 
+		    CODIGO_DUN AS DUN, 
+            DESCRIPCION_PRODUCTO AS DESPROD, 
+		    SUM(TOTALUNIDADES * INV) * - 1 AS TOTALUNIDADES,
+		    SUM(TOTALCOSTO * INV) * - 1 AS TOTALCOSTO, 
+		    SUM(TOTALPRECIO * INV) * - 1 AS TOTALPRECIO
+        FROM view_rpt_general
+        WHERE  (EMPNIT = '${sucursal}') AND (ANIO = ${anio}) AND (MES = ${mes}) AND 
+        (CODIGO_MUNICIPIO = ${codmun})
+        GROUP BY CODIGO_MUNICIPIO, PRODUCTO, CODIGO_DUN, DESCRIPCION_PRODUCTO
+        ORDER BY TOTALPRECIO DESC;
+    `
+
+     execute.QueryToken(res,qry,token);
+    
+});
+router.post('/backup_get_marcas_municipio', async function(req,res){
+
+    const {token,sucursal,anio,mes,codmun} = req.body;
+    let qry = '';
+
+        qry = `
+        SELECT 
+            rpt_marcas_municipio.EMPNIT, 
+            rpt_marcas_municipio.MES, 
+            rpt_marcas_municipio.ANIO, 
+            rpt_marcas_municipio.CODMUN, 
+            param_municipio_marcas_clientes_res.DESMUN, 
+            rpt_marcas_municipio.CODMARCA, 
+            rpt_marcas_municipio.DESMARCA, 
+            rpt_marcas_municipio.TOTALPRECIO, 
+            param_municipio_marcas_clientes_res.CONTEO
+        FROM   rpt_marcas_municipio LEFT OUTER JOIN
+            param_municipio_marcas_clientes_res ON rpt_marcas_municipio.CODMARCA = param_municipio_marcas_clientes_res.CODMARCA AND rpt_marcas_municipio.CODMUN = param_municipio_marcas_clientes_res.CODMUN AND
+            rpt_marcas_municipio.ANIO = param_municipio_marcas_clientes_res.ANIO AND rpt_marcas_municipio.MES = param_municipio_marcas_clientes_res.MES AND 
+            rpt_marcas_municipio.EMPNIT = param_municipio_marcas_clientes_res.EMPNIT
+        WHERE    
+            (rpt_marcas_municipio.EMPNIT = '${sucursal}') AND 
+            (rpt_marcas_municipio.MES = ${mes}) AND 
+            (rpt_marcas_municipio.ANIO = ${anio}) AND 
+            (rpt_marcas_municipio.CODMUN = ${codmun})
+        `
+  
+       
+        //COUNT(CODIGO_CLIENTE)
+    
+      execute.QueryToken(res,qry,token);
+    
+});
+router.post('/get_marcas_municipio', async function(req,res){
+
+    const {token,sucursal,anio,mes,codmun} = req.body;
+    let qry = '';
+
+        qry = `
+        SELECT 
+            CODIGO_MUNICIPIO AS CODMUN, 
+			CODIGO_MARCA AS CODMARCA, 
+			MARCA AS DESMARCA, 
+			(SUM(TOTALCOSTO * INV) *-1) AS TOTALCOSTO, 
+			(SUM(TOTALPRECIO * INV) *-1) AS TOTALPRECIO,
+			 0 AS CONTEO
+        FROM view_rpt_general
+        WHERE 
+            (EMPNIT = '${sucursal}') AND 
+            (ANIO = ${anio}) AND 
+            (MES = ${mes}) AND 
+            CODIGO_MUNICIPIO=${codmun}
+        GROUP BY CODIGO_MUNICIPIO,  CODIGO_MARCA, MARCA
+        ORDER BY CODIGO_MARCA
+        `
+  
+       
+        //COUNT(CODIGO_CLIENTE)
+    
+      execute.QueryToken(res,qry,token);
+    
+});
+router.post('/get_clientes_efectivos_municipio', async function(req,res){
+
+    const {token,sucursal, codmun, anio, mes} = req.body;
+
+    let qry = '';
+
+        qry = `
+             
+        `
+            
+ 
+
+     execute.QueryToken(res,qry,token);
+    
+});
+//-----------------------------
+// COBERTURA MUNICIPIOS
+//-----------------------------
+
+
+module.exports = router;
