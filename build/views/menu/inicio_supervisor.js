@@ -87,8 +87,7 @@ function getView(){
             <div class="row">
                 <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
                 
-                    <div class="card border-info card-rounded bg-white shadow col-12 hand"  
-                        onclick="Menu.clientes()">
+                    <div class="card border-info card-rounded bg-white shadow col-12 hand" href="#/mant/clientes" data-spa-route="mant/clientes">
                         <div class="card-body p-4">
                             
                             <h4 class="text-info">CATALOGO CLIENTES</h4>
@@ -106,8 +105,7 @@ function getView(){
 
                     <br>
 
-                    <div class="card border-info card-rounded bg-white shadow col-12 hand"  
-                    onclick="Menu.ventas_pedidos_comodin()">
+                    <div class="card border-info card-rounded bg-white shadow col-12 hand" href="#/ventas/pedidos-comodin" data-spa-route="ventas/pedidos-comodin">
                         <div class="card-body p-4">
                             
                             <h4 class="text-info">NUEVO PEDIDO</h4>
@@ -125,8 +123,7 @@ function getView(){
 
                     <br>
 
-                    <div class="card border-info card-rounded  bg-white shadow col-12 hand"  
-                    onclick="Menu.ventas_censo()">
+                    <div class="card border-info card-rounded  bg-white shadow col-12 hand" href="#/ventas/censo" data-spa-route="ventas/censo">
                         <div class="card-body p-4">
 
                             <h4 class="text-info">CREAR CLIENTES (CENSO)</h4>
@@ -382,13 +379,13 @@ function getView(){
                     <div class="row">
                                 <div class="col-6">
                                     <div class="form-group">
-                                        <label class="negrita">Fecha inicio</label>
+                                        <label class="negrita text-secondary">Fecha inicio</label>
                                         <input type="date" class="form-control negrita text-danger" id="txtMarcaFechaInicial">
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="form-group">
-                                        <label class="negrita">Fecha Final</label>
+                                        <label class="negrita text-secondary">Fecha Final</label>
                                         <input type="date" class="form-control negrita text-danger" id="txtMarcaFechaFinal">
                                     </div>
                                 </div>
@@ -442,13 +439,13 @@ function getView(){
                             <div class="row">
                                         <div class="col-6">
                                             <div class="form-group">
-                                                <label>Fecha Inicial</label>
+                                                <label class="text-secondary">Fecha Inicial</label>
                                                 <input type="date" class="form-control negrita" id='txtRptFacturasFechaInicial'>
                                             </div>
                                         </div>
                                         <div class="col-6">
                                             <div class="form-group">
-                                                <label>Fecha Final</label>
+                                                <label class="text-secondary">Fecha Final</label>
                                                 <input type="date" class="form-control negrita" id='txtRptFacturasFechaFinal'>
                                             </div>
                                         </div>
@@ -572,13 +569,13 @@ function getView(){
                         <div class="row">
                             <div class="col-6">
                                 <div class="form-group">
-                                    <label>Fecha Inicial</label>
+                                    <label class="text-secondary">Fecha Inicial</label>
                                     <input type="date" class="form-control negrita" id='txtRptProdFechaInicial'>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
-                                    <label>Fecha Final</label>
+                                    <label class="text-secondary">Fecha Final</label>
                                     <input type="date" class="form-control negrita" id='txtRptProdFechaFinal'>
                                 </div>
                             </div>
@@ -644,13 +641,13 @@ function getView(){
                         <div class="row">
                             <div class="col-6">
                                 <div class="form-group">
-                                    <label>Fecha Inicial</label>
+                                    <label class="text-secondary">Fecha Inicial</label>
                                     <input type="date" class="form-control negrita" id='txtRptVenFechaInicial'>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
-                                    <label>Fecha Final</label>
+                                    <label class="text-secondary">Fecha Final</label>
                                     <input type="date" class="form-control negrita" id='txtRptVenFechaFinal'>
                                 </div>
                             </div>

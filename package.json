@@ -11,14 +11,14 @@
     "mssql": "^11.0.1",
     "mysql": "^2.18.1",
     "nodemailer": "^6.9.2",
-    "nodemon": "^2.0.20",
     "request": "^2.88.2",
+    "sigma_pos": "file:",
     "soap": "^1.1.10",
     "socket.io": "^2.3.0"
   },
   "scripts": {
     "test": "nodemon server.js",
-    "start": "node ./server.js"
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
@@ -27,6 +27,6 @@
   "author": "Alexis Burgos",
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "^1.19.4"
+    "nodemon": "^3.1.0"
   }
 }

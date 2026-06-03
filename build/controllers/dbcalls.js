@@ -408,14 +408,14 @@ function dbCargarPedidosPendientes(){
                                 <div class="row">
                                     <div class="col-6">
                                         <div class="form-group">
-                                            <label>Fecha</label>
+                                            <label class="text-secondary">Fecha</label>
                                             <br>
                                             ${rs.FECHA}
                                         </div>
                                     </div>
                                     <div class="col-6">
                                         <div class="form-group">
-                                            <label>Importe</label>
+                                            <label class="text-secondary">Importe</label>
                                             <br>
                                             <label class="negrita text-danger">${F.setMoneda(rs.TOTALPRECIO,'Q')}</label>
                                         </div>

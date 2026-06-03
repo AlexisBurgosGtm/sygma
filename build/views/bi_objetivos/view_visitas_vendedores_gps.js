@@ -8,8 +8,7 @@ function getView(){
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
                             ${view.vista_inicio()}
 
-                            <button class="btn btn-bottom-l btn-xl btn-circle btn-primary hand shadow"
-                            onclick="Navegar.inicio()">
+                            <button type="button" class="btn btn-bottom-l btn-xl btn-circle btn-primary hand shadow" data-spa-action="inicio">
                                 <i class="fal fa-home"></i>
                             </button>
                            
@@ -50,7 +49,7 @@ function getView(){
                         <div class="col-6">
                             
                             <div class="form-group">
-                                <label>Sucursal</label>
+                                <label class="text-secondary">Sucursal</label>
                                 <select class="form-control" id="cmbSucursal">
                                 </select>
                             </div>
@@ -78,7 +77,7 @@ function getView(){
                         <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
                             
                             <div class="form-group">
-                                <label>Vendedor</label>
+                                <label class="text-secondary">Vendedor</label>
                                 <select class="form-control" id="cmbEmpleado">
                                 </select>
                             </div>
@@ -87,14 +86,14 @@ function getView(){
                         <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
 
                             <div class="form-group">
-                                <label>Fecha</label>
+                                <label class="text-secondary">Fecha</label>
                                 <input type="date" class="form-control" id="txtFecha">
                             </div>
 
                         </div>
                         <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
                             <div class="form-group">
-                                <label>Fecha</label>
+                                <label class="text-secondary">Fecha</label>
                                 <select class="form-control negrita text-danger border-danger" id="cmbDiaCliente">
                                             <option value="LUNES">LUNES</option>
                                             <option value="MARTES">MARTES</option>

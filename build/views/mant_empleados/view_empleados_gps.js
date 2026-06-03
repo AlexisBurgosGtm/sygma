@@ -54,8 +54,7 @@ function getView(){
 
 
 
-            <button class="btn btn-bottom-l btn-secondary btn-circle btn-xl hand shadow" 
-            onclick="Navegar.inicio()">
+            <button type="button" class="btn btn-bottom-l btn-secondary btn-circle btn-xl hand shadow" data-spa-action="inicio">
                 <i class="fal fa-home"></i>
             </button>
 
@@ -67,7 +66,7 @@ function getView(){
                 <div class="card-body p-2">
 
                     <div class="form-group">
-                        <label>Seleccione sede y mes</label>
+                        <label class="text-secondary">Seleccione sede y mes</label>
                         <div class="input-group">
                             <select class="form-control" id="cmbSucursal">
                             </select>

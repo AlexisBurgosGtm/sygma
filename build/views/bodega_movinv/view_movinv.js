@@ -1,31 +1,30 @@
 
 function getView(){
+    spa_inyectarEstilosPos2();
+
     let view = {
         body:()=>{
             return `
-                <div class="row">
-                    <div class="col-1 text-left">
-                            <img src="./favicon.png" width="70px" height="70px">
-                    </div>
-                    <div class="card border-base card-rounded shadow col-11 p-2">
-                        
-                            <div class="row">
-                                <div class="col-4 text-left">   
-                                    <label class="text-verde-claro negrita h5" style="font-size:120%" id="lbTitulo">MOVINV</label>
-                                    <br>
-                                    <label class="text-base negrita h5" style="font-size:120%" id="lbTotalItems">0 items</label>
-                                </div>
-                                
-                                <div class="col-8 text-right">
-                                    <h1 class="text-base negrita" id="lbTotalVenta">Q 0.00</h1>
-                                    <h5 class="text-danger negrita hidden" id="lbTotalDescuento">Q 0.00</h5>
-                                    <h1 class="text-base negrita hidden" id="lbTotalVentaDescuento">Q 0.00</h1>
+                <div class="pos2-wrap">
+                    <div class="pos2-totals-bar">
+                        <div class="row align-items-center no-gutters">
+                            <div class="col-md-5 col-7">
+                                <div class="d-flex align-items-center">
+                                    <img src="./favicon.png" width="36" height="36" alt="" class="mr-2">
+                                    <div>
+                                        <div class="negrita mb-0 pos2-bar-title" style="font-size:0.95rem" id="lbTitulo">MOVINV</div>
+                                        <div class="small" style="opacity:0.9" id="lbTotalItems">0 items</div>
+                                    </div>
                                 </div>
                             </div>
-                        
+                            <div class="col-md-7 col-5 text-right">
+                                <div class="negrita mb-0" id="lbTotalVenta">Q 0.00</div>
+                                <div class="hidden" id="lbTotalDescuento">Q 0.00</div>
+                                <div class="negrita pos2-total-main hidden" id="lbTotalVentaDescuento">Q 0.00</div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                
+
                 <div class="col-12 p-0">
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="pedido" role="tabpanel" aria-labelledby="dias-tab">
@@ -55,65 +54,48 @@ function getView(){
                         </li>                           
                     </ul>
                 </div>
+                </div>
             `
         },
         pedido:()=>{
             return `
             <div class="row">
-
-                <div class="col-12">              
-               
-                <br>
-                
-                   <div class="row">
-                      
-                        <div class="col-12">
-                            <div class="card card-rounded shadow border-base col-12 p-2">
-                                <div class="card-body">
-                                    
-                                    <div class="form-group">
-                                        <div class="input-group">
-                                           
-                                            <input type="text" autocomplete="off" class="form-control border-base negrita col-7" placeholder='Escriba para buscar...' id="txtPosCodprod">
-                                            <button class="btn btn-base hand col-1" id="btnBuscarProd">
-                                                <i class="fal fa-search"></i>
-                                            </button>
-                                                                                    
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-
-                                        <div class="col-12">
-                                            <b class="text-base">Productos agregados a la Factura</b>
-                                        </div>
-                                    </div>
-                                    <table class="table table-responsive  table-hover col-12 h-full">
-                                        <thead class="bg-verde text-white">
-                                            <tr>
-                                                <td>PRODUCTO</td>
-                                                <td>DESCRIPCION 2</td>
-                                                <td>MEDIDA</td>
-                                                <td>CANTIDAD</td>
-                                                <td>COSTO</td>
-                                                <td>IMPORTE</td>
-                                                <td></td>
-                                                <td></td>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="tblPosPedido"></tbody>
-                                    </table>
+                <div class="col-12">
+                    <div class="pos2-panel-card">
+                        <div class="pos2-panel-head d-flex justify-content-between align-items-center flex-wrap">
+                            <span class="negrita mb-0"><i class="fal fa-boxes mr-1"></i> Detalle de movimiento</span>
+                            <small class="mb-0">Productos agregados al documento</small>
+                        </div>
+                        <div class="card-body">
+                            <label class="mb-1 small" style="color:var(--pos2-muted);font-weight:600">Buscar producto</label>
+                            <div class="input-group mb-2">
+                                <input type="text" autocomplete="off" class="form-control negrita pos2-search-input" placeholder="Código o nombre..." id="txtPosCodprod">
+                                <div class="input-group-append">
+                                    <button class="btn btn-base hand px-3" type="button" id="btnBuscarProd">
+                                        <i class="fal fa-search"></i>
+                                    </button>
                                 </div>
+                            </div>
+                            <div class="pos2-table-scroll table-responsive">
+                                <table class="table table-sm table-hover mb-0 pos2-table-compact">
+                                    <thead class="bg-base text-white">
+                                        <tr>
+                                            <th>Producto</th>
+                                            <th>Desc. 2</th>
+                                            <th>Medida</th>
+                                            <th class="text-center">Cant.</th>
+                                            <th class="text-right">Costo</th>
+                                            <th class="text-right">Importe</th>
+                                            <th></th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblPosPedido"></tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
-
                 </div>
-            </div>
-            
-            <div class="row">
-
-
             </div>
 
             <button class="btn btn-warning btn-xl btn-bottom-l btn-circle shadow hand" id="btnListadoDocumentos">
@@ -135,7 +117,7 @@ function getView(){
                             <label class="modal-title text-base h3" id="">Buscar producto</label>
 
                                     <div class="form-group">
-                                        <label>Escriba para buscar...</label>
+                                        <label class="text-secondary">Escriba para buscar...</label>
                                         <input type="text" class="form-control border-danger" placeholder="Escriba para buscar..."
                                         oninput="F.FiltrarTabla('tblProductos','txtBuscarProdLista')" id="txtBuscarProdLista">
                                     </div>
@@ -311,12 +293,12 @@ function getView(){
         },
         documento:()=>{
             return `
-            <br>
-            <div class="row">
-              
-
+            <div class="row pos2-doc-compact">
                 <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                    <div class="card card-rounded shadow col-12">
+                    <div class="pos2-panel-card">
+                        <div class="pos2-panel-head">
+                            <span class="negrita mb-0"><i class="fal fa-file-invoice mr-1"></i> Datos del documento</span>
+                        </div>
                         <div class="card-body">
 
                             <div class="row">
@@ -391,10 +373,11 @@ function getView(){
                 </div>
 
                 <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                    <div class="card card-rounded col-12 shadow">
+                    <div class="pos2-panel-card">
+                        <div class="pos2-panel-head">
+                            <span class="negrita mb-0"><i class="fal fa-truck mr-1"></i> Datos del destino</span>
+                        </div>
                         <div class="card-body p-4">
-
-                            <h5 class="negrita text-base">Datos del Destino</h5>
                         
                             <div class="form-group">
                                 <label class="text-secondary negrita">Sucursal de Destino</label>
@@ -419,7 +402,7 @@ function getView(){
                 <i class="fal fa-arrow-left"></i>
             </button>
 
-            <button class="btn btn-info btn-xl btn-bottom-r btn-circle shadow" id="btnGuardarFactura">
+            <button class="btn btn-base btn-xl btn-bottom-r btn-circle shadow hand" id="btnGuardarFactura">
                 <i class="fal fa-save"></i>
             </button>
 

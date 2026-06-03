@@ -83,8 +83,7 @@ function getView(){
                 </div>
             </div>
 
-            <button class="btn btn-secondary btn-bottom-r btn-xl btn-circle hand shadow"
-            onclick="Navegar.inicio()">
+            <button type="button" class="btn btn-secondary btn-bottom-r btn-xl btn-circle hand shadow" data-spa-action="inicio">
                 <i class="fal fa-home"></i>
             </button>
 

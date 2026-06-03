@@ -104,7 +104,18 @@ let Selected_existencia = 0;
 let Selected_bono = 0;
 let Selected_cantidad_original = 0;
 
+/** Producto seleccionado en POS / pedidos (view_pos, view_pos2, bodega, etc.) */
+let Selected_codprod = '';
+let Selected_desprod = '';
+let Selected_codmedida = '';
+let Selected_equivale = 1;
+let Selected_costo = 0;
+let Selected_precio = 0;
+let Selected_id = 0;
+
 let GlobalSelectedCodclie = 0;
+let GlobalSelectedNomCliente = '';
+let GlobalSelectedDirCliente = '';
 let selected_cod_cliente = 0;
 let GlobalSelectedNoOrden = 0;
 let GlobalSelectedCodEquipo = 0;

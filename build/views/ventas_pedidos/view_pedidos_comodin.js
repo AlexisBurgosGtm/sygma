@@ -530,8 +530,7 @@ function getView(){
                 </button>
 
                 
-                <button class="btn btn-circle btn-xl btn-secondary btn-bottom-l hand shadow"
-                    onclick="Navegar.inicio()">
+                <button type="button" class="btn btn-circle btn-xl btn-secondary btn-bottom-l hand shadow" data-spa-action="inicio">
                         <i class="fal fa-home"></i>
                 </button>
 
@@ -737,7 +736,7 @@ function getView(){
                                     <h5 class="negrita text-danger" id="lbCodclieHistorial"></h5>
 
                                     <div class="form-group">
-                                        <label>Fecha Inicio y Final</label>
+                                        <label class="text-secondary">Fecha Inicio y Final</label>
                                         <div class="row">
                                             <div class="col-6">
                                                 <input type="date" class="form-control" id="txtFechaInicial">

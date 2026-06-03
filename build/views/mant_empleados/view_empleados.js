@@ -46,7 +46,7 @@ function getView(){
                         <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                             
                             <div class="form-group">
-                                <label>Sucursal / Tipo lista</label>
+                                <label class="text-secondary">Sucursal / Tipo lista</label>
                                 <div class="input-group">
                                     <select class="form-control negrita" id="cmbSucursal">
                                     </select>
@@ -61,7 +61,7 @@ function getView(){
                         <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                                                         
                             <div class="form-group">
-                                <label>Escriba para buscar:</label>
+                                <label class="text-secondary">Escriba para buscar:</label>
                                 <input type="text" 
                                     class="form-control negrita text-negrita" 
                                     id="txtBuscar" 

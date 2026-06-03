@@ -1,5 +1,5 @@
-const staticCacheName = 'pre-cache-v15-01-2026';
-const dynamicCacheName = 'runtime-cache-v15-01-2026';
+const staticCacheName = 'pre-cache-v17-pos2-global';
+const dynamicCacheName = 'runtime-cache-v17-pos2-global';
 
 // Pre Caching Assets
 const precacheAssets = [
@@ -14,6 +14,9 @@ const precacheAssets = [
     './css/bootstrap-toggle.css',
     './css/app.bundle.css.map',
     './css/app.bundle.css',
+    './css/spa-pos2-theme.css',
+    './css/pace-percent-loader.css',
+    './js/pace-percent-config.js',
     './controllers/GlobalVars.js',
     './controllers/dbcalls.js',
     './controllers/customerVars.js',
@@ -42,10 +45,11 @@ const precacheAssets = [
     './libs/leaftlet/leaftlet.js',
     './libs/noty/noty.min.js',
     './libs/noty/noty.min.css',
-    './libs/chartjs.bundle.js',
-    './libs/F.js',
-    './libs/sweetalert.min.js',
-    './libs/toastr.js',
+    './libs/chart.min.js',
+    './libs/funciones.js',
+    './libs/sweetalert2/sweetalert2.bundle.js',
+    './libs/sweetalert2/sweetalert2.bundle.css',
+    './css/swal-overrides.css',
     './models/classTipoDocumentos.js',
     './models/classEmpleados.js',
     './vendor/jquery-easing/jquery.easing.js',

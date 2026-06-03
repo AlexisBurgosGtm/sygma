@@ -1,32 +1,29 @@
-
 function getView(){
+    spa_inyectarEstilosPos2();
+
     let view = {
         body:()=>{
             return `
-                <div class="row">
-                    <div class="col-1 text-left">
-                            <img src="./favicon.png" width="70px" height="70px">
-                    </div>
-                    <div class="card border-base card-rounded shadow col-11 p-2">
-                        
-                            <div class="row">
-                                <div class="col-4 text-left">   
-                                    <label class="text-base negrita h5" style="font-size:120%">Ingreso de Compras</label>
-                                    <br>
-                                    <label class="text-base negrita h5" style="font-size:120%" id="lbTotalItems">0 items</label>
-                                </div>
-                                
-                                <div class="col-8 text-right">
-                                    <h5 class="text-verde negrita" id="lbTotalVenta">Q 0.00</h5>
-                                    <h5 class="text-danger negrita" id="lbTotalDescuento">Q 0.00</h5>
-                                    <h1 class="text-base negrita" id="lbTotalVentaDescuento">Q 0.00</h1>
+                <div class="pos2-wrap">
+                    <div class="pos2-totals-bar">
+                        <div class="row align-items-center no-gutters">
+                            <div class="col-md-5 col-7">
+                                <div class="d-flex align-items-center">
+                                    <img src="./favicon.png" width="36" height="36" alt="" class="mr-2">
+                                    <div>
+                                        <div class="negrita mb-0 pos2-bar-title" style="font-size:0.95rem">Ingreso de Compras</div>
+                                        <div class="small" style="opacity:0.9" id="lbTotalItems">0 items</div>
+                                    </div>
                                 </div>
                             </div>
-                        
+                            <div class="col-md-7 col-5 text-right">
+                                <div class="negrita mb-0" id="lbTotalVenta">Q 0.00</div>
+                                <div id="lbTotalDescuento">Q 0.00</div>
+                                <div class="negrita pos2-total-main" id="lbTotalVentaDescuento">Q 0.00</div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="col-12 p-0">
+
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="pedido" role="tabpanel" aria-labelledby="dias-tab">
                             ${view.pedido() + view.modal_cantidad() + view.modal_editar_cantidad() + view.modal_lista_precios() + view.modal_lista_documentos() + view.modal_tomar_datos() + view.modal_detalle_tomar_datos()}
@@ -59,84 +56,54 @@ function getView(){
         },
         pedido:()=>{
             return `
-            <div class="row">
-
+            <div class="row pos2-pedido-col">
                 <div class="col-12">
-
-                                  
-               
-                <hr class="solid">
-                
-                   <div class="row">
-                      
-                        <div class="col-12">
-                            <div class="card card-rounded shadow border-base col-12 p-2">
-                                <div class="card-body">
-                                    
-                                    <div class="row">
-                                        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                                            <div class="form-group">
-                                                <div class="input-group">
-                                                
-                                                    <input type="text" autocomplete="off" class="form-control border-base negrita col-7" placeholder='Escriba para buscar...' id="txtPosCodprod">
-                                                    <button class="btn btn-base hand col-1" id="btnBuscarProd">
-                                                        <i class="fal fa-search"></i>
-                                                    </button>
-                                                                                            
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-
-                                            <div class="form-group">
-                                                <div class="input-group">
-                                                
-                                                    <button class="btn btn-info hand shadow" id="btnTomarDatos">
-                                                        <i class="fal fa-download"></i> Tomar Orden Compra
-                                                    </button>
-                                                                                            
-                                                </div>
-                                            </div>
-                                            
+                    <div class="pos2-panel-card">
+                        <div class="pos2-panel-head d-flex justify-content-between align-items-center flex-wrap">
+                            <span class="negrita mb-0"><i class="fal fa-shopping-cart mr-1"></i> Detalle de compra</span>
+                            <small class="mb-0">Productos agregados a la factura</small>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-2">
+                                <div class="col-md-6 col-12 mb-2 mb-md-0">
+                                    <label class="negrita text-secondary mb-1 small">Buscar producto</label>
+                                    <div class="input-group">
+                                        <input type="text" autocomplete="off" class="form-control border-base negrita pos2-search-input" placeholder="Código o nombre..." id="txtPosCodprod">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-base hand px-3" type="button" id="btnBuscarProd">
+                                                <i class="fal fa-search"></i>
+                                            </button>
                                         </div>
                                     </div>
-
-                                   
-
-                                    <div class="row">
-
-                                        <div class="col-12">
-                                            <b class="text-base">Productos agregados a la Factura</b>
-                                        </div>
-                                    </div>
-                                    <table class="table table-responsive  table-hover col-12 h-full">
-                                        <thead class="bg-verde text-white">
-                                            <tr>
-                                                <td>PRODUCTO</td>
-                                                <td>DESCRIPCION 2</td>
-                                                <td>MEDIDA</td>
-                                                <td>CANTIDAD</td>
-                                                <td>COSTO</td>
-                                                <td>SUBTOTAL</td>
-                                                <td>DESCUENTO</td>
-                                                <td>IMPORTE</td>
-                                                <td></td>
-                                                <td></td>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="tblPosPedido"></tbody>
-                                    </table>
                                 </div>
+                                <div class="col-md-6 col-12 d-flex align-items-end">
+                                    <button class="btn btn-info hand shadow btn-block" type="button" id="btnTomarDatos">
+                                        <i class="fal fa-download mr-1"></i> Tomar orden de compra
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="pos2-table-scroll table-responsive">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="bg-base text-white">
+                                        <tr>
+                                            <th>Producto</th>
+                                            <th>Desc. 2</th>
+                                            <th>Medida</th>
+                                            <th class="text-center">Cant.</th>
+                                            <th class="text-right">Costo</th>
+                                            <th class="text-right">Subtotal</th>
+                                            <th class="text-right">Desc.</th>
+                                            <th class="text-right">Importe</th>
+                                            <th></th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblPosPedido"></tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
-
                 </div>
-            </div>
-            
-            <div class="row">
-
-
             </div>
 
             <button class="btn btn-warning btn-xl btn-bottom-l btn-circle shadow hand" id="btnListadoDocumentos">
@@ -335,40 +302,42 @@ function getView(){
         },
         documento:()=>{
             return `
-            <div class="row">
-                <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
+            <div class="row pos2-doc-col pos2-doc-compact">
+                <div class="col-lg-4 col-md-5 col-12 mb-2">
                     ${view.documento_card_cliente()}
                 </div>
 
-                <div class="col-sm-12 col-md-6 col-lg-8 col-xl-8">
-                    <div class="card card-rounded shadow col-12 border-base">
+                <div class="col-lg-8 col-md-7 col-12 mb-2">
+                    <div class="pos2-panel-card h-100">
+                        <div class="pos2-panel-head">
+                            <span class="negrita text-base mb-0"><i class="fal fa-file-invoice mr-1"></i> Datos del documento</span>
+                        </div>
                         <div class="card-body">
 
                             <div class="row">
 
-                                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                                <div class="col-md-6">
 
-                                        <div class="form-group">
-                                            <label class="text-secondary">Tipo de Documento</label>
-                                            <select class="form-control col-12" id="cmbTipoDocumento">
+                                        <div class="form-group mb-2">
+                                            <label class="text-secondary">Tipo de documento</label>
+                                            <select class="form-control" id="cmbTipoDocumento">
                                                 <option value="COM">COMPRAS IVA</option>
                                                 <option value="COP">COMPRA PEQUEÑO CONTRIBUYENTE</option>
                                             </select>   
                                         </div>
 
-                                        <div class="form-group text-left">
-                                            <label class="text-secondary">Serie Documento</label>
+                                        <div class="form-group mb-2">
+                                            <label class="text-secondary">Serie / correlativo</label>
                                             <div class="input-group">
-                                                <select class="form-control col-12" id="cmbCoddoc">
-                                                </select>
-                                                <input type="number" id="txtCorrelativo" class="form-control" disabled="true" value=0>
+                                                <select class="form-control" id="cmbCoddoc"></select>
+                                                <input type="number" id="txtCorrelativo" class="form-control negrita" disabled value="0">
                                             </div>    
                                         </div>
 
-                                        <div class="form-group">
-                                            <label class="text-secondary">Forma de Pago</label>
+                                        <div class="form-group mb-2">
+                                            <label class="text-secondary">Forma de pago</label>
                                             <div class="input-group">
-                                                <select class="form-control negrita text-base" id="cmbConCre">
+                                                <select class="form-control negrita" id="cmbConCre">
                                                     <option value="CON">CONTADO</option>
                                                     <option value="CRE">CREDITO</option>
                                                 </select>
@@ -378,26 +347,24 @@ function getView(){
 
                                         
                                 </div>
-                                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                                <div class="col-md-6">
 
-                                        <div class="form-group text-left">
-                                            <label class="text-secondary">Caja</label>
+                                        <div class="form-group mb-2">
+                                            <label class="text-secondary">Caja y fecha</label>
                                             <div class="input-group">
-                                                <select class="form-control col-12" id="cmbCaja">
-                                                </select>
-                                                <input type="date" id="txtFecha" class="form-control text-base negrita border-base">
+                                                <select class="form-control" id="cmbCaja"></select>
+                                                <input type="date" id="txtFecha" class="form-control negrita border-base">
                                             </div>
                                         </div>
                                         
-                                        <div class="form-group text-left">
+                                        <div class="form-group mb-2">
                                             <label class="text-secondary">Empleado</label>
-                                            <select class="form-control col-12" id="cmbVendedor">
-                                            </select>   
+                                            <select class="form-control" id="cmbVendedor"></select>   
                                         </div>
                                     
-                                        <div class="form-group">
-                                                <label class="text-secondary">Prioridad</label>
-                                                <select class="form-control negrita text-base" id="cmbPrioridad"></select>
+                                        <div class="form-group mb-2">
+                                            <label class="text-secondary">Prioridad</label>
+                                            <select class="form-control negrita" id="cmbPrioridad"></select>
                                         </div>
 
                                 </div>
@@ -412,18 +379,18 @@ function getView(){
 
                             <div class="row">
                                
-                                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                                        <div class="form-group">
-                                            <label class="text-secondary">Serie y Número de Factura de Compra</label>
+                                <div class="col-md-6">
+                                        <div class="form-group mb-2">
+                                            <label class="text-secondary">Serie y número de factura de compra</label>
                                             <div class="input-group">
                                                 <input type="text" class="form-control text-base negrita" id="txtSerieFac" placeholder="Serie Factura">
                                                 <input type="text" class="form-control text-base negrita" id="txtNumeroFac" placeholder="Número Factura">
                                             </div>
                                         </div>
                                 </div>
-                                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                                        <div class="form-group">
-                                            <label class="text-secondary">No. orden de Compra</label>
+                                <div class="col-md-6">
+                                        <div class="form-group mb-2">
+                                            <label class="text-secondary">No. orden de compra</label>
                                             <div class="input-group">
                                                 <input type="text" class="form-control text-base negrita" id="txtCoddocOrigen" placeholder="Serie Orden">
                                                 <input type="text" class="form-control text-base negrita" id="txtCorrelativoOrigen" placeholder="Número Orden">
@@ -442,12 +409,15 @@ function getView(){
                                     </button>
                                 </div>
 
-                                <div class="form-group">
+                                <div class="form-group mb-0">
                                     <label class="text-secondary">Observaciones</label>
-                                    <textarea class="form-control negrita col-12" rows="2" value="" id="txtObs"></textarea>   
+                                    <textarea class="form-control negrita" rows="2" id="txtObs"></textarea>   
                                 </div>
 
-                                <h2 class="negrita text-danger hidden" style="font-size:280%" id="lbPosCobroTotalPagar">Q 0.00</h2>
+                                <div class="text-md-right text-center mt-2 hidden">
+                                    <label class="text-secondary d-block">Total a pagar</label>
+                                    <div class="negrita pos2-sidebar-total-value" id="lbPosCobroTotalPagar">Q 0.00</div>
+                                </div>
                             
 
                         </div>
@@ -467,46 +437,47 @@ function getView(){
         },
         documento_card_cliente:()=>{
             return `
-            <div class="card card-rounded shadow border-base p-4"  style="font-size:80%">
+            <div class="pos2-panel-card h-100 pos2-doc-compact">
+                <div class="pos2-panel-head">
+                    <span class="negrita text-base mb-0"><i class="fal fa-truck mr-1"></i> Proveedor</span>
+                </div>
                 <div class="card-body">
-                            <h3 class="negrita text-base">Selecciona al Proveedor</h3>
-                            <div class="form-group">
-                                <label class="negrita text-base">NIT</label>
+                            <div class="form-group mb-2">
+                                <label class="negrita">NIT</label>
                                 <div class="input-group">
-                                    <input type="text" class="form-control form-control-md border-base negrita text-verde" id="txtPosCobroNit">
-                                    <button class="btn btn-base text-white hand" id="btnBuscarCliente">
-                                        <i class="fal fa-search"></i>
-                                    </button>
+                                    <input type="text" class="form-control border-base negrita text-verde" id="txtPosCobroNit">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-base text-white hand" type="button" id="btnBuscarCliente">
+                                            <i class="fal fa-search"></i>
+                                        </button>
+                                    </div>
                                 </div>
-                                
-                            
                             </div>
 
-                        
-                            <div class="form-group">
-                                <label class="negrita text-base">PROVEEDOR</label>
-                                <input type="text" class="form-control form-control-md border-base negrita text-verde" id="txtPosCobroNombre">
+                            <div class="form-group mb-2">
+                                <label class="negrita">Proveedor</label>
+                                <input type="text" class="form-control border-base negrita text-verde" id="txtPosCobroNombre">
                             </div>
                             
-                            <div class="form-group">
-                                <label class="negrita text-base">DIRECCIÓN</label>
-                                <input type="text" class="form-control form-control-md border-base negrita text-verde" id="txtPosCobroDireccion">
+                            <div class="form-group mb-2">
+                                <label class="negrita">Dirección</label>
+                                <input type="text" class="form-control border-base negrita text-verde" id="txtPosCobroDireccion">
                             </div>
 
-                            <div class="form-group">
-                                <label class="negrita text-base">TELÉFONO/S</label>
-                                <input type="text" class="form-control form-control-md border-base negrita text-verde" id="txtPosCobroTelefono">
+                            <div class="form-group mb-2">
+                                <label class="negrita">Teléfono/s</label>
+                                <input type="text" class="form-control border-base negrita text-verde" id="txtPosCobroTelefono">
                             </div>
 
                             <div class="text-right">
-                                <button class="btn btn-verde hand text-white" id="btnNuevoCliente">
-                                    <i class="fal fa-plus"></i> Crear Nuevo Proveedor
+                                <button type="button" class="btn btn-verde btn-sm hand text-white" id="btnNuevoCliente">
+                                    <i class="fal fa-plus"></i> Crear proveedor
                                 </button>
                             </div>
 
-                            <div class="form-group hidden">
-                                <label class="negrita text-base">CÓDIGO CLIENTE</label>
-                                <input disabled type="text" class="form-control form-control-md border-base negrita text-verde" id="txtPosCobroNitclie" autocomplete="off">                            
+                            <div class="form-group hidden mb-0">
+                                <label class="negrita">Código proveedor</label>
+                                <input disabled type="text" class="form-control border-base negrita text-verde" id="txtPosCobroNitclie" autocomplete="off">                            
                             </div>
 
                           
@@ -608,7 +579,7 @@ function getView(){
                             </div>
                             <div class="table-responsive col-12">
                                 <table class="table table-responsive table-bordered table-hover" id="tblTomarDatos">
-                                    <thead class="bg-verde text-white">
+                                    <thead class="bg-base text-white">
                                         <tr>
                                             <td>FECHA</td>
                                             <td>DOCUMENTO</td>
@@ -644,7 +615,7 @@ function getView(){
                 <div class="modal-dialog modal-lg" role="document">
                     <div class="modal-content">
 
-                        <div class="modal-header bg-verde">
+                        <div class="modal-header bg-base">
                             <label class="modal-title text-white h3" id="">Detalle de la Requisicion</label>
                         </div>
             
@@ -655,7 +626,7 @@ function getView(){
 
                             <div class="table-responsive col-12">
                                 <table class="table table-responsive table-bordered table-hover">
-                                    <thead class="bg-verde text-white">
+                                    <thead class="bg-base text-white">
                                         <tr>
                                             <td>CODIGO</td>
                                             <td>PRODUCTO</td>
@@ -1897,13 +1868,13 @@ function get_tbl_pedido(){
                 <td>
                     ${rows.CODMEDIDA} (eq: ${rows.EQUIVALE})
                 </td>
-                <td>
-                    <b class="text-info" style="font-size:140%">${rows.CANTIDAD}</b>
+                <td class="text-center">
+                    <b class="text-info pos2-qty">${rows.CANTIDAD}</b>
                 </td>
-                <td class="negrita">${F.setMoneda(rows.PRECIO,'Q')}</td>
-                <td class="negrita h4">${F.setMoneda(rows.TOTALPRECIO,'Q')}</td>
-                <td class="negrita text-danger">${F.setMoneda(rows.DESCUENTO,'Q')}</td>
-                <td class="negrita text-verde h4">${F.setMoneda((Number(rows.TOTALPRECIO)-Number(rows.DESCUENTO)),'Q')}</td>
+                <td class="text-right negrita">${F.setMoneda(rows.PRECIO,'Q')}</td>
+                <td class="text-right negrita pos2-amount">${F.setMoneda(rows.TOTALPRECIO,'Q')}</td>
+                <td class="text-right negrita text-danger">${F.setMoneda(rows.DESCUENTO,'Q')}</td>
+                <td class="text-right negrita text-verde pos2-amount">${F.setMoneda((Number(rows.TOTALPRECIO)-Number(rows.DESCUENTO)),'Q')}</td>
 
                 <td>
                     <button class="btn btn-md btn-circle btn-info shadow hand" onclick="edit_item_pedido('${rows.ID}','${rows.CODPROD}','${rows.DESPROD}','${rows.CODMEDIDA}','${rows.EQUIVALE}','${rows.CANTIDAD}','${rows.COSTO}','${rows.PRECIO}','${rows.TIPOPROD}','${rows.EXENTO}','${rows.EXISTENCIA}','${rows.BONO}','${rows.DESCUENTO}')">

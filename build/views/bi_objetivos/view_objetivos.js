@@ -45,21 +45,21 @@ function getView(){
                         <div class="row">
                             <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
                                 <div class="form-group">
-                                    <label>Sucursal</label>
+                                    <label class="text-secondary">Sucursal</label>
                                     <select class="form-control negrita text-secondary" id="cmbSucursal">
                                     </select>
                                 </div>
                             </div>
                             <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
                                 <div class="form-group">
-                                    <label>Mes</label>
+                                    <label class="text-secondary">Mes</label>
                                     <select class="form-control negrita text-secondary" id="cmbMes">
                                     </select>
                                 </div>
                             </div>
                             <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
                                 <div class="form-group">
-                                    <label>Año</label>
+                                    <label class="text-secondary">Año</label>
                                     <select class="form-control negrita text-secondary" id="cmbAnio">
                                     </select>
                                 </div>
@@ -274,7 +274,7 @@ function getView(){
                                 <div class="card-body p-4">
                                 
                                     <div class="form-group">
-                                        <label class="negrita">Vendedor</label>
+                                        <label class="negrita text-secondary">Vendedor</label>
                                         <select class="negrita form-control" id="cmbVendedorGC">
                                         </select>
                                     </div>
@@ -284,13 +284,13 @@ function getView(){
                                     <div class="row">
                                         <div class="col-6">
                                             <div class="form-group">
-                                                <label class="negrita">Objetivo Goles</label>
+                                                <label class="negrita text-secondary">Objetivo Goles</label>
                                                 <input type="number" class="negrita form-control text-danger" id="txtObjGoles" value=0>
                                             </div>
                                         </div>
                                         <div class="col-6">
                                             <div class="form-group">
-                                                <label class="negrita">Objetivo Clientes (cobertura)</label>
+                                                <label class="negrita text-secondary">Objetivo Clientes (cobertura)</label>
                                                 <input type="number" class="negrita form-control text-danger" id="txtObjCobertura" value=0>
                                             </div>
                                         </div>
@@ -343,19 +343,19 @@ function getView(){
                                 <div class="card-body p-4">
                                 
                                     <div class="form-group">
-                                        <label class="negrita">Vendedor</label>
+                                        <label class="negrita text-secondary">Vendedor</label>
                                         <select class="negrita form-control" id="cmbVenVendedor">
                                         </select>
                                     </div>
 
                                     <div class="form-group">
-                                        <label class="negrita">Categoría</label>
+                                        <label class="negrita text-secondary">Categoría</label>
                                         <select class="negrita form-control" id="cmbVenMarca">
                                         </select>
                                     </div>
 
                                     <div class="form-group">
-                                        <label class="negrita">Objetivo</label>
+                                        <label class="negrita text-secondary">Objetivo</label>
                                         <input type="number" class="negrita form-control text-danger" id="txtVenObjetivo">
                                     </div>
 

@@ -76,7 +76,7 @@ function getView(){
 
             <br>
                 <div class="form-group">
-                    <label class="negrita">Seleccione Mes y Año</label>
+                    <label class="negrita text-secondary">Seleccione Mes y Año</label>
                     <div class="input-group">
                         <select class="form-control negrita border-base text-base" id="cmbMes"></select>
                         <select class="form-control negrita border-base text-base" id="cmbAnio"></select>
@@ -90,8 +90,7 @@ function getView(){
 
                 <div class="col-sm-12 col-md-4 col-xl-4 col-lg-4 p-2">
                     
-                    <div class="card border-danger card-rounded bg-white shadow col-12 hand"  
-                    onclick="Menu.objetivos_logro_procter()">
+                    <div class="card border-danger card-rounded bg-white shadow col-12 hand" href="#/bi/logro-procter" data-spa-route="bi/logro-procter">
                         <div class="card-body p-4">
                             
                             <h4 class="text-danger">AVANCE P&G</h4>
@@ -111,8 +110,7 @@ function getView(){
                 </div>
                 <div class="col-sm-12 col-md-4 col-xl-4 col-lg-4 p-2">
                     
-                    <div class="card border-info card-rounded bg-white shadow col-12 hand"  
-                    onclick="Menu.ventas_pedidos()">
+                    <div class="card border-info card-rounded bg-white shadow col-12 hand" href="#/ventas/pedidos" data-spa-route="ventas/pedidos">
                         <div class="card-body p-4">
                             
                             <h4 class="text-info">NUEVO PEDIDO</h4>
@@ -132,8 +130,7 @@ function getView(){
                 </div>
                 <div class="col-sm-12 col-md-4 col-xl-4 col-lg-4 p-2" >
                     
-                    <div class="card border-info card-rounded  bg-white shadow col-12 hand"  
-                    onclick="Menu.ventas_censo()">
+                    <div class="card border-info card-rounded  bg-white shadow col-12 hand" href="#/ventas/censo" data-spa-route="ventas/censo">
                         <div class="card-body p-4">
 
                             <h4 class="text-info">CREAR CLIENTES (CENSO)</h4>
@@ -294,13 +291,13 @@ function getView(){
                             <div class="row">
                                 <div class="col-6">
                                     <div class="form-group">
-                                        <label class="negrita">Fecha inicio</label>
+                                        <label class="negrita text-secondary">Fecha inicio</label>
                                         <input type="date" class="form-control negrita text-danger" id="txtDocFechaInicial">
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="form-group">
-                                        <label class="negrita">Fecha Final</label>
+                                        <label class="negrita text-secondary">Fecha Final</label>
                                         <input type="date" class="form-control negrita text-danger" id="txtDocFechaFinal">
                                     </div>
                                 </div>
@@ -355,13 +352,13 @@ function getView(){
                             <div class="row">
                                 <div class="col-6">
                                     <div class="form-group">
-                                        <label class="negrita">Fecha inicio</label>
+                                        <label class="negrita text-secondary">Fecha inicio</label>
                                         <input type="date" class="form-control negrita text-danger" id="txtMarcaFechaInicial">
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="form-group">
-                                        <label class="negrita">Fecha Final</label>
+                                        <label class="negrita text-secondary">Fecha Final</label>
                                         <input type="date" class="form-control negrita text-danger" id="txtMarcaFechaFinal">
                                     </div>
                                 </div>
@@ -543,13 +540,13 @@ function getView(){
                             <div class="row">
                                 <div class="col-6">
                                     <div class="form-group">
-                                        <label class="negrita">Fecha inicio</label>
+                                        <label class="negrita text-secondary">Fecha inicio</label>
                                         <input type="date" class="form-control negrita text-danger" id="txtProdFechaInicial">
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="form-group">
-                                        <label class="negrita">Fecha Final</label>
+                                        <label class="negrita text-secondary">Fecha Final</label>
                                         <input type="date" class="form-control negrita text-danger" id="txtProdFechaFinal">
                                     </div>
                                 </div>

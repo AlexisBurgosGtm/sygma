@@ -17,6 +17,7 @@
 
         <link rel="stylesheet" media="screen, print" href="css/vendors.bundle.css">
         <link rel="stylesheet" media="screen, print" href="css/app.bundle.css">
+        <link rel="stylesheet" media="screen, print" href="css/pace-percent-loader.css">
         <!-- Place favicon.ico in the root directory -->
         <link rel="apple-touch-icon" sizes="180x180" href="./favicon.png">
         <link rel="icon" type="image/png" sizes="32x32" href="./favicon.png">
@@ -26,23 +27,14 @@
         <link rel="stylesheet" media="screen, print" href="./css/view_transition.css">
         
         <link rel="stylesheet" media="screen, print" href="./css/custom_theme.css">
+        <link rel="stylesheet" media="screen, print" href="./css/spa-pos2-theme.css">
         <link rel="stylesheet" media="screen, print" href="./design/alexis_especial.css">
 
-
         <link rel="stylesheet" href="./libs/noty/noty.min.css">
+        <link rel="stylesheet" href="./libs/sweetalert2/sweetalert2.bundle.css">
+        <link rel="stylesheet" href="./css/swal-overrides.css">
         <link rel="stylesheet" href="./libs/leaflet/leaflet.css">
         <link rel="stylesheet" href="./libs/animate.min.css">
-
-        <!------------------->
-        <!-- PACE JS THEME -->
-        <!------------------->
-        <!--
-        <link rel="stylesheet" href="./libs/pacejs/big-counter.css">
-        <script src="./libs/pacejs/pace.min.js"></script>
-        -->
-        <!------------------->
-        <!------------------->
-
 
         <link href="./libs/bootstrap-toggle/bootstrap2-toggle.min.css" rel="stylesheet">
         <link rel="stylesheet" href="./librerias_aux/dataTables.dataTables.css">
@@ -51,12 +43,12 @@
       
 
         <!-- service worker -->
-        <meta name="application-name" content="SYGMA" />
+        <meta name="application-name" content="XELASOLv2" />
         <meta name="theme-color" content="#ffffff">
         <link rel="manifest" href="manifest.json">
 
     </head>
-    <body class="mod-bg-1 ">
+    <body class="mod-bg-1 mod-pace-percent">
         <!-- DOC: script to save and load page settings -->
         <script>
             /**
@@ -123,11 +115,11 @@
         <div class="page-wrapper">
             <div class="page-inner">
                 <!-- BEGIN Left Aside -->
-                <aside class="page-sidebar bg-base" id="root_navbar">
+                <aside class="page-sidebar bg-white border-base" id="root_navbar">
                     <!-- BEGIN PRIMARY NAVIGATION -->
                     
                     
-                    <nav id="js-primary-nav" class="primary-nav bg-base" role="navigation"> 
+                    <nav id="js-primary-nav" class="primary-nav bg-white border-base" role="navigation"> 
                         
                         <!--
                         <ul id="js-nav-menu" class="nav-menu">
@@ -139,7 +131,7 @@
                     
                     <!-- END PRIMARY NAVIGATION -->
                     <!-- NAV FOOTER -->
-                    <div class="nav-footer shadow-top bg-base">
+                    <div class="nav-footer shadow-top bg-white border-base">
                         <a href="#" onclick="return false;" data-action="toggle" data-class="nav-function-minify" class="hidden-md-down">
                             <i class="ni ni-chevron-right"></i>
                             <i class="ni ni-chevron-right"></i>
@@ -177,7 +169,7 @@
                             </div>
 
                             <div class="">
-                                <a href="#" class="header-icon text-danger hand" onclick="Navegar.salir()">
+                                <a href="#" class="header-icon text-danger hand" data-spa-action="salir" title="Cerrar sesión">
                                     <i class="fal fa-power-off"></i>
                                 </a>
                             </div>
@@ -367,7 +359,7 @@
                             <div class="list" id="mpc">
                                 <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle" data-class="mod-pace-custom"></a>
                                 <span class="onoffswitch-title">Preloader Inside</span>
-                                <span class="onoffswitch-title-desc">preloader will be inside content</span>
+                                <span class="onoffswitch-title-desc">contador % centrado (sin barra animada)</span>
                             </div>
                             <div class="mt-4 d-table w-100 px-5">
                                 <div class="d-table-cell align-middle">
@@ -549,14 +541,14 @@
                                 <div class="row">
                                     <div class="col-sm-12 col-md-6 col-lg-5 col-xl-5">
                                         <div class="form-group">
-                                            <label class="negrita">Cliente</label>
+                                            <label class="negrita text-secondary">Cliente</label>
                                             <input type="text" class="form-control" id="EF_txtEditarFacturaNomclie" disabled>
                                             <input type="text" class="form-control" id="EF_txtEditarFacturaDirclie" disabled>
                                         </div>
                                     </div>
                                     <div class="col-sm-12 col-md-6 col-lg-5 col-xl-5">
                                         <div class="form-group">
-                                            <label class="negrita">Total Factura</label>
+                                            <label class="negrita text-secondary">Total Factura</label>
                                             <h3 class="negrita text-danger" id="EF_lbEditarFacturaTotal"></h3>
                                             <br>
                                             <small class="negrita text-danger" id="EF_lbEditarFacturaCoddoc"></small>
@@ -658,7 +650,7 @@
                             <div class="card-body p-4">
 
                                 <div class="form-group">
-                                    <label class="negrita ">Escriba para buscar un producto...</label>
+                                    <label class="negrita text-secondary">Escriba para buscar un producto...</label>
                                     <input type="text" class="form-control negrita text-danger" 
                                     placeholder="Escriba para buscar y presione ENTER"
                                     id="txtEditarFacturaBuscarProducto">
@@ -719,17 +711,17 @@
                                         <br>
 
                                                 <div id="form-group">
-                                                    <label class="negrita">Cantidad</label>
+                                                    <label class="negrita text-secondary">Cantidad</label>
                                                     <input type="number" class="negrita text-danger form-control"  id="EF_txtEditarFacturaCantidad">
                                                 </div>
                                         
                                                 <div id="form-group">
-                                                    <label class="negrita">Precio Q</label>
+                                                    <label class="negrita text-secondary">Precio Q</label>
                                                     <input disabled type="number" class="negrita text-info form-control" id="EF_txtEditarFacturaPrecio">
                                                 </div>
                                         
                                                 <div id="form-group">
-                                                    <label class="negrita">Importe Q</label>
+                                                    <label class="negrita text-secondary">Importe Q</label>
                                                     <input disabled type="number" class="negrita text-info form-control" id="EF_txtEditarFacturaETotalPrecio">
                                                 </div>
                                         
@@ -785,17 +777,17 @@
                                         <br>
 
                                                 <div id="form-group">
-                                                    <label class="negrita">Cantidad</label>
+                                                    <label class="negrita text-secondary">Cantidad</label>
                                                     <input type="number" class="negrita text-danger form-control"  id="txtEditarFacturaCantidadE">
                                                 </div>
                                         
                                                 <div id="form-group">
-                                                    <label class="negrita">Precio Q</label>
+                                                    <label class="negrita text-secondary">Precio Q</label>
                                                     <input disabled type="number" class="negrita text-info form-control" id="txtEditarFacturaPrecioE">
                                                 </div>
                                         
                                                 <div id="form-group">
-                                                    <label class="negrita">Importe Q</label>
+                                                    <label class="negrita text-secondary">Importe Q</label>
                                                     <input disabled type="number" class="negrita text-info form-control" id="txtEditarFacturaTotalPrecioE">
                                                 </div>
                                         
@@ -839,8 +831,7 @@
         
 
 
-
-
+        <script src="js/pace-percent-config.js"></script>
         <script src="js/vendors.bundle.js"></script>
         <script src="js/app.bundle.js"></script>
        
@@ -856,15 +847,14 @@
         <script src="./controllers/classDb.js"></script>
         <script src="./controllers/dbcalls.js"></script>
 
+        <script src="./libs/sweetalert2/sweetalert2.bundle.js"></script>
         <script src="./libs/funciones.js"></script>
         <script src="./libs/mousetrap.min.js"></script>
         
         <script src="./libs/noty/noty.min.js"></script>
 
         
-        <script src="./libs/sweetalert.min.js"></script>
         <script src="./libs/axios.min.js"></script>
-        <script src="./libs/parallax.min.js"></script>
         <script src="./design/alexis_especial.js"></script>
 
         <script src="./libs/chart.min.js"></script>
@@ -879,29 +869,13 @@
         <script src="./controllers/print.js"></script>
        
        
-    <!-- links para exportar a excel -->
-       
-     <!--
-        <script src="./libs/export_xlsx/xlsx.full.min.js"></script>
-        <script src="./libs/export_xlsx/FileSaver.min.js"></script>
-        <script src="./libs/export_xlsx/tableexport.min.js"></script>
-    -->
-        
-       
-
-        <!--<script src="./librerias_aux/excellentexport.js"></script>-->
-        
-        
-        <script type="text/javascript" src="libs/exporter/FileSaver/FileSaver.min.js"></script>
-        
-        <script type="text/javascript" src="libs/exporter/js-xlsx/xlsx.core.min.js"></script>
-        
-        <script type="text/javascript" src="libs/exporter/jsPDF/jspdf.umd.min.js"></script>
-
-        
+        <script src="./spa/spaRouter.js"></script>
+        <script src="./spa/routes.js"></script>
+        <script src="./spa/spaNav.js"></script>
         <script src="./controllers/classNavegar.js"></script>
         <script src="./controllers/GlobalVars.js"></script>
         <script src="./controllers/GlobalFunciones.js"></script>
+        <script src="./libs/spa-pos2-theme.js"></script>
         <script src="./controllers/menu_handler.js"></script>
         <script src="./controllers/permisos.js"></script>
         <script src="./controllers/editar_factura.js"></script>

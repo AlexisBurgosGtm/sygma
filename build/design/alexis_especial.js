@@ -225,7 +225,7 @@ let special_loader_puntos_saltando = `
 let special_toggle = `
     <div class="toggle-border">
       <input id="one" type="checkbox">
-      <label for="one">
+      <label for="one" class="text-secondary">
         <div class="handle"></div>
       </label>
     </div>

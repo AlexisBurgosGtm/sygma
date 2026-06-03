@@ -66,7 +66,7 @@ function getView(){
                         </div>
                         <div class="col-6">
                             <div class="form-group">
-                                <label>Total Productos</label>
+                                <label class="text-secondary">Total Productos</label>
                                 <br>
                                 <label class="negrita text-danger h4" id="lbTotalProductos"></label> / <label class="negrita text-success h5" id="lbTotalItemsLista"></label>
 
@@ -82,7 +82,7 @@ function getView(){
                 <div class="card-body p-2">
 
                     <div class="form-group">
-                        <label>Búsqueda de productos</label>
+                        <label class="text-secondary">Búsqueda de productos</label>
                         <div class="input-group">
                             <select class="form-control" id="cmbFiltroMarca">
                             </select>
@@ -870,7 +870,7 @@ function getView(){
                             </div>
 
                             <div class="form-group">
-                                <label>Búsqueda de Marcas</label>
+                                <label class="text-secondary">Búsqueda de Marcas</label>
                                 <input type="search" class="negrita text-base border-base form-control" id="txtBuscarProdMarcas" oninput="F.FiltrarTabla('tblProdMarcas','txtBuscarProdMarcas')">
                             </div>
 
@@ -942,7 +942,7 @@ function getView(){
                             </div>
 
                             <div class="form-group">
-                                <label>Búsqueda de Fabricantes</label>
+                                <label class="text-secondary">Búsqueda de Fabricantes</label>
                                 <input type="search" class="negrita text-base border-base form-control" id="txtBuscarProdClaseuno" oninput="F.FiltrarTabla('tblProdClaseuno','txtBuscarProdClaseuno')">
                             </div>
 
@@ -1014,7 +1014,7 @@ function getView(){
                             </div>
 
                             <div class="form-group">
-                                <label>Búsqueda de Fabricantes</label>
+                                <label class="text-secondary">Búsqueda de Fabricantes</label>
                                 <input type="search" class="negrita text-base border-base form-control" id="txtBuscarProdProv" oninput="F.FiltrarTabla('tblProdProv','txtBuscarProdProv')">
                             </div>
 

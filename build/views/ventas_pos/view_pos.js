@@ -391,7 +391,7 @@ function getView(){
                             <br>
                             <div class="row">
                                 <div class="form-group">
-                                    <label>Vehiculo</label>
+                                    <label class="text-secondary">Vehiculo</label>
                                     <select class="form-control negrita" id="cmbVehiculo">
                                     </select>
                                 </div>
@@ -477,7 +477,7 @@ function getView(){
                         <div class="modal-body p-4">
                             <div class="row">
                                 <div class="form-group col-12">
-                                    <label>Búsqueda de Clientes</label>
+                                    <label class="text-secondary">Búsqueda de Clientes</label>
                                     <div class="input-group">
                                         <input type="search" autocomplete="off" class="form-control border-base negrita" id="txtBuscarClie">
                                         <button class="btn btn-base hand text-white" id="btnBuscarClie">

@@ -756,7 +756,7 @@ function getView(){
                             <h4 class="negrita text-base">Facturar Pedidos Pendientes</h4>
                             
                             <div class="form-group">
-                                <label class="negrita">Serie y Fecha de la Factura</label>
+                                <label class="negrita text-secondary">Serie y Fecha de la Factura</label>
                                 <div class="input-group">
                                     <select class="negrita text-info form-control" id="cmbFacCoddoc">
                                     </select>
@@ -969,7 +969,7 @@ function getView(){
                         <div class="table-responsive">
                             
                             <div class="form-group">
-                                <label>Escriba para buscar</label>
+                                <label class="text-secondary">Escriba para buscar</label>
                                 <input type="text" class="form-control border-warning text-secondary"
                                 id="txtFBuscarTipoPrecio"
                                 oninput="F.FiltrarTabla('tblFTipoPrecio','txtFBuscarTipoPrecio')">
@@ -1053,13 +1053,13 @@ function getView(){
                     <div class="row">
                         <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
                             <div class="form-group">
-                                <label class="negrita">Fecha Inicial</label>
+                                <label class="negrita text-secondary">Fecha Inicial</label>
                                 <input type="date" class="negrita form-control" id="txtSFechaInicial">
                             </div>
                         </div>
                         <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
                             <div class="form-group">
-                                <label class="negrita">Fecha Inicial</label>
+                                <label class="negrita text-secondary">Fecha Inicial</label>
                                 <input type="date" class="negrita form-control" id="txtSFechaFinal">
                             </div>
                         </div>

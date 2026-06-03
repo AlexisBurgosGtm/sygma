@@ -87,8 +87,7 @@ function getView(){
             </div>
             
 
-            <button class="btn btn-circle btn-xl btn-secondary btn-bottom-l hand shadow"
-                onclick="Navegar.inicio()">
+            <button type="button" class="btn btn-circle btn-xl btn-secondary btn-bottom-l hand shadow" data-spa-action="inicio">
                     <i class="fal fa-home"></i>
             </button>
 
@@ -139,7 +138,7 @@ function getView(){
                     <div class="row">
                         <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                             <div class="form-group">
-                                <label>Sucursal</label>
+                                <label class="text-secondary">Sucursal</label>
                                 <div class="input-group">
                                     <select class="form-control negrita" id="cmbSucursal">
                                     </select>
@@ -149,7 +148,7 @@ function getView(){
                         </div>
                         <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                             <div class="form-group">
-                                <label>Seleccione mes y año</label>
+                                <label class="text-secondary">Seleccione mes y año</label>
                                 <div class="input-group">
                                     <select class="form-control negrita" id="cmbMes">
                                     </select>
@@ -168,7 +167,7 @@ function getView(){
             <div class="row">
                 <div class="col-8">
                        <div class="form-group">
-                            <label>Vendedor</label>
+                            <label class="text-secondary">Vendedor</label>
                             <div class="input-group">
                                 <select class="form-control negrita" id="cmbEmpleado">
                                 </select>

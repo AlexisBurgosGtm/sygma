@@ -1,0 +1,443 @@
+/**
+ * Tema global POS2 — Onne Business
+ * Colores: #0044a3 (primario), blanco, gris slate
+ */
+:root {
+    --pos2-primary: #0044a3;
+    --pos2-primary-rgb: 0, 68, 163;
+    --pos2-surface: #ffffff;
+    --pos2-muted: #64748b;
+    --pos2-border: #e2e8f0;
+    --pos2-bg: #f1f5f9;
+    --pos2-text: #1e293b;
+}
+
+/* Shell de la app (excepto login) */
+body.app-pos2-theme:not(.login-active) #js-page-content,
+body.app-pos2-theme:not(.login-active) main.page-content {
+    background: var(--pos2-bg);
+}
+
+body.app-pos2-theme #root {
+    color: var(--pos2-text);
+}
+
+/* --- Componentes POS2 (clases explícitas) --- */
+.pos2-wrap {
+    max-width: 100%;
+    color: var(--pos2-text);
+}
+
+.pos2-totals-bar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    padding: 0.5rem 1rem;
+    margin-bottom: 0.75rem;
+    background: var(--pos2-primary);
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(var(--pos2-primary-rgb), 0.22);
+    color: var(--pos2-surface);
+}
+
+.pos2-totals-bar .pos2-total-main {
+    font-size: clamp(1.15rem, 2.5vw, 1.5rem);
+    line-height: 1.15;
+    color: var(--pos2-surface);
+}
+
+.pos2-totals-bar #lbTotalVenta,
+.pos2-totals-bar #lbTotalDescuento,
+.pos2-totals-bar #lbTotalVentaDescuento {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    color: var(--pos2-surface);
+}
+
+.pos2-totals-bar #lbTotalItems,
+.pos2-totals-bar .pos2-bar-title,
+.pos2-totals-bar #lbTitulo {
+    color: var(--pos2-surface);
+}
+
+.pos2-totals-bar img {
+    width: 36px;
+    height: 36px;
+}
+
+.pos2-panel-head {
+    padding: 0.5rem 0.9rem;
+    margin: 0;
+    background: var(--pos2-primary);
+    color: var(--pos2-surface);
+    border-radius: 10px 10px 0 0;
+}
+
+.pos2-panel-head .text-secondary,
+.pos2-panel-head small {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.pos2-panel-card {
+    border: 1px solid var(--pos2-border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--pos2-surface);
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+    margin-bottom: 0.75rem;
+}
+
+.pos2-panel-card > .card-body {
+    padding: 0.75rem 0.9rem;
+}
+
+.pos2-search-input {
+    font-size: 0.9375rem;
+    min-height: 40px;
+    border-color: var(--pos2-border);
+}
+
+.pos2-search-input:focus {
+    border-color: var(--pos2-primary);
+    box-shadow: 0 0 0 2px rgba(var(--pos2-primary-rgb), 0.15);
+}
+
+.pos2-table-scroll {
+    max-height: min(52vh, 480px);
+    overflow: auto;
+}
+
+.pos2-table-scroll thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    white-space: nowrap;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    border: none;
+}
+
+.pos2-table-scroll tbody td {
+    font-size: 0.875rem;
+    vertical-align: middle;
+    color: #334155;
+}
+
+.pos2-table-scroll tbody tr:hover {
+    background: var(--pos2-bg);
+}
+
+.pos2-table-compact thead th {
+    font-size: 0.675rem;
+    padding: 0.35rem 0.4rem;
+}
+
+.pos2-table-compact tbody td {
+    font-size: 0.7875rem;
+    padding: 0.35rem 0.4rem;
+}
+
+.pos2-table-compact tbody .btn {
+    padding: 0.2rem 0.45rem;
+    font-size: 0.72rem;
+}
+
+.pos2-table-compact tbody .btn.btn-circle {
+    width: 1.75rem;
+    height: 1.75rem;
+}
+
+.pos2-doc-compact {
+    font-size: 0.8125rem;
+}
+
+.pos2-doc-compact .form-control,
+.pos2-doc-compact .btn {
+    font-size: 0.8125rem;
+    min-height: 34px;
+    border-color: var(--pos2-border);
+}
+
+.pos2-doc-compact label {
+    font-size: 0.7rem;
+    margin-bottom: 0.2rem;
+    color: var(--pos2-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.pos2-doc-compact .form-control:focus {
+    border-color: var(--pos2-primary);
+    box-shadow: 0 0 0 2px rgba(var(--pos2-primary-rgb), 0.12);
+}
+
+.pos2-doc-compact .form-check-label {
+    font-size: 0.8125rem;
+    color: #475569;
+}
+
+.pos2-sidebar-total-label {
+    font-size: 0.75rem;
+    color: var(--pos2-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.pos2-sidebar-total-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--pos2-primary);
+    line-height: 1.2;
+}
+
+.pos2-qty {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.pos2-amount {
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.pos2-step-tabs {
+    border-bottom: 1px solid var(--pos2-border);
+    margin-bottom: 0.75rem !important;
+}
+
+.pos2-step-tabs .nav-link {
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.55rem 1rem;
+    border: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    color: var(--pos2-muted);
+    background: transparent;
+}
+
+.pos2-step-tabs .nav-link.active {
+    color: var(--pos2-primary);
+    border-bottom-color: var(--pos2-primary);
+    background: transparent;
+}
+
+.pos2-step-tabs .nav-link:hover:not(.active) {
+    color: var(--pos2-primary);
+    opacity: 0.8;
+}
+
+.pos2-field-accent {
+    color: var(--pos2-primary) !important;
+    font-weight: 600;
+}
+
+.pos2-btn-guardar {
+    min-height: 48px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 10px;
+}
+
+/* POS2 — reglas solo vista ventas_pos2 */
+#documento:not(.show) #btnPosDocumentoAtras { display: none !important; }
+#pedido:not(.show) #btnPosEscanearBarcode { display: none !important; }
+#root_pos2_barcode video {
+    max-width: 100%;
+    width: 100%;
+    border-radius: 8px;
+    background: #0f172a;
+}
+.pos2-card-cliente { font-size: 0.7125rem; margin-bottom: 0 !important; }
+.pos2-card-cliente > .card-body { padding: 0.45rem 0.55rem; }
+.pos2-card-cliente .form-group { margin-bottom: 0.35rem !important; }
+.pos2-card-cliente .form-control,
+.pos2-card-cliente .btn,
+.pos2-card-cliente select { font-size: 0.7125rem; min-height: 28px; padding: 0.15rem 0.4rem; }
+.pos2-card-cliente label { font-size: 0.594rem; margin-bottom: 0.1rem; }
+.pos2-card-cliente .pos2-panel-head { padding: 0.35rem 0.55rem; font-size: 0.76rem; }
+.pos2-card-cliente textarea.form-control { min-height: 42px; font-size: 0.7125rem; padding: 0.2rem 0.4rem; }
+.pos2-card-cliente .row.mb-2 { margin-bottom: 0.35rem !important; }
+.pos2-edit-banner {
+    display: none;
+    background: rgba(var(--pos2-primary-rgb), 0.08);
+    border: 1px solid rgba(var(--pos2-primary-rgb), 0.25);
+    border-radius: 10px;
+    padding: 0.5rem 0.85rem;
+    margin-bottom: 0.65rem;
+    font-weight: 600;
+    font-size: 0.8125rem;
+    color: var(--pos2-primary);
+}
+.pos2-edit-banner.active {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.pos2-sidebar { display: flex; flex-direction: column; gap: 0.35rem; }
+.pos2-sidebar-save {
+    background: var(--pos2-bg);
+    border: 1px solid var(--pos2-border);
+    border-radius: 12px;
+    padding: 0.65rem 0.75rem;
+    margin-top: 0;
+}
+.pos2-doc-tab-pane { font-size: 0.73125rem; }
+.pos2-doc-tab-pane .pos2-panel-card > .card-body { padding: 0.55rem 0.7rem; }
+.pos2-doc-tab-pane .pos2-doc-grid {
+    display: grid;
+    grid-template-columns: minmax(6.5rem, 16%) 1fr minmax(6.5rem, 16%) 1fr;
+    gap: 0.28rem 0.5rem;
+    align-items: center;
+}
+.pos2-doc-tab-pane .pos2-doc-cell-lbl {
+    margin: 0;
+    font-size: 0.63rem;
+    font-weight: 600;
+    color: var(--pos2-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+.pos2-doc-tab-pane .pos2-doc-cell-val .form-control,
+.pos2-doc-tab-pane .pos2-doc-cell-val select {
+    font-size: 0.73125rem;
+    min-height: 28px;
+    padding: 0.15rem 0.35rem;
+}
+.pos2-doc-tab-pane .pos2-doc-span-lbl { grid-column: 1; }
+.pos2-doc-tab-pane .pos2-doc-span-val { grid-column: 2 / -1; }
+.pos2-modal-producto {
+    background: var(--pos2-bg);
+    border: 1px solid var(--pos2-border);
+    border-radius: 8px;
+    padding: 0.65rem 0.85rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.875rem;
+}
+#modal_pos2_lista_precios.show { z-index: 2050; }
+#modal_pos2_cantidad.show,
+#modal_pos2_editar_cantidad.show { z-index: 2060; }
+#modal_pos2_lista_documentos.show,
+#modal_pos2_lista_clientes.show { z-index: 2050; }
+#modal_pos2_barcode.show { z-index: 2070; }
+.pos2-modal,
+.pos2-modal .modal-dialog,
+body > .modal-backdrop {
+    transition: none !important;
+    animation: none !important;
+}
+.pos2-modal.fade .modal-dialog {
+    transform: none !important;
+}
+@media (max-width: 767.98px) {
+    .pos2-doc-tab-pane .pos2-doc-grid {
+        grid-template-columns: minmax(5.5rem, 32%) 1fr;
+    }
+    .pos2-doc-tab-pane .pos2-doc-span-val { grid-column: 2; }
+}
+@media (max-width: 991.98px) {
+    .pos2-pedido-main { margin-bottom: 0.75rem; }
+    .pos2-table-scroll { max-height: min(40vh, 360px); }
+}
+@media (min-width: 992px) {
+    .pos2-pedido-main { padding-right: 0.5rem; }
+    .pos2-pedido-side { padding-left: 0.35rem; }
+}
+
+/* --- Adaptación global: vistas legacy sin clases pos2 --- */
+body.app-pos2-theme #root .card,
+body.app-pos2-theme #root .card.card-rounded,
+body.app-pos2-theme #root .card.shadow {
+    border: 1px solid var(--pos2-border);
+    border-radius: 12px;
+    background: var(--pos2-surface);
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+}
+
+body.app-pos2-theme #root .card > .card-body {
+    padding: 0.75rem 0.9rem;
+}
+
+body.app-pos2-theme #root .card.border-base {
+    border-color: var(--pos2-border) !important;
+}
+
+body.app-pos2-theme #root table thead.bg-verde,
+body.app-pos2-theme #root table thead.bg-secondary,
+body.app-pos2-theme #root .table thead.bg-verde,
+body.app-pos2-theme #root .table thead.bg-secondary {
+    background: var(--pos2-primary) !important;
+    color: var(--pos2-surface) !important;
+}
+
+body.app-pos2-theme #root table thead.bg-base,
+body.app-pos2-theme #root .table thead.bg-base {
+    color: var(--pos2-surface) !important;
+}
+
+body.app-pos2-theme #root table thead th,
+body.app-pos2-theme #root table thead td {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    vertical-align: middle;
+}
+
+body.app-pos2-theme #root .table-hover tbody tr:hover {
+    background: var(--pos2-bg);
+}
+
+body.app-pos2-theme #root .table tbody td {
+    font-size: 0.875rem;
+    vertical-align: middle;
+    color: #334155;
+}
+
+body.app-pos2-theme #root .form-control {
+    border-color: var(--pos2-border);
+    border-radius: 8px;
+}
+
+body.app-pos2-theme #root .form-control:focus,
+body.app-pos2-theme #root select.form-control:focus {
+    border-color: var(--pos2-primary);
+    box-shadow: 0 0 0 2px rgba(var(--pos2-primary-rgb), 0.12);
+}
+
+body.app-pos2-theme #root label.negrita.text-secondary,
+body.app-pos2-theme #root label.text-secondary {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--pos2-muted);
+}
+
+body.app-pos2-theme #root h3.negrita.text-base,
+body.app-pos2-theme #root h5.negrita.text-base {
+    color: var(--pos2-primary);
+}
+
+body.app-pos2-theme .modal .dropdown-header.bg-secondary,
+body.app-pos2-theme .modal .dropdown-header.bg-danger {
+    background: var(--pos2-primary) !important;
+    color: var(--pos2-surface) !important;
+}
+
+body.app-pos2-theme .modal-header.bg-base,
+body.app-pos2-theme .modal-header.bg-verde {
+    color: var(--pos2-surface) !important;
+}
+
+body.app-pos2-theme .page-header {
+    background: var(--pos2-surface);
+    border-bottom: 1px solid var(--pos2-border);
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+}
+
+body.app-pos2-theme .btn-bottom-r.btn-success,
+body.app-pos2-theme .btn-bottom-r.btn-verde {
+    box-shadow: 0 4px 14px rgba(var(--pos2-primary-rgb), 0.25);
+}

@@ -1,4 +1,4 @@
-﻿
+
 //inicia las view transition
 //document.startViewTransition(() => updateDOM());
 
@@ -150,7 +150,7 @@ function get_log(){
 };
 
 
-Navegar.login();
+SpaRouter.start('login');
 
 
 

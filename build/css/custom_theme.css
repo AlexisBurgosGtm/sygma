@@ -199,13 +199,38 @@ border-color:  rgb(118, 188, 64)}
                 -webkit-box-shadow: 0 0 0 0.2rem rgb(118, 188, 64);
                 box-shadow: 0 0 0 0.2rem rgb(118, 188, 64); 
               }
+
+/* Menú principal: fondo blanco, bordes base, textos base */
+.page-sidebar,
+.page-sidebar .primary-nav,
+.page-sidebar .nav-footer {
+  background: #fff !important;
+  border-color: rgb(0, 68, 163) !important;
+}
+.page-sidebar {
+  border-right: 1px solid rgb(0, 68, 163) !important;
+}
+.page-sidebar .nav-footer {
+  border-top: 1px solid rgb(0, 68, 163) !important;
+}
+.page-sidebar .nav-menu > li > a,
+.page-sidebar .nav-menu > li > a .nav-link-text,
+.page-sidebar .nav-menu > li > a > i,
+.page-sidebar .nav-footer a {
+  color: rgb(0, 68, 163) !important;
+}
+.page-sidebar .nav-menu > li > a:hover,
+.page-sidebar .nav-menu > li.active > a,
+.page-sidebar .nav-menu > li.open > a {
+  background: rgba(0, 68, 163, 0.08) !important;
+  color: rgb(0, 68, 163) !important;
+}
+.page-sidebar .nav-menu > li > a:hover .nav-link-text,
+.page-sidebar .nav-menu > li.active > a .nav-link-text,
+.page-sidebar .nav-menu > li.open > a .nav-link-text {
+  color: rgb(0, 68, 163) !important;
+}
+.page-sidebar .nav-menu ul li a .nav-link-text {
+  color: rgb(0, 68, 163) !important;
+}
             
-
-
-
-
-
-
-
-
-

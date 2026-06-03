@@ -103,7 +103,7 @@ function getView(){
                     <div class="table-responsive col-12">
 
                                 <div class="form-group">
-                                    <label>Seleccione un Departamento</label>
+                                    <label class="text-secondary">Seleccione un Departamento</label>
                                     <div class="input-group">
                                         <select class="negrita form-control" id="cmbDepartamentos">
                                         </select>
@@ -141,7 +141,7 @@ function getView(){
                     <div class="table-responsive col-12">
                         
                             <div class="form-group">
-                                <label>Seleccione un Municipio</label>
+                                <label class="text-secondary">Seleccione un Municipio</label>
                                 <div class="input-group">
                                     <select class="negrita form-control" id="cmbMunicipios">
                                     </select>
@@ -186,11 +186,11 @@ function getView(){
                                 <div class="card-body p-4">
 
                                     <div class="form-group">
-                                        <label>Codigo Departamento</label>
+                                        <label class="text-secondary">Codigo Departamento</label>
                                         <input type="text" class="form-control" id="txtCodDepto" disabled="true">
                                     </div>
                                     <div class="form-group">
-                                        <label>Nombre Departamento</label>
+                                        <label class="text-secondary">Nombre Departamento</label>
                                         <input type="text" class="form-control" id="txtDesDepto">
                                     </div>
 
@@ -236,15 +236,15 @@ function getView(){
                             <div class="card card-rounded">
                                 <div class="card-body p-4">
 
-                                    <label>Departamento:</label>
+                                    <label class="text-secondary">Departamento:</label>
                                     <h5 class="negrita text-danger" id="lbDesDepto"></h5>
 
                                     <div class="form-group">
-                                        <label>Codigo Municipio</label>
+                                        <label class="text-secondary">Codigo Municipio</label>
                                         <input type="text" class="form-control" id="txtCodMun" disabled="true">
                                     </div>
                                     <div class="form-group">
-                                        <label>Nombre del Municipio</label>
+                                        <label class="text-secondary">Nombre del Municipio</label>
                                         <input type="text" class="form-control" id="txtDesMun">
                                     </div>
 
@@ -290,15 +290,15 @@ function getView(){
                             <div class="card card-rounded">
                                 <div class="card-body p-4">
 
-                                    <label>Municipio:</label>
+                                    <label class="text-secondary">Municipio:</label>
                                     <h5 class="negrita text-danger" id="lbDesMunicipio"></h5>
 
                                     <div class="form-group">
-                                        <label>Codigo Sector</label>
+                                        <label class="text-secondary">Codigo Sector</label>
                                         <input type="text" class="form-control" id="txtCodSector" disabled="true">
                                     </div>
                                     <div class="form-group">
-                                        <label>Nombre del Sector</label>
+                                        <label class="text-secondary">Nombre del Sector</label>
                                         <input type="text" class="form-control" id="txtDesSector">
                                     </div>
 

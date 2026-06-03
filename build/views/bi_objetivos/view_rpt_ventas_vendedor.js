@@ -4,8 +4,7 @@ function getView(){
             return `
             ${view.vista_vendedores()}
 
-            <button class="btn btn-circle btn-xl btn-secondary btn-bottom-l hand shadow"
-                onclick="Navegar.inicio()">
+            <button type="button" class="btn btn-circle btn-xl btn-secondary btn-bottom-l hand shadow" data-spa-action="inicio">
                     <i class="fal fa-home"></i>
             </button>
             `

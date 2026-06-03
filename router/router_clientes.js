@@ -2,6 +2,11 @@ const execute = require('../connection');
 const express = require('express');
 const router = express.Router();
 
+function esc(val) {
+    if (val === null || val === undefined) return '';
+    return String(val).replace(/'/g, "''");
+}
+
 
 router.post("/historial_cliente", async(req,res)=>{
    
@@ -124,16 +129,46 @@ router.post("/insert_ruta", async(req,res)=>{
    
     const { token, sucursal, codigo, descripcion, codemp} = req.body;
 
-    let qry = '';
-
-        qry = `
+    let qry = `
            INSERT INTO RUTAS_CLIENTES
             (EMPNIT,CODRUTA,DESRUTA,CODEMP)
-            SELECT '${sucursal}' AS EMPNIT, ${codigo} AS CODRUTA, '${descripcion}' AS DESRUTA, ${codemp} AS CODEMP;
-        `
+            SELECT '${esc(sucursal)}' AS EMPNIT, ${Number(codigo)} AS CODRUTA, '${esc(descripcion)}' AS DESRUTA, ${Number(codemp) || 0} AS CODEMP;
+        `;
 
     execute.QueryToken(res,qry,token);
      
+});
+
+router.post("/update_ruta", async (req, res) => {
+    const { token, sucursal, codigo, descripcion, codemp } = req.body;
+
+    let qry = `
+        UPDATE RUTAS_CLIENTES SET
+            DESRUTA = '${esc(descripcion)}',
+            CODEMP = ${Number(codemp) || 0}
+        WHERE EMPNIT = '${esc(sucursal)}' AND CODRUTA = ${Number(codigo)}
+    `;
+
+    execute.QueryToken(res, qry, token);
+});
+
+router.post("/delete_ruta", async (req, res) => {
+    const { token, sucursal, codigo } = req.body;
+    const cod = Number(codigo);
+    const emp = esc(sucursal);
+
+    let qry = `
+        IF (
+            (SELECT COUNT(*) FROM CLIENTES WHERE EMPNIT = '${emp}' AND CODRUTA = ${cod}) = 0
+            AND (SELECT COUNT(*) FROM EMPLEADOS WHERE EMPNIT = '${emp}' AND CODRUTA = ${cod}) = 0
+        )
+        BEGIN
+            DELETE FROM RUTAS_CLIENTES
+            WHERE EMPNIT = '${emp}' AND CODRUTA = ${cod};
+        END
+    `;
+
+    execute.QueryToken(res, qry, token);
 });
 
 

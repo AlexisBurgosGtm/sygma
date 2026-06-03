@@ -65,7 +65,7 @@ function getView(){
                     <div class="table-responsive col-12">
                         
                         <div class="form-group">
-                            <label>Escriba para buscar...</label>
+                            <label class="text-secondary">Escriba para buscar...</label>
                             <input type="text" class="form-control col-12" id="txtBuscar"
                             placeholder="Escriba para buscar..."
                             oninput="F.FiltrarTabla('tblInventario','txtBuscar')">
@@ -91,7 +91,7 @@ function getView(){
             </div>
 
 
-            <button class="btn btn-base btn-circle btn-xl btn-bottom-l hand shadow" onclick="Navegar.inicio()">
+            <button type="button" class="btn btn-base btn-circle btn-xl btn-bottom-l hand shadow" data-spa-action="inicio">
                 <i class="fal fa-home"></i>
             </button>
 

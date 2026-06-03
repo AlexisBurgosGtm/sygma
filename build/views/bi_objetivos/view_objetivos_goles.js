@@ -78,14 +78,14 @@ function getView(){
                     <div class="row">
                         <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                             <div class="form-group">
-                                <label>Sucursal</label>
+                                <label class="text-secondary">Sucursal</label>
                                 <select class="form-control negrita" id="cmbSucursal">
                                 </select>
                             </div>
                         </div>
                         <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                             <div class="form-group">
-                                <label>Vendedor</label>
+                                <label class="text-secondary">Vendedor</label>
                                 <select class="form-control negrita" id="cmbEmpleado">
                                 </select>
                             </div>
@@ -96,7 +96,7 @@ function getView(){
                     <div class="row">
                         <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                             <div class="form-group">
-                                <label>Seleccione Mes y Año</label>
+                                <label class="text-secondary">Seleccione Mes y Año</label>
                                 <div class="input-group">
                                     <select class="form-control negrita" id="cmbMesGoles">
                                     </select>

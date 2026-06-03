@@ -343,7 +343,7 @@ function getView(){
                         <div class="col-sm-12 col-md-8 col-lg-8 col-xl-8">
                             
                             <div class="form-group">
-                                <label class="negrita">Seleccione mes y año</label>
+                                <label class="negrita text-secondary">Seleccione mes y año</label>
                                 
                                 <div class="input-group">
                                     <select class="negrita form-control" id="cmbVMes">
@@ -414,7 +414,7 @@ function getView(){
                             <div class="table-responsive">
                                 
                                 <div class="form-group">
-                                    <label>Escriba para buscar...</label>
+                                    <label class="text-secondary">Escriba para buscar...</label>
                                     <input type=""text" class="form-control negrita"
                                     placeholder="Escriba para buscar..."
                                     id="txtBuscarMarca"
@@ -458,7 +458,7 @@ function getView(){
                         <div class="col-sm-12 col-md-8 col-lg-8 col-xl-8">
                             
                             <div class="form-group">
-                                <label class="negrita">Seleccione mes y año</label>
+                                <label class="negrita text-secondary">Seleccione mes y año</label>
                                 
                                 <div class="input-group">
                                     <select class="negrita form-control" id="cmbMMes">
@@ -571,13 +571,13 @@ function getView(){
                     <div class="row">
                         <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
                             <div class="form-group">
-                                <label class="negrita">Fecha Inicial</label>
+                                <label class="negrita text-secondary">Fecha Inicial</label>
                                 <input type="date" class="negrita form-control" id="txtSFechaInicial">
                             </div>
                         </div>
                         <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
                             <div class="form-group">
-                                <label class="negrita">Fecha Inicial</label>
+                                <label class="negrita text-secondary">Fecha Inicial</label>
                                 <input type="date" class="negrita form-control" id="txtSFechaFinal">
                             </div>
                         </div>
@@ -722,25 +722,25 @@ function getView(){
                                 <div class="card-body p-4">
 
                                         <div class="form-group">
-                                            <label>Seleccione el Año</label>
+                                            <label class="text-secondary">Seleccione el Año</label>
                                             <select class="form-control negrita" id="cmbSOAnio">
                                             </select>
                                         </div>
 
                                         <div class="form-group">
-                                            <label>Seleccione el Mes Inicial</label>
+                                            <label class="text-secondary">Seleccione el Mes Inicial</label>
                                             <select class="form-control negrita" id="cmbSOMesInicial">
                                             </select>
                                         </div>
 
                                         <div class="form-group">
-                                            <label>Seleccione el Mes Final</label>
+                                            <label class="text-secondary">Seleccione el Mes Final</label>
                                             <select class="form-control negrita" id="cmbSOMesFinal">
                                             </select>
                                         </div>
 
                                         <div class="form-group">
-                                            <label>Ultimo SellOut generado</label>
+                                            <label class="text-secondary">Ultimo SellOut generado</label>
                                             <input type="text" class="form-control negrita" id="txtSOObs" disabled="true">
                                         </div>
 

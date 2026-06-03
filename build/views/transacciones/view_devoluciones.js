@@ -1,9 +1,28 @@
 
 function getView(){
+    spa_inyectarEstilosPos2();
+
     let view = {
         body:()=>{
             return `
-                <div class="col-12 p-0 bg-white">
+                <div class="pos2-wrap">
+                    <div class="pos2-totals-bar">
+                        <div class="row align-items-center no-gutters">
+                            <div class="col-md-6 col-7">
+                                <div class="d-flex align-items-center">
+                                    <img src="./favicon.png" width="36" height="36" alt="" class="mr-2">
+                                    <div>
+                                        <div class="negrita mb-0 pos2-bar-title" style="font-size:0.95rem">Ingreso de Devoluciones</div>
+                                        <div class="small" style="opacity:0.9" id="lbNomclieBar">Sin cliente</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-5 text-right">
+                                <div class="small mb-0" style="opacity:0.85">Total devolución</div>
+                                <div class="negrita pos2-total-main" id="lbTotal">Q 0.00</div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
                             ${view.vista_devolucion()}
@@ -30,9 +49,7 @@ function getView(){
                                 <i class="fal fa-comments"></i></a>
                         </li>         
                     </ul>
-                    
                 </div>
-               
             `
         },
         vista_devolucion:()=>{
@@ -55,7 +72,7 @@ function getView(){
                 <i class="fal fa-plus"></i>
             </button>
 
-             <button class="btn btn-bottom-r btn-info btn-circle btn-xl hand shadow" id="btnGuardar">
+             <button class="btn btn-bottom-r btn-base btn-circle btn-xl hand shadow" id="btnGuardar">
                 <i class="fal fa-save"></i>
             </button>
 
@@ -66,13 +83,14 @@ function getView(){
         },
         frag_encabezado:()=>{
             return `
-            <div class="card card-rounded shadow col-12">
-                <div class="card-body p-4">
-
-                    <h3 class="negrita text-danger text-center">INGRESO DE DEVOLUCIONES</h3>
+            <div class="pos2-panel-card pos2-doc-compact">
+                <div class="pos2-panel-head">
+                    <span class="negrita mb-0"><i class="fal fa-file-invoice mr-1"></i> Datos del documento</span>
+                </div>
+                <div class="card-body p-3">
 
                     <div class="form-group">
-                        <label class="negrita text-base">Sucursal</label>
+                        <label>Sucursal</label>
                         <select class="form-control negrita text-danger" id="cmbSucursal">
                         </select>
                     </div>
@@ -92,17 +110,17 @@ function getView(){
                     </div>
 
                     <div class="form-group">
-                        <label class="negrita text-base">Cliente</label>
-                        <h5 class="negrita text-danger" id="lbNomclie">CLIENTE</h5>
-                        <small class="negrita text-secondary" id="lbDirclie"></small>
+                        <label>Cliente</label>
+                        <div class="negrita" style="color:var(--pos2-primary)" id="lbNomclie">CLIENTE</div>
+                        <small class="text-muted" id="lbDirclie"></small>
                     </div>
 
                     <div class="form-group">
-                        <label class="negrita text-base">Factura</label>
+                        <label>Factura</label>
                         <div class="input-group">
                             <input type="text" class="form-control" id="cmbCoddocFac" disabled="true">
                             <input type="text" class="form-control" id="cmbCorrelativoFac" disabled="true">
-                            <button class="btn btn-md btn-success shadow hand" id="btnNuevo">
+                            <button class="btn btn-md btn-base shadow hand" type="button" id="btnNuevo">
                                 <i class="fal fa-plus"></i>
                             </button>
                         </div>
@@ -110,18 +128,18 @@ function getView(){
                     </div>
 
                     <div class="form-group">
-                        <label class="negrita text-base">Embarque / Picking</label>
+                        <label>Embarque / Picking</label>
                         <input type="text" class="form-control negrita text-secondary" id="txtCodembarque" disabled="true">
                     </div>
 
                     <div class="form-group">
-                        <label class="negrita text-base">Vendedor</label>
+                        <label>Vendedor</label>
                         <select class="form-control negrita text-secondary" id="cmbEmpleados">
                         </select>
                     </div>
 
-                     <div class="form-group">
-                        <label class="negrita text-base">Motivo</label>
+                     <div class="form-group mb-0">
+                        <label>Motivo</label>
                         <select class="form-control negrita text-secondary" id="cmbObs">
                            
                         </select>
@@ -142,43 +160,30 @@ function getView(){
         },
         frag_listado_productos:()=>{
             return `
-            <div class="card card-rounded shadow col-12">
-                <div class="card-body p-2">
-
-                    <div class="row">
-                        <div class="col-6">
-                            <h5 class="negrita text-base">Productos devueltos</h5>
-                
-                        </div>
-                        <div class="col-6 text-right">
-                            <h2 class="negrita text-danger" id="lbTotal"></h2>
-                        </div>
-
-                    </div>
-
-                  
-                    <div class="table-responsive col-12">
-                        <table class="table table-responsive table-hover h-full col-12">
+            <div class="pos2-panel-card">
+                <div class="pos2-panel-head d-flex justify-content-between align-items-center">
+                    <span class="negrita mb-0"><i class="fal fa-undo mr-1"></i> Productos devueltos</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="pos2-table-scroll table-responsive">
+                        <table class="table table-sm table-hover mb-0 pos2-table-compact">
                             <thead class="bg-base text-white">
                                 <tr>
-                                    <td>CODIGO</td>
-                                    <td>PRODUCTO</td>
-                                    <td>MEDIDA</td>
-                                    <td>CANTIDAD</td>
-                                    <td>PRECIO</td>
-                                    <td>IMPORTE</td>
-                                    <td></td>
-                                    <td></td>
+                                    <th>Código</th>
+                                    <th>Producto</th>
+                                    <th>Medida</th>
+                                    <th class="text-center">Cant.</th>
+                                    <th class="text-right">Precio</th>
+                                    <th class="text-right">Importe</th>
+                                    <th></th>
+                                    <th></th>
                                 </tr>
                             </thead>
-                            <tbody id="tblDataProductos">
-                            </tbody>
+                            <tbody id="tblDataProductos"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
-
-          
             `
         },
         modal_editar_cantidad:()=>{
@@ -191,14 +196,14 @@ function getView(){
                             <label class="modal-title text-white h3" id="lbCantidadDesprodE">Cantidad de producto</label>
                         </div>
             
-                        <div class="modal-body p-4">
+                        <div class="modal-body p-4 pos2-doc-compact">
                             <div class="row">
                                 <div class="col-4 text-center">
                                     <img src="./favicon.png" width="120px" height="100px">
                                 </div>
                                 <div class="col-8">
                                     <div class="form-group">
-                                        <label class="negrita text-secondary">Cantidad:</label>
+                                        <label>Cantidad</label>
                                         <input type="number" style="font-size:140%" class="form-control negrita text-info border-base shadow col-10" id="txtMCCantidadE">
                                     </div>   
                                     
@@ -254,15 +259,13 @@ function getView(){
               <div id="modal_listado_facturas" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-right modal-xl">
                     <div class="modal-content">
-                        <div class="dropdown-header bg-secondary d-flex justify-content-center align-items-center w-100">
-                            <h4 class="m-0 text-center color-white" id="">
-                                SELECCIONE LA FACTURA
-                            </h4>
+                        <div class="modal-header bg-base text-white py-2">
+                            <h5 class="modal-title mb-0">Seleccione la factura</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"><span>&times;</span></button>
                         </div>
-                        <div class="modal-body p-4">
-                            
-                            <div class="card card-rounded">
-                                <div class="card-body p-4">
+                        <div class="modal-body p-4 pos2-doc-compact">
+                            <div class="pos2-panel-card">
+                                <div class="card-body p-3">
 
                                     <div class="row">
                                         <div class="col-6">
@@ -287,19 +290,21 @@ function getView(){
                                             oninput="F.FiltrarTabla('tblFacturas','txtBuscarFac')" id="txtBuscarFac">
                                         </div>
 
-                                        <table class="col-12 h-full table table-bordered table-hover" id="tblFacturas">
-                                            <thead class="bg-secondary text-white">
+                                        <div class="pos2-table-scroll table-responsive">
+                                        <table class="table table-sm table-hover mb-0 pos2-table-compact" id="tblFacturas">
+                                            <thead class="bg-base text-white">
                                                 <tr>
-                                                    <td>FECHA</td>
-                                                    <td>FACTURA</td>
-                                                    <td>CLIENTE</td>
-                                                    <td>VENDEDOR</td>
-                                                    <td>IMPORTE</td>
-                                                    <td></td>
+                                                    <th>Fecha</th>
+                                                    <th>Factura</th>
+                                                    <th>Cliente</th>
+                                                    <th>Vendedor</th>
+                                                    <th class="text-right">Importe</th>
+                                                    <th></th>
                                                 </tr>
                                             </thead>
                                             <tbody id="tblDataFacturas"></tbody>
                                         </table>
+                                        </div>
 
                                     </div>
 
@@ -707,6 +712,8 @@ function get_datos_factura(coddoc,correlativo,codclie,nit,nomclie,dirclie,codemp
 
 
     document.getElementById('lbNomclie').innerText = nomclie;
+    const lbBar = document.getElementById('lbNomclieBar');
+    if (lbBar) lbBar.innerText = nomclie || 'Sin cliente';
     document.getElementById('txtCodclie').value = codclie;
     document.getElementById('txtNit').value = nit;
     
@@ -815,17 +822,17 @@ function get_grid_productos(){
                 <td>${r.CODPROD}</td>
                 <td>${r.DESPROD}</td>
                 <td>${r.CODMEDIDA}</td>
-                <td>${r.CANTIDAD}</td>
-                <td>${F.setMoneda(r.PRECIO,'Q')}</td>
-                <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                <td class="text-center"><span class="pos2-qty">${r.CANTIDAD}</span></td>
+                <td class="text-right">${F.setMoneda(r.PRECIO,'Q')}</td>
+                <td class="text-right negrita pos2-amount">${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
                 <td>
-                    <button class="btn btn-info btn-md btn-circle hand shadow"
+                    <button type="button" class="btn btn-info btn-md btn-circle hand shadow"
                     onclick="edit_item('${r.ID}','${r.CODPROD}','${r.DESPROD}','${r.CODMEDIDA}','${r.EQUIVALE}','${r.CANTIDAD}','${r.COSTO}','${r.PRECIO}','${r.TIPOPROD}','${r.EXENTO}','${r.EXISTENCIA}','${r.BONO}','${r.DESCUENTO}')">
                         <i class="fal fa-edit"></i>
                     </button>
                 </td>
                 <td>
-                    <button class="btn btn-danger btn-md btn-circle hand shadow"
+                    <button type="button" class="btn btn-danger btn-md btn-circle hand shadow"
                     onclick="delete_item('${r.ID}')">
                         <i class="fal fa-trash"></i>
                     </button>
@@ -1023,6 +1030,8 @@ function clean_data(){
     
         document.getElementById('txtCodclie').value='';
         document.getElementById('lbNomclie').innerText='';
+        const lbBar = document.getElementById('lbNomclieBar');
+        if (lbBar) lbBar.innerText = 'Sin cliente';
         document.getElementById('txtNit').value='';
         document.getElementById('lbDirclie').innerText='';
         

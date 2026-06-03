@@ -105,12 +105,12 @@ function getView(){
                         <div class="modal-body p-4">
                             
                             <div class="form-group">
-                                <label>Descripción</label>
+                                <label class="text-secondary">Descripción</label>
                                 <input type="text" class="form-control negrita text-verde border-base" id="txtDescripcion">
                             </div>
                             
                             <div class="form-group">
-                                <label>Marca Asociada</label>
+                                <label class="text-secondary">Marca Asociada</label>
                                 <select class="form-control negrita text-verde border-base" id="cmbCodMarca">
                                 </select>
                             </div>
@@ -136,7 +136,7 @@ function getView(){
                             </div>
                             
                             <div class="form-group hidden">
-                                <label>Codigo</label>
+                                <label class="text-secondary">Codigo</label>
                                 <input type="text" class="form-control negrita text-verde" id="txtCodigo">
                             </div>
 
@@ -159,7 +159,7 @@ function getView(){
                         <div class="modal-body p-4">
                             
                             <div class="form-group">
-                                <label>Marca</label>
+                                <label class="text-secondary">Marca</label>
                                 <input type="text" class="form-control negrita text-verde border-base" id="txtDescripcionMarca">
                             </div>
                             
@@ -168,7 +168,7 @@ function getView(){
                            
 
                             <div class="form-group hidden">
-                                <label>Objetivo</label>
+                                <label class="text-secondary">Objetivo</label>
                                 <input type="number" class="form-control negrita text-verde border-base" id="txtObjetivoMarca">
                             </div>
 
@@ -194,7 +194,7 @@ function getView(){
                             </div>
                             
                             <div class="form-group hidden">
-                                <label>Codigo</label>
+                                <label class="text-secondary">Codigo</label>
                                 <input type="text" class="form-control negrita text-verde" id="txtCodigoMarca">
                             </div>
 

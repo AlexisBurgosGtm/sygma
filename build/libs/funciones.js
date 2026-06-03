@@ -1,3 +1,53 @@
+/** SweetAlert2 v8: confirmación sin input → value true; con input → value = dato; cancelar → dismiss */
+function swalFueConfirmado(result) {
+    if (!result || result.dismiss != null) return false;
+    if (result.isConfirmed === true) return true;
+    if (result.value === true) return true;
+    return typeof result.value !== 'undefined';
+}
+
+/** Estilo minimalista compartido por todos los Swal.fire del proyecto */
+const SWAL_ESTILO = {
+    buttonsStyling: true,
+    confirmButtonColor: '#0044a3',
+    cancelButtonColor: '#64748b',
+    width: '22rem'
+};
+
+/** v8 usa "type"; v9+ usa "icon". Normaliza opciones para el bundle instalado. */
+function swalNormalizarOpciones(opciones) {
+    if (!opciones || typeof opciones !== 'object') return opciones;
+    const opts = Object.assign({}, SWAL_ESTILO, opciones);
+    if (opts.icon && !opts.type) {
+        opts.type = opts.icon;
+    }
+    if (opts.toast) {
+        opts.toast = true;
+        opts.position = opts.position || 'top-end';
+        opts.showConfirmButton = opts.showConfirmButton === true;
+        if (opts.timer == null && opts.showConfirmButton !== true) {
+            opts.timer = 2200;
+        }
+        if (opts.timerProgressBar === undefined && opts.timer) {
+            opts.timerProgressBar = true;
+        }
+    }
+    return opts;
+}
+
+if (typeof Swal !== 'undefined' && typeof Swal.fire === 'function') {
+    const swalFireOriginal = Swal.fire.bind(Swal);
+    Swal.fire = function (opciones) {
+        if (typeof opciones === 'string') {
+            return swalFireOriginal(opciones, arguments[1], arguments[2]);
+        }
+        if (!opciones || typeof opciones !== 'object') {
+            return swalFireOriginal(opciones);
+        }
+        return swalFireOriginal(swalNormalizarOpciones(opciones));
+    };
+}
+
 let F = {
       Lmap: (lat,long)=>{
         //INICIALIZACION DEL MAPA            
@@ -202,22 +252,20 @@ let F = {
           
       },
       shareAppWhatsapp: ()=>{
-          let url= window.location.origin
-          swal({
+          let url = window.location.origin;
+          Swal.fire({
             text: 'Escriba el número a donde se enviará el link de la aplicación:',
-            content: "input",
-            button: {
-              text: "Enviar Whatsapp",
-              closeModal: true,
-            },
-          })
-          .then(numero => {
-            if (!numero) throw null;
-              let stn = '502' + numero.toString();
-              let msg = encodeURIComponent(`Aplicación Ventas Mercados Efectivos ${versionapp} `);
-                  window.open('https://api.whatsapp.com/send?phone='+stn+'&text='+msg+url)
-          })   
-
+            input: 'tel',
+            inputAttributes: { autocapitalize: 'off' },
+            showCancelButton: true,
+            confirmButtonText: 'Enviar Whatsapp',
+            cancelButtonText: 'Cancelar'
+          }).then((result) => {
+            if (!swalFueConfirmado(result) || result.value == null || result.value === '') return;
+            let stn = '502' + result.value.toString();
+            let msg = encodeURIComponent(`Aplicación Ventas Mercados Efectivos ${versionapp} `);
+            window.open('https://api.whatsapp.com/send?phone=' + stn + '&text=' + msg + url);
+          });
       },
       mostrarErrores: (deserror)=>{
         console.log('error:')
@@ -379,21 +427,25 @@ let F = {
             //INSTALACION APP
       },
       Confirmacion: function(msn){
-          return swal({
-              title: 'Confirme',
-              text: msn,
-              icon: 'warning',
-              buttons: {
-                  cancel: true,
-                  confirm: true,
-                }})
+          return Swal.fire({
+              title: msn,
+              type: 'question',
+              showCancelButton: true,
+              showConfirmButton: true,
+              confirmButtonText: 'Aceptar',
+              cancelButtonText: 'Cancelar',
+              reverseButtons: true,
+              focusCancel: false
+          }).then((result) => swalFueConfirmado(result));
       },
       Aviso: function(msn){
-          swal(msn, {
-              timer: 1500,
-              icon: "success",
-              buttons: false
-              });
+          Swal.fire({
+              type: 'success',
+              title: msn,
+              toast: true,
+              timer: 2200,
+              showConfirmButton: false
+          });
 
           try {
               navigator.vibrate(500);
@@ -402,10 +454,14 @@ let F = {
           }
       },
       AvisoNotificacion: function(msn){
-          swal(msn, {
-              timer: 2500,
-              icon: "warning"
-              });
+          Swal.fire({
+              type: 'warning',
+              title: msn,
+              toast: true,
+              timer: 4500,
+              showConfirmButton: true,
+              confirmButtonText: 'Entendido'
+          });
 
           try {
               navigator.vibrate(600);
@@ -414,11 +470,13 @@ let F = {
           }
       },
       AvisoError: function(msn){
-          swal(msn, {
-              timer: 1500,
-              icon: "error",
-              buttons: false
-              });
+          Swal.fire({
+              type: 'error',
+              title: msn,
+              toast: true,
+              timer: 2800,
+              showConfirmButton: false
+          });
           try {
               navigator.vibrate([100,200,500]);
           } catch (error) {
@@ -426,58 +484,50 @@ let F = {
           }
       },
       FiltrarListaProductos: function(idTabla){
-          swal({
+          Swal.fire({
             text: 'Escriba para buscar...',
-            content: "input",
-            button: {
-              text: "Buscar",
-              closeModal: true,
-            },
-          })
-          .then(name => {
-            if (!name) throw null;
-              F.FiltrarTabla(idTabla,name);
-
-              //'tblProductosVentas'
-          })
+            input: 'text',
+            showCancelButton: true,
+            confirmButtonText: 'Buscar',
+            cancelButtonText: 'Cancelar'
+          }).then((result) => {
+            if (!swalFueConfirmado(result) || result.value == null || result.value === '') return;
+            F.FiltrarTabla(idTabla, result.value);
+          });
       },
       solicitarClave: function(){
         return new Promise((resolve,reject)=>{
-            swal({
+            Swal.fire({
               text: 'Escriba su contraseña de usuario',
-              content: "input",
-              button: {
-                text: "Contraseña",
-                closeModal: true,
-              },
-            })
-            .then(name => {
-              if (!name) throw null;
-                  resolve(name);
-            })
-            .catch(()=>{
-              reject('no');
-            })
-        })     
+              input: 'password',
+              showCancelButton: true,
+              confirmButtonText: 'Contraseña',
+              cancelButtonText: 'Cancelar'
+            }).then((result) => {
+              if (swalFueConfirmado(result) && result.value != null && result.value !== '') {
+                  resolve(result.value);
+              } else {
+                  reject('no');
+              }
+            });
+        });     
       },
       solicitarCantidad: function(){
         return new Promise((resolve,reject)=>{
-            swal({
+            Swal.fire({
               text: 'Escriba la Cantidad de Producto',
-              content: "input",
-              button: {
-                text: "Aceptar",
-                closeModal: true,
-              },
-            })
-            .then(name => {
-              if (!name) throw null;
-                  resolve(name);
-            })
-            .catch(()=>{
-              reject('no');
-            })
-        })     
+              input: 'number',
+              showCancelButton: true,
+              confirmButtonText: 'Aceptar',
+              cancelButtonText: 'Cancelar'
+            }).then((result) => {
+              if (swalFueConfirmado(result) && result.value != null && result.value !== '') {
+                  resolve(result.value);
+              } else {
+                  reject('no');
+              }
+            });
+        });     
       },
       setMoneda: function(num,signo) {
           num = num.toString().replace(/\$|\,/g, '');
