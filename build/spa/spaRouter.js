@@ -146,13 +146,18 @@ const SpaRouter = {
     },
 
     _applyLayout(route) {
+        const sidebar = document.getElementById('root_navbar');
         const nav = document.getElementById('js-primary-nav');
-        if (!nav) return;
+        const hideNav = route.showNavbar === false;
 
-        if (route.showNavbar === false) {
-            nav.style.visibility = 'hidden';
-        } else {
-            nav.style.visibility = 'visible';
+        document.body.classList.toggle('spa-nav-hidden', hideNav);
+
+        if (sidebar) {
+            sidebar.style.display = hideNav ? 'none' : '';
+        }
+
+        if (nav) {
+            nav.style.visibility = hideNav ? 'hidden' : 'visible';
         }
     },
 

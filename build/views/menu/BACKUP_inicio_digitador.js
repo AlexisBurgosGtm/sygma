@@ -140,6 +140,119 @@ function getView(){
                 </div>
             `).join('');
         },
+        panel:()=>{
+            return `
+            
+            <div class="card card-rounded shadow col-12">
+                <div class="card-body p-4 text-center">
+                
+                    <h1 class="text-base negrita">Inicio Digitador</h1>
+
+                </div>
+            </div>
+
+            <br>
+
+            <div class="row">
+                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
+
+                    <div class="card card-rounded shadow hand col-12"  id="btnMenuFacturacion">
+                        <div class="card-body p-4">
+                            
+                            <h4>ASIGNACION DE FACTURAS</h4>
+                            <h1 class="negrita text-danger" id="">Armado de Embarques</h1>
+                            
+                            <div class="row">
+                                <div class="col-6">
+                                </div>
+                                <div class="col-6 text-right">
+                                    <i class="fal fa-box negrita text-secondary" style="font-size:250%"></i>
+                                </div>
+                            </div>
+                           
+                        </div>
+                    </div>
+                  
+                    
+
+                </div>
+                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6" >
+                    
+                    <div class="card card-rounded  bg-white shadow col-12 hand"  onclick="document.getElementById('tab-tres').click()">
+                        <div class="card-body p-4">
+
+                            <h4>RELLENO DE INVENTARIO</h4>
+                            <h1 class="negrita text-danger" id="lbTotalMR"></h1>
+
+                             <div class="row">
+                                <div class="col-6">
+                                </div>
+                                <div class="col-6 text-right">
+                                    <i class="fal fa-warehouse negrita text-secondary" style="font-size:250%"></i>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    
+
+                </div>
+            </div>
+
+            <br>
+
+            <div class="row">
+
+                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
+                    
+                    <div class="card card-rounded  bg-white shadow col-12 hand" onclick="document.getElementById('tab-cuatro').click()">
+                        <div class="card-body p-4">
+                            
+                            
+                            <h4>EMBARQUES</h4>
+                            <h1 class="negrita text-danger" id="lbTotalEmb"></h1>
+                            
+                            <div class="row">
+                                <div class="col-6">
+                                </div>
+                                <div class="col-6 text-right">
+                                    <i class="fal fa-truck negrita text-secondary" style="font-size:250%"></i>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+
+                </div>
+                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6" >
+                    
+                     
+                    <div class="card card-rounded bg-white shadow col-12 hand" id="btnMenuSellout">
+                        <div class="card-body p-4">
+                            
+                            <h4>SELL OUT</h4>
+                            <h1 class="negrita text-danger" id="">Reporte SellOut</h1>
+
+                            <div class="row">
+                                <div class="col-6">
+                                </div>
+                                <div class="col-6 text-right">
+                                    <i class="fal fa-folder negrita text-secondary" style="font-size:250%"></i>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+
+                </div>
+            </div>
+
+
+            
+            `
+        },
         vista_pedidos_pendientes:()=>{
             return `
                     <div class="card card-rounded shadow col-12">
@@ -184,7 +297,7 @@ function getView(){
                         </div>
                     </div>
 
-                    <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="digitador_showHome()">
+                    <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
                         <i class="fal fa-arrow-left"></i>
                     </button>
             `
@@ -233,7 +346,7 @@ function getView(){
                         </div>
                     </div>
 
-                    <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="digitador_showHome()">
+                    <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
                         <i class="fal fa-arrow-left"></i>
                     </button>
             `
@@ -386,7 +499,7 @@ function getView(){
                         </div>
                     </div>
 
-                    <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="digitador_showHome()">
+                    <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
                         <i class="fal fa-arrow-left"></i>
                     </button>
             `
@@ -458,7 +571,7 @@ function getView(){
                 </div>
             </div>
 
-            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="digitador_showHome()">
+            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
                 <i class="fal fa-arrow-left"></i>
             </button>
 
@@ -605,7 +718,7 @@ function getView(){
                         </div>
                     </div>
 
-                    <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="digitador_showHome()">
+                    <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
                         <i class="fal fa-arrow-left"></i>
                     </button>
             `
@@ -698,7 +811,7 @@ function getView(){
 
                 </div>
 
-                <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="digitador_showHome()">
+                <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
                     <i class="fal fa-arrow-left"></i>
                 </button>
             
@@ -1080,7 +1193,7 @@ function getView(){
            
 
             
-            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="digitador_showHome()">
+            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
                 <i class="fal fa-arrow-left"></i>
             </button>
 
@@ -1097,9 +1210,6 @@ function addListeners(){
 
     
     document.title = `Digitador - ${GlobalNomEmpresa}`;
-
-    const lbEmpresa = document.getElementById('lbDigitadorEmpresa');
-    if (lbEmpresa) lbEmpresa.innerText = GlobalNomEmpresa || '';
 
     F.slideAnimationTabs();
 
@@ -1128,17 +1238,10 @@ function addListeners(){
     })
 
     document.getElementById('btnMenuSellout').addEventListener('click',()=>{
-        digitador_showPanel('siete', 'btnMenuSellout', ()=>{
-            tbl_rpt_sellout();
-        });
-    });
 
-    document.getElementById('btnMenuRelleno').addEventListener('click',()=>{
-        digitador_showPanel('tres', 'btnMenuRelleno');
-    });
+        document.getElementById('tab-siete').click();
+        tbl_rpt_sellout();
 
-    document.getElementById('btnMenuEmbarques').addEventListener('click',()=>{
-        digitador_showPanel('cuatro', 'btnMenuEmbarques');
     });
 
 
@@ -1185,14 +1288,11 @@ function addListeners(){
 };
 
 function initView(){
-    document.getElementById('js-page-content')?.classList.add('proveedor-page');
+
     getView();
     addListeners();
-}
 
-function destroyView(){
-    document.getElementById('js-page-content')?.classList.remove('proveedor-page');
-}
+};
 
 
 
@@ -1212,11 +1312,16 @@ function listeners_pedidos_pendientes(){
 
 
     document.getElementById('btnMenuFacturacion').addEventListener('click',()=>{
-        digitador_showPanel('seis', 'btnMenuFacturacion', ()=>{
-            get_combo_embarques();
-            document.getElementById('tab-Funo').click();
-            tbl_pedidos_pendientes('tblDataPedidos');
-        });
+
+        document.getElementById('tab-seis').click();
+        
+        get_combo_embarques();
+        
+        document.getElementById('tab-Funo').click();
+        
+        tbl_pedidos_pendientes('tblDataPedidos');
+
+    
     });
 
     document.getElementById('txtFFecha').value = F.getFecha();

@@ -1,115 +1,8 @@
 
-let proveedor_embedDestroy = null;
-
-const PROVEEDOR_EMBED_SCRIPTS = {
-    btnMenuObjetivosLogro: '../views/bi_objetivos/view_avance_procter_vendedor.js',
-    btnMenuRptVisitasMapa: '../views/bi_objetivos/view_visitas_vendedores_gps.js',
-    btnMenuInventarioRetroactivo: '../views/bodega_inv_fisico/view_inv_retroactivo.js',
-    btnMenuGps: '../views/mant_empleados/view_empleados_gps.js',
-    btnMenuCoberturaMunicipios: '../views/bi_objetivos/view_cobertura_municipios_mapa.js',
-    btnMenuCoberturaClientes: '../views/bi_objetivos/view_objetivo_cobertura.js',
-};
-
-function proveedor_setActiveCard(cardId) {
-    document.querySelectorAll('.proveedor-menu-card').forEach(el => {
-        el.classList.toggle('proveedor-menu-card--active', !!cardId && el.id === cardId);
-    });
-}
-
-function proveedor_showHome() {
-    selected_tab = '';
-    proveedor_showPanel('uno', null);
-}
-
-function proveedor_teardownEmbed() {
-    if (proveedor_embedDestroy) {
-        try { proveedor_embedDestroy(); } catch (e) { /* vista embebida sin teardown */ }
-        proveedor_embedDestroy = null;
-    }
-    document.querySelector('script[data-proveedor-embed]')?.remove();
-    const embed = document.getElementById('proveedorPanelEmbed');
-    if (embed) {
-        embed.classList.add('d-none');
-        embed.innerHTML = '';
-    }
-    document.getElementById('myTabHomeContent')?.classList.remove('d-none');
-    if (window._proveedorCore) {
-        window.initView = window._proveedorCore.initView;
-        window.destroyView = window._proveedorCore.destroyView;
-    }
-}
-
-function proveedor_showPanel(paneId, cardId, afterShow) {
-    proveedor_teardownEmbed();
-    document.querySelectorAll('#myTabHomeContent .tab-pane').forEach(p => {
-        p.classList.remove('show', 'active');
-    });
-    const pane = document.getElementById(paneId);
-    if (pane) {
-        pane.classList.add('show', 'active');
-    }
-    document.querySelectorAll('#myTabHome .nav-link').forEach(l => {
-        l.classList.remove('active');
-        l.setAttribute('aria-selected', 'false');
-    });
-    const tabLink = document.querySelector(`#myTabHome a[href="#${paneId}"]`);
-    if (tabLink) {
-        tabLink.classList.add('active');
-        tabLink.setAttribute('aria-selected', 'true');
-    }
-    proveedor_setActiveCard(cardId);
-    if (typeof afterShow === 'function') afterShow();
-}
-
-function proveedor_rewireEmbedActions(container) {
-    if (!container) return;
-    container.querySelectorAll('[data-spa-action="inicio"]').forEach(btn => {
-        btn.removeAttribute('data-spa-action');
-        btn.onclick = (e) => { e.preventDefault(); proveedor_showHome(); };
-    });
-    container.querySelectorAll('button[onclick*="tab-uno"]').forEach(btn => {
-        btn.setAttribute('onclick', 'proveedor_showHome()');
-    });
-}
-
-function proveedor_loadEmbed(scriptUrl, cardId) {
-    proveedor_teardownEmbed();
-    document.getElementById('myTabHomeContent')?.classList.add('d-none');
-    const embed = document.getElementById('proveedorPanelEmbed');
-    embed.classList.remove('d-none');
-    embed.innerHTML = GlobalLoader;
-    proveedor_setActiveCard(cardId);
-
-    return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = scriptUrl + (scriptUrl.includes('?') ? '&' : '?') + '_pe=' + Date.now();
-        script.setAttribute('data-proveedor-embed', 'true');
-        script.onload = () => {
-            const embedRoot = embed;
-            const savedRoot = root;
-            root = embedRoot;
-            if (typeof initView === 'function') {
-                initView();
-                proveedor_embedDestroy = typeof destroyView === 'function' ? destroyView : null;
-            }
-            root = savedRoot;
-            if (window._proveedorCore) {
-                window.initView = window._proveedorCore.initView;
-                window.destroyView = window._proveedorCore.destroyView;
-            }
-            proveedor_rewireEmbedActions(embedRoot);
-            resolve();
-        };
-        script.onerror = () => reject(new Error('No se pudo cargar: ' + scriptUrl));
-        document.getElementById('root').appendChild(script);
-    });
-}
-
 function getView(){
     let view = {
         body:()=>{
             return `
-            <div class="proveedor-layout">
             <div class="proveedor-header-card card shadow-sm mb-3">
                 <div class="card-body py-2 px-3">
                     <div class="row align-items-center no-gutters">
@@ -120,7 +13,7 @@ function getView(){
                             <h5 class="negrita text-white mb-0">INICIO PROCTER</h5>
                         </div>
                         <div class="col">
-                            <select class="form-control form-control-sm negrita" id="cmbSucursalHeader"></select>
+                            <select class="form-control form-control-sm negrita" id="cmbSucursal"></select>
                         </div>
                     </div>
                 </div>
@@ -131,9 +24,7 @@ function getView(){
                     ${view.menu()}
                 </div>
                 <div class="col-12 col-md-10 proveedor-tab-area">
-                    <div id="proveedorPanelContent">
-                        <div id="proveedorPanelEmbed" class="d-none"></div>
-                        <div class="tab-content" id="myTabHomeContent">
+                    <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
                             <div class="card proveedor-content-card shadow-sm">
                                 <div class="card-body p-4" id="proveedorMainContent">
@@ -156,7 +47,6 @@ function getView(){
                         <div class="tab-pane fade" id="seis" role="tabpanel" aria-labelledby="home-tab">
                             ${view.objetivos()}
                         </div>
-                    </div>
                     </div>
                 </div>
             </div>
@@ -187,7 +77,6 @@ function getView(){
                                 <i class="fal fa-comments"></i></a>
                         </li>         
                     </ul>
-            </div>
             `
         },
         menu:()=>{
@@ -355,7 +244,7 @@ function getView(){
             
 
 
-            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="proveedor_showHome()">
+            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
                 <i class="fal fa-arrow-left"></i>
             </button>
             `
@@ -469,7 +358,7 @@ function getView(){
            
 
             
-            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="proveedor_showHome()">
+            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
                 <i class="fal fa-arrow-left"></i>
             </button>
             `
@@ -551,7 +440,7 @@ function getView(){
            
 
             
-            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="proveedor_showHome()">
+            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
                 <i class="fal fa-arrow-left"></i>
             </button>
 
@@ -610,7 +499,7 @@ function getView(){
                 </div>
             </div>
 
-            <button class="btn btn-secondary btn-circle btn-xl hand shadow btn-bottom-l" onclick="proveedor_showHome()">
+            <button class="btn btn-secondary btn-circle btn-xl hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
                 <i class="fal fa-arrow-left"></i>
             </button>
 
@@ -698,7 +587,7 @@ function getView(){
             </div>
 
             
-            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="proveedor_showHome()">
+            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
                 <i class="fal fa-arrow-left"></i>
             </button>
 
@@ -868,7 +757,7 @@ function addListeners(){
   
     selected_tab = ''; //VENTAS_VENDEDOR,VENTAS_MARCAS,SELLOUT,INVENTARIOS,OBJETIVOS
 
-    let cmbSucursalHeader = document.getElementById('cmbSucursalHeader');
+    let cmbSucursal = document.getElementById('cmbSucursal');
     
 
     //bloqueo los controles para que no cargue nada
@@ -885,18 +774,18 @@ function addListeners(){
                     <option value="${r.EMPNIT}">${r.NOMBRE}</option>
                 `
             })
-            cmbSucursalHeader.innerHTML = str;
+            cmbSucursal.innerHTML = str;
             document.getElementById('btnMenuVentasVendedor').disbled = false;
             document.getElementById('btnMenuVentasMarcas').disabled = false;
             document.getElementById('btnMenuVentasSellout').disabled = false;
             
-            cmbSucursalHeader.addEventListener('change',()=>{
+            cmbSucursal.addEventListener('change',()=>{
                 //document.getElementById('tab-uno').click();
                 get_grid_tab();
             })
         })
         .catch(()=>{
-            cmbSucursalHeader.innerHTML = "<option value=''>NO SE CARGARON LAS SEDES</option>"
+            cmbSucursal.innerHTML = "<option value=''>NO SE CARGARON LAS SEDES</option>"
         })
         
       
@@ -928,22 +817,47 @@ function addListeners(){
 
     
 
-    document.getElementById('cmbVMes').addEventListener('change',()=>{ tbl_rpt_vendedores(); });
-    document.getElementById('cmbVAnio').addEventListener('change',()=>{ tbl_rpt_vendedores(); });
+    document.getElementById('btnMenuRptVisitasMapa').addEventListener('click',()=>{
+
+        Menu.objetivos_visitas_gps();
+
+    });
+
+   
+
+
+    //--------------------------------
+
+
+    // ventas vendedor
 
     document.getElementById('btnMenuVentasVendedor').addEventListener('click',()=>{
-        proveedor_showPanel('dos', 'btnMenuVentasVendedor', ()=>{
-            selected_tab = 'VENTAS_VENDEDOR';
-            tbl_rpt_vendedores();
-        });
-    });
+        
+        Menu.report_ventas_vendedor();
+
+      
+
+    })
+
+ 
+
+
+
+    // ventas vendedor
+    //---------------------------------
+
+
+    // marcas
 
     document.getElementById('btnMenuVentasMarcas').addEventListener('click',()=>{
-        proveedor_showPanel('tres', 'btnMenuVentasMarcas', ()=>{
-            selected_tab = 'VENTAS_MARCAS';
-            tbl_rpt_marcas();
-        });
-    });
+
+        document.getElementById('tab-tres').click();
+
+        selected_tab = 'VENTAS_MARCAS';
+        
+        tbl_rpt_marcas();
+
+    })
 
 
     document.getElementById('cmbMMes').addEventListener('change',()=>{
@@ -961,11 +875,14 @@ function addListeners(){
 
     //sell out
     document.getElementById('btnMenuVentasSellout').addEventListener('click',()=>{
-        proveedor_showPanel('cuatro', 'btnMenuVentasSellout', ()=>{
-            selected_tab = 'SELLOUT';
-            tbl_rpt_sellout();
-        });
-    });
+
+        document.getElementById('tab-cuatro').click();
+
+        selected_tab = 'SELLOUT';
+        
+        tbl_rpt_sellout();
+
+    })
 
 
     document.getElementById('txtSFechaInicial').addEventListener('change',()=>{
@@ -986,10 +903,13 @@ function addListeners(){
     });
 
     document.getElementById('btnMenuRptInventario').addEventListener('click',()=>{
-        proveedor_showPanel('cinco', 'btnMenuRptInventario', ()=>{
-            selected_tab = 'INVENTARIOS';
-            tbl_inventario();
-        });
+
+        document.getElementById('tab-cinco').click();
+
+        selected_tab = 'INVENTARIOS';
+        
+
+        tbl_inventario();
     });
 
 
@@ -1011,7 +931,7 @@ function addListeners(){
 
     document.getElementById('btnSOConfigModal').addEventListener('click',()=>{
 
-        let sucursal = document.getElementById('cmbSucursalHeader').value;
+        let sucursal = document.getElementById('cmbSucursal').value;
         if(sucursal=='%'){F.AvisoError('Seleccione una sede para configurar SELLOUT');return;}
 
         $('#modal_sellout_config').modal('show');
@@ -1027,7 +947,7 @@ function addListeners(){
         .then((value)=>{
             if(value==true){
 
-                let sucursalSO = document.getElementById('cmbSucursalHeader').value;
+                let sucursalSO = document.getElementById('cmbSucursal').value;
                 let mi = document.getElementById('cmbSOMesInicial').value;
                 let mf = document.getElementById('cmbSOMesFinal').value;
                 let anio = document.getElementById('cmbSOAnio').value;
@@ -1076,28 +996,28 @@ function addListeners(){
      // inventarios
 
      document.getElementById('btnMenuObjetivosLogro').addEventListener('click',()=>{
-        proveedor_loadEmbed(PROVEEDOR_EMBED_SCRIPTS.btnMenuObjetivosLogro, 'btnMenuObjetivosLogro');
-     });
+
+        Menu.objetivos_logro_procter();
+
+     })
 
      document.getElementById('btnMenuInventarioRetroactivo').addEventListener('click',()=>{
-        proveedor_loadEmbed(PROVEEDOR_EMBED_SCRIPTS.btnMenuInventarioRetroactivo, 'btnMenuInventarioRetroactivo');
-     });
+        Menu.bodega_inv_retroactivo();
+     })
 
+
+    // empleados gps
     document.getElementById('btnMenuGps').addEventListener('click',()=>{
-        proveedor_loadEmbed(PROVEEDOR_EMBED_SCRIPTS.btnMenuGps, 'btnMenuGps');
-     });
-
-     document.getElementById('btnMenuRptVisitasMapa').addEventListener('click',()=>{
-        proveedor_loadEmbed(PROVEEDOR_EMBED_SCRIPTS.btnMenuRptVisitasMapa, 'btnMenuRptVisitasMapa');
-     });
+        Menu.empleados_gps();
+     })
 
      document.getElementById('btnMenuCoberturaMunicipios').addEventListener('click',()=>{
-        proveedor_loadEmbed(PROVEEDOR_EMBED_SCRIPTS.btnMenuCoberturaMunicipios, 'btnMenuCoberturaMunicipios');
-     });
+        Menu.objetivos_cobertura_municipios()
+     })
 
       document.getElementById('btnMenuCoberturaClientes').addEventListener('click',()=>{
-        proveedor_loadEmbed(PROVEEDOR_EMBED_SCRIPTS.btnMenuCoberturaClientes, 'btnMenuCoberturaClientes');
-     });
+        Menu.objetivos_cobertura()
+     })
 
      
 
@@ -1112,9 +1032,6 @@ function get_grid_tab(){
 
     switch (selected_tab) {
       
-        case 'VENTAS_VENDEDOR':
-            tbl_rpt_vendedores();
-            break;
         case 'VENTAS_MARCAS':
             tbl_rpt_marcas();
 
@@ -1151,100 +1068,13 @@ function get_config_obs_sellout(){
 
 
 function initView(){
-    document.getElementById('js-page-content')?.classList.add('proveedor-page');
+
     getView();
     addListeners();
-}
 
-function destroyView(){
-    proveedor_teardownEmbed();
-    document.getElementById('js-page-content')?.classList.remove('proveedor-page');
-}
+};
 
-window._proveedorCore = { initView, destroyView, getView, addListeners };
 
-function tbl_rpt_vendedores(){
-
-    let mes = document.getElementById('cmbVMes').value;
-    let anio = document.getElementById('cmbVAnio').value;
-
-    let container = document.getElementById('tblDataVendedores');
-    if (!container) return;
-    container.innerHTML = GlobalLoader;
-
-    document.getElementById('lbFootTotalPrecio').innerText = ``;
-    document.getElementById('lbFootTotalPedidos').innerText = ``;
-
-    let sucursal = document.getElementById('cmbSucursalHeader').value;
-
-    let varTotal = 0;
-    let varPedidos = 0;
-
-    RPT.data_ventas_vendedor(sucursal,mes,anio)
-    .then((data)=>{
-
-        let str = '';
-        data.recordset.map((r)=>{
-            varTotal += Number(r.TOTALPRECIO);
-            varPedidos += Number(r.CONTEO);
-            str += `
-                <tr>
-                    <td>${r.EMPLEADO}</td>
-                    <td>${r.TELEFONO}</td>
-                    <td>${r.CONTEO}</td>
-                    <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
-                    <td>
-                        <button class="btn btn-info btn-md hand shadow btn-circle"
-                        onclick="get_rpt_marcas_vendedor('${r.CODEMP}', '${r.EMPLEADO}','${mes}', '${anio}')">
-                            <i class="fal fa-arrow-right"></i>
-                        </button>
-                    </td>
-                </tr>
-            `
-        })
-        
-        container.innerHTML = str;
-        document.getElementById('lbTotalVImporte').innerText = `Total: ${F.setMoneda(varTotal,'Q')}`;
-        document.getElementById('lbFootTotalPrecio').innerText = `${F.setMoneda(varTotal,'Q')}`;
-        document.getElementById('lbFootTotalPedidos').innerText = `${varPedidos}`;
-
-    })
-    .catch(()=>{
-        container.innerHTML = 'No se cargaron datos...';
-        document.getElementById('lbTotalVImporte').innerText = '';
-        document.getElementById('lbFootTotalPrecio').innerText = ``;
-        document.getElementById('lbFootTotalPedidos').innerText = ``;
-    });
-}
-
-function get_rpt_marcas_vendedor(codemp,nombre,mes,anio){
-
-    document.getElementById('lbVendedorMarcas').innerText = nombre;
-
-    let container = document.getElementById('tblDataVendedorMarcas');
-    container.innerHTML = GlobalLoader;
-
-    let sucursal = document.getElementById('cmbSucursalHeader').value;
-
-    RPT.data_ventas_vendedor_marcas(sucursal,codemp,mes,anio)
-    .then((data)=>{
-
-        let str = '';
-        data.recordset.map((r)=>{
-            str += `
-                <tr>
-                    <td>${r.DESMARCA}</td>
-                    <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
-                </tr>
-            `
-        })
-        container.innerHTML = str;
-
-    })
-    .catch(()=>{
-        container.innerHTML = 'No se cargaron datos....';
-    });
-}
 
 function tbl_rpt_marcas(){
 
@@ -1259,7 +1089,7 @@ function tbl_rpt_marcas(){
     let contador = 0;
     let varTotal = 0;
 
-    let sucursal = document.getElementById('cmbSucursalHeader').value;
+    let sucursal = document.getElementById('cmbSucursal').value;
 
    
     RPT.data_marcas(sucursal,mes,anio)
@@ -1314,7 +1144,7 @@ function tbl_rpt_marcas_productos(codmarca,desmarca,mes,anio){
     let varTotal = 0;
 
    
-    let sucursal = document.getElementById('cmbSucursalHeader').value;
+    let sucursal = document.getElementById('cmbSucursal').value;
 
 
     RPT.data_marcas_productos(sucursal,codmarca,mes,anio)
@@ -1366,7 +1196,7 @@ function tbl_rpt_sellout(){
     let contador = 0;
     let varTotal = 0;
 
-    let sucursal = document.getElementById('cmbSucursalHeader').value;
+    let sucursal = document.getElementById('cmbSucursal').value;
 
    
     RPT.data_sellout(sucursal,fi,ff)
@@ -1436,7 +1266,7 @@ function tbl_inventario(){
 
     let st = document.getElementById('cmbSt').value;
 
-    let sucursal = document.getElementById('cmbSucursalHeader').value;
+    let sucursal = document.getElementById('cmbSucursal').value;
 
 
     GF.get_data_inventarios_general(sucursal,st)
@@ -1491,15 +1321,18 @@ function listeners_objetivos(){
 
 
     document.getElementById('btnMenuObjetivos').addEventListener('click',()=>{
-        proveedor_showPanel('seis', 'btnMenuObjetivos', ()=>{
-            selected_tab = 'OBJETIVOS';
-            get_reportes();
-        });
+
+        document.getElementById('tab-seis').click();
+
+        selected_tab = 'OBJETIVOS';
+
+        get_reportes();
+
     });
 
 
     
-    let cmbSucursalHeader = document.getElementById('cmbSucursalHeader');
+    let cmbSucursal = document.getElementById('cmbSucursal');
 
    
     document.getElementById('cmbMes').innerHTML = F.ComboMeses();
@@ -1510,7 +1343,7 @@ function listeners_objetivos(){
 
 
 
-    //cmbSucursalHeader.addEventListener('change',()=>{ get_reportes(); });
+    //cmbSucursal.addEventListener('change',()=>{ get_reportes(); });
     document.getElementById('cmbMes').addEventListener('change',()=>{ get_reportes(); });
     document.getElementById('cmbAnio').addEventListener('change',()=>{ get_reportes(); });
 
@@ -1520,7 +1353,7 @@ function listeners_objetivos(){
 
 function get_reportes(){
 
-    let sucursal = document.getElementById('cmbSucursalHeader').value;
+    let sucursal = document.getElementById('cmbSucursal').value;
     let mes = document.getElementById('cmbMes').value;
     let anio = document.getElementById('cmbAnio').value;
 
@@ -1768,7 +1601,7 @@ function tbl_logro_categorias_marca(codmarca){
     container.innerHTML = GlobalLoader;
 
 
-    let sucursal = document.getElementById('cmbSucursalHeader').value;
+    let sucursal = document.getElementById('cmbSucursal').value;
     let mes = document.getElementById('cmbMes').value;
     let anio = document.getElementById('cmbAnio').value;
 

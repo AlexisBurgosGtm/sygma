@@ -4,6 +4,8 @@ function login_inyectarEstilos() {
     let style = document.getElementById('login-styles');
     const css = `
         body.login-active .page-header { display: none !important; }
+        body.login-active #root_navbar { display: none !important; }
+        body.login-active .page-content-wrapper { margin-left: 0 !important; }
         body.login-active #js-page-content { padding: 0 !important; }
         body.login-active main.page-content { min-height: 100vh; }
         body.login-active #root { min-height: 100vh; width: 100%; }

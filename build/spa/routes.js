@@ -42,6 +42,7 @@ SpaRouter.registerMany({
     },
     'inicio/proveedor': {
         script: '../views/menu/inicio_proveedor.js',
+        showNavbar: false,
         title: 'Inicio - Proveedor'
     },
     'inicio/admin': {
