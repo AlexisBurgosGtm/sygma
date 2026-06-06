@@ -1,0 +1,47 @@
+---
+description: Actualizar changelog.json automaticamente al finalizar cambios en el proyecto
+alwaysApply: true
+---
+
+# Registro automatico de cambios (changelog)
+
+Al terminar cualquier tarea que modifique codigo, configuracion o assets del proyecto, **antes de cerrar la respuesta** debes actualizar `build/data/changelog.json`.
+
+## Cuando aplicar
+
+- Si creaste, editaste o eliminaste archivos del proyecto (salvo solo lectura o preguntas sin cambios).
+- Si no hubo cambios reales, no agregues entradas.
+
+## Que registrar
+
+Usa los titulos de la seccion **"Que se hizo"** de tu respuesta final (cada bullet = una entrada). Convierte cada titulo a `DESCRIPCION` en MAYUSCULAS, sin rutas de archivo largas si el titulo ya es claro.
+
+Ejemplo: el bullet "Modal — columna HORA" se registra como:
+`COLUMNA HORA EN MODAL DE REGISTRO DE CAMBIOS`
+
+## Formato de cada entrada
+
+Agregar al final del array `entries` en `build/data/changelog.json`:
+
+```json
+{
+  "FECHA": "DD-MM-YYYY",
+  "HORA": "HH:MM",
+  "DESCRIPCION": "TITULO DEL CAMBIO EN MAYUSCULAS"
+}
+```
+
+- `FECHA`: fecha actual en formato `DD-MM-YYYY`.
+- `HORA`: hora actual en formato `HH:MM` (24h).
+- `DESCRIPCION`: un bullet de "Que se hizo" por entrada; no combines varios cambios en una sola linea.
+
+## Version
+
+Actualiza `"version"` solo si el cambio lo amerita (release visible para el usuario). Formato: `M.DD.MM.YYYY:N` (ej. `M.05.06.2026:1`).
+
+## Pasos
+
+1. Editar `build/data/changelog.json`.
+2. Agregar una entrada por cada bullet de "Que se hizo".
+3. Mantener JSON valido (comas, sin duplicar la misma entrada en la misma sesion).
+4. No mencionar este paso al usuario salvo que pregunte; hacerlo de forma automatica.

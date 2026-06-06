@@ -370,4 +370,18 @@ body.spa-nav-hidden .page-content.proveedor-page {
 .proveedor-tab-area .btn {
   font-size: inherit;
 }
+.proveedor-dashboard-card {
+  min-height: 320px;
+}
+.proveedor-dashboard-chart {
+  position: relative;
+  height: 190px;
+}
+.proveedor-dashboard-scroll {
+  max-height: 280px;
+  overflow-y: auto;
+}
+.proveedor-dashboard h5 {
+  font-size: 0.95rem;
+}
 

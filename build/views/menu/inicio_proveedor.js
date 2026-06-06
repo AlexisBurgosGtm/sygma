@@ -1,5 +1,6 @@
 
 let proveedor_embedDestroy = null;
+let proveedor_dashboardCharts = {};
 
 const PROVEEDOR_EMBED_SCRIPTS = {
     btnMenuObjetivosLogro: '../views/bi_objetivos/view_avance_procter_vendedor.js',
@@ -18,7 +19,7 @@ function proveedor_setActiveCard(cardId) {
 
 function proveedor_showHome() {
     selected_tab = '';
-    proveedor_showPanel('uno', null);
+    proveedor_showPanel('uno', null, () => proveedor_loadDashboard());
 }
 
 function proveedor_teardownEmbed() {
@@ -63,12 +64,9 @@ function proveedor_showPanel(paneId, cardId, afterShow) {
 
 function proveedor_rewireEmbedActions(container) {
     if (!container) return;
-    container.querySelectorAll('[data-spa-action="inicio"]').forEach(btn => {
-        btn.removeAttribute('data-spa-action');
-        btn.onclick = (e) => { e.preventDefault(); proveedor_showHome(); };
-    });
-    container.querySelectorAll('button[onclick*="tab-uno"]').forEach(btn => {
-        btn.setAttribute('onclick', 'proveedor_showHome()');
+    container.querySelectorAll('[data-spa-action="inicio"]').forEach(btn => btn.remove());
+    container.querySelectorAll('button.btn-bottom-l').forEach(btn => {
+        if (btn.querySelector('.fa-home')) btn.remove();
     });
 }
 
@@ -135,10 +133,8 @@ function getView(){
                         <div id="proveedorPanelEmbed" class="d-none"></div>
                         <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
-                            <div class="card proveedor-content-card shadow-sm">
-                                <div class="card-body p-4" id="proveedorMainContent">
-                                    <p class="text-muted mb-0 text-center">Contenido principal</p>
-                                </div>
+                            <div id="proveedorMainContent">
+                                ${view.vista_dashboard()}
                             </div>
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
@@ -212,6 +208,99 @@ function getView(){
                     </div>
                 </div>
             `).join('');
+        },
+        vista_dashboard:()=>{
+            return `
+            <div class="proveedor-dashboard">
+                <div class="row">
+                    <div class="col-12 col-lg-4 mb-3 mb-lg-0">
+                        <div class="card card-rounded shadow h-100 proveedor-dashboard-card">
+                            <div class="card-body p-3">
+                                <h5 class="negrita text-secondary mb-3">Resumen de inventario por categoria</h5>
+                                <div class="proveedor-dashboard-chart mb-3">
+                                    <canvas id="chartDashInventario"></canvas>
+                                </div>
+                                <div class="table-responsive proveedor-dashboard-scroll">
+                                    <table class="table table-sm table-bordered h-full col-12" id="tblDashInventarioCategoria">
+                                        <thead class="bg-secondary text-white negrita">
+                                            <tr>
+                                                <td>CATEGORIA</td>
+                                                <td>CAJAS</td>
+                                                <td>COSTO</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblDataDashInventarioCategoria"></tbody>
+                                        <tfoot class="bg-secondary text-white negrita">
+                                            <tr>
+                                                <td>TOTALES</td>
+                                                <td id="lbFootDashInvCajas">--</td>
+                                                <td id="lbFootDashInvCosto">--</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-4 mb-3 mb-lg-0">
+                        <div class="card card-rounded shadow h-100 proveedor-dashboard-card">
+                            <div class="card-body p-3">
+                                <h5 class="negrita text-info mb-3">Ventas por vendedor</h5>
+                                <div class="proveedor-dashboard-chart mb-3">
+                                    <canvas id="chartDashVentasVendedor"></canvas>
+                                </div>
+                                <div class="table-responsive proveedor-dashboard-scroll">
+                                    <table class="table table-sm table-bordered h-full col-12" id="tblDashVentasVendedor">
+                                        <thead class="bg-info text-white negrita">
+                                            <tr>
+                                                <td>VENDEDOR</td>
+                                                <td>PEDIDOS</td>
+                                                <td>IMPORTE</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblDataDashVentasVendedor"></tbody>
+                                        <tfoot class="bg-info text-white negrita">
+                                            <tr>
+                                                <td>TOTALES</td>
+                                                <td id="lbFootDashVendedorPedidos">--</td>
+                                                <td id="lbFootDashVendedorImporte">--</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-4">
+                        <div class="card card-rounded shadow h-100 proveedor-dashboard-card">
+                            <div class="card-body p-3">
+                                <h5 class="negrita text-secondary mb-3">Ventas por marca</h5>
+                                <div class="proveedor-dashboard-chart mb-3">
+                                    <canvas id="chartDashVentasMarca"></canvas>
+                                </div>
+                                <div class="table-responsive proveedor-dashboard-scroll">
+                                    <table class="table table-sm table-bordered h-full col-12" id="tblDashVentasMarca">
+                                        <thead class="bg-secondary text-white negrita">
+                                            <tr>
+                                                <td>MARCA</td>
+                                                <td>IMPORTE</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblDataDashVentasMarca"></tbody>
+                                        <tfoot class="bg-secondary text-white negrita">
+                                            <tr>
+                                                <td>TOTAL</td>
+                                                <td id="lbFootDashMarcaImporte">--</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `
         },
         modal:()=>{
             return `
@@ -891,9 +980,11 @@ function addListeners(){
             document.getElementById('btnMenuVentasSellout').disabled = false;
             
             cmbSucursalHeader.addEventListener('change',()=>{
-                //document.getElementById('tab-uno').click();
                 get_grid_tab();
+                if (!selected_tab) proveedor_loadDashboard();
             })
+
+            proveedor_loadDashboard();
         })
         .catch(()=>{
             cmbSucursalHeader.innerHTML = "<option value=''>NO SE CARGARON LAS SEDES</option>"
@@ -1105,6 +1196,233 @@ function addListeners(){
 
 };
 
+function proveedor_destroyDashboardChart(chartKey) {
+    if (proveedor_dashboardCharts[chartKey]) {
+        proveedor_dashboardCharts[chartKey].destroy();
+        delete proveedor_dashboardCharts[chartKey];
+    }
+}
+
+function proveedor_renderDashboardChart(chartKey, canvasId, labels, values, title) {
+    proveedor_destroyDashboardChart(chartKey);
+
+    const canvas = document.getElementById(canvasId);
+    if (!canvas || !labels.length || !values.length) return;
+
+    const total = values.reduce((sum, value) => sum + Number(value), 0);
+    if (total <= 0) return;
+
+    const pctValues = values.map((value) => Number(((Number(value) / total) * 100).toFixed(2)));
+    const bgColor = labels.map(() => getRandomColor());
+    const plugins = typeof ChartDataLabels !== 'undefined' ? [ChartDataLabels] : [];
+
+    proveedor_dashboardCharts[chartKey] = new Chart(canvas.getContext('2d'), {
+        plugins,
+        type: 'doughnut',
+        data: {
+            labels,
+            datasets: [{
+                data: pctValues,
+                backgroundColor: bgColor,
+                borderColor: '#fff',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: title,
+                    font: { size: 12 }
+                },
+                datalabels: {
+                    anchor: 'center',
+                    align: 'center',
+                    formatter: (value) => `${value}%`,
+                    color: '#fff',
+                    font: { weight: 'bold', size: 10 }
+                }
+            }
+        }
+    });
+}
+
+function proveedor_resetDashboardFooters() {
+    const footers = [
+        'lbFootDashInvCajas',
+        'lbFootDashInvCosto',
+        'lbFootDashVendedorPedidos',
+        'lbFootDashVendedorImporte',
+        'lbFootDashMarcaImporte'
+    ];
+    footers.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = '--';
+    });
+}
+
+function proveedor_loadDashboard() {
+    proveedor_resetDashboardFooters();
+    tbl_dashboard_inventario_categoria();
+    tbl_dashboard_ventas_vendedor();
+    tbl_dashboard_ventas_marca();
+}
+
+function tbl_dashboard_inventario_categoria() {
+    const container = document.getElementById('tblDataDashInventarioCategoria');
+    if (!container) return;
+
+    container.innerHTML = GlobalLoader;
+    proveedor_destroyDashboardChart('inventario');
+    const sucursal = document.getElementById('cmbSucursalHeader')?.value || '%';
+
+    GF.get_data_inventarios_general(sucursal, 'SI')
+        .then((data) => {
+            const resumen = {};
+            data.recordset.forEach((r) => {
+                const categoria = r.DESMARCA || 'SIN CATEGORIA';
+                const cajas = F.get_existencia(Number(r.TOTALUNIDADES), Number(r.UXC));
+                const costo = Number(r.TOTALUNIDADES) * Number(r.COSTO);
+                if (!resumen[categoria]) {
+                    resumen[categoria] = { cajas: 0, costo: 0 };
+                }
+                resumen[categoria].cajas += Number(cajas);
+                resumen[categoria].costo += costo;
+            });
+
+            const items = Object.keys(resumen)
+                .map((categoria) => ({ categoria, ...resumen[categoria] }))
+                .sort((a, b) => b.costo - a.costo);
+
+            let totalCajas = 0;
+            let totalCosto = 0;
+            let str = '';
+
+            items.forEach((item) => {
+                totalCajas += item.cajas;
+                totalCosto += item.costo;
+                str += `
+                    <tr>
+                        <td>${item.categoria}</td>
+                        <td>${item.cajas.toFixed(2)}</td>
+                        <td>${F.setMoneda(item.costo, 'Q')}</td>
+                    </tr>
+                `;
+            });
+
+            container.innerHTML = str || '<tr><td colspan="3" class="text-center text-muted">Sin datos</td></tr>';
+            document.getElementById('lbFootDashInvCajas').innerText = totalCajas.toFixed(2);
+            document.getElementById('lbFootDashInvCosto').innerText = F.setMoneda(totalCosto, 'Q');
+
+            proveedor_renderDashboardChart(
+                'inventario',
+                'chartDashInventario',
+                items.map((item) => item.categoria),
+                items.map((item) => item.costo),
+                `Costo por categoria: ${F.setMoneda(totalCosto, 'Q')}`
+            );
+        })
+        .catch(() => {
+            container.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No se cargaron datos</td></tr>';
+            proveedor_destroyDashboardChart('inventario');
+        });
+}
+
+function tbl_dashboard_ventas_vendedor() {
+    const container = document.getElementById('tblDataDashVentasVendedor');
+    if (!container) return;
+
+    container.innerHTML = GlobalLoader;
+    proveedor_destroyDashboardChart('vendedor');
+    const sucursal = document.getElementById('cmbSucursalHeader')?.value || '%';
+    const mes = F.get_mes_curso();
+    const anio = F.get_anio_curso();
+
+    RPT.data_ventas_vendedor(sucursal, mes, anio)
+        .then((data) => {
+            const items = [...data.recordset].sort((a, b) => Number(b.TOTALPRECIO) - Number(a.TOTALPRECIO));
+            let totalPedidos = 0;
+            let totalImporte = 0;
+            let str = '';
+
+            items.forEach((r) => {
+                totalPedidos += Number(r.CONTEO);
+                totalImporte += Number(r.TOTALPRECIO);
+                str += `
+                    <tr>
+                        <td>${r.EMPLEADO}</td>
+                        <td>${r.CONTEO}</td>
+                        <td>${F.setMoneda(r.TOTALPRECIO, 'Q')}</td>
+                    </tr>
+                `;
+            });
+
+            container.innerHTML = str || '<tr><td colspan="3" class="text-center text-muted">Sin datos</td></tr>';
+            document.getElementById('lbFootDashVendedorPedidos').innerText = `${totalPedidos}`;
+            document.getElementById('lbFootDashVendedorImporte').innerText = F.setMoneda(totalImporte, 'Q');
+
+            proveedor_renderDashboardChart(
+                'vendedor',
+                'chartDashVentasVendedor',
+                items.map((r) => r.EMPLEADO),
+                items.map((r) => r.TOTALPRECIO),
+                `Ventas por vendedor: ${F.setMoneda(totalImporte, 'Q')}`
+            );
+        })
+        .catch(() => {
+            container.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No se cargaron datos</td></tr>';
+            proveedor_destroyDashboardChart('vendedor');
+        });
+}
+
+function tbl_dashboard_ventas_marca() {
+    const container = document.getElementById('tblDataDashVentasMarca');
+    if (!container) return;
+
+    container.innerHTML = GlobalLoader;
+    proveedor_destroyDashboardChart('marca');
+    const sucursal = document.getElementById('cmbSucursalHeader')?.value || '%';
+    const mes = F.get_mes_curso();
+    const anio = F.get_anio_curso();
+
+    RPT.data_marcas(sucursal, mes, anio)
+        .then((data) => {
+            const items = [...data.recordset].sort((a, b) => Number(b.TOTALPRECIO) - Number(a.TOTALPRECIO));
+            let totalImporte = 0;
+            let str = '';
+
+            items.forEach((r) => {
+                totalImporte += Number(r.TOTALPRECIO);
+                str += `
+                    <tr>
+                        <td>${r.DESMARCA}</td>
+                        <td>${F.setMoneda(r.TOTALPRECIO, 'Q')}</td>
+                    </tr>
+                `;
+            });
+
+            container.innerHTML = str || '<tr><td colspan="2" class="text-center text-muted">Sin datos</td></tr>';
+            document.getElementById('lbFootDashMarcaImporte').innerText = F.setMoneda(totalImporte, 'Q');
+
+            proveedor_renderDashboardChart(
+                'marca',
+                'chartDashVentasMarca',
+                items.map((r) => r.DESMARCA),
+                items.map((r) => r.TOTALPRECIO),
+                `Ventas por marca: ${F.setMoneda(totalImporte, 'Q')}`
+            );
+        })
+        .catch(() => {
+            container.innerHTML = '<tr><td colspan="2" class="text-center text-muted">No se cargaron datos</td></tr>';
+            proveedor_destroyDashboardChart('marca');
+        });
+}
+
 function get_grid_tab(){
   
         //selected_tab = ''; 
@@ -1157,6 +1475,7 @@ function initView(){
 }
 
 function destroyView(){
+    Object.keys(proveedor_dashboardCharts).forEach(proveedor_destroyDashboardChart);
     proveedor_teardownEmbed();
     document.getElementById('js-page-content')?.classList.remove('proveedor-page');
 }

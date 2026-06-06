@@ -351,8 +351,8 @@ function getView() {
                         </div>
 
                         <div class="login-footer" id="scene2">
-                            <button type="button" class="btn login-version-btn" onclick="$('#modal_log').modal('show')">
-                                <i class="fal fa-list mr-1"></i>${versionapp}
+                            <button type="button" class="btn login-version-btn" id="btnChangelog" title="Registro de cambios del sistema" onclick="get_log(); $('#modal_log').modal('show')">
+                                <i class="fal fa-clipboard-list mr-1"></i>${versionapp}
                             </button>
                             <button type="button" class="btn btn-circle shadow hand" id="btnIniciar" title="Iniciar sesión">
                                 <i class="fal fa-arrow-right"></i>

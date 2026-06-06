@@ -1,0 +1,410 @@
+{
+  "version": "M.05.06.2026:0",
+  "entries": [
+    {
+      "FECHA": "20-08-2025",
+      "HORA": "",
+      "DESCRIPCION": "AGREGADO INPUT BUSQUEDA DE DOCUMENTOS EN ARCHIVO/DOCUMENTOS"
+    },
+    {
+      "FECHA": "21-08-2025",
+      "HORA": "",
+      "DESCRIPCION": "AGREGADO CARGA DE COSTOS EN COMPRAS"
+    },
+    {
+      "FECHA": "21-08-2025",
+      "HORA": "",
+      "DESCRIPCION": "SE QUITO PROVISIONALMENTE LA EDICION DE CANTIDAD EN PEDIDOS VENDEDOR"
+    },
+    {
+      "FECHA": "21-08-2025",
+      "HORA": "",
+      "DESCRIPCION": "SE AGREGO LA VENTANA DE GOLES A MODULO GERENCIA EN INICIO"
+    },
+    {
+      "FECHA": "22-08-2025",
+      "HORA": "",
+      "DESCRIPCION": "EDITAR CANTIDAD EN NOTAS DE CREDITO / DEVOLUCIONES"
+    },
+    {
+      "FECHA": "22-08-2025",
+      "HORA": "",
+      "DESCRIPCION": "REVISION DE DUPLICIDAD AL CARGAR NOTA DE CREDITO / DEVOLUCION"
+    },
+    {
+      "FECHA": "02-09-2025",
+      "HORA": "",
+      "DESCRIPCION": "DESHABILITAR UNA MEDIDA DE PRECIOS POR SEDE"
+    },
+    {
+      "FECHA": "04-09-2025",
+      "HORA": "",
+      "DESCRIPCION": "CAJA DE BUSQUEDA EN FACTURAS ASIGNADAS A PICKING"
+    },
+    {
+      "FECHA": "09-09-2025",
+      "HORA": "",
+      "DESCRIPCION": "COLUMNA PARA BONI EN PICKING"
+    },
+    {
+      "FECHA": "22-09-2025",
+      "HORA": "",
+      "DESCRIPCION": "MODULO REPARTIDOR (V1)"
+    },
+    {
+      "FECHA": "23-09-2025",
+      "HORA": "",
+      "DESCRIPCION": "MODULO REPARTIDOR (V2)"
+    },
+    {
+      "FECHA": "25-09-2025",
+      "HORA": "",
+      "DESCRIPCION": "MODULO REPARTIDOR (V3)"
+    },
+    {
+      "FECHA": "26-09-2025",
+      "HORA": "",
+      "DESCRIPCION": "SE FILTRO EL COMBO EMPLEADOS PARA QUE APAREZCAN SOLO LOS DEL PICKING"
+    },
+    {
+      "FECHA": "26-09-2025",
+      "HORA": "",
+      "DESCRIPCION": "SE AGREGO RESUMEN DE DEVOLUCIONES EN MOD. REPARTIDOR"
+    },
+    {
+      "FECHA": "04-10-2025",
+      "HORA": "",
+      "DESCRIPCION": "SELLOUT Y CLIENTES EXPORTAR A XLSX"
+    },
+    {
+      "FECHA": "04-10-2025",
+      "HORA": "",
+      "DESCRIPCION": "RE-CREACION DE VENTANA DE LOGRO SEGUN P&G"
+    },
+    {
+      "FECHA": "10-10-2025",
+      "HORA": "",
+      "DESCRIPCION": "VENTANA DE LOGRO P&G V1"
+    },
+    {
+      "FECHA": "10-10-2025",
+      "HORA": "",
+      "DESCRIPCION": "DESCARGAR LISTA DE CLIENTES POR SEDE (EXCEL)"
+    },
+    {
+      "FECHA": "14-10-2025",
+      "HORA": "",
+      "DESCRIPCION": "SE AGREGO LOGRO PROCTER A SUPERVISOR Y PROVEEDOR"
+    },
+    {
+      "FECHA": "14-10-2025",
+      "HORA": "",
+      "DESCRIPCION": "VENTANA LOGRO P&G, OBJETIVOS GOLES Y PONER FALTANTES NEGATIVOS A CERO"
+    },
+    {
+      "FECHA": "15-10-2025",
+      "HORA": "",
+      "DESCRIPCION": "MODIFICACION DE GUARDADO DE DIAS LABORALES EN LOGRO P&G"
+    },
+    {
+      "FECHA": "15-10-2025",
+      "HORA": "",
+      "DESCRIPCION": "COLORES Y PROYECCION PORCENTUAL EN LOGRO P&G"
+    },
+    {
+      "FECHA": "17-10-2025",
+      "HORA": "",
+      "DESCRIPCION": "HISTORIAL DE CLIENTES CAMBIADO A MES"
+    },
+    {
+      "FECHA": "22-10-2025",
+      "HORA": "",
+      "DESCRIPCION": "SE AGREGARON TOTALES DE IMPORTE Y DEVOLUCION A LISTA DE EMBARQUES"
+    },
+    {
+      "FECHA": "28-10-2025",
+      "HORA": "",
+      "DESCRIPCION": "RESUMEN GENERAL EN LOGRO (TODOS)"
+    },
+    {
+      "FECHA": "30-10-2025",
+      "HORA": "",
+      "DESCRIPCION": "AGREGADO SUPERVISOR A LISTA DE VENDEDORES EN OBJETIVO"
+    },
+    {
+      "FECHA": "31-10-2025",
+      "HORA": "",
+      "DESCRIPCION": "OPCION PARA CAMBIO DE EMPLEADO EN DOCUMENTO"
+    },
+    {
+      "FECHA": "07-11-2025",
+      "HORA": "",
+      "DESCRIPCION": "REPORTE DE RESUMEN DE MARCAS EN GOLES V1"
+    },
+    {
+      "FECHA": "11-11-2025",
+      "HORA": "",
+      "DESCRIPCION": "REPORTE DE RESUMEN DE MARCAS EN GOLES V2"
+    },
+    {
+      "FECHA": "13-11-2025",
+      "HORA": "",
+      "DESCRIPCION": "INVENTARIO RETROACTIVO"
+    },
+    {
+      "FECHA": "03-12-2025",
+      "HORA": "",
+      "DESCRIPCION": "REPORTE DE COBERTURA CLIENTES POR MARCA"
+    },
+    {
+      "FECHA": "07-12-2025",
+      "HORA": "",
+      "DESCRIPCION": "REPORTE DE COBERTURA CLIENTES POR MARCA EN VENDEDOR"
+    },
+    {
+      "FECHA": "15-12-2025",
+      "HORA": "",
+      "DESCRIPCION": "REPORTE DE GOLES Y COBERTURA JUNTOS EN VENDEDOR"
+    },
+    {
+      "FECHA": "15-12-2025",
+      "HORA": "",
+      "DESCRIPCION": "REORGANIZAR OPCIONES EN VENDEDOR"
+    },
+    {
+      "FECHA": "02-01-2026",
+      "HORA": "",
+      "DESCRIPCION": "SE AGREGO PRECIO A Y B EN PEDIDOS VENDEDOR"
+    },
+    {
+      "FECHA": "07-01-2026",
+      "HORA": "",
+      "DESCRIPCION": "OPCION DE INVENTARIO RETROACTIVO PARA PROVEEDOR"
+    },
+    {
+      "FECHA": "07-01-2026",
+      "HORA": "",
+      "DESCRIPCION": "OPCION EN CONFIG PARA PERMITIR VENTAS MENORES AL COSTOS"
+    },
+    {
+      "FECHA": "08-01-2026",
+      "HORA": "",
+      "DESCRIPCION": "AGREGADA LA COLUMNA CAJAS EN INVENTARIO RETROACTIVO Y TOTAL COSTO"
+    },
+    {
+      "FECHA": "15-01-2026",
+      "HORA": "",
+      "DESCRIPCION": "COLUMNA COSTOS AGREGADA A INVENTARIO RETROACTIVO"
+    },
+    {
+      "FECHA": "16-01-2026",
+      "HORA": "",
+      "DESCRIPCION": "BOTON DE ACTUALIZACION DE COSTOS DESDE DOCUMENTOS"
+    },
+    {
+      "FECHA": "28-01-2026",
+      "HORA": "",
+      "DESCRIPCION": "LISTADO DE PRODUCTOS VENDIDOS A PRECIOS MAYORISTAS EN DIGITADORES"
+    },
+    {
+      "FECHA": "28-01-2026",
+      "HORA": "",
+      "DESCRIPCION": "CARGA DE COSTOS AL FINALIZAR COMPRA"
+    },
+    {
+      "FECHA": "28-01-2026",
+      "HORA": "",
+      "DESCRIPCION": "AGREGA LA UBICACION DEL EMPLEADO AL HACER LOGIN"
+    },
+    {
+      "FECHA": "03-02-2026",
+      "HORA": "",
+      "DESCRIPCION": "AGREGADO SKUS POR TIENDA EN REPORTE LOGRO P&G"
+    },
+    {
+      "FECHA": "04-02-2026",
+      "HORA": "",
+      "DESCRIPCION": "V1 MAPA DE VISITAS VENDEDOR"
+    },
+    {
+      "FECHA": "05-02-2026",
+      "HORA": "",
+      "DESCRIPCION": "FUNCION PARA ACTUALIZAR CORRELATIVO AUTOMATICAMENTES"
+    },
+    {
+      "FECHA": "06-02-2026",
+      "HORA": "",
+      "DESCRIPCION": "HISTORIAL DE VENTAS DE CLIENTE EN OPCION MAPA"
+    },
+    {
+      "FECHA": "07-02-2026",
+      "HORA": "",
+      "DESCRIPCION": "HISTORIAL DE MARCAS DEL MES DE CLIENTE EN OPCION MAPA"
+    },
+    {
+      "FECHA": "08-02-2026",
+      "HORA": "",
+      "DESCRIPCION": "MAPA DE VISITAS PARA SUPERVISOR"
+    },
+    {
+      "FECHA": "09-02-2026",
+      "HORA": "",
+      "DESCRIPCION": "MAPA DE VISITAS PARA SUPERVISOR, REPORTE MARCAS VENDIDAS CLIENTE"
+    },
+    {
+      "FECHA": "10-02-2026",
+      "HORA": "",
+      "DESCRIPCION": "AGREGADA QRY QUE AGREGA UN REGISTRO DE VISITA CLIENTE AL VENDER"
+    },
+    {
+      "FECHA": "10-02-2026",
+      "HORA": "",
+      "DESCRIPCION": "AGREGADA LISTA PRODUCTOS EN OPCIONES CLIENTE MAPA"
+    },
+    {
+      "FECHA": "18-02-2026",
+      "HORA": "",
+      "DESCRIPCION": "AGREGADO HORA Y FECHA A UBICACION EMPLEADOS GPS"
+    },
+    {
+      "FECHA": "19-02-2026",
+      "HORA": "",
+      "DESCRIPCION": "CREACION, EDICION Y ELIMINACION DE DEPARTAMENTOS, SECTORES Y MUNICIPIOS V1"
+    },
+    {
+      "FECHA": "19-02-2026",
+      "HORA": "",
+      "DESCRIPCION": "MAPA PARA UBICAR Y ACTUALIZAR MUNICIPIOS"
+    },
+    {
+      "FECHA": "02-03-2026",
+      "HORA": "",
+      "DESCRIPCION": "CORRECCION DE BOTON CORREGIR DOCUMENTO EN DIGITADORES"
+    },
+    {
+      "FECHA": "02-03-2026",
+      "HORA": "",
+      "DESCRIPCION": "OPCION PARA CAMBIAR FECHA EN DOCUMENTOS"
+    },
+    {
+      "FECHA": "06-03-2026",
+      "HORA": "",
+      "DESCRIPCION": "COBERTURA DE EMPLEADOS POR MARCA EN OBJETIVOS COBERTURA"
+    },
+    {
+      "FECHA": "10-03-2026",
+      "HORA": "",
+      "DESCRIPCION": "COBERTURA POR MUNICIPIO, REPORTE MARCAS Y PRODUCTOS"
+    },
+    {
+      "FECHA": "11-03-2026",
+      "HORA": "",
+      "DESCRIPCION": "AGREGADO MENU DE COBERTURA MUNICIPIO A SUPERVISORES"
+    },
+    {
+      "FECHA": "13-04-2026",
+      "HORA": "",
+      "DESCRIPCION": "TABLA DE CHECK IN Y CHECK OUT DE EMPLEADOS"
+    },
+    {
+      "FECHA": "15-04-2026",
+      "HORA": "",
+      "DESCRIPCION": "FILTRO DE MARCAS EN PRODUCTOS Y PRECIOS"
+    },
+    {
+      "FECHA": "18-04-2026",
+      "HORA": "",
+      "DESCRIPCION": "CORRECCION EN EDICION DE FACTURA AL AGREGAR ITEM"
+    },
+    {
+      "FECHA": "14-05-2026",
+      "HORA": "",
+      "DESCRIPCION": "AGREGADO BOTON PARA INICIAR CHECK IN EN INICIO"
+    },
+    {
+      "FECHA": "15-05-2026",
+      "HORA": "",
+      "DESCRIPCION": "BOTON PREVIO DE CHECK OUT"
+    },
+    {
+      "FECHA": "16-05-2026",
+      "HORA": "",
+      "DESCRIPCION": "BOTON PREVIO DE CHECK OUT / FINALIZA Y SE GUARDA EN JSSTORE, FALTA ENVIO DE INFORMACION DE VENTAS"
+    },
+    {
+      "FECHA": "19-05-2026",
+      "HORA": "",
+      "DESCRIPCION": "ORDENADO DE MAYOR A MENOR EN VENTAS POR VENDEDOR REP"
+    },
+    {
+      "FECHA": "19-05-2026",
+      "HORA": "",
+      "DESCRIPCION": "FILTRO EN VENTAS POR MARCA DE VENDEDOR Y VISTA DE VENTAS POR VENDEDOR Y MARCA AGREGADOS A DIGITADOR, SUPERVISOR Y PROVEEDOR"
+    },
+    {
+      "FECHA": "23-05-2026",
+      "HORA": "",
+      "DESCRIPCION": "TABLA VENDEDORES EN VENTAS POR MARCA"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "22:24",
+      "DESCRIPCION": "JSON DE CAMBIOS EN changelog.json CON FECHA, HORA Y DESCRIPCION"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "22:24",
+      "DESCRIPCION": "get_log() CARGA REGISTRO DESDE changelog.json"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "22:24",
+      "DESCRIPCION": "COLUMNA HORA EN MODAL DE REGISTRO DE CAMBIOS"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "22:24",
+      "DESCRIPCION": "BOTON DE LOG DE CAMBIOS A LA IZQUIERDA DE INICIAR SESION EN LOGIN"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "22:24",
+      "DESCRIPCION": "REGLA AUTOMATICA PARA ACTUALIZAR changelog.json AL FINALIZAR CAMBIOS"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "22:40",
+      "DESCRIPCION": "BOTONES HOME OCULTOS EN VISTAS INCRUSTADAS DE inicio_proveedor.js"
+    },
+    {
+      "FECHA": "06-06-2026",
+      "HORA": "11:29",
+      "DESCRIPCION": "SECCION vista_dashboard EN inicio_proveedor.js COMO VISTA INICIAL"
+    },
+    {
+      "FECHA": "06-06-2026",
+      "HORA": "11:29",
+      "DESCRIPCION": "CARD RESUMEN DE INVENTARIO POR CATEGORIA EN DASHBOARD PROVEEDOR"
+    },
+    {
+      "FECHA": "06-06-2026",
+      "HORA": "11:29",
+      "DESCRIPCION": "CARD VENTAS POR VENDEDOR EN DASHBOARD PROVEEDOR"
+    },
+    {
+      "FECHA": "06-06-2026",
+      "HORA": "11:29",
+      "DESCRIPCION": "CARD VENTAS POR MARCA EN DASHBOARD PROVEEDOR"
+    },
+    {
+      "FECHA": "06-06-2026",
+      "HORA": "11:55",
+      "DESCRIPCION": "TOTALES EN FOOTER DE TABLAS DEL DASHBOARD PROVEEDOR"
+    },
+    {
+      "FECHA": "06-06-2026",
+      "HORA": "11:55",
+      "DESCRIPCION": "GRAFICAS DOUGHNUT SOBRE TABLAS DEL DASHBOARD PROVEEDOR"
+    }
+  ]
+}
