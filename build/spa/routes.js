@@ -17,7 +17,7 @@ SpaRouter.registerMany({
         title: 'Inicio - Gerencia'
     },
     'inicio/supervisor': {
-        script: '../views/menu/inicio_supervisor.js',
+        script: '../views/menu/INICIO_SUPERVISOR/inicio_supervisor.js',
         title: 'Inicio - Supervisor'
     },
     'inicio/compras': {
@@ -33,7 +33,7 @@ SpaRouter.registerMany({
         title: 'Inicio - Ventas'
     },
     'inicio/digitador': {
-        script: '../views/menu/inicio_digitador.js',
+        script: '../views/menu/INICIO_DIGITADOR/inicio_digitador.js',
         title: 'Inicio - Digitador'
     },
     'inicio/despacho': {
@@ -41,7 +41,7 @@ SpaRouter.registerMany({
         title: 'Inicio - Despacho'
     },
     'inicio/proveedor': {
-        script: '../views/menu/inicio_proveedor.js',
+        script: '../views/menu/INICIO_PROVEEDOR/inicio_proveedor.js',
         showNavbar: false,
         title: 'Inicio - Proveedor'
     },

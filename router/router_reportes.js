@@ -177,7 +177,7 @@ router.post("/rpt_marcas_vendedores", async(req,res)=>{
             PRODUCTOS LEFT OUTER JOIN
             MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA ON DOCPRODUCTOS.CODPROD = PRODUCTOS.CODPROD
         WHERE 
-            (DOCUMENTOS.EMPNIT LIKE '%${sucursal}%') AND 
+            (DOCUMENTOS.EMPNIT LIKE '${sucursal}') AND 
             (DOCUMENTOS.MES = ${mes}) AND 
             (DOCUMENTOS.ANIO = ${anio}) AND 
             (DOCUMENTOS.STATUS <> 'A') AND 
