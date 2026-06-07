@@ -54,10 +54,6 @@ function getView(){
 
 
 
-            <button type="button" class="btn btn-bottom-l btn-secondary btn-circle btn-xl hand shadow" data-spa-action="inicio">
-                <i class="fal fa-home"></i>
-            </button>
-
             `
         },
         partial_encabezado:()=>{

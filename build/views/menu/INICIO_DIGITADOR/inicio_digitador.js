@@ -5,11 +5,26 @@ function digitador_setActiveCard(cardId) {
     });
 }
 
+function digitador_toggleSidebar(forceOpen) {
+    const sidebar = document.getElementById('digitadorSidebar');
+    const backdrop = document.getElementById('digitadorSidebarBackdrop');
+    if (!sidebar) return;
+    const open = typeof forceOpen === 'boolean' ? forceOpen : !sidebar.classList.contains('proveedor-sidebar--open');
+    sidebar.classList.toggle('proveedor-sidebar--open', open);
+    backdrop?.classList.toggle('proveedor-sidebar-backdrop--visible', open);
+    document.body.classList.toggle('proveedor-sidebar-open', open);
+}
+
+function digitador_closeSidebarMobile() {
+    if (window.innerWidth < 768) digitador_toggleSidebar(false);
+}
+
 function digitador_showHome() {
     digitador_showPanel('uno', null);
 }
 
 function digitador_showPanel(paneId, cardId, afterShow) {
+    digitador_closeSidebarMobile();
     document.querySelectorAll('#myTabHomeContent .tab-pane').forEach(p => {
         p.classList.remove('show', 'active');
     });
@@ -49,9 +64,16 @@ function getView(){
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-12 col-md-2 proveedor-sidebar">
-                    ${view.menu()}
+            <button type="button" class="btn btn-sm btn-primary proveedor-menu-toggle d-md-none" id="btnDigitadorMenuToggle" title="Menú de opciones">
+                <i class="fal fa-bars mr-1"></i> Menú
+            </button>
+            <div class="proveedor-sidebar-backdrop d-md-none" id="digitadorSidebarBackdrop"></div>
+
+            <div class="row proveedor-main-row">
+                <div class="col-12 col-md-2 proveedor-sidebar" id="digitadorSidebar">
+                    <div class="proveedor-sidebar__scroll">
+                        ${view.menu()}
+                    </div>
                 </div>
                 <div class="col-12 col-md-10 proveedor-tab-area">
                     <div id="proveedorPanelContent">
@@ -184,9 +206,6 @@ function getView(){
                         </div>
                     </div>
 
-                    <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="digitador_showHome()">
-                        <i class="fal fa-arrow-left"></i>
-                    </button>
             `
         },
         vista_pedidos_pendientes_anulados:()=>{
@@ -233,9 +252,6 @@ function getView(){
                         </div>
                     </div>
 
-                    <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="digitador_showHome()">
-                        <i class="fal fa-arrow-left"></i>
-                    </button>
             `
         },
         modal_detalle_documento:()=>{
@@ -386,9 +402,6 @@ function getView(){
                         </div>
                     </div>
 
-                    <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="digitador_showHome()">
-                        <i class="fal fa-arrow-left"></i>
-                    </button>
             `
         },
         vista_embarques:()=>{
@@ -458,9 +471,6 @@ function getView(){
                 </div>
             </div>
 
-            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="digitador_showHome()">
-                <i class="fal fa-arrow-left"></i>
-            </button>
 
             <button class="btn btn-success btn-xl btn-circle hand shadow btn-bottom-r" id="btnEmbarquesNuevo">
                 <i class="fal fa-plus"></i>
@@ -605,9 +615,6 @@ function getView(){
                         </div>
                     </div>
 
-                    <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="digitador_showHome()">
-                        <i class="fal fa-arrow-left"></i>
-                    </button>
             `
         },
         vista_facturacion:()=>{
@@ -698,9 +705,6 @@ function getView(){
 
                 </div>
 
-                <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="digitador_showHome()">
-                    <i class="fal fa-arrow-left"></i>
-                </button>
             
             `
         },
@@ -1007,40 +1011,34 @@ function getView(){
             return `
             <div class="card card-rounded shadow col-12">
                 <div class="card-body p-4">
-                   
-                    <h3 class="negrita text-center text-base">SELL OUT</h3>
-
-                    <br>
-                    <div class="row">
-                        <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
-                            <div class="form-group">
+                    <div class="row align-items-end">
+                        <div class="col-12 col-md-2 col-lg-2 mb-3 mb-md-0">
+                            <h5 class="negrita text-success mb-0">SELL OUT</h5>
+                        </div>
+                        <div class="col-sm-6 col-md-3 col-lg-3">
+                            <div class="form-group mb-0">
                                 <label class="negrita text-secondary">Fecha Inicial</label>
                                 <input type="date" class="negrita form-control" id="txtSFechaInicial">
                             </div>
                         </div>
-                        <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
-                            <div class="form-group">
-                                <label class="negrita text-secondary">Fecha Inicial</label>
+                        <div class="col-sm-6 col-md-3 col-lg-3">
+                            <div class="form-group mb-0">
+                                <label class="negrita text-secondary">Fecha Final</label>
                                 <input type="date" class="negrita form-control" id="txtSFechaFinal">
                             </div>
                         </div>
-                        <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
-                            <br>
+                        <div class="col-12 col-md-4 col-lg-4 text-md-right mb-2 mb-md-0">
                             <button class="btn btn-success btn-md hand shadow" id="btnExportarSellOut">
                                 <i class="fal fa-share"></i> Exportar Excel
                             </button>
                         </div>
                     </div>
-
-                    
-
                 </div>
             </div>
             <br>
             <div class="card card-rounded shadow col-12">
                 <div class="card-body p-4">
-
-                        <div class="table-responsive">
+                        <div class="table-responsive sygma-sellout-table">
                             <table class="table h-full table-bordered col-12" id="tblSellout">
                                 <thead class="bg-success text-white negrita">
                                     <tr>
@@ -1080,9 +1078,6 @@ function getView(){
            
 
             
-            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="digitador_showHome()">
-                <i class="fal fa-arrow-left"></i>
-            </button>
 
             
             `
@@ -1095,7 +1090,13 @@ function getView(){
 
 function addListeners(){
 
-    
+    document.getElementById('btnDigitadorMenuToggle')?.addEventListener('click', () => {
+        digitador_toggleSidebar();
+    });
+    document.getElementById('digitadorSidebarBackdrop')?.addEventListener('click', () => {
+        digitador_toggleSidebar(false);
+    });
+
     document.title = `Digitador - ${GlobalNomEmpresa}`;
 
     const lbEmpresa = document.getElementById('lbDigitadorEmpresa');
@@ -1191,6 +1192,8 @@ function initView(){
 }
 
 function destroyView(){
+    digitador_toggleSidebar(false);
+    document.body.classList.remove('proveedor-sidebar-open');
     document.getElementById('js-page-content')?.classList.remove('proveedor-page');
 }
 

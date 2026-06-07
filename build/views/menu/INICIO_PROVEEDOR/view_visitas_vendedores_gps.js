@@ -8,10 +8,6 @@ function getView(){
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
                             ${view.vista_inicio()}
 
-                            <button type="button" class="btn btn-bottom-l btn-xl btn-circle btn-primary hand shadow" data-spa-action="inicio">
-                                <i class="fal fa-home"></i>
-                            </button>
-                           
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
                             ${view.vista_datos_cliente()}
@@ -129,11 +125,6 @@ function getView(){
                 </div>
             </div>
             
-            
-            <button class="btn btn-bottom-l btn-xl btn-secondary btn-circle hand shadow"
-            id="btnAtrasDatosCliente" onclick="document.getElementById('tab-uno').click()">
-                <i class="fal fa-arrow-left"></i>
-            </button>                              
             
             `
         },

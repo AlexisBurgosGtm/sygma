@@ -113,7 +113,7 @@ function proveedor_rewireEmbedActions(container) {
     if (!container) return;
     container.querySelectorAll('[data-spa-action="inicio"]').forEach(btn => btn.remove());
     container.querySelectorAll('button.btn-bottom-l').forEach(btn => {
-        if (btn.querySelector('.fa-home')) btn.remove();
+        if (!btn.hasAttribute('data-dismiss')) btn.remove();
     });
 }
 
@@ -480,9 +480,6 @@ function getView(){
                 </div>
             </div>
 
-            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="proveedor_showHome()">
-                <i class="fal fa-arrow-left"></i>
-            </button>
             `
         },
         vista_marcas:()=>{
@@ -560,50 +557,40 @@ function getView(){
                 </div>
             </div>
 
-            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="proveedor_showHome()">
-                <i class="fal fa-arrow-left"></i>
-            </button>
             `
         },
         vista_sellout:()=>{
             return `
-            <div class="proveedor-section-hero proveedor-rpt-marcas__hero card shadow-sm mb-3">
-                <div class="card-body py-2 px-4">
-                    <h5 class="negrita text-success mb-0 text-center">SELL OUT</h5>
-                </div>
-            </div>
             <div class="card card-rounded shadow col-12">
                 <div class="card-body p-4">
-                    <div class="row">
-                        <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
-                            <div class="form-group">
+                    <div class="row align-items-end">
+                        <div class="col-12 col-md-2 col-lg-2 mb-3 mb-md-0">
+                            <h5 class="negrita text-success mb-0">SELL OUT</h5>
+                        </div>
+                        <div class="col-sm-6 col-md-3 col-lg-3">
+                            <div class="form-group mb-0">
                                 <label class="negrita text-secondary">Fecha Inicial</label>
                                 <input type="date" class="negrita form-control" id="txtSFechaInicial">
                             </div>
                         </div>
-                        <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
-                            <div class="form-group">
-                                <label class="negrita text-secondary">Fecha Inicial</label>
+                        <div class="col-sm-6 col-md-3 col-lg-3">
+                            <div class="form-group mb-0">
+                                <label class="negrita text-secondary">Fecha Final</label>
                                 <input type="date" class="negrita form-control" id="txtSFechaFinal">
                             </div>
                         </div>
-                        <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
-                            <br>
+                        <div class="col-12 col-md-4 col-lg-4 text-md-right mb-2 mb-md-0">
                             <button class="btn btn-success btn-md hand shadow" onclick="F.exportTableToExcel('tblSellout','SellOut')">
                                 <i class="fal fa-share"></i> Exportar Excel
                             </button>
                         </div>
                     </div>
-
-                    
-
                 </div>
             </div>
             <br>
             <div class="card card-rounded shadow col-12">
                 <div class="card-body p-4">
-
-                        <div class="table-responsive">
+                        <div class="table-responsive sygma-sellout-table">
                             <table class="table h-full table-bordered col-12" id="tblSellout">
                                 <thead class="bg-success text-white negrita">
                                     <tr>
@@ -643,9 +630,6 @@ function getView(){
            
 
             
-            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="proveedor_showHome()">
-                <i class="fal fa-arrow-left"></i>
-            </button>
 
             
             `
@@ -701,10 +685,6 @@ function getView(){
                     </div>
                 </div>
             </div>
-
-            <button class="btn btn-secondary btn-circle btn-xl hand shadow btn-bottom-l" onclick="proveedor_showHome()">
-                <i class="fal fa-arrow-left"></i>
-            </button>
 
             <button class="btn btn-warning btn-xl btn-circle hand shadow btn-bottom-r" id="btnSOConfigModal">
                 <i class="fal fa-cog"></i>
@@ -790,9 +770,6 @@ function getView(){
             </div>
 
             
-            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="proveedor_showHome()">
-                <i class="fal fa-arrow-left"></i>
-            </button>
 
             ${view.modal_categorias_marca()}
             `
@@ -1208,40 +1185,51 @@ function proveedor_renderDashboardChart(chartKey, canvasId, labels, values, titl
     const total = values.reduce((sum, value) => sum + Number(value), 0);
     if (total <= 0) return;
 
-    const pctValues = values.map((value) => Number(((Number(value) / total) * 100).toFixed(2)));
     const bgColor = labels.map(() => getRandomColor());
-    const plugins = typeof ChartDataLabels !== 'undefined' ? [ChartDataLabels] : [];
+    const chartWrap = canvas.closest('.proveedor-dashboard-chart');
+    if (chartWrap) {
+        chartWrap.style.height = `${Math.max(200, labels.length * 30)}px`;
+    }
 
     proveedor_dashboardCharts[chartKey] = new Chart(canvas.getContext('2d'), {
-        plugins,
-        type: 'doughnut',
+        type: 'bar',
         data: {
             labels,
             datasets: [{
-                data: pctValues,
+                label: title,
+                data: values.map((v) => Number(v)),
                 backgroundColor: bgColor,
-                borderColor: '#fff',
-                borderWidth: 1
+                borderRadius: 5,
+                maxBarThickness: 24
             }]
         },
         options: {
+            indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: {
-                    display: false
-                },
+                legend: { display: false },
                 title: {
                     display: true,
                     text: title,
                     font: { size: 12 }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0, 68, 163, 0.08)' },
+                    ticks: {
+                        font: { size: 10 },
+                        callback: (value) => F.setMoneda(value, 'Q')
+                    }
                 },
-                datalabels: {
-                    anchor: 'center',
-                    align: 'center',
-                    formatter: (value) => `${value}%`,
-                    color: '#fff',
-                    font: { weight: 'bold', size: 10 }
+                y: {
+                    grid: { display: false },
+                    ticks: {
+                        font: { size: 10 },
+                        autoSkip: false
+                    }
                 }
             }
         }

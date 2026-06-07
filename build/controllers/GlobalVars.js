@@ -60,18 +60,12 @@ let navmenu = document.getElementById('js-nav-menu');
 
 
 let GlobalLoader = `
-                <div>
-                    <div  class="spinner-grow" role="status">
-                        <img src="./favicon.png" width="30" height="30">
-                    </div>
-                    <div  class="spinner-grow" role="status">
-                        <img src="./favicon.png" width="30" height="30">
-                    </div>
-                    <div class="spinner-grow text-base" role="status"><span class="sr-only">Loading...</span></div>
-                    <div class="spinner-grow text-base" role="status"><span class="sr-only">Loading...</span></div>
-                    <div class="spinner-grow text-base" role="status"><span class="sr-only">Loading...</span></div>
-                </div>
-                `
+<div class="sygma-loader" role="status" aria-live="polite" aria-label="Cargando">
+    <div class="sygma-loader__spinner">
+        <span class="sygma-loader__dot"></span>
+    </div>
+    <span class="sygma-loader__label">Cargando</span>
+</div>`
                
 function get_button_loader(texto){
     let str = '';

@@ -7,9 +7,51 @@ const SUPERVISOR_EMBED_SCRIPTS = {
     btnMenuCoberturaMunicipio: SUPERVISOR_EMBED_BASE + 'view_cobertura_municipios_mapa.js',
 };
 
-function supervisor_showHome() {
+function supervisor_setActiveCard(cardId) {
+    document.querySelectorAll('.proveedor-menu-card').forEach(el => {
+        el.classList.toggle('proveedor-menu-card--active', !!cardId && el.id === cardId);
+    });
+}
+
+function supervisor_toggleSidebar(forceOpen) {
+    const sidebar = document.getElementById('supervisorSidebar');
+    const backdrop = document.getElementById('supervisorSidebarBackdrop');
+    if (!sidebar) return;
+    const open = typeof forceOpen === 'boolean' ? forceOpen : !sidebar.classList.contains('proveedor-sidebar--open');
+    sidebar.classList.toggle('proveedor-sidebar--open', open);
+    backdrop?.classList.toggle('proveedor-sidebar-backdrop--visible', open);
+    document.body.classList.toggle('proveedor-sidebar-open', open);
+}
+
+function supervisor_closeSidebarMobile() {
+    if (window.innerWidth < 768) supervisor_toggleSidebar(false);
+}
+
+function supervisor_showPanel(paneId, cardId, afterShow) {
+    supervisor_closeSidebarMobile();
     supervisor_teardownEmbed();
-    document.getElementById('tab-uno')?.click();
+    document.querySelectorAll('#myTabHomeContent .tab-pane').forEach(p => {
+        p.classList.remove('show', 'active');
+    });
+    const pane = document.getElementById(paneId);
+    if (pane) {
+        pane.classList.add('show', 'active');
+    }
+    document.querySelectorAll('#myTabHome .nav-link').forEach(l => {
+        l.classList.remove('active');
+        l.setAttribute('aria-selected', 'false');
+    });
+    const tabLink = document.querySelector(`#myTabHome a[href="#${paneId}"]`);
+    if (tabLink) {
+        tabLink.classList.add('active');
+        tabLink.setAttribute('aria-selected', 'true');
+    }
+    supervisor_setActiveCard(cardId);
+    if (typeof afterShow === 'function') afterShow();
+}
+
+function supervisor_showHome() {
+    supervisor_showPanel('uno', null);
 }
 
 function supervisor_teardownEmbed() {
@@ -34,13 +76,15 @@ function supervisor_rewireEmbedActions(container) {
     if (!container) return;
     container.querySelectorAll('[data-spa-action="inicio"]').forEach(btn => btn.remove());
     container.querySelectorAll('button.btn-bottom-l').forEach(btn => {
-        if (btn.querySelector('.fa-home')) btn.remove();
+        if (!btn.hasAttribute('data-dismiss')) btn.remove();
     });
 }
 
-function supervisor_loadEmbed(scriptUrl) {
+function supervisor_loadEmbed(scriptUrl, cardId) {
+    supervisor_closeSidebarMobile();
     supervisor_teardownEmbed();
     document.getElementById('myTabHomeContent')?.classList.add('d-none');
+    supervisor_setActiveCard(cardId || null);
     const embed = document.getElementById('supervisorPanelEmbed');
     embed.classList.remove('d-none');
     embed.innerHTML = GlobalLoader;
@@ -74,11 +118,38 @@ function getView(){
     let view = {
         body:()=>{
             return `
-                <div class="col-12 p-0 bg-white">
+            <div class="proveedor-layout">
+            <div class="proveedor-header-card card shadow-sm mb-3">
+                <div class="card-body py-2 px-3">
+                    <div class="row align-items-center no-gutters">
+                        <div class="col">
+                            <h5 class="negrita text-white mb-0">INICIO SUPERVISOR</h5>
+                            <small class="text-white-50 negrita">${GlobalUsuario}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-sm btn-primary proveedor-menu-toggle d-md-none" id="btnSupervisorMenuToggle" title="Menú de opciones">
+                <i class="fal fa-bars mr-1"></i> Menú
+            </button>
+            <div class="proveedor-sidebar-backdrop d-md-none" id="supervisorSidebarBackdrop"></div>
+
+            <div class="row proveedor-main-row">
+                <div class="col-12 col-md-2 proveedor-sidebar" id="supervisorSidebar">
+                    <div class="proveedor-sidebar__scroll">
+                        ${view.menu()}
+                    </div>
+                </div>
+                <div class="col-12 col-md-10 proveedor-tab-area">
                     <div id="supervisorPanelEmbed" class="d-none"></div>
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
-                            ${view.menu()}
+                            <div class="card proveedor-content-card shadow-sm">
+                                <div class="card-body p-4">
+                                    <p class="text-muted mb-0 text-center">Seleccione una opción del menú</p>
+                                </div>
+                            </div>
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
                             ${view.rpt_marcas()}
@@ -91,17 +162,19 @@ function getView(){
                         </div>
                         <div class="tab-pane fade" id="cinco" role="tabpanel" aria-labelledby="home-tab">
                             ${view.rpt_vendedores()}
-                        </div>  
+                        </div>
                         <div class="tab-pane fade" id="seis" role="tabpanel" aria-labelledby="home-tab">
                             ${view.rpt_inventarios()}
                         </div>
                         <div class="tab-pane fade" id="siete" role="tabpanel" aria-labelledby="home-tab">
                             ${view.rpt_clientes()}
-                        </div> 
+                        </div>
                         <div class="tab-pane fade" id="ocho" role="tabpanel" aria-labelledby="home-tab">
                             ${view.objetivos() + view.modal_categorias_marca() + view.modal_categorias_vendedor()}
-                        </div>        
+                        </div>
                     </div>
+                </div>
+            </div>
 
                     <ul class="nav nav-tabs hidden" id="myTabHome" role="tablist">
                         <li class="nav-item">
@@ -137,245 +210,32 @@ function getView(){
                                 <i class="fal fa-comments"></i></a>
                         </li>         
                     </ul>
-                    
-                </div>
-               
+            </div>
             `
         },
         menu:()=>{
-            return `
-            <div class="card card-rounded shadow col-12 bg-danger">
-                <div class="card-body p-4 text-center ">
-                
-                    <h5 class="text-white">Supervisor</h5>
-                    <h2 class="text-white negrita">${GlobalUsuario}</h2>
-
+            const items = [
+                { id: 'btnMenuClientes', label: 'Catálogo clientes', icon: 'fa-user', color: 'info', route: 'mant/clientes' },
+                { id: 'btnMenuNuevoPedido', label: 'Nuevo pedido', icon: 'fa-shopping-cart', color: 'info', route: 'ventas/pedidos-comodin' },
+                { id: 'btnMenuCenso', label: 'Crear clientes (censo)', icon: 'fa-users', color: 'info', route: 'ventas/censo' },
+                { id: 'btnMenuObjetivos', label: 'Logro objetivos P&G', icon: 'fa-chart-pie', color: 'danger' },
+                { id: 'btnMenuCoberturaMunicipio', label: 'Cobertura municipios', icon: 'fa-globe', color: 'primary' },
+                { id: 'btnMenuRptVisitasMapa', label: 'Visitas vendedor mapa', icon: 'fa-map-signs', color: 'secondary' },
+                { id: 'btnMenuRptInventario', label: 'Inventario', icon: 'fa-warehouse', color: 'secondary' },
+                { id: 'btnMenuRptVendedores', label: 'Ventas vendedores', icon: 'fa-chart-bar', color: 'secondary' },
+                { id: 'btnMenuRptMarcas', label: 'Reporte marcas', icon: 'fa-list', color: 'secondary' },
+                { id: 'btnMenuRptDocumentos', label: 'Reporte facturas', icon: 'fa-chart-pie', color: 'secondary' },
+                { id: 'btnMenuRptProductos', label: 'Reporte productos', icon: 'fa-box', color: 'secondary' },
+                { id: 'btnMenuRptClientesVendedor', label: 'Clientes por vendedor', icon: 'fa-map', color: 'secondary' },
+            ];
+            return items.map(item => `
+                <div class="card proveedor-menu-card hand" id="${item.id}"${item.route ? ` data-spa-route="${item.route}"` : ''}>
+                    <div class="card-body d-flex align-items-center flex-wrap">
+                        <i class="fal ${item.icon} text-${item.color} mr-2 proveedor-menu-icon"></i>
+                        <span class="negrita proveedor-menu-label">${item.label}</span>
+                    </div>
                 </div>
-            </div>
-
-            <br>
-
-            
-            <div class="row">
-                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
-                
-                    <div class="card border-info card-rounded bg-white shadow col-12 hand" href="#/mant/clientes" data-spa-route="mant/clientes">
-                        <div class="card-body p-4">
-                            
-                            <h4 class="text-info">CATALOGO CLIENTES</h4>
-
-                            <div class="row">
-                                <div class="col-6">
-                                </div>
-                                <div class="col-6 text-right">
-                                    <i class="fal fa-user negrita text-info" style="font-size:250%"></i>
-                                </div>
-                            </div>
-                            
-                        </div>
-                    </div>
-
-                    <br>
-
-                    <div class="card border-info card-rounded bg-white shadow col-12 hand" href="#/ventas/pedidos-comodin" data-spa-route="ventas/pedidos-comodin">
-                        <div class="card-body p-4">
-                            
-                            <h4 class="text-info">NUEVO PEDIDO</h4>
-
-                            <div class="row">
-                                <div class="col-6">
-                                </div>
-                                <div class="col-6 text-right">
-                                    <i class="fal fa-shopping-cart negrita text-info" style="font-size:250%"></i>
-                                </div>
-                            </div>
-                            
-                        </div>
-                    </div>
-
-                    <br>
-
-                    <div class="card border-info card-rounded  bg-white shadow col-12 hand" href="#/ventas/censo" data-spa-route="ventas/censo">
-                        <div class="card-body p-4">
-
-                            <h4 class="text-info">CREAR CLIENTES (CENSO)</h4>
-                          
-                             <div class="row">
-                                <div class="col-6">
-                                </div>
-                                <div class="col-6 text-right">
-                                    <i class="fal fa-users negrita text-info" style="font-size:250%"></i>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <br>
-
-                    <div class="card border-info card-rounded  bg-white shadow col-12 hand"  
-                    id="btnMenuObjetivos">
-                        <div class="card-body p-4">
-
-                            <h4 class="text-info">LOGRO OBJETIVOS P&G</h4>
-                          
-                             <div class="row">
-                                <div class="col-6">
-                                </div>
-                                <div class="col-6 text-right">
-                                    <i class="fal fa-chart-pie negrita text-info" style="font-size:250%"></i>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <br>
-
-                    <div class="card border-info card-rounded  bg-white shadow col-12 hand"  
-                    id="btnMenuCoberturaMunicipio">
-                        <div class="card-body p-4">
-
-                            <h4 class="text-info">COBERTURA MUNICIPIOS</h4>
-                          
-                             <div class="row">
-                                <div class="col-6">
-                                </div>
-                                <div class="col-6 text-right">
-                                    <i class="fal fa-globe negrita text-info" style="font-size:250%"></i>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-
-                
-                </div>
-                
-                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
-
-                    <div class="card card-rounded   bg-white shadow col-12 hand" id="btnMenuRptVisitasMapa">
-                        <div class="card-body p-4">
-
-                            <h4 class="">VISITAS VENDEDOR MAPA</h4>
-                          
-                             <div class="row">
-                                <div class="col-6">
-                                </div>
-                                <div class="col-6 text-right">
-                                    <i class="fal fa-map-signs negrita text-secondary" style="font-size:250%"></i>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                    <br>
-
-                    <div class="card card-rounded   bg-white shadow col-12 hand" id="btnMenuRptInventario">
-                        <div class="card-body p-4">
-
-                            <h4 class="">INVENTARIO</h4>
-                          
-                             <div class="row">
-                                <div class="col-6">
-                                </div>
-                                <div class="col-6 text-right">
-                                    <i class="fal fa-warehouse negrita text-secondary" style="font-size:250%"></i>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                    <br>
-
-                    <div class="card card-rounded   bg-white shadow col-12 hand" id="btnMenuRptVendedores">
-                        <div class="card-body p-4">
-
-                            <h4 class="">VENTAS VENDEDORES</h4>
-                          
-                             <div class="row">
-                                <div class="col-6">
-                                </div>
-                                <div class="col-6 text-right">
-                                    <i class="fal fa-chart-bar negrita text-secondary" style="font-size:250%"></i>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                    <br>
-                    <div class="card card-rounded bg-white shadow col-12 hand" id="btnMenuRptMarcas">
-                        <div class="card-body p-4">
-                            
-                            <h4>REPORTE MARCAS</h4>
-
-                            <div class="row">
-                                <div class="col-6">
-                                </div>
-                                <div class="col-6 text-right">
-                                    <i class="fal fa-list negrita text-secondary" style="font-size:250%"></i>
-                                </div>
-                            </div>
-                            
-                        </div>
-                    </div>
-                    <br>
-                    <div class="card card-rounded bg-white shadow col-12 hand" id="btnMenuRptDocumentos">
-                        <div class="card-body p-4">
-                            
-                            <h4>REPORTE DE FACTURAS</h4>
-
-                            <div class="row">
-                                <div class="col-6">
-                                </div>
-                                <div class="col-6 text-right">
-                                    <i class="fal fa-chart-pie negrita text-secondary" style="font-size:250%"></i>
-                                </div>
-                            </div>
-                            
-                        </div>
-                    </div>
-                    <br>
-                    <div class="card card-rounded   bg-white shadow col-12 hand" id="btnMenuRptProductos">
-                        <div class="card-body p-4">
-
-                            <h4 class="">REPORTE PRODUCTOS</h4>
-                          
-                             <div class="row">
-                                <div class="col-6">
-                                </div>
-                                <div class="col-6 text-right">
-                                    <i class="fal fa-box negrita text-secondary" style="font-size:250%"></i>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                    <br>
-                    <div class="card card-rounded   bg-white shadow col-12 hand" id="btnMenuRptClientesVendedor">
-                        <div class="card-body p-4">
-
-                            <h4 class="">CLIENTES POR VENDEDOR</h4>
-                          
-                             <div class="row">
-                                <div class="col-6">
-                                </div>
-                                <div class="col-6 text-right">
-                                    <i class="fal fa-map negrita text-secondary" style="font-size:250%"></i>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-                
-                </div>
-            </div>
-            
-       
-
-            `
+            `).join('');
         },
         vista_listado:()=>{
             return `
@@ -484,9 +344,6 @@ function getView(){
                     </div>
 
             
-            <button class="btn btn-secondary btn-circle btn-xl hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
-                <i class="fal fa-arrow-left"></i>
-            </button>
             `
         },
         rpt_facturas:()=>{
@@ -544,9 +401,6 @@ function getView(){
                         </div>
                     </div>
             
-            <button class="btn btn-secondary btn-circle btn-xl hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
-                <i class="fal fa-arrow-left"></i>
-            </button>
             `
         },
         modal_detalle_documento:()=>{
@@ -684,9 +538,6 @@ function getView(){
             
             
             
-            <button class="btn btn-secondary btn-circle btn-xl hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
-                <i class="fal fa-arrow-left"></i>
-            </button>
             `
         },
         rpt_vendedores:()=>{
@@ -750,9 +601,6 @@ function getView(){
 
             
             
-            <button class="btn btn-secondary btn-circle btn-xl hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
-                <i class="fal fa-arrow-left"></i>
-            </button>
             `
         },
         rpt_inventarios:()=>{
@@ -804,9 +652,6 @@ function getView(){
                 </div>
             </div>
 
-            <button class="btn btn-secondary btn-circle btn-xl hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
-                <i class="fal fa-arrow-left"></i>
-            </button>
 
             `
         },
@@ -841,9 +686,6 @@ function getView(){
                 </div>
             </div>
 
-            <button class="btn btn-secondary btn-circle btn-xl hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
-                <i class="fal fa-arrow-left"></i>
-            </button>
 
             `
         },
@@ -861,10 +703,6 @@ function getView(){
 
          
 
-            <button class="btn btn-bottom-l btn-secondary btn-circle btn-xl hand shadow"
-            onclick="document.getElementById('tab-uno').click()">
-                <i class="fal fa-arrow-left"></i>
-            </button>
             `
         },
         frag_parametros: ()=>{
@@ -1109,39 +947,37 @@ function getView(){
 
 function addListeners(){
 
+    document.getElementById('btnSupervisorMenuToggle')?.addEventListener('click', () => {
+        supervisor_toggleSidebar();
+    });
+    document.getElementById('supervisorSidebarBackdrop')?.addEventListener('click', () => {
+        supervisor_toggleSidebar(false);
+    });
+    document.getElementById('supervisorSidebar')?.addEventListener('click', (e) => {
+        if (e.target.closest('[data-spa-route]')) supervisor_closeSidebarMobile();
+    });
+
     F.slideAnimationTabs();
 
-   document.title = `Supervisor - ${GlobalNomEmpresa}`;
+    document.title = `Supervisor - ${GlobalNomEmpresa}`;
 
-  
-
-
-    //MENU
-
-    //documentos
     document.getElementById('btnMenuRptDocumentos').addEventListener('click',()=>{
+        supervisor_showPanel('tres', 'btnMenuRptDocumentos', () => {
+            rpt_facturas('tblDataPedidos');
+        });
+    });
 
-        document.getElementById('tab-tres').click();
-        
-        rpt_facturas('tblDataPedidos');
-
-    })
-
-
-    //marcas
     document.getElementById('btnMenuRptMarcas').addEventListener('click',()=>{
-
-        document.getElementById('tab-dos').click();
-        
-        rpt_tbl_marcas();
-
-    })
+        supervisor_showPanel('dos', 'btnMenuRptMarcas', () => {
+            rpt_tbl_marcas();
+        });
+    });
 
     document.getElementById('btnMenuRptProductos').addEventListener('click',()=>{
-        document.getElementById('tab-cuatro').click();
-        rpt_tbl_productos();
-
-    })
+        supervisor_showPanel('cuatro', 'btnMenuRptProductos', () => {
+            rpt_tbl_productos();
+        });
+    });
 
 
 
@@ -1203,26 +1039,19 @@ function addListeners(){
     
   
     document.getElementById('btnMenuRptVisitasMapa').addEventListener('click',()=>{
-        supervisor_loadEmbed(SUPERVISOR_EMBED_SCRIPTS.btnMenuRptVisitasMapa);
+        supervisor_loadEmbed(SUPERVISOR_EMBED_SCRIPTS.btnMenuRptVisitasMapa, 'btnMenuRptVisitasMapa');
     });
 
     document.getElementById('btnMenuRptInventario').addEventListener('click',()=>{
-
-        document.getElementById('tab-seis').click();
-
-        tbl_inventario();
-
+        supervisor_showPanel('seis', 'btnMenuRptInventario', () => {
+            tbl_inventario();
+        });
     });
 
-
-
-
     document.getElementById('btnMenuRptVendedores').addEventListener('click',()=>{
-
-        document.getElementById('tab-cinco').click();
-
-        rpt_tbl_vendedores();
-
+        supervisor_showPanel('cinco', 'btnMenuRptVendedores', () => {
+            rpt_tbl_vendedores();
+        });
     });
 
     document.getElementById('txtRptVenFechaInicial').value = F.getFecha();
@@ -1241,11 +1070,9 @@ function addListeners(){
 
 
     document.getElementById('btnMenuRptClientesVendedor').addEventListener('click',()=>{
-
-        document.getElementById('tab-siete').click();
-
-        rpt_tbl_clientes_vendedores();
-
+        supervisor_showPanel('siete', 'btnMenuRptClientesVendedor', () => {
+            rpt_tbl_clientes_vendedores();
+        });
     });
 
 
@@ -1261,12 +1088,16 @@ function addListeners(){
 };
 
 function initView(){
+    document.getElementById('js-page-content')?.classList.add('proveedor-page');
     getView();
     addListeners();
 }
 
 function destroyView(){
     supervisor_teardownEmbed();
+    supervisor_toggleSidebar(false);
+    document.body.classList.remove('proveedor-sidebar-open');
+    document.getElementById('js-page-content')?.classList.remove('proveedor-page');
 }
 
 window._supervisorCore = { initView, destroyView, getView, addListeners };
@@ -1693,12 +1524,11 @@ function listeners_objetivos(){
 
 
     document.getElementById('btnMenuObjetivos').addEventListener('click',()=>{
-        supervisor_loadEmbed(SUPERVISOR_EMBED_SCRIPTS.btnMenuObjetivos);
+        supervisor_loadEmbed(SUPERVISOR_EMBED_SCRIPTS.btnMenuObjetivos, 'btnMenuObjetivos');
     });
 
-
     document.getElementById('btnMenuCoberturaMunicipio').addEventListener('click',()=>{
-        supervisor_loadEmbed(SUPERVISOR_EMBED_SCRIPTS.btnMenuCoberturaMunicipio);
+        supervisor_loadEmbed(SUPERVISOR_EMBED_SCRIPTS.btnMenuCoberturaMunicipio, 'btnMenuCoberturaMunicipio');
     });
 
     

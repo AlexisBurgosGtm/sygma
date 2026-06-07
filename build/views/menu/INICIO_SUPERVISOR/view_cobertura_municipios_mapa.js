@@ -101,9 +101,6 @@ function getView(){
                 </div>
             </div>
             
-             <button type="button" class="btn btn-circle btn-xl btn-secondary btn-bottom-l hand shadow" data-spa-action="inicio">
-                    <i class="fal fa-home"></i>
-            </button>
           `
         },
         detalles_municipio:()=>{
@@ -143,10 +140,6 @@ function getView(){
                 </div>
             </div>
 
-            <button class="btn btn-secondary btn-circle btn-xl btn-bottom-l hand shadow"
-                onclick="document.getElementById('tab-uno').click()">
-                <i class="fal fa-arrow-left"></i>
-            </button>
             `
         },
         frag_rpt_ventas_marcas_municipio:()=>{

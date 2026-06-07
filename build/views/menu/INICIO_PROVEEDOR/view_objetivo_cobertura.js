@@ -104,9 +104,6 @@ function getView(){
                 </div>
             </div>
 
-            <button type="button" class="btn btn-circle btn-xl btn-secondary btn-bottom-l hand shadow" data-spa-action="inicio">
-                    <i class="fal fa-home"></i>
-            </button>
             `
         },
         vista_empleado:()=>{
@@ -189,10 +186,6 @@ function getView(){
             </div>
 
 
-            <button class="btn btn-bottom-l btn-secondary btn-xl btn-circle hand shadow"
-            id="btnAtrasEmpleado">
-                <i class="fal fa-arrow-left"></i>
-            </button>
             `
         },
         modal_cobertura_marca_empleados:()=>{
@@ -303,7 +296,7 @@ function addListeners(){
     cobertura_refresh();
     window.proveedor_embedRefresh = cobertura_refresh;
 
-    document.getElementById('btnAtrasEmpleado').addEventListener('click',()=>{
+    document.getElementById('btnAtrasEmpleado')?.addEventListener('click',()=>{
         document.getElementById('tab-uno').click();
         document.getElementById('tblDataEmpleado').innerHTML = '';
     });

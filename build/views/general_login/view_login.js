@@ -256,19 +256,33 @@ function login_inyectarEstilos() {
         #btnIniciar {
             width: 52px;
             height: 52px;
-            border: none;
-            background: linear-gradient(145deg, #3b7ddd, var(--login-primary));
-            box-shadow: 0 6px 20px rgba(0, 68, 163, 0.45);
-            transition: transform 0.2s, box-shadow 0.2s;
+            border: 2px solid rgba(255, 255, 255, 0.38);
+            border-radius: 50%;
+            background: linear-gradient(145deg, #0a2540 0%, #001433 100%);
+            color: #f8fafc;
+            box-shadow:
+                0 4px 18px rgba(0, 0, 0, 0.38),
+                inset 0 1px 0 rgba(255, 255, 255, 0.14);
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s, background 0.2s;
+        }
+
+        #btnIniciar i {
+            color: #f8fafc;
+            font-size: 1.1rem;
         }
 
         #btnIniciar:hover:not(:disabled) {
             transform: translateY(-2px) scale(1.04);
-            box-shadow: 0 10px 28px rgba(0, 68, 163, 0.55);
+            background: linear-gradient(145deg, #0d3050 0%, #002055 100%);
+            border-color: rgba(255, 255, 255, 0.55);
+            box-shadow:
+                0 8px 24px rgba(0, 0, 0, 0.42),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
 
         #btnIniciar:disabled {
-            opacity: 0.75;
+            opacity: 0.7;
+            border-color: rgba(255, 255, 255, 0.22);
         }
 
         @media (max-width: 480px) {

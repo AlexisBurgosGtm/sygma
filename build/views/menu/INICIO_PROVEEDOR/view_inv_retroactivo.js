@@ -88,15 +88,6 @@ function getView(){
                 </div>
             </div>
 
-
-            <button type="button" class="btn btn-base btn-circle btn-xl btn-bottom-l hand shadow" data-spa-action="inicio">
-                <i class="fal fa-home"></i>
-            </button>
-
-            <button class="btn btn-success btn-circle btn-xl btn-bottom-r hand shadow" id="btnNuevo">
-                <i class="fal fa-plus"></i>
-            </button>
-
             `
         },
         modal:()=>{

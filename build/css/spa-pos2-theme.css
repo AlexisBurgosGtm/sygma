@@ -146,6 +146,13 @@ body.app-pos2-theme #root {
 .pos2-table-compact tbody .btn.btn-circle {
     width: 1.75rem;
     height: 1.75rem;
+    min-width: 1.75rem;
+    min-height: 1.75rem;
+    border-radius: 50% !important;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .pos2-doc-compact {

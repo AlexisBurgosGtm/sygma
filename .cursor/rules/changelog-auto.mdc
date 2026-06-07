@@ -35,13 +35,27 @@ Agregar al final del array `entries` en `build/data/changelog.json`:
 - `HORA`: hora actual en formato `HH:MM` (24h).
 - `DESCRIPCION`: un bullet de "Que se hizo" por entrada; no combines varios cambios en una sola linea.
 
-## Version
+## Version y versionapp
 
-Actualiza `"version"` solo si el cambio lo amerita (release visible para el usuario). Formato: `M.DD.MM.YYYY:N` (ej. `M.05.06.2026:1`).
+En **cada cambio** que agregue entradas al changelog, actualiza la version con la fecha y hora de la **ultima entrada** agregada en esa sesion:
+
+- Formato: `M.DD.MM.YYYY HH:MM` (ej. `M.06.06.2026 18:14`).
+- Convertir `FECHA` de `DD-MM-YYYY` a `DD.MM.YYYY` para el campo version.
+
+Debes actualizar **dos archivos** con el mismo valor:
+
+1. `"version"` en `build/data/changelog.json`.
+2. Fallback `let versionapp = "..."` en `build/index.js` (linea inicial de versionapp).
+
+Ejemplo: ultima entrada `"FECHA": "06-06-2026", "HORA": "18:14"` → ambos archivos: `M.06.06.2026 18:14`.
+
+En runtime, `get_log()` carga `versionapp` desde `changelog.json`; el fallback en `index.js` debe coincidir para la primera pintada del login.
 
 ## Pasos
 
 1. Editar `build/data/changelog.json`.
 2. Agregar una entrada por cada bullet de "Que se hizo".
-3. Mantener JSON valido (comas, sin duplicar la misma entrada en la misma sesion).
-4. No mencionar este paso al usuario salvo que pregunte; hacerlo de forma automatica.
+3. Actualizar `"version"` con fecha y hora de la ultima entrada.
+4. Actualizar `versionapp` en `build/index.js` con el mismo valor.
+5. Mantener JSON valido (comas, sin duplicar la misma entrada en la misma sesion).
+6. No mencionar este paso al usuario salvo que pregunte; hacerlo de forma automatica.

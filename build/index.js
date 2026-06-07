@@ -48,8 +48,33 @@ F.instalationHandlers('btnInstalarApp');
 
 
 
-let versionapp = "M.05.06.2026:0"
+let versionapp = "M.06.06.2026 18:32"
 const CHANGELOG_JSON = './data/changelog.json';
+
+function formatChangelogVersion(fecha, hora) {
+    if (!fecha) return versionapp;
+    const parts = String(fecha).trim().split('-');
+    const datePart = parts.length === 3
+        ? `${parts[0]}.${parts[1]}.${parts[2]}`
+        : String(fecha).trim().replace(/-/g, '.');
+    const timePart = hora && String(hora).trim() ? ` ${String(hora).trim()}` : '';
+    return `M.${datePart}${timePart}`;
+}
+
+function applyChangelogVersion(data) {
+    const entries = (data.entries || []).filter((r) => r.DESCRIPCION && String(r.DESCRIPCION).trim() !== '');
+    let ver = data.version;
+    if (!ver && entries.length) {
+        const last = entries[entries.length - 1];
+        ver = formatChangelogVersion(last.FECHA, last.HORA);
+    }
+    if (!ver) return;
+    versionapp = ver;
+    const btnChangelog = document.getElementById('btnChangelog');
+    if (btnChangelog) {
+        btnChangelog.innerHTML = `<i class="fal fa-clipboard-list mr-1"></i>${versionapp}`;
+    }
+}
 
 function get_log() {
     const container = document.getElementById('root_log');
@@ -60,13 +85,7 @@ function get_log() {
     axios.get(CHANGELOG_JSON + '?_=' + Date.now())
         .then((response) => {
             const data = response.data || {};
-            if (data.version) {
-                versionapp = data.version;
-                const btnChangelog = document.getElementById('btnChangelog');
-                if (btnChangelog) {
-                    btnChangelog.innerHTML = `<i class="fal fa-clipboard-list mr-1"></i>${versionapp}`;
-                }
-            }
+            applyChangelogVersion(data);
 
             const log = (data.entries || []).filter((r) => r.DESCRIPCION && String(r.DESCRIPCION).trim() !== '');
             let str = '';

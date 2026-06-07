@@ -87,10 +87,6 @@ function getView(){
             </div>
             
 
-            <button type="button" class="btn btn-circle btn-xl btn-secondary btn-bottom-l hand shadow" data-spa-action="inicio">
-                    <i class="fal fa-home"></i>
-            </button>
-
             `
         },
         vista_listado:()=>{
@@ -123,11 +119,6 @@ function getView(){
                
             </div>
 
-
-            <button class="btn btn-circle btn-xl btn-secondary btn-bottom-l hand shadow"
-                onclick="document.getElementById('tab-uno').click()">
-                    <i class="fal fa-arrow-left"></i>
-            </button>
 
            
 

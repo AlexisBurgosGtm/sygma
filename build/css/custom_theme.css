@@ -436,7 +436,8 @@ body.proveedor-sidebar-open {
 }
 .proveedor-dashboard-chart {
   position: relative;
-  height: 190px;
+  min-height: 200px;
+  height: 200px;
 }
 .proveedor-dashboard-scroll {
   max-height: 280px;
@@ -605,7 +606,98 @@ body.proveedor-sidebar-open {
   background: rgba(59, 125, 221, 0.06);
 }
 .proveedor-view-modern .form-control,
-.proveedor-view-modern .btn {
+.proveedor-view-modern .btn:not(.btn-circle) {
   border-radius: 8px;
+}
+
+/* Botones circulares — forma redonda en toda la app */
+.btn.btn-circle,
+button.btn-circle {
+  border-radius: 50% !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  flex-shrink: 0;
+  line-height: 1;
+  padding: 0;
+}
+.proveedor-view-modern .btn.btn-circle,
+.proveedor-tab-area .btn.btn-circle,
+#proveedorPanelEmbed .btn.btn-circle,
+body.app-pos2-theme #root .btn.btn-circle {
+  border-radius: 50% !important;
+}
+
+/* Loader global — sygma-loader */
+.sygma-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  padding: 1.25rem 1rem;
+  min-height: 72px;
+  width: 100%;
+}
+.sygma-loader__spinner {
+  position: relative;
+  width: 46px;
+  height: 46px;
+}
+.sygma-loader__spinner::before,
+.sygma-loader__spinner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2.5px solid transparent;
+}
+.sygma-loader__spinner::before {
+  border-top-color: #0044a3;
+  border-right-color: rgba(0, 68, 163, 0.18);
+  animation: sygma-loader-spin 0.85s cubic-bezier(0.45, 0.05, 0.35, 0.95) infinite;
+}
+.sygma-loader__spinner::after {
+  inset: 7px;
+  border-bottom-color: #3b7ddd;
+  border-left-color: rgba(59, 125, 221, 0.15);
+  animation: sygma-loader-spin 1.15s cubic-bezier(0.45, 0.05, 0.35, 0.95) infinite reverse;
+}
+.sygma-loader__dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  background: linear-gradient(135deg, #0044a3, #3b7ddd);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(0, 68, 163, 0.35);
+  animation: sygma-loader-pulse 1.4s ease-in-out infinite;
+}
+.sygma-loader__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #64748b;
+  animation: sygma-loader-fade 1.6s ease-in-out infinite;
+}
+@keyframes sygma-loader-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes sygma-loader-pulse {
+  0%, 100% { transform: scale(0.88); opacity: 0.7; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+@keyframes sygma-loader-fade {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+/* Sell out — fuente -5% solo en tabla */
+.sygma-sellout-table .table {
+  font-size: 0.95em;
 }
 
