@@ -579,6 +579,141 @@ router.post("/cobertura_vendedores_sucursal", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+router.post("/get_cobertura_marcas", async (req, res) => {
+    const { token, sucursal, mes, anio } = req.body;
+
+    const qry = `
+        SELECT
+            M.CODMARCA,
+            M.DESMARCA,
+            COUNT(DISTINCT D.CODCLIENTE) AS CLIENTES,
+            SUM(ISNULL(DP.TOTALPRECIO, 0)) AS IMPORTE,
+            U.UNIVERSO
+        FROM DOCUMENTOS D
+        INNER JOIN TIPODOCUMENTOS TD
+            ON D.CODDOC = TD.CODDOC
+            AND D.EMPNIT = TD.EMPNIT
+        INNER JOIN DOCPRODUCTOS DP
+            ON D.EMPNIT = DP.EMPNIT
+            AND D.CODDOC = DP.CODDOC
+            AND D.CORRELATIVO = DP.CORRELATIVO
+        INNER JOIN PRODUCTOS P
+            ON DP.CODPROD = P.CODPROD
+        INNER JOIN MARCAS M
+            ON P.CODMARCA = M.CODMARCA
+        CROSS JOIN (
+            SELECT COUNT(C.CODCLIENTE) AS UNIVERSO
+            FROM CLIENTES C
+            WHERE C.HABILITADO = 'SI'
+                AND (${objFiltroSucursal('C.EMPNIT', sucursal)})
+        ) U
+        WHERE D.STATUS <> 'A'
+            AND TD.TIPODOC = 'FAC'
+            AND D.ANIO = ${anio}
+            AND D.MES = ${mes}
+            AND (${objFiltroSucursal('D.EMPNIT', sucursal)})
+            AND D.CODCLIENTE IS NOT NULL
+            AND D.CODCLIENTE > 0
+        GROUP BY M.CODMARCA, M.DESMARCA, U.UNIVERSO
+        ORDER BY IMPORTE DESC, M.DESMARCA
+    `;
+
+    execute.QueryToken(res, qry, token);
+});
+
+router.post("/get_cobertura_marcas_vendedores", async (req, res) => {
+    const { token, sucursal, mes, anio, codmarca } = req.body;
+
+    const qry = `
+        ;WITH DocsMarca AS (
+            SELECT
+                D.CODEMP,
+                D.CODCLIENTE,
+                DP.TOTALPRECIO
+            FROM DOCUMENTOS D
+            INNER JOIN TIPODOCUMENTOS TD
+                ON D.CODDOC = TD.CODDOC
+                AND D.EMPNIT = TD.EMPNIT
+            INNER JOIN DOCPRODUCTOS DP
+                ON D.EMPNIT = DP.EMPNIT
+                AND D.CODDOC = DP.CODDOC
+                AND D.CORRELATIVO = DP.CORRELATIVO
+            INNER JOIN PRODUCTOS P
+                ON DP.CODPROD = P.CODPROD
+            INNER JOIN MARCAS M
+                ON P.CODMARCA = M.CODMARCA
+            WHERE D.STATUS <> 'A'
+                AND TD.TIPODOC = 'FAC'
+                AND D.ANIO = ${anio}
+                AND D.MES = ${mes}
+                AND (${objFiltroSucursal('D.EMPNIT', sucursal)})
+                AND M.CODMARCA = ${Number(codmarca)}
+                AND D.CODCLIENTE IS NOT NULL
+                AND D.CODCLIENTE > 0
+        ),
+        ClientesAlcanzados AS (
+            SELECT DISTINCT CODCLIENTE
+            FROM DocsMarca
+        ),
+        ClientesPorEmpleado AS (
+            SELECT
+                CL.CODEMPLEADO AS CODEMP,
+                COUNT(DISTINCT CA.CODCLIENTE) AS CLIENTES
+            FROM ClientesAlcanzados CA
+            INNER JOIN CLIENTES CL
+                ON CA.CODCLIENTE = CL.CODCLIENTE
+                AND CL.HABILITADO = 'SI'
+                AND (${objFiltroSucursal('CL.EMPNIT', sucursal)})
+                AND CL.CODEMPLEADO IS NOT NULL
+                AND CL.CODEMPLEADO > 0
+            GROUP BY CL.CODEMPLEADO
+        ),
+        ImportePorEmpleado AS (
+            SELECT
+                CODEMP,
+                SUM(ISNULL(TOTALPRECIO, 0)) AS IMPORTE
+            FROM DocsMarca
+            WHERE CODEMP IS NOT NULL
+                AND CODEMP > 0
+            GROUP BY CODEMP
+        ),
+        EmpleadosActivos AS (
+            SELECT CODEMP FROM ClientesPorEmpleado
+            UNION
+            SELECT CODEMP FROM ImportePorEmpleado
+        )
+        SELECT
+            EA.CODEMP,
+            ISNULL(E.NOMEMPLEADO, 'SIN VENDEDOR') AS NOMEMPLEADO,
+            ISNULL(CPE.CLIENTES, 0) AS CLIENTES,
+            ISNULL(UE.UNIVERSO_EMP, 0) AS UNIVERSO_EMP,
+            ISNULL(IPE.IMPORTE, 0) AS IMPORTE,
+            (SELECT COUNT(*) FROM ClientesAlcanzados) AS TOTAL_CLIENTES_MARCA
+        FROM EmpleadosActivos EA
+        LEFT JOIN ClientesPorEmpleado CPE
+            ON EA.CODEMP = CPE.CODEMP
+        LEFT JOIN ImportePorEmpleado IPE
+            ON EA.CODEMP = IPE.CODEMP
+        LEFT JOIN EMPLEADOS E
+            ON EA.CODEMP = E.CODEMPLEADO
+            AND (${objFiltroSucursal('E.EMPNIT', sucursal)})
+        LEFT JOIN (
+            SELECT
+                C.CODEMPLEADO,
+                COUNT(C.CODCLIENTE) AS UNIVERSO_EMP
+            FROM CLIENTES C
+            WHERE C.HABILITADO = 'SI'
+                AND (${objFiltroSucursal('C.EMPNIT', sucursal)})
+                AND C.CODEMPLEADO IS NOT NULL
+                AND C.CODEMPLEADO > 0
+            GROUP BY C.CODEMPLEADO
+        ) UE ON EA.CODEMP = UE.CODEMPLEADO
+        ORDER BY IMPORTE DESC, NOMEMPLEADO
+    `;
+
+    execute.QueryToken(res, qry, token);
+});
+
 router.post("/cobertura_marcas_sucursal", async(req,res)=>{
    
     const { token, sucursal, mes, anio} = req.body;

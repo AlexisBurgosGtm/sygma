@@ -560,6 +560,45 @@ body.proveedor-sidebar-open {
   max-height: 380px;
   overflow-y: auto;
 }
+.proveedor-cobertura-marcas .proveedor-rpt-marcas__scroll {
+  max-height: 480px;
+  overflow-y: auto;
+}
+.proveedor-cobertura-marca-modal .modal-dialog {
+  max-width: 920px;
+}
+.proveedor-cobertura-marca-modal .modal-content {
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(0, 68, 163, 0.14) !important;
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(0, 68, 163, 0.18);
+  overflow: hidden;
+}
+.proveedor-cobertura-marca-modal.show ~ .modal-backdrop,
+.proveedor-cobertura-marca-modal + .modal-backdrop {
+  opacity: 0.35;
+}
+.proveedor-cobertura-marca-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #eef4ff 100%);
+  border-bottom: 1px solid rgba(0, 68, 163, 0.08);
+}
+.proveedor-cobertura-marca-modal__close {
+  background: rgba(255, 255, 255, 0.7) !important;
+  border: 1px solid rgba(0, 68, 163, 0.12) !important;
+  color: #475569 !important;
+  flex-shrink: 0;
+}
+.proveedor-cobertura-marca-modal__body {
+  padding: 1rem 1.25rem 1.25rem;
+}
+.proveedor-cobertura-marca-modal__scroll {
+  max-height: 420px;
+}
 .proveedor-cobertura-clientes-detalle-header .card-body {
   padding-top: 0.45rem !important;
   padding-bottom: 0.45rem !important;

@@ -40,6 +40,7 @@ const PROVEEDOR_EMBED_SCRIPTS = {
     btnMenuInventarioRetroactivo: PROVEEDOR_EMBED_BASE + 'view_inv_retroactivo.js',
     btnMenuCoberturaMunicipios: PROVEEDOR_EMBED_BASE + 'view_cobertura_municipios_mapa.js',
     btnMenuCoberturaClientes: PROVEEDOR_EMBED_BASE + 'view_objetivo_cobertura.js',
+    btnMenuCoberturaMarcas: PROVEEDOR_EMBED_BASE + 'view_cobertura_marcas.js',
 };
 
 const PROVEEDOR_MODERN_EMBEDS = new Set([
@@ -47,6 +48,7 @@ const PROVEEDOR_MODERN_EMBEDS = new Set([
     'btnMenuInventarioRetroactivo',
     'btnMenuCoberturaMunicipios',
     'btnMenuCoberturaClientes',
+    'btnMenuCoberturaMarcas',
 ]);
 
 function proveedor_toggleSidebar(forceOpen) {
@@ -272,11 +274,12 @@ function getView(){
                 { id: 'btnMenuVentasSellout',    label: 'Sell out',                  icon: 'fa-chart-pie',  color: 'success' },
                 { id: 'btnMenuRptInventario',    label: 'Inventario',                icon: 'fa-warehouse',  color: 'secondary' },
                 { id: 'btnMenuObjetivosLogro',   label: 'Logro P&G',                 icon: 'fa-chart-pie',  color: 'danger' },
+                { id: 'btnMenuCoberturaMunicipios', label: 'Cobertura municipios',   icon: 'fa-globe',      color: 'primary' },
+                { id: 'btnMenuCoberturaClientes', label: 'Cobertura clientes',       icon: 'fa-users',      color: 'secondary' },
+                { id: 'btnMenuCoberturaMarcas',   label: 'Cobertura marcas',         icon: 'fa-tags',       color: 'info' },
                 { id: 'btnMenuRptVisitasMapa',   label: 'Visitas vendedor mapa',     icon: 'fa-map-signs',  color: 'secondary' },
                 { id: 'btnMenuObjetivos',        label: 'Objetivos',                 icon: 'fa-list',       color: 'base' },
                 { id: 'btnMenuInventarioRetroactivo', label: 'Inventario retroactivo', icon: 'fa-box',     color: 'secondary' },
-                { id: 'btnMenuCoberturaMunicipios', label: 'Cobertura municipios',   icon: 'fa-globe',      color: 'primary' },
-                { id: 'btnMenuCoberturaClientes', label: 'Cobertura clientes',       icon: 'fa-users',      color: 'secondary' },
             ];
             return items.map(item => `
                 <div class="card proveedor-menu-card hand" id="${item.id}">
@@ -1204,7 +1207,9 @@ function addListeners(){
         proveedor_loadEmbed(PROVEEDOR_EMBED_SCRIPTS.btnMenuCoberturaClientes, 'btnMenuCoberturaClientes');
      });
 
-     
+     document.getElementById('btnMenuCoberturaMarcas').addEventListener('click',()=>{
+        proveedor_loadEmbed(PROVEEDOR_EMBED_SCRIPTS.btnMenuCoberturaMarcas, 'btnMenuCoberturaMarcas');
+     });
 
      listeners_objetivos();
 
