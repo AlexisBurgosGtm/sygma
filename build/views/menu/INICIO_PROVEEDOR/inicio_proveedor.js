@@ -381,7 +381,7 @@ function getView(){
                     </div>
                 </div>
             </div>
-            `
+            `;
         },
         modal:()=>{
             return `
@@ -964,7 +964,6 @@ function addListeners(){
     selected_tab = ''; //VENTAS_VENDEDOR,VENTAS_MARCAS,SELLOUT,INVENTARIOS,OBJETIVOS
 
     let cmbSucursalHeader = document.getElementById('cmbSucursalHeader');
-    
 
     //bloqueo los controles para que no cargue nada
     document.getElementById('btnMenuVentasVendedor').disbled = true;
@@ -1215,6 +1214,51 @@ function addListeners(){
 
 };
 
+function get_grid_tab(){
+  
+        //selected_tab = ''; 
+        //VENTAS_MARCAS,SELLOUT,INVENTARIOS,OBJETIVOS
+
+    switch (selected_tab) {
+      
+        case 'VENTAS_VENDEDOR':
+            tbl_rpt_vendedores();
+            break;
+        case 'VENTAS_MARCAS':
+            tbl_rpt_marcas();
+
+            break;
+        case 'SELLOUT':
+            tbl_rpt_sellout();
+
+            break;
+        case 'INVENTARIOS':
+            tbl_inventario();
+
+            break;
+        case 'OBJETIVOS':
+            get_reportes();
+
+            break;
+
+    }
+
+};
+
+function get_config_obs_sellout(){
+
+    let mes_inicial = document.getElementById('cmbSOMesInicial').value;
+    let mes_final = document.getElementById('cmbSOMesFinal').value;
+    let anio = document.getElementById('cmbSOAnio').value;
+    
+
+    document.getElementById('txtSOObs').value = `Sellout del mes ${mes_inicial} al mes ${mes_final} del año ${anio}`;
+
+
+};
+
+
+
 function proveedor_destroyDashboardChart(chartKey) {
     if (proveedor_dashboardCharts[chartKey]) {
         proveedor_dashboardCharts[chartKey].destroy();
@@ -1458,51 +1502,6 @@ function tbl_dashboard_ventas_marca() {
             proveedor_destroyDashboardChart('marca');
         });
 }
-
-function get_grid_tab(){
-  
-        //selected_tab = ''; 
-        //VENTAS_MARCAS,SELLOUT,INVENTARIOS,OBJETIVOS
-
-    switch (selected_tab) {
-      
-        case 'VENTAS_VENDEDOR':
-            tbl_rpt_vendedores();
-            break;
-        case 'VENTAS_MARCAS':
-            tbl_rpt_marcas();
-
-            break;
-        case 'SELLOUT':
-            tbl_rpt_sellout();
-
-            break;
-        case 'INVENTARIOS':
-            tbl_inventario();
-
-            break;
-        case 'OBJETIVOS':
-            get_reportes();
-
-            break;
-
-    }
-
-};
-
-function get_config_obs_sellout(){
-
-    let mes_inicial = document.getElementById('cmbSOMesInicial').value;
-    let mes_final = document.getElementById('cmbSOMesFinal').value;
-    let anio = document.getElementById('cmbSOAnio').value;
-    
-
-    document.getElementById('txtSOObs').value = `Sellout del mes ${mes_inicial} al mes ${mes_final} del año ${anio}`;
-
-
-};
-
-
 
 function initView(){
     document.getElementById('js-page-content')?.classList.add('proveedor-page');

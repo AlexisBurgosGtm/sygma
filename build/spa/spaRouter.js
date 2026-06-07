@@ -207,9 +207,12 @@ const SpaRouter = {
 
     async _loadClasses(classUrls) {
         if (!classUrls || !classUrls.length) return;
+        if (!this._loadedClassUrls) this._loadedClassUrls = new Set();
 
         for (const url of classUrls) {
+            if (this._loadedClassUrls.has(url)) continue;
             await F.loadClass(url, this.containerId);
+            this._loadedClassUrls.add(url);
         }
     },
 
