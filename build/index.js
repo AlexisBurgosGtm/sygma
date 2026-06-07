@@ -48,26 +48,56 @@ F.instalationHandlers('btnInstalarApp');
 
 
 
-let versionapp = "M.06.06.2026 18:32"
+let versionapp = "M.07.06.26 00:18"
 const CHANGELOG_JSON = './data/changelog.json';
 
 function formatChangelogVersion(fecha, hora) {
-    if (!fecha) return versionapp;
+    if (!fecha) return null;
     const parts = String(fecha).trim().split('-');
-    const datePart = parts.length === 3
-        ? `${parts[0]}.${parts[1]}.${parts[2]}`
-        : String(fecha).trim().replace(/-/g, '.');
+    if (parts.length !== 3) return null;
+    const dd = parts[0];
+    const mm = parts[1];
+    const yy = parts[2].length >= 4 ? parts[2].slice(-2) : parts[2];
+    const datePart = `${dd}.${mm}.${yy}`;
     const timePart = hora && String(hora).trim() ? ` ${String(hora).trim()}` : '';
     return `M.${datePart}${timePart}`;
 }
 
+function parseChangelogEntryTime(fecha, hora) {
+    const parts = String(fecha || '').trim().split('-');
+    if (parts.length !== 3) return 0;
+    const dd = parseInt(parts[0], 10) || 1;
+    const mm = parseInt(parts[1], 10) || 1;
+    let yyyy = parseInt(parts[2], 10) || 2000;
+    if (parts[2].length === 2) yyyy = 2000 + yyyy;
+    const timeStr = hora && String(hora).trim() ? String(hora).trim() : '00:00';
+    const timeParts = timeStr.split(':');
+    const hh = parseInt(timeParts[0], 10) || 0;
+    const min = parseInt(timeParts[1], 10) || 0;
+    return new Date(yyyy, mm - 1, dd, hh, min).getTime();
+}
+
+function getLatestChangelogEntry(entries) {
+    if (!entries.length) return null;
+    let latest = entries[0];
+    let latestTs = parseChangelogEntryTime(latest.FECHA, latest.HORA);
+    for (let i = 1; i < entries.length; i++) {
+        const entry = entries[i];
+        const ts = parseChangelogEntryTime(entry.FECHA, entry.HORA);
+        if (ts >= latestTs) {
+            latestTs = ts;
+            latest = entry;
+        }
+    }
+    return latest;
+}
+
 function applyChangelogVersion(data) {
     const entries = (data.entries || []).filter((r) => r.DESCRIPCION && String(r.DESCRIPCION).trim() !== '');
-    let ver = data.version;
-    if (!ver && entries.length) {
-        const last = entries[entries.length - 1];
-        ver = formatChangelogVersion(last.FECHA, last.HORA);
-    }
+    const latest = getLatestChangelogEntry(entries);
+    const ver = latest
+        ? formatChangelogVersion(latest.FECHA, latest.HORA)
+        : (data.version || null);
     if (!ver) return;
     versionapp = ver;
     const btnChangelog = document.getElementById('btnChangelog');

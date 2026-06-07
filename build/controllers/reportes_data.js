@@ -1,5 +1,5 @@
 let RPT = {
-    data_ventas_vendedor:(empnit,mes,anio)=>{
+    data_ventas_vendedor:(empnit,mes,anio,modo)=>{
 
         return new Promise((resolve,reject)=>{
 
@@ -7,7 +7,8 @@ let RPT = {
                 token:TOKEN,
                 sucursal:empnit,
                 mes:mes,
-                anio:anio
+                anio:anio,
+                modo: modo || 'bruta'
             })
             .then((response) => {
                 if(response.status.toString()=='200'){
@@ -30,7 +31,34 @@ let RPT = {
         }) 
     
     },
-    data_ventas_vendedor_marcas:(empnit,codemp,mes,anio)=>{
+    data_dashboard_ventas_vendedor:(empnit, mes, anio, modo)=>{
+        return new Promise((resolve, reject) => {
+            axios.post(GlobalUrlCalls + '/reportes/rpt_dashboard_ventas_vendedor', {
+                token: TOKEN,
+                sucursal: empnit,
+                mes: mes,
+                anio: anio,
+                modo: modo || 'bruta'
+            })
+            .then((response) => {
+                if (response.status.toString() === '200') {
+                    const data = response.data;
+                    if (data.toString() === 'error') {
+                        reject();
+                    } else if (Number(data.rowsAffected[0]) > 0) {
+                        resolve(data);
+                    } else {
+                        reject();
+                    }
+                } else {
+                    reject();
+                }
+            }, () => {
+                reject();
+            });
+        });
+    },
+    data_ventas_vendedor_marcas:(empnit,codemp,mes,anio,modo)=>{
 
         return new Promise((resolve,reject)=>{
 
@@ -39,7 +67,8 @@ let RPT = {
                 sucursal:empnit,
                 codemp:codemp,
                 mes:mes,
-                anio:anio
+                anio:anio,
+                modo: modo || 'bruta'
             })
             .then((response) => {
                 if(response.status.toString()=='200'){
@@ -62,7 +91,7 @@ let RPT = {
         }) 
     
     },
-    data_marcas: (empnit,mes,anio)=>{
+    data_marcas: (empnit,mes,anio,modo)=>{
         
         return new Promise((resolve, reject)=>{
             
@@ -70,7 +99,8 @@ let RPT = {
                 token:TOKEN,
                 sucursal:empnit,
                 mes:mes,
-                anio:anio
+                anio:anio,
+                modo: modo || 'bruta'
             };
     
             axios.post(`/reportes/rpt_marcas`, data)
@@ -127,7 +157,7 @@ let RPT = {
     
         })
     },
-    data_marcas_vendedores: (empnit,codmarca,mes,anio)=>{
+    data_marcas_vendedores: (empnit,codmarca,mes,anio,modo)=>{
         
         return new Promise((resolve, reject)=>{
             
@@ -136,7 +166,8 @@ let RPT = {
                 sucursal:empnit,
                 mes:mes,
                 anio:anio,
-                codmarca:codmarca
+                codmarca:codmarca,
+                modo: modo || 'bruta'
             };
     
             axios.post(`/reportes/rpt_marcas_vendedores`, data)

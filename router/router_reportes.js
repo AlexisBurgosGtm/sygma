@@ -2,6 +2,21 @@ const execute = require('./../connection');
 const express = require('express');
 const router = express.Router();
 
+const RPT_TIPOS_VENTA = `('FAC','FEF','FEC','FCP','FES','FPC')`;
+const RPT_TIPOS_NETAS = `('FAC','FEF','FEC','FCP','FES','FPC','DEV')`;
+
+function rptEsModoNeta(modo) {
+    return String(modo || 'bruta').toLowerCase() === 'neta';
+}
+
+function rptSumDocNeta(campo) {
+    return `SUM(CASE WHEN TD.TIPODOC IN ${RPT_TIPOS_VENTA} THEN ISNULL(D.${campo},0) WHEN TD.TIPODOC = 'DEV' THEN -ISNULL(D.${campo},0) ELSE 0 END)`;
+}
+
+function rptSumProductoNeta(campo) {
+    return `SUM(CASE WHEN TD.TIPODOC IN ${RPT_TIPOS_VENTA} THEN ISNULL(DP.${campo},0) WHEN TD.TIPODOC = 'DEV' THEN -ISNULL(DP.${campo},0) ELSE 0 END)`;
+}
+
 
 
 
@@ -97,30 +112,58 @@ router.post("/rpt_sellout_export", async(req,res)=>{
 
 router.post("/rpt_marcas", async(req,res)=>{
    
-    const { token, sucursal, mes, anio } = req.body;
+    const { token, sucursal, mes, anio, modo } = req.body;
+    const esNetas = rptEsModoNeta(modo);
+    let qry = '';
 
-    let qry = `
-        SELECT PRODUCTOS.CODMARCA, ISNULL(MARCAS.DESMARCA,'') AS DESMARCA, 
-            SUM(ISNULL(DOCPRODUCTOS.TOTALUNIDADES,0)) AS TOTALUNIDADES, 
-            SUM(ISNULL(DOCPRODUCTOS.TOTALCOSTO,0)) AS TOTALCOSTO, 
-            SUM(ISNULL(DOCPRODUCTOS.TOTALPRECIO,0)) AS TOTALPRECIO
-        FROM  DOCUMENTOS LEFT OUTER JOIN
-            TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC 
-            AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT LEFT OUTER JOIN
-            DOCPRODUCTOS ON DOCUMENTOS.CORRELATIVO = DOCPRODUCTOS.CORRELATIVO 
-            AND DOCUMENTOS.CODDOC = DOCPRODUCTOS.CODDOC AND DOCUMENTOS.EMPNIT = DOCPRODUCTOS.EMPNIT LEFT OUTER JOIN
-            PRODUCTOS LEFT OUTER JOIN
-            MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA ON DOCPRODUCTOS.CODPROD = PRODUCTOS.CODPROD
-        WHERE (DOCUMENTOS.EMPNIT LIKE '${sucursal}') 
-        AND (DOCUMENTOS.MES = ${mes})
-        AND (DOCUMENTOS.ANIO = ${anio}) 
-        AND (DOCUMENTOS.STATUS <> 'A')
-        AND (TIPODOCUMENTOS.TIPODOC IN('FAC','FEF','FEC','FCP','FES','FPC'))
-        AND (MARCAS.DESMARCA IS NOT NULL)
-        GROUP BY PRODUCTOS.CODMARCA,MARCAS.DESMARCA
-    `;
-    
-   
+    if (esNetas) {
+        qry = `
+            SELECT
+                P.CODMARCA,
+                ISNULL(M.DESMARCA, '') AS DESMARCA,
+                ${rptSumProductoNeta('TOTALUNIDADES')} AS TOTALUNIDADES,
+                ${rptSumProductoNeta('TOTALCOSTO')} AS TOTALCOSTO,
+                ${rptSumProductoNeta('TOTALPRECIO')} AS TOTALPRECIO
+            FROM DOCUMENTOS D
+            INNER JOIN TIPODOCUMENTOS TD
+                ON D.CODDOC = TD.CODDOC AND D.EMPNIT = TD.EMPNIT
+            INNER JOIN DOCPRODUCTOS DP
+                ON D.CORRELATIVO = DP.CORRELATIVO AND D.CODDOC = DP.CODDOC AND D.EMPNIT = DP.EMPNIT
+            INNER JOIN PRODUCTOS P ON DP.CODPROD = P.CODPROD
+            LEFT JOIN MARCAS M ON P.CODMARCA = M.CODMARCA
+            WHERE D.EMPNIT LIKE '${sucursal}'
+                AND D.MES = ${mes}
+                AND D.ANIO = ${anio}
+                AND D.STATUS <> 'A'
+                AND TD.TIPODOC IN ${RPT_TIPOS_NETAS}
+                AND M.DESMARCA IS NOT NULL
+            GROUP BY P.CODMARCA, M.DESMARCA
+            HAVING ${rptSumProductoNeta('TOTALPRECIO')} <> 0
+            ORDER BY TOTALPRECIO DESC;
+        `;
+    } else {
+        qry = `
+            SELECT PRODUCTOS.CODMARCA, ISNULL(MARCAS.DESMARCA,'') AS DESMARCA, 
+                SUM(ISNULL(DOCPRODUCTOS.TOTALUNIDADES,0)) AS TOTALUNIDADES, 
+                SUM(ISNULL(DOCPRODUCTOS.TOTALCOSTO,0)) AS TOTALCOSTO, 
+                SUM(ISNULL(DOCPRODUCTOS.TOTALPRECIO,0)) AS TOTALPRECIO
+            FROM  DOCUMENTOS LEFT OUTER JOIN
+                TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC 
+                AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT LEFT OUTER JOIN
+                DOCPRODUCTOS ON DOCUMENTOS.CORRELATIVO = DOCPRODUCTOS.CORRELATIVO 
+                AND DOCUMENTOS.CODDOC = DOCPRODUCTOS.CODDOC AND DOCUMENTOS.EMPNIT = DOCPRODUCTOS.EMPNIT LEFT OUTER JOIN
+                PRODUCTOS LEFT OUTER JOIN
+                MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA ON DOCPRODUCTOS.CODPROD = PRODUCTOS.CODPROD
+            WHERE (DOCUMENTOS.EMPNIT LIKE '${sucursal}') 
+            AND (DOCUMENTOS.MES = ${mes})
+            AND (DOCUMENTOS.ANIO = ${anio}) 
+            AND (DOCUMENTOS.STATUS <> 'A')
+            AND (TIPODOCUMENTOS.TIPODOC IN ${RPT_TIPOS_VENTA})
+            AND (MARCAS.DESMARCA IS NOT NULL)
+            GROUP BY PRODUCTOS.CODMARCA,MARCAS.DESMARCA
+            ORDER BY TOTALPRECIO DESC;
+        `;
+    }
 
     execute.QueryToken(res,qry,token);
      
@@ -160,35 +203,65 @@ ORDER BY PRODUCTOS.CODPROD
 
 router.post("/rpt_marcas_vendedores", async(req,res)=>{
    
-    const { token, sucursal, codmarca, mes, anio } = req.body;
+    const { token, sucursal, codmarca, mes, anio, modo } = req.body;
+    const esNetas = rptEsModoNeta(modo);
+    let qry = '';
 
-    let qry = `
-        SELECT  
-            EMPRESAS.NOMBRE AS EMPRESA, 
-            EMPLEADOS.NOMEMPLEADO AS EMPLEADO, 
-            SUM(ISNULL(DOCPRODUCTOS.TOTALUNIDADES, 0)) AS TOTALUNIDADES, 
-            SUM(ISNULL(DOCPRODUCTOS.TOTALCOSTO, 0)) AS TOTALCOSTO, 
-            SUM(ISNULL(DOCPRODUCTOS.TOTALPRECIO, 0)) AS TOTALPRECIO
-        FROM  DOCUMENTOS LEFT OUTER JOIN
-            EMPRESAS ON DOCUMENTOS.EMPNIT = EMPRESAS.EMPNIT LEFT OUTER JOIN
-            EMPLEADOS ON DOCUMENTOS.CODEMP = EMPLEADOS.CODEMPLEADO LEFT OUTER JOIN
-            TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT LEFT OUTER JOIN
-            DOCPRODUCTOS ON DOCUMENTOS.CORRELATIVO = DOCPRODUCTOS.CORRELATIVO AND DOCUMENTOS.CODDOC = DOCPRODUCTOS.CODDOC AND DOCUMENTOS.EMPNIT = DOCPRODUCTOS.EMPNIT LEFT OUTER JOIN
-            PRODUCTOS LEFT OUTER JOIN
-            MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA ON DOCPRODUCTOS.CODPROD = PRODUCTOS.CODPROD
-        WHERE 
-            (DOCUMENTOS.EMPNIT LIKE '${sucursal}') AND 
-            (DOCUMENTOS.MES = ${mes}) AND 
-            (DOCUMENTOS.ANIO = ${anio}) AND 
-            (DOCUMENTOS.STATUS <> 'A') AND 
-            (TIPODOCUMENTOS.TIPODOC IN ('FAC', 'FEF', 'FEC', 'FCP', 'FES', 'FPC')) AND 
-            (MARCAS.DESMARCA IS NOT NULL) AND 
-            (PRODUCTOS.CODMARCA = ${codmarca})
-        GROUP BY EMPLEADOS.NOMEMPLEADO, EMPRESAS.NOMBRE
-        ORDER BY TOTALPRECIO DESC;
-    `;
-    
-   
+    if (esNetas) {
+        qry = `
+            SELECT
+                EMP.NOMBRE AS EMPRESA,
+                E.NOMEMPLEADO AS EMPLEADO,
+                ${rptSumProductoNeta('TOTALUNIDADES')} AS TOTALUNIDADES,
+                ${rptSumProductoNeta('TOTALCOSTO')} AS TOTALCOSTO,
+                ${rptSumProductoNeta('TOTALPRECIO')} AS TOTALPRECIO
+            FROM DOCUMENTOS D
+            INNER JOIN EMPRESAS EMP ON D.EMPNIT = EMP.EMPNIT
+            INNER JOIN EMPLEADOS E ON D.CODEMP = E.CODEMPLEADO
+            INNER JOIN TIPODOCUMENTOS TD
+                ON D.CODDOC = TD.CODDOC AND D.EMPNIT = TD.EMPNIT
+            INNER JOIN DOCPRODUCTOS DP
+                ON D.CORRELATIVO = DP.CORRELATIVO AND D.CODDOC = DP.CODDOC AND D.EMPNIT = DP.EMPNIT
+            INNER JOIN PRODUCTOS P ON DP.CODPROD = P.CODPROD
+            LEFT JOIN MARCAS M ON P.CODMARCA = M.CODMARCA
+            WHERE D.EMPNIT LIKE '${sucursal}'
+                AND D.MES = ${mes}
+                AND D.ANIO = ${anio}
+                AND D.STATUS <> 'A'
+                AND TD.TIPODOC IN ${RPT_TIPOS_NETAS}
+                AND M.DESMARCA IS NOT NULL
+                AND P.CODMARCA = ${codmarca}
+            GROUP BY E.NOMEMPLEADO, EMP.NOMBRE
+            HAVING ${rptSumProductoNeta('TOTALPRECIO')} <> 0
+            ORDER BY TOTALPRECIO DESC;
+        `;
+    } else {
+        qry = `
+            SELECT  
+                EMPRESAS.NOMBRE AS EMPRESA, 
+                EMPLEADOS.NOMEMPLEADO AS EMPLEADO, 
+                SUM(ISNULL(DOCPRODUCTOS.TOTALUNIDADES, 0)) AS TOTALUNIDADES, 
+                SUM(ISNULL(DOCPRODUCTOS.TOTALCOSTO, 0)) AS TOTALCOSTO, 
+                SUM(ISNULL(DOCPRODUCTOS.TOTALPRECIO, 0)) AS TOTALPRECIO
+            FROM  DOCUMENTOS LEFT OUTER JOIN
+                EMPRESAS ON DOCUMENTOS.EMPNIT = EMPRESAS.EMPNIT LEFT OUTER JOIN
+                EMPLEADOS ON DOCUMENTOS.CODEMP = EMPLEADOS.CODEMPLEADO LEFT OUTER JOIN
+                TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT LEFT OUTER JOIN
+                DOCPRODUCTOS ON DOCUMENTOS.CORRELATIVO = DOCPRODUCTOS.CORRELATIVO AND DOCUMENTOS.CODDOC = DOCPRODUCTOS.CODDOC AND DOCUMENTOS.EMPNIT = DOCPRODUCTOS.EMPNIT LEFT OUTER JOIN
+                PRODUCTOS LEFT OUTER JOIN
+                MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA ON DOCPRODUCTOS.CODPROD = PRODUCTOS.CODPROD
+            WHERE 
+                (DOCUMENTOS.EMPNIT LIKE '${sucursal}') AND 
+                (DOCUMENTOS.MES = ${mes}) AND 
+                (DOCUMENTOS.ANIO = ${anio}) AND 
+                (DOCUMENTOS.STATUS <> 'A') AND 
+                (TIPODOCUMENTOS.TIPODOC IN ${RPT_TIPOS_VENTA}) AND 
+                (MARCAS.DESMARCA IS NOT NULL) AND 
+                (PRODUCTOS.CODMARCA = ${codmarca})
+            GROUP BY EMPLEADOS.NOMEMPLEADO, EMPRESAS.NOMBRE
+            ORDER BY TOTALPRECIO DESC;
+        `;
+    }
 
     execute.QueryToken(res,qry,token);
      
@@ -196,61 +269,172 @@ router.post("/rpt_marcas_vendedores", async(req,res)=>{
 
 router.post("/rpt_ventas_vendedor", async(req,res)=>{
 
-    const {token,sucursal,anio,mes} = req.body;
+    const { token, sucursal, anio, mes, modo } = req.body;
+    const esNetas = rptEsModoNeta(modo);
+    let qry = '';
 
-    let qry = `
-         SELECT EMPLEADOS.CODEMPLEADO AS CODEMP, EMPLEADOS.NOMEMPLEADO AS EMPLEADO, 
-                    EMPLEADOS.TELEFONO, 
-                    EMPLEADOS.USUARIO, 
-                    EMPLEADOS.CLAVE, 
-                    COUNT(DOCUMENTOS.CODDOC) AS CONTEO,
-                    SUM(DOCUMENTOS.TOTALCOSTO) AS TOTALCOSTO, 
-                    SUM(DOCUMENTOS.TOTALVENTA) AS TOTALVENTA, 
-                    SUM(DOCUMENTOS.TOTALPRECIO) AS TOTALPRECIO
+    if (esNetas) {
+        qry = `
+            SELECT
+                E.CODEMPLEADO AS CODEMP,
+                E.NOMEMPLEADO AS EMPLEADO,
+                E.TELEFONO,
+                E.USUARIO,
+                E.CLAVE,
+                SUM(CASE WHEN TD.TIPODOC IN ${RPT_TIPOS_VENTA} THEN 1 ELSE 0 END) AS CONTEO,
+                ${rptSumDocNeta('TOTALCOSTO')} AS TOTALCOSTO,
+                ${rptSumDocNeta('TOTALVENTA')} AS TOTALVENTA,
+                ${rptSumDocNeta('TOTALPRECIO')} AS TOTALPRECIO
+            FROM DOCUMENTOS D
+            INNER JOIN TIPODOCUMENTOS TD
+                ON D.CODDOC = TD.CODDOC AND D.EMPNIT = TD.EMPNIT
+            INNER JOIN EMPLEADOS E
+                ON D.CODEMP = E.CODEMPLEADO AND D.EMPNIT = E.EMPNIT
+            WHERE D.EMPNIT LIKE '${sucursal}'
+                AND D.MES = ${mes}
+                AND D.ANIO = ${anio}
+                AND D.STATUS <> 'A'
+                AND TD.TIPODOC IN ${RPT_TIPOS_NETAS}
+            GROUP BY E.CODEMPLEADO, E.NOMEMPLEADO, E.TELEFONO, E.USUARIO, E.CLAVE
+            HAVING ${rptSumDocNeta('TOTALPRECIO')} <> 0
+            ORDER BY TOTALPRECIO DESC;
+        `;
+    } else {
+        qry = `
+            SELECT EMPLEADOS.CODEMPLEADO AS CODEMP, EMPLEADOS.NOMEMPLEADO AS EMPLEADO, 
+                EMPLEADOS.TELEFONO, 
+                EMPLEADOS.USUARIO, 
+                EMPLEADOS.CLAVE, 
+                COUNT(DOCUMENTOS.CODDOC) AS CONTEO,
+                SUM(DOCUMENTOS.TOTALCOSTO) AS TOTALCOSTO, 
+                SUM(DOCUMENTOS.TOTALVENTA) AS TOTALVENTA, 
+                SUM(DOCUMENTOS.TOTALPRECIO) AS TOTALPRECIO
             FROM DOCUMENTOS LEFT OUTER JOIN
-                  EMPLEADOS ON DOCUMENTOS.CODEMP = EMPLEADOS.CODEMPLEADO AND DOCUMENTOS.EMPNIT = EMPLEADOS.EMPNIT LEFT OUTER JOIN
-                  TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+                EMPLEADOS ON DOCUMENTOS.CODEMP = EMPLEADOS.CODEMPLEADO AND DOCUMENTOS.EMPNIT = EMPLEADOS.EMPNIT LEFT OUTER JOIN
+                TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
             WHERE 
                 (DOCUMENTOS.EMPNIT LIKE '${sucursal}') 
                 AND (DOCUMENTOS.MES = ${mes})
                 AND (DOCUMENTOS.ANIO = ${anio}) 
                 AND (DOCUMENTOS.STATUS <> 'A') 
-                AND (TIPODOCUMENTOS.TIPODOC IN('FAC','FEF','FEC','FCP','FES','FPC'))
+                AND (TIPODOCUMENTOS.TIPODOC IN ${RPT_TIPOS_VENTA})
             GROUP BY EMPLEADOS.CODEMPLEADO, EMPLEADOS.NOMEMPLEADO, 
                 EMPLEADOS.TELEFONO, EMPLEADOS.USUARIO, EMPLEADOS.CLAVE, DOCUMENTOS.MES, DOCUMENTOS.ANIO
             ORDER BY SUM(DOCUMENTOS.TOTALPRECIO) DESC;
-        `
+        `;
+    }
 
-     
-  
     execute.QueryToken(res,qry,token)
+
+});
+
+router.post("/rpt_dashboard_ventas_vendedor", async(req,res)=>{
+
+    const { token, sucursal, anio, mes, modo } = req.body;
+    const esNetas = rptEsModoNeta(modo);
+    let qry = '';
+
+    if (esNetas) {
+        qry = `
+            SELECT
+                E.CODEMPLEADO AS CODEMP,
+                E.NOMEMPLEADO AS EMPLEADO,
+                E.TELEFONO,
+                SUM(CASE WHEN TD.TIPODOC IN ${RPT_TIPOS_VENTA} THEN 1 ELSE 0 END) AS CONTEO,
+                ${rptSumDocNeta('TOTALPRECIO')} AS TOTALPRECIO
+            FROM DOCUMENTOS D
+            INNER JOIN TIPODOCUMENTOS TD
+                ON D.CODDOC = TD.CODDOC AND D.EMPNIT = TD.EMPNIT
+            INNER JOIN EMPLEADOS E
+                ON D.CODEMP = E.CODEMPLEADO AND D.EMPNIT = E.EMPNIT
+            WHERE D.EMPNIT LIKE '${sucursal}'
+                AND D.MES = ${mes}
+                AND D.ANIO = ${anio}
+                AND D.STATUS <> 'A'
+                AND TD.TIPODOC IN ${RPT_TIPOS_NETAS}
+            GROUP BY E.CODEMPLEADO, E.NOMEMPLEADO, E.TELEFONO
+            HAVING ${rptSumDocNeta('TOTALPRECIO')} <> 0
+            ORDER BY TOTALPRECIO DESC;
+        `;
+    } else {
+        qry = `
+            SELECT
+                E.CODEMPLEADO AS CODEMP,
+                E.NOMEMPLEADO AS EMPLEADO,
+                E.TELEFONO,
+                COUNT(D.CODDOC) AS CONTEO,
+                SUM(D.TOTALPRECIO) AS TOTALPRECIO
+            FROM DOCUMENTOS D
+            INNER JOIN TIPODOCUMENTOS TD
+                ON D.CODDOC = TD.CODDOC AND D.EMPNIT = TD.EMPNIT
+            INNER JOIN EMPLEADOS E
+                ON D.CODEMP = E.CODEMPLEADO AND D.EMPNIT = E.EMPNIT
+            WHERE D.EMPNIT LIKE '${sucursal}'
+                AND D.MES = ${mes}
+                AND D.ANIO = ${anio}
+                AND D.STATUS <> 'A'
+                AND TD.TIPODOC IN ${RPT_TIPOS_VENTA}
+            GROUP BY E.CODEMPLEADO, E.NOMEMPLEADO, E.TELEFONO
+            ORDER BY TOTALPRECIO DESC;
+        `;
+    }
+
+    execute.QueryToken(res, qry, token);
 
 });
 
 router.post("/rpt_ventas_vendedor_marcas", async(req,res)=>{
 
-    const {token,sucursal,codemp,anio,mes} = req.body;
+    const { token, sucursal, codemp, anio, mes, modo } = req.body;
+    const esNetas = rptEsModoNeta(modo);
+    let qry = '';
 
-    let qry = `
-        SELECT ISNULL(MARCAS.DESMARCA, '') AS DESMARCA, SUM(ISNULL(DOCPRODUCTOS.TOTALUNIDADES, 0)) AS TOTALUNIDADES, SUM(ISNULL(DOCPRODUCTOS.TOTALCOSTO, 0)) AS TOTALCOSTO, 
-                  SUM(ISNULL(DOCPRODUCTOS.TOTALPRECIO, 0)) AS TOTALPRECIO
-        FROM     DOCUMENTOS LEFT OUTER JOIN
-                  TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT LEFT OUTER JOIN
-                  DOCPRODUCTOS ON DOCUMENTOS.CORRELATIVO = DOCPRODUCTOS.CORRELATIVO AND DOCUMENTOS.CODDOC = DOCPRODUCTOS.CODDOC AND DOCUMENTOS.EMPNIT = DOCPRODUCTOS.EMPNIT LEFT OUTER JOIN
-                  PRODUCTOS LEFT OUTER JOIN
-                  MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA ON DOCPRODUCTOS.CODPROD = PRODUCTOS.CODPROD
-        WHERE  (DOCUMENTOS.EMPNIT LIKE '${sucursal}') 
-            AND (DOCUMENTOS.MES = ${mes}) 
-            AND (DOCUMENTOS.ANIO = ${anio}) 
-            AND (DOCUMENTOS.STATUS <> 'A') 
-            AND (TIPODOCUMENTOS.TIPODOC IN ('FAC', 'FEF', 'FEC', 'FCP', 'FES', 'FPC')) 
-            AND (DOCUMENTOS.CODEMP = ${codemp}) 
-            AND (MARCAS.DESMARCA IS NOT NULL)
-        GROUP BY MARCAS.DESMARCA
-        `
+    if (esNetas) {
+        qry = `
+            SELECT
+                ISNULL(M.DESMARCA, '') AS DESMARCA,
+                ${rptSumProductoNeta('TOTALUNIDADES')} AS TOTALUNIDADES,
+                ${rptSumProductoNeta('TOTALCOSTO')} AS TOTALCOSTO,
+                ${rptSumProductoNeta('TOTALPRECIO')} AS TOTALPRECIO
+            FROM DOCUMENTOS D
+            INNER JOIN TIPODOCUMENTOS TD
+                ON D.CODDOC = TD.CODDOC AND D.EMPNIT = TD.EMPNIT
+            INNER JOIN DOCPRODUCTOS DP
+                ON D.CORRELATIVO = DP.CORRELATIVO AND D.CODDOC = DP.CODDOC AND D.EMPNIT = DP.EMPNIT
+            INNER JOIN PRODUCTOS P ON DP.CODPROD = P.CODPROD
+            LEFT JOIN MARCAS M ON P.CODMARCA = M.CODMARCA
+            WHERE D.EMPNIT LIKE '${sucursal}'
+                AND D.MES = ${mes}
+                AND D.ANIO = ${anio}
+                AND D.STATUS <> 'A'
+                AND TD.TIPODOC IN ${RPT_TIPOS_NETAS}
+                AND D.CODEMP = ${codemp}
+                AND M.DESMARCA IS NOT NULL
+            GROUP BY M.DESMARCA
+            HAVING ${rptSumProductoNeta('TOTALPRECIO')} <> 0
+            ORDER BY TOTALPRECIO DESC;
+        `;
+    } else {
+        qry = `
+            SELECT ISNULL(MARCAS.DESMARCA, '') AS DESMARCA, SUM(ISNULL(DOCPRODUCTOS.TOTALUNIDADES, 0)) AS TOTALUNIDADES, SUM(ISNULL(DOCPRODUCTOS.TOTALCOSTO, 0)) AS TOTALCOSTO, 
+                SUM(ISNULL(DOCPRODUCTOS.TOTALPRECIO, 0)) AS TOTALPRECIO
+            FROM DOCUMENTOS LEFT OUTER JOIN
+                TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT LEFT OUTER JOIN
+                DOCPRODUCTOS ON DOCUMENTOS.CORRELATIVO = DOCPRODUCTOS.CORRELATIVO AND DOCUMENTOS.CODDOC = DOCPRODUCTOS.CODDOC AND DOCUMENTOS.EMPNIT = DOCPRODUCTOS.EMPNIT LEFT OUTER JOIN
+                PRODUCTOS LEFT OUTER JOIN
+                MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA ON DOCPRODUCTOS.CODPROD = PRODUCTOS.CODPROD
+            WHERE (DOCUMENTOS.EMPNIT LIKE '${sucursal}') 
+                AND (DOCUMENTOS.MES = ${mes}) 
+                AND (DOCUMENTOS.ANIO = ${anio}) 
+                AND (DOCUMENTOS.STATUS <> 'A') 
+                AND (TIPODOCUMENTOS.TIPODOC IN ${RPT_TIPOS_VENTA}) 
+                AND (DOCUMENTOS.CODEMP = ${codemp}) 
+                AND (MARCAS.DESMARCA IS NOT NULL)
+            GROUP BY MARCAS.DESMARCA
+            ORDER BY TOTALPRECIO DESC;
+        `;
+    }
 
-     console.log(qry);
-  
     execute.QueryToken(res,qry,token)
 
 });

@@ -39,17 +39,17 @@ Agregar al final del array `entries` en `build/data/changelog.json`:
 
 En **cada cambio** que agregue entradas al changelog, actualiza la version con la fecha y hora de la **ultima entrada** agregada en esa sesion:
 
-- Formato: `M.DD.MM.YYYY HH:MM` (ej. `M.06.06.2026 18:14`).
-- Convertir `FECHA` de `DD-MM-YYYY` a `DD.MM.YYYY` para el campo version.
+- Formato: `M.DD.MM.YY HH:MM` (ej. `M.06.06.26 18:14`).
+- Convertir `FECHA` de `DD-MM-YYYY` a `DD.MM.YY` (ano con 2 digitos) para el campo version.
 
 Debes actualizar **dos archivos** con el mismo valor:
 
 1. `"version"` en `build/data/changelog.json`.
 2. Fallback `let versionapp = "..."` en `build/index.js` (linea inicial de versionapp).
 
-Ejemplo: ultima entrada `"FECHA": "06-06-2026", "HORA": "18:14"` → ambos archivos: `M.06.06.2026 18:14`.
+Ejemplo: ultima entrada `"FECHA": "06-06-2026", "HORA": "18:14"` → ambos archivos: `M.06.06.26 18:14`.
 
-En runtime, `get_log()` carga `versionapp` desde `changelog.json`; el fallback en `index.js` debe coincidir para la primera pintada del login.
+En runtime, `get_log()` calcula `versionapp` desde la **ultima entrada** de `entries` (mayor FECHA+HORA), no desde el campo `version` del JSON. El campo `version` y el fallback en `index.js` deben coincidir con esa ultima entrada para la primera pintada del login antes de cargar el JSON.
 
 ## Pasos
 

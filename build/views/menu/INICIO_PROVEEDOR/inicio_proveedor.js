@@ -5,6 +5,14 @@ let proveedor_marcasVendedorChart = null;
 let proveedor_vendedorMarcasChart = null;
 let proveedor_vendedorSeleccionado = '';
 
+function proveedor_getModoVentas() {
+    return document.getElementById('cmbProveedorModoVentas')?.value || 'bruta';
+}
+
+function proveedor_labelModoVentas() {
+    return proveedor_getModoVentas() === 'neta' ? 'Ventas netas' : 'Ventas brutas';
+}
+
 const PROVEEDOR_EMBED_BASE = '../views/menu/INICIO_PROVEEDOR/';
 
 function proveedor_getSucursal() {
@@ -157,7 +165,12 @@ function getView(){
         body:()=>{
             return `
             <div class="proveedor-layout">
-            <div class="proveedor-header-card card shadow-sm mb-3">
+            <button type="button" class="btn btn-sm btn-primary proveedor-menu-toggle d-md-none" id="btnProveedorMenuToggle" title="Menú de opciones">
+                <i class="fal fa-bars mr-1"></i> Menú
+            </button>
+            <div class="proveedor-sidebar-backdrop d-md-none" id="proveedorSidebarBackdrop"></div>
+
+            <div class="proveedor-header-card card shadow-sm">
                 <div class="card-body py-2 px-3">
                     <div class="row align-items-center no-gutters">
                         <div class="col-auto pr-2">
@@ -175,14 +188,15 @@ function getView(){
                         <div class="col-auto pl-2">
                             <select class="form-control form-control-sm negrita" id="cmbAnioHeader"></select>
                         </div>
+                        <div class="col pl-2">
+                            <select class="form-control form-control-sm negrita" id="cmbProveedorModoVentas" title="Tipo de ventas">
+                                <option value="neta">Ventas netas (venta - devolución)</option>
+                                <option value="bruta" selected>Ventas brutas (solo ventas)</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <button type="button" class="btn btn-sm btn-primary proveedor-menu-toggle d-md-none" id="btnProveedorMenuToggle" title="Menú de opciones">
-                <i class="fal fa-bars mr-1"></i> Menú
-            </button>
-            <div class="proveedor-sidebar-backdrop d-md-none" id="proveedorSidebarBackdrop"></div>
 
             <div class="row proveedor-main-row">
                 <div class="col-12 col-md-2 proveedor-sidebar" id="proveedorSidebar">
@@ -190,7 +204,8 @@ function getView(){
                         ${view.menu()}
                     </div>
                 </div>
-                <div class="col-12 col-md-10 proveedor-tab-area">
+                <div class="col-12 col-md-10 proveedor-content-col">
+                    <div class="proveedor-tab-area">
                     <div id="proveedorPanelContent">
                         <div id="proveedorPanelEmbed" class="d-none"></div>
                         <div class="tab-content" id="myTabHomeContent">
@@ -214,6 +229,7 @@ function getView(){
                         <div class="tab-pane fade proveedor-view-modern" id="seis" role="tabpanel" aria-labelledby="home-tab">
                             ${view.objetivos()}
                         </div>
+                    </div>
                     </div>
                     </div>
                 </div>
@@ -759,61 +775,50 @@ function getView(){
         },
         objetivos:()=>{
            return `
-           ${view.frag_parametros()}
-            <div class="row">
-                <div class="col-sm-12 col-xl-6 col-lg-6 col-md-6">
-                    ${view.frag_marcas()}
+            <div class="proveedor-objetivos">
+                <div class="card card-rounded shadow mb-3">
+                    <div class="card-body py-3 px-3 proveedor-section-hero">
+                        <h5 class="negrita text-danger mb-0">Logro de objetivos</h5>
+                        <small class="text-muted">Mes y sede según filtros del encabezado</small>
+                    </div>
                 </div>
-                <div class="col-sm-12 col-xl-6 col-lg-6 col-md-6">
-                    ${view.frag_vendedores()}
+                <div class="row">
+                    <div class="col-12 col-xl-6 mb-3 mb-xl-0">
+                        ${view.frag_marcas()}
+                    </div>
+                    <div class="col-12 col-xl-6">
+                        ${view.frag_vendedores()}
+                    </div>
                 </div>
             </div>
-
-            
-
             ${view.modal_categorias_marca()}
-            `
-        },
-        frag_parametros: ()=>{
-            return `
-            <div class="card card-rounded shadow col-12">
-                <div class="card-body p-4">
-                    
-                    <h5 class="negrita text-danger mb-0">Logro de Objetivos</h5>
-
-                
-                </div>
-            </div>
-            <br>
+            ${view.modal_categorias_vendedor()}
             `
         },
         frag_marcas:()=>{
             return `
-            <div class="card card-rounded shadow">
-                <div class="card-body p-2">
-
-                    <h4 class="negrita text-base text-center">LOGRO DE MARCAS</h4>
-
-                    <div class="table-responsive col-12">
-                        <table class="table h-full table-hover col-12">
+            <div class="card card-rounded shadow h-100 proveedor-rpt-marcas__panel">
+                <div class="card-body p-3">
+                    <h5 class="negrita text-base text-center mb-3">Logro de marcas</h5>
+                    <div class="table-responsive proveedor-rpt-marcas__scroll">
+                        <table class="table table-sm table-bordered proveedor-rpt-marcas__table mb-0" id="tblObjetivosMarcas">
                             <thead class="bg-base text-white">
                                 <tr>
                                     <td>MARCA</td>
-                                    <td>IMPORTE</td>
-                                    <td>OBJETIVO</td>
-                                    <td>FALTA</td>
-                                    <td>ALCANCE</td>
+                                    <td class="text-right">IMPORTE</td>
+                                    <td class="text-right">OBJETIVO</td>
+                                    <td class="text-right">FALTA</td>
+                                    <td class="text-right">ALCANCE</td>
                                 </tr>
                             </thead>
-                            <tbody id="tblDataMarcas2">
-                            </tbody>
+                            <tbody id="tblDataMarcas2"></tbody>
                             <tfoot class="bg-base text-white negrita">
                                 <tr>
-                                    <td></td>
-                                    <td id="lbTotalMarcasImporte"></td>
-                                    <td id="lbTotalMarcasObjetivo"></td>
-                                    <td id="lbTotalMarcasFalta"></td>
-                                    <td id="lbTotalMarcasLogro"></td>
+                                    <td>TOTALES</td>
+                                    <td class="text-right" id="lbTotalMarcasImporte"></td>
+                                    <td class="text-right" id="lbTotalMarcasObjetivo"></td>
+                                    <td class="text-right" id="lbTotalMarcasFalta"></td>
+                                    <td class="text-right" id="lbTotalMarcasLogro"></td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -824,31 +829,28 @@ function getView(){
         },
         frag_vendedores:()=>{
             return `
-            <div class="card card-rounded shadow">
-                <div class="card-body p-2">
-
-                    <h4 class="negrita text-secondary text-center">LOGRO DE VENDEDORES</h4>
-
-                    <div class="table-responsive col-12">
-                        <table class="table h-full table-hover col-12">
+            <div class="card card-rounded shadow h-100 proveedor-rpt-marcas__panel">
+                <div class="card-body p-3">
+                    <h5 class="negrita text-secondary text-center mb-3">Logro de vendedores</h5>
+                    <div class="table-responsive proveedor-rpt-marcas__scroll">
+                        <table class="table table-sm table-bordered proveedor-rpt-marcas__table mb-0" id="tblObjetivosVendedores">
                             <thead class="bg-secondary text-white">
                                 <tr>
                                     <td>VENDEDOR</td>
-                                    <td>IMPORTE</td>
-                                    <td>OBJETIVO</td>
-                                    <td>FALTA</td>
-                                    <td>ALCANCE</td>
+                                    <td class="text-right">IMPORTE</td>
+                                    <td class="text-right">OBJETIVO</td>
+                                    <td class="text-right">FALTA</td>
+                                    <td class="text-right">ALCANCE</td>
                                 </tr>
                             </thead>
-                            <tbody id="tblDataVendedores2">
-                            </tbody>
+                            <tbody id="tblDataVendedores2"></tbody>
                             <tfoot class="bg-secondary text-white negrita">
                                 <tr>
-                                    <td></td>
-                                    <td id="lbTotalVendedoresImporte"></td>
-                                    <td id="lbTotalVendedoresObjetivo"></td>
-                                    <td id="lbTotalVendedoresFalta"></td>
-                                    <td id="lbTotalVendedoresLogro"></td>
+                                    <td>TOTALES</td>
+                                    <td class="text-right" id="lbTotalVendedoresImporte"></td>
+                                    <td class="text-right" id="lbTotalVendedoresObjetivo"></td>
+                                    <td class="text-right" id="lbTotalVendedoresFalta"></td>
+                                    <td class="text-right" id="lbTotalVendedoresLogro"></td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -872,15 +874,15 @@ function getView(){
                             <div class="card card-rounded">
                                 <div class="card-body p-4">
 
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered h-full col-12">
+                                    <div class="table-responsive proveedor-rpt-marcas__scroll">
+                                        <table class="table table-sm table-bordered proveedor-rpt-marcas__table mb-0">
                                             <thead class="bg-base text-white"> 
                                                 <tr>
                                                     <td>CATEGORIA</td>
-                                                    <td>OBJETIVO</td>
-                                                    <td>LOGRO</td>
-                                                    <td>FALTAN</td>
-                                                    <td></td>
+                                                    <td class="text-right">OBJETIVO</td>
+                                                    <td class="text-right">LOGRO</td>
+                                                    <td class="text-right">FALTAN</td>
+                                                    <td class="text-right">ALCANCE</td>
                                                 </tr>
                                             </thead>
                                             <tbody id="tblDataCategoriasMarca"></tbody>
@@ -899,6 +901,44 @@ function getView(){
 
                         </div>
                     
+                    </div>
+                </div>
+            </div>
+            `
+        },
+        modal_categorias_vendedor:()=>{
+            return `
+              <div id="modal_categorias_vendedor" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-right modal-xl">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-secondary d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white" id="lbVendedorCategorias"></h4>
+                        </div>
+                        <div class="modal-body p-4">
+                            <div class="card card-rounded">
+                                <div class="card-body p-4">
+                                    <div class="table-responsive proveedor-rpt-marcas__scroll">
+                                        <table class="table table-sm table-bordered proveedor-rpt-marcas__table mb-0">
+                                            <thead class="bg-secondary text-white"> 
+                                                <tr>
+                                                    <td>CATEGORIA</td>
+                                                    <td class="text-right">VENTA</td>
+                                                    <td class="text-right">OBJETIVO</td>
+                                                    <td class="text-right">FALTAN</td>
+                                                    <td class="text-right">ALCANCE</td>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tblDataVendedorCategorias"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <button class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
+                                    <i class="fal fa-arrow-left"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -959,6 +999,7 @@ function addListeners(){
     cmbSucursalHeader.addEventListener('change', proveedor_onHeaderFiltersChange);
     cmbMesHeader.addEventListener('change', proveedor_onHeaderFiltersChange);
     cmbAnioHeader.addEventListener('change', proveedor_onHeaderFiltersChange);
+    document.getElementById('cmbProveedorModoVentas')?.addEventListener('change', proveedor_onHeaderFiltersChange);
 
     document.getElementById('txtSFechaInicial').value = F.getFecha();
     document.getElementById('txtSFechaFinal').value = F.getFecha();
@@ -1326,8 +1367,10 @@ function tbl_dashboard_ventas_vendedor() {
     const sucursal = proveedor_getSucursal();
     const mes = proveedor_getMes();
     const anio = proveedor_getAnio();
+    const modo = proveedor_getModoVentas();
+    const tituloModo = `${proveedor_labelModoVentas()} por vendedor`;
 
-    RPT.data_ventas_vendedor(sucursal, mes, anio)
+    RPT.data_dashboard_ventas_vendedor(sucursal, mes, anio, modo)
         .then((data) => {
             const items = [...data.recordset].sort((a, b) => Number(b.TOTALPRECIO) - Number(a.TOTALPRECIO));
             let totalPedidos = 0;
@@ -1354,12 +1397,14 @@ function tbl_dashboard_ventas_vendedor() {
                 'vendedor',
                 'chartDashVentasVendedor',
                 items.map((r) => r.EMPLEADO),
-                items.map((r) => r.TOTALPRECIO),
-                `Ventas por vendedor: ${F.setMoneda(totalImporte, 'Q')}`
+                items.map((r) => Number(r.TOTALPRECIO)),
+                `${tituloModo}: ${F.setMoneda(totalImporte, 'Q')}`
             );
         })
         .catch(() => {
             container.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No se cargaron datos</td></tr>';
+            document.getElementById('lbFootDashVendedorPedidos').innerText = '--';
+            document.getElementById('lbFootDashVendedorImporte').innerText = '--';
             proveedor_destroyDashboardChart('vendedor');
         });
 }
@@ -1373,8 +1418,10 @@ function tbl_dashboard_ventas_marca() {
     const sucursal = proveedor_getSucursal();
     const mes = proveedor_getMes();
     const anio = proveedor_getAnio();
+    const modo = proveedor_getModoVentas();
+    const tituloModo = `${proveedor_labelModoVentas()} por marca`;
 
-    RPT.data_marcas(sucursal, mes, anio)
+    RPT.data_marcas(sucursal, mes, anio, modo)
         .then((data) => {
             const items = [...data.recordset].sort((a, b) => Number(b.TOTALPRECIO) - Number(a.TOTALPRECIO));
             let totalImporte = 0;
@@ -1398,7 +1445,7 @@ function tbl_dashboard_ventas_marca() {
                 'chartDashVentasMarca',
                 items.map((r) => r.DESMARCA),
                 items.map((r) => r.TOTALPRECIO),
-                `Ventas por marca: ${F.setMoneda(totalImporte, 'Q')}`
+                `${tituloModo}: ${F.setMoneda(totalImporte, 'Q')}`
             );
         })
         .catch(() => {
@@ -1522,7 +1569,7 @@ function proveedor_renderVendedorMarcasChart(items, nombre) {
                 legend: { display: false },
                 title: {
                     display: true,
-                    text: `Ventas por marca — ${nombre}`,
+                    text: `${proveedor_labelModoVentas()} por marca — ${nombre}`,
                     font: { size: 12 }
                 }
             },
@@ -1557,7 +1604,9 @@ function tbl_rpt_vendedores() {
 
     const sucursal = proveedor_getSucursal();
 
-    RPT.data_ventas_vendedor(sucursal, mes, anio)
+    const modo = proveedor_getModoVentas();
+
+    RPT.data_ventas_vendedor(sucursal, mes, anio, modo)
         .then((data) => {
             const items = [...data.recordset].sort((a, b) => Number(b.TOTALPRECIO) - Number(a.TOTALPRECIO));
             let varTotal = 0;
@@ -1606,8 +1655,9 @@ function tbl_rpt_vendedor_marcas(codemp, nombre, mes, anio) {
     const sucursal = proveedor_getSucursal();
     const mesVal = mes || proveedor_getMes();
     const anioVal = anio || proveedor_getAnio();
+    const modo = proveedor_getModoVentas();
 
-    RPT.data_ventas_vendedor_marcas(sucursal, codemp, mesVal, anioVal)
+    RPT.data_ventas_vendedor_marcas(sucursal, codemp, mesVal, anioVal, modo)
         .then((data) => {
             const items = [...data.recordset].sort((a, b) => Number(b.TOTALPRECIO) - Number(a.TOTALPRECIO));
             let varTotal = 0;
@@ -1672,7 +1722,7 @@ function proveedor_renderMarcasVendedorChart(items, desmarca) {
                 legend: { display: false },
                 title: {
                     display: true,
-                    text: `Ventas por vendedor — ${desmarca}`,
+                    text: `${proveedor_labelModoVentas()} por vendedor — ${desmarca}`,
                     font: { size: 12 }
                 }
             },
@@ -1719,8 +1769,9 @@ function tbl_rpt_marcas() {
     proveedor_resetMarcasDetalle();
 
     const sucursal = proveedor_getSucursal();
+    const modo = proveedor_getModoVentas();
 
-    RPT.data_marcas(sucursal, mes, anio)
+    RPT.data_marcas(sucursal, mes, anio, modo)
         .then((data) => {
             const items = [...data.recordset].sort((a, b) => Number(b.TOTALPRECIO) - Number(a.TOTALPRECIO));
             let varTotal = 0;
@@ -1761,8 +1812,9 @@ function tbl_rpt_marcas_vendedores(codmarca, desmarca, mes, anio) {
     const sucursal = proveedor_getSucursal();
     const mesVal = mes || proveedor_getMes();
     const anioVal = anio || proveedor_getAnio();
+    const modo = proveedor_getModoVentas();
 
-    RPT.data_marcas_vendedores(sucursal, codmarca, mesVal, anioVal)
+    RPT.data_marcas_vendedores(sucursal, codmarca, mesVal, anioVal, modo)
         .then((data) => {
             const items = [...data.recordset].sort((a, b) => Number(b.TOTALPRECIO) - Number(a.TOTALPRECIO));
             let varTotal = 0;
@@ -1926,9 +1978,20 @@ function tbl_inventario(){
 
 //OBJETIVOS
 
+function proveedor_resolveObjetivosData(data) {
+    if (!data || data.toString() === 'error') return Promise.reject();
+    if (Array.isArray(data.recordset)) return Promise.resolve(data);
+    if (Number(data.rowsAffected?.[0]) > 0) return Promise.resolve(data);
+    return Promise.reject();
+}
+
+function proveedor_pctLogro(importe, objetivo) {
+    const obj = Number(objetivo);
+    if (!obj) return 0;
+    return (Number(importe) / obj) * 100;
+}
+
 function listeners_objetivos(){
-
-
     document.getElementById('btnMenuObjetivos').addEventListener('click',()=>{
         proveedor_showPanel('seis', 'btnMenuObjetivos', ()=>{
             selected_tab = 'OBJETIVOS';
@@ -1936,8 +1999,17 @@ function listeners_objetivos(){
         });
     });
 
+    document.getElementById('tblObjetivosMarcas')?.addEventListener('click', (e) => {
+        const row = e.target.closest('tr[data-codmarca]');
+        if (!row) return;
+        get_detalle_marca(row.dataset.codmarca, row.dataset.desmarca || '');
+    });
 
-    
+    document.getElementById('tblObjetivosVendedores')?.addEventListener('click', (e) => {
+        const row = e.target.closest('tr[data-codemp]');
+        if (!row) return;
+        get_detalle_vendedor(row.dataset.codemp, row.dataset.nombre || '');
+    });
 };
 
 function get_reportes(){
@@ -1955,205 +2027,165 @@ function get_reportes(){
 
 
 function get_data_logro_marcas(sucursal,mes,anio){
-
      return new Promise((resolve,reject)=>{
-
             axios.post(GlobalUrlCalls + '/objetivos/select_logro_marcas', {
                     token:TOKEN,
                     sucursal:sucursal,
                     mes:mes,
                     anio:anio})
             .then((response) => {
-                if(response.status.toString()=='200'){
-                    let data = response.data;
-                    if(data.toString()=="error"){
-                        reject();
-                    }else{
-                        if(Number(data.rowsAffected[0])>0){
-                            resolve(data);             
-                        }else{
-                            reject();
-                        } 
-                    }       
-                }else{
+                if (response.status.toString() === '200') {
+                    proveedor_resolveObjetivosData(response.data).then(resolve).catch(reject);
+                } else {
                     reject();
-                }                   
-            }, (error) => {
-                reject();
-            });
-        }) 
-    
-
+                }
+            }, () => reject());
+        });
 };
+
 function tbl_logro_marcas(sucursal,mes,anio){
+    const container = document.getElementById('tblDataMarcas2');
+    if (!container) return;
 
-
-    let container = document.getElementById('tblDataMarcas2');
-    container.innerHTML = GlobalLoader;
+    container.innerHTML = `<tr><td colspan="5" class="text-center">${GlobalLoader}</td></tr>`;
 
     let conteo = 0;
-    let varTotalObjetivo =0; let varTotalImporte = 0; 
-    let varTotalFaltan = 0; let varTotalLogro = 0;
+    let varTotalObjetivo = 0;
+    let varTotalImporte = 0;
+    let varTotalFaltan = 0;
+    let varTotalLogro = 0;
 
     get_data_logro_marcas(sucursal,mes,anio)
     .then((data)=>{
-
+        const items = data.recordset || [];
         let str = '';
-        data.recordset.map((r)=>{
+
+        items.forEach((r) => {
             conteo += 1;
-            let varFaltan = (Number(r.OBJETIVO) - Number(r.TOTALPRECIO));
-            let varLOGRO = ((Number(r.TOTALPRECIO)/Number(r.OBJETIVO))*100);
-            
+            const varFaltan = Number(r.OBJETIVO) - Number(r.TOTALPRECIO);
+            const varLOGRO = proveedor_pctLogro(r.TOTALPRECIO, r.OBJETIVO);
             varTotalObjetivo += Number(r.OBJETIVO);
             varTotalImporte += Number(r.TOTALPRECIO);
-            varTotalFaltan += Number(varFaltan);
-            varTotalLogro += Number(varLOGRO);
+            varTotalFaltan += varFaltan;
+            varTotalLogro += varLOGRO;
 
+            const desmarcaAttr = String(r.MARCA || '').replace(/"/g, '&quot;');
+            const strLogro = get_color_logro(Number(varLOGRO));
             str += `
-            <tr class="hand" onclick="get_detalle_marca('${r.CODIGO_MARCA}','${r.MARCA}')">
+            <tr class="${strLogro} hand" data-codmarca="${r.CODIGO_MARCA}" data-desmarca="${desmarcaAttr}">
                 <td>${r.MARCA}</td>
-                <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
-                <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
-                <td>${F.setMoneda(varFaltan,'Q')}</td>
-                <td>${varLOGRO.toFixed(2)} %</td>
-            </tr>
-            `
-        })
-        container.innerHTML = str;
+                <td class="text-right">${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                <td class="text-right">${F.setMoneda(r.OBJETIVO,'Q')}</td>
+                <td class="text-right">${F.setMoneda(varFaltan,'Q')}</td>
+                <td class="text-right">${varLOGRO.toFixed(2)}%</td>
+            </tr>`;
+        });
 
-
-        document.getElementById('lbTotalMarcasImporte').innerHTML = F.setMoneda(varTotalImporte,'Q');
-        document.getElementById('lbTotalMarcasObjetivo').innerHTML = F.setMoneda(varTotalObjetivo,'Q');
-        document.getElementById('lbTotalMarcasFalta').innerHTML = F.setMoneda(varTotalFaltan,'Q');
-        document.getElementById('lbTotalMarcasLogro').innerHTML = `${F.setMoneda(varTotalLogro / conteo,'')} %`
-
+        container.innerHTML = str || '<tr><td colspan="5" class="text-center text-muted">Sin datos</td></tr>';
+        document.getElementById('lbTotalMarcasImporte').innerText = F.setMoneda(varTotalImporte,'Q');
+        document.getElementById('lbTotalMarcasObjetivo').innerText = F.setMoneda(varTotalObjetivo,'Q');
+        document.getElementById('lbTotalMarcasFalta').innerText = F.setMoneda(varTotalFaltan,'Q');
+        document.getElementById('lbTotalMarcasLogro').innerText = conteo ? `${(varTotalLogro / conteo).toFixed(2)}%` : '--';
     })
     .catch(()=>{
-        container.innerHTML = 'No se cargaron datos...';
-
-        document.getElementById('lbTotalMarcasImporte').innerHTML = '';
-        document.getElementById('lbTotalMarcasObjetivo').innerHTML =''; 
-        document.getElementById('lbTotalMarcasFalta').innerHTML = '';
-        document.getElementById('lbTotalMarcasLogro').innerHTML = '';
-    })
-
-
-
+        container.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No se cargaron datos</td></tr>';
+        document.getElementById('lbTotalMarcasImporte').innerText = '';
+        document.getElementById('lbTotalMarcasObjetivo').innerText = '';
+        document.getElementById('lbTotalMarcasFalta').innerText = '';
+        document.getElementById('lbTotalMarcasLogro').innerText = '';
+    });
 };
 
 
 
 function get_data_logro_vendedores(sucursal,mes,anio){
-
      return new Promise((resolve,reject)=>{
-
             axios.post(GlobalUrlCalls + '/objetivos/select_logro_vendedores', {
                     token:TOKEN,
                     sucursal:sucursal,
                     mes:mes,
                     anio:anio})
             .then((response) => {
-                if(response.status.toString()=='200'){
-                    let data = response.data;
-                    if(data.toString()=="error"){
-                        reject();
-                    }else{
-                        if(Number(data.rowsAffected[0])>0){
-                            resolve(data);             
-                        }else{
-                            reject();
-                        } 
-                    }       
-                }else{
+                if (response.status.toString() === '200') {
+                    proveedor_resolveObjetivosData(response.data).then(resolve).catch(reject);
+                } else {
                     reject();
-                }                   
-            }, (error) => {
-                reject();
-            });
-        }) 
-    
-
+                }
+            }, () => reject());
+        });
 };
+
 function tbl_logro_vendedores(sucursal,mes,anio){
+    const container = document.getElementById('tblDataVendedores2');
+    if (!container) return;
 
-
-    let container = document.getElementById('tblDataVendedores2');
-    container.innerHTML = GlobalLoader;
+    container.innerHTML = `<tr><td colspan="5" class="text-center">${GlobalLoader}</td></tr>`;
 
     let conteo = 0;
-    let varTotalObjetivo =0; let varTotalImporte = 0; 
-    let varTotalFaltan = 0; let varTotalLogro = 0;
+    let varTotalObjetivo = 0;
+    let varTotalImporte = 0;
+    let varTotalFaltan = 0;
+    let varTotalLogro = 0;
 
     get_data_logro_vendedores(sucursal,mes,anio)
     .then((data)=>{
-
+        const items = data.recordset || [];
         let str = '';
-        data.recordset.map((r)=>{
+
+        items.forEach((r) => {
             conteo += 1;
-            let varFaltan = (Number(r.OBJETIVO) - Number(r.TOTALPRECIO));
-            let varLOGRO = ((Number(r.TOTALPRECIO)/Number(r.OBJETIVO))*100);
-            
+            const varFaltan = Number(r.OBJETIVO) - Number(r.TOTALPRECIO);
+            const varLOGRO = proveedor_pctLogro(r.TOTALPRECIO, r.OBJETIVO);
             varTotalObjetivo += Number(r.OBJETIVO);
             varTotalImporte += Number(r.TOTALPRECIO);
-            varTotalFaltan += Number(varFaltan);
-            varTotalLogro += Number(varLOGRO);
+            varTotalFaltan += varFaltan;
+            varTotalLogro += varLOGRO;
 
+            const nombreAttr = String(r.VENDEDOR || '').replace(/"/g, '&quot;');
+            const strLogro = get_color_logro(Number(varLOGRO));
             str += `
-            <tr class="hand" onclick="get_detalle_vendedor('${r.CODIGO_VENDEDOR}','${r.VENDEDOR}')">
-                <td>${r.VENDEDOR}
-                    <br>
-                    <small class="negrita text-info">${r.EMPRESA}</small>
-                </td>
-                <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
-                <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
-                <td>${F.setMoneda(varFaltan,'Q')}</td>
-                <td>${varLOGRO.toFixed(2)} %</td>
-            </tr>
-            `
-        })
-        container.innerHTML = str;
+            <tr class="${strLogro} hand" data-codemp="${r.CODIGO_VENDEDOR}" data-nombre="${nombreAttr}">
+                <td>${r.VENDEDOR}<br><small class="text-muted">${r.EMPRESA || ''}</small></td>
+                <td class="text-right">${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                <td class="text-right">${F.setMoneda(r.OBJETIVO,'Q')}</td>
+                <td class="text-right">${F.setMoneda(varFaltan,'Q')}</td>
+                <td class="text-right">${varLOGRO.toFixed(2)}%</td>
+            </tr>`;
+        });
 
-
-        document.getElementById('lbTotalVendedoresImporte').innerHTML = F.setMoneda(varTotalImporte,'Q');
-        document.getElementById('lbTotalVendedoresObjetivo').innerHTML = F.setMoneda(varTotalObjetivo,'Q');
-        document.getElementById('lbTotalVendedoresFalta').innerHTML = F.setMoneda(varTotalFaltan,'Q');
-        document.getElementById('lbTotalVendedoresLogro').innerHTML = `${F.setMoneda(varTotalLogro / conteo,'')} %`
-
+        container.innerHTML = str || '<tr><td colspan="5" class="text-center text-muted">Sin datos</td></tr>';
+        document.getElementById('lbTotalVendedoresImporte').innerText = F.setMoneda(varTotalImporte,'Q');
+        document.getElementById('lbTotalVendedoresObjetivo').innerText = F.setMoneda(varTotalObjetivo,'Q');
+        document.getElementById('lbTotalVendedoresFalta').innerText = F.setMoneda(varTotalFaltan,'Q');
+        document.getElementById('lbTotalVendedoresLogro').innerText = conteo ? `${(varTotalLogro / conteo).toFixed(2)}%` : '--';
     })
     .catch(()=>{
-        container.innerHTML = 'No se cargaron datos...';
-        
-        document.getElementById('lbTotalVendedoresImporte').innerHTML = '';
-        document.getElementById('lbTotalVendedoresObjetivo').innerHTML =''; 
-        document.getElementById('lbTotalVendedoresFalta').innerHTML = '';
-        document.getElementById('lbTotalVendedoresLogro').innerHTML = '';
-    })
-
-
-
+        container.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No se cargaron datos</td></tr>';
+        document.getElementById('lbTotalVendedoresImporte').innerText = '';
+        document.getElementById('lbTotalVendedoresObjetivo').innerText = '';
+        document.getElementById('lbTotalVendedoresFalta').innerText = '';
+        document.getElementById('lbTotalVendedoresLogro').innerText = '';
+    });
 };
 
 //OBJETIVOS
 
 
-function get_detalle_marca(codmarca,desmarca){
-
-
+function get_detalle_marca(codmarca, desmarca){
     $("#modal_categorias_marca").modal('show');
-
     document.getElementById('lbMarcasDescategoria').innerText = desmarca;
-    
     tbl_logro_categorias_marca(codmarca);
+}
 
-
-
+function get_detalle_vendedor(codemp, nombre){
+    $("#modal_categorias_vendedor").modal('show');
+    document.getElementById('lbVendedorCategorias').innerText = nombre;
+    tbl_detalle_vendedor(codemp);
 }
 
 
 function get_data_logro_categorias_marcas(sucursal,codmarca,mes,anio){
-
      return new Promise((resolve,reject)=>{
-
             axios.post(GlobalUrlCalls + '/objetivos/select_logro_marcas_categorias', {
                     token:TOKEN,
                     sucursal:sucursal,
@@ -2161,60 +2193,98 @@ function get_data_logro_categorias_marcas(sucursal,codmarca,mes,anio){
                     mes:mes,
                     anio:anio})
             .then((response) => {
-                if(response.status.toString()=='200'){
-                    let data = response.data;
-                    if(data.toString()=="error"){
-                        reject();
-                    }else{
-                        if(Number(data.rowsAffected[0])>0){
-                            resolve(data);             
-                        }else{
-                            reject();
-                        } 
-                    }       
-                }else{
+                if (response.status.toString() === '200') {
+                    proveedor_resolveObjetivosData(response.data).then(resolve).catch(reject);
+                } else {
                     reject();
-                }                   
-            }, (error) => {
-                reject();
-            });
-        }) 
-    
-
+                }
+            }, () => reject());
+        });
 };
+
+function get_data_vendedor_categorias(codemp, mes, anio){
+    return new Promise((resolve, reject) => {
+        axios.post(GlobalUrlCalls + '/objetivos/select_logro_vendedores_categorias_todas', {
+            token: TOKEN,
+            codemp: codemp,
+            mes: mes,
+            anio: anio,
+            sucursal: proveedor_getSucursal()
+        })
+        .then((response) => {
+            if (response.status.toString() === '200') {
+                proveedor_resolveObjetivosData(response.data).then(resolve).catch(reject);
+            } else {
+                reject();
+            }
+        }, () => reject());
+    });
+}
 
 function tbl_logro_categorias_marca(codmarca){
+    const container = document.getElementById('tblDataCategoriasMarca');
+    if (!container) return;
 
-    let container = document.getElementById('tblDataCategoriasMarca');
-    container.innerHTML = GlobalLoader;
+    container.innerHTML = `<tr><td colspan="5" class="text-center">${GlobalLoader}</td></tr>`;
 
+    const sucursal = proveedor_getSucursal();
+    const mes = proveedor_getMes();
+    const anio = proveedor_getAnio();
 
-    let sucursal = proveedor_getSucursal();
-    let mes = proveedor_getMes();
-    let anio = proveedor_getAnio();
-
-    get_data_logro_categorias_marcas(sucursal,codmarca,mes,anio)
+    get_data_logro_categorias_marcas(sucursal, codmarca, mes, anio)
     .then((data)=>{
         let str = '';
-        data.recordset.map((r)=>{
-           
-            let varLOGRO = ((Number(r.TOTALPRECIO)/Number(r.OBJETIVO))*100);
-           
+        (data.recordset || []).forEach((r) => {
+            const varLOGRO = proveedor_pctLogro(r.TOTALPRECIO, r.OBJETIVO);
+            const strLogro = get_color_logro(Number(varLOGRO));
             str += `
-            <tr>
+            <tr class="${strLogro}">
                 <td>${r.CATEGORIA}</td>
-                <td>${F.setMoneda(r.OBJETIVO,'Q')}</td>
-                <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
-                <td>${F.setMoneda((Number(r.OBJETIVO)-Number(r.TOTALPRECIO)),'Q')}</td>
-                <td>${varLOGRO.toFixed(2)}%</td>
-            </tr>
-            `
-        })
-        container.innerHTML = str;
+                <td class="text-right">${F.setMoneda(r.OBJETIVO,'Q')}</td>
+                <td class="text-right">${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                <td class="text-right">${F.setMoneda(Number(r.OBJETIVO) - Number(r.TOTALPRECIO),'Q')}</td>
+                <td class="text-right">${varLOGRO.toFixed(2)}%</td>
+            </tr>`;
+        });
+        container.innerHTML = str || '<tr><td colspan="5" class="text-center text-muted">Sin datos</td></tr>';
     })
     .catch(()=>{
-        container.innerHTML = 'No se cargaron datos...';
-    })
-
-
+        container.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No se cargaron datos</td></tr>';
+    });
 };
+
+function tbl_detalle_vendedor(codemp){
+    const container = document.getElementById('tblDataVendedorCategorias');
+    if (!container) return;
+
+    container.innerHTML = `<tr><td colspan="5" class="text-center">${GlobalLoader}</td></tr>`;
+
+    const mes = proveedor_getMes();
+    const anio = proveedor_getAnio();
+
+    get_data_vendedor_categorias(codemp, mes, anio)
+    .then((data) => {
+        let str = '';
+        (data.recordset || []).forEach((r) => {
+            const logro = Number(r.LOGRO ?? r.TOTALPRECIO ?? 0);
+            const varLOGRO = proveedor_pctLogro(logro, r.OBJETIVO);
+            const strLogro = get_color_logro(Number(varLOGRO));
+            str += `
+            <tr class="${strLogro}">
+                <td>${r.CATEGORIA}</td>
+                <td class="text-right">${F.setMoneda(logro,'Q')}</td>
+                <td class="text-right">${F.setMoneda(r.OBJETIVO,'Q')}</td>
+                <td class="text-right">${F.setMoneda(Number(r.OBJETIVO) - logro,'Q')}</td>
+                <td class="text-right">${varLOGRO.toFixed(2)}%</td>
+            </tr>`;
+        });
+        container.innerHTML = str || '<tr><td colspan="5" class="text-center text-muted">Sin datos</td></tr>';
+    })
+    .catch(() => {
+        container.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No se cargaron datos</td></tr>';
+    });
+};
+
+window.get_detalle_marca = get_detalle_marca;
+window.get_detalle_vendedor = get_detalle_vendedor;
+window.get_reportes = get_reportes;

@@ -271,10 +271,11 @@ body.spa-nav-hidden .page-header .hidden-lg-up {
 
 /* Inicio proveedor: layout y cards */
 body.spa-nav-hidden .page-content.proveedor-page {
-  padding-top: 0.35rem !important;
+  padding-top: 0.85rem !important;
 }
 .proveedor-layout {
-  margin-top: -0.65rem;
+  margin-top: 0;
+  padding-top: 0.35rem;
 }
 .proveedor-menu-card--active {
   background: rgba(255, 255, 255, 0.95) !important;
@@ -285,13 +286,34 @@ body.spa-nav-hidden .page-content.proveedor-page {
   min-height: 280px;
 }
 
+.proveedor-content-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
 .proveedor-header-card {
-  max-width: 720px;
+  width: 100%;
+  max-width: none;
+  margin-bottom: 0.85rem;
   background: rgba(0, 68, 163, 0.75) !important;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 12px;
+}
+.proveedor-main-row {
+  margin-left: 0;
+  margin-right: 0;
+}
+.proveedor-header-card .form-control {
+  min-width: 0;
+}
+.proveedor-header-card #cmbMesHeader,
+.proveedor-header-card #cmbAnioHeader {
+  min-width: 5.5rem;
+}
+.proveedor-header-card #cmbProveedorModoVentas {
+  min-width: 12rem;
 }
 .proveedor-menu-toggle {
   position: fixed;
@@ -499,6 +521,170 @@ body.proveedor-sidebar-open {
 .proveedor-rpt-marcas__row--active {
   background: rgba(59, 125, 221, 0.14) !important;
   box-shadow: inset 3px 0 0 #3b7ddd;
+}
+
+/* Objetivos proveedor */
+.proveedor-objetivos .proveedor-rpt-marcas__scroll {
+  max-height: 420px;
+  overflow-y: auto;
+}
+.proveedor-cobertura-municipios .proveedor-rpt-marcas__scroll {
+  max-height: 320px;
+  overflow-y: auto;
+}
+.proveedor-cobertura-municipios #cobertura-pane-detalle .proveedor-rpt-marcas__scroll {
+  max-height: 420px;
+}
+.proveedor-cobertura-municipios .proveedor-cobertura-subtitle {
+  margin-bottom: 0.15rem !important;
+}
+.proveedor-cobertura-municipios #cobertura-pane-detalle {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+.proveedor-cobertura-detalle-header {
+  font-size: 1.05em;
+}
+.proveedor-cobertura-detalle-header .card-body {
+  padding-top: 0.45rem !important;
+  padding-bottom: 0.45rem !important;
+}
+.proveedor-cobertura-detalle-stats {
+  line-height: 1.25;
+}
+/* Cobertura clientes proveedor */
+.proveedor-cobertura-clientes .table {
+  font-size: 0.95em;
+}
+.proveedor-cobertura-clientes .proveedor-rpt-marcas__scroll {
+  max-height: 380px;
+  overflow-y: auto;
+}
+.proveedor-cobertura-clientes-detalle-header .card-body {
+  padding-top: 0.45rem !important;
+  padding-bottom: 0.45rem !important;
+}
+.proveedor-cobertura-clientes-detalle-stats {
+  line-height: 1.25;
+}
+.proveedor-cobertura-clientes-nv {
+  font-size: 0.88em;
+  table-layout: fixed;
+  width: 100%;
+}
+.proveedor-cobertura-clientes-nv-scroll {
+  overflow-x: auto;
+}
+.proveedor-cobertura-col-visita {
+  width: 3.25rem;
+}
+.proveedor-cobertura-col-cliente {
+  width: 34%;
+}
+.proveedor-cobertura-col-direccion {
+  width: 36%;
+}
+.proveedor-cobertura-col-fecha {
+  width: 4.75rem;
+}
+.proveedor-cobertura-col-action {
+  width: 2.1rem;
+}
+.proveedor-cobertura-clientes-nv td {
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  vertical-align: top;
+  padding: 0.35rem 0.45rem;
+  line-height: 1.3;
+}
+.proveedor-cobertura-cliente-cell {
+  min-width: 0;
+}
+.proveedor-cobertura-cliente-tipo {
+  display: block;
+  font-size: 0.9em;
+  color: #64748b;
+  margin-bottom: 0.1rem;
+}
+.proveedor-cobertura-cliente-nombre {
+  display: block;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.proveedor-cobertura-cliente-dir {
+  font-size: 0.86em;
+  color: #475569;
+  line-height: 1.25;
+}
+.proveedor-cobertura-cliente-dir-linea {
+  display: block;
+}
+.proveedor-cobertura-cliente-dir-meta {
+  display: block;
+  font-size: 0.82em;
+  color: #94a3b8;
+}
+.proveedor-cobertura-vendedor-row td {
+  border-bottom: none !important;
+  vertical-align: middle;
+}
+.proveedor-cobertura-vendedor-progress td {
+  padding-top: 0 !important;
+  border-top: none !important;
+}
+.proveedor-cobertura-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+.proveedor-cobertura-progress {
+  flex: 1 1 auto;
+  width: 100%;
+  height: 0.65rem;
+  margin: 0;
+  border: none;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(0, 68, 163, 0.08);
+}
+.proveedor-cobertura-progress::-webkit-progress-bar {
+  background: rgba(0, 68, 163, 0.08);
+  border-radius: 999px;
+}
+.proveedor-cobertura-progress::-webkit-progress-value {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+  border-radius: 999px;
+}
+.proveedor-cobertura-progress::-moz-progress-bar {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+  border-radius: 999px;
+}
+.proveedor-cobertura-progress-pct {
+  flex: 0 0 auto;
+  font-size: 0.85em;
+  min-width: 3rem;
+  text-align: right;
+}
+.proveedor-cobertura-btn-detalle {
+  background: rgba(23, 162, 184, 0.12) !important;
+  border: 1px solid rgba(23, 162, 184, 0.35) !important;
+  color: #0e7490 !important;
+  box-shadow: none !important;
+}
+.proveedor-cobertura-btn-detalle:hover {
+  background: rgba(23, 162, 184, 0.24) !important;
+  color: #155e75 !important;
+}
+.proveedor-cobertura-chart {
+  min-height: 200px;
+  max-height: 420px;
+  position: relative;
+}
+.proveedor-cobertura-chart canvas {
+  width: 100% !important;
+  height: 100% !important;
 }
 
 /* Vistas proveedor: diseño moderno y fuente -5% adicional */

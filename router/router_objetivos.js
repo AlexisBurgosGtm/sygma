@@ -2,6 +2,58 @@ const execute = require('../connection');
 const express = require('express');
 const router = express.Router();
 
+const RPT_TIPOS_VENTA = `('FAC','FEF','FEC','FCP','FES','FPC')`;
+const RPT_TIPOS_NETAS = `('FAC','FEF','FEC','FCP','FES','FPC','DEV')`;
+
+function rptEsModoNeta(modo) {
+    return String(modo || 'bruta').toLowerCase() === 'neta';
+}
+
+function objFiltroSucursal(campo, sucursal) {
+    return sucursal === '%' ? `${campo} LIKE '%'` : `${campo} = '${sucursal}'`;
+}
+
+function objSumDocCobertura(esNetas) {
+    if (esNetas) {
+        return `SUM(
+            CASE
+                WHEN TIPODOCUMENTOS.TIPODOC IN ${RPT_TIPOS_VENTA} THEN DOCUMENTOS.TOTALPRECIO * CONFIG_TIPODOCUMENTOS.INV
+                WHEN TIPODOCUMENTOS.TIPODOC = 'DEV' THEN -(DOCUMENTOS.TOTALPRECIO * CONFIG_TIPODOCUMENTOS.INV)
+                ELSE 0
+            END
+        ) * -1`;
+    }
+    return `SUM(DOCUMENTOS.TOTALPRECIO * CONFIG_TIPODOCUMENTOS.INV) * -1`;
+}
+
+function objSumDocCostoCobertura(esNetas) {
+    if (esNetas) {
+        return `SUM(
+            CASE
+                WHEN TIPODOCUMENTOS.TIPODOC IN ${RPT_TIPOS_VENTA} THEN DOCUMENTOS.TOTALCOSTO * CONFIG_TIPODOCUMENTOS.INV
+                WHEN TIPODOCUMENTOS.TIPODOC = 'DEV' THEN -(DOCUMENTOS.TOTALCOSTO * CONFIG_TIPODOCUMENTOS.INV)
+                ELSE 0
+            END
+        ) * -1`;
+    }
+    return `SUM(DOCUMENTOS.TOTALCOSTO * CONFIG_TIPODOCUMENTOS.INV) * -1`;
+}
+
+function objTiposCobertura(esNetas) {
+    return esNetas ? RPT_TIPOS_NETAS : RPT_TIPOS_VENTA;
+}
+
+function objSumRptGeneral(campo, esNetas) {
+    if (esNetas) {
+        return `SUM(${campo} * INV) * -1`;
+    }
+    return `SUM(CASE WHEN ISNULL(TRANSACCION, '') = 'DEV' THEN 0 ELSE ${campo} * INV END) * -1`;
+}
+
+function objFiltroTransaccionesRpt() {
+    return `(ISNULL(TRANSACCION, '') <> 'FNC')`;
+}
+
 
 // ---------------------------
 // LOGRO PROCTER
@@ -1113,19 +1165,18 @@ router.post("/delete_objetivo_vendedor_marca", async(req,res)=>{
 //-----------------------------
 router.post('/get_cobertura', async function(req,res){
 
-    const {token,sucursal, anio, mes} = req.body;
+    const { token, sucursal, anio, mes, modo } = req.body;
+    const esNetas = rptEsModoNeta(modo);
 
-    let qry = '';
-
-        qry = `
+    const qry = `
        SELECT  
             DOCUMENTOS.EMPNIT AS SUCURSAL, 
             MUNICIPIOS.CODMUN AS CODMUNICIPIO, 
             MUNICIPIOS.DESMUN AS MUNICIPIO, 
             ISNULL(MUNICIPIOS.LATITUD, 0) AS LAT, 
             ISNULL(MUNICIPIOS.LONGITUD, 0) AS LONG, 
-            FORMAT((SUM(DOCUMENTOS.TOTALCOSTO * CONFIG_TIPODOCUMENTOS.INV) * -1), '##.##') AS TOTALCOSTO, 
-			FORMAT((SUM(DOCUMENTOS.TOTALPRECIO * CONFIG_TIPODOCUMENTOS.INV) * -1), '##.##') AS TOTALPRECIO, 
+            ${objSumDocCostoCobertura(esNetas)} AS TOTALCOSTO, 
+			${objSumDocCobertura(esNetas)} AS TOTALPRECIO, 
             COUNT(DOCUMENTOS.CODCLIENTE) AS CONTEO, 
             param_municipio_universo_clientes.UNIVERSO
         FROM CLIENTES RIGHT OUTER JOIN
@@ -1137,17 +1188,14 @@ router.post('/get_cobertura', async function(req,res){
             MUNICIPIOS ON param_municipio_universo_clientes.CODMUN = MUNICIPIOS.CODMUN ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
         WHERE  
             (DOCUMENTOS.STATUS <> 'A') AND 
-            (TIPODOCUMENTOS.TIPODOC IN ('FAC', 'FCP', 'FEC', 'FEF', 'FES', 'FPC','DEV','FNC')) AND
+            (TIPODOCUMENTOS.TIPODOC IN ${objTiposCobertura(esNetas)}) AND
             (DOCUMENTOS.ANIO = ${anio}) AND 
             (DOCUMENTOS.MES = ${mes}) AND 
-            (DOCUMENTOS.EMPNIT = '${sucursal}')
+            (${objFiltroSucursal('DOCUMENTOS.EMPNIT', sucursal)})
         GROUP BY DOCUMENTOS.EMPNIT, MUNICIPIOS.CODMUN, MUNICIPIOS.DESMUN, 
             MUNICIPIOS.LATITUD, MUNICIPIOS.LONGITUD, param_municipio_universo_clientes.UNIVERSO
-        ORDER BY SUM(DOCUMENTOS.TOTALPRECIO) DESC
-       
-        `
-            
- 
+        ORDER BY TOTALPRECIO DESC
+        `;
 
      execute.QueryToken(res,qry,token);
     
@@ -1195,25 +1243,24 @@ router.post('/BACKUP_get_cobertura', async function(req,res){
 });
 router.post('/get_productos_municipio', async function(req,res){
 
-    
+    const { token, sucursal, codmun, anio, mes, modo } = req.body;
+    const esNetas = rptEsModoNeta(modo);
 
-    const {token,sucursal,codmun, anio, mes} = req.body;
-  
-    let qry = `
+    const qry = `
         SELECT  
             CODIGO_MUNICIPIO AS CODMUN, 
             PRODUCTO AS CODPROD, 
 		    CODIGO_DUN AS DUN, 
             DESCRIPCION_PRODUCTO AS DESPROD, 
-		    SUM(TOTALUNIDADES * INV) * - 1 AS TOTALUNIDADES,
-		    SUM(TOTALCOSTO * INV) * - 1 AS TOTALCOSTO, 
-		    SUM(TOTALPRECIO * INV) * - 1 AS TOTALPRECIO
+		    ${objSumRptGeneral('TOTALUNIDADES', esNetas)} AS TOTALUNIDADES,
+		    ${objSumRptGeneral('TOTALCOSTO', esNetas)} AS TOTALCOSTO, 
+		    ${objSumRptGeneral('TOTALPRECIO', esNetas)} AS TOTALPRECIO
         FROM view_rpt_general
-        WHERE  (EMPNIT = '${sucursal}') AND (ANIO = ${anio}) AND (MES = ${mes}) AND 
-        (CODIGO_MUNICIPIO = ${codmun})
+        WHERE (${objFiltroSucursal('EMPNIT', sucursal)}) AND (ANIO = ${anio}) AND (MES = ${mes}) AND 
+            (CODIGO_MUNICIPIO = ${codmun}) AND ${objFiltroTransaccionesRpt()}
         GROUP BY CODIGO_MUNICIPIO, PRODUCTO, CODIGO_DUN, DESCRIPCION_PRODUCTO
         ORDER BY TOTALPRECIO DESC;
-    `
+    `;
 
      execute.QueryToken(res,qry,token);
     
@@ -1253,30 +1300,28 @@ router.post('/backup_get_marcas_municipio', async function(req,res){
 });
 router.post('/get_marcas_municipio', async function(req,res){
 
-    const {token,sucursal,anio,mes,codmun} = req.body;
-    let qry = '';
+    const { token, sucursal, anio, mes, codmun, modo } = req.body;
+    const esNetas = rptEsModoNeta(modo);
 
-        qry = `
+    const qry = `
         SELECT 
             CODIGO_MUNICIPIO AS CODMUN, 
 			CODIGO_MARCA AS CODMARCA, 
 			MARCA AS DESMARCA, 
-			(SUM(TOTALCOSTO * INV) *-1) AS TOTALCOSTO, 
-			(SUM(TOTALPRECIO * INV) *-1) AS TOTALPRECIO,
-			 0 AS CONTEO
+			${objSumRptGeneral('TOTALCOSTO', esNetas)} AS TOTALCOSTO, 
+			${objSumRptGeneral('TOTALPRECIO', esNetas)} AS TOTALPRECIO,
+			0 AS CONTEO
         FROM view_rpt_general
         WHERE 
-            (EMPNIT = '${sucursal}') AND 
+            (${objFiltroSucursal('EMPNIT', sucursal)}) AND 
             (ANIO = ${anio}) AND 
             (MES = ${mes}) AND 
-            CODIGO_MUNICIPIO=${codmun}
-        GROUP BY CODIGO_MUNICIPIO,  CODIGO_MARCA, MARCA
-        ORDER BY CODIGO_MARCA
-        `
-  
-       
-        //COUNT(CODIGO_CLIENTE)
-    
+            (CODIGO_MUNICIPIO = ${codmun}) AND
+            ${objFiltroTransaccionesRpt()}
+        GROUP BY CODIGO_MUNICIPIO, CODIGO_MARCA, MARCA
+        ORDER BY TOTALPRECIO DESC
+        `;
+
       execute.QueryToken(res,qry,token);
     
 });
