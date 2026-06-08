@@ -2,7 +2,17 @@ var digitador_currentPane = 'uno';
 var digitador_dashboardCharts = {};
 
 function digitador_getSucursal() {
-    return document.getElementById('cmbSucursalHeader')?.value || GlobalEmpnit || '%';
+    return GlobalEmpnit || document.getElementById('cmbSucursalHeader')?.value || '%';
+}
+
+function digitador_setupSucursalHeader() {
+    const cmb = document.getElementById('cmbSucursalHeader');
+    if (!cmb) return;
+    const emp = GlobalEmpnit || '%';
+    const nom = GlobalNomEmpresa || 'Sede';
+    cmb.innerHTML = `<option value="${emp}">${nom}</option>`;
+    cmb.value = emp;
+    cmb.disabled = true;
 }
 
 function digitador_getMes() {
@@ -1263,39 +1273,10 @@ function addListeners(){
         cmbAnioHeader.value = F.get_anio_curso();
     }
 
-    if (cmbSucursalHeader && !cmbSucursalHeader.options.length) {
-        const empDefault = GlobalEmpnit || '%';
-        const nomDefault = GlobalNomEmpresa || 'Sede';
-        cmbSucursalHeader.innerHTML = `<option value="${empDefault}">${nomDefault}</option>`;
-        cmbSucursalHeader.value = empDefault;
-    }
+    digitador_setupSucursalHeader();
 
     digitador_initDashboard();
     digitador_setActiveCard('btnMenuDashboard');
-
-    if (cmbSucursalHeader) {
-        GF.get_data_empresas()
-            .then((data) => {
-                let str = '';
-                data.recordset.forEach((r) => {
-                    str += `<option value="${r.EMPNIT}">${r.NOMBRE}</option>`;
-                });
-                cmbSucursalHeader.innerHTML = str;
-                if (GlobalEmpnit) {
-                    cmbSucursalHeader.value = GlobalEmpnit;
-                }
-                digitador_initDashboard();
-            })
-            .catch(() => {
-                if (!cmbSucursalHeader.options.length) {
-                    cmbSucursalHeader.innerHTML = `<option value="${GlobalEmpnit || '%'}">${GlobalNomEmpresa || 'Sede'}</option>`;
-                    if (GlobalEmpnit) cmbSucursalHeader.value = GlobalEmpnit;
-                }
-                digitador_initDashboard();
-            });
-    }
-
-    cmbSucursalHeader?.addEventListener('change', digitador_onHeaderFiltersChange);
     cmbMesHeader?.addEventListener('change', digitador_onHeaderFiltersChange);
     cmbAnioHeader?.addEventListener('change', digitador_onHeaderFiltersChange);
     document.getElementById('cmbProveedorModoVentas')?.addEventListener('change', digitador_onHeaderFiltersChange);

@@ -1,4 +1,46 @@
 let supervisor_embedDestroy = null;
+var supervisor_currentPane = 'uno';
+var supervisor_dashboardCharts = {};
+
+function supervisor_getSucursal() {
+    return GlobalEmpnit || document.getElementById('cmbSucursalHeader')?.value || '%';
+}
+
+function supervisor_getMes() {
+    return document.getElementById('cmbMesHeader')?.value || F.get_mes_curso();
+}
+
+function supervisor_getAnio() {
+    return document.getElementById('cmbAnioHeader')?.value || F.get_anio_curso();
+}
+
+function supervisor_getModoVentas() {
+    return document.getElementById('cmbSupervisorModoVentas')?.value || 'bruta';
+}
+
+function supervisor_labelModoVentas() {
+    return supervisor_getModoVentas() === 'neta' ? 'Ventas netas' : 'Ventas brutas';
+}
+
+function supervisor_setupSucursalHeader() {
+    const cmb = document.getElementById('cmbSucursalHeader');
+    if (!cmb) return;
+    const emp = GlobalEmpnit || '%';
+    const nom = GlobalNomEmpresa || 'Sede';
+    cmb.innerHTML = `<option value="${emp}">${nom}</option>`;
+    cmb.value = emp;
+    cmb.disabled = true;
+}
+
+function supervisor_onHeaderFiltersChange() {
+    if (supervisor_currentPane === 'uno') {
+        supervisor_initDashboard();
+    }
+}
+
+function supervisor_initDashboard() {
+    supervisor_loadDashboard();
+}
 
 const SUPERVISOR_EMBED_BASE = '../views/menu/INICIO_SUPERVISOR/';
 const SUPERVISOR_EMBED_SCRIPTS = {
@@ -28,6 +70,7 @@ function supervisor_closeSidebarMobile() {
 }
 
 function supervisor_showPanel(paneId, cardId, afterShow) {
+    supervisor_currentPane = paneId;
     supervisor_closeSidebarMobile();
     supervisor_teardownEmbed();
     document.querySelectorAll('#myTabHomeContent .tab-pane').forEach(p => {
@@ -51,7 +94,7 @@ function supervisor_showPanel(paneId, cardId, afterShow) {
 }
 
 function supervisor_showHome() {
-    supervisor_showPanel('uno', null);
+    supervisor_showPanel('uno', 'btnMenuDashboard', () => supervisor_initDashboard());
 }
 
 function supervisor_teardownEmbed() {
@@ -122,9 +165,27 @@ function getView(){
             <div class="proveedor-header-card card shadow-sm mb-3">
                 <div class="card-body py-2 px-3">
                     <div class="row align-items-center no-gutters">
-                        <div class="col">
+                        <div class="col-auto pr-2">
+                            <img src="./favicon.png" width="50" height="50" alt="Logo">
+                        </div>
+                        <div class="col-auto pr-3">
                             <h5 class="negrita text-white mb-0">INICIO SUPERVISOR</h5>
-                            <small class="text-white-50 negrita">${GlobalUsuario}</small>
+                            <small class="text-white-50 negrita d-block">${GlobalUsuario}</small>
+                        </div>
+                        <div class="col">
+                            <select class="form-control form-control-sm negrita" id="cmbSucursalHeader"></select>
+                        </div>
+                        <div class="col-auto pl-2">
+                            <select class="form-control form-control-sm negrita" id="cmbMesHeader"></select>
+                        </div>
+                        <div class="col-auto pl-2">
+                            <select class="form-control form-control-sm negrita" id="cmbAnioHeader"></select>
+                        </div>
+                        <div class="col pl-2">
+                            <select class="form-control form-control-sm negrita" id="cmbSupervisorModoVentas" title="Tipo de ventas">
+                                <option value="neta">Ventas netas (venta - devolución)</option>
+                                <option value="bruta" selected>Ventas brutas (solo ventas)</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -145,10 +206,8 @@ function getView(){
                     <div id="supervisorPanelEmbed" class="d-none"></div>
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
-                            <div class="card proveedor-content-card shadow-sm">
-                                <div class="card-body p-4">
-                                    <p class="text-muted mb-0 text-center">Seleccione una opción del menú</p>
-                                </div>
+                            <div id="supervisorMainContent">
+                                ${view.vista_dashboard()}
                             </div>
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
@@ -215,6 +274,7 @@ function getView(){
         },
         menu:()=>{
             const items = [
+                { id: 'btnMenuDashboard', label: 'Dashboard', icon: 'fa-chart-line', color: 'primary' },
                 { id: 'btnMenuClientes', label: 'Catálogo clientes', icon: 'fa-user', color: 'info', route: 'mant/clientes' },
                 { id: 'btnMenuNuevoPedido', label: 'Nuevo pedido', icon: 'fa-shopping-cart', color: 'info', route: 'ventas/pedidos-comodin' },
                 { id: 'btnMenuCenso', label: 'Crear clientes (censo)', icon: 'fa-users', color: 'info', route: 'ventas/censo' },
@@ -236,6 +296,99 @@ function getView(){
                     </div>
                 </div>
             `).join('');
+        },
+        vista_dashboard:()=>{
+            return `
+            <div class="proveedor-dashboard">
+                <div class="row">
+                    <div class="col-12 col-lg-4 mb-3 mb-lg-0">
+                        <div class="card card-rounded shadow h-100 proveedor-dashboard-card">
+                            <div class="card-body p-3">
+                                <h5 class="negrita text-secondary mb-3">Resumen de inventario por categoria</h5>
+                                <div class="proveedor-dashboard-chart mb-3">
+                                    <canvas id="chartSupDashInventario"></canvas>
+                                </div>
+                                <div class="table-responsive proveedor-dashboard-scroll">
+                                    <table class="table table-sm table-bordered h-full col-12" id="tblSupDashInventarioCategoria">
+                                        <thead class="bg-secondary text-white negrita">
+                                            <tr>
+                                                <td>CATEGORIA</td>
+                                                <td>CAJAS</td>
+                                                <td>COSTO</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblDataSupDashInventarioCategoria"></tbody>
+                                        <tfoot class="bg-secondary text-white negrita">
+                                            <tr>
+                                                <td>TOTALES</td>
+                                                <td id="lbSupFootDashInvCajas">--</td>
+                                                <td id="lbSupFootDashInvCosto">--</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-4 mb-3 mb-lg-0">
+                        <div class="card card-rounded shadow h-100 proveedor-dashboard-card">
+                            <div class="card-body p-3">
+                                <h5 class="negrita text-info mb-3">Ventas por vendedor</h5>
+                                <div class="proveedor-dashboard-chart mb-3">
+                                    <canvas id="chartSupDashVentasVendedor"></canvas>
+                                </div>
+                                <div class="table-responsive proveedor-dashboard-scroll">
+                                    <table class="table table-sm table-bordered h-full col-12" id="tblSupDashVentasVendedor">
+                                        <thead class="bg-info text-white negrita">
+                                            <tr>
+                                                <td>VENDEDOR</td>
+                                                <td>PEDIDOS</td>
+                                                <td>IMPORTE</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblDataSupDashVentasVendedor"></tbody>
+                                        <tfoot class="bg-info text-white negrita">
+                                            <tr>
+                                                <td>TOTALES</td>
+                                                <td id="lbSupFootDashVendedorPedidos">--</td>
+                                                <td id="lbSupFootDashVendedorImporte">--</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-4">
+                        <div class="card card-rounded shadow h-100 proveedor-dashboard-card">
+                            <div class="card-body p-3">
+                                <h5 class="negrita text-secondary mb-3">Ventas por marca</h5>
+                                <div class="proveedor-dashboard-chart mb-3">
+                                    <canvas id="chartSupDashVentasMarca"></canvas>
+                                </div>
+                                <div class="table-responsive proveedor-dashboard-scroll">
+                                    <table class="table table-sm table-bordered h-full col-12" id="tblSupDashVentasMarca">
+                                        <thead class="bg-secondary text-white negrita">
+                                            <tr>
+                                                <td>MARCA</td>
+                                                <td>IMPORTE</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblDataSupDashVentasMarca"></tbody>
+                                        <tfoot class="bg-secondary text-white negrita">
+                                            <tr>
+                                                <td>TOTAL</td>
+                                                <td id="lbSupFootDashMarcaImporte">--</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
         },
         vista_listado:()=>{
             return `
@@ -961,6 +1114,28 @@ function addListeners(){
 
     document.title = `Supervisor - ${GlobalNomEmpresa}`;
 
+    const cmbMesHeader = document.getElementById('cmbMesHeader');
+    const cmbAnioHeader = document.getElementById('cmbAnioHeader');
+    if (cmbMesHeader) {
+        cmbMesHeader.innerHTML = F.ComboMeses();
+        cmbMesHeader.value = F.get_mes_curso();
+    }
+    if (cmbAnioHeader) {
+        cmbAnioHeader.innerHTML = F.ComboAnio();
+        cmbAnioHeader.value = F.get_anio_curso();
+    }
+    supervisor_setupSucursalHeader();
+    supervisor_initDashboard();
+    supervisor_setActiveCard('btnMenuDashboard');
+
+    cmbMesHeader?.addEventListener('change', supervisor_onHeaderFiltersChange);
+    cmbAnioHeader?.addEventListener('change', supervisor_onHeaderFiltersChange);
+    document.getElementById('cmbSupervisorModoVentas')?.addEventListener('change', supervisor_onHeaderFiltersChange);
+
+    document.getElementById('btnMenuDashboard')?.addEventListener('click', () => {
+        supervisor_showHome();
+    });
+
     document.getElementById('btnMenuRptDocumentos').addEventListener('click',()=>{
         supervisor_showPanel('tres', 'btnMenuRptDocumentos', () => {
             rpt_facturas('tblDataPedidos');
@@ -1087,6 +1262,176 @@ function addListeners(){
 
 };
 
+function supervisor_destroyDashboardChart(chartKey) {
+    if (supervisor_dashboardCharts[chartKey]) {
+        supervisor_dashboardCharts[chartKey].destroy();
+        delete supervisor_dashboardCharts[chartKey];
+    }
+}
+
+function supervisor_renderDashboardChart(chartKey, canvasId, labels, values, title) {
+    supervisor_destroyDashboardChart(chartKey);
+    const canvas = document.getElementById(canvasId);
+    if (!canvas || !labels.length || !values.length || typeof Chart === 'undefined') return;
+    const total = values.reduce((sum, value) => sum + Number(value), 0);
+    if (total <= 0) return;
+    const bgColor = labels.map(() => getRandomColor());
+    const chartWrap = canvas.closest('.proveedor-dashboard-chart');
+    if (chartWrap) chartWrap.style.height = `${Math.max(200, labels.length * 30)}px`;
+    try {
+        supervisor_dashboardCharts[chartKey] = new Chart(canvas.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{
+                    label: title,
+                    data: values.map((v) => Number(v)),
+                    backgroundColor: bgColor,
+                    borderRadius: 5,
+                    maxBarThickness: 24
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    title: { display: true, text: title, font: { size: 12 } }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0, 68, 163, 0.08)' },
+                        ticks: { font: { size: 10 }, callback: (value) => F.setMoneda(value, 'Q') }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { font: { size: 10 }, autoSkip: false }
+                    }
+                }
+            }
+        });
+    } catch (e) {
+        console.error('[inicio_supervisor] chart:', e);
+    }
+}
+
+function supervisor_resetDashboardFooters() {
+    [
+        'lbSupFootDashInvCajas', 'lbSupFootDashInvCosto',
+        'lbSupFootDashVendedorPedidos', 'lbSupFootDashVendedorImporte',
+        'lbSupFootDashMarcaImporte'
+    ].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = '--';
+    });
+}
+
+function supervisor_loadDashboard() {
+    supervisor_resetDashboardFooters();
+    supervisor_tbl_dashboard_inventario_categoria();
+    supervisor_tbl_dashboard_ventas_vendedor();
+    supervisor_tbl_dashboard_ventas_marca();
+}
+
+function supervisor_tbl_dashboard_inventario_categoria() {
+    const container = document.getElementById('tblDataSupDashInventarioCategoria');
+    if (!container) return;
+    container.innerHTML = GlobalLoader;
+    supervisor_destroyDashboardChart('inventario');
+    GF.get_data_inventarios_general(supervisor_getSucursal(), 'SI')
+        .then((data) => {
+            const resumen = {};
+            (data.recordset || []).forEach((r) => {
+                const categoria = r.DESMARCA || 'SIN CATEGORIA';
+                const cajas = F.get_existencia(Number(r.TOTALUNIDADES), Number(r.UXC));
+                const costo = Number(r.TOTALUNIDADES) * Number(r.COSTO);
+                if (!resumen[categoria]) resumen[categoria] = { cajas: 0, costo: 0 };
+                resumen[categoria].cajas += Number(cajas);
+                resumen[categoria].costo += costo;
+            });
+            const items = Object.keys(resumen)
+                .map((categoria) => ({ categoria, ...resumen[categoria] }))
+                .sort((a, b) => b.costo - a.costo);
+            let totalCajas = 0, totalCosto = 0, str = '';
+            items.forEach((item) => {
+                totalCajas += item.cajas;
+                totalCosto += item.costo;
+                str += `<tr><td>${item.categoria}</td><td>${item.cajas.toFixed(2)}</td><td>${F.setMoneda(item.costo, 'Q')}</td></tr>`;
+            });
+            container.innerHTML = str || '<tr><td colspan="3" class="text-center text-muted">Sin datos</td></tr>';
+            const lbCajas = document.getElementById('lbSupFootDashInvCajas');
+            const lbCosto = document.getElementById('lbSupFootDashInvCosto');
+            if (lbCajas) lbCajas.innerText = totalCajas.toFixed(2);
+            if (lbCosto) lbCosto.innerText = F.setMoneda(totalCosto, 'Q');
+            supervisor_renderDashboardChart('inventario', 'chartSupDashInventario',
+                items.map((i) => i.categoria), items.map((i) => i.costo),
+                `Costo por categoria: ${F.setMoneda(totalCosto, 'Q')}`);
+        })
+        .catch(() => {
+            container.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No se cargaron datos</td></tr>';
+            supervisor_destroyDashboardChart('inventario');
+        });
+}
+
+function supervisor_tbl_dashboard_ventas_vendedor() {
+    const container = document.getElementById('tblDataSupDashVentasVendedor');
+    if (!container) return;
+    container.innerHTML = GlobalLoader;
+    supervisor_destroyDashboardChart('vendedor');
+    const tituloModo = `${supervisor_labelModoVentas()} por vendedor`;
+    RPT.data_dashboard_ventas_vendedor(supervisor_getSucursal(), supervisor_getMes(), supervisor_getAnio(), supervisor_getModoVentas())
+        .then((data) => {
+            const items = [...(data.recordset || [])].sort((a, b) => Number(b.TOTALPRECIO) - Number(a.TOTALPRECIO));
+            let totalPedidos = 0, totalImporte = 0, str = '';
+            items.forEach((r) => {
+                totalPedidos += Number(r.CONTEO);
+                totalImporte += Number(r.TOTALPRECIO);
+                str += `<tr><td>${r.EMPLEADO}</td><td>${r.CONTEO}</td><td>${F.setMoneda(r.TOTALPRECIO, 'Q')}</td></tr>`;
+            });
+            container.innerHTML = str || '<tr><td colspan="3" class="text-center text-muted">Sin datos</td></tr>';
+            const lbPed = document.getElementById('lbSupFootDashVendedorPedidos');
+            const lbImp = document.getElementById('lbSupFootDashVendedorImporte');
+            if (lbPed) lbPed.innerText = `${totalPedidos}`;
+            if (lbImp) lbImp.innerText = F.setMoneda(totalImporte, 'Q');
+            supervisor_renderDashboardChart('vendedor', 'chartSupDashVentasVendedor',
+                items.map((r) => r.EMPLEADO), items.map((r) => Number(r.TOTALPRECIO)),
+                `${tituloModo}: ${F.setMoneda(totalImporte, 'Q')}`);
+        })
+        .catch(() => {
+            container.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No se cargaron datos</td></tr>';
+            supervisor_destroyDashboardChart('vendedor');
+        });
+}
+
+function supervisor_tbl_dashboard_ventas_marca() {
+    const container = document.getElementById('tblDataSupDashVentasMarca');
+    if (!container) return;
+    container.innerHTML = GlobalLoader;
+    supervisor_destroyDashboardChart('marca');
+    const tituloModo = `${supervisor_labelModoVentas()} por marca`;
+    RPT.data_marcas(supervisor_getSucursal(), supervisor_getMes(), supervisor_getAnio(), supervisor_getModoVentas())
+        .then((data) => {
+            const items = [...(data.recordset || [])].sort((a, b) => Number(b.TOTALPRECIO) - Number(a.TOTALPRECIO));
+            let totalImporte = 0, str = '';
+            items.forEach((r) => {
+                totalImporte += Number(r.TOTALPRECIO);
+                str += `<tr><td>${r.DESMARCA}</td><td>${F.setMoneda(r.TOTALPRECIO, 'Q')}</td></tr>`;
+            });
+            container.innerHTML = str || '<tr><td colspan="2" class="text-center text-muted">Sin datos</td></tr>';
+            const lbMarca = document.getElementById('lbSupFootDashMarcaImporte');
+            if (lbMarca) lbMarca.innerText = F.setMoneda(totalImporte, 'Q');
+            supervisor_renderDashboardChart('marca', 'chartSupDashVentasMarca',
+                items.map((r) => r.DESMARCA), items.map((r) => r.TOTALPRECIO),
+                `${tituloModo}: ${F.setMoneda(totalImporte, 'Q')}`);
+        })
+        .catch(() => {
+            container.innerHTML = '<tr><td colspan="2" class="text-center text-muted">No se cargaron datos</td></tr>';
+            supervisor_destroyDashboardChart('marca');
+        });
+}
+
 function initView(){
     document.getElementById('js-page-content')?.classList.add('proveedor-page');
     getView();
@@ -1094,6 +1439,7 @@ function initView(){
 }
 
 function destroyView(){
+    Object.keys(supervisor_dashboardCharts).forEach(supervisor_destroyDashboardChart);
     supervisor_teardownEmbed();
     supervisor_toggleSidebar(false);
     document.body.classList.remove('proveedor-sidebar-open');
