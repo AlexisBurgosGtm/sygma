@@ -599,7 +599,7 @@ function getView(){
                             </div>
                         </div>
                         <div class="col-12 col-md-4 col-lg-4 text-md-right mb-2 mb-md-0">
-                            <button class="btn btn-success btn-md hand shadow" onclick="F.exportTableToExcel('tblSellout','SellOut')">
+                            <button class="btn btn-success btn-md hand shadow" id="btnExportarSellOut">
                                 <i class="fal fa-share"></i> Exportar Excel
                             </button>
                         </div>
@@ -1086,9 +1086,28 @@ function addListeners(){
         tbl_rpt_sellout();
     })
 
-    //sell out
+    document.getElementById('btnExportarSellOut')?.addEventListener('click', () => {
+        const btn = document.getElementById('btnExportarSellOut');
+        const fi = F.devuelveFecha('txtSFechaInicial');
+        const ff = F.devuelveFecha('txtSFechaFinal');
+        const sucursal = proveedor_getSucursal();
 
+        F.showToast('Cargando datos...');
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fal fa-share fa-spin"></i>`;
 
+        RPT.data_sellout_export(sucursal, fi, ff)
+            .then((data) => {
+                F.export_json_to_xlsx(data.recordset, 'SellOut');
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fal fa-share"></i> Exportar Excel`;
+            })
+            .catch(() => {
+                F.AvisoError('No se pudo exportar');
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fal fa-share"></i> Exportar Excel`;
+            });
+    });
 
     // inventarios
 

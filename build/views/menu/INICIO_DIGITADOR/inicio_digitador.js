@@ -1333,40 +1333,26 @@ function addListeners(){
     });
 
     btnExportarSellOut?.addEventListener('click', () => {
+        const btn = document.getElementById('btnExportarSellOut');
+        const fi = F.devuelveFecha('txtSFechaInicial');
+        const ff = F.devuelveFecha('txtSFechaFinal');
+        const sucursal = digitador_getSucursal();
 
         F.showToast('Cargando datos...');
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fal fa-share fa-spin"></i>`;
 
-            let fi = F.devuelveFecha('txtSFechaInicial');
-            let ff = F.devuelveFecha('txtSFechaFinal');
-
-
-            let sucursal = digitador_getSucursal();
-
-
-            document.getElementById('btnExportarSellOut').disabled = false;
-            document.getElementById('btnExportarSellOut').innerHTML = `<i class="fal fa-share fa-spin"></i>`;
-
-        
-            RPT.data_sellout_export(sucursal,fi,ff)
-            .then((data)=>{
-
-                let datos = data.recordset;
-                F.export_json_to_xlsx(datos,'SellOut');
-
-                document.getElementById('btnExportarSellOut').disabled = false;
-                document.getElementById('btnExportarSellOut').innerHTML = `<i class="fal fa-share"></i> Exportar Excel`;
-
+        RPT.data_sellout_export(sucursal, fi, ff)
+            .then((data) => {
+                F.export_json_to_xlsx(data.recordset, 'SellOut');
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fal fa-share"></i> Exportar Excel`;
             })
-            .catch(()=>{
-                F.AvisoError('No se pudo cargar');
-                document.getElementById('btnExportarSellOut').disabled = false;
-                document.getElementById('btnExportarSellOut').innerHTML = `<i class="fal fa-share"></i> Exportar Excel`;
-
-            })
-
-      
-        
-
+            .catch(() => {
+                F.AvisoError('No se pudo exportar');
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fal fa-share"></i> Exportar Excel`;
+            });
     });
 
 

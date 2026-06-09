@@ -44,10 +44,21 @@ function supervisor_initDashboard() {
 
 const SUPERVISOR_EMBED_BASE = '../views/menu/INICIO_SUPERVISOR/';
 const SUPERVISOR_EMBED_SCRIPTS = {
+    btnMenuClientes: SUPERVISOR_EMBED_BASE + 'view_clientes.js',
+    btnMenuNuevoPedido: SUPERVISOR_EMBED_BASE + 'view_pedidos_comodin.js',
+    btnMenuCenso: SUPERVISOR_EMBED_BASE + 'view_censo.js',
     btnMenuObjetivos: SUPERVISOR_EMBED_BASE + 'view_avance_procter_vendedor.js',
-    btnMenuRptVisitasMapa: SUPERVISOR_EMBED_BASE + 'view_visitas_vendedores_gps.js',
     btnMenuCoberturaMunicipio: SUPERVISOR_EMBED_BASE + 'view_cobertura_municipios_mapa.js',
+    btnMenuRptVisitasMapa: SUPERVISOR_EMBED_BASE + 'view_visitas_vendedores_gps.js',
 };
+
+function supervisor_bindEmbedMenu(cardId) {
+    const scriptUrl = SUPERVISOR_EMBED_SCRIPTS[cardId];
+    if (!scriptUrl) return;
+    document.getElementById(cardId)?.addEventListener('click', () => {
+        supervisor_loadEmbed(scriptUrl, cardId);
+    });
+}
 
 function supervisor_setActiveCard(cardId) {
     document.querySelectorAll('.proveedor-menu-card').forEach(el => {
@@ -203,6 +214,7 @@ function getView(){
                     </div>
                 </div>
                 <div class="col-12 col-md-10 proveedor-tab-area">
+                    <div id="supervisorPanelContent">
                     <div id="supervisorPanelEmbed" class="d-none"></div>
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
@@ -231,6 +243,7 @@ function getView(){
                         <div class="tab-pane fade" id="ocho" role="tabpanel" aria-labelledby="home-tab">
                             ${view.objetivos() + view.modal_categorias_marca() + view.modal_categorias_vendedor()}
                         </div>
+                    </div>
                     </div>
                 </div>
             </div>
@@ -275,9 +288,9 @@ function getView(){
         menu:()=>{
             const items = [
                 { id: 'btnMenuDashboard', label: 'Dashboard', icon: 'fa-chart-line', color: 'primary' },
-                { id: 'btnMenuClientes', label: 'Catálogo clientes', icon: 'fa-user', color: 'info', route: 'mant/clientes' },
-                { id: 'btnMenuNuevoPedido', label: 'Nuevo pedido', icon: 'fa-shopping-cart', color: 'info', route: 'ventas/pedidos-comodin' },
-                { id: 'btnMenuCenso', label: 'Crear clientes (censo)', icon: 'fa-users', color: 'info', route: 'ventas/censo' },
+                { id: 'btnMenuClientes', label: 'Catálogo clientes', icon: 'fa-user', color: 'info' },
+                { id: 'btnMenuNuevoPedido', label: 'Nuevo pedido', icon: 'fa-shopping-cart', color: 'info' },
+                { id: 'btnMenuCenso', label: 'Crear clientes (censo)', icon: 'fa-users', color: 'info' },
                 { id: 'btnMenuObjetivos', label: 'Logro objetivos P&G', icon: 'fa-chart-pie', color: 'danger' },
                 { id: 'btnMenuCoberturaMunicipio', label: 'Cobertura municipios', icon: 'fa-globe', color: 'primary' },
                 { id: 'btnMenuRptVisitasMapa', label: 'Visitas vendedor mapa', icon: 'fa-map-signs', color: 'secondary' },
@@ -289,7 +302,7 @@ function getView(){
                 { id: 'btnMenuRptClientesVendedor', label: 'Clientes por vendedor', icon: 'fa-map', color: 'secondary' },
             ];
             return items.map(item => `
-                <div class="card proveedor-menu-card hand" id="${item.id}"${item.route ? ` data-spa-route="${item.route}"` : ''}>
+                <div class="card proveedor-menu-card hand" id="${item.id}">
                     <div class="card-body d-flex align-items-center flex-wrap">
                         <i class="fal ${item.icon} text-${item.color} mr-2 proveedor-menu-icon"></i>
                         <span class="negrita proveedor-menu-label">${item.label}</span>
@@ -1107,7 +1120,7 @@ function addListeners(){
         supervisor_toggleSidebar(false);
     });
     document.getElementById('supervisorSidebar')?.addEventListener('click', (e) => {
-        if (e.target.closest('[data-spa-route]')) supervisor_closeSidebarMobile();
+        if (e.target.closest('.proveedor-menu-card')) supervisor_closeSidebarMobile();
     });
 
     F.slideAnimationTabs();
@@ -1135,6 +1148,8 @@ function addListeners(){
     document.getElementById('btnMenuDashboard')?.addEventListener('click', () => {
         supervisor_showHome();
     });
+
+    Object.keys(SUPERVISOR_EMBED_SCRIPTS).forEach(supervisor_bindEmbedMenu);
 
     document.getElementById('btnMenuRptDocumentos').addEventListener('click',()=>{
         supervisor_showPanel('tres', 'btnMenuRptDocumentos', () => {
@@ -1212,11 +1227,6 @@ function addListeners(){
 
 
     
-  
-    document.getElementById('btnMenuRptVisitasMapa').addEventListener('click',()=>{
-        supervisor_loadEmbed(SUPERVISOR_EMBED_SCRIPTS.btnMenuRptVisitasMapa, 'btnMenuRptVisitasMapa');
-    });
-
     document.getElementById('btnMenuRptInventario').addEventListener('click',()=>{
         supervisor_showPanel('seis', 'btnMenuRptInventario', () => {
             tbl_inventario();
@@ -1867,20 +1877,8 @@ function rpt_tbl_clientes_vendedores(){
 //OBJETIVOS
 
 function listeners_objetivos(){
-
-
-    document.getElementById('btnMenuObjetivos').addEventListener('click',()=>{
-        supervisor_loadEmbed(SUPERVISOR_EMBED_SCRIPTS.btnMenuObjetivos, 'btnMenuObjetivos');
-    });
-
-    document.getElementById('btnMenuCoberturaMunicipio').addEventListener('click',()=>{
-        supervisor_loadEmbed(SUPERVISOR_EMBED_SCRIPTS.btnMenuCoberturaMunicipio, 'btnMenuCoberturaMunicipio');
-    });
-
-    
-
-    
     let cmbSucursal = document.getElementById('cmbSucursal');
+    if (!cmbSucursal) return;
 
     GF.get_data_empresas()
     .then((data)=>{
