@@ -306,7 +306,11 @@ async function connectDb(){
             //alert('Connection is opened');
           
         }
+        return isDbCreated;
     
 }
 //inicia la conexión a la db
-connectDb();
+var sygmaDbReady = connectDb().catch((err) => {
+    console.error('[classDb] initDb failed:', err);
+});
+window._sygmaDbReady = sygmaDbReady;

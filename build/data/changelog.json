@@ -1,5 +1,5 @@
 {
-  "version": "M.05.06.26 12:35",
+  "version": "M.05.06.26 12:50",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -845,6 +845,16 @@
       "FECHA": "05-06-2026",
       "HORA": "12:35",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 12:35"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "12:49",
+      "DESCRIPCION": "CORREGIDA CARGA DASHBOARD INICIO VENTAS CON CACHE INDEXEDDB POR EMPRESA VENDEDOR Y DIA"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "12:50",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 12:50"
     }
   ]
 }

@@ -90,6 +90,7 @@ function ventas_showPanel(paneId, cardId, afterShow) {
 
 function ventas_showHome() {
     ventas_showPanel('uno', 'btnMenuHome');
+    ventas_loadDashboard(false);
 }
 
 function ventas_teardownEmbed() {
@@ -855,7 +856,6 @@ function addListeners(){
 
     document.getElementById('btnMenuHome')?.addEventListener('click', () => {
         ventas_showHome();
-        ventas_loadDashboard();
     });
     Object.keys(VENTAS_EMBED_SCRIPTS).forEach(ventas_bindEmbedMenu);
 
@@ -1127,6 +1127,14 @@ function ventas_setDashboardCacheInfo(fromCache, updatedAt) {
     }
 }
 
+function ventas_resizeDashboardCharts() {
+    Object.keys(ventas_dashboardCharts).forEach((key) => {
+        try {
+            ventas_dashboardCharts[key]?.resize();
+        } catch (e) { /* chart no inicializado */ }
+    });
+}
+
 function ventas_applyDashboardFromRows(rowsDia, rowsMarcas, mes, anio) {
     const lbDia = document.getElementById('lbVentasDashDiaTotal');
     const lbMarcas = document.getElementById('lbVentasDashMarcasTotal');
@@ -1152,6 +1160,20 @@ function ventas_applyDashboardFromRows(rowsDia, rowsMarcas, mes, anio) {
         items.map((r) => r.TOTALPRECIO),
         `Marcas FAC (${mes}/${anio})`
     );
+    requestAnimationFrame(() => ventas_resizeDashboardCharts());
+}
+
+function ventas_applyDashboardCache(cached, mes, anio) {
+    try {
+        const rowsDia = JSON.parse(cached.VENTAS_DIA || '[]');
+        const rowsMarcas = JSON.parse(cached.MARCAS_FAC || '[]');
+        ventas_applyDashboardFromRows(rowsDia, rowsMarcas, mes, anio);
+        ventas_setDashboardCacheInfo(true, cached.UPDATED_AT);
+        return true;
+    } catch (err) {
+        console.warn('[inicio_ventas] dashboard cache parse:', err);
+        return false;
+    }
 }
 
 function ventas_fetchDashboardRemote(sucursal, mes, anio, codemp, fecha) {
@@ -1164,7 +1186,7 @@ function ventas_fetchDashboardRemote(sucursal, mes, anio, codemp, fecha) {
         ventas_applyDashboardFromRows(rowsDia, rowsMarcas, mes, anio);
         ventas_setDashboardCacheInfo(false, F.getHora());
         if (typeof db_ventas_dashboard !== 'undefined') {
-            db_ventas_dashboard.save(sucursal, codemp, mes, anio, fecha, rowsDia, rowsMarcas)
+            return db_ventas_dashboard.save(sucursal, codemp, mes, anio, fecha, rowsDia, rowsMarcas)
                 .catch((err) => console.warn('[inicio_ventas] dashboard cache save:', err));
         }
     });
@@ -1183,52 +1205,47 @@ function ventas_loadDashboard(forceRefresh) {
     const btnRefresh = document.getElementById('btnActualizarDashboard');
     const iconRefresh = btnRefresh?.querySelector('i');
 
-    if (lbDia) lbDia.innerText = 'Total mes: --';
-    if (lbMarcas) lbMarcas.innerText = 'Total mes: --';
-
     const finishRefresh = () => {
         if (btnRefresh) btnRefresh.disabled = false;
         iconRefresh?.classList.remove('fa-spin');
     };
 
-    if (forceRefresh) {
-        if (btnRefresh) btnRefresh.disabled = true;
-        iconRefresh?.classList.add('fa-spin');
-        return ventas_fetchDashboardRemote(sucursal, mes, anio, codemp, fecha)
-            .catch((err) => {
-                console.error('[inicio_ventas] dashboard refresh:', err);
-                if (lbDia) lbDia.innerText = 'Total mes: --';
-                if (lbMarcas) lbMarcas.innerText = 'Total mes: --';
-                ventas_destroyDashboardChart('ventasDia');
-                ventas_destroyDashboardChart('ventasMarcas');
-                F.AvisoError('No se pudieron actualizar los datos del dashboard');
+    const handleFetchError = (err) => {
+        console.error('[inicio_ventas] dashboard:', err);
+        if (lbDia) lbDia.innerText = 'Total mes: --';
+        if (lbMarcas) lbMarcas.innerText = 'Total mes: --';
+        ventas_destroyDashboardChart('ventasDia');
+        ventas_destroyDashboardChart('ventasMarcas');
+        if (forceRefresh) F.AvisoError('No se pudieron actualizar los datos del dashboard');
+    };
+
+    const runLoad = () => {
+        if (forceRefresh) {
+            if (btnRefresh) btnRefresh.disabled = true;
+            iconRefresh?.classList.add('fa-spin');
+            return ventas_fetchDashboardRemote(sucursal, mes, anio, codemp, fecha)
+                .catch(handleFetchError)
+                .finally(finishRefresh);
+        }
+
+        if (typeof db_ventas_dashboard === 'undefined') {
+            return ventas_fetchDashboardRemote(sucursal, mes, anio, codemp, fecha).catch(handleFetchError);
+        }
+
+        return db_ventas_dashboard.get(sucursal, codemp, mes, anio, fecha)
+            .then((cached) => {
+                if (ventas_applyDashboardCache(cached, mes, anio)) return;
+                return ventas_fetchDashboardRemote(sucursal, mes, anio, codemp, fecha);
             })
-            .finally(finishRefresh);
-    }
+            .catch(() => ventas_fetchDashboardRemote(sucursal, mes, anio, codemp, fecha))
+            .catch(handleFetchError);
+    };
 
-    if (typeof db_ventas_dashboard === 'undefined') {
-        return ventas_fetchDashboardRemote(sucursal, mes, anio, codemp, fecha).catch((err) => {
-            console.error('[inicio_ventas] dashboard:', err);
-            ventas_destroyDashboardChart('ventasDia');
-            ventas_destroyDashboardChart('ventasMarcas');
-        });
-    }
+    if (lbDia) lbDia.innerText = 'Cargando...';
+    if (lbMarcas) lbMarcas.innerText = 'Cargando...';
 
-    return db_ventas_dashboard.get(sucursal, codemp, mes, anio, fecha)
-        .then((cached) => {
-            const rowsDia = JSON.parse(cached.VENTAS_DIA || '[]');
-            const rowsMarcas = JSON.parse(cached.MARCAS_FAC || '[]');
-            ventas_applyDashboardFromRows(rowsDia, rowsMarcas, mes, anio);
-            ventas_setDashboardCacheInfo(true, cached.UPDATED_AT);
-        })
-        .catch(() => ventas_fetchDashboardRemote(sucursal, mes, anio, codemp, fecha)
-            .catch((err) => {
-                console.error('[inicio_ventas] dashboard:', err);
-                if (lbDia) lbDia.innerText = 'Total mes: --';
-                if (lbMarcas) lbMarcas.innerText = 'Total mes: --';
-                ventas_destroyDashboardChart('ventasDia');
-                ventas_destroyDashboardChart('ventasMarcas');
-            }));
+    const dbReady = window._sygmaDbReady || Promise.resolve();
+    return dbReady.then(runLoad);
 }
 
 function ventas_checkInIsClosed(finValue) {

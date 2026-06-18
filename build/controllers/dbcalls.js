@@ -1242,50 +1242,60 @@ let db_checkin = {
 
 let db_ventas_dashboard = {
     cacheKey:(sucursal, codemp, mes, anio)=>{
-        return `${sucursal}|${codemp}|${mes}|${anio}`;
+        return `${String(sucursal || '')}|${Number(codemp) || 0}|${String(mes)}|${String(anio)}`;
     },
     get:(sucursal, codemp, mes, anio, fecha)=>{
         return new Promise(async(resolve,reject)=>{
-            const CACHE_KEY = db_ventas_dashboard.cacheKey(sucursal, codemp, mes, anio);
-            var response = await connection.select({
-                from: "ventas_dashboard_cache",
-                where: {
-                    CACHE_KEY: CACHE_KEY,
-                    FECHA: fecha
+            try {
+                await window._sygmaDbReady;
+                const CACHE_KEY = db_ventas_dashboard.cacheKey(sucursal, codemp, mes, anio);
+                var response = await connection.select({
+                    from: "ventas_dashboard_cache",
+                    where: {
+                        CACHE_KEY: CACHE_KEY,
+                        FECHA: String(fecha)
+                    }
+                });
+                if(Number(response.length)>0){
+                    resolve(response[0]);
+                }else{
+                    reject();
                 }
-            });
-            if(Number(response.length)>0){
-                resolve(response[0]);
-            }else{
-                reject();
+            } catch (err) {
+                reject(err);
             }
         });
     },
     save:(sucursal, codemp, mes, anio, fecha, ventasDia, marcasFac)=>{
         return new Promise(async(resolve,reject)=>{
-            const CACHE_KEY = db_ventas_dashboard.cacheKey(sucursal, codemp, mes, anio);
-            await connection.remove({
-                from: "ventas_dashboard_cache",
-                where: { CACHE_KEY: CACHE_KEY }
-            });
-            var noOfRowsInserted = await connection.insert({
-                into: "ventas_dashboard_cache",
-                values: [{
-                    CACHE_KEY: CACHE_KEY,
-                    FECHA: fecha,
-                    SUCURSAL: sucursal,
-                    CODEMP: Number(codemp),
-                    MES: String(mes),
-                    ANIO: String(anio),
-                    VENTAS_DIA: JSON.stringify(ventasDia || []),
-                    MARCAS_FAC: JSON.stringify(marcasFac || []),
-                    UPDATED_AT: F.getHora()
-                }]
-            });
-            if(noOfRowsInserted > 0){
-                resolve();
-            }else{
-                reject();
+            try {
+                await window._sygmaDbReady;
+                const CACHE_KEY = db_ventas_dashboard.cacheKey(sucursal, codemp, mes, anio);
+                await connection.remove({
+                    from: "ventas_dashboard_cache",
+                    where: { CACHE_KEY: CACHE_KEY }
+                });
+                var noOfRowsInserted = await connection.insert({
+                    into: "ventas_dashboard_cache",
+                    values: [{
+                        CACHE_KEY: CACHE_KEY,
+                        FECHA: String(fecha),
+                        SUCURSAL: String(sucursal || ''),
+                        CODEMP: Number(codemp) || 0,
+                        MES: String(mes),
+                        ANIO: String(anio),
+                        VENTAS_DIA: JSON.stringify(ventasDia || []),
+                        MARCAS_FAC: JSON.stringify(marcasFac || []),
+                        UPDATED_AT: F.getHora()
+                    }]
+                });
+                if(noOfRowsInserted > 0){
+                    resolve();
+                }else{
+                    reject();
+                }
+            } catch (err) {
+                reject(err);
             }
         });
     }
