@@ -152,7 +152,7 @@ const SpaNav = {
             Menu.salidaMenu();
         }
 
-        return SpaRouter.navigate(route, { params });
+        return SpaRouter.navigate(route, { params, force: true });
     }
 };
 

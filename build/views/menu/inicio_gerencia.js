@@ -1484,4 +1484,11 @@ function rpt_tbl_goles_resumen(sucursal,codemp,mes,anio,universo){
 //---------------------
 //GOLES
 
+(function () {
+    window.__spaViewHooks = window.__spaViewHooks || {};
+    window.__spaViewHooks['inicio/gerencia'] = {
+        initView: initView,
+        destroyView: function () {}
+    };
+})();
 

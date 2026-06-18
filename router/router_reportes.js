@@ -409,6 +409,32 @@ router.post("/rpt_dashboard_vendedor_ventas_dia", async(req,res)=>{
 
 });
 
+router.post("/rpt_dashboard_vendedor_devoluciones_dia", async(req,res)=>{
+
+    const { token, sucursal, anio, mes, codemp } = req.body;
+
+    let qry = `
+        SELECT
+            D.FECHA,
+            SUM(ISNULL(D.TOTALPRECIO, 0)) AS TOTALPRECIO,
+            COUNT(*) AS CONTEO
+        FROM DOCUMENTOS D
+        INNER JOIN TIPODOCUMENTOS TD
+            ON D.CODDOC = TD.CODDOC AND D.EMPNIT = TD.EMPNIT
+        WHERE D.EMPNIT LIKE '${sucursal}'
+            AND D.MES = ${mes}
+            AND D.ANIO = ${anio}
+            AND D.STATUS <> 'A'
+            AND TD.TIPODOC = 'DEV'
+            AND D.CODEMP = ${codemp}
+        GROUP BY D.FECHA
+        ORDER BY D.FECHA;
+    `;
+
+    execute.QueryToken(res, qry, token);
+
+});
+
 router.post("/rpt_dashboard_vendedor_marcas_fac", async(req,res)=>{
 
     const { token, sucursal, anio, mes, codemp } = req.body;

@@ -1538,6 +1538,14 @@ function destroyView(){
 
 window._proveedorCore = { initView, destroyView, getView, addListeners };
 
+(function () {
+    window.__spaViewHooks = window.__spaViewHooks || {};
+    window.__spaViewHooks['inicio/proveedor'] = {
+        initView: window._proveedorCore.initView,
+        destroyView: window._proveedorCore.destroyView
+    };
+})();
+
 function proveedor_destroyVendedorMarcasChart() {
     if (proveedor_vendedorMarcasChart) {
         proveedor_vendedorMarcasChart.destroy();

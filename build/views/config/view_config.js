@@ -1,13 +1,14 @@
-'use strict';
+(function () {
+    'use strict';
 
-/** ID en tabla CONFIG para “permite inventario negativo” (índice 0 en data_config_general). */
-let ConfigInvNegativoId = null;
+    var ConfigInvNegativoId = null;
+    var ROUTE_ID = 'config/general';
 
-function config_inyectarEstilos() {
-    if (document.getElementById('config-styles')) return;
-    const style = document.createElement('style');
-    style.id = 'config-styles';
-    style.textContent = `
+    function config_inyectarEstilos() {
+        if (document.getElementById('config-styles')) return;
+        var style = document.createElement('style');
+        style.id = 'config-styles';
+        style.textContent = `
         .config-wrap { max-width: 100%; }
         .config-panel-head {
             background: linear-gradient(135deg, #f8f9fc 0%, #eef2f7 100%);
@@ -36,14 +37,15 @@ function config_inyectarEstilos() {
             background: #fafbfc;
         }
     `;
-    document.head.appendChild(style);
-}
+        document.head.appendChild(style);
+    }
 
-function getView() {
-    config_inyectarEstilos();
+    function getView() {
+        config_inyectarEstilos();
 
-    const view = {
-        body: () => `
+        var view = {
+            body: function () {
+                return `
             <div class="config-wrap">
                 <div class="row">
                     <div class="col-lg-6 col-12 mb-3">
@@ -56,8 +58,10 @@ function getView() {
                     </div>
                 </div>
             </div>
-        `,
-        card_inventario_negativo: () => `
+        `;
+            },
+            card_inventario_negativo: function () {
+                return `
             <div class="config-panel-card">
                 <div class="config-panel-head">
                     <span class="negrita text-base mb-0"><i class="fal fa-sliders-h mr-1"></i> Inventario</span>
@@ -78,105 +82,118 @@ function getView() {
                     </div>
                 </div>
             </div>
-        `
-    };
+        `;
+            }
+        };
 
-    root.innerHTML = view.body();
-}
-
-function config_cargar_inventario_negativo() {
-    const cmb = document.getElementById('cmbPermiteInvNegativo');
-    const lbDesc = document.getElementById('lbConfigInvNegDesc');
-    if (!cmb) return;
-
-    const aplicar = (rows) => {
-        const row = (rows && rows.length) ? rows[0] : null;
-        if (!row) {
-            cmb.value = 'NO';
-            ConfigInvNegativoId = null;
-            if (lbDesc) lbDesc.textContent = 'Sin configuración cargada.';
-            return;
-        }
-        ConfigInvNegativoId = row.ID;
-        const valor = String(row.VALOR || 'NO').toUpperCase();
-        cmb.value = (valor === 'SI') ? 'SI' : 'NO';
-        if (lbDesc) {
-            lbDesc.textContent = row.DESCRIPCION ? String(row.DESCRIPCION) : '';
-        }
-    };
-
-    if (data_config_general && data_config_general.length) {
-        aplicar([data_config_general[0]]);
-        return;
+        var rootEl = document.getElementById('root');
+        if (!rootEl) return;
+        root = rootEl;
+        rootEl.innerHTML = view.body();
     }
 
-    GF.get_data_config()
-        .then((data) => {
-            data_config_general = data.recordset || [];
+    function config_cargar_inventario_negativo() {
+        var cmb = document.getElementById('cmbPermiteInvNegativo');
+        var lbDesc = document.getElementById('lbConfigInvNegDesc');
+        if (!cmb) return;
+
+        var aplicar = function (rows) {
+            var row = (rows && rows.length) ? rows[0] : null;
+            if (!row) {
+                cmb.value = 'NO';
+                ConfigInvNegativoId = null;
+                if (lbDesc) lbDesc.textContent = 'Sin configuración cargada.';
+                return;
+            }
+            ConfigInvNegativoId = row.ID;
+            var valor = String(row.VALOR || 'NO').toUpperCase();
+            cmb.value = (valor === 'SI') ? 'SI' : 'NO';
+            if (lbDesc) {
+                lbDesc.textContent = row.DESCRIPCION ? String(row.DESCRIPCION) : '';
+            }
+        };
+
+        if (data_config_general && data_config_general.length) {
             aplicar([data_config_general[0]]);
-        })
-        .catch(() => {
-            cmb.value = 'NO';
-            if (lbDesc) lbDesc.textContent = 'No se pudo cargar la configuración.';
-        });
-}
-
-function config_guardar_inventario_negativo() {
-    const cmb = document.getElementById('cmbPermiteInvNegativo');
-    const btn = document.getElementById('btnGuardarConfigInv');
-    if (!cmb || ConfigInvNegativoId == null) {
-        F.AvisoError('Configuración no disponible');
-        return;
-    }
-
-    const valor = cmb.value;
-    if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fal fa-sync fa-spin mr-1"></i> Guardando...';
-    }
-
-    axios.post(GlobalUrlCalls + '/config/update_valor', {
-        token: TOKEN,
-        id: ConfigInvNegativoId,
-        valor: valor
-    })
-    .then((response) => {
-        if (response.data === 'error') {
-            F.AvisoError('No se pudo guardar');
             return;
         }
-        if (data_config_general && data_config_general[0]) {
-            data_config_general[0].VALOR = valor;
-        }
-        F.Aviso('Configuración guardada');
-    })
-    .catch(() => {
-        F.AvisoError('No se pudo guardar');
-    })
-    .finally(() => {
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fal fa-save mr-1"></i> Guardar';
-        }
-    });
-}
 
-function addListeners() {
-    document.title = 'Configuraciones Generales';
-
-    config_cargar_inventario_negativo();
-
-    const btn = document.getElementById('btnGuardarConfigInv');
-    if (btn) {
-        btn.addEventListener('click', config_guardar_inventario_negativo);
+        GF.get_data_config()
+            .then(function (data) {
+                data_config_general = data.recordset || [];
+                aplicar([data_config_general[0]]);
+            })
+            .catch(function () {
+                cmb.value = 'NO';
+                if (lbDesc) lbDesc.textContent = 'No se pudo cargar la configuración.';
+            });
     }
-}
 
-function destroyView() {
-    ConfigInvNegativoId = null;
-}
+    function config_guardar_inventario_negativo() {
+        var cmb = document.getElementById('cmbPermiteInvNegativo');
+        var btn = document.getElementById('btnGuardarConfigInv');
+        if (!cmb || ConfigInvNegativoId == null) {
+            F.AvisoError('Configuración no disponible');
+            return;
+        }
 
-function initView() {
-    getView();
-    addListeners();
-}
+        var valor = cmb.value;
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fal fa-sync fa-spin mr-1"></i> Guardando...';
+        }
+
+        axios.post(GlobalUrlCalls + '/config/update_valor', {
+            token: TOKEN,
+            id: ConfigInvNegativoId,
+            valor: valor
+        })
+        .then(function (response) {
+            if (response.data === 'error') {
+                F.AvisoError('No se pudo guardar');
+                return;
+            }
+            if (data_config_general && data_config_general[0]) {
+                data_config_general[0].VALOR = valor;
+            }
+            F.Aviso('Configuración guardada');
+        })
+        .catch(function () {
+            F.AvisoError('No se pudo guardar');
+        })
+        .finally(function () {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fal fa-save mr-1"></i> Guardar';
+            }
+        });
+    }
+
+    function addListeners() {
+        document.title = 'Configuraciones Generales';
+        config_cargar_inventario_negativo();
+
+        var btn = document.getElementById('btnGuardarConfigInv');
+        if (btn) {
+            btn.addEventListener('click', config_guardar_inventario_negativo);
+        }
+    }
+
+    function destroyView() {
+        ConfigInvNegativoId = null;
+    }
+
+    function initView() {
+        getView();
+        addListeners();
+    }
+
+    window.initView = initView;
+    window.destroyView = destroyView;
+
+    window.__spaViewHooks = window.__spaViewHooks || {};
+    window.__spaViewHooks[ROUTE_ID] = {
+        initView: initView,
+        destroyView: destroyView
+    };
+})();

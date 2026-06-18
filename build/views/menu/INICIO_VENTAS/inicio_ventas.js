@@ -280,7 +280,7 @@ function getView(){
                     <div class="col-12 col-lg-6 mb-2">
                         <div class="card card-rounded shadow h-100 ventas-dashboard-card">
                             <div class="card-body py-2 px-2">
-                                <h6 class="negrita text-base mb-2 ventas-dashboard-card__title">Ventas FAC por día</h6>
+                                <h6 class="negrita text-base mb-2 ventas-dashboard-card__title">Ventas FAC y devoluciones DEV por día</h6>
                                 <div class="ventas-dashboard-chart ventas-dashboard-chart--line mb-2">
                                     <canvas id="chartVentasDia"></canvas>
                                 </div>
@@ -989,7 +989,7 @@ function ventas_destroyDashboardChart(chartKey) {
     }
 }
 
-function ventas_renderLineChart(chartKey, canvasId, labels, values, title) {
+function ventas_renderLineChart(chartKey, canvasId, labels, valuesFac, title, valuesDev) {
     ventas_destroyDashboardChart(chartKey);
     const canvas = document.getElementById(canvasId);
     if (!canvas || typeof Chart === 'undefined') return;
@@ -997,26 +997,46 @@ function ventas_renderLineChart(chartKey, canvasId, labels, values, title) {
     const chartWrap = canvas.closest('.ventas-dashboard-chart');
     if (chartWrap) chartWrap.style.height = '220px';
 
+    const datasets = [{
+        label: 'Ventas FAC',
+        data: valuesFac.map((v) => Number(v)),
+        borderColor: '#0044a3',
+        backgroundColor: 'rgba(0, 68, 163, 0.12)',
+        fill: true,
+        tension: 0.25,
+        pointRadius: 3,
+        pointHoverRadius: 5
+    }];
+
+    if (Array.isArray(valuesDev)) {
+        datasets.push({
+            label: 'Devoluciones DEV',
+            data: valuesDev.map((v) => Number(v)),
+            borderColor: '#dc3545',
+            backgroundColor: 'rgba(220, 53, 69, 0.08)',
+            fill: false,
+            tension: 0.25,
+            pointRadius: 3,
+            pointHoverRadius: 5,
+            borderWidth: 2
+        });
+    }
+
     ventas_dashboardCharts[chartKey] = new Chart(canvas.getContext('2d'), {
         type: 'line',
         data: {
             labels,
-            datasets: [{
-                label: 'Ventas FAC',
-                data: values.map((v) => Number(v)),
-                borderColor: '#0044a3',
-                backgroundColor: 'rgba(0, 68, 163, 0.12)',
-                fill: true,
-                tension: 0.25,
-                pointRadius: 3,
-                pointHoverRadius: 5
-            }]
+            datasets
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false },
+                legend: {
+                    display: Array.isArray(valuesDev),
+                    position: 'bottom',
+                    labels: { font: { size: 10 }, boxWidth: 12, padding: 8 }
+                },
                 title: { display: true, text: title, font: { size: 12 } }
             },
             scales: {
@@ -1135,19 +1155,24 @@ function ventas_resizeDashboardCharts() {
     });
 }
 
-function ventas_applyDashboardFromRows(rowsDia, rowsMarcas, mes, anio) {
+function ventas_applyDashboardFromRows(rowsDia, rowsMarcas, rowsDev, mes, anio) {
     const lbDia = document.getElementById('lbVentasDashDiaTotal');
     const lbMarcas = document.getElementById('lbVentasDashMarcasTotal');
 
-    const series = ventas_buildDiasMesSeries(mes, anio, rowsDia || []);
-    const totalDia = series.values.reduce((sum, v) => sum + Number(v), 0);
-    if (lbDia) lbDia.innerText = `Total mes: ${F.setMoneda(totalDia, 'Q')}`;
+    const seriesFac = ventas_buildDiasMesSeries(mes, anio, rowsDia || []);
+    const seriesDev = ventas_buildDiasMesSeries(mes, anio, rowsDev || []);
+    const totalFac = seriesFac.values.reduce((sum, v) => sum + Number(v), 0);
+    const totalDev = seriesDev.values.reduce((sum, v) => sum + Number(v), 0);
+    if (lbDia) {
+        lbDia.innerHTML = `FAC: <span class="text-base">${F.setMoneda(totalFac, 'Q')}</span> &nbsp;|&nbsp; DEV: <span class="text-danger">${F.setMoneda(totalDev, 'Q')}</span>`;
+    }
     ventas_renderLineChart(
         'ventasDia',
         'chartVentasDia',
-        series.labels,
-        series.values,
-        `Ventas FAC día a día (${mes}/${anio})`
+        seriesFac.labels,
+        seriesFac.values,
+        `Ventas FAC y devoluciones DEV (${mes}/${anio})`,
+        seriesDev.values
     );
 
     const items = [...(rowsMarcas || [])].sort((a, b) => Number(b.TOTALPRECIO) - Number(a.TOTALPRECIO));
@@ -1167,7 +1192,8 @@ function ventas_applyDashboardCache(cached, mes, anio) {
     try {
         const rowsDia = JSON.parse(cached.VENTAS_DIA || '[]');
         const rowsMarcas = JSON.parse(cached.MARCAS_FAC || '[]');
-        ventas_applyDashboardFromRows(rowsDia, rowsMarcas, mes, anio);
+        const rowsDev = JSON.parse(cached.DEVOLUCIONES_DIA || '[]');
+        ventas_applyDashboardFromRows(rowsDia, rowsMarcas, rowsDev, mes, anio);
         ventas_setDashboardCacheInfo(true, cached.UPDATED_AT);
         return true;
     } catch (err) {
@@ -1179,14 +1205,16 @@ function ventas_applyDashboardCache(cached, mes, anio) {
 function ventas_fetchDashboardRemote(sucursal, mes, anio, codemp, fecha) {
     return Promise.all([
         RPT.data_dashboard_vendedor_ventas_dia(sucursal, mes, anio, codemp),
+        RPT.data_dashboard_vendedor_devoluciones_dia(sucursal, mes, anio, codemp),
         RPT.data_dashboard_vendedor_marcas_fac(sucursal, mes, anio, codemp)
-    ]).then(([dataDia, dataMarcas]) => {
+    ]).then(([dataDia, dataDev, dataMarcas]) => {
         const rowsDia = dataDia.recordset || [];
+        const rowsDev = dataDev.recordset || [];
         const rowsMarcas = dataMarcas.recordset || [];
-        ventas_applyDashboardFromRows(rowsDia, rowsMarcas, mes, anio);
+        ventas_applyDashboardFromRows(rowsDia, rowsMarcas, rowsDev, mes, anio);
         ventas_setDashboardCacheInfo(false, F.getHora());
         if (typeof db_ventas_dashboard !== 'undefined') {
-            return db_ventas_dashboard.save(sucursal, codemp, mes, anio, fecha, rowsDia, rowsMarcas)
+            return db_ventas_dashboard.save(sucursal, codemp, mes, anio, fecha, rowsDia, rowsMarcas, rowsDev)
                 .catch((err) => console.warn('[inicio_ventas] dashboard cache save:', err));
         }
     });
@@ -1425,6 +1453,13 @@ function ventas_bindCheckInActions() {
 
 window._ventasCore = { initView, destroyView, getView, addListeners };
 
+(function () {
+    window.__spaViewHooks = window.__spaViewHooks || {};
+    window.__spaViewHooks['inicio/ventas'] = {
+        initView: window._ventasCore.initView,
+        destroyView: window._ventasCore.destroyView
+    };
+})();
 
 function cargar_grid(){
 

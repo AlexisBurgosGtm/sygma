@@ -1627,7 +1627,13 @@ function destroyView(){
     document.getElementById('js-page-content')?.classList.remove('proveedor-page');
 }
 
-
+(function () {
+    window.__spaViewHooks = window.__spaViewHooks || {};
+    window.__spaViewHooks['inicio/digitador'] = {
+        initView: initView,
+        destroyView: destroyView
+    };
+})();
 
 //------------------------
 // PEDIDOS PENDIENTES

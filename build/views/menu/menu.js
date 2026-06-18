@@ -334,3 +334,11 @@ function getLineChartFechasEmpresa(data){
 
 };
 
+(function () {
+    window.__spaViewHooks = window.__spaViewHooks || {};
+    window.__spaViewHooks['inicio/admin'] = {
+        initView: initView,
+        destroyView: function () {}
+    };
+})();
+

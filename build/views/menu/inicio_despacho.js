@@ -1723,3 +1723,11 @@ function clean_data(){
 
 
 };
+
+(function () {
+    window.__spaViewHooks = window.__spaViewHooks || {};
+    window.__spaViewHooks['inicio/despacho'] = {
+        initView: initView,
+        destroyView: function () {}
+    };
+})();

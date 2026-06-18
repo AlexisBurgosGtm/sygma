@@ -836,4 +836,11 @@ function get_data(){
     })
 };
 
+(function () {
+    window.__spaViewHooks = window.__spaViewHooks || {};
+    window.__spaViewHooks['inicio/compras'] = {
+        initView: initView,
+        destroyView: function () {}
+    };
+})();
 

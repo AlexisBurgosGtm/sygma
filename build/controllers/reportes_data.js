@@ -83,6 +83,31 @@ let RPT = {
             });
         });
     },
+    data_dashboard_vendedor_devoluciones_dia:(empnit, mes, anio, codemp)=>{
+        return new Promise((resolve, reject) => {
+            axios.post(GlobalUrlCalls + '/reportes/rpt_dashboard_vendedor_devoluciones_dia', {
+                token: TOKEN,
+                sucursal: empnit,
+                mes: mes,
+                anio: anio,
+                codemp: codemp
+            })
+            .then((response) => {
+                if (response.status.toString() === '200') {
+                    const data = response.data;
+                    if (data.toString() === 'error') {
+                        reject();
+                    } else {
+                        resolve(data);
+                    }
+                } else {
+                    reject();
+                }
+            }, () => {
+                reject();
+            });
+        });
+    },
     data_dashboard_vendedor_marcas_fac:(empnit, mes, anio, codemp)=>{
         return new Promise((resolve, reject) => {
             axios.post(GlobalUrlCalls + '/reportes/rpt_dashboard_vendedor_marcas_fac', {

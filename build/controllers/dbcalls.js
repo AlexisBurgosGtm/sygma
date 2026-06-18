@@ -1266,7 +1266,7 @@ let db_ventas_dashboard = {
             }
         });
     },
-    save:(sucursal, codemp, mes, anio, fecha, ventasDia, marcasFac)=>{
+    save:(sucursal, codemp, mes, anio, fecha, ventasDia, marcasFac, devolucionesDia)=>{
         return new Promise(async(resolve,reject)=>{
             try {
                 await window._sygmaDbReady;
@@ -1285,6 +1285,7 @@ let db_ventas_dashboard = {
                         MES: String(mes),
                         ANIO: String(anio),
                         VENTAS_DIA: JSON.stringify(ventasDia || []),
+                        DEVOLUCIONES_DIA: JSON.stringify(devolucionesDia || []),
                         MARCAS_FAC: JSON.stringify(marcasFac || []),
                         UPDATED_AT: F.getHora()
                     }]

@@ -200,7 +200,285 @@ border-color:  rgb(118, 188, 64)}
                 box-shadow: 0 0 0 0.2rem rgb(118, 188, 64); 
               }
 
-/* Navbar y header: azul oscuro con transparencia, texto blanco */
+/* Navbar y header: diseño moderno con glassmorphism */
+.page-inner {
+  background: linear-gradient(145deg, #dce8f8 0%, #eef3fb 42%, #f4f7fc 100%);
+}
+
+.page-sidebar.sygma-sidebar-modern,
+.page-sidebar.sygma-sidebar-modern .primary-nav,
+.page-sidebar.sygma-sidebar-modern .nav-footer {
+  background: linear-gradient(
+    180deg,
+    rgba(7, 22, 48, 0.78) 0%,
+    rgba(10, 32, 68, 0.72) 45%,
+    rgba(6, 18, 42, 0.85) 100%
+  ) !important;
+  backdrop-filter: blur(22px) saturate(1.35);
+  -webkit-backdrop-filter: blur(22px) saturate(1.35);
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.page-sidebar.sygma-sidebar-modern {
+  border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 4px 0 28px rgba(0, 24, 64, 0.22), inset -1px 0 0 rgba(255, 255, 255, 0.06);
+}
+
+.page-sidebar.sygma-sidebar-modern::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: radial-gradient(ellipse at 20% 0%, rgba(0, 100, 220, 0.28) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.page-sidebar.sygma-sidebar-modern .primary-nav,
+.page-sidebar.sygma-sidebar-modern .nav-footer {
+  position: relative;
+  z-index: 1;
+}
+
+.page-sidebar.sygma-sidebar-modern .nav-footer.sygma-nav-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: rgba(0, 0, 0, 0.22) !important;
+}
+
+.page-sidebar.sygma-sidebar-modern .nav-footer a {
+  color: rgba(255, 255, 255, 0.75) !important;
+  border-radius: 8px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.page-sidebar.sygma-sidebar-modern .nav-footer a:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+}
+
+/* Cabecera del menú */
+.sygma-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0.85rem 0.75rem 0.65rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 4px 16px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.sygma-nav-brand__logo {
+  flex-shrink: 0;
+  width: 2.35rem;
+  height: 2.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.sygma-nav-brand__logo img {
+  border-radius: 6px;
+}
+
+.sygma-nav-brand__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sygma-nav-brand__title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.sygma-nav-brand__sub {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* Ítems del menú */
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu {
+  padding: 0 0 1rem;
+}
+
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu > li > a,
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu > li > a .nav-link-text,
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu > li > a > i,
+.page-sidebar.sygma-sidebar-modern .nav-footer a {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu > li > a {
+  margin: 0.18rem 0.6rem !important;
+  padding: 0.58rem 0.7rem !important;
+  border-radius: 11px !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transition: background 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, transform 0.18s ease !important;
+}
+
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu > li > a > i,
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu > li > a > [class*='fa-'] {
+  width: 2rem !important;
+  height: 2rem !important;
+  margin-right: 0.55rem !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.95rem !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+  transition: background 0.2s ease, transform 0.18s ease;
+}
+
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu > li > a .nav-link-text {
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.03em;
+}
+
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu > li > a:hover,
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu > li.open > a {
+  background: rgba(255, 255, 255, 0.11) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14) !important;
+  color: #fff !important;
+  transform: translateX(2px);
+}
+
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu > li > a:hover > i,
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu > li.open > a > i,
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu > li > a:hover > [class*='fa-'],
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu > li.open > a > [class*='fa-'] {
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: #fff !important;
+}
+
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu > li.active > a {
+  background: linear-gradient(135deg, rgba(0, 82, 180, 0.55) 0%, rgba(20, 110, 210, 0.38) 100%) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 6px 18px rgba(0, 68, 163, 0.32) !important;
+  color: #fff !important;
+}
+
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu > li.active > a::before {
+  display: none !important;
+}
+
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu > li.active > a > i,
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu > li.active > a > [class*='fa-'] {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #fff !important;
+}
+
+/* Submenús */
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu li > ul {
+  margin: 0.12rem 0.55rem 0.45rem 0.7rem !important;
+  padding: 0.35rem 0 !important;
+  background: rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  border-radius: 10px !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu li > ul li a {
+  margin: 0.1rem 0.35rem !important;
+  padding: 0.42rem 0.65rem 0.42rem 0.85rem !important;
+  border-radius: 8px !important;
+  border: 1px solid transparent !important;
+  transition: background 0.18s ease, color 0.18s ease !important;
+}
+
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu ul li a .nav-link-text {
+  color: rgba(255, 255, 255, 0.78) !important;
+  font-size: 0.72rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em;
+}
+
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu li > ul li a:hover {
+  background: rgba(255, 255, 255, 0.09) !important;
+}
+
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu li > ul li a:hover .nav-link-text {
+  color: #fff !important;
+}
+
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu li > ul li.active > a {
+  background: rgba(0, 68, 163, 0.35) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: none !important;
+}
+
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu li > ul li.active > a .nav-link-text {
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+/* Indicador expandir/colapsar */
+.page-sidebar.sygma-sidebar-modern .sygma-nav-menu b.collapse-sign {
+  width: 1.45rem !important;
+  height: 1.45rem !important;
+  border-radius: 7px !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 0.75rem !important;
+  font-weight: 700;
+}
+
+/* Scroll del menú */
+.page-sidebar.sygma-sidebar-modern .sygma-primary-nav::-webkit-scrollbar {
+  width: 5px;
+}
+
+.page-sidebar.sygma-sidebar-modern .sygma-primary-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.page-sidebar.sygma-sidebar-modern .sygma-primary-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 4px;
+}
+
+.page-sidebar.sygma-sidebar-modern .sygma-primary-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* Sidebar minificado */
+.nav-function-minify:not(.nav-function-top) .page-sidebar.sygma-sidebar-modern .sygma-nav-menu > li > a {
+  margin: 0.2rem 0.35rem !important;
+  padding: 0.55rem !important;
+  justify-content: center;
+}
+
+.nav-function-minify:not(.nav-function-top) .page-sidebar.sygma-sidebar-modern .sygma-nav-menu > li > a > i,
+.nav-function-minify:not(.nav-function-top) .page-sidebar.sygma-sidebar-modern .sygma-nav-menu > li > a > [class*='fa-'] {
+  margin-right: 0 !important;
+}
+
+/* Compatibilidad con estilos base del sidebar */
 .page-sidebar,
 .page-sidebar .primary-nav,
 .page-sidebar .nav-footer {
@@ -236,10 +514,15 @@ border-color:  rgb(118, 188, 64)}
   color: rgba(255, 255, 255, 0.85) !important;
 }
 .page-header {
-  background: rgba(10, 28, 58, 0.88) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: linear-gradient(
+    90deg,
+    rgba(8, 24, 52, 0.82) 0%,
+    rgba(10, 32, 68, 0.78) 100%
+  ) !important;
+  backdrop-filter: blur(18px) saturate(1.3);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
   border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 4px 20px rgba(0, 24, 64, 0.12);
   color: #fff !important;
 }
 .page-header .header-btn,

@@ -280,6 +280,7 @@ var tblVentasDashboardCache = {
         MES:{dataType: "string"},
         ANIO:{dataType: "string"},
         VENTAS_DIA:{dataType: "string"},
+        DEVOLUCIONES_DIA:{dataType: "string"},
         MARCAS_FAC:{dataType: "string"},
         UPDATED_AT:{dataType: "string"}
     }

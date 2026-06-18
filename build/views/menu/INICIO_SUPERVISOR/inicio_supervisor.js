@@ -1387,7 +1387,13 @@ function destroyView(){
 
 window._supervisorCore = { initView, destroyView, getView, addListeners };
 
-
+(function () {
+    window.__spaViewHooks = window.__spaViewHooks || {};
+    window.__spaViewHooks['inicio/supervisor'] = {
+        initView: window._supervisorCore.initView,
+        destroyView: window._supervisorCore.destroyView
+    };
+})();
 
 function rpt_facturas(idContainer){
 

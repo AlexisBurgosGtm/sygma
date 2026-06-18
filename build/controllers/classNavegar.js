@@ -10,15 +10,7 @@ const NAVEGAR_INICIO_POR_NIVEL = {
     8: 'inicio/ventas'
 };
 
-const NAVEGAR_NAVBAR_POR_NIVEL = {
-    1: ['GERENCIA', 'js-nav-menu_gerencia'],
-    2: ['SUPERVISOR', 'js-nav-menu_supervisor'],
-    3: ['VENDEDOR', 'js-nav-menu_vendedor'],
-    4: ['REPARTIDOR', 'js-nav-menu_repartidor'],
-    5: ['DIGITADOR', 'js-nav-menu_digitador'],
-    7: ['PROVEEDOR', 'js-nav-menu_proveedor'],
-    8: ['VENDEDOR', 'js-nav-menu_vendedor']
-};
+const NAVEGAR_NAVBAR_ID = 'js-nav-menu';
 
 let Navegar = {
     pendiente: () => {
@@ -44,14 +36,13 @@ let Navegar = {
     inicio: () => {
         const nivel = Number(GlobalNivelUsuario);
         const ruta = NAVEGAR_INICIO_POR_NIVEL[nivel];
-        const navbar = NAVEGAR_NAVBAR_POR_NIVEL[nivel];
 
-        if (!ruta || !navbar) {
+        if (!ruta) {
             return;
         }
 
-        GF.fcn_load_navbar(navbar[0], navbar[1], 'js-primary-nav');
-        return SpaRouter.navigate(ruta);
+        GF.fcn_load_navbar(NAVEGAR_NAVBAR_ID, 'js-primary-nav');
+        return SpaRouter.navigate(ruta, { force: true });
     },
 
     inicio_gerencia: () => Navegar._inicioRuta('inicio/gerencia'),
@@ -65,6 +56,7 @@ let Navegar = {
 
     _inicioRuta(ruta) {
         if (Number(GlobalNivelUsuario) === 0) return;
-        return SpaRouter.navigate(ruta);
+        GF.fcn_load_navbar(NAVEGAR_NAVBAR_ID, 'js-primary-nav');
+        return SpaRouter.navigate(ruta, { force: true });
     }
 };

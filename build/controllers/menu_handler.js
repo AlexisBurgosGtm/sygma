@@ -20,7 +20,7 @@ let Menu = {
             return Promise.resolve();
         }
         Menu.salidaMenu();
-        return SpaRouter.navigate(route, { params: params || {} });
+        return SpaRouter.navigate(route, { params: params || {}, force: true });
     }
 };
 
