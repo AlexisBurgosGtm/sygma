@@ -320,9 +320,33 @@ body.spa-nav-hidden .page-content.proveedor-page {
   bottom: 1rem;
   left: 1rem;
   z-index: 1045;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   border-radius: 999px;
-  box-shadow: 0 4px 16px rgba(0, 68, 163, 0.28);
-  padding: 0.45rem 1rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff !important;
+  background: rgba(0, 68, 163, 0.72) !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 18px rgba(0, 68, 163, 0.25);
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+.proveedor-menu-toggle:hover,
+.proveedor-menu-toggle:focus {
+  color: #fff !important;
+  background: rgba(0, 68, 163, 0.88) !important;
+  box-shadow: 0 6px 22px rgba(0, 68, 163, 0.32);
+  transform: translateY(-1px);
+}
+.proveedor-menu-toggle:active {
+  transform: translateY(0);
+}
+.proveedor-menu-toggle .fal {
+  font-size: 0.95rem;
 }
 .proveedor-sidebar-backdrop {
   display: none;
@@ -450,7 +474,7 @@ body.proveedor-sidebar-open {
 }
 .proveedor-tab-area .form-control,
 .proveedor-tab-area label,
-.proveedor-tab-area .btn {
+.proveedor-tab-area .btn:not(.btn-circle) {
   font-size: inherit;
 }
 .proveedor-dashboard-card {
@@ -850,8 +874,34 @@ button.btn-circle {
 .proveedor-view-modern .btn.btn-circle,
 .proveedor-tab-area .btn.btn-circle,
 #proveedorPanelEmbed .btn.btn-circle,
+#ventasPanelEmbed .btn.btn-circle,
 body.app-pos2-theme #root .btn.btn-circle {
   border-radius: 50% !important;
+}
+
+/* Iconos proporcionales en botones circulares grandes (fijos y embebidos) */
+.btn-circle.btn-xl,
+.proveedor-tab-area .btn-circle.btn-xl,
+#proveedorPanelEmbed .btn-circle.btn-xl,
+#ventasPanelEmbed .btn-circle.btn-xl {
+  font-size: 1.75rem !important;
+}
+
+.btn-circle.btn-lg,
+.proveedor-tab-area .btn-circle.btn-lg,
+#proveedorPanelEmbed .btn-circle.btn-lg,
+#ventasPanelEmbed .btn-circle.btn-lg {
+  font-size: 1.45rem !important;
+}
+
+.btn-circle.btn-xl [class*="fa-"],
+.btn-circle.btn-lg [class*="fa-"],
+.proveedor-tab-area .btn-circle.btn-xl [class*="fa-"],
+.proveedor-tab-area .btn-circle.btn-lg [class*="fa-"],
+#proveedorPanelEmbed .btn-circle [class*="fa-"],
+#ventasPanelEmbed .btn-circle [class*="fa-"] {
+  font-size: inherit;
+  line-height: 1;
 }
 
 /* Loader global — sygma-loader */
@@ -926,3 +976,695 @@ body.app-pos2-theme #root .btn.btn-circle {
   font-size: 0.95em;
 }
 
+#tblFFacturas tr.sygma-factura-descuadre td {
+  border-top: 2px solid #dc3545 !important;
+  border-bottom: 2px solid #dc3545 !important;
+}
+
+#tblFFacturas tr.sygma-factura-descuadre td:first-child {
+  border-left: 2px solid #dc3545 !important;
+}
+
+#tblFFacturas tr.sygma-factura-descuadre td:last-child {
+  border-right: 2px solid #dc3545 !important;
+}
+
+.ventas-header-periodo__row {
+  width: 100%;
+}
+
+@media (max-width: 767.98px) {
+  .ventas-header-periodo {
+    margin-top: 0.35rem;
+    padding-left: 0 !important;
+  }
+  .ventas-header-periodo__row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+  }
+  .ventas-header-periodo__row select {
+    min-width: 0;
+    flex: 1 1 50%;
+  }
+}
+
+.sygma-ventas-facturas-table {
+  max-height: calc(100vh - 13.5rem);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ventas-facturas-toolbar__title {
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.ventas-facturas-toolbar__label {
+  font-size: 0.72rem;
+  line-height: 1.1;
+}
+
+.ventas-facturas-toolbar__field .form-control-sm {
+  font-size: 0.78rem;
+  height: calc(1.5em + 0.45rem);
+  padding: 0.15rem 0.35rem;
+}
+
+.ventas-facturas-toolbar__totales small {
+  font-size: 0.75rem;
+  line-height: 1.15;
+}
+
+.ventas-facturas-resumen .btn-sm {
+  padding: 0.1rem 0.45rem;
+  font-size: 0.72rem;
+  line-height: 1.3;
+}
+
+.sygma-ventas-facturas-table .table {
+  font-size: 0.875rem;
+  min-width: 36rem;
+  margin-bottom: 0;
+}
+
+.sygma-facturas-acciones-col {
+  width: 5.5rem;
+}
+
+.sygma-facturas-acciones .btn-circle {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  line-height: 2rem;
+}
+
+@media (max-width: 767.98px) {
+  .sygma-ventas-facturas-table .table {
+    font-size: 0.78rem;
+    min-width: 32rem;
+  }
+  .sygma-facturas-acciones .btn-circle {
+    width: 1.85rem;
+    height: 1.85rem;
+    line-height: 1.85rem;
+    font-size: 0.72rem;
+  }
+}
+
+/* Inicio ventas: reportes marcas, categorías, goles, historial */
+.ventas-marcas-toolbar__title,
+.ventas-categorias-toolbar__title,
+.ventas-goles-toolbar__title,
+.ventas-historial-toolbar__title {
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.ventas-marcas-toolbar__label,
+.ventas-categorias-objetivos__label {
+  font-size: 0.72rem;
+  line-height: 1.1;
+}
+
+.ventas-marcas-toolbar__field .form-control-sm {
+  font-size: 0.82rem;
+  height: calc(1.5em + 0.45rem);
+  padding: 0.15rem 0.35rem;
+}
+
+.ventas-marcas-toolbar__total small {
+  font-size: 0.75rem;
+  line-height: 1.15;
+}
+
+@media (min-width: 768px) {
+  .ventas-marcas-toolbar__fechas .form-control-sm {
+    font-size: 0.88rem;
+    height: calc(1.5em + 0.55rem);
+  }
+}
+
+.sygma-ventas-marcas-table {
+  max-height: calc(100vh - 13rem);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sygma-ventas-marcas-table .table {
+  font-size: 0.82rem;
+  margin-bottom: 0;
+  min-width: 22rem;
+}
+
+.ventas-categorias-panel .card-body {
+  padding: 0.5rem !important;
+}
+
+.ventas-categorias-objetivos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  align-items: flex-end;
+}
+
+.ventas-categorias-objetivos__item {
+  flex: 1 1 calc(50% - 0.5rem);
+  min-width: 9rem;
+}
+
+.ventas-categorias-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ventas-categorias-progress progress {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  height: 0.55rem;
+  margin: 0;
+}
+
+.ventas-categorias-progress b {
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.sygma-ventas-categorias-table {
+  max-height: calc(100vh - 12.5rem);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sygma-ventas-categorias-table .table {
+  font-size: 0.8rem;
+  margin-bottom: 0;
+  min-width: 28rem;
+}
+
+.ventas-goles-panel .card-body {
+  padding: 0.5rem !important;
+}
+
+.ventas-goles-total__value {
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+
+.sygma-ventas-goles-table {
+  max-height: calc(50vh - 6rem);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sygma-ventas-goles-table .table {
+  font-size: 0.78rem;
+  margin-bottom: 0;
+}
+
+.sygma-ventas-goles-table--marcas .table {
+  min-width: 20rem;
+}
+
+.sygma-ventas-goles-table--productos .table {
+  min-width: 14rem;
+}
+
+.ventas-historial-card .card-body {
+  padding: 0.5rem !important;
+}
+
+.sygma-ventas-historial-table {
+  max-height: calc(100vh - 11.5rem);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sygma-ventas-historial-table .table {
+  font-size: 0.76rem;
+  margin-bottom: 0;
+  min-width: 18rem;
+}
+
+.sygma-historial-col-visita {
+  width: 4.5rem;
+  min-width: 4.5rem;
+  max-width: 5.5rem;
+  padding-left: 0.45rem !important;
+  padding-right: 0.85rem !important;
+  white-space: nowrap;
+  vertical-align: top;
+  text-align: center;
+}
+
+.sygma-historial-col-cliente {
+  padding-left: 0.35rem !important;
+}
+
+.sygma-historial-col-acc {
+  width: 2.1rem;
+  max-width: 2.4rem;
+}
+
+.sygma-historial-acc-btn {
+  width: 1.65rem !important;
+  height: 1.65rem !important;
+  line-height: 1.65rem !important;
+  padding: 0 !important;
+  font-size: 0.68rem;
+}
+
+.sygma-historial-cliente-nombre {
+  font-weight: 600;
+}
+
+@media (max-width: 767.98px) {
+  .ventas-marcas-toolbar__total {
+    text-align: left !important;
+  }
+
+  .ventas-categorias-objetivos__item {
+    flex: 1 1 48%;
+    min-width: 0;
+  }
+
+  .sygma-ventas-marcas-table .table {
+    font-size: 0.74rem;
+  }
+
+  .sygma-ventas-categorias-table .table {
+    font-size: 0.72rem;
+    min-width: 24rem;
+  }
+
+  .sygma-ventas-goles-table {
+    max-height: calc(45vh - 4rem);
+  }
+
+  .sygma-ventas-goles-table .table {
+    font-size: 0.7rem;
+  }
+
+  .sygma-ventas-goles-table--marcas .table {
+    min-width: 17rem;
+  }
+
+  .ventas-goles-total__value {
+    font-size: 1.1rem;
+  }
+
+  .sygma-ventas-historial-table .table {
+    font-size: 0.68rem;
+    min-width: 14rem;
+  }
+
+  .sygma-historial-cliente-dir small {
+    font-size: 0.62rem;
+    line-height: 1.2;
+  }
+}
+
+@media (min-width: 992px) {
+  .sygma-ventas-goles-table {
+    max-height: calc(100vh - 13rem);
+  }
+
+  .sygma-historial-col-visita {
+    width: 5.75rem;
+    min-width: 5.75rem;
+    max-width: 7rem;
+    padding-right: 1.15rem !important;
+  }
+
+  .sygma-historial-col-cliente {
+    padding-left: 0.5rem !important;
+  }
+}
+
+/* Inicio ventas: dashboard y productos */
+.ventas-dashboard-toolbar__title {
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.ventas-dashboard-toolbar__cache {
+  font-size: 0.72rem;
+  line-height: 1.1;
+}
+
+.ventas-checkin-status {
+  margin-top: 0.15rem;
+}
+
+.ventas-checkin-status__badge {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.35em 0.65em;
+}
+
+.ventas-welcome-card .card-body {
+  padding-top: 0.65rem !important;
+  padding-bottom: 0.65rem !important;
+}
+
+.ventas-dashboard-card__title {
+  font-size: 0.88rem;
+}
+
+.ventas-dashboard-chart {
+  position: relative;
+  min-height: 200px;
+}
+
+.ventas-dashboard-chart--line {
+  height: 220px;
+}
+
+.ventas-productos-toolbar__title,
+.ventas-productos-toolbar__label,
+.ventas-productos-toolbar__field .form-control-sm,
+.ventas-productos-toolbar__total small {
+  font-size: inherit;
+}
+
+.ventas-productos-toolbar__title {
+  font-size: 0.9rem;
+}
+
+.ventas-productos-toolbar__label {
+  font-size: 0.72rem;
+}
+
+.ventas-productos-toolbar__field .form-control-sm {
+  font-size: 0.82rem;
+  height: calc(1.5em + 0.45rem);
+}
+
+.ventas-productos-toolbar__total small {
+  font-size: 0.75rem;
+}
+
+.sygma-ventas-productos-table {
+  max-height: calc(100vh - 15rem);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sygma-ventas-productos-table .table {
+  font-size: 0.78rem;
+  margin-bottom: 0;
+  min-width: 24rem;
+}
+
+.sygma-historial-visita-inline {
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+@media (max-width: 767.98px) {
+  .sygma-ventas-productos-table .table {
+    font-size: 0.7rem;
+    min-width: 22rem;
+  }
+
+  .ventas-productos-toolbar__total {
+    text-align: left !important;
+  }
+}
+
+/* Inicio ventas: Avance P&G embebido */
+.ventas-procter-panel {
+  padding: 0;
+}
+
+.ventas-procter-card {
+  background: rgba(255, 255, 255, 0.88) !important;
+  border: 1px solid rgba(0, 68, 163, 0.12) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.ventas-procter-card .card-body {
+  padding: 0.5rem !important;
+}
+
+.ventas-procter-title {
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.ventas-procter-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.ventas-procter-resumen {
+  border-top: 1px solid rgba(0, 68, 163, 0.1);
+  font-size: 0.78rem;
+}
+
+.ventas-procter-btn-report {
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+}
+
+.ventas-procter-pct__value {
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+
+.ventas-procter-section-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #0044a3;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ventas-procter-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.ventas-procter-stat {
+  background: rgba(0, 68, 163, 0.05);
+  border: 1px solid rgba(0, 68, 163, 0.08);
+  border-radius: 8px;
+  padding: 0.35rem 0.4rem;
+  text-align: center;
+  min-width: 0;
+}
+
+.ventas-procter-stat__label {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #6c757d;
+  text-transform: uppercase;
+  line-height: 1.1;
+  margin-bottom: 0.15rem;
+}
+
+.ventas-procter-stat__value {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.15;
+  word-break: break-word;
+}
+
+.sygma-ventas-procter-table {
+  max-height: calc(100vh - 14rem);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ventas-procter-table {
+  font-size: 0.72rem;
+  min-width: 28rem;
+  margin-bottom: 0;
+}
+
+.ventas-procter-table thead td,
+.ventas-procter-table tfoot td {
+  font-size: 0.68rem;
+  padding: 0.3rem 0.25rem;
+  white-space: nowrap;
+}
+
+.ventas-procter-table tbody td {
+  padding: 0.3rem 0.25rem;
+  vertical-align: middle;
+}
+
+.ventas-procter-print {
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 767.98px) {
+  .ventas-procter-pct {
+    text-align: left !important;
+    margin-top: 0.35rem;
+  }
+
+  .ventas-procter-pct__value {
+    font-size: 1.15rem;
+  }
+
+  .ventas-procter-stat__value {
+    font-size: 0.85rem;
+  }
+
+  .ventas-procter-table {
+    font-size: 0.65rem;
+    min-width: 24rem;
+  }
+
+  .sygma-ventas-procter-table {
+    max-height: calc(100vh - 12rem);
+  }
+}
+
+/* Inicio ventas: crear clientes (censo) */
+.proveedor-tab-area .panel-container:has(.sygma-censo-tabs) .panel-content {
+  padding: 0.35rem 0.5rem 0.5rem;
+}
+
+.sygma-censo-toolbar__title {
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.sygma-censo-card .card-body,
+.sygma-censo-form-card .card-body {
+  padding: 0.5rem !important;
+}
+
+.sygma-censo-panel .card {
+  margin-bottom: 0;
+}
+
+.sygma-censo-tabs {
+  padding-top: 0 !important;
+}
+
+.sygma-censo-filters .form-control-sm {
+  font-size: 0.82rem;
+  height: calc(1.5em + 0.45rem);
+  padding: 0.15rem 0.35rem;
+}
+
+.sygma-ventas-censo-table {
+  max-height: calc(100vh - 13rem);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sygma-ventas-censo-table .table {
+  font-size: 0.8rem;
+  margin-bottom: 0;
+  min-width: 18rem;
+}
+
+.sygma-censo-col-nit {
+  min-width: 5.5rem;
+}
+
+.sygma-censo-col-cliente {
+  min-width: 9rem;
+}
+
+.sygma-censo-col-acc {
+  width: 2.5rem;
+  min-width: 2.5rem;
+}
+
+.sygma-censo-acc-btn {
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  line-height: 1.75rem;
+}
+
+.sygma-censo-cliente-nombre {
+  font-weight: 600;
+  display: block;
+}
+
+.sygma-censo-cliente-dir {
+  line-height: 1.25;
+}
+
+.sygma-censo-visita-badge {
+  font-size: 0.65rem;
+  padding: 0.2em 0.45em;
+}
+
+.sygma-censo-form-label {
+  font-size: 0.72rem;
+  margin-bottom: 0.15rem;
+}
+
+.sygma-censo-form-card .form-control-sm {
+  font-size: 0.82rem;
+}
+
+.sygma-censo-coords {
+  gap: 0.5rem 0.75rem;
+}
+
+.sygma-censo-coords__item {
+  font-size: 0.82rem;
+}
+
+.sygma-censo-form-actions {
+  gap: 0.35rem;
+  padding-top: 0.25rem;
+}
+
+.sygma-censo-map.mapcontainer2 {
+  height: calc(100vh - 7.5rem);
+  min-height: 16rem;
+  box-shadow: none;
+}
+
+.sygma-censo-map-actions {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 4.25rem;
+  z-index: 931;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (max-width: 575.98px) {
+  .sygma-ventas-censo-table .table {
+    font-size: 0.74rem;
+  }
+
+  .sygma-censo-cliente-dir small,
+  .sygma-censo-col-cliente small {
+    font-size: 0.68rem;
+  }
+
+  .sygma-censo-map.mapcontainer2 {
+    height: calc(100vh - 6.5rem);
+  }
+
+  .sygma-censo-map-actions {
+    right: 0.75rem;
+    bottom: 3.75rem;
+  }
+}

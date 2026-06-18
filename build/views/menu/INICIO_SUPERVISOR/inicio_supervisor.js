@@ -202,8 +202,8 @@ function getView(){
                 </div>
             </div>
 
-            <button type="button" class="btn btn-sm btn-primary proveedor-menu-toggle d-md-none" id="btnSupervisorMenuToggle" title="Menú de opciones">
-                <i class="fal fa-bars mr-1"></i> Menú
+            <button type="button" class="btn proveedor-menu-toggle d-md-none" id="btnSupervisorMenuToggle" title="Menú de opciones">
+                <i class="fal fa-bars"></i><span>Menú</span>
             </button>
             <div class="proveedor-sidebar-backdrop d-md-none" id="supervisorSidebarBackdrop"></div>
 
@@ -314,36 +314,7 @@ function getView(){
             return `
             <div class="proveedor-dashboard">
                 <div class="row">
-                    <div class="col-12 col-lg-4 mb-3 mb-lg-0">
-                        <div class="card card-rounded shadow h-100 proveedor-dashboard-card">
-                            <div class="card-body p-3">
-                                <h5 class="negrita text-secondary mb-3">Resumen de inventario por categoria</h5>
-                                <div class="proveedor-dashboard-chart mb-3">
-                                    <canvas id="chartSupDashInventario"></canvas>
-                                </div>
-                                <div class="table-responsive proveedor-dashboard-scroll">
-                                    <table class="table table-sm table-bordered h-full col-12" id="tblSupDashInventarioCategoria">
-                                        <thead class="bg-secondary text-white negrita">
-                                            <tr>
-                                                <td>CATEGORIA</td>
-                                                <td>CAJAS</td>
-                                                <td>COSTO</td>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="tblDataSupDashInventarioCategoria"></tbody>
-                                        <tfoot class="bg-secondary text-white negrita">
-                                            <tr>
-                                                <td>TOTALES</td>
-                                                <td id="lbSupFootDashInvCajas">--</td>
-                                                <td id="lbSupFootDashInvCosto">--</td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-lg-4 mb-3 mb-lg-0">
+                    <div class="col-12 col-lg-6 mb-3 mb-lg-0">
                         <div class="card card-rounded shadow h-100 proveedor-dashboard-card">
                             <div class="card-body p-3">
                                 <h5 class="negrita text-info mb-3">Ventas por vendedor</h5>
@@ -372,7 +343,7 @@ function getView(){
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-lg-4">
+                    <div class="col-12 col-lg-6">
                         <div class="card card-rounded shadow h-100 proveedor-dashboard-card">
                             <div class="card-body p-3">
                                 <h5 class="negrita text-secondary mb-3">Ventas por marca</h5>
@@ -1329,7 +1300,6 @@ function supervisor_renderDashboardChart(chartKey, canvasId, labels, values, tit
 
 function supervisor_resetDashboardFooters() {
     [
-        'lbSupFootDashInvCajas', 'lbSupFootDashInvCosto',
         'lbSupFootDashVendedorPedidos', 'lbSupFootDashVendedorImporte',
         'lbSupFootDashMarcaImporte'
     ].forEach((id) => {
@@ -1340,49 +1310,8 @@ function supervisor_resetDashboardFooters() {
 
 function supervisor_loadDashboard() {
     supervisor_resetDashboardFooters();
-    supervisor_tbl_dashboard_inventario_categoria();
     supervisor_tbl_dashboard_ventas_vendedor();
     supervisor_tbl_dashboard_ventas_marca();
-}
-
-function supervisor_tbl_dashboard_inventario_categoria() {
-    const container = document.getElementById('tblDataSupDashInventarioCategoria');
-    if (!container) return;
-    container.innerHTML = GlobalLoader;
-    supervisor_destroyDashboardChart('inventario');
-    GF.get_data_inventarios_general(supervisor_getSucursal(), 'SI')
-        .then((data) => {
-            const resumen = {};
-            (data.recordset || []).forEach((r) => {
-                const categoria = r.DESMARCA || 'SIN CATEGORIA';
-                const cajas = F.get_existencia(Number(r.TOTALUNIDADES), Number(r.UXC));
-                const costo = Number(r.TOTALUNIDADES) * Number(r.COSTO);
-                if (!resumen[categoria]) resumen[categoria] = { cajas: 0, costo: 0 };
-                resumen[categoria].cajas += Number(cajas);
-                resumen[categoria].costo += costo;
-            });
-            const items = Object.keys(resumen)
-                .map((categoria) => ({ categoria, ...resumen[categoria] }))
-                .sort((a, b) => b.costo - a.costo);
-            let totalCajas = 0, totalCosto = 0, str = '';
-            items.forEach((item) => {
-                totalCajas += item.cajas;
-                totalCosto += item.costo;
-                str += `<tr><td>${item.categoria}</td><td>${item.cajas.toFixed(2)}</td><td>${F.setMoneda(item.costo, 'Q')}</td></tr>`;
-            });
-            container.innerHTML = str || '<tr><td colspan="3" class="text-center text-muted">Sin datos</td></tr>';
-            const lbCajas = document.getElementById('lbSupFootDashInvCajas');
-            const lbCosto = document.getElementById('lbSupFootDashInvCosto');
-            if (lbCajas) lbCajas.innerText = totalCajas.toFixed(2);
-            if (lbCosto) lbCosto.innerText = F.setMoneda(totalCosto, 'Q');
-            supervisor_renderDashboardChart('inventario', 'chartSupDashInventario',
-                items.map((i) => i.categoria), items.map((i) => i.costo),
-                `Costo por categoria: ${F.setMoneda(totalCosto, 'Q')}`);
-        })
-        .catch(() => {
-            container.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No se cargaron datos</td></tr>';
-            supervisor_destroyDashboardChart('inventario');
-        });
 }
 
 function supervisor_tbl_dashboard_ventas_vendedor() {

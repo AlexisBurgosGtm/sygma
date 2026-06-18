@@ -48,7 +48,7 @@ F.instalationHandlers('btnInstalarApp');
 
 
 
-let versionapp = "M.09.06.26 11:37"
+let versionapp = "M.17.06.26 22:53"
 const CHANGELOG_JSON = './data/changelog.json';
 
 function formatChangelogVersion(fecha, hora) {

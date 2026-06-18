@@ -269,10 +269,26 @@ var tblCheckin = {
     }
 };
 
+var tblVentasDashboardCache = {
+    name: 'ventas_dashboard_cache',
+    columns: {
+        ID:{ primaryKey: true, autoIncrement: true },
+        CACHE_KEY:{dataType: "string"},
+        FECHA:{dataType: "string"},
+        SUCURSAL:{dataType: "string"},
+        CODEMP:{dataType: "number"},
+        MES:{dataType: "string"},
+        ANIO:{dataType: "string"},
+        VENTAS_DIA:{dataType: "string"},
+        MARCAS_FAC:{dataType: "string"},
+        UPDATED_AT:{dataType: "string"}
+    }
+};
+
 
 var database = {
     name: DbName,
-    tables: [tblCheckin,tbl_temp_cxc,tblDocumentos,tblTempventas,tblTempventasPos,tblTempCompras,tblTempventasMovinv,tblTempventasMovinvBod,tblTempDevoluciones,tblTempCargaCostos,tblCredenciales]
+    tables: [tblVentasDashboardCache,tblCheckin,tbl_temp_cxc,tblDocumentos,tblTempventas,tblTempventasPos,tblTempCompras,tblTempventasMovinv,tblTempventasMovinvBod,tblTempDevoluciones,tblTempCargaCostos,tblCredenciales]
 };
  
 // initiate jsstore connection

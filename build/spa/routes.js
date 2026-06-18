@@ -29,7 +29,8 @@ SpaRouter.registerMany({
         title: 'Inicio - Requisiciones'
     },
     'inicio/ventas': {
-        script: '../views/menu/inicio_ventas.js',
+        script: '../views/menu/INICIO_VENTAS/inicio_ventas.js',
+        showNavbar: false,
         title: 'Inicio - Ventas'
     },
     'inicio/digitador': {

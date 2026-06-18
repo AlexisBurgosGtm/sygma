@@ -167,8 +167,8 @@ function getView(){
         body:()=>{
             return `
             <div class="proveedor-layout">
-            <button type="button" class="btn btn-sm btn-primary proveedor-menu-toggle d-md-none" id="btnProveedorMenuToggle" title="Menú de opciones">
-                <i class="fal fa-bars mr-1"></i> Menú
+            <button type="button" class="btn proveedor-menu-toggle d-md-none" id="btnProveedorMenuToggle" title="Menú de opciones">
+                <i class="fal fa-bars"></i><span>Menú</span>
             </button>
             <div class="proveedor-sidebar-backdrop d-md-none" id="proveedorSidebarBackdrop"></div>
 
