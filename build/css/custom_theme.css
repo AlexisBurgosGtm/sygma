@@ -263,6 +263,14 @@ body.spa-nav-hidden.nav-function-fixed:not(.nav-function-top) .page-content-wrap
 body.login-active.nav-function-fixed:not(.nav-function-top) .page-content-wrapper {
   margin-left: 0 !important;
 }
+
+/* Login: registro de cambios (changelog) */
+#modal_log #tblLog,
+#modal_log #tblLog td,
+#modal_log #tblLog thead td {
+  font-size: 0.8em;
+}
+
 body.spa-nav-hidden .page-header .dropdown-icon-menu,
 body.spa-nav-hidden .page-header .hidden-lg-up {
   visibility: hidden;
@@ -1322,6 +1330,13 @@ body.app-pos2-theme #root .btn.btn-circle {
   font-size: 0.78rem;
   font-weight: 600;
   padding: 0.35em 0.65em;
+}
+
+@media (max-width: 767.98px) {
+  .proveedor-page #btnIniciarCheckIn.btn-bottom-l,
+  .proveedor-page #btnFinalizarCheckIn.btn-bottom-ml {
+    bottom: 5.75rem;
+  }
 }
 
 .ventas-welcome-card .card-body {
