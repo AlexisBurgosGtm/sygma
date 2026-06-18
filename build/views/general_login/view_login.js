@@ -404,10 +404,14 @@ function login_submit() {
                 Selected_coddoc_cot = r.CODDOC_COT;
             });
 
-            GF.get_data_empresa_config(GlobalEmpnit)
+                GF.get_data_empresa_config(GlobalEmpnit)
                 .then((data) => {
                     btnIniciar.disabled = false;
                     btnIniciar.innerHTML = '<i class="fal fa-arrow-right"></i>';
+
+                    if (typeof sygma_updateHeaderUsuario === 'function') {
+                        sygma_updateHeaderUsuario();
+                    }
 
                     GF.get_data_config().then((data) => {
                         data_config_general = data.recordset;

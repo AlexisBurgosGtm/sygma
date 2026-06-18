@@ -253,6 +253,49 @@ border-color:  rgb(118, 188, 64)}
   background: rgba(255, 255, 255, 0.12) !important;
 }
 
+.page-header .header-user-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 10.5rem;
+  padding: 0.28rem 0.65rem 0.28rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.15;
+  color: #fff !important;
+  background: linear-gradient(135deg, rgba(0, 68, 163, 0.92) 0%, rgba(26, 95, 191, 0.88) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: 0 2px 10px rgba(0, 68, 163, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.page-header .header-user-badge__icon {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  opacity: 0.92;
+}
+
+.page-header .header-user-badge__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+@media (min-width: 576px) {
+  .page-header .header-user-badge {
+    font-size: 0.76rem;
+    max-width: 15rem;
+    padding: 0.32rem 0.75rem 0.32rem 0.5rem;
+  }
+
+  .page-header .header-user-badge__icon {
+    font-size: 0.9rem;
+  }
+}
+
 body.spa-nav-hidden #root_navbar {
   display: none !important;
 }

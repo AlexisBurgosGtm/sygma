@@ -45,6 +45,22 @@ $.fn.dataTable.ext.errMode = 'none';
 
 F.instalationHandlers('btnInstalarApp');
 
+function sygma_updateHeaderUsuario() {
+    const el = document.getElementById('lbHeaderUsuario');
+    if (!el) return;
+    const textEl = el.querySelector('.header-user-badge__text');
+    const loggedIn = Number(GlobalNivelUsuario) !== 0;
+    const nombre = String(GlobalUsuario || '').trim();
+    if (loggedIn && nombre) {
+        if (textEl) textEl.textContent = nombre;
+        el.title = 'Usuario: ' + nombre;
+        el.classList.remove('d-none');
+    } else {
+        if (textEl) textEl.textContent = '';
+        el.title = 'Usuario en sesión';
+        el.classList.add('d-none');
+    }
+}
 
 
 

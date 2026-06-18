@@ -159,6 +159,10 @@ const SpaRouter = {
         if (nav) {
             nav.style.visibility = hideNav ? 'hidden' : 'visible';
         }
+
+        if (typeof sygma_updateHeaderUsuario === 'function') {
+            sygma_updateHeaderUsuario();
+        }
     },
 
     async _teardown() {
