@@ -282,7 +282,9 @@
                 
         `
     },
-    inicio_digitador: () => botones_menu.menu_principal(),
+    menu_general_digitador: () => botones_menu.menu_principal(),
+    /** @deprecated usar menu_general_digitador */
+    inicio_digitador: () => botones_menu.menu_general_digitador(),
     inicio_gerente: () => botones_menu.menu_principal(),
     inicio_vendedor: () => {
         return `

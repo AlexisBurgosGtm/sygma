@@ -340,7 +340,6 @@ function getView() {
                             ondblclick="typeof send_test === 'function' && send_test()">
                     </div>
 
-                    <h1 class="login-brand-title">Onne Business</h1>
                     <p class="login-brand-sub">Inicie sesión para continuar</p>
 
                     <div id="frmLogin" autocomplete="off">
@@ -456,17 +455,19 @@ function addListeners() {
 
     const btnIniciar = document.getElementById('btnIniciar');
     if (btnIniciar) {
-        btnIniciar.addEventListener('click', login_submit);
+        btnIniciar.disabled = false;
+        btnIniciar.innerHTML = '<i class="fal fa-arrow-right"></i>';
+        btnIniciar.onclick = login_submit;
     }
 
     const txtPass = document.getElementById('txtPass');
     if (txtPass) {
-        txtPass.addEventListener('keydown', (e) => {
+        txtPass.onkeydown = (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 login_submit();
             }
-        });
+        };
     }
 
     const txtUser = document.getElementById('txtUser');

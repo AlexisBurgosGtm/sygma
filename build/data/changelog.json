@@ -1,5 +1,5 @@
 {
-  "version": "M.19.06.26 00:10",
+  "version": "M.19.06.26 08:10",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -1390,6 +1390,96 @@
       "FECHA": "19-06-2026",
       "HORA": "00:10",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.19.06.26 00:10"
+    },
+    {
+      "FECHA": "19-06-2026",
+      "HORA": "07:42",
+      "DESCRIPCION": "FIX BOTON INICIO MENU USA SPA goHome Y data-mp-action HOME EN LUGAR DE Navegar.inicio LEGACY"
+    },
+    {
+      "FECHA": "19-06-2026",
+      "HORA": "07:42",
+      "DESCRIPCION": "FIX INICIO DIGITADOR EN MISMA RUTA LLAMA digitador_showHome SIN RECARGAR TODA LA VISTA"
+    },
+    {
+      "FECHA": "19-06-2026",
+      "HORA": "07:42",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.19.06.26 07:42"
+    },
+    {
+      "FECHA": "19-06-2026",
+      "HORA": "07:47",
+      "DESCRIPCION": "FIX MENU GENERAL INICIO RESTAURA onclick Navegar.inicio Y RECARGA VISTA PERFIL DESDE SECCIONES COMO COMPRAS"
+    },
+    {
+      "FECHA": "19-06-2026",
+      "HORA": "07:47",
+      "DESCRIPCION": "FIX INICIO DIGITADOR SOLO USA digitador_showHome DENTRO DEL PERFIL NO DESDE MENU GENERAL"
+    },
+    {
+      "FECHA": "19-06-2026",
+      "HORA": "07:47",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.19.06.26 07:47"
+    },
+    {
+      "FECHA": "19-06-2026",
+      "HORA": "07:55",
+      "DESCRIPCION": "NAVEGACION OPCION 1: NUEVO menuGeneral.js SEPARA MENU GENERAL SYGMA DE MENU INTERNO POR PERFIL"
+    },
+    {
+      "FECHA": "19-06-2026",
+      "HORA": "07:55",
+      "DESCRIPCION": "INICIO MENU LATERAL USA MenuGeneral.volverInicioPerfil Y PerfilDigitador.volverInicio RECARGA PERFIL DESDE COMPRAS"
+    },
+    {
+      "FECHA": "19-06-2026",
+      "HORA": "07:55",
+      "DESCRIPCION": "CARDS PERFIL DIGITADOR USAN PerfilDigitador.irDashboard irEmbarques irRelleno irSellout irFacturacion"
+    },
+    {
+      "FECHA": "19-06-2026",
+      "HORA": "07:55",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.19.06.26 07:55"
+    },
+    {
+      "FECHA": "19-06-2026",
+      "HORA": "08:05",
+      "DESCRIPCION": "FIX INICIO Y SALIR: REMONTAJE VIA __spaViewHooks SIN REINYECTAR SCRIPTS DUPLICADOS"
+    },
+    {
+      "FECHA": "19-06-2026",
+      "HORA": "08:05",
+      "DESCRIPCION": "FIX SALIR BLOQUEO ANTI DOBLE CLIC Y LOGIN REMONTA FORMULARIO SIN LISTENERS DUPLICADOS"
+    },
+    {
+      "FECHA": "19-06-2026",
+      "HORA": "08:05",
+      "DESCRIPCION": "FIX inicio_digitador.js VARIABLES TOP LEVEL let A var PARA RECARGA SEGURA"
+    },
+    {
+      "FECHA": "19-06-2026",
+      "HORA": "08:05",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.19.06.26 08:05"
+    },
+    {
+      "FECHA": "19-06-2026",
+      "HORA": "08:10",
+      "DESCRIPCION": "REVERT MENU GENERAL SYGMA A LEGACY: onclick Navegar.inicio Y Menu.xxx CON F.loadScript"
+    },
+    {
+      "FECHA": "19-06-2026",
+      "HORA": "08:10",
+      "DESCRIPCION": "ELIMINADO menuGeneral.js Y MenuGeneral — SPA SOLO EN CARDS INTERNAS DE PERFIL"
+    },
+    {
+      "FECHA": "19-06-2026",
+      "HORA": "08:10",
+      "DESCRIPCION": "DIGITADOR CARDS VUELVEN A digitador_showPanel SALIR Y LOGIN SIMPLIFICADOS"
+    },
+    {
+      "FECHA": "19-06-2026",
+      "HORA": "08:10",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.19.06.26 08:10"
     }
   ]
 }

@@ -1,0 +1,35 @@
+---
+description: MENÚ GENERAL SYGMA CONGELADO — no cambiar comportamiento; solo agregar/quitar ítems
+alwaysApply: true
+---
+
+# Menú general SYGMA — NO TOCAR (comportamiento congelado)
+
+El usuario definió que el **menú lateral general** (`#root_navbar`) **no debe modificarse en su comportamiento**. Ya quedó estable hace horas; cambios en dashboard digitador u otras vistas **no deben** alterarlo.
+
+## Permitido (únicamente)
+
+- En `build/controllers/menu_buttons.js`: **agregar o quitar ítems** del HTML del menú (nuevo `<li>` con `onclick="Menu.xxx()"`).
+- Ajustar textos, iconos o `data-filter-tags` de ítems existentes.
+
+## Prohibido (salvo petición explícita del usuario)
+
+- Modificar lógica de `Navegar.inicio()`, `Navegar.inicio_*()`, `Navegar.salir()`, `Navegar.login()`, `mostrarMenu()`, `ocultarMenu()` en `classNavegar.js`.
+- Crear/reintroducir `menuGeneral.js`, `MenuGeneral`, `PerfilDigitador` para el menú general, `spaRouter`, `data-mp-action`, `data-mp-route`, `__spaViewHooks` en flujo del menú lateral.
+- Cambiar INICIO del menú lateral: debe seguir siendo `onclick="Navegar.inicio();"`.
+- Cambiar opciones del menú de `Menu.xxx()` a otro patrón.
+- Tocar `menu_handler.js` o `GlobalFunciones.fcn_load_navbar` por trabajo en dashboard digitador u otras vistas de perfil.
+
+## Comportamiento vigente (referencia)
+
+| Acción | Patrón |
+|--------|--------|
+| INICIO menú lateral | `Navegar.inicio()` → `mostrarMenu()` → `Navegar.inicio_<perfil>()` → `F.loadScript` |
+| Compras, POS, etc. | `Menu.xxx()` → `Menu.verify()` → `F.loadScript` |
+| Digitador INICIO desde menú general | Siempre `F.loadScript` de `INICIO_DIGITADOR/inicio_digitador.js` |
+
+## Menú interno de perfil (sí se puede modificar)
+
+Cards/sidebar del digitador (`#digitadorSidebar`): `digitador_showPanel`, `digitador_showHome` — SPA solo ahí. Trabajo en `inicio_digitador.js` **no debe** importar ni cambiar archivos del menú general.
+
+Documentación: `build/docs/NAVEGACION-POR-PERFIL.md`

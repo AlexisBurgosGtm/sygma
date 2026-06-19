@@ -24,21 +24,35 @@ La lógica central está en `build/controllers/classNavegar.js`.
 
 ---
 
+## Menú general — CONGELADO (jun 2026)
+
+**No modificar el comportamiento del menú lateral SYGMA** (`#root_navbar`) al trabajar en dashboard digitador u otras vistas. Solo se permite **agregar o quitar ítems** en `menu_buttons.js` (HTML + `onclick="Menu.xxx()"`).
+
+| Archivo | ¿Se puede tocar? |
+|---------|------------------|
+| `menu_buttons.js` | Solo ítems del menú (HTML). INICIO siempre `onclick="Navegar.inicio();"` |
+| `classNavegar.js` | **No** (salvo petición explícita del usuario) |
+| `menu_handler.js` | **No** |
+| `GlobalFunciones.js` (`fcn_load_navbar`) | **No** |
+| `inicio_digitador.js` y cards internas | **Sí** — SPA solo aquí (`digitador_showPanel`) |
+
+---
+
 ## Flujo de navegación
 
 ```
 Login (view_login.js)
   └─ login_submit → GlobalNivelUsuario = NIVEL → Navegar.inicio()
 
-Navegar.inicio()
-  ├─ Navegar.mostrarMenu()     ← aplica menú según perfil
-  └─ Navegar.inicio_<perfil>() ← carga vista con F.loadScript
+Navegar.inicio()                     ← INICIO del menú lateral #root_navbar
+  ├─ Navegar.mostrarMenu()
+  └─ Navegar.inicio_<perfil>()       ← F.loadScript (legacy, siempre recarga)
 
-Salir
-  └─ Navegar.salir() → Navegar.login() → ocultarMenu + view_login.js
+Cards internas del perfil (digitador, supervisor…)
+  └─ xxx_showPanel / xxx_showHome    ← SPA solo aquí, sin F.loadScript
 
 Opciones del menú general
-  └─ Menu.verify() → Navegar.mostrarMenu() → Menu.xxx() → F.loadScript
+  └─ Menu.verify() → Menu.xxx() → F.loadScript (reemplaza #root)
 ```
 
 ---
@@ -47,7 +61,7 @@ Opciones del menú general
 
 | Archivo | Responsabilidad |
 |---------|-----------------|
-| `controllers/classNavegar.js` | Login, salir, inicio por nivel, visibilidad del menú lateral |
+| `controllers/classNavegar.js` | Login, salir, `Navegar.inicio()`, `inicio_*` por nivel, visibilidad del menú lateral |
 | `controllers/GlobalFunciones.js` | `GF.fcn_load_navbar(menu, idNavbar, idContainer)` — HTML del sidebar por rol |
 | `controllers/menu_buttons.js` | Plantillas HTML: `menu_principal`, `inicio_gerente`, `inicio_digitador`, etc. |
 | `controllers/menu_handler.js` | `Menu.verify()` llama `Navegar.mostrarMenu()` antes de cada opción |
@@ -115,7 +129,7 @@ Restaurado desde el patrón original (commit `ab76095`). Recibe el **rol**, no s
 | Rol `menu` | Función en `menu_buttons.js` |
 |------------|-------------------------------|
 | `GERENCIA` | `inicio_gerente()` → alias de `menu_principal()` |
-| `DIGITADOR` | `inicio_digitador()` → alias de `menu_principal()` |
+| `DIGITADOR` | `menu_general_digitador()` → alias de `menu_principal()` |
 | `VENDEDOR` | `inicio_vendedor()` (menú reducido; perfiles 3/8 no lo usan porque ocultan sidebar) |
 | `VENDEDOR_COMODIN` | `inicio_vendedor_comodin()` |
 | `SUPERVISOR` | `inicio_supervisor()` (legacy; perfil 2 no muestra sidebar) |
@@ -219,9 +233,12 @@ Digitador y gerente **sí** usan además `#root_navbar` con menú general.
 
 ## Lo que NO reintroducir
 
+- `menuGeneral.js` / `MenuGeneral.volverInicioPerfil()` — eliminado a propósito
 - Router SPA en `index.html` (`spaRouter.js`, hashes) salvo decisión explícita de migrar de nuevo
+- `__spaViewHooks` para navegación del menú general SYGMA
+- `data-mp-action="home"` en el menú lateral — usar `onclick="Navegar.inicio();"`
 - `mostrarMenu()` que siempre cargue `menu_principal()` sin mirar el nivel
-- Atajos `if (typeof xxx_showHome === 'function')` **sin** comprobar el DOM
+- Atajos `if (typeof xxx_showHome === 'function')` **sin** comprobar el DOM (excepto digitador: menú general siempre recarga)
 - `let`/`const` a nivel de archivo en vistas recargables por `F.loadScript`
 
 ---

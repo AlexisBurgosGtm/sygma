@@ -1,37 +1,40 @@
 ---
-description: Navegación SYGMA v2 por perfil (Navegar, menú lateral, login, F.loadScript)
+description: Navegación SYGMA v2 — menú general legacy vs menú interno de perfil
 globs: build/controllers/classNavegar.js,build/controllers/GlobalFunciones.js,build/controllers/menu_buttons.js,build/controllers/menu_handler.js,build/views/menu/**/*.js,build/views/general_login/view_login.js
 alwaysApply: false
 ---
 
-# Navegación por perfil (SYGMA v2)
+# Navegación: menú general vs perfil
 
-Consultar `build/docs/NAVEGACION-POR-PERFIL.md` para el detalle completo.
+Consultar `build/docs/NAVEGACION-POR-PERFIL.md`.
 
-## Patrón vigente
-- Sin router SPA: `Menu.*` / `Navegar.*` → `F.loadScript(url, 'root')` → `initView()`
-- Entrada post-login: `Navegar.inicio()` → `mostrarMenu()` + `inicio_<perfil>()`
+> **CONGELADO:** Ver regla `menu-general-congelado.mdc`. El menú general **no se toca** salvo agregar/quitar ítems en `menu_buttons.js`.
 
-## Menú lateral `#root_navbar`
-- **Con menú general:** gerente (1), digitador (5) → `GF.fcn_load_navbar(getMenuRole(), ...)`
-- **Solo cards internas:** supervisor (2), vendedor (3/8), proveedor (7) → `usaMenuSoloCards()` + `body.spa-nav-hidden`
+## Dos sistemas distintos (NO mezclar)
 
-## Reglas obligatorias al tocar perfiles
+| Sistema | UI | Navegación | Ejemplo |
+|---------|-----|------------|---------|
+| **Menú general SYGMA** | `#root_navbar` lateral | `onclick` → `Navegar.inicio()` / `Menu.xxx()` → `F.loadScript` | INICIO, Compras, POS |
+| **Menú interno del perfil** | Cards `#digitadorSidebar`, etc. | `digitador_showPanel` / `xxx_showHome` sin recargar script | Dashboard, Embarques |
 
-1. **`inicio_<perfil>()` — atajo INICIO solo si el DOM existe**
-   ```javascript
-   if (Navegar.enVistaPerfil('xxxSidebar') && typeof xxx_showHome === 'function') { ... return; }
-   F.loadScript(...).then(() => initView());
-   ```
-   Nunca atajar solo con `typeof xxx_showHome` (tras logout la función sigue en memoria y el usuario queda en login).
+## Reglas obligatorias
 
-2. **Vistas recargables:** top-level con `var`, no `let`/`const` (segunda ejecución de `F.loadScript` rompe).
+1. **Menú lateral INICIO** → `onclick="Navegar.inicio();"` — siempre `F.loadScript` del perfil. **No** SPA, **no** `MenuGeneral`, **no** `__spaViewHooks` para el menú general.
 
-3. **`mostrarMenu()`** debe quitar `login-active` y respetar `usaMenuSoloCards()` — no inyectar `menu_principal` a todos.
+2. **Opciones del menú general** (Compras, POS…) → `Menu.xxx()` → `F.loadScript`. Igual que al inicio del proyecto.
 
-4. **Perfil nuevo:** actualizar `usaMenuSoloCards()` o `getMenuRole()`, case en `Navegar.inicio()`, sidebar ID estable, probar **re-login** tras salir.
+3. **Cards internas del perfil** → `digitador_showPanel`, `supervisor_showHome`, etc. Solo ahí aplica navegación tipo SPA (cambio de panel sin recargar).
 
-## IDs sidebar
-- Supervisor: `supervisorSidebar` / `supervisor_showHome`
-- Proveedor: `proveedorSidebar` / `proveedor_showHome`
-- Vendedor: `ventasSidebar` / `ventas_showHome`
+4. **Perfiles solo-cards** (supervisor, vendedor, proveedor): atajo INICIO solo si `Navegar.enVistaPerfil('xxxSidebar')` — ya en `Navegar.inicio_*`.
+
+5. **Digitador INICIO desde menú general** → siempre `F.loadScript` (aunque vengas de Compras). Cards internas → `digitador_showPanel`.
+
+6. **No cargar** `spaRouter.js` ni `menuGeneral.js` en `index.html`.
+
+7. **Vistas recargables:** top-level con `var`, no `let`/`const`.
+
+## Archivos clave
+
+- `build/controllers/classNavegar.js` — login, salir, `Navegar.inicio()`, `inicio_*`
+- `build/controllers/menu_handler.js` — `Menu.verify()` + `F.loadScript`
+- `build/controllers/menu_buttons.js` — HTML del menú lateral con `onclick` directo

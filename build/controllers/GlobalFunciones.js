@@ -11,7 +11,9 @@ let GF = {
         let strMenu = '';
         switch (menu) {
             case 'DIGITADOR':
-                strMenu = botones_menu.inicio_digitador ? botones_menu.inicio_digitador() : '';
+                strMenu = botones_menu.menu_general_digitador
+                    ? botones_menu.menu_general_digitador()
+                    : (botones_menu.menu_principal ? botones_menu.menu_principal() : '');
                 break;
             case 'VENDEDOR':
                 strMenu = botones_menu.inicio_vendedor ? botones_menu.inicio_vendedor() : '';

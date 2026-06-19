@@ -1752,8 +1752,8 @@ function destroyView(){
 // PEDIDOS PENDIENTES
 //------------------------
 
-let pendientesPedidosCache = [];
-let pendientesFiltroFechaActivo = true;
+var pendientesPedidosCache = [];
+var pendientesFiltroFechaActivo = false;
 
 function listeners_pedidos_pendientes(){
 
@@ -1941,6 +1941,20 @@ function pendientes_fecha_input_valor(idInput){
     return `${Number(parts[0])}-${Number(parts[1])}-${Number(parts[2])}`;
 }
 
+function pendientes_reset_filtro_fecha_inicio(){
+    pendientesFiltroFechaActivo = false;
+    const inp = document.getElementById('txtFPFechaPend');
+    const btnQuitar = document.getElementById('btnFPQuitarFechaPend');
+    const btnHoy = document.getElementById('btnFPRestaurarFechaPend');
+    if (inp) {
+        inp.value = '';
+        inp.disabled = false;
+        inp.classList.remove('sygma-pendientes-filtros__fecha-off');
+    }
+    btnQuitar?.classList.add('d-none');
+    btnHoy?.classList.remove('d-none');
+}
+
 function pendientes_init_filtros_fecha(){
     const inp = document.getElementById('txtFPFechaPend');
     const btnQuitar = document.getElementById('btnFPQuitarFechaPend');
@@ -1985,9 +1999,21 @@ function pendientes_cargar_vendedores(records){
 }
 
 function pendientes_init_filtros_listeners(){
+    pendientes_reset_filtro_fecha_inicio();
+
     document.getElementById('txtFPFechaPend')?.addEventListener('change', () => {
-        pendientesFiltroFechaActivo = true;
-        document.getElementById('txtFPFechaPend')?.classList.remove('sygma-pendientes-filtros__fecha-off');
+        const inp = document.getElementById('txtFPFechaPend');
+        if (!inp?.value) {
+            pendientesFiltroFechaActivo = false;
+            inp?.classList.remove('sygma-pendientes-filtros__fecha-off');
+            document.getElementById('btnFPQuitarFechaPend')?.classList.add('d-none');
+            document.getElementById('btnFPRestaurarFechaPend')?.classList.remove('d-none');
+        } else {
+            pendientesFiltroFechaActivo = true;
+            inp.classList.remove('sygma-pendientes-filtros__fecha-off');
+            document.getElementById('btnFPQuitarFechaPend')?.classList.remove('d-none');
+            document.getElementById('btnFPRestaurarFechaPend')?.classList.add('d-none');
+        }
         pendientes_aplicar_filtros();
     });
     document.getElementById('cmbFPVendedorPend')?.addEventListener('change', pendientes_aplicar_filtros);
@@ -2119,9 +2145,6 @@ function tbl_pedidos_pendientes(idContainer){
     .then((data)=>{
         pendientesPedidosCache = data.recordset || [];
         pendientes_cargar_vendedores(pendientesPedidosCache);
-        if (document.getElementById('txtFPFechaPend') && !document.getElementById('txtFPFechaPend').disabled && !document.getElementById('txtFPFechaPend').value) {
-            pendientes_init_filtros_fecha();
-        }
         pendientes_aplicar_filtros();
     })
     .catch((error)=>{
@@ -3225,12 +3248,12 @@ function listeners_embarques(){
 
 };
 
-let embarque_print_codembarque = '';
-let embarque_print_fecha = '';
-let embarque_finalizar_codembarque = '';
-let embarque_finalizar_btn_id = '';
-let embarque_finalizar_total_facturas = 0;
-let embarque_finalizar_total_devoluciones = 0;
+var embarque_print_codembarque = '';
+var embarque_print_fecha = '';
+var embarque_finalizar_codembarque = '';
+var embarque_finalizar_btn_id = '';
+var embarque_finalizar_total_facturas = 0;
+var embarque_finalizar_total_devoluciones = 0;
 
 function embarque_finalizar_show_loader(mensaje){
     const loader = document.getElementById('embFinalizarLoader');

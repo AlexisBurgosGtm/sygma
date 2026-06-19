@@ -1,4 +1,5 @@
 let lbForm = document.getElementById('lbForm');
+let _sygmaSalirEnCurso = false;
 
 let Navegar = {
     pendiente: () => {
@@ -6,15 +7,22 @@ let Navegar = {
     },
 
     salir: () => {
+        if (_sygmaSalirEnCurso) return;
+        _sygmaSalirEnCurso = true;
+
         F.Confirmacion('¿Está seguro que desea cerrar sesión y salir?')
             .then((value) => {
-                if (value === true) {
-                    GlobalNivelUsuario = 0;
-                    if (typeof sygma_updateHeaderUsuario === 'function') {
-                        sygma_updateHeaderUsuario();
-                    }
-                    Navegar.login();
+                _sygmaSalirEnCurso = false;
+                if (value !== true) return;
+
+                GlobalNivelUsuario = 0;
+                if (typeof sygma_updateHeaderUsuario === 'function') {
+                    sygma_updateHeaderUsuario();
                 }
+                Navegar.login();
+            })
+            .catch(() => {
+                _sygmaSalirEnCurso = false;
             });
     },
 
@@ -113,7 +121,9 @@ let Navegar = {
         }
     },
 
+    /** Menú general INICIO y post-login — siempre F.loadScript legacy */
     inicio: () => {
+        if (Number(GlobalNivelUsuario) === 0) return;
         Navegar.mostrarMenu();
 
         switch (Number(GlobalNivelUsuario)) {
@@ -212,6 +222,7 @@ window.Navegar = Navegar;
 window.sygmaGoInicio = function () { return Navegar.inicio(); };
 window.sygmaCerrarSesion = function () { return Navegar.salir(); };
 
+/** Botones flotantes en módulos (data-spa-action) — no afecta al menú lateral general */
 document.addEventListener('click', function (e) {
     const inicio = e.target.closest('[data-spa-action="inicio"]');
     if (inicio) {
