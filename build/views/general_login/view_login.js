@@ -379,7 +379,12 @@ function getView() {
         `
     };
 
-    root.innerHTML = view.login();
+    const rootEl = document.getElementById('root');
+    if (!rootEl) {
+        console.error('[view_login] Contenedor #root no encontrado');
+        return;
+    }
+    rootEl.innerHTML = view.login();
 }
 
 function login_submit() {
@@ -552,6 +557,14 @@ function initView() {
     getView();
     addListeners();
 }
+
+(function registerLoginSpaHooks() {
+    window.__spaViewHooks = window.__spaViewHooks || {};
+    window.__spaViewHooks.login = {
+        initView: initView,
+        destroyView: destroyView
+    };
+})();
 
 function login(u, p) {
     return new Promise((resolve, reject) => {

@@ -322,161 +322,188 @@ function getView(){
         },
         vista_pedidos_pendientes:()=>{
             return `
-                    <div class="card card-rounded shadow col-12">
-                        <div class="card-body p-4 table-responsive">
-                        
-                            
-                            <div class="row">
-                                <div class="col-6">
-                                    <h4>LISTADO DE FACTURAS PENDIENTES</h4>
-                                    <div class="form-group">
-                                        <input type="text" class="form-control negrita text-info" id="txtFPBuscar"
-                                        placeholder="Escriba para buscar..."
-                                        oninput="F.FiltrarTabla('tblPedidos','txtFPBuscar')">
-                                    </div>
-                                    <br>
-                                </div>
-                                <div class="col-6">
-                                    <label class="negrita text-danger" id="lbTotalP"></label>
-                                </div>
+            <div class="sygma-embarque-rpt card card-rounded shadow-sm col-12 border-0" id="rpt_facturas_pendientes">
+                <div class="card-body sygma-embarque-rpt__body p-2">
+                    <header class="sygma-embarque-rpt__header">
+                        <div class="sygma-embarque-rpt__brand">
+                            <img class="sygma-embarque-rpt__logo" src="./favicon.png" width="40" height="40" alt="Logo">
+                            <div class="sygma-embarque-rpt__brand-text">
+                                <h4 class="sygma-embarque-rpt__title mb-0">Facturas Pendientes</h4>
+                                <span class="sygma-embarque-rpt__embarque-date">Pedidos sin embarque asignado</span>
                             </div>
-                            
+                        </div>
+                        <div class="sygma-embarque-rpt__detail oculto-impresion">
+                            <span class="sygma-embarque-rpt__stat sygma-embarque-rpt__stat--items" id="lbPendTotalPedidos"></span>
+                            <button type="button" class="btn btn-info btn-md btn-circle hand shadow sygma-embarque-rpt__print-btn" title="Imprimir" onclick="F.imprimirSelec('rpt_facturas_pendientes')">
+                                <i class="fal fa-print"></i>
+                            </button>
+                        </div>
+                    </header>
 
-                            <table class="table h-full table-bordered col-12" id="tblPedidos">
-                                <thead class="bg-base text-white negrita">
-                                    <tr>
-                                        <td class="text-left">EMBARQUE</td>
-                                        <td>VENDEDOR</td>
-                                        <td>FECHA</td>
-                                        <td>CLIENTE</td>
-                                        <td>MUNICIPIO</td>
-                                        <td>IMPORTE</td>
-                                        <td>ST</td>
-                                        <td></td>
-                                        <td></td>
-                                    </tr>
-                                </thead>
-                                <tbody id="tblDataPedidos"></tbody>
-
-                            </table>
-                        
-
+                    <div class="sygma-embarque-rpt__toolbar sygma-pendientes-filtros oculto-impresion">
+                        <div class="sygma-pendientes-filtros__row">
+                            <input type="text" class="form-control sygma-embarque-rpt__search sygma-pendientes-filtros__search" id="txtFPBuscar"
+                                placeholder="Escriba para buscar..."
+                                oninput="F.FiltrarTabla('tblPedidos','txtFPBuscar')">
+                            <div class="sygma-pendientes-filtros__fecha-wrap">
+                                <label class="sygma-pendientes-filtros__label" for="txtFPFechaPend">Fecha</label>
+                                <input type="date" class="form-control sygma-pendientes-filtros__fecha" id="txtFPFechaPend" title="Filtrar por fecha del pedido">
+                                <button type="button" class="btn btn-outline-secondary btn-sm sygma-pendientes-filtros__btn-clear" id="btnFPQuitarFechaPend" title="Quitar filtro de fecha">
+                                    <i class="fal fa-times"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm sygma-pendientes-filtros__btn-today d-none" id="btnFPRestaurarFechaPend" title="Filtrar por fecha de hoy">
+                                    Hoy
+                                </button>
+                            </div>
+                            <div class="sygma-pendientes-filtros__vendedor-wrap">
+                                <label class="sygma-pendientes-filtros__label" for="cmbFPVendedorPend">Vendedor</label>
+                                <select class="form-control sygma-pendientes-filtros__vendedor" id="cmbFPVendedorPend">
+                                    <option value="">Todos</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
+                    <div class="table-responsive sygma-embarque-rpt__table-wrap">
+                        <table class="table sygma-embarque-rpt__table mb-0" id="tblPedidos">
+                            <thead>
+                                <tr>
+                                    <th class="sygma-embarque-rpt__col-action oculto-impresion"></th>
+                                    <th>VENDEDOR</th>
+                                    <th>FECHA</th>
+                                    <th>CLIENTE</th>
+                                    <th>MUNICIPIO</th>
+                                    <th class="text-right">IMPORTE</th>
+                                    <th class="sygma-embarque-rpt__col-action oculto-impresion text-center">ST</th>
+                                    <th class="sygma-embarque-rpt__col-action oculto-impresion"></th>
+                                    <th class="sygma-embarque-rpt__col-action oculto-impresion"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataPedidos"></tbody>
+                        </table>
+                    </div>
+                    <div class="sygma-embarque-rpt__total-block" id="lbPendTotalBlock"></div>
+                </div>
+            </div>
             `
         },
         vista_pedidos_pendientes_anulados:()=>{
             return `
-                    <div class="card card-rounded shadow col-12">
-                        <div class="card-body p-4 table-responsive">
-                        
-                            
-                            <div class="row">
-                                <div class="col-6">
-                                    <h4>LISTADO DE FACTURAS PENDIENTES ANULADAS</h4>
-                                    <div class="form-group">
-                                        <input type="text" class="form-control negrita text-info" id="txtFPBuscarAnuladas"
-                                        placeholder="Escriba para buscar..."
-                                        oninput="F.FiltrarTabla('tblPedidosAnulados','txtFPBuscarAnuladas')">
-                                    </div>
-                                    <br>
-                                </div>
-                                <div class="col-6">
-                                    <label class="negrita text-danger" id="lbTotalPA"></label>
+            <div class="sygma-embarque-rpt card card-rounded shadow-sm col-12 border-0" id="rpt_facturas_anuladas">
+                <div class="card-body sygma-embarque-rpt__body p-3">
+                    <header class="sygma-embarque-rpt__header">
+                        <div class="sygma-embarque-rpt__brand">
+                            <img class="sygma-embarque-rpt__logo" src="./favicon.png" width="44" height="44" alt="Logo">
+                            <div class="sygma-embarque-rpt__brand-text">
+                                <h4 class="sygma-embarque-rpt__title mb-0">Facturas Anuladas</h4>
+                                <div class="sygma-embarque-rpt__embarque-info">
+                                    <span class="sygma-embarque-rpt__embarque-code" id="lbAnulCodembarque"></span>
+                                    <span class="sygma-embarque-rpt__embarque-date" id="lbAnulFechaEmbarque"></span>
                                 </div>
                             </div>
-                            
-
-                            <table class="table h-full table-bordered col-12" id="tblPedidosAnulados">
-                                <thead class="bg-base text-white negrita">
-                                    <tr>
-                                        <td class="text-left">EMBARQUE</td>
-                                        <td>VENDEDOR</td>
-                                        <td>FECHA</td>
-                                        <td>CLIENTE</td>
-                                        <td>MUNICIPIO</td>
-                                        <td>IMPORTE</td>
-                                        <td>ST</td>
-                                        <td></td>
-                                        <td></td>
-                                    </tr>
-                                </thead>
-                                <tbody id="tblDataPedidosAnulados"></tbody>
-
-                            </table>
-                        
-
                         </div>
+                        <div class="sygma-embarque-rpt__detail oculto-impresion">
+                            <span class="sygma-embarque-rpt__stat sygma-embarque-rpt__stat--items" id="lbAnulTotalPedidos"></span>
+                            <button type="button" class="btn btn-info btn-md btn-circle hand shadow sygma-embarque-rpt__print-btn" title="Imprimir" onclick="F.imprimirSelec('rpt_facturas_anuladas')">
+                                <i class="fal fa-print"></i>
+                            </button>
+                        </div>
+                    </header>
+
+                    <div class="sygma-embarque-rpt__toolbar oculto-impresion">
+                        <input type="text" class="form-control sygma-embarque-rpt__search" id="txtFPBuscarAnuladas"
+                            placeholder="Escriba para buscar..."
+                            oninput="F.FiltrarTabla('tblPedidosAnulados','txtFPBuscarAnuladas')">
                     </div>
 
+                    <div class="table-responsive sygma-embarque-rpt__table-wrap">
+                        <table class="table sygma-embarque-rpt__table mb-0" id="tblPedidosAnulados">
+                            <thead>
+                                <tr>
+                                    <th class="sygma-embarque-rpt__col-action oculto-impresion"></th>
+                                    <th>VENDEDOR</th>
+                                    <th>FECHA</th>
+                                    <th>CLIENTE</th>
+                                    <th>MUNICIPIO</th>
+                                    <th class="text-right">IMPORTE</th>
+                                    <th class="sygma-embarque-rpt__col-action oculto-impresion text-center">ST</th>
+                                    <th class="sygma-embarque-rpt__col-action oculto-impresion"></th>
+                                    <th class="sygma-embarque-rpt__col-action oculto-impresion"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataPedidosAnulados"></tbody>
+                        </table>
+                    </div>
+                    <div class="sygma-embarque-rpt__total-block" id="lbAnulTotalBlock"></div>
+                </div>
+            </div>
             `
         },
         modal_detalle_documento:()=>{
             return `
-            <div id="modal_detalle_pedido" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-right modal-xl">
-                    <div class="modal-content">
-                        <div class="dropdown-header bg-base d-flex justify-content-center align-items-center w-100">
-                            <h4 class="m-0 text-center color-white" id="">
-                                Detalle del Documento
-                            </h4>
-                        </div>
-                        <div class="modal-body p-4">
-                            
-                            <div class="card card-rounded">
-                                <div class="card-body p-2">
-
-                                        <h4 class="negrita text-base" id="lbDetalleTomarDatosNombre"></h4>
-                                        <br>
-
-                                        <div class="table-responsive col-12">
-                                            <table class="table table-responsive table-bordered table-hover">
-                                                <thead class="bg-verde text-white">
-                                                    <tr>
-                                                        <td>CODIGO</td>
-                                                        <td>PRODUCTO</td>
-                                                        <td>TIPOP</td>
-                                                        <td>MEDIDA</td>
-                                                        <td>CANTIDAD</td>
-                                                        <td>PRECIO</td>
-                                                        <td>IMPORTE</td>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="tblDataDetallePedido"></tbody>
-                                                <tfoot class="bg-secondary negrita text-white">
-                                                    <tr>
-                                                        <td></td>
-                                                        <td></td>
-                                                        <td></td>
-                                                        <td></td>
-                                                        <td id="lbFtotalCantidad"></td>
-                                                        <td></td>
-                                                        <td id="lbFtotalImporte"></td>
-                                                    </tr>
-                                                </tfoot>
-                                            </table>
-
-                                            <div class="form-group">
-                                                <label class="negrita text-base">Observaciones</label>
-                                                <textarea class="form-control negrita" id="txtDetallePedidoObs" rows="4"></textarea>
-                                            </div>
-
-                                        
-                                        </div>
-
+            <div id="modal_detalle_pedido" class="modal fade sygma-doc-detalle-modal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+                    <div class="modal-content sygma-doc-detalle-modal__content">
+                        <div class="sygma-doc-detalle-modal__header">
+                            <div class="sygma-doc-detalle-modal__header-top">
+                                <div>
+                                    <h4 class="sygma-doc-detalle-modal__title">Detalle del documento</h4>
+                                    <p class="sygma-doc-detalle-modal__doc-ref mb-0" id="lbDetalleDocRef"></p>
                                 </div>
-                            </div>
-
-                                
-                            <div class="row">
-                                <button class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
-                                    <i class="fal fa-arrow-left"></i>
+                                <button type="button" class="sygma-doc-detalle-modal__close" data-dismiss="modal" aria-label="Cerrar">
+                                    <i class="fal fa-times"></i>
                                 </button>
                             </div>
-
+                            <div class="sygma-doc-detalle-modal__meta">
+                                <div class="sygma-doc-detalle-modal__meta-row">
+                                    <span class="sygma-doc-detalle-modal__label-inline">Embarque:</span>
+                                    <span class="sygma-doc-detalle-modal__embarque" id="lbDetalleCodembarque">—</span>
+                                </div>
+                                <div class="sygma-doc-detalle-modal__meta-row">
+                                    <span class="sygma-doc-detalle-modal__label-inline">Cliente:</span>
+                                    <span class="sygma-doc-detalle-modal__value" id="lbDetalleNomclie">—</span>
+                                </div>
+                                <div class="sygma-doc-detalle-modal__meta-row">
+                                    <span class="sygma-doc-detalle-modal__label-inline">Dirección:</span>
+                                    <span class="sygma-doc-detalle-modal__value" id="lbDetalleDirclie">—</span>
+                                </div>
+                            </div>
                         </div>
-                    
+                        <div class="modal-body sygma-doc-detalle-modal__body">
+                            <div class="sygma-doc-detalle-modal__table-wrap">
+                                <table class="table sygma-doc-detalle-modal__table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Código</th>
+                                            <th>Producto</th>
+                                            <th>Tipo P.</th>
+                                            <th>Medida</th>
+                                            <th class="text-right">Cant.</th>
+                                            <th class="text-right">Precio</th>
+                                            <th class="text-right">Importe</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDataDetallePedido"></tbody>
+                                </table>
+                            </div>
+                            <div class="sygma-doc-detalle-modal__total-block">
+                                <div class="sygma-doc-detalle-modal__total-inner">
+                                    <span class="sygma-doc-detalle-modal__total-label">Total líneas</span>
+                                    <span class="sygma-doc-detalle-modal__total-qty" id="lbFtotalCantidad">0</span>
+                                    <span class="sygma-doc-detalle-modal__total-label">Importe total</span>
+                                    <span class="sygma-doc-detalle-modal__total-amount" id="lbFtotalImporte">Q 0.00</span>
+                                </div>
+                            </div>
+                            <div class="sygma-doc-detalle-modal__obs">
+                                <label class="sygma-doc-detalle-modal__label" for="txtDetallePedidoObs">Observaciones</label>
+                                <textarea class="form-control sygma-doc-detalle-modal__obs-input" id="txtDetallePedidoObs" rows="3" readonly></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer sygma-doc-detalle-modal__footer">
+                            <button type="button" class="btn btn-secondary sygma-doc-detalle-modal__btn-close" data-dismiss="modal">
+                                <i class="fal fa-times mr-1"></i> Cerrar
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -484,82 +511,103 @@ function getView(){
         },
         vista_pedidos_modal_embarques:()=>{
             return `
-                <div id="modal_embarques_pendientes" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-body p-2">
-                                
-                                <div class="card card-rounded col-12">
-                                    <div class="card-body p-4">
-
-                                       
-                                        <div class="table-responsive">
-                            
-                                            <table class="table col-12 h-full" id="tblMEmbarques">
-                                                <thead class="bg-secondary text-white">
-                                                    <tr>
-                                                        <td>FECHA</td>
-                                                        <td>EMBARQUE</td>
-                                                        <td>REPARTIDOR</td>
-                                                        <td></td>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="tblDataMEmbarques">
-                                                
-                                                </tbody>
-
-                                            </table>
-
-                                        </div>
-
-                                       
-
-                                      
-                                    
+                <div id="modal_embarques_pendientes" class="modal fade sygma-doc-detalle-modal sygma-embarque-select-modal" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+                        <div class="modal-content sygma-doc-detalle-modal__content">
+                            <div class="sygma-doc-detalle-modal__header sygma-embarque-select-modal__header">
+                                <div class="sygma-doc-detalle-modal__header-top mb-0">
+                                    <div>
+                                        <h4 class="sygma-doc-detalle-modal__title">Asignar embarque</h4>
+                                        <p class="sygma-doc-detalle-modal__doc-ref mb-0" id="lbModalEmbDocRef"></p>
+                                    </div>
+                                    <button type="button" class="sygma-doc-detalle-modal__close" data-dismiss="modal" aria-label="Cerrar">
+                                        <i class="fal fa-times"></i>
+                                    </button>
+                                </div>
+                                <div class="sygma-embarque-select-modal__hint">
+                                    Seleccione el embarque activo para vincular este pedido.
+                                </div>
+                            </div>
+                            <div class="modal-body sygma-embarque-select-modal__body">
+                                <div class="sygma-embarque-rpt__toolbar">
+                                    <input type="text" class="form-control sygma-embarque-rpt__search" id="txtBuscarModalEmbarques"
+                                        placeholder="Buscar por embarque, repartidor o descripción..."
+                                        oninput="F.FiltrarTabla('tblMEmbarques','txtBuscarModalEmbarques')">
+                                </div>
+                                <div class="table-responsive sygma-embarque-rpt__table-wrap sygma-embarque-select-modal__table-wrap">
+                                    <table class="table sygma-embarque-rpt__table mb-0" id="tblMEmbarques">
+                                        <thead>
+                                            <tr>
+                                                <th>FECHA</th>
+                                                <th>EMBARQUE</th>
+                                                <th>REPARTIDOR</th>
+                                                <th class="sygma-embarque-rpt__col-action text-center"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblDataMEmbarques"></tbody>
+                                    </table>
+                                </div>
+                                <div class="sygma-embarque-rpt__total-block sygma-embarque-select-modal__total-block">
+                                    <div class="sygma-embarque-rpt__total-inner">
+                                        <span class="sygma-embarque-rpt__foot-label">EMBARQUES ACTIVOS</span>
+                                        <span class="sygma-embarque-rpt__foot-total" id="lbModalEmbTotal">0</span>
                                     </div>
                                 </div>
-
+                            </div>
+                            <div class="modal-footer sygma-doc-detalle-modal__footer">
+                                <button type="button" class="btn btn-secondary sygma-doc-detalle-modal__btn-close" data-dismiss="modal">
+                                    <i class="fal fa-times mr-1"></i> Cancelar
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
-
             `
-
         },
         vista_relleno:()=>{
             return `
-                    <div class="card card-rounded shadow col-12">
-                        <div class="card-body p-4 table-responsive">
-                        
-                            <div class="row">
-                                <div class="col-6">
-                                    <h4>RELLENO DE INVENTARIO</h4>
-                                </div>
-                                <div class="col-6">
-                                    <label class="negrita text-danger" id="lbTotal"></label>
-                                </div>
+            <div class="sygma-embarque-rpt card card-rounded shadow-sm col-12 border-0" id="rpt_relleno_inventario">
+                <div class="card-body sygma-embarque-rpt__body p-2">
+                    <header class="sygma-embarque-rpt__header">
+                        <div class="sygma-embarque-rpt__brand">
+                            <img class="sygma-embarque-rpt__logo" src="./favicon.png" width="40" height="40" alt="Logo">
+                            <div class="sygma-embarque-rpt__brand-text">
+                                <h4 class="sygma-embarque-rpt__title mb-0">Relleno de Inventario</h4>
+                                <span class="sygma-embarque-rpt__embarque-date">Productos bajo mínimo que requieren surtido</span>
                             </div>
-                            
-
-                             <table class="table h-full table-bordered col-12">
-                                <thead class="bg-warning text-white negrita">
-                                    <tr>
-                                        <td>PRODUCTO</td>
-                                        <td>MARCA</td>
-                                        <td>EXISTENCIA</td>
-                                        <td>MINIMO</td>
-                                        <td>MAXIMO</td>
-                                        <td>RELLENO</td>
-                                    </tr>
-                                </thead>
-                                <tbody id="tblDataRelleno"></tbody>
-
-                            </table>
-                        
                         </div>
+                        <div class="sygma-embarque-rpt__detail oculto-impresion">
+                            <span class="sygma-embarque-rpt__stat sygma-embarque-rpt__stat--items" id="lbRellenoTotalItems"></span>
+                            <button type="button" class="btn btn-info btn-md btn-circle hand shadow sygma-embarque-rpt__print-btn" title="Imprimir" onclick="F.imprimirSelec('rpt_relleno_inventario')">
+                                <i class="fal fa-print"></i>
+                            </button>
+                        </div>
+                    </header>
+
+                    <div class="sygma-embarque-rpt__toolbar oculto-impresion">
+                        <input type="text" class="form-control sygma-embarque-rpt__search" id="txtBuscarRelleno"
+                            placeholder="Buscar por producto, código o marca..."
+                            oninput="F.FiltrarTabla('tblRellenoInventario','txtBuscarRelleno')">
                     </div>
 
+                    <div class="table-responsive sygma-embarque-rpt__table-wrap">
+                        <table class="table sygma-embarque-rpt__table mb-0" id="tblRellenoInventario">
+                            <thead>
+                                <tr>
+                                    <th>PRODUCTO</th>
+                                    <th>MARCA</th>
+                                    <th class="text-right">EXIST.</th>
+                                    <th class="text-right">MÍN.</th>
+                                    <th class="text-right">MÁX.</th>
+                                    <th class="text-right">RELLENO</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataRelleno"></tbody>
+                        </table>
+                    </div>
+                    <div class="sygma-embarque-rpt__total-block" id="lbRellenoTotalBlock"></div>
+                </div>
+            </div>
             `
         },
         vista_embarques:()=>{
@@ -927,242 +975,232 @@ function getView(){
         },
         facturacion_embarque_facturas:()=>{
             return `
-            <br>
-            
-            <div class="card card-rounded shadow col-12" id="rpt_facturas_embarque">
-                <div class="card-body p-4">
+            <div class="sygma-embarque-rpt card card-rounded shadow-sm col-12 border-0" id="rpt_facturas_embarque">
+                <div class="card-body sygma-embarque-rpt__body p-3">
+                    <header class="sygma-embarque-rpt__header">
+                        <div class="sygma-embarque-rpt__brand">
+                            <img class="sygma-embarque-rpt__logo" src="./favicon.png" width="44" height="44" alt="Logo">
+                            <div class="sygma-embarque-rpt__brand-text">
+                                <h4 class="sygma-embarque-rpt__title mb-0">Facturas del Embarque</h4>
+                                <div class="sygma-embarque-rpt__embarque-info">
+                                    <span class="sygma-embarque-rpt__embarque-code" id="lbFacCodembarque"></span>
+                                    <span class="sygma-embarque-rpt__embarque-date" id="lbFacFechaEmbarque"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="sygma-embarque-rpt__detail oculto-impresion">
+                            <span class="sygma-embarque-rpt__stat sygma-embarque-rpt__stat--items" id="lbFacTotalPedidos"></span>
+                            <button type="button" class="btn btn-info btn-md btn-circle hand shadow sygma-embarque-rpt__print-btn" title="Imprimir" onclick="F.imprimirSelec('rpt_facturas_embarque')">
+                                <i class="fal fa-print"></i>
+                            </button>
+                        </div>
+                    </header>
 
-                    <div class="row">
-                        <div class="col-6">
-                            <h4 class="negrita text-base">Facturas del Embarque</h4>
-                            <h5 class="negrita" id="lbFacCodembarque"></h5>
-                            <br>
-                        </div>
-                        <div class="col-6">
-                            <label class="negrita text-info" id="lbFacTotalPedidos">Pedidos:</label>
-                            <br>
-                            <label class="negrita text-danger" id="lbFacTotalImporte">Importe:</label>
-                        </div>
+                    <div class="sygma-embarque-rpt__toolbar oculto-impresion">
+                        <input type="text" class="form-control sygma-embarque-rpt__search"
+                            id="txt_buscar_facturas_embarque"
+                            oninput="F.FiltrarTabla('tblFFacturas','txt_buscar_facturas_embarque')"
+                            placeholder="Escriba para buscar...">
                     </div>
-                    
 
-                    <div class="table-responsive">
-                        <div class="form-group">
-                            <input type="text" class="form-control col-12 border-info text-info" 
-                                id="txt_buscar_facturas_embarque" 
-                                oninput="F.FiltrarTabla('tblFFacturas','txt_buscar_facturas_embarque')"
-                                placeholder="Escriba para buscar..."
-                            >
-                        </div>
-
-                         <table class="table h-full table-bordered col-12" id="tblFFacturas">
-                                <thead class="bg-success text-white negrita">
-                                    <tr>
-                                        <td></td>
-                                        <td>VENDEDOR</td>
-                                        <td>FECHA</td>
-                                        <td>CLIENTE</td>
-                                        <td>MUNICIPIO</td>
-                                        <td>IMPORTE</td>
-                                        <td></td>
-                                        <td></td>
-                                    </tr>
-                                </thead>
-                                <tbody id="tblDataFFacturas"></tbody>
-
-                            </table>
-
+                    <div class="table-responsive sygma-embarque-rpt__table-wrap">
+                        <table class="table sygma-embarque-rpt__table mb-0" id="tblFFacturas">
+                            <thead>
+                                <tr>
+                                    <th class="sygma-embarque-rpt__col-action oculto-impresion"></th>
+                                    <th>VENDEDOR</th>
+                                    <th>FECHA</th>
+                                    <th>CLIENTE</th>
+                                    <th>MUNICIPIO</th>
+                                    <th class="text-right">IMPORTE</th>
+                                    <th class="sygma-embarque-rpt__col-action oculto-impresion"></th>
+                                    <th class="sygma-embarque-rpt__col-action oculto-impresion"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataFFacturas"></tbody>
+                        </table>
                     </div>
-                    
+                    <div class="sygma-embarque-rpt__total-block" id="lbFacTotalBlock"></div>
                 </div>
             </div>
-
-
-            <button class="btn btn-info btn-xl btn-circle hand shadow btn-bottom-r" onclick="F.imprimirSelec('rpt_facturas_embarque')">
-                <i class="fal fa-print"></i>
-            </button>
-
-           
-
             `
         },
         facturacion_embarque_productos:()=>{
             return `
-            <br>
-
-            <div class="card card-rounded shadow col-12" id="rpt_productos_embarque">
-                <div class="card-body p-4">
-            
-                    <div class="row">
-                        <div class="col-6">
-                            <h4 class="negrita text-base">Productos del Embarque</h4>
-                            <h5 id="lbProdCodembarque"></h5>
-                            <br>
+            <div class="sygma-embarque-rpt card card-rounded shadow-sm col-12 border-0" id="rpt_productos_embarque">
+                <div class="card-body sygma-embarque-rpt__body p-3">
+                    <header class="sygma-embarque-rpt__header">
+                        <div class="sygma-embarque-rpt__brand">
+                            <img class="sygma-embarque-rpt__logo" src="./favicon.png" width="44" height="44" alt="Logo">
+                            <div class="sygma-embarque-rpt__brand-text">
+                                <h4 class="sygma-embarque-rpt__title mb-0">Productos del Embarque</h4>
+                                <div class="sygma-embarque-rpt__embarque-info">
+                                    <span class="sygma-embarque-rpt__embarque-code" id="lbProdCodembarque"></span>
+                                    <span class="sygma-embarque-rpt__embarque-date" id="lbProdFechaEmbarque"></span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-6">
-                            <label class="negrita text-info" id="lbProdTotalPedidos">Productos:</label>
-                            <br>
-                            <label class="negrita text-danger" id="lbProdTotalImporte">Importe:</label>
+                        <div class="sygma-embarque-rpt__detail oculto-impresion">
+                            <span class="sygma-embarque-rpt__stat sygma-embarque-rpt__stat--items" id="lbProdTotalPedidos"></span>
+                            <button type="button" class="btn btn-info btn-md btn-circle hand shadow sygma-embarque-rpt__print-btn" title="Imprimir" onclick="F.imprimirSelec('rpt_productos_embarque')">
+                                <i class="fal fa-print"></i>
+                            </button>
                         </div>
+                    </header>
+
+                    <div class="table-responsive sygma-embarque-rpt__table-wrap">
+                        <table class="table sygma-embarque-rpt__table mb-0" id="tblFProductos">
+                            <thead>
+                                <tr>
+                                    <th>CODIGO</th>
+                                    <th>PRODUCTO</th>
+                                    <th class="text-center">UXC</th>
+                                    <th class="text-center">CAJAS</th>
+                                    <th class="text-center">UNIDADES</th>
+                                    <th class="text-right">IMPORTE</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataFProductos"></tbody>
+                        </table>
                     </div>
-
-                    <div class="table-responsive">
-
-                         <table class="table h-full table-bordered col-12" id="tblFProductos">
-                                <thead class="bg-secondary text-white negrita">
-                                    <tr>
-                                        <td>CODIGO</td>
-                                        <td>PRODUCTO</td>
-                                        <td>UXC</td>
-                                        <td>CAJAS</td>
-                                        <td>UNIDADES</td>
-                                        <td>IMPORTE</td>
-                                        <td></td>
-                                    </tr>
-                                </thead>
-                                <tbody id="tblDataFProductos"></tbody>
-
-                            </table>
-
-                    </div>
-            
-
+                    <div class="sygma-embarque-rpt__total-block" id="lbProdTotalBlock"></div>
                 </div>
             </div>
-
-            <button class="btn btn-info btn-xl btn-circle hand shadow btn-bottom-r" onclick="F.imprimirSelec('rpt_productos_embarque')">
-                <i class="fal fa-print"></i>
-            </button>
             `
         },
         facturacion_embarque_productos_bonif:()=>{
             return `
-            <br>
-
-            <div class="card card-rounded shadow col-12" id="rpt_productos_embarqueB">
-                <div class="card-body p-4">
-            
-                    <div class="row">
-                        <div class="col-6">
-                            <h4 class="negrita text-base">Productos Bonificados del Embarque</h4>
-                            <h5 id="lbProdCodembarqueB"></h5>
-                            <br>
+            <div class="sygma-embarque-rpt card card-rounded shadow-sm col-12 border-0" id="rpt_productos_embarqueB">
+                <div class="card-body sygma-embarque-rpt__body p-3">
+                    <header class="sygma-embarque-rpt__header">
+                        <div class="sygma-embarque-rpt__brand">
+                            <img class="sygma-embarque-rpt__logo" src="./favicon.png" width="44" height="44" alt="Logo">
+                            <div class="sygma-embarque-rpt__brand-text">
+                                <h4 class="sygma-embarque-rpt__title mb-0">Productos Bonificados del Embarque</h4>
+                                <div class="sygma-embarque-rpt__embarque-info">
+                                    <span class="sygma-embarque-rpt__embarque-code" id="lbProdCodembarqueB"></span>
+                                    <span class="sygma-embarque-rpt__embarque-date" id="lbProdFechaEmbarqueB"></span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-6">
-                            <label class="negrita text-info" id="lbProdTotalPedidosB">Productos:</label>
-                            <br>
-                            <label class="negrita text-danger" id="lbProdTotalImporteB">Importe:</label>
+                        <div class="sygma-embarque-rpt__detail oculto-impresion">
+                            <span class="sygma-embarque-rpt__stat sygma-embarque-rpt__stat--items" id="lbProdTotalPedidosB"></span>
+                            <button type="button" class="btn btn-info btn-md btn-circle hand shadow sygma-embarque-rpt__print-btn" title="Imprimir" onclick="F.imprimirSelec('rpt_productos_embarqueB')">
+                                <i class="fal fa-print"></i>
+                            </button>
                         </div>
+                    </header>
+
+                    <div class="table-responsive sygma-embarque-rpt__table-wrap">
+                        <table class="table sygma-embarque-rpt__table mb-0" id="tblFProductosB">
+                            <thead>
+                                <tr>
+                                    <th>CODIGO</th>
+                                    <th>PRODUCTO</th>
+                                    <th class="text-center">UXC</th>
+                                    <th class="text-center">CAJAS</th>
+                                    <th class="text-center">UNIDADES</th>
+                                    <th class="text-right">IMPORTE</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataFProductosB"></tbody>
+                        </table>
                     </div>
-
-                    <div class="table-responsive">
-
-                         <table class="table h-full table-bordered col-12" id="tblFProductosB">
-                                <thead class="bg-secondary text-white negrita">
-                                    <tr>
-                                        <td>CODIGO</td>
-                                        <td>PRODUCTO</td>
-                                        <td>UXC</td>
-                                        <td>CAJAS</td>
-                                        <td>UNIDADES</td>
-                                        <td>IMPORTE</td>
-                                        <td></td>
-                                    </tr>
-                                </thead>
-                                <tbody id="tblDataFProductosB"></tbody>
-
-                            </table>
-
-                    </div>
-            
-
+                    <div class="sygma-embarque-rpt__total-block" id="lbProdTotalBlockB"></div>
                 </div>
             </div>
-
-            <button class="btn btn-info btn-xl btn-circle hand shadow btn-bottom-r" onclick="F.imprimirSelec('rpt_productos_embarqueB')">
-                <i class="fal fa-print"></i>
-            </button>
             `
         },
         facturacion_tipo_precios:()=>{
             return `
-                <div class="card card-rounded col-12">
-                    <div class="card-body p-2">
-
-                        <div class="table-responsive">
-                            
-                            <div class="form-group">
-                                <label class="text-secondary">Escriba para buscar</label>
-                                <input type="text" class="form-control border-warning text-secondary"
-                                id="txtFBuscarTipoPrecio"
-                                oninput="F.FiltrarTabla('tblFTipoPrecio','txtFBuscarTipoPrecio')">
+            <div class="sygma-embarque-rpt card card-rounded shadow-sm col-12 border-0" id="rpt_tipo_precio">
+                <div class="card-body sygma-embarque-rpt__body p-3">
+                    <header class="sygma-embarque-rpt__header">
+                        <div class="sygma-embarque-rpt__brand">
+                            <img class="sygma-embarque-rpt__logo" src="./favicon.png" width="44" height="44" alt="Logo">
+                            <div class="sygma-embarque-rpt__brand-text">
+                                <h4 class="sygma-embarque-rpt__title mb-0">Productos con Precios Especiales</h4>
+                                <div class="sygma-embarque-rpt__embarque-info">
+                                    <span class="sygma-embarque-rpt__embarque-code" id="lbTpCodembarque"></span>
+                                    <span class="sygma-embarque-rpt__embarque-date" id="lbTpFechaEmbarque"></span>
+                                </div>
                             </div>
-
-                            <table class="table table-borderd h-full col-12" id="tblFTipoPrecio">
-                                <thead class="negrita bg-secondary text-white">
-                                    <tr>
-                                        <td>VENDEDOR</td>
-                                        <td>DOCUMENTO</td>
-                                        <td>CLIENTE</td>
-                                        <td>PRODUCTO</td>
-                                        <td>CANTIDAD</td>
-                                        <td>PRECIO</td>
-                                        <td>TIPOPRE</td>
-                                        <td></td>
-                                        <td></td>
-                                    </tr>
-                                </thead>
-                                <tbody id="data_tblFTipoPrecio"></tbody>
-                            </table>
                         </div>
+                        <div class="sygma-embarque-rpt__detail oculto-impresion">
+                            <span class="sygma-embarque-rpt__stat sygma-embarque-rpt__stat--items" id="lbTpTotalItems"></span>
+                            <button type="button" class="btn btn-info btn-md btn-circle hand shadow sygma-embarque-rpt__print-btn" title="Imprimir" onclick="F.imprimirSelec('rpt_tipo_precio')">
+                                <i class="fal fa-print"></i>
+                            </button>
+                        </div>
+                    </header>
 
+                    <div class="sygma-embarque-rpt__toolbar oculto-impresion">
+                        <input type="text" class="form-control sygma-embarque-rpt__search" id="txtFBuscarTipoPrecio"
+                            placeholder="Escriba para buscar..."
+                            oninput="F.FiltrarTabla('tblFTipoPrecio','txtFBuscarTipoPrecio')">
                     </div>
+
+                    <div class="table-responsive sygma-embarque-rpt__table-wrap">
+                        <table class="table sygma-embarque-rpt__table mb-0" id="tblFTipoPrecio">
+                            <thead>
+                                <tr>
+                                    <th>VENDEDOR</th>
+                                    <th>DOCUMENTO</th>
+                                    <th>CLIENTE</th>
+                                    <th>PRODUCTO</th>
+                                    <th class="text-center">CANTIDAD</th>
+                                    <th class="text-right">PRECIO</th>
+                                    <th class="text-center">TIPOPRE</th>
+                                    <th class="sygma-embarque-rpt__col-action oculto-impresion"></th>
+                                    <th class="sygma-embarque-rpt__col-action oculto-impresion"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="data_tblFTipoPrecio"></tbody>
+                        </table>
+                    </div>
+                    <div class="sygma-embarque-rpt__total-block" id="lbTpTotalBlock"></div>
                 </div>
+            </div>
             `
         },
         facturacion_vendedores:()=>{
             return `
-            <br>
-
-            <div class="card card-rounded shadow col-12">
-                <div class="card-body p-4">
-            
-                    <div class="row">
-                        <div class="col-6">
-                            <h4 class="negrita text-base">Resumen por Vendedor</h4>
-                            <br>
+            <div class="sygma-embarque-rpt card card-rounded shadow-sm col-12 border-0" id="rpt_resumen_vendedor">
+                <div class="card-body sygma-embarque-rpt__body p-3">
+                    <header class="sygma-embarque-rpt__header">
+                        <div class="sygma-embarque-rpt__brand">
+                            <img class="sygma-embarque-rpt__logo" src="./favicon.png" width="44" height="44" alt="Logo">
+                            <div class="sygma-embarque-rpt__brand-text">
+                                <h4 class="sygma-embarque-rpt__title mb-0">Resumen por Vendedor</h4>
+                                <div class="sygma-embarque-rpt__embarque-info">
+                                    <span class="sygma-embarque-rpt__embarque-code" id="lbVenCodembarque"></span>
+                                    <span class="sygma-embarque-rpt__embarque-date" id="lbVenFechaEmbarque"></span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-6">
-                        
-                            <label class="negrita text-danger" id="lbFVImporte">Importe:</label>
+                        <div class="sygma-embarque-rpt__detail oculto-impresion">
+                            <span class="sygma-embarque-rpt__stat sygma-embarque-rpt__stat--items" id="lbVenTotalVendedores"></span>
+                            <button type="button" class="btn btn-info btn-md btn-circle hand shadow sygma-embarque-rpt__print-btn" title="Imprimir" onclick="F.imprimirSelec('rpt_resumen_vendedor')">
+                                <i class="fal fa-print"></i>
+                            </button>
                         </div>
+                    </header>
+
+                    <div class="table-responsive sygma-embarque-rpt__table-wrap">
+                        <table class="table sygma-embarque-rpt__table mb-0" id="tblVendedores">
+                            <thead>
+                                <tr>
+                                    <th>VENDEDOR</th>
+                                    <th class="text-center">PEDIDOS</th>
+                                    <th class="text-right">IMPORTE</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataVendedores"></tbody>
+                        </table>
                     </div>
-
-                    <div class="table-responsive">
-
-                         <table class="table h-full table-bordered col-12" id="tblVendedores">
-                                <thead class="bg-secondary text-white negrita">
-                                    <tr>
-                                        <td>VENDEDOR</td>
-                                        <td>PEDIDOS</td>
-                                        <td>IMPORTE</td>
-                                        <td></td>
-                                    </tr>
-                                </thead>
-                                <tbody id="tblDataVendedores"></tbody>
-
-                            </table>
-
-                    </div>
-            
-
+                    <div class="sygma-embarque-rpt__total-block" id="lbVenTotalBlock"></div>
                 </div>
             </div>
-
-            <button class="btn btn-info btn-xl btn-circle hand shadow btn-bottom-r" onclick="F.imprimirSelec('rpt_productos_embarque')">
-                <i class="fal fa-print"></i>
-            </button>
-
             `
         },
         vista_sellout:()=>{
@@ -1618,6 +1656,7 @@ function initView(){
         console.error('[inicio_digitador] addListeners:', err);
         F.AvisoError('Error al inicializar digitador: ' + (err.message || err));
     }
+    digitador_showHome();
 }
 
 function destroyView(){
@@ -1633,11 +1672,15 @@ function destroyView(){
         initView: initView,
         destroyView: destroyView
     };
+    window.digitador_showHome = digitador_showHome;
 })();
 
 //------------------------
 // PEDIDOS PENDIENTES
 //------------------------
+
+let pendientesPedidosCache = [];
+let pendientesFiltroFechaActivo = true;
 
 function listeners_pedidos_pendientes(){
 
@@ -1649,6 +1692,7 @@ function listeners_pedidos_pendientes(){
     selected_ped_correlativo = '';
     selected_ped_codembarque = '';
 
+    pendientes_init_filtros_listeners();
 
     const btnMenuFacturacion = document.getElementById('btnMenuFacturacion');
     const txtFFecha = document.getElementById('txtFFecha');
@@ -1666,6 +1710,24 @@ function listeners_pedidos_pendientes(){
 
     txtFFecha?.addEventListener('change', () => {
         get_combo_embarques();
+        if (document.getElementById('cmbFTipo')?.value === 'PRODUCTOS') {
+            embarque_rpt_syncEncabezado(document.getElementById('cmbFEmbarques')?.value || '', 'lbProdCodembarque', 'lbProdFechaEmbarque');
+        }
+        if (document.getElementById('cmbFTipo')?.value === 'FACTURAS') {
+            embarque_rpt_syncEncabezado(document.getElementById('cmbFEmbarques')?.value || '', 'lbFacCodembarque', 'lbFacFechaEmbarque');
+        }
+        if (document.getElementById('cmbFTipo')?.value === 'BONIFICACIONES') {
+            embarque_rpt_syncEncabezado(document.getElementById('cmbFEmbarques')?.value || '', 'lbProdCodembarqueB', 'lbProdFechaEmbarqueB');
+        }
+        if (document.getElementById('cmbFTipo')?.value === 'VENDEDORES') {
+            embarque_rpt_syncEncabezado(document.getElementById('cmbFEmbarques')?.value || '', 'lbVenCodembarque', 'lbVenFechaEmbarque');
+        }
+        if (document.getElementById('cmbFTipo')?.value === 'ANULADAS') {
+            embarque_rpt_syncEncabezado(document.getElementById('cmbFEmbarques')?.value || '', 'lbAnulCodembarque', 'lbAnulFechaEmbarque');
+        }
+        if (document.getElementById('cmbFTipo')?.value === 'TIPOPRECIO') {
+            embarque_rpt_syncEncabezado(document.getElementById('cmbFEmbarques')?.value || '', 'lbTpCodembarque', 'lbTpFechaEmbarque');
+        }
     });
 
     cmbFEmbarques?.addEventListener('change', () => {
@@ -1680,7 +1742,6 @@ function listeners_pedidos_pendientes(){
                 document.getElementById('tab-Fdos').click();
 
                 tbl_facturas_embarque(codembarque);
-                document.getElementById('lbFacCodembarque').innerText = codembarque;
 
                 break;
         
@@ -1688,7 +1749,6 @@ function listeners_pedidos_pendientes(){
                 document.getElementById('tab-Ftres').click();
 
                 tbl_productos_embarque(codembarque);
-                document.getElementById('lbProdCodembarque').innerText = codembarque;
 
 
                 break;
@@ -1696,7 +1756,6 @@ function listeners_pedidos_pendientes(){
                 document.getElementById('tab-Fseis').click();
 
                 tbl_productos_embarque_bonif(codembarque);
-                document.getElementById('lbProdCodembarqueB').innerText = codembarque;
 
 
                 break;
@@ -1742,7 +1801,6 @@ function listeners_pedidos_pendientes(){
                 document.getElementById('tab-Fdos').click();
 
                 tbl_facturas_embarque(codembarque);
-                document.getElementById('lbFacCodembarque').innerText = codembarque;
 
                 break;
         
@@ -1750,7 +1808,6 @@ function listeners_pedidos_pendientes(){
                 document.getElementById('tab-Ftres').click();
 
                 tbl_productos_embarque(codembarque);
-                document.getElementById('lbProdCodembarque').innerText = codembarque;
 
 
                 break;
@@ -1758,7 +1815,6 @@ function listeners_pedidos_pendientes(){
                 document.getElementById('tab-Fseis').click();
 
                 tbl_productos_embarque_bonif(codembarque);
-                document.getElementById('lbProdCodembarqueB').innerText = codembarque;
 
 
                 break;
@@ -1791,113 +1847,218 @@ function listeners_pedidos_pendientes(){
 
 };
 
+function pendientes_normalizar_fecha(fecha){
+    if (!fecha) return '';
+    if (fecha instanceof Date) {
+        return `${fecha.getFullYear()}-${fecha.getMonth() + 1}-${fecha.getDate()}`;
+    }
+    const s = String(fecha).replace('T00:00:00.000Z', '').split('T')[0];
+    const parts = s.split('-');
+    if (parts.length >= 3) {
+        return `${Number(parts[0])}-${Number(parts[1])}-${Number(parts[2])}`;
+    }
+    return s;
+}
+
+function pendientes_fecha_input_valor(idInput){
+    const el = document.getElementById(idInput);
+    if (!el?.value) return '';
+    const parts = el.value.split('-');
+    if (parts.length < 3) return '';
+    return `${Number(parts[0])}-${Number(parts[1])}-${Number(parts[2])}`;
+}
+
+function pendientes_init_filtros_fecha(){
+    const inp = document.getElementById('txtFPFechaPend');
+    const btnQuitar = document.getElementById('btnFPQuitarFechaPend');
+    const btnHoy = document.getElementById('btnFPRestaurarFechaPend');
+    if (!inp) return;
+
+    pendientesFiltroFechaActivo = true;
+    inp.disabled = false;
+    inp.value = F.getFecha();
+    inp.classList.remove('sygma-pendientes-filtros__fecha-off');
+    btnQuitar?.classList.remove('d-none');
+    btnHoy?.classList.add('d-none');
+}
+
+function pendientes_quitar_filtro_fecha(){
+    pendientesFiltroFechaActivo = false;
+    const inp = document.getElementById('txtFPFechaPend');
+    const btnQuitar = document.getElementById('btnFPQuitarFechaPend');
+    const btnHoy = document.getElementById('btnFPRestaurarFechaPend');
+    if (inp) {
+        inp.value = '';
+        inp.disabled = true;
+        inp.classList.add('sygma-pendientes-filtros__fecha-off');
+    }
+    btnQuitar?.classList.add('d-none');
+    btnHoy?.classList.remove('d-none');
+    pendientes_aplicar_filtros();
+}
+
+function pendientes_restaurar_filtro_fecha(){
+    pendientes_init_filtros_fecha();
+    pendientes_aplicar_filtros();
+}
+
+function pendientes_cargar_vendedores(records){
+    const sel = document.getElementById('cmbFPVendedorPend');
+    if (!sel) return;
+    const actual = sel.value;
+    const vendedores = [...new Set(records.map(r => (r.NOMEMPLEADO || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+    sel.innerHTML = '<option value="">Todos</option>' + vendedores.map(v => `<option value="${v}">${v}</option>`).join('');
+    if (actual && vendedores.includes(actual)) sel.value = actual;
+}
+
+function pendientes_init_filtros_listeners(){
+    document.getElementById('txtFPFechaPend')?.addEventListener('change', () => {
+        pendientesFiltroFechaActivo = true;
+        document.getElementById('txtFPFechaPend')?.classList.remove('sygma-pendientes-filtros__fecha-off');
+        pendientes_aplicar_filtros();
+    });
+    document.getElementById('cmbFPVendedorPend')?.addEventListener('change', pendientes_aplicar_filtros);
+    document.getElementById('btnFPQuitarFechaPend')?.addEventListener('click', pendientes_quitar_filtro_fecha);
+    document.getElementById('btnFPRestaurarFechaPend')?.addEventListener('click', pendientes_restaurar_filtro_fecha);
+}
+
+function pendientes_aplicar_filtros(){
+    const vendedor = document.getElementById('cmbFPVendedorPend')?.value || '';
+    const fechaFiltro = pendientesFiltroFechaActivo ? pendientes_fecha_input_valor('txtFPFechaPend') : '';
+
+    const filtrados = pendientesPedidosCache.filter((r) => {
+        if (fechaFiltro && pendientes_normalizar_fecha(r.FECHA) !== fechaFiltro) return false;
+        if (vendedor && (r.NOMEMPLEADO || '') !== vendedor) return false;
+        return true;
+    });
+
+    pendientes_render_tabla('tblDataPedidos', filtrados);
+
+    const txtBuscar = document.getElementById('txtFPBuscar');
+    if (txtBuscar) F.FiltrarTabla('tblPedidos', 'txtFPBuscar');
+}
+
+function pendientes_render_tabla(idContainer, records){
+    const container = document.getElementById(idContainer);
+    if (!container) return;
+
+    let str = '';
+    let contador = 0;
+    let varTotal = 0;
+
+    records.map((r)=>{
+        let idRowPedido = `idRowPedido${r.CODDOC}-${r.CORRELATIVO}`;
+        let idBtnEmbarque = `idBtnEmbarque${r.CODDOC}-${r.CORRELATIVO}`;
+        let idBtnFix = `idBtnFix${r.CODDOC}-${r.CORRELATIVO}`;
+        contador +=1;
+        varTotal += Number(r.IMPORTE);
+        let strClassSt = 'success'; if(r.STATUS.toString()=='A'){strClassSt='danger'};
+        let idbtnAnular = `btnAnular${r.CODDOC}-${r.CORRELATIVO}`
+
+        let strClassBtnFixEmb = ''; 
+        if(r.TOTALPRECIOPROD.toFixed(2).toString()==r.IMPORTE.toFixed(2).toString()){
+            strClassBtnFixEmb= ` `;
+        }else{
+            strClassBtnFixEmb=`
+                    <button class="btn btn-danger btn-sm hand shadow oculto-impresion" id="${idBtnFix}"
+                        onclick="get_fix_pedido('${r.CODDOC}','${r.CORRELATIVO}','${idBtnFix}')">
+                            <i class="fal fa-wrench"></i>&nbsp Reparar
+                    </button>
+            `;
+        }
+
+        str += `
+            <tr>
+                <td class="sygma-embarque-rpt__col-action oculto-impresion">
+                    <button class="btn btn-base btn-md btn-circle hand shadow" id="${idBtnEmbarque}"
+                    onclick="get_embarques_pedido('${r.CODDOC}','${r.CORRELATIVO}','${idRowPedido}')">
+                            <i class="fal fa-plus"></i>
+                    </button>
+                </td>
+                <td class="sygma-embarque-rpt__cell-stack">
+                    <span class="sygma-embarque-rpt__cell-main">${r.NOMEMPLEADO}</span>
+                    <span class="sygma-embarque-rpt__cell-sub">${r.CODDOC}-${r.CORRELATIVO}</span>
+                    <span class="sygma-embarque-rpt__cell-sub text-danger" id="${idRowPedido}">Embarque: ${r.CODEMBARQUE || ''}</span>
+                    <button class="btn btn-outline-info btn-circle btn-sm hand shadow oculto-impresion mt-1"
+                    onclick="F.gotoGoogleMaps('${r.LAT}','${r.LONG}')">
+                        <i class="fal fa-map"></i>
+                    </button>
+                </td>
+                <td class="sygma-embarque-rpt__cell-stack">
+                    <span class="sygma-embarque-rpt__cell-main">${F.convertDateNormal(r.FECHA)}</span>
+                    <span class="sygma-embarque-rpt__cell-sub">Hora: ${r.HORA}</span>
+                    ${strClassBtnFixEmb}
+                </td>
+                <td class="sygma-embarque-rpt__cell-stack">
+                    <span class="sygma-embarque-rpt__cell-main">${r.NOMCLIE}</span>
+                    <span class="sygma-embarque-rpt__cell-sub">${r.DIRCLIE || ''}</span>
+                </td>
+                <td>${r.DESMUN}</td>
+                <td class="text-right sygma-embarque-rpt__importe">
+                    <span class="sygma-embarque-rpt__cell-main">${F.setMoneda(r.IMPORTE,'Q')}</span>
+                    <span class="sygma-embarque-rpt__cell-sub">Det: ${F.setMoneda(r.TOTALPRECIOPROD,'Q')}</span>
+                </td>
+                <td class="sygma-embarque-rpt__col-action oculto-impresion text-center">
+                    <button class="btn btn-${strClassSt} btn-md btn-circle hand shadow" id="${idbtnAnular}"
+                        onclick="anular_pedido('${r.CODDOC}','${r.CORRELATIVO}','${r.STATUS}','${idbtnAnular}')">
+                        ${r.STATUS}        
+                    </button>
+                </td>
+                <td class="sygma-embarque-rpt__col-action oculto-impresion">
+                    <button class="btn btn-warning btn-md btn-circle hand shadow"
+                        onclick="get_detalle_pedido('${r.CODDOC}','${r.CORRELATIVO}')">
+                            <i class="fal fa-list"></i>
+                    </button>
+                </td>
+                <td class="sygma-embarque-rpt__col-action oculto-impresion">
+                    <button class="btn btn-info btn-md btn-circle hand shadow"
+                        onclick="fcn_editar_factura('${r.CODDOC}','${r.CORRELATIVO}','${r.NOMCLIE}','${r.DIRCLIE}')">
+                            <i class="fal fa-edit"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+
+    container.innerHTML = str || `<tr><td colspan="9" class="text-center text-muted py-3">No hay pedidos con los filtros seleccionados</td></tr>`;
+
+    const lbItems = document.getElementById('lbPendTotalPedidos');
+    if (lbItems) lbItems.innerText = `Pendientes: ${contador}`;
+
+    const totalBlock = document.getElementById('lbPendTotalBlock');
+    if (totalBlock) {
+        totalBlock.innerHTML = contador ? `
+            <div class="sygma-embarque-rpt__total-inner">
+                <span class="sygma-embarque-rpt__foot-label">TOTAL IMPORTE</span>
+                <span class="sygma-embarque-rpt__foot-total">${F.setMoneda(varTotal, 'Q')}</span>
+            </div>` : '';
+    }
+}
+
 function tbl_pedidos_pendientes(idContainer){
 
     let container = document.getElementById(idContainer);
+    if (!container) return;
 
     container.innerHTML = GlobalLoader;
-    let contador = 0;
 
     GF.get_data_pedidos_pendientes_vendedores()
     .then((data)=>{
-
-        let str = '';
-
-        data.recordset.map((r)=>{
-            let idRowPedido = `idRowPedido${r.CODDOC}-${r.CORRELATIVO}`;
-            let idBtnEmbarque = `idBtnEmbarque${r.CODDOC}-${r.CORRELATIVO}`;
-            contador +=1;
-            let strClassSt = 'success'; if(r.STATUS.toString()=='A'){strClassSt='danger'};
-            let idbtnAnular = `btnAnular${r.CODDOC}-${r.CORRELATIVO}`
-            
-
-            let strClassBtnFixEmb = ''; 
-            if(r.TOTALPRECIOPROD.toFixed(2).toString()==r.IMPORTE.toFixed(2).toString()){
-                strClassBtnFixEmb= ` `;
-            }else{
-              
-                strClassBtnFixEmb=`
-                        <button class="btn btn-danger btn-sm hand shadow" id="${idBtnEmbarque}"
-                            onclick="get_fix_pedido('${r.CODDOC}','${r.CORRELATIVO}','${idBtnEmbarque}')">
-                                <i class="fal fa-wrench"></i>&nbsp Reparar
-                        </button>
-                `;
-            }
-
-
-            str += `
-                <tr>
-                    <td class="text-left">
-
-                        <button class="btn btn-base btn-md btn-circle hand shadow" id="${idBtnEmbarque}"
-                        onclick="get_embarques_pedido('${r.CODDOC}','${r.CORRELATIVO}','${idRowPedido}')">
-                                <i class="fal fa-plus"></i>
-                        </button>
-                        
-                      
-                    </td>
-                    <td>${r.NOMEMPLEADO}
-                        <button class="btn btn-outline-info btn-circle btn-sm hand shadow"
-                        onclick="F.gotoGoogleMaps('${r.LAT}','${r.LONG}')">
-                            <i class="fal fa-map"></i>
-                        </button>
-                        <br>
-                        <small class="negrita">${r.CODDOC}-${r.CORRELATIVO}</small>
-                        <br>
-                        <b class="text-danger" id="${idRowPedido}">${r.CODEMBARQUE}</b>
-                    </td>
-                    <td>${F.convertDateNormal(r.FECHA)}
-                        <br>
-                        <small>Hora:${r.HORA}</small>
-                        <br>
-                        ${strClassBtnFixEmb}
-                    </td>
-                    <td>${r.NOMCLIE}
-                        <br>
-                        <small>${r.DIRCLIE}</small>
-                    </td>
-                    <td>
-                        ${r.DESMUN}
-                    </td>
-                    <td class="negrita text-danger text-right">
-                        ${F.setMoneda(r.IMPORTE,'Q')}
-                        <br>
-                        <small class="negrita text-base">${F.setMoneda(r.TOTALPRECIOPROD,'Q')}</small>
-                    </td>
-                    <td>
-                        <button class="btn btn-${strClassSt} btn-md btn-circle hand shadow" id="${idbtnAnular}"
-                            onclick="anular_pedido('${r.CODDOC}','${r.CORRELATIVO}','${r.STATUS}','${idbtnAnular}')">
-                            ${r.STATUS}        
-                        </button>
-                        
-                    </td>                    
-                    <td>
-                        <button class="btn btn-warning btn-md btn-circle hand shadow"
-                            onclick="get_detalle_pedido('${r.CODDOC}','${r.CORRELATIVO}')">
-                                <i class="fal fa-list"></i>
-                        </button>
-                    </td>
-                    <td>
-                        <button class="btn btn-info btn-md btn-circle hand shadow"
-                            onclick="fcn_editar_factura('${r.CODDOC}','${r.CORRELATIVO}','${r.NOMCLIE}','${r.DIRCLIE}')">
-                                <i class="fal fa-edit"></i>
-                        </button>
-                    </td>
-                </tr>
-            `
-        })
-        container.innerHTML = str;
-        document.getElementById('lbTotalP').innerText = `Pendientes: ${contador}`
-        //document.getElementById('lbTotalMP').innerText =`${contador} pedidos`
-
-
-        //F.initit_datatable('tblPedidos',true);
-
+        pendientesPedidosCache = data.recordset || [];
+        pendientes_cargar_vendedores(pendientesPedidosCache);
+        if (document.getElementById('txtFPFechaPend') && !document.getElementById('txtFPFechaPend').disabled && !document.getElementById('txtFPFechaPend').value) {
+            pendientes_init_filtros_fecha();
+        }
+        pendientes_aplicar_filtros();
     })
     .catch((error)=>{
-        container.innerHTML = 'No se cargaron datos....'
-        document.getElementById('lbTotalP').innerText = '---'
-        //document.getElementById('lbTotalMP').innerText = '---'
+        pendientesPedidosCache = [];
+        container.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-3">No se cargaron datos.</td></tr>';
+        const lbItems = document.getElementById('lbPendTotalPedidos');
+        if (lbItems) lbItems.innerText = '---';
+        const totalBlock = document.getElementById('lbPendTotalBlock');
+        if (totalBlock) totalBlock.innerHTML = '';
+        pendientes_cargar_vendedores([]);
     })
 
 
@@ -1911,6 +2072,9 @@ function tbl_pedidos_pendientes_anulados(idContainer){
 
     container.innerHTML = GlobalLoader;
     let contador = 0;
+    let varTotal = 0;
+
+    embarque_rpt_syncEncabezado(document.getElementById('cmbFEmbarques')?.value || '', 'lbAnulCodembarque', 'lbAnulFechaEmbarque');
 
     GF.get_data_pedidos_pendientes_vendedores_anulados()
     .then((data)=>{
@@ -1920,78 +2084,68 @@ function tbl_pedidos_pendientes_anulados(idContainer){
         data.recordset.map((r)=>{
             let idRowPedido = `idRowPedido${r.CODDOC}-${r.CORRELATIVO}`;
             let idBtnEmbarque = `idBtnEmbarque${r.CODDOC}-${r.CORRELATIVO}`;
+            let idBtnFix = `idBtnFix${r.CODDOC}-${r.CORRELATIVO}`;
             contador +=1;
+            varTotal += Number(r.IMPORTE);
             let strClassSt = 'success'; if(r.STATUS.toString()=='A'){strClassSt='danger'};
             let idbtnAnular = `btnAnular${r.CODDOC}-${r.CORRELATIVO}`
-            
 
             let strClassBtnFixEmb = ''; 
             if(r.TOTALPRECIOPROD.toFixed(2).toString()==r.IMPORTE.toFixed(2).toString()){
                 strClassBtnFixEmb= ` `;
             }else{
-              
                 strClassBtnFixEmb=`
-                        <button class="btn btn-danger btn-sm hand shadow" id="${idBtnEmbarque}"
-                            onclick="get_fix_pedido('${r.CODDOC}','${r.CORRELATIVO}','${idBtnEmbarque}')">
+                        <button class="btn btn-danger btn-sm hand shadow oculto-impresion" id="${idBtnFix}"
+                            onclick="get_fix_pedido('${r.CODDOC}','${r.CORRELATIVO}','${idBtnFix}')">
                                 <i class="fal fa-wrench"></i>&nbsp Reparar
                         </button>
                 `;
             }
 
-
             str += `
                 <tr>
-                    <td class="text-left">
-
+                    <td class="sygma-embarque-rpt__col-action oculto-impresion">
                         <button class="btn btn-base btn-md btn-circle hand shadow" id="${idBtnEmbarque}"
                         onclick="get_embarques_pedido('${r.CODDOC}','${r.CORRELATIVO}','${idRowPedido}')">
                                 <i class="fal fa-plus"></i>
                         </button>
-                        
-                      
                     </td>
-                    <td>${r.NOMEMPLEADO}
-                        <button class="btn btn-outline-info btn-circle btn-sm hand shadow"
+                    <td class="sygma-embarque-rpt__cell-stack">
+                        <span class="sygma-embarque-rpt__cell-main">${r.NOMEMPLEADO}</span>
+                        <span class="sygma-embarque-rpt__cell-sub">${r.CODDOC}-${r.CORRELATIVO}</span>
+                        <span class="sygma-embarque-rpt__cell-sub text-danger" id="${idRowPedido}">Embarque: ${r.CODEMBARQUE || ''}</span>
+                        <button class="btn btn-outline-info btn-circle btn-sm hand shadow oculto-impresion mt-1"
                         onclick="F.gotoGoogleMaps('${r.LAT}','${r.LONG}')">
                             <i class="fal fa-map"></i>
                         </button>
-                        <br>
-                        <small class="negrita">${r.CODDOC}-${r.CORRELATIVO}</small>
-                        <br>
-                        <b class="text-danger" id="${idRowPedido}">${r.CODEMBARQUE}</b>
                     </td>
-                    <td>${F.convertDateNormal(r.FECHA)}
-                        <br>
-                        <small>Hora:${r.HORA}</small>
-                        <br>
+                    <td class="sygma-embarque-rpt__cell-stack">
+                        <span class="sygma-embarque-rpt__cell-main">${F.convertDateNormal(r.FECHA)}</span>
+                        <span class="sygma-embarque-rpt__cell-sub">Hora: ${r.HORA}</span>
                         ${strClassBtnFixEmb}
                     </td>
-                    <td>${r.NOMCLIE}
-                        <br>
-                        <small>${r.DIRCLIE}</small>
+                    <td class="sygma-embarque-rpt__cell-stack">
+                        <span class="sygma-embarque-rpt__cell-main">${r.NOMCLIE}</span>
+                        <span class="sygma-embarque-rpt__cell-sub">${r.DIRCLIE || ''}</span>
                     </td>
-                    <td>
-                        ${r.DESMUN}
+                    <td>${r.DESMUN}</td>
+                    <td class="text-right sygma-embarque-rpt__importe">
+                        <span class="sygma-embarque-rpt__cell-main">${F.setMoneda(r.IMPORTE,'Q')}</span>
+                        <span class="sygma-embarque-rpt__cell-sub">Det: ${F.setMoneda(r.TOTALPRECIOPROD,'Q')}</span>
                     </td>
-                    <td class="negrita text-danger text-right">
-                        ${F.setMoneda(r.IMPORTE,'Q')}
-                        <br>
-                        <small class="negrita text-base">${F.setMoneda(r.TOTALPRECIOPROD,'Q')}</small>
-                    </td>
-                    <td>
+                    <td class="sygma-embarque-rpt__col-action oculto-impresion text-center">
                         <button class="btn btn-${strClassSt} btn-md btn-circle hand shadow" id="${idbtnAnular}"
                             onclick="anular_pedido('${r.CODDOC}','${r.CORRELATIVO}','${r.STATUS}','${idbtnAnular}')">
                             ${r.STATUS}        
                         </button>
-                        
-                    </td>                    
-                    <td>
+                    </td>
+                    <td class="sygma-embarque-rpt__col-action oculto-impresion">
                         <button class="btn btn-warning btn-md btn-circle hand shadow"
                             onclick="get_detalle_pedido('${r.CODDOC}','${r.CORRELATIVO}')">
                                 <i class="fal fa-list"></i>
                         </button>
                     </td>
-                    <td>
+                    <td class="sygma-embarque-rpt__col-action oculto-impresion">
                         <button class="btn btn-info btn-md btn-circle hand shadow"
                             onclick="fcn_editar_factura('${r.CODDOC}','${r.CORRELATIVO}','${r.NOMCLIE}','${r.DIRCLIE}')">
                                 <i class="fal fa-edit"></i>
@@ -2001,17 +2155,25 @@ function tbl_pedidos_pendientes_anulados(idContainer){
             `
         })
         container.innerHTML = str;
-        document.getElementById('lbTotalP').innerText = `Pendientes: ${contador}`
-        //document.getElementById('lbTotalMP').innerText =`${contador} pedidos`
+        const lbItems = document.getElementById('lbAnulTotalPedidos');
+        if (lbItems) lbItems.innerText = `Pedidos: ${contador}`;
 
-
-        //F.initit_datatable('tblPedidos',true);
+        const totalBlock = document.getElementById('lbAnulTotalBlock');
+        if (totalBlock) {
+            totalBlock.innerHTML = `
+                <div class="sygma-embarque-rpt__total-inner">
+                    <span class="sygma-embarque-rpt__foot-label">TOTAL IMPORTE</span>
+                    <span class="sygma-embarque-rpt__foot-total">${F.setMoneda(varTotal, 'Q')}</span>
+                </div>`;
+        }
 
     })
     .catch((error)=>{
-        container.innerHTML = 'No se cargaron datos....'
-        document.getElementById('lbTotalP').innerText = '---'
-        //document.getElementById('lbTotalMP').innerText = '---'
+        container.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-3">No se cargaron datos.</td></tr>';
+        const lbItems = document.getElementById('lbAnulTotalPedidos');
+        if (lbItems) lbItems.innerText = '';
+        const totalBlock = document.getElementById('lbAnulTotalBlock');
+        if (totalBlock) totalBlock.innerHTML = '';
     })
 
 
@@ -2089,66 +2251,65 @@ function anular_pedido(coddoc,correlativo,statusActual,idbtn){
 
 function get_embarques_pedido(coddoc,correlativo,idUpdate){
 
-
-
-    $("#modal_embarques_pendientes").modal('show');
-
-
     selected_id_element = idUpdate;
     selected_ped_coddoc = coddoc;
     selected_ped_correlativo = correlativo.toString();
 
+    const lbDocRef = document.getElementById('lbModalEmbDocRef');
+    if (lbDocRef) lbDocRef.textContent = `Pedido ${coddoc}-${correlativo}`;
 
-
+    tbl_modal_embarques();
+    $("#modal_embarques_pendientes").modal('show');
 };
 
 function tbl_modal_embarques(){
-
 
     let container = document.getElementById('tblDataMEmbarques');
     if (!container) return;
     container.innerHTML = GlobalLoader;
 
     let str = '';
+    let contador = 0;
 
     GF.get_data_embarques_listado_activos(GlobalEmpnit)
     .then((data)=>{
-        
 
         data.recordset.map((r)=>{
-          
+            contador += 1;
             let idbtnF = `btnMF${r.CODEMBARQUE}`;
             str += `
                 <tr>
-                    <td>${F.convertDateNormal(r.FECHA)}</td>
-                    <td class="negrita text-danger">${r.CODEMBARQUE}
-                        <br>
-                        <small class="negrita text-secondary">${r.DESCRIPCION}</small>
+                    <td class="sygma-embarque-rpt__cell-stack">
+                        <span class="sygma-embarque-rpt__cell-main">${F.convertDateNormal(r.FECHA)}</span>
                     </td>
-                    <td>${r.NOMEMPLEADO}</td>
-                    <td>
-                        <buttton id="${idbtnF}" class="btn btn-md btn-circle hand shadow btn-success"
-                        onclick="seleccionar_embarque('${r.CODEMBARQUE}')">
+                    <td class="sygma-embarque-rpt__cell-stack">
+                        <span class="sygma-embarque-rpt__cell-main text-danger">${r.CODEMBARQUE}</span>
+                        <span class="sygma-embarque-rpt__cell-sub">${r.DESCRIPCION || ''}</span>
+                    </td>
+                    <td>${r.NOMEMPLEADO || ''}</td>
+                    <td class="sygma-embarque-rpt__col-action text-center">
+                        <button id="${idbtnF}" type="button" class="btn btn-success btn-md btn-circle hand shadow"
+                        onclick="seleccionar_embarque('${r.CODEMBARQUE}')" title="Asignar embarque">
                             <i class="fal fa-check"></i>
                         </button>
                     </td>
                 </tr>
-            `
-        })
-
-
-        container.innerHTML = str;
-        
-        new DataTable('#tblMEmbarques', {
-            paging: false,
-            scrollCollapse: true
+            `;
         });
 
+        container.innerHTML = str || `<tr><td colspan="4" class="text-center text-muted py-3">No hay embarques activos</td></tr>`;
+
+        const lbTotal = document.getElementById('lbModalEmbTotal');
+        if (lbTotal) lbTotal.textContent = contador;
+
+        const txtBuscar = document.getElementById('txtBuscarModalEmbarques');
+        if (txtBuscar) txtBuscar.value = '';
 
     })
     .catch(()=>{
-        document.getElementById('lbTotalEmb').innerText = '---'
-        container.innerHTML = 'No se cargaron datos...';
+        container.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">No se cargaron datos</td></tr>`;
+        const lbTotal = document.getElementById('lbModalEmbTotal');
+        if (lbTotal) lbTotal.textContent = '0';
     })
 
 };
@@ -2164,20 +2325,19 @@ function seleccionar_embarque(codembarque){
 
     let valorAnterior = '';
     let valor = document.getElementById(selected_id_element);
-    valorAnterior = valor.innerHTML;
-
-    valor.innerHTML = 'Actualizando....';
+    valorAnterior = valor.textContent;
+    valor.textContent = 'Actualizando....';
 
     console.log('por aqui....')
 
     GF.get_data_pedidos_update_embarque(GlobalEmpnit,selected_ped_coddoc,selected_ped_correlativo,codembarque)
     .then((data)=>{
 
-        valor.innerHTML = `${codembarque}`;
+        valor.textContent = `Embarque: ${codembarque}`;
     })
     .catch(()=>{
         F.AvisoError('No se pudo actualizar el Embarque en el pedido')
-        valor.innerHTML = valorAnterior;
+        valor.textContent = valorAnterior;
     })
 
 
@@ -2185,63 +2345,65 @@ function seleccionar_embarque(codembarque){
 
 function get_detalle_pedido(coddoc,correlativo){
 
-
     $("#modal_detalle_pedido").modal('show');
-
 
     let container = document.getElementById('tblDataDetallePedido');
     container.innerHTML = GlobalLoader;
 
+    document.getElementById('lbDetalleDocRef').textContent = `${coddoc}-${correlativo}`;
+    document.getElementById('lbDetalleNomclie').textContent = '—';
+    document.getElementById('lbDetalleDirclie').textContent = '—';
+    document.getElementById('lbDetalleCodembarque').textContent = '—';
+    document.getElementById('lbFtotalCantidad').textContent = '0';
+    document.getElementById('lbFtotalImporte').textContent = F.setMoneda(0,'Q');
+    document.getElementById('txtDetallePedidoObs').value = '';
 
     GF.get_data_detalle_documento(GlobalEmpnit,coddoc,correlativo)
     .then((data)=>{
         let str = "";
-        
-        
-        //let json = JSON.parse(data.recordset[0].JSONDOCPRODUCTOS);
-        let obs = '';//data.recordset[0].OBS;
+        let contador = 0;
+        let varImporte = 0;
+        let obs = '';
+        let nomclie = '—';
+        let dirclie = '—';
+        let codembarque = '—';
 
-
-        let contador = 0; let varImporte = 0;
-
-        
         data.recordset.map((r)=>{
+            if (contador === 0) {
+                nomclie = (r.NOMCLIE || '').trim() || '—';
+                dirclie = (r.DIRCLIE || '').trim() || '—';
+                codembarque = (r.CODEMBARQUE || '').trim() || '—';
+                obs = (r.DOCOBS || '').trim();
+            }
             contador += 1;
             varImporte += Number(r.TOTALPRECIO);
             str += `
             <tr>
-                <td>${r.CODPROD}</td>
+                <td><span class="sygma-doc-detalle-modal__cod">${r.CODPROD}</span></td>
                 <td>${r.DESPROD}</td>
-                <td>${r.TIPOPRECIO}</td>
-                <td>${r.CODMEDIDA}</td>
-                <td>${r.CANTIDAD}</td>
-                <td>${F.setMoneda(r.PRECIO,'Q')}</td>
-                <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                <td>${r.TIPOPRECIO || ''}</td>
+                <td>${r.CODMEDIDA || ''}</td>
+                <td class="text-right">${r.CANTIDAD}</td>
+                <td class="text-right">${F.setMoneda(r.PRECIO,'Q')}</td>
+                <td class="text-right sygma-doc-detalle-modal__importe">${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
             </tr>
-            `
-        })
-        container.innerHTML = str;
-        document.getElementById('lbFtotalCantidad').innerHTML = contador;
-        document.getElementById('lbFtotalImporte').innerHTML = F.setMoneda(varImporte,'Q');
-       
+            `;
+        });
+
+        container.innerHTML = str || `<tr><td colspan="7" class="text-center text-muted py-4">Sin productos en este documento</td></tr>`;
+        document.getElementById('lbDetalleNomclie').textContent = nomclie;
+        document.getElementById('lbDetalleDirclie').textContent = dirclie;
+        document.getElementById('lbDetalleCodembarque').textContent = codembarque;
+        document.getElementById('lbFtotalCantidad').textContent = contador;
+        document.getElementById('lbFtotalImporte').textContent = F.setMoneda(varImporte,'Q');
         document.getElementById('txtDetallePedidoObs').value = obs;
-       
-
-
     })
     .catch(()=>{
-        container.innerHTML = 'No hay datos...';
-       
-        document.getElementById('lbFtotalCantidad').innerHTML = '';
-        document.getElementById('lbFtotalImporte').innerHTML = '';
-       
+        container.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">No se pudo cargar el detalle</td></tr>`;
+        document.getElementById('lbFtotalCantidad').textContent = '0';
+        document.getElementById('lbFtotalImporte').textContent = F.setMoneda(0,'Q');
         document.getElementById('txtDetallePedidoObs').value = '';
-
-    })
-
-
-
-
+    });
 };
 
 
@@ -2420,6 +2582,9 @@ function tbl_resumen_embarque(codembarque){
     container.innerHTML = GlobalLoader;
     let contador = 0;
     let varTotal = 0;
+    let totalPedidos = 0;
+
+    embarque_rpt_syncEncabezado(codembarque, 'lbVenCodembarque', 'lbVenFechaEmbarque');
 
     GF.get_data_embarque_resumen_vendedores(GlobalEmpnit,codembarque)
     .then((data)=>{
@@ -2428,25 +2593,37 @@ function tbl_resumen_embarque(codembarque){
 
         data.recordset.map((r)=>{
 
-            
+            contador += 1;
+            totalPedidos += Number(r.CONTEO);
             varTotal += Number(r.IMPORTE);
             str += `
                 <tr>
-                    <td>${r.EMPLEADO}</td>
-                    <td>${r.CONTEO}</td>
-                    <td class="negrita text-danger text-right">${F.setMoneda(r.IMPORTE,'Q')}</td>
-                    <td>
-                    </td>
+                    <td class="sygma-embarque-rpt__cell-main">${r.EMPLEADO}</td>
+                    <td class="text-center">${r.CONTEO}</td>
+                    <td class="text-right sygma-embarque-rpt__importe">${F.setMoneda(r.IMPORTE,'Q')}</td>
                 </tr>
             `
         })
         container.innerHTML = str;
-        document.getElementById('lbFVImporte').innerText =`Total: ${F.setMoneda(varTotal,'Q')}`;
+        const lbVen = document.getElementById('lbVenTotalVendedores');
+        if (lbVen) lbVen.innerText = `Vendedores: ${contador} · Pedidos: ${totalPedidos}`;
+
+        const totalBlock = document.getElementById('lbVenTotalBlock');
+        if (totalBlock) {
+            totalBlock.innerHTML = `
+                <div class="sygma-embarque-rpt__total-inner">
+                    <span class="sygma-embarque-rpt__foot-label">TOTAL IMPORTE</span>
+                    <span class="sygma-embarque-rpt__foot-total">${F.setMoneda(varTotal, 'Q')}</span>
+                </div>`;
+        }
 
     })
     .catch((error)=>{
-        container.innerHTML = 'No se cargaron datos....';
-        document.getElementById('lbFVImporte').innerText = '';
+        container.innerHTML = '<tr><td colspan="3" class="text-center text-muted py-3">No se cargaron datos.</td></tr>';
+        const lbVen = document.getElementById('lbVenTotalVendedores');
+        if (lbVen) lbVen.innerText = '';
+        const totalBlock = document.getElementById('lbVenTotalBlock');
+        if (totalBlock) totalBlock.innerHTML = '';
     })
 
 
@@ -2459,6 +2636,8 @@ function tbl_facturas_embarque(codembarque){
     container.innerHTML = GlobalLoader;
     let contador = 0;
     let varTotal = 0;
+
+    embarque_rpt_syncEncabezado(codembarque, 'lbFacCodembarque', 'lbFacFechaEmbarque');
 
     GF.get_data_embarque_facturas(GlobalEmpnit,codembarque)
     .then((data)=>{
@@ -2473,35 +2652,33 @@ function tbl_facturas_embarque(codembarque){
             varTotal += Number(r.IMPORTE);
             str += `
                 <tr>
-                    <td>
+                    <td class="sygma-embarque-rpt__col-action oculto-impresion">
                         <button class="btn btn-danger btn-md btn-circle hand shadow" id="${idBtnEmbarque}"
                         onclick="quitar_embarque_factura('${r.CODDOC}','${r.CORRELATIVO}','${idBtnEmbarque}')">
                                 <i class="fal fa-unlink"></i>
                         </button>
                     </td>
-                    <td>${r.NOMEMPLEADO}
-                        <br>
-                        <small class="negrita">${r.CODDOC}-${r.CORRELATIVO}</small>
+                    <td class="sygma-embarque-rpt__cell-stack">
+                        <span class="sygma-embarque-rpt__cell-main">${r.NOMEMPLEADO}</span>
+                        <span class="sygma-embarque-rpt__cell-sub">${r.CODDOC}-${r.CORRELATIVO}</span>
                     </td>
-                    <td>${F.convertDateNormal(r.FECHA)}
-                        <br>
-                        <small>Hora:${r.HORA}</small>
+                    <td class="sygma-embarque-rpt__cell-stack">
+                        <span class="sygma-embarque-rpt__cell-main">${F.convertDateNormal(r.FECHA)}</span>
+                        <span class="sygma-embarque-rpt__cell-sub">Hora: ${r.HORA}</span>
                     </td>
-                    <td>${r.NOMCLIE}
-                        <br>
-                        <small>${r.DIRCLIE}</small>
+                    <td class="sygma-embarque-rpt__cell-stack">
+                        <span class="sygma-embarque-rpt__cell-main">${r.NOMCLIE}</span>
+                        <span class="sygma-embarque-rpt__cell-sub">${r.DIRCLIE || ''}</span>
                     </td>
-                    <td>
-                        ${r.DESMUN}
-                    </td>
-                    <td class="negrita text-danger text-right">${F.setMoneda(r.IMPORTE,'Q')}</td>
-                    <td>
+                    <td>${r.DESMUN}</td>
+                    <td class="text-right sygma-embarque-rpt__importe">${F.setMoneda(r.IMPORTE,'Q')}</td>
+                    <td class="sygma-embarque-rpt__col-action oculto-impresion">
                         <button class="btn btn-warning btn-md btn-circle hand shadow"
                             onclick="get_detalle_pedido('${r.CODDOC}','${r.CORRELATIVO}')">
                                 <i class="fal fa-list"></i>
                         </button>
                     </td>
-                    <td>
+                    <td class="sygma-embarque-rpt__col-action oculto-impresion">
                         <button class="btn btn-info btn-md btn-circle hand shadow"
                             onclick="fcn_editar_factura('${r.CODDOC}','${r.CORRELATIVO}','${r.NOMCLIE}','${r.DIRCLIE}')">
                                 <i class="fal fa-edit"></i>
@@ -2512,13 +2689,22 @@ function tbl_facturas_embarque(codembarque){
         })
         container.innerHTML = str;
         document.getElementById('lbFacTotalPedidos').innerText = `Pedidos: ${contador}`;
-        document.getElementById('lbFacTotalImporte').innerText =`Total: ${F.setMoneda(varTotal,'Q')}`;
+
+        const totalBlock = document.getElementById('lbFacTotalBlock');
+        if (totalBlock) {
+            totalBlock.innerHTML = `
+                <div class="sygma-embarque-rpt__total-inner">
+                    <span class="sygma-embarque-rpt__foot-label">TOTAL IMPORTE</span>
+                    <span class="sygma-embarque-rpt__foot-total">${F.setMoneda(varTotal, 'Q')}</span>
+                </div>`;
+        }
 
     })
     .catch((error)=>{
-        container.innerHTML = 'No se cargaron datos....';
+        container.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-3">No se cargaron datos.</td></tr>';
         document.getElementById('lbFacTotalPedidos').innerText = '';
-        document.getElementById('lbFacTotalImporte').innerText = '';
+        const totalBlock = document.getElementById('lbFacTotalBlock');
+        if (totalBlock) totalBlock.innerHTML = '';
     })
 
 
@@ -2572,6 +2758,18 @@ function quitar_embarque_factura(coddoc,correlativo,idbtn){
 
 
 
+function embarque_rpt_syncEncabezado(codembarque, codeId, dateId) {
+    const lbCode = document.getElementById(codeId || 'lbProdCodembarque');
+    const lbFecha = document.getElementById(dateId || 'lbProdFechaEmbarque');
+    if (lbCode) {
+        lbCode.textContent = codembarque ? 'Embarque: ' + codembarque : '';
+    }
+    if (lbFecha) {
+        const raw = document.getElementById('txtFFecha')?.value || '';
+        lbFecha.textContent = raw ? 'Fecha: ' + F.convertDateNormal(raw) : '';
+    }
+}
+
 function tbl_productos_embarque(codembarque){
 
     let container = document.getElementById('tblDataFProductos');
@@ -2579,6 +2777,8 @@ function tbl_productos_embarque(codembarque){
     container.innerHTML = GlobalLoader;
     let contador = 0;
     let varTotal = 0;
+
+    embarque_rpt_syncEncabezado(codembarque, 'lbProdCodembarque', 'lbProdFechaEmbarque');
 
     GF.get_data_embarque_productos(GlobalEmpnit,codembarque)
     .then((data)=>{
@@ -2591,31 +2791,39 @@ function tbl_productos_embarque(codembarque){
             varTotal += Number(r.IMPORTE);
             str += `
                 <tr>
-                    <td>${r.CODPROD}
-                    <br>
-                        <small>${r.TOTALUNIDADES}</small>
+                    <td class="sygma-embarque-rpt__cod">
+                        <span class="sygma-embarque-rpt__cod-main">${r.CODPROD}</span>
+                        <span class="sygma-embarque-rpt__cod-sub">${r.TOTALUNIDADES} uds.</span>
                     </td>
-                    <td>${r.DESPROD}
-                        <br>
-                        <small>${r.DESMARCA}</small>
+                    <td class="sygma-embarque-rpt__prod">
+                        <span class="sygma-embarque-rpt__prod-main">${r.DESPROD}</span>
+                        <span class="sygma-embarque-rpt__prod-sub">${r.DESMARCA || ''}</span>
                     </td>
-                    <td>${r.UXC}</td>
-                    <td>${r.CAJAS}</td>
-                    <td>${r.UNIDADES}</td>
-                    <td>${F.setMoneda(r.IMPORTE,'Q')}</td>
-                    <td></td>
+                    <td class="text-center">${r.UXC}</td>
+                    <td class="text-center">${r.CAJAS}</td>
+                    <td class="text-center">${r.UNIDADES}</td>
+                    <td class="text-right sygma-embarque-rpt__importe">${F.setMoneda(r.IMPORTE,'Q')}</td>
                 </tr>
                 `
         })
         container.innerHTML = str;
         document.getElementById('lbProdTotalPedidos').innerText = `Items: ${contador}`;
-        document.getElementById('lbProdTotalImporte').innerText =`Total: ${F.setMoneda(varTotal,'Q')}`;
+
+        const totalBlock = document.getElementById('lbProdTotalBlock');
+        if (totalBlock) {
+            totalBlock.innerHTML = `
+                <div class="sygma-embarque-rpt__total-inner">
+                    <span class="sygma-embarque-rpt__foot-label">TOTAL IMPORTE</span>
+                    <span class="sygma-embarque-rpt__foot-total">${F.setMoneda(varTotal, 'Q')}</span>
+                </div>`;
+        }
 
     })
     .catch((error)=>{
-        container.innerHTML = 'No se cargaron datos....';
+        container.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No se cargaron datos.</td></tr>';
         document.getElementById('lbProdTotalPedidos').innerText = '';
-        document.getElementById('lbProdTotalImporte').innerText = '';
+        const totalBlock = document.getElementById('lbProdTotalBlock');
+        if (totalBlock) totalBlock.innerHTML = '';
     })
 
 
@@ -2628,6 +2836,8 @@ function tbl_productos_embarque_bonif(codembarque){
     let contador = 0;
     let varTotal = 0;
 
+    embarque_rpt_syncEncabezado(codembarque, 'lbProdCodembarqueB', 'lbProdFechaEmbarqueB');
+
     GF.get_data_embarque_productos_bonif(GlobalEmpnit,codembarque)
     .then((data)=>{
 
@@ -2639,31 +2849,39 @@ function tbl_productos_embarque_bonif(codembarque){
             varTotal += Number(r.IMPORTE);
             str += `
                 <tr>
-                    <td>${r.CODPROD}
-                    <br>
-                        <small>${r.TOTALUNIDADES}</small>
+                    <td class="sygma-embarque-rpt__cod">
+                        <span class="sygma-embarque-rpt__cod-main">${r.CODPROD}</span>
+                        <span class="sygma-embarque-rpt__cod-sub">${r.TOTALUNIDADES} uds.</span>
                     </td>
-                    <td>${r.DESPROD}
-                        <br>
-                        <small>${r.DESMARCA}</small>
+                    <td class="sygma-embarque-rpt__prod">
+                        <span class="sygma-embarque-rpt__prod-main">${r.DESPROD}</span>
+                        <span class="sygma-embarque-rpt__prod-sub">${r.DESMARCA || ''}</span>
                     </td>
-                    <td>${r.UXC}</td>
-                    <td>${r.CAJAS}</td>
-                    <td>${r.UNIDADES}</td>
-                    <td>${F.setMoneda(r.IMPORTE,'Q')}</td>
-                    <td></td>
+                    <td class="text-center">${r.UXC}</td>
+                    <td class="text-center">${r.CAJAS}</td>
+                    <td class="text-center">${r.UNIDADES}</td>
+                    <td class="text-right sygma-embarque-rpt__importe">${F.setMoneda(r.IMPORTE,'Q')}</td>
                 </tr>
                 `
         })
         container.innerHTML = str;
         document.getElementById('lbProdTotalPedidosB').innerText = `Items: ${contador}`;
-        document.getElementById('lbProdTotalImporteB').innerText =`Total: ${F.setMoneda(varTotal,'Q')}`;
+
+        const totalBlock = document.getElementById('lbProdTotalBlockB');
+        if (totalBlock) {
+            totalBlock.innerHTML = `
+                <div class="sygma-embarque-rpt__total-inner">
+                    <span class="sygma-embarque-rpt__foot-label">TOTAL IMPORTE</span>
+                    <span class="sygma-embarque-rpt__foot-total">${F.setMoneda(varTotal, 'Q')}</span>
+                </div>`;
+        }
 
     })
     .catch((error)=>{
-        container.innerHTML = 'No se cargaron datos....';
+        container.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No se cargaron datos.</td></tr>';
         document.getElementById('lbProdTotalPedidosB').innerText = '';
-        document.getElementById('lbProdTotalImporteB').innerText = '';
+        const totalBlock = document.getElementById('lbProdTotalBlockB');
+        if (totalBlock) totalBlock.innerHTML = '';
     })
 
 
@@ -2687,8 +2905,8 @@ function tbl_relleno_inventario(idContainer){
     if (!container) return;
 
     container.innerHTML = GlobalLoader;
-    let lbTotal = document.getElementById('lbTotal');
     let contador = 0;
+    let totalRelleno = 0;
 
     GF.get_data_surtido(GlobalEmpnit)
     .then((data)=>{
@@ -2696,36 +2914,50 @@ function tbl_relleno_inventario(idContainer){
         let str = '';
         data.recordset.map((r)=>{
             contador +=1;
+            totalRelleno += Number(r.RELLENO) || 0;
           
             str +=`
                 <tr>
-                    <td>${r.DESPROD}
-                        <br>
-                        <small class="negrita text-base">${r.CODPROD}</small>
+                    <td class="sygma-embarque-rpt__cell-stack">
+                        <span class="sygma-embarque-rpt__cell-main">${r.DESPROD}</span>
+                        <span class="sygma-embarque-rpt__cell-sub">${r.CODPROD}</span>
                     </td>
-                     <td>${r.DESMARCA}</td>
-                    <td class="negrita">${r.EXISTENCIA}</td>
-                     <td>${r.MINIMO}</td>
-                    <td>${r.MAXIMO}</td>
-                    <td class="negrita text-danger">${r.RELLENO}</td>
+                    <td>${r.DESMARCA || ''}</td>
+                    <td class="text-right">${r.EXISTENCIA}</td>
+                    <td class="text-right">${r.MINIMO}</td>
+                    <td class="text-right">${r.MAXIMO}</td>
+                    <td class="text-right sygma-embarque-rpt__importe text-danger">${r.RELLENO}</td>
                 </tr>
-            `
-        })
-        container.innerHTML = str;
-        lbTotal.innerText = `Pendientes surtir ${contador}`;
-        document.getElementById('lbTotalMR').innerText = `${contador} productos`;
+            `;
+        });
+        container.innerHTML = str || `<tr><td colspan="6" class="text-center text-muted py-3">No hay productos pendientes de relleno</td></tr>`;
+
+        const lbItems = document.getElementById('lbRellenoTotalItems');
+        if (lbItems) lbItems.innerText = `Pendientes surtir: ${contador}`;
+
+        const lbBadge = document.getElementById('lbTotalMR');
+        if (lbBadge) lbBadge.innerText = `${contador} productos`;
+
+        const totalBlock = document.getElementById('lbRellenoTotalBlock');
+        if (totalBlock) {
+            totalBlock.innerHTML = `
+                <div class="sygma-embarque-rpt__total-inner">
+                    <span class="sygma-embarque-rpt__foot-label">TOTAL UNIDADES A RELLENAR</span>
+                    <span class="sygma-embarque-rpt__foot-total">${totalRelleno}</span>
+                </div>`;
+        }
         
     })
     .catch((error)=>{
-        console.log(error)
-        container.innerHTML = 'No se cargaron datos...'
-        lbTotal.innerText = '---'
-        document.getElementById('lbTotalMR').innerText = '---'
+        console.log(error);
+        container.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">No se cargaron datos</td></tr>`;
+        const lbItems = document.getElementById('lbRellenoTotalItems');
+        if (lbItems) lbItems.innerText = '---';
+        const lbBadge = document.getElementById('lbTotalMR');
+        if (lbBadge) lbBadge.innerText = '---';
+        const totalBlock = document.getElementById('lbRellenoTotalBlock');
+        if (totalBlock) totalBlock.innerHTML = '';
     })
-
-
-
-
 
 
 
@@ -3222,30 +3454,41 @@ function tbl_facturas_tipo_precio(){
     let container = document.getElementById('data_tblFTipoPrecio');
     container.innerHTML = GlobalLoader;
 
-
     let codembarque = document.getElementById('cmbFEmbarques').value;
+    let contador = 0;
+    let varTotal = 0;
+
+    embarque_rpt_syncEncabezado(codembarque, 'lbTpCodembarque', 'lbTpFechaEmbarque');
     
     GF.get_data_embarque_tipo_precios(GlobalEmpnit,codembarque)
     .then((data)=>{
         let str = '';
 
         data.recordset.map((r)=>{
+            contador += 1;
+            varTotal += Number(r.PRECIO) * Number(r.CANTIDAD);
             str += `
                 <tr>
-                    <td>${r.NOMEMPLEADO}</td>
-                    <td>${r.CODDOC}-${r.CORRELATIVO}</td>
-                    <td>${r.NOMCLIE}</td>
-                    <td>${r.DESPROD}</td>
-                    <td>${r.CANTIDAD} ${r.CODMEDIDA}</td>
-                    <td>${F.setMoneda(r.PRECIO,'Q')}</td>
-                    <td class="negrita text-danger">${r.TIPOPRECIO}</td>
-                    <td>
+                    <td class="sygma-embarque-rpt__cell-stack">
+                        <span class="sygma-embarque-rpt__cell-main">${r.NOMEMPLEADO}</span>
+                    </td>
+                    <td class="sygma-embarque-rpt__cell-sub">${r.CODDOC}-${r.CORRELATIVO}</td>
+                    <td class="sygma-embarque-rpt__cell-stack">
+                        <span class="sygma-embarque-rpt__cell-main">${r.NOMCLIE}</span>
+                    </td>
+                    <td class="sygma-embarque-rpt__cell-stack">
+                        <span class="sygma-embarque-rpt__cell-main">${r.DESPROD}</span>
+                    </td>
+                    <td class="text-center">${r.CANTIDAD} ${r.CODMEDIDA}</td>
+                    <td class="text-right sygma-embarque-rpt__importe">${F.setMoneda(r.PRECIO,'Q')}</td>
+                    <td class="text-center sygma-embarque-rpt__cell-main text-danger">${r.TIPOPRECIO}</td>
+                    <td class="sygma-embarque-rpt__col-action oculto-impresion">
                         <button class="btn btn-md btn-circle btn-warning hand shadow"
                         onclick="get_detalle_pedido('${r.CODDOC}','${r.CORRELATIVO}')">
                             <i class="fal fa-list"></i>
                         </button>
                     </td>
-                    <td>
+                    <td class="sygma-embarque-rpt__col-action oculto-impresion">
                         <button class="btn btn-md btn-circle btn-info hand shadow"
                         onclick="fcn_editar_factura('${r.CODDOC}','${r.CORRELATIVO}','${r.NOMCLIE}','${r.DIRCLIE}')">
                             <i class="fal fa-edit"></i>
@@ -3256,9 +3499,25 @@ function tbl_facturas_tipo_precio(){
         })
         container.innerHTML = str;
 
+        const lbItems = document.getElementById('lbTpTotalItems');
+        if (lbItems) lbItems.innerText = `Items: ${contador}`;
+
+        const totalBlock = document.getElementById('lbTpTotalBlock');
+        if (totalBlock) {
+            totalBlock.innerHTML = `
+                <div class="sygma-embarque-rpt__total-inner">
+                    <span class="sygma-embarque-rpt__foot-label">TOTAL IMPORTE</span>
+                    <span class="sygma-embarque-rpt__foot-total">${F.setMoneda(varTotal, 'Q')}</span>
+                </div>`;
+        }
+
     })
     .catch(()=>{
-        container.innerHTML = 'No se cargaron datos...';
+        container.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-3">No se cargaron datos.</td></tr>';
+        const lbItems = document.getElementById('lbTpTotalItems');
+        if (lbItems) lbItems.innerText = '';
+        const totalBlock = document.getElementById('lbTpTotalBlock');
+        if (totalBlock) totalBlock.innerHTML = '';
     })
 
 

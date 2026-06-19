@@ -1,0 +1,41 @@
+---
+description: Actualizar build/data/changelog.json al finalizar cambios en el proyecto
+alwaysApply: true
+---
+
+# Changelog obligatorio (changelog.json)
+
+Al **terminar cualquier prompt** donde hayas modificado código, configuración o documentación del proyecto SYGMA v2, **debes actualizar** `build/data/changelog.json`.
+
+## Cuándo actualizar
+- Siempre que el usuario pida cambios y los implementes.
+- Aunque el usuario no lo mencione explícitamente.
+- Si solo respondiste una pregunta sin tocar archivos, **no** actualices.
+
+## Cómo actualizar
+
+1. Obtén fecha y hora actuales en formato:
+   - `FECHA`: `DD-MM-YYYY` (ej. `18-06-2026`)
+   - `HORA`: `HH:mm` en 24h (ej. `22:03`)
+
+2. Añade **al final** del array `entries` una o más entradas con cambios concretos en `DESCRIPCION` (mayúsculas, estilo del archivo).
+
+3. Actualiza el campo raíz `"version"` con el formato `M.DD.MM.YY HH:mm` de la **última** entrada (la más reciente por fecha/hora).
+
+4. Añade siempre una entrada final tipo:
+   - `"ACTUALIZACION DE VERSION A M.DD.MM.YY HH:mm"`
+
+## Ejemplo de entrada
+
+```json
+{
+  "FECHA": "18-06-2026",
+  "HORA": "22:03",
+  "DESCRIPCION": "DESCRIPCION BREVE DEL CAMBIO REALIZADO"
+}
+```
+
+## Notas
+- `versionapp` en login se sincroniza sola vía `get_log()` / `applyChangelogVersion()` leyendo la entrada más reciente.
+- No dupliques entradas idénticas en el mismo minuto salvo que sean cambios distintos.
+- Agrupa cambios relacionados en entradas separadas si son funcionalidades distintas.

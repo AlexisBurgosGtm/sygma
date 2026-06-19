@@ -968,6 +968,7 @@ function initView(){
     try {
         getView();
         addListeners();
+        ventas_showHome();
     } catch (err) {
         console.error('[inicio_ventas] initView:', err);
         F.AvisoError('Error al inicializar ventas: ' + (err.message || err));
@@ -976,6 +977,7 @@ function initView(){
 
 function destroyView(){
     ventas_teardownEmbed();
+    ventas_currentPane = 'uno';
     ventas_toggleSidebar(false);
     document.body.classList.remove('proveedor-sidebar-open');
     Object.keys(ventas_dashboardCharts).forEach(ventas_destroyDashboardChart);

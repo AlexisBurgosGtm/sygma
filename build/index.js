@@ -64,7 +64,7 @@ function sygma_updateHeaderUsuario() {
 
 
 
-let versionapp = "M.17.06.26 22:53"
+let versionapp = "M.05.06.26 23:05"
 const CHANGELOG_JSON = './data/changelog.json';
 
 function formatChangelogVersion(fecha, hora) {
@@ -152,7 +152,7 @@ function get_log() {
 }
 
 
-SpaRouter.start('login');
+Navegar.login();
 
 
 

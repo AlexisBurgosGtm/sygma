@@ -2009,3 +2009,763 @@ body.app-pos2-theme #root .btn.btn-circle {
     bottom: 3.75rem;
   }
 }
+
+/* Reporte productos del embarque (digitador) */
+.sygma-embarque-rpt__body {
+  padding: 0.85rem 1rem !important;
+}
+
+.sygma-embarque-rpt__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.65rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 2px solid rgba(0, 68, 163, 0.15);
+}
+
+.sygma-embarque-rpt__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.sygma-embarque-rpt__brand-text {
+  min-width: 0;
+}
+
+.sygma-embarque-rpt__embarque-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin-top: 0.2rem;
+}
+
+.sygma-embarque-rpt__embarque-code {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #dc2626;
+}
+
+.sygma-embarque-rpt__embarque-date {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.sygma-embarque-rpt__logo {
+  flex-shrink: 0;
+  border-radius: 0.35rem;
+}
+
+.sygma-embarque-rpt__detail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem 1.25rem;
+  margin-left: auto;
+}
+
+.sygma-embarque-rpt__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--sygma-primary, #0044a3);
+  margin: 0;
+}
+
+.sygma-embarque-rpt__code {
+  display: inline-block;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #dc2626;
+  letter-spacing: 0.02em;
+}
+
+.sygma-embarque-rpt__stats {
+  text-align: right;
+  line-height: 1.35;
+}
+
+.sygma-embarque-rpt__stat {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.sygma-embarque-rpt__stat--items {
+  color: #0369a1;
+}
+
+.sygma-embarque-rpt__table-wrap {
+  margin: 0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.sygma-embarque-rpt__table {
+  font-size: 0.8rem;
+  margin-bottom: 0;
+}
+
+.sygma-embarque-rpt__table thead th {
+  background: linear-gradient(180deg, #0044a3 0%, #003580 100%);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.45rem 0.55rem;
+  border: none;
+  white-space: nowrap;
+}
+
+.sygma-embarque-rpt__table tbody td {
+  padding: 0.4rem 0.55rem;
+  vertical-align: top;
+  border-top: 1px solid #eef2f7;
+  line-height: 1.3;
+}
+
+.sygma-embarque-rpt__table tbody tr:hover {
+  background: rgba(0, 68, 163, 0.04);
+}
+
+.sygma-embarque-rpt__table tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.sygma-embarque-rpt__table tbody tr:nth-child(even):hover {
+  background: rgba(0, 68, 163, 0.06);
+}
+
+.sygma-embarque-rpt__cod-main,
+.sygma-embarque-rpt__prod-main,
+.sygma-embarque-rpt__cell-main {
+  display: block;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.sygma-embarque-rpt__cod-sub,
+.sygma-embarque-rpt__prod-sub,
+.sygma-embarque-rpt__cell-sub {
+  display: block;
+  font-size: 0.68rem;
+  color: #64748b;
+  margin-top: 0.1rem;
+}
+
+.sygma-embarque-rpt__toolbar {
+  margin-bottom: 0.55rem;
+}
+
+.sygma-embarque-rpt__search {
+  font-size: 0.82rem;
+  border-color: rgba(0, 68, 163, 0.25);
+  color: #0044a3;
+}
+
+.sygma-embarque-rpt__search:focus {
+  border-color: #0044a3;
+  box-shadow: 0 0 0 0.15rem rgba(0, 68, 163, 0.12);
+}
+
+.sygma-embarque-rpt__col-action {
+  width: 3rem;
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.sygma-embarque-rpt__col-action .btn {
+  margin: 0;
+}
+
+.sygma-embarque-rpt__importe {
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+}
+
+.sygma-embarque-rpt__print-btn {
+  flex-shrink: 0;
+  width: 2.85rem;
+  height: 2.85rem;
+  padding: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.sygma-embarque-rpt__total-block {
+  border-top: 2px solid #0044a3;
+  background: #f1f5f9;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.sygma-embarque-rpt__total-inner {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0.55rem;
+}
+
+.sygma-embarque-rpt__foot-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #0044a3;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.sygma-embarque-rpt__foot-total {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #dc2626;
+  white-space: nowrap;
+}
+
+@media (max-width: 767.98px) {
+  .sygma-embarque-rpt__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sygma-embarque-rpt__detail {
+    width: 100%;
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+
+  .sygma-embarque-rpt__stats {
+    text-align: left;
+  }
+
+  .sygma-embarque-rpt__table {
+    font-size: 0.74rem;
+  }
+}
+
+@media print {
+  @page {
+    size: auto;
+    margin: 8mm;
+  }
+
+  #root_navbar,
+  .page-header,
+  .proveedor-header-card,
+  .proveedor-sidebar,
+  .proveedor-menu-toggle,
+  .proveedor-sidebar-backdrop,
+  .btn-bottom-r,
+  .btn-bottom-l,
+  .btn-bottom-md,
+  #btnInstalarApp,
+  .sygma-embarque-rpt__print-btn,
+  .sygma-embarque-rpt__col-action,
+  .sygma-embarque-rpt__toolbar,
+  .oculto-impresion,
+  .nav-tabs,
+  .card.oculto-impresion {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  body,
+  .page-content-wrapper,
+  main.page-content,
+  #js-page-content {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .page-content-wrapper {
+    margin-left: 0 !important;
+  }
+
+  .sygma-embarque-rpt {
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .sygma-embarque-rpt__body {
+    padding: 0 !important;
+  }
+
+  .sygma-embarque-rpt__header {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.45rem;
+    border-bottom: 2px solid #0044a3;
+  }
+
+  .sygma-embarque-rpt__detail {
+    display: none !important;
+  }
+
+  .sygma-embarque-rpt__brand {
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+
+  .sygma-embarque-rpt__embarque-info {
+    margin-top: 0.15rem;
+  }
+
+  .sygma-embarque-rpt__embarque-code {
+    font-size: 10pt;
+  }
+
+  .sygma-embarque-rpt__embarque-date {
+    font-size: 9.5pt;
+  }
+
+  .sygma-embarque-rpt__logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .sygma-embarque-rpt__title {
+    font-size: 14pt;
+    color: #0044a3;
+  }
+
+  .sygma-embarque-rpt__table thead th {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .sygma-embarque-rpt__table tbody tr:nth-child(even) {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .sygma-embarque-rpt__total-block {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background: #f1f5f9 !important;
+    border-top: 2px solid #0044a3 !important;
+  }
+
+  .sygma-embarque-rpt__table-wrap {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+
+  .sygma-embarque-rpt__table tbody tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+
+#rpt_facturas_pendientes .sygma-embarque-rpt__body {
+  padding: 0.55rem 0.75rem !important;
+}
+
+#rpt_facturas_pendientes .sygma-embarque-rpt__header {
+  margin-bottom: 0.4rem;
+  padding-bottom: 0.4rem;
+  gap: 0.35rem 0.75rem;
+}
+
+#rpt_facturas_pendientes .sygma-embarque-rpt__toolbar {
+  margin-bottom: 0.4rem;
+}
+
+#rpt_facturas_pendientes .sygma-embarque-rpt__total-block {
+  margin-top: 0.45rem;
+  padding: 0.45rem 0.65rem;
+}
+
+#rpt_facturas_pendientes .sygma-embarque-rpt__table tbody td {
+  padding: 0.32rem 0.45rem;
+}
+
+#rpt_facturas_pendientes .sygma-embarque-rpt__table thead th {
+  padding: 0.35rem 0.45rem;
+}
+
+#rpt_relleno_inventario .sygma-embarque-rpt__body {
+  padding: 0.55rem 0.75rem !important;
+}
+
+#rpt_relleno_inventario .sygma-embarque-rpt__header {
+  margin-bottom: 0.4rem;
+  padding-bottom: 0.4rem;
+  gap: 0.35rem 0.75rem;
+}
+
+#rpt_relleno_inventario .sygma-embarque-rpt__toolbar {
+  margin-bottom: 0.4rem;
+}
+
+#rpt_relleno_inventario .sygma-embarque-rpt__total-block {
+  margin-top: 0.45rem;
+  padding: 0.45rem 0.65rem;
+}
+
+#rpt_relleno_inventario .sygma-embarque-rpt__table tbody td {
+  padding: 0.32rem 0.45rem;
+}
+
+#rpt_relleno_inventario .sygma-embarque-rpt__table thead th {
+  padding: 0.35rem 0.45rem;
+}
+
+.sygma-pendientes-filtros__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.45rem 0.65rem;
+}
+
+.sygma-pendientes-filtros__search {
+  flex: 1 1 220px;
+  min-width: 180px;
+}
+
+.sygma-pendientes-filtros__fecha-wrap,
+.sygma-pendientes-filtros__vendedor-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.sygma-pendientes-filtros__fecha-wrap {
+  flex: 0 1 auto;
+}
+
+.sygma-pendientes-filtros__vendedor-wrap {
+  flex: 0 1 220px;
+  min-width: 170px;
+}
+
+.sygma-pendientes-filtros__label {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.sygma-pendientes-filtros__fecha {
+  width: 9.5rem;
+  font-size: 0.82rem;
+  padding: 0.35rem 0.5rem;
+  height: calc(1.5em + 0.7rem + 2px);
+}
+
+.sygma-pendientes-filtros__fecha-off {
+  opacity: 0.55;
+  background: #f1f5f9;
+}
+
+.sygma-pendientes-filtros__vendedor {
+  font-size: 0.82rem;
+  padding: 0.35rem 0.5rem;
+  height: calc(1.5em + 0.7rem + 2px);
+  min-width: 150px;
+}
+
+.sygma-pendientes-filtros__btn-clear,
+.sygma-pendientes-filtros__btn-today {
+  padding: 0.25rem 0.5rem;
+  line-height: 1.2;
+}
+
+@media (max-width: 767.98px) {
+  .sygma-pendientes-filtros__vendedor-wrap {
+    flex: 1 1 100%;
+  }
+
+  .sygma-pendientes-filtros__search {
+    flex: 1 1 100%;
+  }
+}
+
+/* Modal selección embarque (facturas pendientes) */
+.sygma-embarque-select-modal .modal-dialog {
+  max-width: min(760px, calc(100vw - 1.5rem));
+}
+
+.sygma-embarque-select-modal__header {
+  padding-bottom: 1rem !important;
+}
+
+.sygma-embarque-select-modal__hint {
+  margin-top: 0.75rem;
+  font-size: 0.82rem;
+  opacity: 0.88;
+  line-height: 1.35;
+}
+
+.sygma-embarque-select-modal__body {
+  padding: 0.75rem 1rem 0.85rem !important;
+  background: #f8fafc;
+}
+
+.sygma-embarque-select-modal__table-wrap {
+  max-height: min(50vh, 380px);
+  overflow: auto;
+}
+
+.sygma-embarque-select-modal__total-block {
+  margin-top: 0.55rem;
+  padding: 0.45rem 0.65rem;
+}
+
+.sygma-embarque-select-modal .sygma-embarque-rpt__toolbar {
+  margin-bottom: 0.45rem;
+}
+
+.sygma-embarque-select-modal .sygma-embarque-rpt__table tbody td {
+  padding: 0.35rem 0.5rem;
+}
+
+.sygma-embarque-select-modal .sygma-embarque-rpt__table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+/* Modal detalle documento (digitador / asignación pedidos) */
+.sygma-doc-detalle-modal .modal-dialog {
+  max-width: min(960px, calc(100vw - 1.5rem));
+}
+
+.sygma-doc-detalle-modal__content {
+  border: none;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.18);
+}
+
+.sygma-doc-detalle-modal__header {
+  background: linear-gradient(135deg, #0044a3 0%, #0066cc 100%);
+  color: #fff;
+  padding: 1.1rem 1.35rem 1.25rem;
+}
+
+.sygma-doc-detalle-modal__header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sygma-doc-detalle-modal__title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.sygma-doc-detalle-modal__doc-ref {
+  margin-top: 0.2rem;
+  font-size: 0.82rem;
+  opacity: 0.88;
+  font-weight: 600;
+}
+
+.sygma-doc-detalle-modal__close {
+  border: none;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.sygma-doc-detalle-modal__close:hover {
+  background: rgba(255, 255, 255, 0.24);
+  color: #fff;
+}
+
+.sygma-doc-detalle-modal__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+}
+
+.sygma-doc-detalle-modal__meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.5rem;
+  line-height: 1.35;
+}
+
+.sygma-doc-detalle-modal__label-inline {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.85;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.sygma-doc-detalle-modal__label {
+  display: block;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.78;
+  margin-bottom: 0.15rem;
+  font-weight: 600;
+}
+
+.sygma-doc-detalle-modal__value {
+  display: inline;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.sygma-doc-detalle-modal__embarque {
+  display: inline;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #ff4d4f;
+  letter-spacing: 0.03em;
+}
+
+.sygma-doc-detalle-modal__body {
+  padding: 1rem 1.35rem 1.1rem;
+  background: #f8fafc;
+}
+
+.sygma-doc-detalle-modal__table-wrap {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  overflow: auto;
+  max-height: min(52vh, 420px);
+}
+
+.sygma-doc-detalle-modal__table {
+  font-size: 0.82rem;
+  margin-bottom: 0;
+}
+
+.sygma-doc-detalle-modal__table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #0f172a;
+  color: #fff;
+  border: none;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.sygma-doc-detalle-modal__table tbody td {
+  padding: 0.55rem 0.75rem;
+  vertical-align: middle;
+  border-top: 1px solid #eef2f7;
+}
+
+.sygma-doc-detalle-modal__table tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.sygma-doc-detalle-modal__table tbody tr:hover {
+  background: #eef6ff;
+}
+
+.sygma-doc-detalle-modal__cod {
+  font-weight: 700;
+  color: #0044a3;
+}
+
+.sygma-doc-detalle-modal__importe {
+  font-weight: 700;
+  color: #0f766e;
+}
+
+.sygma-doc-detalle-modal__total-block {
+  margin-top: 0.85rem;
+  background: #fff;
+  border: 1px solid #dbeafe;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+}
+
+.sygma-doc-detalle-modal__total-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem 1rem;
+}
+
+.sygma-doc-detalle-modal__total-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.sygma-doc-detalle-modal__total-qty {
+  font-weight: 700;
+  color: #334155;
+  margin-right: 0.75rem;
+}
+
+.sygma-doc-detalle-modal__total-amount {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0044a3;
+}
+
+.sygma-doc-detalle-modal__obs {
+  margin-top: 0.85rem;
+}
+
+.sygma-doc-detalle-modal__obs-input {
+  background: #fff;
+  border-color: #e2e8f0;
+  font-size: 0.85rem;
+  resize: none;
+}
+
+.sygma-doc-detalle-modal__footer {
+  border-top: 1px solid #e2e8f0;
+  background: #fff;
+  padding: 0.75rem 1.35rem;
+  justify-content: flex-end;
+}
+
+.sygma-doc-detalle-modal__btn-close {
+  border-radius: 999px;
+  padding: 0.45rem 1.1rem;
+  font-weight: 600;
+}
+
+@media (max-width: 767.98px) {
+  .sygma-doc-detalle-modal__table-wrap {
+    max-height: 45vh;
+  }
+}

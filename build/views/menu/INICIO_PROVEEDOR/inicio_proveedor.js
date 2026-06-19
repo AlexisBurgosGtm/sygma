@@ -1,9 +1,9 @@
 
-let proveedor_embedDestroy = null;
-let proveedor_dashboardCharts = {};
-let proveedor_marcasVendedorChart = null;
-let proveedor_vendedorMarcasChart = null;
-let proveedor_vendedorSeleccionado = '';
+var proveedor_embedDestroy = null;
+var proveedor_dashboardCharts = {};
+var proveedor_marcasVendedorChart = null;
+var proveedor_vendedorMarcasChart = null;
+var proveedor_vendedorSeleccionado = '';
 
 function proveedor_getModoVentas() {
     return document.getElementById('cmbProveedorModoVentas')?.value || 'bruta';
@@ -13,7 +13,7 @@ function proveedor_labelModoVentas() {
     return proveedor_getModoVentas() === 'neta' ? 'Ventas netas' : 'Ventas brutas';
 }
 
-const PROVEEDOR_EMBED_BASE = '../views/menu/INICIO_PROVEEDOR/';
+var PROVEEDOR_EMBED_BASE = '../views/menu/INICIO_PROVEEDOR/';
 
 function proveedor_getSucursal() {
     return document.getElementById('cmbSucursalHeader')?.value || '%';
@@ -34,7 +34,7 @@ function proveedor_onHeaderFiltersChange() {
         window.proveedor_embedRefresh();
     }
 }
-const PROVEEDOR_EMBED_SCRIPTS = {
+var PROVEEDOR_EMBED_SCRIPTS = {
     btnMenuObjetivosLogro: PROVEEDOR_EMBED_BASE + 'view_avance_procter_vendedor.js',
     btnMenuRptVisitasMapa: PROVEEDOR_EMBED_BASE + 'view_visitas_vendedores_gps.js',
     btnMenuInventarioRetroactivo: PROVEEDOR_EMBED_BASE + 'view_inv_retroactivo.js',
@@ -43,7 +43,7 @@ const PROVEEDOR_EMBED_SCRIPTS = {
     btnMenuCoberturaMarcas: PROVEEDOR_EMBED_BASE + 'view_cobertura_marcas.js',
 };
 
-const PROVEEDOR_MODERN_EMBEDS = new Set([
+var PROVEEDOR_MODERN_EMBEDS = new Set([
     'btnMenuObjetivosLogro',
     'btnMenuInventarioRetroactivo',
     'btnMenuCoberturaMunicipios',
@@ -1526,6 +1526,7 @@ function initView(){
     document.getElementById('js-page-content')?.classList.add('proveedor-page');
     getView();
     addListeners();
+    proveedor_showHome();
 }
 
 function destroyView(){
@@ -1544,6 +1545,7 @@ window._proveedorCore = { initView, destroyView, getView, addListeners };
         initView: window._proveedorCore.initView,
         destroyView: window._proveedorCore.destroyView
     };
+    window.proveedor_showHome = proveedor_showHome;
 })();
 
 function proveedor_destroyVendedorMarcasChart() {
@@ -1715,7 +1717,7 @@ function tbl_rpt_vendedor_marcas(codemp, nombre, mes, anio) {
         });
 }
 
-let proveedor_marcaSeleccionada = '';
+var proveedor_marcaSeleccionada = '';
 
 function proveedor_destroyMarcasVendedorChart() {
     if (proveedor_marcasVendedorChart) {

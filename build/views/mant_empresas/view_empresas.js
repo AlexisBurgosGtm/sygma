@@ -306,3 +306,11 @@ function initView() {
     getView();
     addListeners();
 }
+
+(function registerEmpresasSpaHooks() {
+    window.__spaViewHooks = window.__spaViewHooks || {};
+    window.__spaViewHooks['mant/empresas'] = {
+        initView: initView,
+        destroyView: function () {}
+    };
+})();

@@ -2,41 +2,52 @@ let GF = {
     modo_sat:()=>{
         socket.emit('MODO_SAT')
     },
-    fcn_load_navbar: (idNavbar, idContainer) => {
+    fcn_load_navbar: (menu, idNavbar, idContainer) => {
         const container = document.getElementById(idContainer || 'js-primary-nav');
-        if (!container) return;
+        if (!container || typeof botones_menu === 'undefined') {
+            return;
+        }
 
-        const navId = idNavbar || 'js-nav-menu';
+        let strMenu = '';
+        switch (menu) {
+            case 'DIGITADOR':
+                strMenu = botones_menu.inicio_digitador ? botones_menu.inicio_digitador() : '';
+                break;
+            case 'VENDEDOR':
+                strMenu = botones_menu.inicio_vendedor ? botones_menu.inicio_vendedor() : '';
+                break;
+            case 'VENDEDOR_COMODIN':
+                strMenu = botones_menu.inicio_vendedor_comodin ? botones_menu.inicio_vendedor_comodin() : '';
+                break;
+            case 'SUPERVISOR':
+                strMenu = botones_menu.inicio_supervisor ? botones_menu.inicio_supervisor() : '';
+                break;
+            case 'GERENCIA':
+                strMenu = botones_menu.inicio_gerente ? botones_menu.inicio_gerente() : '';
+                break;
+            case 'REPARTIDOR':
+                strMenu = '';
+                break;
+            default:
+                strMenu = botones_menu.menu_principal ? botones_menu.menu_principal() : '';
+                break;
+        }
+
+        container.innerHTML = strMenu;
         container.style.visibility = 'visible';
 
-        const $existing = $('#' + navId);
-        if ($existing.length && $.fn.navigationDestroy) {
-            try { $existing.navigationDestroy(); } catch (e) { /* sin nav previa */ }
+        const navId = idNavbar || 'js-nav-menu';
+        const menuEl = document.getElementById(navId) || container.querySelector('[id^="js-nav-menu"]');
+        if (menuEl && window.$ && $.fn.navigation) {
+            $(menuEl).navigation({
+                accordion: true,
+                animate: 'easeOutExpo',
+                speed: 200,
+                closedSign: '+',
+                openedSign: '-',
+                initClass: 'js-nav-built'
+            });
         }
-
-        container.innerHTML = botones_menu.menu_principal();
-
-        if (!container._spaMenuBound) {
-            container.addEventListener('click', function (e) {
-                var link = e.target.closest('[data-spa-route],[data-spa-action]');
-                if (!link || !container.contains(link)) return;
-                e.preventDefault();
-                e.stopPropagation();
-                if (window.SpaNav) {
-                    SpaNav.navigateFromLink(link);
-                }
-            }, true);
-            container._spaMenuBound = true;
-        }
-
-        $('#' + navId).navigation({
-            accordion: true,
-            animate: 'easeOutExpo',
-            speed: 200,
-            closedSign: '+',
-            openedSign: '-',
-            initClass: 'js-nav-built'
-        });
     },
     print_orden_soporte:(noorden)=>{
         return new Promise((resolve,reject)=>{

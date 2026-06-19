@@ -176,7 +176,7 @@
                             </div>
 
                             <div class="">
-                                <a href="#" class="header-icon text-danger hand" data-spa-action="salir" title="Cerrar sesión">
+                                <a href="javascript:void(0)" id="btnMpLogout" onclick="Navegar.salir(); return false;" class="header-icon text-danger hand" title="Cerrar sesión">
                                     <i class="fal fa-power-off"></i>
                                 </a>
                             </div>
@@ -868,9 +868,6 @@
         <script src="./controllers/print.js"></script>
        
        
-        <script src="./spa/spaRouter.js"></script>
-        <script src="./spa/routes.js"></script>
-        <script src="./spa/spaNav.js"></script>
         <script src="./controllers/classNavegar.js"></script>
         <script src="./controllers/GlobalVars.js"></script>
         <script src="./controllers/GlobalFunciones.js"></script>
@@ -893,8 +890,9 @@
         <script src="./libs/xlsx.full.min.js"></script>
 
         
-        <script src="./index.js"></script>
         <script src="./controllers/menu_buttons.js"></script>
+
+        <script src="./index.js"></script>
 
 
         <!--

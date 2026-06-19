@@ -1,8 +1,7 @@
 'use strict';
 
 /**
- * Registro central de rutas SPA.
- * path → hash (#/path)
+ * Registro central de rutas (sin URLs hash).
  */
 SpaRouter.registerMany({
     login: {

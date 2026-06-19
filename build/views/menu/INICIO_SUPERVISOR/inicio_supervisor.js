@@ -1,4 +1,4 @@
-let supervisor_embedDestroy = null;
+var supervisor_embedDestroy = null;
 var supervisor_currentPane = 'uno';
 var supervisor_dashboardCharts = {};
 
@@ -42,8 +42,8 @@ function supervisor_initDashboard() {
     supervisor_loadDashboard();
 }
 
-const SUPERVISOR_EMBED_BASE = '../views/menu/INICIO_SUPERVISOR/';
-const SUPERVISOR_EMBED_SCRIPTS = {
+var SUPERVISOR_EMBED_BASE = '../views/menu/INICIO_SUPERVISOR/';
+var SUPERVISOR_EMBED_SCRIPTS = {
     btnMenuClientes: SUPERVISOR_EMBED_BASE + 'view_clientes.js',
     btnMenuNuevoPedido: SUPERVISOR_EMBED_BASE + 'view_pedidos_comodin.js',
     btnMenuCenso: SUPERVISOR_EMBED_BASE + 'view_censo.js',
@@ -1375,6 +1375,7 @@ function initView(){
     document.getElementById('js-page-content')?.classList.add('proveedor-page');
     getView();
     addListeners();
+    supervisor_showHome();
 }
 
 function destroyView(){
@@ -1393,6 +1394,7 @@ window._supervisorCore = { initView, destroyView, getView, addListeners };
         initView: window._supervisorCore.initView,
         destroyView: window._supervisorCore.destroyView
     };
+    window.supervisor_showHome = supervisor_showHome;
 })();
 
 function rpt_facturas(idContainer){

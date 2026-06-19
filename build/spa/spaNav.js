@@ -69,7 +69,7 @@ const SpaNav = {
     linkAttrs(route, params) {
         const p = params || {};
         const paramsJson = Object.keys(p).length ? JSON.stringify(p) : '';
-        let attrs = 'href="' + this.hash(route, p) + '" data-spa-route="' + route + '"';
+        let attrs = 'href="javascript:void(0)" data-spa-route="' + route + '"';
         if (paramsJson) {
             attrs += ' data-spa-params=\'' + paramsJson.replace(/'/g, '&#39;') + '\'';
         }
@@ -112,13 +112,17 @@ const SpaNav = {
     handleAction(action) {
         switch (action) {
             case 'inicio':
-                return Navegar.inicio();
+                if (Number(GlobalNivelUsuario) === 0) {
+                    F.AvisoError('Debe iniciar sesión.');
+                    return SpaRouter.goLogin();
+                }
+                return SpaRouter.goHome();
             case 'salir':
-                return Navegar.salir();
+                return SpaRouter.requestLogout();
             case 'pendiente':
                 return Menu.pendiente();
             case 'login':
-                return Navegar.login();
+                return SpaRouter.goLogin();
             default:
                 console.warn('[SpaNav] Acción desconocida:', action);
         }
@@ -130,7 +134,7 @@ const SpaNav = {
             return this.handleAction(action);
         }
 
-        const route = el.getAttribute('data-spa-route');
+        let route = el.getAttribute('data-spa-route');
         if (!route) return;
 
         if (Number(GlobalNivelUsuario) === 0) {
@@ -152,7 +156,10 @@ const SpaNav = {
             Menu.salidaMenu();
         }
 
-        return SpaRouter.navigate(route, { params, force: true });
+        document.body.classList.remove('mobile-nav-on');
+        return SpaRouter.loadView(route, params, {
+            skipTransition: String(route).indexOf('inicio/') === 0
+        });
     }
 };
 

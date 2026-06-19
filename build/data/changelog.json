@@ -1,5 +1,5 @@
 {
-  "version": "M.05.06.26 15:32",
+  "version": "M.05.06.26 23:05",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -925,6 +925,316 @@
       "FECHA": "05-06-2026",
       "HORA": "15:32",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 15:32"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "15:44",
+      "DESCRIPCION": "FIX NAVEGACION INICIO DEL MENU SEGUN PERFIL DE USUARIO"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "15:45",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 15:45"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "16:01",
+      "DESCRIPCION": "FIX DEFINITIVO BOTON INICIO DEL MENU CON onclick Y goHome SPA"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "16:02",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 16:02"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "16:14",
+      "DESCRIPCION": "FIX INICIO MENU: window.Navegar, RENDER ANTES DE HASH Y SIN TRANSICION"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "16:15",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 16:15"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "16:44",
+      "DESCRIPCION": "FIX INICIO MENU: sygmaGoInicio, BLOQUEO HASH Y RESET DASHBOARD POR PERFIL"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "16:45",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 16:45"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "17:09",
+      "DESCRIPCION": "FIX INICIO MENU: BLOQUEO HASH PENDIENTE Y EVITAR RE-RENDER DE VISTA ANTERIOR"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "17:10",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 17:10"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "17:34",
+      "DESCRIPCION": "INICIO MENU COMO ENLACE SPA NORMAL CON RUTA DINAMICA POR PERFIL"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "17:35",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 17:35"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "18:04",
+      "DESCRIPCION": "INICIO MENU: HANDLER DIRECTO Y SpaRouter.renderTo SIN CARRERA HASH"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "18:05",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 18:05"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "18:34",
+      "DESCRIPCION": "FIX SALIR E INICIO: navigate replace con force, sin blockHashChange, onclick directo"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "18:35",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 18:35"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "19:09",
+      "DESCRIPCION": "MODULO MenuPrincipal: menu lateral con data-mp-route y data-mp-action sin conflicto con menus de usuario"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "19:10",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 19:10"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "19:44",
+      "DESCRIPCION": "FIX INICIO Y SALIR: onclick directo, listener global y navigate force sin reiniciar plugin nav"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "19:45",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 19:45"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "20:04",
+      "DESCRIPCION": "FIX INICIO/SALIR: manejo centralizado en SpaRouter con stopImmediatePropagation"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "20:05",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 20:05"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "20:24",
+      "DESCRIPCION": "FIX goHome: replaceState sin hashchange, destroy por ruta visible y re-panel inicio"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "20:25",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 20:25"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "20:39",
+      "DESCRIPCION": "FIX INICIO en misma ruta: resetea panel dashboard sin recargar hash"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "20:40",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 20:40"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "20:54",
+      "DESCRIPCION": "FIX INICIO desde otras secciones: usa hash real y no currentPath desactualizado"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "20:55",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 20:55"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "21:09",
+      "DESCRIPCION": "FIX INICIO repetido: destroy por currentPath y hash al final del render"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "21:10",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 21:10"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "21:29",
+      "DESCRIPCION": "REHACER NAVEGACION INICIO/SALIR: sygmaLoadView.js con loadView unico"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "21:30",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 21:30"
+    },
+    {
+      "FECHA": "18-06-2026",
+      "HORA": "21:40",
+      "DESCRIPCION": "NAVEGACION POR PERFIL: MENU LATERAL SOLO DIGITADOR Y GERENTE, CARDS EN SUPERVISOR PROVEEDOR Y VENDEDOR"
+    },
+    {
+      "FECHA": "18-06-2026",
+      "HORA": "21:40",
+      "DESCRIPCION": "FIX RE-LOGIN SUPERVISOR PROVEEDOR Y VENDEDOR CON enVistaPerfil ANTES DE ATAJO showHome"
+    },
+    {
+      "FECHA": "18-06-2026",
+      "HORA": "21:40",
+      "DESCRIPCION": "DOCUMENTACION NAVEGACION POR PERFIL EN build/docs Y REGLA CURSOR"
+    },
+    {
+      "FECHA": "18-06-2026",
+      "HORA": "21:55",
+      "DESCRIPCION": "REPORTE PRODUCTOS DEL EMBARQUE DIGITADOR: TABLA MODERNA, IMPRESION Y TOTAL AL PIE"
+    },
+    {
+      "FECHA": "18-06-2026",
+      "HORA": "22:00",
+      "DESCRIPCION": "IMPRESION PRODUCTOS EMBARQUE: LOGO, TITULO, CODEMBARQUE Y FECHA SIN MENU NI BOTONES"
+    },
+    {
+      "FECHA": "18-06-2026",
+      "HORA": "22:00",
+      "DESCRIPCION": "TOTAL IMPORTE SOLO EN ULTIMA PAGINA DEL REPORTE PRODUCTOS EMBARQUE"
+    },
+    {
+      "FECHA": "18-06-2026",
+      "HORA": "22:10",
+      "DESCRIPCION": "REPORTE FACTURAS DEL EMBARQUE DIGITADOR CON MISMO FORMATO IMPRESION Y TABLA MODERNA"
+    },
+    {
+      "FECHA": "18-06-2026",
+      "HORA": "22:10",
+      "DESCRIPCION": "FACTURAS EMBARQUE CONSERVA BOTONES DESVINCULAR, DETALLE Y EDITAR EN PANTALLA"
+    },
+    {
+      "FECHA": "18-06-2026",
+      "HORA": "22:03",
+      "DESCRIPCION": "REGLA OBLIGATORIA: ACTUALIZAR changelog.json CON FECHA Y HORA EN CADA PROMPT CON CAMBIOS"
+    },
+    {
+      "FECHA": "18-06-2026",
+      "HORA": "22:03",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.18.06.26 22:03"
+    },
+    {
+      "FECHA": "18-06-2026",
+      "HORA": "22:05",
+      "DESCRIPCION": "REPORTE PRODUCTOS BONIFICADOS DEL EMBARQUE CON FORMATO MODERNO, IMPRESION Y TOTAL AL PIE"
+    },
+    {
+      "FECHA": "18-06-2026",
+      "HORA": "22:05",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.18.06.26 22:05"
+    },
+    {
+      "FECHA": "18-06-2026",
+      "HORA": "22:13",
+      "DESCRIPCION": "REPORTES FACTURAS ANULADAS, PRECIOS ESPECIALES Y RESUMEN VENDEDOR CON FORMATO MODERNO E IMPRESION"
+    },
+    {
+      "FECHA": "18-06-2026",
+      "HORA": "22:13",
+      "DESCRIPCION": "FACTURAS ANULADAS CONSERVA BOTONES EMBARQUE, MAPA, REPARAR, ST, DETALLE Y EDITAR"
+    },
+    {
+      "FECHA": "18-06-2026",
+      "HORA": "22:13",
+      "DESCRIPCION": "PRECIOS ESPECIALES CONSERVA BOTONES DETALLE Y EDITAR CON TOTAL AL PIE"
+    },
+    {
+      "FECHA": "18-06-2026",
+      "HORA": "22:13",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.18.06.26 22:13"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "22:28",
+      "DESCRIPCION": "MODAL DETALLE DOCUMENTO EN ASIGNACION PEDIDOS CENTRADO CON CLIENTE, DIRECCION Y EMBARQUE EN ROJO"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "22:28",
+      "DESCRIPCION": "API DETALLE DOCUMENTO INCLUYE NOMCLIE, DIRCLIE Y CODEMBARQUE DESDE DOCUMENTOS"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "22:28",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 22:28"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "22:35",
+      "DESCRIPCION": "FACTURAS PENDIENTES CON ESTILO MODERNO COMO FACTURAS DEL EMBARQUE, TOTAL AL PIE E IMPRESION"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "22:35",
+      "DESCRIPCION": "TABLA PENDIENTES CON CELDAS COMPACTAS Y BOTONES EMBARQUE, MAPA, REPARAR, ST, DETALLE Y EDITAR"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "22:35",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 22:35"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "22:42",
+      "DESCRIPCION": "MODAL ASIGNAR EMBARQUE EN FACTURAS PENDIENTES CON ESTILO MODERNO CENTRADO Y BUSCADOR"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "22:42",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 22:42"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "22:48",
+      "DESCRIPCION": "RELLENO DE INVENTARIO CON ESTILO MODERNO, BUSCADOR, IMPRESION Y TOTAL UNIDADES AL PIE"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "22:48",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 22:48"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "22:52",
+      "DESCRIPCION": "MODAL DETALLE DOCUMENTO CON EMBARQUE, CLIENTE Y DIRECCION EN LA MISMA FILA LABEL VALOR"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "22:52",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 22:52"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "23:05",
+      "DESCRIPCION": "FACTURAS PENDIENTES CON FILTRO FECHA DEL DISPOSITIVO, QUITAR FECHA Y SELECTOR VENDEDOR TODOS"
+    },
+    {
+      "FECHA": "05-06-2026",
+      "HORA": "23:05",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.05.06.26 23:05"
     }
   ]
 }

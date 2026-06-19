@@ -1,0 +1,37 @@
+---
+description: Navegación SYGMA v2 por perfil (Navegar, menú lateral, login, F.loadScript)
+globs: build/controllers/classNavegar.js,build/controllers/GlobalFunciones.js,build/controllers/menu_buttons.js,build/controllers/menu_handler.js,build/views/menu/**/*.js,build/views/general_login/view_login.js
+alwaysApply: false
+---
+
+# Navegación por perfil (SYGMA v2)
+
+Consultar `build/docs/NAVEGACION-POR-PERFIL.md` para el detalle completo.
+
+## Patrón vigente
+- Sin router SPA: `Menu.*` / `Navegar.*` → `F.loadScript(url, 'root')` → `initView()`
+- Entrada post-login: `Navegar.inicio()` → `mostrarMenu()` + `inicio_<perfil>()`
+
+## Menú lateral `#root_navbar`
+- **Con menú general:** gerente (1), digitador (5) → `GF.fcn_load_navbar(getMenuRole(), ...)`
+- **Solo cards internas:** supervisor (2), vendedor (3/8), proveedor (7) → `usaMenuSoloCards()` + `body.spa-nav-hidden`
+
+## Reglas obligatorias al tocar perfiles
+
+1. **`inicio_<perfil>()` — atajo INICIO solo si el DOM existe**
+   ```javascript
+   if (Navegar.enVistaPerfil('xxxSidebar') && typeof xxx_showHome === 'function') { ... return; }
+   F.loadScript(...).then(() => initView());
+   ```
+   Nunca atajar solo con `typeof xxx_showHome` (tras logout la función sigue en memoria y el usuario queda en login).
+
+2. **Vistas recargables:** top-level con `var`, no `let`/`const` (segunda ejecución de `F.loadScript` rompe).
+
+3. **`mostrarMenu()`** debe quitar `login-active` y respetar `usaMenuSoloCards()` — no inyectar `menu_principal` a todos.
+
+4. **Perfil nuevo:** actualizar `usaMenuSoloCards()` o `getMenuRole()`, case en `Navegar.inicio()`, sidebar ID estable, probar **re-login** tras salir.
+
+## IDs sidebar
+- Supervisor: `supervisorSidebar` / `supervisor_showHome`
+- Proveedor: `proveedorSidebar` / `proveedor_showHome`
+- Vendedor: `ventasSidebar` / `ventas_showHome`

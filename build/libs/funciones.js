@@ -1289,23 +1289,7 @@ let F = {
         window.open(`https://www.google.com/maps?q=${lat},${long}`);
       },
       imprimirSelec:(nombreDiv)=>{
-        
-        var contenido= document.getElementById(nombreDiv).innerHTML;
-        
-        //var contenidoOriginal= document.body.innerHTML;
-    
-        //document.body.innerHTML = contenido;
-    
-        /*
-        setTimeout(() => {
-          window.print();
-          document.body.innerHTML = contenidoOriginal;    
-        }, 3000);
-        */
-
         window.print();
-        //document.body.innerHTML = contenidoOriginal;
-      
       },
       converFileBase64:(file)=>{
           return new Promise((resolve, reject)=>{
