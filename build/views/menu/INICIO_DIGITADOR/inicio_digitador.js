@@ -157,7 +157,7 @@ function getView(){
                             ${view.vista_relleno()}
                         </div>
                         <div class="tab-pane fade" id="cuatro" role="tabpanel" aria-labelledby="home-tab">
-                            ${view.vista_embarques() + view.vista_embarques_modal_datos()}
+                            ${view.vista_embarques() + view.vista_embarques_modal_datos() + view.vista_embarques_modal_imprimir() + view.vista_embarques_modal_finalizar()}
                         </div>
                         <div class="tab-pane fade" id="cinco" role="tabpanel" aria-labelledby="home-tab">
                             ${view.vista_revision_inventario_embarque()}
@@ -612,156 +612,229 @@ function getView(){
         },
         vista_embarques:()=>{
             return `
-            <div class="card card-rounded shadow col-12">
-                <div class="card-body p-4">
-                    <h4 class="negrita text-base">EMBARQUES - (GESTION DE PICKING)</h4>
-
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label class="negrita text-secondary">Seleccione mes y año</label>
-                                <div class="input-group">
-                                    <select class="form-control negrita" id="cmbMes"></select>
-                                    <select class="form-control negrita" id="cmbAnio"></select>
-                                </div>
+            <div class="sygma-embarque-rpt card card-rounded shadow-sm col-12 border-0" id="rpt_embarques_picking">
+                <div class="card-body sygma-embarque-rpt__body p-2">
+                    <header class="sygma-embarque-rpt__header">
+                        <div class="sygma-embarque-rpt__brand">
+                            <img class="sygma-embarque-rpt__logo" src="./favicon.png" width="40" height="40" alt="Logo">
+                            <div class="sygma-embarque-rpt__brand-text">
+                                <h4 class="sygma-embarque-rpt__title mb-0">Embarques</h4>
+                                <span class="sygma-embarque-rpt__embarque-date">Gestión de picking</span>
                             </div>
                         </div>
-                        <div class="col-6">
-                            
-                            <div class="form-group">
-                                <label class="negrita text-secondary">Filtrar por</label>
-                                <div class="input-group">
-                                    <select class="form-control negrita" id="cmbStatus">
-                                        <option value="NO">PENDIENTES</option>
-                                        <option value="SI">FINALIZADOS</option>
-                                    </select>
-                                    
-                                </div>
-                            </div>
+                        <div class="sygma-embarque-rpt__detail oculto-impresion">
+                            <span class="sygma-embarque-rpt__stat sygma-embarque-rpt__stat--items" id="lbEmbGridTotal"></span>
+                            <span class="d-none" id="lbTotalEmb"></span>
+                        </div>
+                    </header>
 
+                    <div class="sygma-embarque-rpt__toolbar sygma-embarques-filtros oculto-impresion">
+                        <div class="sygma-embarques-filtros__row">
+                            <input type="text" class="form-control sygma-embarque-rpt__search sygma-embarques-filtros__search" id="txtBuscarEmbarques"
+                                placeholder="Buscar embarque, repartidor o descripción..."
+                                oninput="F.FiltrarTabla('tblEmbarques','txtBuscarEmbarques')">
+                            <div class="sygma-embarques-filtros__field">
+                                <label class="sygma-embarques-filtros__label" for="cmbMes">Mes</label>
+                                <select class="form-control sygma-embarques-filtros__select" id="cmbMes"></select>
+                            </div>
+                            <div class="sygma-embarques-filtros__field">
+                                <label class="sygma-embarques-filtros__label" for="cmbAnio">Año</label>
+                                <select class="form-control sygma-embarques-filtros__select" id="cmbAnio"></select>
+                            </div>
+                            <div class="sygma-embarques-filtros__field">
+                                <label class="sygma-embarques-filtros__label" for="cmbStatus">Estado</label>
+                                <select class="form-control sygma-embarques-filtros__select" id="cmbStatus">
+                                    <option value="NO">Pendientes</option>
+                                    <option value="SI">Finalizados</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
-                
-                </div>
-            </div>
-            
-            <br>
 
-            <div class="card card-rounded shadow col-12">
-                <div class="card-body p-4">
-
-                    <div class="table-responsive">
-                        
-                        <table class="table col-12 h-full" id="tblEmbarques">
-                            <thead class="bg-base text-white">
+                    <div class="table-responsive sygma-embarque-rpt__table-wrap">
+                        <table class="table sygma-embarque-rpt__table mb-0" id="tblEmbarques">
+                            <thead>
                                 <tr>
-                                    <td>FECHA</td>
-                                    <td>EMBARQUE</td>
-                                    <td>REPARTIDOR</td>
-                                    <td>IMPORTE</td>
-                                    <td>DEVOLUCIONES</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
+                                    <th>FECHA</th>
+                                    <th>EMBARQUE</th>
+                                    <th>REPARTIDOR</th>
+                                    <th class="text-right">IMPORTE</th>
+                                    <th class="text-right">DEVOL.</th>
+                                    <th class="sygma-embarque-rpt__col-action oculto-impresion text-center" title="Finalizar / Activar"></th>
+                                    <th class="sygma-embarque-rpt__col-action oculto-impresion text-center" title="Editar"></th>
+                                    <th class="sygma-embarque-rpt__col-action oculto-impresion text-center" title="Imprimir"></th>
+                                    <th class="sygma-embarque-rpt__col-action oculto-impresion text-center" title="Eliminar"></th>
                                 </tr>
                             </thead>
-                            <tbody id="tblDatalEmbarques">
-                            
-                            </tbody>
-
+                            <tbody id="tblDatalEmbarques"></tbody>
                         </table>
-
                     </div>
-                           
+                    <div class="sygma-embarque-rpt__total-block" id="lbEmbGridTotalBlock"></div>
                 </div>
             </div>
 
-
-            <button class="btn btn-success btn-xl btn-circle hand shadow btn-bottom-r" id="btnEmbarquesNuevo">
+            <button type="button" class="btn btn-success btn-lg btn-circle hand shadow sygma-embarques-fab oculto-impresion" id="btnEmbarquesNuevo" title="Nuevo embarque">
                 <i class="fal fa-plus"></i>
             </button>
 
+            <div id="sygma_embarque_print_host" class="sygma-embarque-print-host" aria-hidden="true"></div>
             `
-
         },
-        vista_embarques_modal_datos:()=>{
+        vista_embarques_modal_imprimir:()=>{
             return `
-                <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true" id="modal_embarques_nuevo">
-                    <div class="modal-dialog modal-dialog-right modal-xl">
-                        <div class="modal-content">
-                            <div class="modal-body p-2">
-                                
-                                <div class="card card-rounded">
-                                    <div class="card-body p-4">
-
-                                        <div class="row">
-                                            <div class="col-6">
-                                                <h4 class="negrita text-danger">Datos del Embarque</h4>
-                                            </div>
-                                            <div class="col-6">
-                                                <div class="form-group">
-                                                    <label class="negrita text-secondary">Fecha</label>
-                                                    <input type="date" class="form-control" id="txtEmbarqueFecha">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <br>
-
-                                        <div class="form-group">
-                                            <label class="negrita text-secondary">Código Embarque</label>
-                                            <div class="input-group">
-                                                <input type="text" class="form-control"  id="txtEmbarqueCodigo">
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="negrita text-secondary">Descripción</label>
-                                            <input type="text" class="form-control" id="txtEmbarqueDescripcion">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="negrita text-secondary">Ruteo</label>
-                                            <input type="text" class="form-control" id="txtEmbarqueRuteo">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="negrita text-secondary">Repartidor</label>
-                                            <select class="form-control" id="cmbEmbarqueEmpleado">
-                                            </select>
-                                        </div>
-
-                                        <br>
-                                        <div class="row">
-                                            <div class="col-6">
-                                                 <button class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
-                                                    <i class="fal fa-arrow-left"></i>
-                                                </button>
-                                            </div>
-                                            <div class="col-6">
-                                                 <button class="btn btn-info btn-circle btn-xl hand shadow" id="btnEmbarqueGuardar">
-                                                    <i class="fal fa-save"></i>
-                                                </button>
-                                            </div>
-
-                                        </div>
-
-                                    
-                                    </div>
+            <div id="modal_embarque_imprimir" class="modal fade sygma-doc-detalle-modal sygma-embarque-print-modal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-sm">
+                    <div class="modal-content sygma-doc-detalle-modal__content">
+                        <div class="sygma-doc-detalle-modal__header sygma-embarque-print-modal__header">
+                            <div class="sygma-doc-detalle-modal__header-top mb-0">
+                                <div>
+                                    <h4 class="sygma-doc-detalle-modal__title sygma-embarque-print-modal__title">Imprimir</h4>
+                                    <p class="sygma-doc-detalle-modal__doc-ref mb-0"><span id="lbEmbPrintCodembarque"></span></p>
                                 </div>
-
-
-
+                                <button type="button" class="sygma-doc-detalle-modal__close" data-dismiss="modal" aria-label="Cerrar">
+                                    <i class="fal fa-times"></i>
+                                </button>
                             </div>
-                         
-                        
+                        </div>
+                        <div class="modal-body sygma-embarque-print-modal__body p-0">
+                            <div id="embPrintLoader" class="sygma-embarque-print-modal__loader d-none">
+                                <div class="sygma-embarque-print-modal__loader-spinner"></div>
+                                <p class="sygma-embarque-print-modal__loader-text mb-0">Generando imprimible...</p>
+                            </div>
+                            <div id="embPrintActions" class="sygma-embarque-print-modal__actions">
+                                <button type="button" class="btn btn-outline-primary btn-sm btn-block sygma-embarque-print-modal__btn hand" id="btnEmbPrintProductos">
+                                    <span class="sygma-embarque-print-modal__btn-icon"><i class="fal fa-boxes"></i></span>
+                                    <span class="sygma-embarque-print-modal__btn-text">Imprimir embarque</span>
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm btn-block sygma-embarque-print-modal__btn hand" id="btnEmbPrintFacturas">
+                                    <span class="sygma-embarque-print-modal__btn-icon"><i class="fal fa-list"></i></span>
+                                    <span class="sygma-embarque-print-modal__btn-text">Lista facturas</span>
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm btn-block sygma-embarque-print-modal__btn hand mb-0" id="btnEmbPrintDocumentos">
+                                    <span class="sygma-embarque-print-modal__btn-icon"><i class="fal fa-print"></i></span>
+                                    <span class="sygma-embarque-print-modal__btn-text">Documentos (tickets)</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="modal-footer sygma-doc-detalle-modal__footer sygma-embarque-print-modal__footer" id="embPrintFooter">
+                            <button type="button" class="btn btn-secondary btn-sm sygma-doc-detalle-modal__btn-close" data-dismiss="modal">Cancelar</button>
                         </div>
                     </div>
                 </div>
-
+            </div>
             `
-
+        },
+        vista_embarques_modal_datos:()=>{
+            return `
+                <div id="modal_embarques_nuevo" class="modal fade sygma-doc-detalle-modal sygma-embarque-form-modal" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-md">
+                        <div class="modal-content sygma-doc-detalle-modal__content">
+                            <div class="sygma-doc-detalle-modal__header sygma-embarque-form-modal__header">
+                                <div class="sygma-doc-detalle-modal__header-top mb-0">
+                                    <div>
+                                        <h4 class="sygma-doc-detalle-modal__title" id="lbEmbFormTitle">Nuevo embarque</h4>
+                                        <p class="sygma-doc-detalle-modal__doc-ref mb-0" id="lbEmbFormRef">Complete los datos del embarque</p>
+                                    </div>
+                                    <button type="button" class="sygma-doc-detalle-modal__close" data-dismiss="modal" aria-label="Cerrar">
+                                        <i class="fal fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="modal-body sygma-embarque-form-modal__body">
+                                <div class="sygma-embarque-form-modal__grid">
+                                    <div class="sygma-embarque-form-modal__field">
+                                        <label class="sygma-embarque-form-modal__label" for="txtEmbarqueFecha">Fecha</label>
+                                        <input type="date" class="form-control form-control-sm sygma-embarque-form-modal__input" id="txtEmbarqueFecha">
+                                    </div>
+                                    <div class="sygma-embarque-form-modal__field">
+                                        <label class="sygma-embarque-form-modal__label" for="txtEmbarqueCodigo">Código embarque</label>
+                                        <input type="text" class="form-control form-control-sm sygma-embarque-form-modal__input" id="txtEmbarqueCodigo">
+                                    </div>
+                                    <div class="sygma-embarque-form-modal__field sygma-embarque-form-modal__field--full">
+                                        <label class="sygma-embarque-form-modal__label" for="txtEmbarqueDescripcion">Descripción</label>
+                                        <input type="text" class="form-control form-control-sm sygma-embarque-form-modal__input" id="txtEmbarqueDescripcion">
+                                    </div>
+                                    <div class="sygma-embarque-form-modal__field">
+                                        <label class="sygma-embarque-form-modal__label" for="txtEmbarqueRuteo">Ruteo</label>
+                                        <input type="text" class="form-control form-control-sm sygma-embarque-form-modal__input" id="txtEmbarqueRuteo">
+                                    </div>
+                                    <div class="sygma-embarque-form-modal__field">
+                                        <label class="sygma-embarque-form-modal__label" for="cmbEmbarqueEmpleado">Repartidor</label>
+                                        <select class="form-control form-control-sm sygma-embarque-form-modal__input" id="cmbEmbarqueEmpleado"></select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer sygma-doc-detalle-modal__footer sygma-embarque-form-modal__footer">
+                                <button type="button" class="btn btn-secondary btn-sm sygma-doc-detalle-modal__btn-close" data-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-primary btn-sm sygma-embarque-form-modal__btn-save hand" id="btnEmbarqueGuardar">
+                                    <i class="fal fa-save mr-1"></i> Guardar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `
+        },
+        vista_embarques_modal_finalizar:()=>{
+            return `
+                <div id="modal_embarque_finalizar" class="modal fade sygma-doc-detalle-modal sygma-embarque-finalizar-modal" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-md">
+                        <div class="modal-content sygma-doc-detalle-modal__content">
+                            <div class="sygma-doc-detalle-modal__header sygma-embarque-finalizar-modal__header">
+                                <div class="sygma-doc-detalle-modal__header-top mb-0">
+                                    <div>
+                                        <h4 class="sygma-doc-detalle-modal__title">Finalizar embarque</h4>
+                                        <p class="sygma-doc-detalle-modal__doc-ref mb-0" id="lbEmbFinalizarCodembarque"></p>
+                                    </div>
+                                    <button type="button" class="sygma-doc-detalle-modal__close" data-dismiss="modal" aria-label="Cerrar">
+                                        <i class="fal fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="modal-body sygma-embarque-finalizar-modal__body p-0">
+                                <div id="embFinalizarLoader" class="sygma-embarque-finalizar-modal__loader d-none">
+                                    <div class="sygma-embarque-print-modal__loader-spinner"></div>
+                                    <p class="sygma-embarque-finalizar-modal__loader-text mb-0">Calculando totales...</p>
+                                </div>
+                                <div id="embFinalizarForm" class="sygma-embarque-finalizar-modal__form">
+                                    <div class="sygma-embarque-finalizar-modal__row sygma-embarque-finalizar-modal__row--fecha">
+                                        <label class="sygma-embarque-finalizar-modal__label" for="txtEmbFinalizarFecha">Fecha finalización</label>
+                                        <input type="date" class="form-control form-control-sm sygma-embarque-finalizar-modal__fecha" id="txtEmbFinalizarFecha">
+                                    </div>
+                                    <div class="sygma-embarque-finalizar-modal__row">
+                                        <span class="sygma-embarque-finalizar-modal__label">Total facturas</span>
+                                        <span class="sygma-embarque-finalizar-modal__value" id="lbEmbFinalizarFacturas">Q 0.00</span>
+                                    </div>
+                                    <div class="sygma-embarque-finalizar-modal__row">
+                                        <span class="sygma-embarque-finalizar-modal__label">Total devoluciones</span>
+                                        <span class="sygma-embarque-finalizar-modal__value sygma-embarque-finalizar-modal__value--dev" id="lbEmbFinalizarDevoluciones">Q 0.00</span>
+                                    </div>
+                                    <div class="sygma-embarque-finalizar-modal__row sygma-embarque-finalizar-modal__row--liquidar">
+                                        <span class="sygma-embarque-finalizar-modal__label">Total a liquidar</span>
+                                        <span class="sygma-embarque-finalizar-modal__value sygma-embarque-finalizar-modal__value--liquidar" id="lbEmbFinalizarLiquidar">Q 0.00</span>
+                                    </div>
+                                    <div class="sygma-embarque-finalizar-modal__row sygma-embarque-finalizar-modal__row--input">
+                                        <label class="sygma-embarque-finalizar-modal__label" for="txtEmbFinalizarReportado">Total reportado</label>
+                                        <div class="input-group sygma-embarque-finalizar-modal__input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text sygma-embarque-finalizar-modal__input-prefix">Q</span>
+                                            </div>
+                                            <input type="number" step="0.01" min="0" class="form-control sygma-embarque-finalizar-modal__input" id="txtEmbFinalizarReportado" placeholder="0.00">
+                                        </div>
+                                    </div>
+                                    <p class="sygma-embarque-finalizar-modal__hint mb-0">Ingrese el monto reportado por el repartidor.</p>
+                                </div>
+                            </div>
+                            <div class="modal-footer sygma-doc-detalle-modal__footer sygma-embarque-finalizar-modal__footer" id="embFinalizarFooter">
+                                <button type="button" class="btn btn-secondary btn-sm sygma-doc-detalle-modal__btn-close" data-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-success btn-sm sygma-embarque-finalizar-modal__btn-save hand" id="btnEmbFinalizarGuardar">
+                                    <i class="fal fa-check mr-1"></i> Finalizar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `
         },
         vista_revision_inventario_embarque:()=>{
             return `
@@ -3050,13 +3123,13 @@ function listeners_embarques(){
                     if(value==true){
 
                         btnEmbarqueGuardar.disabled=true;
-                        btnEmbarqueGuardar.innerHTML = `<i class="fal fa-save fa-spin"></i>`;
+                        btnEmbarqueGuardar.innerHTML = `<i class="fal fa-save fa-spin mr-1"></i> Guardando...`;
 
                         GF.get_data_embarques_insert(GlobalEmpnit,fecha,mes,anio,codembarque,descripcion,ruteo,codempleado)
                         .then((data)=>{
 
                             btnEmbarqueGuardar.disabled=false;
-                            btnEmbarqueGuardar.innerHTML = `<i class="fal fa-save"></i>`;
+                            btnEmbarqueGuardar.innerHTML = `<i class="fal fa-save mr-1"></i> Guardar`;
                             
                             F.Aviso('Embarque creado exitosamente!!');
 
@@ -3071,7 +3144,7 @@ function listeners_embarques(){
 
                             F.AvisoError('No se pudo Guardar')
                             btnEmbarqueGuardar.disabled=false;
-                            btnEmbarqueGuardar.innerHTML = `<i class="fal fa-save"></i>`;
+                            btnEmbarqueGuardar.innerHTML = `<i class="fal fa-save mr-1"></i> Guardar`;
 
                         })
 
@@ -3086,14 +3159,14 @@ function listeners_embarques(){
                     if(value==true){
 
                         btnEmbarqueGuardar.disabled=true;
-                        btnEmbarqueGuardar.innerHTML = `<i class="fal fa-save fa-spin"></i>`;
+                        btnEmbarqueGuardar.innerHTML = `<i class="fal fa-save fa-spin mr-1"></i> Guardando...`;
     
 
                         GF.get_data_embarques_edit(GlobalEmpnit,fecha,mes,anio,codembarque,descripcion,ruteo,codempleado)
                         .then((data)=>{
 
                             btnEmbarqueGuardar.disabled=false;
-                            btnEmbarqueGuardar.innerHTML = `<i class="fal fa-save"></i>`;
+                            btnEmbarqueGuardar.innerHTML = `<i class="fal fa-save mr-1"></i> Guardar`;
 
                             F.Aviso('Embarque editado exitosamente!!');
 
@@ -3108,7 +3181,7 @@ function listeners_embarques(){
                         .catch(()=>{
                                 F.AvisoError('No se pudo Editar este embarque')
                                 btnEmbarqueGuardar.disabled=false;
-                                btnEmbarqueGuardar.innerHTML = `<i class="fal fa-save"></i>`;
+                                btnEmbarqueGuardar.innerHTML = `<i class="fal fa-save mr-1"></i> Guardar`;
                             
                         })
 
@@ -3145,11 +3218,451 @@ function listeners_embarques(){
 
     });
 
-
-
-
+    document.getElementById('btnEmbPrintProductos')?.addEventListener('click', embarque_imprimir_productos);
+    document.getElementById('btnEmbPrintFacturas')?.addEventListener('click', embarque_imprimir_lista_facturas);
+    document.getElementById('btnEmbPrintDocumentos')?.addEventListener('click', embarque_imprimir_documentos_tickets);
+    document.getElementById('btnEmbFinalizarGuardar')?.addEventListener('click', embarque_guardar_finalizar);
 
 };
+
+let embarque_print_codembarque = '';
+let embarque_print_fecha = '';
+let embarque_finalizar_codembarque = '';
+let embarque_finalizar_btn_id = '';
+let embarque_finalizar_total_facturas = 0;
+let embarque_finalizar_total_devoluciones = 0;
+
+function embarque_finalizar_show_loader(mensaje){
+    const loader = document.getElementById('embFinalizarLoader');
+    const form = document.getElementById('embFinalizarForm');
+    const footer = document.getElementById('embFinalizarFooter');
+    const txt = loader?.querySelector('.sygma-embarque-finalizar-modal__loader-text');
+    if (txt) txt.textContent = mensaje || 'Calculando totales...';
+    loader?.classList.remove('d-none');
+    form?.classList.add('d-none');
+    footer?.classList.add('d-none');
+}
+
+function embarque_finalizar_hide_loader(){
+    document.getElementById('embFinalizarLoader')?.classList.add('d-none');
+    document.getElementById('embFinalizarForm')?.classList.remove('d-none');
+    document.getElementById('embFinalizarFooter')?.classList.remove('d-none');
+}
+
+function embarque_abrir_modal_finalizar(codembarque, idbtn){
+    embarque_finalizar_codembarque = codembarque || '';
+    embarque_finalizar_btn_id = idbtn || '';
+    embarque_finalizar_total_facturas = 0;
+    embarque_finalizar_total_devoluciones = 0;
+    const lbCod = document.getElementById('lbEmbFinalizarCodembarque');
+    const lbFac = document.getElementById('lbEmbFinalizarFacturas');
+    const lbDev = document.getElementById('lbEmbFinalizarDevoluciones');
+    const lbLiq = document.getElementById('lbEmbFinalizarLiquidar');
+    const txtFecha = document.getElementById('txtEmbFinalizarFecha');
+    const txtRep = document.getElementById('txtEmbFinalizarReportado');
+    const btnSave = document.getElementById('btnEmbFinalizarGuardar');
+    if (lbCod) lbCod.textContent = codembarque ? `Embarque: ${codembarque}` : '';
+    if (lbFac) lbFac.textContent = 'Q 0.00';
+    if (lbDev) lbDev.textContent = 'Q 0.00';
+    if (lbLiq) lbLiq.textContent = 'Q 0.00';
+    if (txtFecha) txtFecha.value = F.getFecha();
+    if (txtRep) txtRep.value = '';
+    if (btnSave) {
+        btnSave.disabled = false;
+        btnSave.innerHTML = `<i class="fal fa-check mr-1"></i> Finalizar`;
+    }
+    embarque_finalizar_show_loader('Calculando totales del embarque...');
+    $('#modal_embarque_finalizar').modal('show');
+    GF.get_data_embarques_totales_finalizar(GlobalEmpnit, codembarque)
+    .then((data) => {
+        const row = (data.recordset || [])[0] || {};
+        embarque_finalizar_total_facturas = Number(row.TOTAL_FACTURAS) || 0;
+        embarque_finalizar_total_devoluciones = Number(row.TOTAL_DEVOLUCIONES) || 0;
+        const totalLiquidar = embarque_finalizar_total_facturas - embarque_finalizar_total_devoluciones;
+        if (lbFac) lbFac.textContent = F.setMoneda(embarque_finalizar_total_facturas, 'Q');
+        if (lbDev) lbDev.textContent = F.setMoneda(embarque_finalizar_total_devoluciones, 'Q');
+        if (lbLiq) lbLiq.textContent = F.setMoneda(totalLiquidar, 'Q');
+        embarque_finalizar_hide_loader();
+        txtRep?.focus();
+    })
+    .catch(() => {
+        $('#modal_embarque_finalizar').modal('hide');
+        F.AvisoError('No se pudieron calcular los totales del embarque');
+    });
+}
+
+function embarque_guardar_finalizar(){
+    const codembarque = embarque_finalizar_codembarque;
+    if (!codembarque) return;
+    const txtFecha = document.getElementById('txtEmbFinalizarFecha');
+    const txtRep = document.getElementById('txtEmbFinalizarReportado');
+    const btnSave = document.getElementById('btnEmbFinalizarGuardar');
+    const fechaFinalizado = F.devuelveFecha('txtEmbFinalizarFecha');
+    if (!fechaFinalizado) {
+        F.AvisoError('Debe indicar la fecha de finalización');
+        txtFecha?.focus();
+        return;
+    }
+    const reportadoRaw = (txtRep?.value || '').trim();
+    if (reportadoRaw === '') {
+        F.AvisoError('Debe ingresar el total reportado');
+        txtRep?.focus();
+        return;
+    }
+    const reportado = Number(reportadoRaw);
+    if (Number.isNaN(reportado) || reportado < 0) {
+        F.AvisoError('El total reportado debe ser un monto válido');
+        txtRep?.focus();
+        return;
+    }
+    F.Confirmacion('¿Está seguro que desea FINALIZAR este embarque?')
+    .then((value) => {
+        if (!value) return;
+        if (btnSave) {
+            btnSave.disabled = true;
+            btnSave.innerHTML = `<i class="fal fa-check fa-spin mr-1"></i> Guardando...`;
+        }
+        GF.get_data_embarques_finalizar_reporte(
+            GlobalEmpnit,
+            codembarque,
+            embarque_finalizar_total_facturas,
+            embarque_finalizar_total_devoluciones,
+            reportado,
+            fechaFinalizado
+        )
+        .then(() => {
+            $('#modal_embarque_finalizar').modal('hide');
+            F.Aviso('Embarque finalizado exitosamente');
+            cargar_grid_embarques();
+        })
+        .catch(() => {
+            F.AvisoError('No se pudo finalizar el embarque');
+            if (btnSave) {
+                btnSave.disabled = false;
+                btnSave.innerHTML = `<i class="fal fa-check mr-1"></i> Finalizar`;
+            }
+        });
+    });
+}
+
+function embarque_abrir_opciones_imprimir(codembarque, fechaLabel){
+    embarque_print_codembarque = codembarque || '';
+    embarque_print_fecha = fechaLabel || '';
+    const lb = document.getElementById('lbEmbPrintCodembarque');
+    if (lb) lb.textContent = embarque_print_codembarque ? `Embarque: ${embarque_print_codembarque}` : '';
+    embarque_print_hide_loader(true);
+    $('#modal_embarque_imprimir').modal('show');
+}
+
+function embarque_print_show_loader(mensaje){
+    const loader = document.getElementById('embPrintLoader');
+    const actions = document.getElementById('embPrintActions');
+    const footer = document.getElementById('embPrintFooter');
+    const txt = loader?.querySelector('.sygma-embarque-print-modal__loader-text');
+    if (txt) txt.textContent = mensaje || 'Generando imprimible...';
+    loader?.classList.remove('d-none');
+    actions?.classList.add('d-none');
+    footer?.classList.add('d-none');
+}
+
+function embarque_print_hide_loader(keepModalOpen){
+    document.getElementById('embPrintLoader')?.classList.add('d-none');
+    document.getElementById('embPrintActions')?.classList.remove('d-none');
+    document.getElementById('embPrintFooter')?.classList.remove('d-none');
+    if (!keepModalOpen) $('#modal_embarque_imprimir').modal('hide');
+}
+
+function embarque_format_direccion_ticket(doc){
+    return [
+        (doc.DIRCLIE || '').trim(),
+        (doc.DESMUN || '').trim(),
+        (doc.DESDEPTO || '').trim()
+    ].filter(Boolean).join(', ') || '—';
+}
+
+function embarque_print_sheet_open(titulo){
+    return `
+    <div class="sygma-embarque-rpt sygma-embarque-print-sheet">
+        <div class="sygma-embarque-rpt__body p-2">
+            <header class="sygma-embarque-rpt__header">
+                <div class="sygma-embarque-rpt__brand">
+                    <img class="sygma-embarque-rpt__logo" src="./favicon.png" width="40" height="40" alt="Logo">
+                    <div class="sygma-embarque-rpt__brand-text">
+                        <h4 class="sygma-embarque-rpt__title mb-0">${titulo}</h4>
+                        <div class="sygma-embarque-rpt__embarque-info">
+                            <span class="sygma-embarque-rpt__embarque-code">Embarque: ${embarque_print_codembarque}</span>
+                            <span class="sygma-embarque-rpt__embarque-date">Fecha: ${embarque_print_fecha || '—'}</span>
+                        </div>
+                    </div>
+                </div>
+            </header>`;
+}
+
+function embarque_print_sheet_close(){
+    return `</div></div>`;
+}
+
+function embarque_fetch_resumen_vendedor(codembarque){
+    return GF.get_data_embarque_resumen_vendedores(GlobalEmpnit, codembarque)
+        .then((data) => data.recordset || [])
+        .catch(() => []);
+}
+
+function embarque_build_resumen_vendedor_html(rows){
+    let varTotal = 0;
+    let totalPedidos = 0;
+    let strRows = '';
+    rows.forEach((r) => {
+        totalPedidos += Number(r.CONTEO) || 0;
+        varTotal += Number(r.IMPORTE) || 0;
+        strRows += `
+            <tr>
+                <td>${r.EMPLEADO || ''}</td>
+                <td class="text-center">${r.CONTEO || 0}</td>
+                <td class="text-right sygma-embarque-rpt__importe">${F.setMoneda(r.IMPORTE, 'Q')}</td>
+            </tr>`;
+    });
+    if (!strRows) {
+        strRows = `<tr><td colspan="3" class="text-center text-muted py-2">Sin datos de vendedores</td></tr>`;
+    }
+    return `
+        <div class="sygma-embarque-print-section">
+            <h5 class="sygma-embarque-print-section__title">Resumen por Vendedor</h5>
+            <div class="table-responsive sygma-embarque-rpt__table-wrap">
+                <table class="table sygma-embarque-rpt__table mb-0">
+                    <thead>
+                        <tr>
+                            <th>VENDEDOR</th>
+                            <th class="text-center">PEDIDOS</th>
+                            <th class="text-right">IMPORTE</th>
+                        </tr>
+                    </thead>
+                    <tbody>${strRows}</tbody>
+                </table>
+            </div>
+            <div class="sygma-embarque-rpt__total-block">
+                <div class="sygma-embarque-rpt__total-inner">
+                    <span class="sygma-embarque-rpt__foot-label">PEDIDOS</span>
+                    <span class="sygma-embarque-rpt__foot-total">${totalPedidos}</span>
+                    <span class="sygma-embarque-rpt__foot-label">TOTAL IMPORTE</span>
+                    <span class="sygma-embarque-rpt__foot-total">${F.setMoneda(varTotal, 'Q')}</span>
+                </div>
+            </div>
+        </div>`;
+}
+
+function embarque_ejecutar_impresion(){
+    document.body.classList.add('sygma-print-embarque-active');
+    window.print();
+    setTimeout(() => {
+        document.body.classList.remove('sygma-print-embarque-active');
+    }, 600);
+}
+
+function embarque_imprimir_productos(){
+    const codembarque = embarque_print_codembarque;
+    if (!codembarque) return;
+    const host = document.getElementById('sygma_embarque_print_host');
+    if (!host) return;
+    embarque_print_show_loader('Generando reporte de productos...');
+    Promise.all([
+        GF.get_data_embarque_productos(GlobalEmpnit, codembarque),
+        embarque_fetch_resumen_vendedor(codembarque)
+    ])
+    .then(([prodData, resumenRows]) => {
+        let contador = 0;
+        let varTotal = 0;
+        let strRows = '';
+        (prodData.recordset || []).forEach((r) => {
+            contador += 1;
+            varTotal += Number(r.IMPORTE) || 0;
+            strRows += `
+                <tr>
+                    <td><span class="sygma-embarque-rpt__cod-main">${r.CODPROD}</span></td>
+                    <td><span class="sygma-embarque-rpt__prod-main">${r.DESPROD}</span><span class="sygma-embarque-rpt__prod-sub">${r.DESMARCA || ''}</span></td>
+                    <td class="text-center">${r.UXC}</td>
+                    <td class="text-center">${r.CAJAS}</td>
+                    <td class="text-center">${r.UNIDADES}</td>
+                    <td class="text-right sygma-embarque-rpt__importe">${F.setMoneda(r.IMPORTE, 'Q')}</td>
+                </tr>`;
+        });
+        if (!strRows) strRows = `<tr><td colspan="6" class="text-center text-muted py-2">Sin productos</td></tr>`;
+        host.innerHTML = embarque_print_sheet_open('Productos del Embarque') + `
+            <div class="table-responsive sygma-embarque-rpt__table-wrap">
+                <table class="table sygma-embarque-rpt__table mb-0">
+                    <thead><tr>
+                        <th>CODIGO</th><th>PRODUCTO</th>
+                        <th class="text-center">UXC</th><th class="text-center">CAJAS</th><th class="text-center">UNIDADES</th>
+                        <th class="text-right">IMPORTE</th>
+                    </tr></thead>
+                    <tbody>${strRows}</tbody>
+                </table>
+            </div>
+            <div class="sygma-embarque-rpt__total-block"><div class="sygma-embarque-rpt__total-inner">
+                <span class="sygma-embarque-rpt__foot-label">ITEMS</span><span class="sygma-embarque-rpt__foot-total">${contador}</span>
+                <span class="sygma-embarque-rpt__foot-label">TOTAL IMPORTE</span><span class="sygma-embarque-rpt__foot-total">${F.setMoneda(varTotal, 'Q')}</span>
+            </div></div>
+            ${embarque_build_resumen_vendedor_html(resumenRows)}
+            ${embarque_print_sheet_close()}`;
+        embarque_ejecutar_impresion();
+        embarque_print_hide_loader(false);
+    })
+    .catch(() => {
+        embarque_print_hide_loader(true);
+        F.AvisoError('No se pudo generar el reporte de productos');
+        host.innerHTML = '';
+    });
+}
+
+function embarque_imprimir_lista_facturas(){
+    const codembarque = embarque_print_codembarque;
+    if (!codembarque) return;
+    const host = document.getElementById('sygma_embarque_print_host');
+    if (!host) return;
+    embarque_print_show_loader('Generando lista de facturas...');
+    Promise.all([
+        GF.get_data_embarque_facturas(GlobalEmpnit, codembarque),
+        embarque_fetch_resumen_vendedor(codembarque)
+    ])
+    .then(([facData, resumenRows]) => {
+        let contador = 0;
+        let varTotal = 0;
+        let strRows = '';
+        (facData.recordset || []).forEach((r) => {
+            contador += 1;
+            varTotal += Number(r.IMPORTE) || 0;
+            strRows += `
+                <tr>
+                    <td class="sygma-embarque-rpt__cell-stack">
+                        <span class="sygma-embarque-rpt__cell-main">${r.NOMEMPLEADO || ''}</span>
+                        <span class="sygma-embarque-rpt__cell-sub">${r.CODDOC}-${r.CORRELATIVO}</span>
+                    </td>
+                    <td class="sygma-embarque-rpt__cell-stack">
+                        <span class="sygma-embarque-rpt__cell-main">${F.convertDateNormal(r.FECHA)}</span>
+                        <span class="sygma-embarque-rpt__cell-sub">Hora: ${r.HORA || ''}</span>
+                    </td>
+                    <td class="sygma-embarque-rpt__cell-stack">
+                        <span class="sygma-embarque-rpt__cell-main">${r.NOMCLIE || ''}</span>
+                        <span class="sygma-embarque-rpt__cell-sub">${r.DIRCLIE || ''}</span>
+                    </td>
+                    <td>${r.DESMUN || ''}</td>
+                    <td class="text-right sygma-embarque-rpt__importe">${F.setMoneda(r.IMPORTE, 'Q')}</td>
+                </tr>`;
+        });
+        if (!strRows) strRows = `<tr><td colspan="5" class="text-center text-muted py-2">Sin facturas</td></tr>`;
+        host.innerHTML = embarque_print_sheet_open('Facturas del Embarque') + `
+            <div class="table-responsive sygma-embarque-rpt__table-wrap">
+                <table class="table sygma-embarque-rpt__table mb-0">
+                    <thead><tr>
+                        <th>VENDEDOR</th><th>FECHA</th><th>CLIENTE</th><th>MUNICIPIO</th><th class="text-right">IMPORTE</th>
+                    </tr></thead>
+                    <tbody>${strRows}</tbody>
+                </table>
+            </div>
+            <div class="sygma-embarque-rpt__total-block"><div class="sygma-embarque-rpt__total-inner">
+                <span class="sygma-embarque-rpt__foot-label">PEDIDOS</span><span class="sygma-embarque-rpt__foot-total">${contador}</span>
+                <span class="sygma-embarque-rpt__foot-label">TOTAL IMPORTE</span><span class="sygma-embarque-rpt__foot-total">${F.setMoneda(varTotal, 'Q')}</span>
+            </div></div>
+            ${embarque_build_resumen_vendedor_html(resumenRows)}
+            ${embarque_print_sheet_close()}`;
+        embarque_ejecutar_impresion();
+        embarque_print_hide_loader(false);
+    })
+    .catch(() => {
+        embarque_print_hide_loader(true);
+        F.AvisoError('No se pudo generar la lista de facturas');
+        host.innerHTML = '';
+    });
+}
+
+function embarque_fetch_detalle_documento(coddoc, correlativo){
+    return GF.get_data_detalle_documento(GlobalEmpnit, coddoc, correlativo)
+        .then((data) => data.recordset || [])
+        .catch(() => []);
+}
+
+function embarque_build_doc_ticket_html(doc, lineas){
+    const head = lineas[0] || {};
+    const nomclie = (head.NOMCLIE || doc.NOMCLIE || '').trim();
+    const direccion = embarque_format_direccion_ticket({
+        DIRCLIE: head.DIRCLIE || doc.DIRCLIE,
+        DESMUN: doc.DESMUN,
+        DESDEPTO: doc.DESDEPTO
+    });
+    const telefono = (doc.TELEFONOVENDEDOR || '').trim();
+    const obs = (head.DOCOBS || '').trim();
+    let total = 0;
+    let lineCount = 0;
+    let rowsHtml = '';
+    lineas.forEach((l) => {
+        lineCount += 1;
+        total += Number(l.TOTALPRECIO) || 0;
+        rowsHtml += `<tr>
+            <td>${l.CODPROD || ''}</td><td>${l.DESPROD || ''}</td>
+            <td class="text-center">${l.CODMEDIDA || ''}</td>
+            <td class="text-center">${l.CANTIDAD || 0}</td>
+            <td class="text-right">${F.setMoneda(l.PRECIO, 'Q')}</td>
+            <td class="text-right">${F.setMoneda(l.TOTALPRECIO, 'Q')}</td>
+        </tr>`;
+    });
+    if (!rowsHtml) {
+        total = Number(doc.IMPORTE) || 0;
+        rowsHtml = `<tr><td colspan="6" class="text-center text-muted">Sin lineas de producto</td></tr>`;
+    }
+    return `
+        <div class="sygma-embarque-doc-ticket">
+            <div class="sygma-embarque-doc-ticket__head">
+                <div class="sygma-embarque-doc-ticket__doc">${doc.CODDOC}-${doc.CORRELATIVO}</div>
+                <div class="sygma-embarque-doc-ticket__meta">Embarque: ${embarque_print_codembarque}</div>
+                <div class="sygma-embarque-doc-ticket__meta">${F.convertDateNormal(doc.FECHA)} · Hora: ${doc.HORA || ''}</div>
+                <div class="sygma-embarque-doc-ticket__meta">Vendedor: ${doc.NOMEMPLEADO || ''}</div>
+                <div class="sygma-embarque-doc-ticket__meta"><strong>No. Telefono:</strong> ${telefono || '—'}</div>
+                <div class="sygma-embarque-doc-ticket__cliente"><strong>Cliente:</strong> ${nomclie || '—'}</div>
+                <div class="sygma-embarque-doc-ticket__cliente"><strong>Direccion:</strong> ${direccion}</div>
+            </div>
+            <table class="sygma-embarque-doc-ticket__table">
+                <thead><tr><th>Cod.</th><th>Producto</th><th>Med.</th><th>Cant.</th><th>Precio</th><th>Importe</th></tr></thead>
+                <tbody>${rowsHtml}</tbody>
+            </table>
+            <div class="sygma-embarque-doc-ticket__total">
+                <span>Lineas: ${lineCount}</span><span>Total: ${F.setMoneda(total, 'Q')}</span>
+            </div>
+            ${obs ? `<div class="sygma-embarque-doc-ticket__obs"><strong>Obs:</strong> ${obs}</div>` : ''}
+        </div>`;
+}
+
+function embarque_imprimir_documentos_tickets(){
+    const codembarque = embarque_print_codembarque;
+    if (!codembarque) return;
+    const host = document.getElementById('sygma_embarque_print_host');
+    if (!host) return;
+    embarque_print_show_loader('Generando documentos, espere...');
+    GF.get_data_embarque_facturas(GlobalEmpnit, codembarque)
+    .then((facData) => {
+        const docs = facData.recordset || [];
+        if (!docs.length) {
+            embarque_print_hide_loader(true);
+            F.AvisoError('No hay documentos en este embarque');
+            return null;
+        }
+        return Promise.all(docs.map((doc) =>
+            embarque_fetch_detalle_documento(doc.CODDOC, doc.CORRELATIVO)
+                .then((lineas) => ({ doc, lineas }))
+        ));
+    })
+    .then((items) => {
+        if (!items) return;
+        const ticketsHtml = items.map(({ doc, lineas }) => embarque_build_doc_ticket_html(doc, lineas)).join('');
+        host.innerHTML = `<div class="sygma-embarque-print-tickets">${ticketsHtml}</div>`;
+        embarque_ejecutar_impresion();
+        embarque_print_hide_loader(false);
+    })
+    .catch(() => {
+        embarque_print_hide_loader(true);
+        F.AvisoError('No se pudieron generar los documentos');
+        host.innerHTML = '';
+    });
+}
 
 function cargar_grid_embarques(){
 
@@ -3165,11 +3678,13 @@ function cargar_grid_embarques(){
 function tbl_embarques(idContainer,status,mes,anio){
 
     let container = document.getElementById(idContainer);
+    if (!container) return;
     container.innerHTML = GlobalLoader;
 
     let str = '';
-
     let conteo = 0;
+    let totalImporte = 0;
+    let totalDevol = 0;
     
     GF.get_data_embarques_listado(GlobalEmpnit,status,mes,anio)
     .then((data)=>{
@@ -3177,60 +3692,89 @@ function tbl_embarques(idContainer,status,mes,anio){
 
         data.recordset.map((r)=>{
             conteo +=1;
+            totalImporte += Number(r.IMPORTE) || 0;
+            totalDevol += Number(r.DEVOLUCIONES) || 0;
             let idbtnE = `btnE${r.CODEMBARQUE}`;
             let idbtnF = `btnF${r.CODEMBARQUE}`;
+            const btnFinalizarClass = status === 'NO' ? 'btn-success' : 'btn-warning';
+            const btnFinalizarTitle = status === 'NO' ? 'Finalizar embarque' : 'Reactivar embarque';
+            const btnFinalizarIcon = status === 'NO' ? 'fa-check' : 'fa-undo';
             str += `
                 <tr>
-                    <td>${F.convertDateNormal(r.FECHA)}</td>
-                    <td class="negrita text-danger">${r.CODEMBARQUE}
-                        <br>
-                        <small class="negrita text-secondary">${r.DESCRIPCION}</small>
-                        <br>
-                        <small>${r.RUTEO}</small>
+                    <td class="sygma-embarque-rpt__cell-stack">
+                        <span class="sygma-embarque-rpt__cell-main">${F.convertDateNormal(r.FECHA)}</span>
                     </td>
-                    <td>${r.NOMEMPLEADO}</td>
-                    <td>${F.setMoneda(r.IMPORTE,'Q')}</td>
-                    <td>${F.setMoneda(r.DEVOLUCIONES,'Q')}</td>
-                    <td>
-                        <buttton id="${idbtnF}" class="btn btn-md btn-circle hand shadow btn-success"
-                        onclick="finalizar_embarque('${r.CODEMBARQUE}','${idbtnF}')">
-                            <i class="fal fa-check"></i>
+                    <td class="sygma-embarque-rpt__cell-stack">
+                        <span class="sygma-embarque-rpt__cell-main text-danger">${r.CODEMBARQUE}</span>
+                        <span class="sygma-embarque-rpt__cell-sub">${r.DESCRIPCION || ''}</span>
+                        <span class="sygma-embarque-rpt__cell-sub">${r.RUTEO || ''}</span>
+                    </td>
+                    <td>${r.NOMEMPLEADO || ''}</td>
+                    <td class="text-right sygma-embarque-rpt__importe">${F.setMoneda(r.IMPORTE,'Q')}</td>
+                    <td class="text-right">${F.setMoneda(r.DEVOLUCIONES,'Q')}</td>
+                    <td class="sygma-embarque-rpt__col-action oculto-impresion text-center">
+                        <button type="button" id="${idbtnF}" class="btn ${btnFinalizarClass} btn-md btn-circle hand shadow sygma-embarques-btn-action"
+                        onclick="finalizar_embarque('${r.CODEMBARQUE}','${idbtnF}')" title="${btnFinalizarTitle}">
+                            <i class="fal ${btnFinalizarIcon}"></i>
                         </button>
                     </td>
-                    <td>
-                        <buttton class="btn btn-md btn-circle hand shadow btn-info" 
-                            onclick="get_data_embarque('${r.FECHA}','${r.CODEMBARQUE}','${r.DESCRIPCION}','${r.RUTEO}','${r.CODEMPLEADO}')">
+                    <td class="sygma-embarque-rpt__col-action oculto-impresion text-center">
+                        <button type="button" class="btn btn-info btn-md btn-circle hand shadow sygma-embarques-btn-action"
+                            onclick="get_data_embarque('${r.FECHA}','${r.CODEMBARQUE}','${r.DESCRIPCION}','${r.RUTEO}','${r.CODEMPLEADO}')" title="Editar embarque">
                             <i class="fal fa-edit"></i>
                         </button>
                     </td>
-                    <td>
-                        <buttton class="btn btn-md btn-circle hand shadow btn-outline-info">
+                    <td class="sygma-embarque-rpt__col-action oculto-impresion text-center">
+                        <button type="button" class="btn btn-outline-info btn-md btn-circle hand shadow sygma-embarques-btn-action"
+                            onclick="embarque_abrir_opciones_imprimir('${r.CODEMBARQUE}','${F.convertDateNormal(r.FECHA)}')" title="Imprimir embarque">
                             <i class="fal fa-print"></i>
                         </button>
                     </td>
-                    <td>
-                        <buttton id="${idbtnE}" class="btn btn-md btn-circle hand shadow btn-danger"
-                        onclick="eliminar_embarque('${r.CODEMBARQUE}','${idbtnE}')">
+                    <td class="sygma-embarque-rpt__col-action oculto-impresion text-center">
+                        <button type="button" id="${idbtnE}" class="btn btn-danger btn-md btn-circle hand shadow sygma-embarques-btn-action"
+                        onclick="eliminar_embarque('${r.CODEMBARQUE}','${idbtnE}')" title="Eliminar embarque">
                             <i class="fal fa-trash"></i>
                         </button>
                     </td>
                 </tr>
-            `
-        })
+            `;
+        });
 
 
-        container.innerHTML = str;
-        if(status=='NO'){document.getElementById('lbTotalEmb').innerText = `Pendientes ${conteo}`;};
-        
+        container.innerHTML = str || `<tr><td colspan="9" class="text-center text-muted py-3">No hay embarques en este periodo</td></tr>`;
 
-        F.initit_datatable('tblEmbarques',true);
+        const lbGrid = document.getElementById('lbEmbGridTotal');
+        const lbBadge = document.getElementById('lbTotalEmb');
+        const estadoLabel = status === 'NO' ? 'Pendientes' : 'Finalizados';
+        if (lbGrid) lbGrid.innerText = `${estadoLabel}: ${conteo}`;
+        if (lbBadge) {
+            lbBadge.innerText = status === 'NO' ? `Pendientes ${conteo}` : `${conteo}`;
+        }
 
+        const totalBlock = document.getElementById('lbEmbGridTotalBlock');
+        if (totalBlock) {
+            totalBlock.innerHTML = conteo ? `
+                <div class="sygma-embarque-rpt__total-inner">
+                    <span class="sygma-embarque-rpt__foot-label">TOTAL IMPORTE</span>
+                    <span class="sygma-embarque-rpt__foot-total">${F.setMoneda(totalImporte, 'Q')}</span>
+                    <span class="sygma-embarque-rpt__foot-label">DEVOLUCIONES</span>
+                    <span class="sygma-embarque-rpt__foot-total">${F.setMoneda(totalDevol, 'Q')}</span>
+                </div>` : '';
+        }
+
+        const txtBuscar = document.getElementById('txtBuscarEmbarques');
+        if (txtBuscar?.value) F.FiltrarTabla('tblEmbarques', 'txtBuscarEmbarques');
 
         
     })
     .catch(()=>{
-        document.getElementById('lbTotalEmb').innerText = '---'
-        container.innerHTML = 'No se cargaron datos...';
+        const lbBadge = document.getElementById('lbTotalEmb');
+        if (lbBadge) lbBadge.innerText = '---';
+        const lbGrid = document.getElementById('lbEmbGridTotal');
+        if (lbGrid) lbGrid.innerText = '---';
+        const totalBlock = document.getElementById('lbEmbGridTotalBlock');
+        if (totalBlock) totalBlock.innerHTML = '';
+        container.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-3">No se cargaron datos</td></tr>`;
     })
 
 };
@@ -3238,36 +3782,29 @@ function tbl_embarques(idContainer,status,mes,anio){
 
 
 function clean_data_embarque(){
-
-
     document.getElementById('txtEmbarqueCodigo').disabled = false;
-
     document.getElementById('txtEmbarqueFecha').value = F.getFecha();
     document.getElementById('txtEmbarqueCodigo').value = '';
     document.getElementById('txtEmbarqueDescripcion').value ='';
     document.getElementById('txtEmbarqueRuteo').value ='';
-    
-
+    const title = document.getElementById('lbEmbFormTitle');
+    const ref = document.getElementById('lbEmbFormRef');
+    if (title) title.textContent = 'Nuevo embarque';
+    if (ref) ref.textContent = 'Complete los datos del embarque';
 }
 
-
 function get_data_embarque(fecha,codembarque,descripcion,ruteo,codempleado){
-
-
     document.getElementById('txtEmbarqueCodigo').disabled = true;
-
-    
     document.getElementById('txtEmbarqueCodigo').value = codembarque;
     document.getElementById('txtEmbarqueDescripcion').value =descripcion;
     document.getElementById('txtEmbarqueRuteo').value =ruteo;
-
     document.getElementById('cmbEmbarqueEmpleado').value = codempleado;
-
-
     document.getElementById('txtEmbarqueFecha').value = fecha.replace("T00:00:00.000Z","");
-
+    const title = document.getElementById('lbEmbFormTitle');
+    const ref = document.getElementById('lbEmbFormRef');
+    if (title) title.textContent = 'Editar embarque';
+    if (ref) ref.textContent = `Embarque: ${codembarque}`;
     $("#modal_embarques_nuevo").modal('show');
-
 };
 
 function eliminar_embarque(codembarque,idbtn){
@@ -3306,32 +3843,23 @@ function eliminar_embarque(codembarque,idbtn){
 };
 
 function finalizar_embarque(codembarque,idbtn){
-
-
-    let btn = document.getElementById(idbtn);
-
-    let statusActual = document.getElementById('cmbStatus').value;
-    let st = '';
-    let strMsg = '';
-
-    if(statusActual=='NO'){
-        st = 'SI';
-        strMsg = '¿Está seguro que desea FINALIZAR este Embarque?'
-    }else{
-        st = 'NO';
-        strMsg = '¿Está seguro que desea VOLVER A ACTIVAR este Embarque?'
+    const statusActual = document.getElementById('cmbStatus').value;
+    if (statusActual === 'NO') {
+        embarque_abrir_modal_finalizar(codembarque, idbtn);
+        return;
     }
 
+    const btn = document.getElementById(idbtn);
+    const st = 'NO';
+    const strMsg = '¿Está seguro que desea VOLVER A ACTIVAR este Embarque?';
 
     F.Confirmacion(strMsg)
     .then((value)=>{
         if(value==true){
-
             btn.disabled = true;
             btn.innerHTML = `<i class="fal fa-spin fa-check"></i>`;
-
             GF.get_data_embarques_finalizar(codembarque,GlobalEmpnit,st)
-            .then((data)=>{
+            .then(()=>{
                 F.Aviso('Embarque cambiado exitosamente!!');
                 cargar_grid_embarques();
             })
@@ -3339,16 +3867,9 @@ function finalizar_embarque(codembarque,idbtn){
                 F.AvisoError('No se pudo actualizar');
                 btn.disabled = false;
                 btn.innerHTML = `<i class="fal fa-check"></i>`;
-            })
-
-
-
+            });
         }
-    })
-
-
-
-
+    });
 };
 
 

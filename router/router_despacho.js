@@ -597,7 +597,7 @@ router.post("/pedidos_pendientes_embarque_documentos", async(req,res)=>{
         DOCUMENTOS.DOC_NOMCLIE AS NOMCLIE, DOCUMENTOS.DOC_DIRCLIE AS DIRCLIE, 
         DOCUMENTOS.TOTALPRECIO AS IMPORTE, DOCUMENTOS.STATUS, 
         DOCUMENTOS.DIRENTREGA, DOCUMENTOS.LAT, DOCUMENTOS.LONG, 
-        EMPLEADOS.NOMEMPLEADO, ISNULL(DOCUMENTOS.CODEMBARQUE, '') AS CODEMBARQUE, 
+        EMPLEADOS.NOMEMPLEADO, ISNULL(EMPLEADOS.TELEFONO, '') AS TELEFONOVENDEDOR, ISNULL(DOCUMENTOS.CODEMBARQUE, '') AS CODEMBARQUE, 
         MUNICIPIOS.DESMUN, DEPARTAMENTOS.DESDEPTO
     FROM  MUNICIPIOS RIGHT OUTER JOIN
         CLIENTES ON MUNICIPIOS.CODMUN = CLIENTES.CODMUN LEFT OUTER JOIN
@@ -1290,6 +1290,61 @@ router.post("/embarques_status", async(req,res)=>{
             `;
 
             
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/embarques_totales_finalizar", async(req,res)=>{
+   
+    const { token, sucursal, codembarque } = req.body;
+
+    let qry = `
+        SELECT
+            ISNULL((
+                SELECT SUM(DOCUMENTOS.TOTALPRECIO)
+                FROM DOCUMENTOS
+                INNER JOIN TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC
+                    AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+                WHERE DOCUMENTOS.EMPNIT = '${sucursal}'
+                    AND DOCUMENTOS.CODEMBARQUE = '${codembarque}'
+                    AND DOCUMENTOS.STATUS <> 'A'
+                    AND TIPODOCUMENTOS.TIPODOC = 'FAC'
+            ), 0) AS TOTAL_FACTURAS,
+            ISNULL((
+                SELECT SUM(DOCUMENTOS.TOTALPRECIO)
+                FROM DOCUMENTOS
+                INNER JOIN TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC
+                    AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+                WHERE DOCUMENTOS.EMPNIT = '${sucursal}'
+                    AND DOCUMENTOS.CODEMBARQUE = '${codembarque}'
+                    AND DOCUMENTOS.STATUS <> 'A'
+                    AND TIPODOCUMENTOS.TIPODOC = 'DEV'
+            ), 0) AS TOTAL_DEVOLUCIONES
+    `;
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/embarques_finalizar_reporte", async(req,res)=>{
+   
+    const { token, sucursal, codembarque, totalFacturas, totalDevoluciones, reportado, fechaFinalizado } = req.body;
+    const fTotal = Number(totalFacturas) || 0;
+    const fDev = Number(totalDevoluciones) || 0;
+    const fRep = Number(reportado) || 0;
+    const fechaFin = (fechaFinalizado || '').trim();
+
+    let qry = `
+            UPDATE EMBARQUES
+                SET FINALIZADO = 'SI',
+                    F_TOTALPRECIO = ${fTotal},
+                    F_DEVOLUCIONES = ${fDev},
+                    F_REPORTADO = ${fRep},
+                    FECHA_FINALIZADO = '${fechaFin}'
+            WHERE EMPNIT = '${sucursal}'
+                AND CODEMBARQUE = '${codembarque}';
+            `;
+
     execute.QueryToken(res,qry,token);
      
 });

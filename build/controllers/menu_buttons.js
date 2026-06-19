@@ -35,7 +35,7 @@
                                     
                                     <li>
                                         <a title="Introduction" data-filter-tags="application intel introduction" href="#" onclick="Menu.devoluciones_clientes()">
-                                            <span class="nav-link-text" data-i18n="nav.application_intel_introduction">NOTAS DE CRÃ‰DITO CLIENTES</span>
+                                            <span class="nav-link-text" data-i18n="nav.application_intel_introduction">NOTAS DE CREDITO CLIENTES</span>
                                         </a>
                                     </li>
 
@@ -47,7 +47,7 @@
                                     
                                     <li>
                                         <a title="Introduction" data-filter-tags="application intel introduction notas credito proveedores" href="#" onclick="Menu.devoluciones_proveedores()">
-                                            <span class="nav-link-text" data-i18n="nav.application_intel_introduction">NOTAS DE CRÃ‰DITO PROVEEDORES</span>
+                                            <span class="nav-link-text" data-i18n="nav.application_intel_introduction">NOTAS DE CREDITO PROVEEDORES</span>
                                         </a>
                                     </li>
 
@@ -83,15 +83,10 @@
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">PRODUCTOS Y PRECIOS</span>
                                         </a>
                                     </li>
-                                    <li>
-                                        <a title="Introduction" data-filter-tags="application intel introduction" href="#" onclick="Menu.compras_gestion_precios()">
-                                            <span class="nav-link-text" data-i18n="nav.application_intel_introduction">GESTIÃ“N DE PRECIOS Y BONOS</span>
-                                        </a>
-                                    </li>
                                  
                                     <li>
                                         <a title="Introduction" data-filter-tags="application intel introduction" href="#" onclick="Menu.compras_gestion_minmax()">
-                                            <span class="nav-link-text" data-i18n="nav.application_intel_introduction">MINIMOS Y MÃXIMOS</span>
+                                            <span class="nav-link-text" data-i18n="nav.application_intel_introduction">MINIMOS Y MAXIMOS</span>
                                         </a>
                                     </li>
 

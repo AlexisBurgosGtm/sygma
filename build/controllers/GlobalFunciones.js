@@ -2491,6 +2491,55 @@ let GF = {
     
         })
     },
+    get_data_embarques_totales_finalizar: (empnit, codembarque)=>{
+        return new Promise((resolve, reject)=>{
+            let data = {
+                token: TOKEN,
+                sucursal: empnit,
+                codembarque: codembarque
+            };
+            axios.post(`/despacho/embarques_totales_finalizar`, data)
+            .then(res => {
+                if(res.status.toString()=='200'){
+                    resolve(res.data);
+                }else{
+                    reject();
+                }
+            })
+            .catch(()=>{
+                reject();
+            });
+        });
+    },
+    get_data_embarques_finalizar_reporte: (empnit, codembarque, totalFacturas, totalDevoluciones, reportado, fechaFinalizado)=>{
+        return new Promise((resolve, reject)=>{
+            let data = {
+                token: TOKEN,
+                sucursal: empnit,
+                codembarque: codembarque,
+                totalFacturas: totalFacturas,
+                totalDevoluciones: totalDevoluciones,
+                reportado: reportado,
+                fechaFinalizado: fechaFinalizado
+            };
+            axios.post(`/despacho/embarques_finalizar_reporte`, data)
+            .then(res => {
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);
+                    }else{
+                        reject();
+                    }
+                }else{
+                    reject();
+                }
+            })
+            .catch(()=>{
+                reject();
+            });
+        });
+    },
     get_data_embarque_tipo_precios: (empnit,codembarque)=>{
         
         return new Promise((resolve, reject)=>{
