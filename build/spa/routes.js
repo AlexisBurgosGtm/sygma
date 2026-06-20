@@ -69,8 +69,9 @@ SpaRouter.registerMany({
         title: 'Punto de Venta'
     },
     'ventas/pos2': {
-        script: '../views/ventas_pos/view_pos2.js',
-        title: 'Punto de Venta'
+        classes: ['../views/ventas_pos/fac2_pos.js'],
+        script: '../views/ventas_pos/view_facturacion2.js',
+        title: 'Facturación'
     },
     'compras/compras': {
         script: '../views/compras/view_compras.js',

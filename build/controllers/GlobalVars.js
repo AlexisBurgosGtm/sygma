@@ -105,6 +105,7 @@ let Selected_codmedida = '';
 let Selected_equivale = 1;
 let Selected_costo = 0;
 let Selected_precio = 0;
+let Selected_descuento = 0;
 let Selected_id = 0;
 
 let GlobalSelectedCodclie = 0;

@@ -97,8 +97,9 @@
     pos:()=>{
         if(Menu.verify()==true){
             Menu.salidaMenu();
-            F.loadScript('../views/ventas_pos/view_pos2.js','root')
-            .then(async()=>{ 
+            F.loadScript('../views/ventas_pos/fac2_pos.js','root')
+            .then(()=> F.loadScript('../views/ventas_pos/view_facturacion2.js','root'))
+            .then(async()=>{
                 initView();
             })
         }else{
@@ -109,6 +110,18 @@
         if(Menu.verify()==true){
             Menu.salidaMenu();
             F.loadScript('../views/compras/view_compras.js','root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta secci├│n');
+        }
+    },
+    compras2:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/compras/compras2_pos.js','root')
+            .then(()=> F.loadScript('../views/compras/view_compras2.js','root'))
             .then(async()=>{
                 initView();
             })
@@ -212,7 +225,8 @@
     bodega_movinv:(tipodoc)=>{
         if(Menu.verify()==true){
             Menu.salidaMenu();
-            F.loadScript('../views/bodega_movinv/view_movinv.js','root')
+            F.loadScript('../views/bodega_movinv/movinv2_pos.js','root')
+            .then(()=> F.loadScript('../views/bodega_movinv/view_movinv2.js','root'))
             .then(async()=>{
                 initView(tipodoc);
             })

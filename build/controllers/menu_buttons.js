@@ -28,7 +28,7 @@
                                 <ul>
                                    
                                     <li>
-                                        <a title="Introduction" data-filter-tags="application intel introduction" href="#" onclick="Menu.pos()">
+                                        <a title="Facturación" data-filter-tags="application intel introduction facturacion ventas" href="#" onclick="Menu.pos()">
                                             <span class="nav-link-text" data-i18n="nav.application_intel_introduction">FACTURACION</span>
                                         </a>
                                     </li>  
@@ -40,7 +40,7 @@
                                     </li>
 
                                     <li>
-                                        <a title="Introduction" data-filter-tags="application intel introduction" href="#" onclick="Menu.compras()">
+                                        <a title="Compras" data-filter-tags="application intel introduction compras" href="#" onclick="Menu.compras2()">
                                             <span class="nav-link-text" data-i18n="nav.application_intel_introduction">COMPRAS</span>
                                         </a>
                                     </li>        

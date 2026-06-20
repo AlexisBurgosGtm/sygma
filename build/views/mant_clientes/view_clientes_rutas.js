@@ -49,7 +49,7 @@ function getView() {
                 </div>
                 ${view.modal_datos()}
             </div>
-            <button type="button" class="btn btn-bottom-r btn-success btn-xl btn-circle shadow hand" id="btnNuevo">
+            <button type="button" class="btn sygma-fab-nuevo btn-success btn-xl btn-circle shadow hand" id="btnNuevo">
                 <i class="fal fa-plus"></i>
             </button>
         `,

@@ -2499,32 +2499,510 @@ body.app-pos2-theme #root .btn.btn-circle {
 
 .sygma-embarques-fab {
   position: fixed;
-  right: 1.25rem;
-  bottom: 1.25rem;
+  right: 0.65rem;
+  bottom: 1.15rem;
   z-index: 1040;
   width: 3.25rem;
   height: 3.25rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 20px rgba(22, 163, 74, 0.35);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  left: auto !important;
+  background-color: rgba(2, 119, 64, 0.78) !important;
+  border: 1px solid rgba(2, 119, 64, 0.45) !important;
+  color: #fff !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 8px 22px rgba(2, 119, 64, 0.32);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 }
 
-.sygma-embarques-fab:hover {
+.sygma-embarques-fab:hover,
+.sygma-embarques-fab:focus {
   transform: scale(1.05);
-  box-shadow: 0 10px 24px rgba(22, 163, 74, 0.45);
+  background-color: rgba(2, 119, 64, 0.92) !important;
+  border-color: rgba(2, 119, 64, 0.65) !important;
+  color: #fff !important;
+  box-shadow: 0 10px 26px rgba(2, 119, 64, 0.4);
+}
+
+/* FAB verde translúcido — botones "Nuevo" flotantes inferiores derechos */
+.sygma-fab-nuevo {
+  position: fixed !important;
+  left: auto !important;
+  right: 0.65rem !important;
+  bottom: 1.15rem !important;
+  z-index: 1088;
+  background-color: rgba(2, 119, 64, 0.78) !important;
+  border: 1px solid rgba(2, 119, 64, 0.45) !important;
+  color: #fff !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 8px 22px rgba(2, 119, 64, 0.32);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.sygma-fab-nuevo:hover,
+.sygma-fab-nuevo:focus {
+  background-color: rgba(2, 119, 64, 0.92) !important;
+  border-color: rgba(2, 119, 64, 0.65) !important;
+  color: #fff !important;
+  transform: scale(1.04);
+  box-shadow: 0 10px 26px rgba(2, 119, 64, 0.4);
+}
+
+.sygma-fab-nuevo:active {
+  background-color: rgba(2, 119, 64, 0.98) !important;
+}
+
+body.compras2-en-ingreso #btnCompras2Nuevo {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+body.movinv2-en-ingreso #btnMovinv2Nuevo {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+body.fac2-en-ingreso #btnFac2Nuevo {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+#fac2Ingreso {
+  position: relative;
+}
+
+#fac2Ingreso .pos2-sidebar-total-value.text-danger {
+  color: #dc3545 !important;
+}
+
+#compras2Ingreso {
+  position: relative;
+}
+
+.compras2-ingreso-loader {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(248, 250, 252, 0.88);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.compras2-ingreso-loader__panel {
+  background: #fff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+  padding: 0.35rem 1.25rem 0.75rem;
+  min-width: 220px;
+}
+
+/* Compras 2 — detalle estilo embarques + modal productos */
+#rpt_compras2_detalle .sygma-embarque-rpt__table-wrap {
+  max-height: min(52vh, 480px);
+}
+
+#rpt_compras2_detalle .sygma-embarque-rpt__table tbody td {
+  vertical-align: middle;
+}
+
+#rpt_compras2_detalle .sygma-embarque-rpt__col-action .btn-circle {
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  font-size: 0.72rem;
+}
+
+.compras2-modal-productos .sygma-embarque-rpt__table tbody tr.hand {
+  cursor: pointer;
+}
+
+.compras2-modal-productos .sygma-embarque-rpt__table tbody tr.hand:hover {
+  background: rgba(0, 68, 163, 0.06);
+}
+
+.compras2-modal-cantidad .modal-dialog {
+  max-width: 400px;
+  margin: 0.75rem auto;
+}
+
+.compras2-modal-cantidad__header {
+  padding: 0.55rem 0.85rem !important;
+}
+
+.compras2-modal-cantidad__header .sygma-doc-detalle-modal__title {
+  font-size: 0.92rem;
+}
+
+.compras2-modal-cantidad__body {
+  padding: 0.75rem 0.9rem !important;
+  background: #f8fafc;
+}
+
+.compras2-modal-cantidad__prod {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #334155;
+  line-height: 1.35;
+  padding: 0.45rem 0.55rem;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.45rem;
+}
+
+.compras2-modal-cantidad__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem 0.55rem;
+}
+
+.compras2-modal-cantidad__span {
+  grid-column: 1 / -1;
+}
+
+.compras2-modal-cantidad label {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  margin-bottom: 0.15rem;
+}
+
+.compras2-modal-cantidad .form-control {
+  font-size: 0.8rem;
+  padding: 0.22rem 0.45rem;
+  min-height: 30px;
+  height: calc(1.35em + 0.45rem + 2px);
+  border-radius: 0.4rem;
+}
+
+.compras2-modal-cantidad__footer {
+  padding: 0.45rem 0.85rem !important;
+  gap: 0.45rem;
+}
+
+.compras2-modal-cantidad__footer .btn {
+  min-width: 5.5rem;
+}
+
+@media (max-width: 420px) {
+  .compras2-modal-cantidad__grid {
+    grid-template-columns: 1fr;
+  }
+  .compras2-modal-cantidad__span {
+    grid-column: auto;
+  }
+}
+
+/* Compras 2 / Facturación 2 — modal cantidad: mitad medida | mitad campos */
+.pos2-modal-cantidad__fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem 0.55rem;
+  align-items: end;
+}
+
+.pos2-modal-cantidad__medida {
+  grid-column: 1 / -1;
+}
+
+.pos2-modal-cantidad__subtotal {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 992px) {
+  .compras2-modal-cantidad .modal-dialog,
+  .pos2-modal-cantidad .modal-dialog {
+    max-width: 26rem;
+  }
+
+  .pos2-modal-cantidad__fields {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    column-gap: 0.75rem;
+    row-gap: 0.45rem;
+    align-items: stretch;
+  }
+
+  .pos2-modal-cantidad__medida {
+    grid-column: 1;
+    grid-row: 1 / 4;
+    align-self: start;
+  }
+
+  .pos2-modal-cantidad__cant {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .pos2-modal-cantidad__precio {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .pos2-modal-cantidad__subtotal {
+    grid-column: 2;
+    grid-row: 3;
+  }
+}
+
+@media (max-width: 991.98px) {
+  #rpt_compras2_detalle .sygma-embarque-rpt__table-wrap {
+    max-height: min(40vh, 360px);
+  }
+}
+
+.compras2-ingreso-toolbar {
+  gap: 0.35rem 0.75rem;
+}
+
+.compras2-proveedor-select-wrap {
+  min-width: 220px;
+  max-width: 520px;
+}
+
+.compras2-card-documento-compact {
+  font-size: 0.72rem;
+}
+
+.compras2-card-documento-compact .pos2-panel-head {
+  padding: 0.35rem 0.55rem;
+  font-size: 0.78rem;
+}
+
+.compras2-card-documento-compact .card-body {
+  padding: 0.5rem 0.6rem !important;
+}
+
+.compras2-card-documento-compact label,
+.compras2-card-documento-compact .small {
+  font-size: 0.62rem;
+  margin-bottom: 0.12rem;
+}
+
+.compras2-card-documento-compact .form-control,
+.compras2-card-documento-compact select,
+.compras2-card-documento-compact textarea {
+  font-size: 0.72rem;
+  min-height: 26px;
+  padding: 0.12rem 0.35rem;
+  height: calc(1.4em + 0.45rem + 2px);
+}
+
+.compras2-card-documento-compact textarea.form-control {
+  height: auto;
+  min-height: 38px;
+}
+
+.compras2-card-documento-compact .input-group-sm > .form-control,
+.compras2-card-documento-compact .input-group-sm > .input-group-append > .btn {
+  font-size: 0.72rem;
+}
+
+.compras2-card-documento-compact .pos2-sidebar-save,
+.compras2-card-documento-compact + .pos2-sidebar-save {
+  font-size: 0.78rem;
+}
+
+.compras2-listado-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.compras2-listado-filtros__fecha {
+  flex: 0 0 auto;
+  width: 10.5rem;
+  max-width: 100%;
+  font-size: 0.82rem;
+}
+
+.compras2-listado-filtros__coddoc {
+  flex: 0 0 auto;
+  width: 7.5rem;
+  max-width: 100%;
+  font-size: 0.82rem;
+}
+
+.compras2-listado-filtros__buscar {
+  flex: 1 1 180px;
+  min-width: 140px;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 575.98px) {
+  .compras2-listado-filtros__fecha,
+  .compras2-listado-filtros__coddoc {
+    flex: 1 1 calc(50% - 0.25rem);
+    width: auto;
+  }
+}
+
+.compras2-detalle-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.45rem;
+}
+
+.compras2-detalle-search-wrap {
+  flex: 1 1 220px;
+  min-width: 180px;
+}
+
+.compras2-btn-cargar-costos {
+  align-self: stretch;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 0.45rem 0.95rem;
+  border: 1px solid rgba(185, 28, 28, 0.55);
+  border-radius: 0.45rem;
+  color: #fff !important;
+  background: linear-gradient(135deg, rgba(185, 28, 28, 0.96) 0%, rgba(220, 38, 38, 0.92) 52%, rgba(153, 27, 27, 0.94) 100%);
+  box-shadow: 0 4px 14px rgba(185, 28, 28, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
+}
+
+.compras2-btn-cargar-costos__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 0.85rem;
+}
+
+.compras2-btn-cargar-costos__text {
+  line-height: 1;
+}
+
+.compras2-btn-cargar-costos:hover,
+.compras2-btn-cargar-costos:focus {
+  color: #fff !important;
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+  box-shadow: 0 8px 20px rgba(185, 28, 28, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+
+.compras2-btn-cargar-costos:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 10px rgba(185, 28, 28, 0.24);
+}
+
+.compras2-modal-finalizar .modal-dialog {
+  max-width: 420px;
+}
+
+.compras2-modal-finalizar__body {
+  padding: 0.75rem 1rem !important;
+}
+
+.compras2-modal-cargar-costos__body {
+  padding: 0 !important;
+}
+
+.compras2-modal-cargar-costos__table-wrap {
+  max-height: min(58vh, 480px);
+  overflow: auto;
+  border-top: 1px solid #e2e8f0;
+}
+
+.compras2-modal-cargar-costos__table {
+  width: 100%;
+  table-layout: fixed;
+  font-size: 0.8rem;
+  margin-bottom: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.compras2-modal-cargar-costos__table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: linear-gradient(180deg, #0044a3 0%, #003580 100%);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.45rem 0.55rem;
+  border: none;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.compras2-modal-cargar-costos__table tbody td {
+  padding: 0.4rem 0.55rem;
+  vertical-align: middle;
+  border-top: 1px solid #eef2f7;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.compras2-modal-cargar-costos__table tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.compras2-modal-cargar-costos__table thead th:nth-child(1),
+.compras2-modal-cargar-costos__table tbody td:nth-child(1) {
+  width: 12%;
+}
+
+.compras2-modal-cargar-costos__table thead th:nth-child(2),
+.compras2-modal-cargar-costos__table tbody td:nth-child(2) {
+  width: 34%;
+}
+
+.compras2-modal-cargar-costos__table thead th:nth-child(3),
+.compras2-modal-cargar-costos__table tbody td:nth-child(3) {
+  width: 12%;
+}
+
+.compras2-modal-cargar-costos__table thead th:nth-child(4),
+.compras2-modal-cargar-costos__table tbody td:nth-child(4) {
+  width: 10%;
+}
+
+.compras2-modal-cargar-costos__table thead th:nth-child(5),
+.compras2-modal-cargar-costos__table tbody td:nth-child(5),
+.compras2-modal-cargar-costos__table thead th:nth-child(6),
+.compras2-modal-cargar-costos__table tbody td:nth-child(6) {
+  width: 16%;
+}
+
+.compras2-modal-cargar-costos__footer {
+  justify-content: space-between;
+}
+
+.compras2-modal-cargar-costos__footer .btn-base {
+  margin-left: auto;
 }
 
 @media (max-width: 767.98px) {
-  .sygma-embarques-filtros__search,
-  .sygma-embarques-filtros__field {
-    flex: 1 1 100%;
-  }
-
-  .sygma-embarques-fab {
-    right: 0.85rem;
-    bottom: 4.5rem;
+  .sygma-embarques-fab,
+  .sygma-fab-nuevo {
+    right: 0.55rem !important;
+    bottom: 4.5rem !important;
   }
 }
 
@@ -3321,11 +3799,20 @@ body.app-pos2-theme #root .btn.btn-circle {
   }
 
   body.sygma-print-embarque-active #sygma_embarque_print_host,
-  body.sygma-print-embarque-active #sygma_embarque_print_host * {
+  body.sygma-print-embarque-active #sygma_embarque_print_host *,
+  body.sygma-print-embarque-active #compras2_print_host,
+  body.sygma-print-embarque-active #compras2_print_host *,
+  body.sygma-print-embarque-active #fac2_print_host,
+  body.sygma-print-embarque-active #fac2_print_host *,
+  body.sygma-print-embarque-active #movinv2_print_host,
+  body.sygma-print-embarque-active #movinv2_print_host * {
     visibility: visible !important;
   }
 
-  body.sygma-print-embarque-active #sygma_embarque_print_host {
+  body.sygma-print-embarque-active #sygma_embarque_print_host,
+  body.sygma-print-embarque-active #compras2_print_host,
+  body.sygma-print-embarque-active #fac2_print_host,
+  body.sygma-print-embarque-active #movinv2_print_host {
     position: absolute !important;
     left: 0 !important;
     top: 0 !important;

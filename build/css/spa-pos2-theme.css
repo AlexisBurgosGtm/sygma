@@ -444,7 +444,8 @@ body.app-pos2-theme .page-header {
     box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
 }
 
-body.app-pos2-theme .btn-bottom-r.btn-success,
-body.app-pos2-theme .btn-bottom-r.btn-verde {
-    box-shadow: 0 4px 14px rgba(var(--pos2-primary-rgb), 0.25);
+body.app-pos2-theme .sygma-fab-nuevo.btn-success,
+body.app-pos2-theme .sygma-fab-nuevo.btn-verde,
+body.app-pos2-theme .sygma-embarques-fab.btn-success {
+    box-shadow: 0 8px 22px rgba(2, 119, 64, 0.32);
 }

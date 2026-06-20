@@ -491,6 +491,168 @@ router.post("/insertcompra", async(req,res)=>{
      
 });
 
+router.post("/insert_documento_abierto", async(req,res)=>{
+
+    const { token,sucursal,
+            coddoc,correlativo,serie_fac,numero_fac,anio,mes,fecha,fechaentrega,
+            codbodega,codcliente,nomclie,
+            nitclie, dirclie, obs, usuario,
+            codven, hora, tipo_pago,
+            codcaja, iva, etiqueta, coddoc_origen, correlativo_origen} = req.body;
+
+    let qryDocumentos = str_qry_documentos('[]',sucursal,
+        coddoc,correlativo,anio,mes,fecha,fechaentrega,'',
+        codbodega,codcliente || 0,nomclie || '',0,0,0,
+        nitclie || '', dirclie || '', obs || '', '', usuario,
+        codven, '0', '0', hora, tipo_pago || 'CON', 'COMPRA',
+        nomclie || '', '', '', '', '0', '0',
+        codcaja, iva,serie_fac || '',numero_fac || '',etiqueta || 'MEDIA',
+        coddoc_origen || '',correlativo_origen || '0');
+
+    let nuevoCorrelativo = Number(correlativo) + 1;
+    let qryTipodocumentos = `UPDATE TIPODOCUMENTOS SET CORRELATIVO=${nuevoCorrelativo} WHERE EMPNIT='${sucursal}' AND CODDOC='${coddoc}';`;
+
+    let qry = qryDocumentos + qryTipodocumentos;
+
+    execute.QueryToken(res,qry,token);
+
+});
+
+router.post("/update_encabezado_compra", async(req,res)=>{
+
+    const { token, sucursal, coddoc, correlativo,
+        codcliente, nomclie, nitclie, dirclie, obs,
+        codven, tipo_pago, codcaja, fecha, fechaentrega,
+        serie_fac, numero_fac, etiqueta,
+        coddoc_origen, correlativo_origen } = req.body;
+
+    let qry = `
+        UPDATE DOCUMENTOS SET
+            CODCLIENTE=${codcliente || 0},
+            DOC_NIT='${nitclie || ''}',
+            DOC_NOMCLIE='${nomclie || ''}',
+            DOC_DIRCLIE='${dirclie || ''}',
+            OBS='${obs || ''}',
+            CODEMP=${codven || 0},
+            CONCRE='${tipo_pago || 'CON'}',
+            CODCAJA=${codcaja || 0},
+            FECHA='${fecha}',
+            VENCIMIENTO='${fechaentrega}',
+            SERIEFAC='${serie_fac || ''}',
+            NOFAC='${numero_fac || ''}',
+            ETIQUETA='${etiqueta || 'MEDIA'}',
+            CODDOC_ORIGEN='${coddoc_origen || ''}',
+            CORRELATIVO_ORIGEN='${correlativo_origen || '0'}',
+            ANIO=YEAR('${fecha}'),
+            MES=MONTH('${fecha}')
+        WHERE EMPNIT='${sucursal}' AND CODDOC='${coddoc}' AND CORRELATIVO=${correlativo};
+    `;
+
+    execute.QueryToken(res,qry,token);
+
+});
+
+router.post("/insert_item_compra", async(req,res)=>{
+
+    const { token, sucursal, coddoc, correlativo, codbodega,
+        codprod, desprod, codmedida, cantidad, equivale,
+        totalunidades, costo, precio, totalcosto, totalprecio,
+        descuento, tipoprod, tipoprecio, lastupdate, por_iva, existencia,
+        bono, exento
+    } = req.body;
+
+    let qry = `
+       INSERT INTO DOCPRODUCTOS (
+            EMPNIT, ANIO, MES, CODDOC, CORRELATIVO,
+            CODPROD, DESPROD, CODMEDIDA, CANTIDAD, CANTIDADBONIF,
+            EQUIVALE, TOTALUNIDADES, TOTALBONIF, COSTO, PRECIO,
+            TOTALCOSTO, DESCUENTO, TOTALPRECIO, ENTREGADOS_TOTALUNIDADES,
+            COSTOANTERIOR, COSTOPROMEDIO, CODBODEGA, NOSERIE, EXENTO,
+            OBS, TIPOPROD, TIPOPRECIO, LASTUPDATE, TOTALUNIDADES_DEVUELTAS,
+            POR_IVA, EXISTENCIA, BONO, TOTALBONO
+            )
+        SELECT
+            EMPNIT, ANIO, MES, CODDOC, CORRELATIVO,
+            '${codprod}' AS CODPROD,
+            '${desprod}' AS DESPROD,
+            '${codmedida}' AS CODMEDIDA,
+            ${cantidad} AS CANTIDAD,
+            0 AS CANTIDADBONIF,
+            ${equivale} AS EQUIVALE,
+            ${totalunidades} AS TOTALUNIDADES,
+            0 AS TOTALBONIF,
+            ${costo} AS COSTO,
+            ${precio} AS PRECIO,
+            ${totalcosto} AS TOTALCOSTO,
+            ${descuento} AS DESCUENTO,
+            ${totalprecio} AS TOTALPRECIO,
+            0 AS ENTREGADOS_TOTALUNIDADES,
+            ${costo} AS COSTOANTERIOR,
+            ${costo} AS COSTOPROMEDIO,
+            ${codbodega || 0} AS CODBODEGA,
+            '' AS NOSERIE,
+            ${exento} AS EXENTO,
+            '' AS OBS,
+            '${tipoprod}' AS TIPOPROD,
+            '${tipoprecio}' AS TIPOPRECIO,
+            '${lastupdate}' AS LASTUPDATE,
+            0 AS TOTALUNIDADES_DEVUELTAS,
+            ${por_iva} AS POR_IVA,
+            ${existencia} AS EXISTENCIA,
+            ${bono} AS BONO,
+            ${Number(bono) * Number(cantidad)} AS TOTALBONO
+        FROM DOCUMENTOS
+        WHERE EMPNIT='${sucursal}'
+            AND CODDOC='${coddoc}'
+            AND CORRELATIVO=${correlativo};
+    `;
+
+    execute.QueryToken(res,qry,token);
+
+});
+
+router.post("/encabezado_documento", async(req,res)=>{
+
+    const { token, sucursal, coddoc, correlativo } = req.body;
+
+    let qry = `
+        SELECT
+            DOCUMENTOS.CODDOC,
+            DOCUMENTOS.CORRELATIVO,
+            DOCUMENTOS.CODCLIENTE,
+            DOCUMENTOS.DOC_NIT AS NIT,
+            DOCUMENTOS.DOC_NOMCLIE AS NOMCLIE,
+            DOCUMENTOS.DOC_DIRCLIE AS DIRCLIE,
+            DOCUMENTOS.FECHA,
+            DOCUMENTOS.HORA,
+            DOCUMENTOS.VENCIMIENTO AS FECHAENTREGA,
+            DOCUMENTOS.CONCRE,
+            DOCUMENTOS.CODCAJA,
+            DOCUMENTOS.CODEMP,
+            DOCUMENTOS.OBS,
+            DOCUMENTOS.SERIEFAC,
+            DOCUMENTOS.NOFAC AS NUMERO_FAC,
+            DOCUMENTOS.ETIQUETA,
+            DOCUMENTOS.CODDOC_ORIGEN,
+            DOCUMENTOS.CORRELATIVO_ORIGEN,
+            DOCUMENTOS.TOTALVENTA,
+            DOCUMENTOS.TOTALDESCUENTO,
+            DOCUMENTOS.TOTALPRECIO,
+            DOCUMENTOS.STATUS AS ST,
+            TIPODOCUMENTOS.TIPODOC,
+            EMPLEADOS.NOMEMPLEADO
+        FROM DOCUMENTOS LEFT OUTER JOIN
+            TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT LEFT OUTER JOIN
+            EMPLEADOS ON DOCUMENTOS.CODEMP = EMPLEADOS.CODEMPLEADO AND DOCUMENTOS.EMPNIT = EMPLEADOS.EMPNIT
+        WHERE DOCUMENTOS.EMPNIT='${sucursal}'
+            AND DOCUMENTOS.CODDOC='${coddoc}'
+            AND DOCUMENTOS.CORRELATIVO=${correlativo};
+    `;
+
+    execute.QueryToken(res,qry,token);
+
+});
+
 router.post("/insertcompra_req", async(req,res)=>{
    
 
@@ -999,6 +1161,82 @@ router.post("/verify_factura_compra_fel", async(req,res)=>{
 
     execute.QueryToken(res,qry,token);
      
+});
+
+
+
+router.post("/preview_costos_catalogo", async(req,res)=>{
+
+    const { token, sucursal, coddoc, correlativo } = req.body;
+
+    let qry = `
+        SELECT
+            g.CODPROD,
+            g.DESPROD,
+            p.ID,
+            p.CODMEDIDA,
+            p.EQUIVALE,
+            p.COSTO AS COSTO_ACTUAL,
+            ROUND(g.COSTO_UN * p.EQUIVALE, 4) AS COSTO_NUEVO
+        FROM (
+            SELECT CODPROD,
+                MAX(DESPROD) AS DESPROD,
+                MAX(PRECIO / NULLIF(EQUIVALE, 0)) AS COSTO_UN
+            FROM DOCPRODUCTOS
+            WHERE EMPNIT='${sucursal}'
+                AND CODDOC='${coddoc}'
+                AND CORRELATIVO=${correlativo}
+            GROUP BY CODPROD
+        ) g
+        INNER JOIN PRECIOS p
+            ON p.CODPROD = g.CODPROD
+        ORDER BY g.CODPROD, p.CODMEDIDA;
+    `;
+
+    execute.QueryToken(res, qry, token);
+
+});
+
+router.post("/aplicar_costos_catalogo", async(req,res)=>{
+
+    const { token, sucursal, json_costos } = req.body;
+
+    let qry = '';
+    let data_costos = [];
+
+    try {
+        data_costos = JSON.parse(json_costos || '[]');
+    } catch (e) {
+        res.send('error');
+        return;
+    }
+
+    if (!Array.isArray(data_costos) || !data_costos.length) {
+        res.send('error');
+        return;
+    }
+
+    data_costos.forEach((r) => {
+        const id = Number(r.id || 0);
+        const codprod = (r.codprod || '').replace(/'/g, "''");
+        const codmedida = (r.codmedida || '').replace(/'/g, "''");
+        const costo = Number(r.costo_nuevo || 0);
+        if (!id || !codprod || !codmedida) return;
+        qry += `
+            UPDATE PRECIOS SET COSTO=${costo.toFixed(4)}
+            WHERE ID=${id}
+                AND CODPROD='${codprod}'
+                AND CODMEDIDA='${codmedida}';
+        `;
+    });
+
+    if (!qry) {
+        res.send('error');
+        return;
+    }
+
+    execute.QueryToken(res, qry, token);
+
 });
 
 

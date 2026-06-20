@@ -87,7 +87,7 @@ function getView(){
                 <i class="fal fa-home"></i>
             </button>
 
-            <button class="btn btn-success btn-bottom-r btn-xl btn-circle hand shadow" id="btnNuevo">
+            <button class="btn btn-success sygma-fab-nuevo btn-xl btn-circle hand shadow" id="btnNuevo">
                 <i class="fal fa-plus"></i>
             </button>
 

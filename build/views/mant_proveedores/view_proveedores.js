@@ -52,7 +52,7 @@ function getView() {
                     </div>
                 </div>
             </div>
-            <button type="button" class="btn btn-bottom-r btn-success btn-xl btn-circle shadow hand" id="btnNuevoProv">
+            <button type="button" class="btn sygma-fab-nuevo btn-success btn-xl btn-circle shadow hand" id="btnNuevoProv">
                 <i class="fal fa-plus"></i>
             </button>
         `,

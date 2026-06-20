@@ -341,5 +341,130 @@ router.post("/update_minmax", async(req,res)=>{
 
 
 
+router.post("/insert_documento_abierto", async(req,res)=>{
+
+    const { token,sucursal,
+            coddoc,correlativo,serie_fac,numero_fac,anio,mes,fecha,fechaentrega,
+            codbodega,codcliente,nomclie,
+            nitclie, dirclie, obs, usuario,
+            codven, hora, tipo_pago, tipo_doc,
+            codcaja, iva, etiqueta, coddoc_origen, correlativo_origen,
+            sucursal_destino} = req.body;
+
+    let qryDocumentos = str_qry_documentos('[]',sucursal,
+        coddoc,correlativo,anio,mes,fecha,fechaentrega,'',
+        codbodega,codcliente || 0,nomclie || 'PROVEEDORES VARIOS',0,0,0,
+        nitclie || 'CF', dirclie || 'CIUDAD', obs || '', '', usuario,
+        codven, '0', '0', hora, tipo_pago || 'CON', tipo_doc || 'TRAS',
+        nomclie || 'PROVEEDORES VARIOS', '', '', '', '0', '0',
+        codcaja, iva,serie_fac || '',numero_fac || '',etiqueta || 'MEDIA',
+        coddoc_origen || '',correlativo_origen || '0',sucursal_destino || '');
+
+    let nuevoCorrelativo = Number(correlativo) + 1;
+    let qryTipodocumentos = `UPDATE TIPODOCUMENTOS SET CORRELATIVO=${nuevoCorrelativo} WHERE EMPNIT='${sucursal}' AND CODDOC='${coddoc}';`;
+
+    let qry = qryDocumentos + qryTipodocumentos;
+
+    execute.QueryToken(res,qry,token);
+
+});
+
+
+router.post("/update_encabezado_movinv", async(req,res)=>{
+
+    const { token, sucursal, coddoc, correlativo,
+        codcliente, nomclie, nitclie, dirclie, obs,
+        codven, tipo_pago, codcaja, fecha, fechaentrega,
+        serie_fac, numero_fac, etiqueta,
+        coddoc_origen, correlativo_origen, sucursal_destino } = req.body;
+
+    let qry = `
+        UPDATE DOCUMENTOS SET
+            CODCLIENTE=${codcliente || 0},
+            DOC_NIT='${nitclie || 'CF'}',
+            DOC_NOMCLIE='${nomclie || 'PROVEEDORES VARIOS'}',
+            DOC_DIRCLIE='${dirclie || 'CIUDAD'}',
+            OBS='${obs || ''}',
+            CODEMP=${codven || 0},
+            CONCRE='${tipo_pago || 'CON'}',
+            CODCAJA=${codcaja || 0},
+            FECHA='${fecha}',
+            VENCIMIENTO='${fechaentrega}',
+            SERIEFAC='${serie_fac || ''}',
+            NOFAC='${numero_fac || ''}',
+            ETIQUETA='${etiqueta || 'MEDIA'}',
+            CODDOC_ORIGEN='${coddoc_origen || ''}',
+            CORRELATIVO_ORIGEN='${correlativo_origen || '0'}',
+            EMPNIT_DESTINO='${sucursal_destino || ''}',
+            ANIO=YEAR('${fecha}'),
+            MES=MONTH('${fecha}')
+        WHERE EMPNIT='${sucursal}' AND CODDOC='${coddoc}' AND CORRELATIVO=${correlativo};
+    `;
+
+    execute.QueryToken(res,qry,token);
+
+});
+
+
+router.post("/insert_item_movinv", async(req,res)=>{
+
+    const { token, sucursal, coddoc, correlativo, codbodega,
+        codprod, desprod, codmedida, cantidad, equivale,
+        totalunidades, costo, precio, totalcosto, totalprecio,
+        descuento, tipoprod, tipoprecio, lastupdate, por_iva, existencia,
+        bono, exento
+    } = req.body;
+
+    let qry = `
+       INSERT INTO DOCPRODUCTOS (
+            EMPNIT, ANIO, MES, CODDOC, CORRELATIVO,
+            CODPROD, DESPROD, CODMEDIDA, CANTIDAD, CANTIDADBONIF,
+            EQUIVALE, TOTALUNIDADES, TOTALBONIF, COSTO, PRECIO,
+            TOTALCOSTO, DESCUENTO, TOTALPRECIO, ENTREGADOS_TOTALUNIDADES,
+            COSTOANTERIOR, COSTOPROMEDIO, CODBODEGA, NOSERIE, EXENTO,
+            OBS, TIPOPROD, TIPOPRECIO, LASTUPDATE, TOTALUNIDADES_DEVUELTAS,
+            POR_IVA, EXISTENCIA, BONO, TOTALBONO
+            )
+        SELECT
+            EMPNIT, ANIO, MES, CODDOC, CORRELATIVO,
+            '${codprod}' AS CODPROD,
+            '${desprod}' AS DESPROD,
+            '${codmedida}' AS CODMEDIDA,
+            ${cantidad} AS CANTIDAD,
+            0 AS CANTIDADBONIF,
+            ${equivale} AS EQUIVALE,
+            ${totalunidades} AS TOTALUNIDADES,
+            0 AS TOTALBONIF,
+            ${costo} AS COSTO,
+            ${precio} AS PRECIO,
+            ${totalcosto} AS TOTALCOSTO,
+            ${descuento} AS DESCUENTO,
+            ${totalprecio} AS TOTALPRECIO,
+            0 AS ENTREGADOS_TOTALUNIDADES,
+            ${costo} AS COSTOANTERIOR,
+            ${costo} AS COSTOPROMEDIO,
+            ${codbodega || 0} AS CODBODEGA,
+            '' AS NOSERIE,
+            ${exento} AS EXENTO,
+            '' AS OBS,
+            '${tipoprod}' AS TIPOPROD,
+            '${tipoprecio}' AS TIPOPRECIO,
+            '${lastupdate}' AS LASTUPDATE,
+            0 AS TOTALUNIDADES_DEVUELTAS,
+            ${por_iva} AS POR_IVA,
+            ${existencia} AS EXISTENCIA,
+            ${bono} AS BONO,
+            ${Number(bono) * Number(cantidad)} AS TOTALBONO
+        FROM DOCUMENTOS
+        WHERE EMPNIT='${sucursal}'
+            AND CODDOC='${coddoc}'
+            AND CORRELATIVO=${correlativo};
+    `;
+
+    execute.QueryToken(res,qry,token);
+
+});
+
+
 module.exports = router;
 
