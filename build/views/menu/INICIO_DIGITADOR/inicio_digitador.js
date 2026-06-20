@@ -1130,6 +1130,7 @@ function getView(){
                                     <th class="text-center">UXC</th>
                                     <th class="text-center">CAJAS</th>
                                     <th class="text-center">UNIDADES</th>
+                                    <th class="text-center">BONI</th>
                                     <th class="text-right">IMPORTE</th>
                                 </tr>
                             </thead>
@@ -2898,6 +2899,7 @@ function tbl_productos_embarque(codembarque){
                     <td class="text-center">${r.UXC}</td>
                     <td class="text-center">${r.CAJAS}</td>
                     <td class="text-center">${r.UNIDADES}</td>
+                    <td class="text-center">${Number(r.BONI || 0)}</td>
                     <td class="text-right sygma-embarque-rpt__importe">${F.setMoneda(r.IMPORTE,'Q')}</td>
                 </tr>
                 `
@@ -2916,7 +2918,7 @@ function tbl_productos_embarque(codembarque){
 
     })
     .catch((error)=>{
-        container.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No se cargaron datos.</td></tr>';
+        container.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">No se cargaron datos.</td></tr>';
         document.getElementById('lbProdTotalPedidos').innerText = '';
         const totalBlock = document.getElementById('lbProdTotalBlock');
         if (totalBlock) totalBlock.innerHTML = '';
@@ -3506,16 +3508,18 @@ function embarque_imprimir_productos(){
                     <td class="text-center">${r.UXC}</td>
                     <td class="text-center">${r.CAJAS}</td>
                     <td class="text-center">${r.UNIDADES}</td>
+                    <td class="text-center">${Number(r.BONI || 0)}</td>
                     <td class="text-right sygma-embarque-rpt__importe">${F.setMoneda(r.IMPORTE, 'Q')}</td>
                 </tr>`;
         });
-        if (!strRows) strRows = `<tr><td colspan="6" class="text-center text-muted py-2">Sin productos</td></tr>`;
+        if (!strRows) strRows = `<tr><td colspan="7" class="text-center text-muted py-2">Sin productos</td></tr>`;
         host.innerHTML = embarque_print_sheet_open('Productos del Embarque') + `
             <div class="table-responsive sygma-embarque-rpt__table-wrap">
                 <table class="table sygma-embarque-rpt__table mb-0">
                     <thead><tr>
                         <th>CODIGO</th><th>PRODUCTO</th>
                         <th class="text-center">UXC</th><th class="text-center">CAJAS</th><th class="text-center">UNIDADES</th>
+                        <th class="text-center">BONI</th>
                         <th class="text-right">IMPORTE</th>
                     </tr></thead>
                     <tbody>${strRows}</tbody>
