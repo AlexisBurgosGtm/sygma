@@ -37,173 +37,149 @@ function getView(){
         },
         vista_listado:()=>{
             return `
-            <div class="card card-rounded shadow">
-                <div class="card-body p-4">
+            <div class="sygma-empleados-wrap">
+            <div class="card card-rounded shadow sygma-empleados-card">
+                <div class="card-body sygma-empleados-card__body">
 
-                    <h3 class="negrita text-base">LISTADO DE EMPLEADOS</h3>
+                    <h3 class="sygma-empleados-title negrita text-base mb-2">LISTADO DE EMPLEADOS</h3>
 
-                    <div class="row">
-                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
-                            
-                            <div class="form-group">
-                                <label class="text-secondary">Sucursal / Tipo lista</label>
-                                <div class="input-group">
-                                    <select class="form-control negrita" id="cmbSucursal">
-                                    </select>
-                                    <select class="form-control negrita text-base" id="cmbStatus">
+                    <div class="row sygma-empleados-filtros mx-0">
+                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 pl-0 pr-xl-2 pr-lg-2 pr-md-2 pr-sm-0">
+                            <div class="form-group sygma-empleados-field mb-2">
+                                <label class="sygma-empleados-label text-secondary mb-1">Sucursal / Tipo lista</label>
+                                <div class="input-group input-group-sm">
+                                    <select class="form-control form-control-sm negrita" id="cmbSucursal"></select>
+                                    <select class="form-control form-control-sm negrita text-base" id="cmbStatus">
                                         <option value='SI'>ACTIVOS</option>
                                         <option value='NO'>DESACTIVADOS</option>
                                     </select>
                                 </div>
                             </div>
-
                         </div>
-                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
-                                                        
-                            <div class="form-group">
-                                <label class="text-secondary">Escriba para buscar:</label>
-                                <input type="text" 
-                                    class="form-control negrita text-negrita" 
-                                    id="txtBuscar" 
+                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 pr-0 pl-xl-2 pl-lg-2 pl-md-2 pl-sm-0">
+                            <div class="form-group sygma-empleados-field mb-2">
+                                <label class="sygma-empleados-label text-secondary mb-1">Escriba para buscar:</label>
+                                <input type="text"
+                                    class="form-control form-control-sm negrita"
+                                    id="txtBuscar"
                                     oninput="F.FiltrarTabla('tblEmpleados','txtBuscar')"
                                     placeholder="Escriba para buscar...">
                             </div>
-  
                         </div>
                     </div>
-                    <br>
 
-                    <div class="table-responsive col-12">
-                        <table class="table table-bordered col-12" id="tblEmpleados">
+                    <div class="table-responsive sygma-empleados-table-wrap">
+                        <table class="table table-bordered table-sm sygma-empleados-table mb-0" id="tblEmpleados">
                             <thead class="bg-base text-white">
                                 <tr>
-                                    <td>TIPO</td>
-                                    <td>NOMBRE</td>
-                                    <td>TELEFONO</td>
-                                    <td>USUARIO</td>
-                                    <td>DOCUMENTOS</td>
-                                    <td>RUTA</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
+                                    <th>TIPO</th>
+                                    <th>NOMBRE</th>
+                                    <th>TELEFONO</th>
+                                    <th>USUARIO</th>
+                                    <th>DOCUMENTOS</th>
+                                    <th>RUTA</th>
+                                    <th class="sygma-empleados-col-action"></th>
+                                    <th class="sygma-empleados-col-action"></th>
+                                    <th class="sygma-empleados-col-action"></th>
                                 </tr>
                             </thead>
-                            <tbody id="tblDataEmpleados">
-                            </tbody>
+                            <tbody id="tblDataEmpleados"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <button class="btn btn-circle btn-success btn-xl sygma-fab-nuevo hand shadow" id="btnNuevo">
+            <button type="button" class="btn btn-success btn-xl btn-circle sygma-fab-nuevo hand shadow" id="btnNuevo" title="Nuevo empleado">
                 <i class="fal fa-plus"></i>
             </button>
+            </div>
             `
         },
         modal_datos_empleado:()=>{
             return `
-              <div id="modal_empleado" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-right modal-xl">
-                    <div class="modal-content">
-                        <div class="dropdown-header bg-secondary d-flex justify-content-center align-items-center w-100">
-                            <h4 class="m-0 text-center color-white" id="">
-                                Datos del Empleado
-                            </h4>
+              <div id="modal_empleado" class="modal fade sygma-empleados-modal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable" role="document">
+                    <div class="modal-content sygma-empleados-modal__content">
+                        <div class="sygma-empleados-modal__header">
+                            <h4 class="sygma-empleados-modal__title mb-0">Datos del Empleado</h4>
+                            <button type="button" class="sygma-empleados-modal__close" data-dismiss="modal" aria-label="Cerrar">
+                                <i class="fal fa-times"></i>
+                            </button>
                         </div>
-                        <div class="modal-body p-4">
-                            
-                            <div class="card card-rounded">
-                                <div class="card-body p-4">
+                        <div class="modal-body sygma-empleados-modal__body">
 
-                                    <div class="form-group">
-                                        <label class="negrita text-secondary">Puesto (Tipo Empleado)</label>
-                                        <select class="form-control negrita" id="cmbPuesto">
-                                        
-                                        </select>
+                            <div class="form-group sygma-empleados-field mb-2">
+                                <label class="sygma-empleados-label negrita text-secondary mb-1">Puesto (Tipo Empleado)</label>
+                                <select class="form-control form-control-sm negrita" id="cmbPuesto"></select>
+                            </div>
+
+                            <div class="form-group sygma-empleados-field mb-2">
+                                <label class="sygma-empleados-label negrita text-secondary mb-1">Nombre Completo</label>
+                                <input type="text" class="form-control form-control-sm negrita" id="txtNombre">
+                            </div>
+
+                            <div class="row mx-0">
+                                <div class="col-md-8 pl-0 pr-md-2 pr-0">
+                                    <div class="form-group sygma-empleados-field mb-2">
+                                        <label class="sygma-empleados-label negrita text-secondary mb-1">Dirección</label>
+                                        <input type="text" class="form-control form-control-sm negrita" id="txtDireccion">
                                     </div>
-
-                                    <div class="form-group">
-                                        <label class="negrita text-secondary">Nombre Completo</label>
-                                        <input type="text" class="form-control negrita" id="txtNombre">
+                                </div>
+                                <div class="col-md-4 pl-md-2 pl-0 pr-0">
+                                    <div class="form-group sygma-empleados-field mb-2">
+                                        <label class="sygma-empleados-label negrita text-secondary mb-1">Teléfono</label>
+                                        <input type="text" class="form-control form-control-sm negrita" id="txtTelefono">
                                     </div>
-
-                                    <div class="form-group">
-                                        <label class="negrita text-secondary">Dirección</label>
-                                        <input type="text" class="form-control negrita" id="txtDireccion">
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="negrita text-secondary">Teléfono</label>
-                                       <input type="text" class="form-control negrita" id="txtTelefono">
-                                    </div>
-
-                                    <div class="card card-rounded col-12">
-                                        <div class="card-body p-4">
-                                            <h5 class="negrita text-danger">Acceso a la Plataforma</h5>
-                                            <div class="row">
-                                                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
-                                                    <div class="form-group">
-                                                        <label class="negrita text-secondary">Usuario</label>
-                                                        <input type="text" class="form-control negrita" id="txtUsuario">
-                                                    </div>
-                                                </div>
-                                                <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
-                                                    <div class="form-group">
-                                                        <label class="negrita text-secondary">Clave</label>
-                                                        <input type="text" class="form-control negrita" id="txtClave">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        
-                                        </div>
-                                    </div>
-                                    
-                                    <br>
-
-                                    <div class="row">
-                                        <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
-                                            <div class="form-group">
-                                                <label class="negrita text-secondary">Serie Facturas</label>
-                                                <select class="form-control negrita" id="cmbCoddocEnv">
-                                                
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-12 col-md-6 col-xl-6 col-lg-6">
-                                            <div class="form-group">
-                                                <label class="negrita text-secondary">Serie Cotizaciones</label>
-                                                <select class="form-control negrita" id="cmbCoddocCot">
-                                                
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-
-
                                 </div>
                             </div>
 
-                            <br><input type="text" id="txtCodEmp" class="hidden" disabled>
-                                
-                            <div class="row">
-                                <div class="col-6">
-                                    <button class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
-                                        <i class="fal fa-arrow-left"></i>
-                                    </button>
+                            <div class="sygma-empleados-modal__section">
+                                <div class="sygma-empleados-modal__section-title negrita text-danger">Acceso a la Plataforma</div>
+                                <div class="row mx-0">
+                                    <div class="col-md-6 pl-0 pr-md-2 pr-0">
+                                        <div class="form-group sygma-empleados-field mb-2 mb-md-0">
+                                            <label class="sygma-empleados-label negrita text-secondary mb-1">Usuario</label>
+                                            <input type="text" class="form-control form-control-sm negrita" id="txtUsuario">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 pl-md-2 pl-0 pr-0">
+                                        <div class="form-group sygma-empleados-field mb-0">
+                                            <label class="sygma-empleados-label negrita text-secondary mb-1">Clave</label>
+                                            <input type="text" class="form-control form-control-sm negrita" id="txtClave">
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-6">
-                                    <button class="btn btn-base btn-circle btn-xl hand shadow" id="btnGuardarEmpleado">
-                                        <i class="fal fa-save"></i>
-                                    </button>
-                                </div>
-                                
                             </div>
 
+                            <div class="row mx-0">
+                                <div class="col-md-6 pl-0 pr-md-2 pr-0">
+                                    <div class="form-group sygma-empleados-field mb-0">
+                                        <label class="sygma-empleados-label negrita text-secondary mb-1">Serie Facturas</label>
+                                        <select class="form-control form-control-sm negrita" id="cmbCoddocEnv"></select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 pl-md-2 pl-0 pr-0">
+                                    <div class="form-group sygma-empleados-field mb-0">
+                                        <label class="sygma-empleados-label negrita text-secondary mb-1">Serie Cotizaciones</label>
+                                        <select class="form-control form-control-sm negrita" id="cmbCoddocCot"></select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <input type="text" id="txtCodEmp" class="hidden" disabled>
                         </div>
-                    
+
+                        <div class="sygma-empleados-modal__footer">
+                            <button type="button" class="btn btn-secondary btn-sm sygma-empleados-modal__btn hand shadow-sm" data-dismiss="modal">
+                                <i class="fal fa-arrow-left mr-1"></i> Volver
+                            </button>
+                            <button type="button" class="btn btn-base btn-sm sygma-empleados-modal__btn hand shadow-sm" id="btnGuardarEmpleado">
+                                <i class="fal fa-save mr-1"></i> Guardar
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
+              </div>
             `
         }
     }
@@ -296,14 +272,14 @@ function addListeners(){
                 if(value==true){
 
                     btnGuardarEmpleado.disabled = true;
-                    btnGuardarEmpleado.innerHTML = `<i class="fal fa-save fa-spin"></i>;`
+                    btnGuardarEmpleado.innerHTML = `<i class="fal fa-save fa-spin mr-1"></i> Guardando...`;
 
                     GF.get_data_empleados_insert(GlobalEmpnit,codtipo,nombre,direccion,telefono,usuario,clave,coddoc_env,coddoc_cot)
                     .then(()=>{
                         F.Aviso('Empleado creado exitosamente!!');
                         
                         btnGuardarEmpleado.disabled = false;
-                        btnGuardarEmpleado.innerHTML = `<i class="fal fa-save"></i>`;
+                        btnGuardarEmpleado.innerHTML = `<i class="fal fa-save mr-1"></i> Guardar`;
         
                         $("#modal_empleado").modal('hide');
         
@@ -312,7 +288,7 @@ function addListeners(){
                     .catch(()=>{
                         F.AvisoError('No se pudo crear el Empleado');
                         btnGuardarEmpleado.disabled = false;
-                        btnGuardarEmpleado.innerHTML = `<i class="fal fa-save"></i>`;
+                        btnGuardarEmpleado.innerHTML = `<i class="fal fa-save mr-1"></i> Guardar`;
         
                     })
 
@@ -328,13 +304,13 @@ function addListeners(){
                 if(value==true){
 
                         btnGuardarEmpleado.disabled = true;
-                        btnGuardarEmpleado.innerHTML = `<i class="fal fa-save fa-spin"></i>;`
+                        btnGuardarEmpleado.innerHTML = `<i class="fal fa-save fa-spin mr-1"></i> Guardando...`;
                         
                         GF.get_data_empleados_edit(GlobalEmpnit,codigo,codtipo,nombre,direccion,telefono,usuario,clave,coddoc_env,coddoc_cot)
                         .then(()=>{
                             F.Aviso('Empleado actualizado exitosamente!!');
                             btnGuardarEmpleado.disabled = false;
-                            btnGuardarEmpleado.innerHTML = `<i class="fal fa-save"></i>`;
+                            btnGuardarEmpleado.innerHTML = `<i class="fal fa-save mr-1"></i> Guardar`;
             
                             $("#modal_empleado").modal('hide');
                             
@@ -343,7 +319,7 @@ function addListeners(){
                         .catch(()=>{
                             F.AvisoError('No se pudo actualizar el Empleado');
                             btnGuardarEmpleado.disabled = false;
-                            btnGuardarEmpleado.innerHTML = `<i class="fal fa-save"></i>`;
+                            btnGuardarEmpleado.innerHTML = `<i class="fal fa-save mr-1"></i> Guardar`;
         
                         })
                     
@@ -445,28 +421,28 @@ function tbl_empleados(){
                         <small class="negrita text-base">Cot: ${r.CODDOC_COT}</small>
                     </td>
                     <td>${r.DESRUTA}</td>
-                    <td>
-                        <button 
-                            title="Editar cliente..."
-                            class="btn btn-md btn-circle btn-info hand shadow"
+                    <td class="sygma-empleados-col-action text-center text-nowrap">
+                        <button type="button"
+                            title="Editar empleado"
+                            class="sygma-empleados-action-btn sygma-empleados-action-btn--info hand"
                             onclick="datos_empleado('${r.CODEMPLEADO}','${r.CODPUESTO}','${r.NOMEMPLEADO}','${r.DIRECCION}','${r.TELEFONO}','${r.USUARIO}','${r.CLAVE}','${r.CODDOC_ENV}','${r.CODDOC_COT}')">
-                                <i class="fal fa-edit"></i>
+                            <i class="fal fa-edit"></i>
                         </button>
                     </td>
-                    <td>
-                        <button id='${btnAct}' 
-                            title="Cambiar Status (desactivar/activar)..."
-                            class="btn btn-md btn-circle btn-outline-info hand shadow"
+                    <td class="sygma-empleados-col-action text-center text-nowrap">
+                        <button type="button" id="${btnAct}"
+                            title="Cambiar status (desactivar/activar)"
+                            class="sygma-empleados-action-btn sygma-empleados-action-btn--outline-info hand"
                             onclick="update_status_empleado('${r.CODEMPLEADO}','${r.ACTIVO}','${btnAct}')">
-                                <i class="fal fa-sync"></i>
+                            <i class="fal fa-sync"></i>
                         </button>
                     </td>
-                    <td>
-                        <button
-                            title="ELIMINAR cliente..." 
-                            class="btn btn-md btn-circle btn-danger hand shadow" id="${btnE}"
+                    <td class="sygma-empleados-col-action text-center text-nowrap">
+                        <button type="button"
+                            title="Eliminar empleado"
+                            class="sygma-empleados-action-btn sygma-empleados-action-btn--danger hand" id="${btnE}"
                             onclick="eliminar_empleado('${r.CODEMPLEADO}','${r.NOMEMPLEADO}','${btnE}')">
-                                <i class="fal fa-trash"></i>
+                            <i class="fal fa-trash"></i>
                         </button>
                     </td>
                 </tr>

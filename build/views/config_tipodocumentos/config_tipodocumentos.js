@@ -37,132 +37,114 @@ function getView(){
         },
         vista_listado:()=>{
             return `
-            <div class="card card-rounded shadow col-12">
-                <div class="card-body p-2">
+            <div class="sygma-empleados-wrap">
+            <div class="card card-rounded shadow sygma-empleados-card">
+                <div class="card-body sygma-empleados-card__body">
 
-                    <h1 class="text-base negrita">Documentos disponibles</h1>
-                    
-                    <br>
-                    <div class="form-group">
-                        <label class="negrita text-verde">Escriba para buscar</label>
-                        <input type="search" class="form-control negrita text-base" placeholder="Escriba para buscar..." id="txtBuscar" 
-                        oninput="F.FiltrarTabla('tblDocumentos','txtBuscar')">
+                    <h3 class="sygma-empleados-title negrita text-base mb-2">Documentos disponibles</h3>
+
+                    <div class="form-group sygma-empleados-field mb-2">
+                        <label class="sygma-empleados-label negrita text-secondary mb-1">Escriba para buscar</label>
+                        <input type="search"
+                            class="form-control form-control-sm negrita"
+                            placeholder="Escriba para buscar..."
+                            id="txtBuscar"
+                            oninput="F.FiltrarTabla('tblDocumentos','txtBuscar')">
                     </div>
 
-                    <div class="table-responsive col-12">
-                        <table class="table table-responsive table-hover h-full" id="tblDocumentos">
+                    <div class="table-responsive sygma-empleados-table-wrap">
+                        <table class="table table-bordered table-sm sygma-empleados-table mb-0" id="tblDocumentos">
                             <thead class="bg-base text-white">
                                 <tr>
-                                    <td>TIPO</td>
-                                    <td>CODDOC</td>
-                                    <td>CORRELATIVO</td>
-                                    <td>DESCRIPCION</td>
-                                    <td>F.CONTA CON</td>
-                                    <td>F.CONTA CRE</td>
-                                    <td>UPD_CORREL</td>
-                                    <td>STATUS</td>
-                                    <td>EDITAR</td>
-                                    <td></td>
+                                    <th>TIPO</th>
+                                    <th>CODDOC</th>
+                                    <th>CORRELATIVO</th>
+                                    <th>DESCRIPCION</th>
+                                    <th>F.CONTA CON</th>
+                                    <th>F.CONTA CRE</th>
+                                    <th class="sygma-empleados-col-action text-center">UPD_CORREL</th>
+                                    <th class="sygma-empleados-col-action text-center">STATUS</th>
+                                    <th class="sygma-empleados-col-action text-center">EDITAR</th>
+                                    <th class="sygma-empleados-col-action text-center"></th>
                                 </tr>
                             </thead>
-                            <tbody id="tblDataListado">
-                            </tbody>
+                            <tbody id="tblDataListado"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
-            <button class="btn btn-success btn-circle btn-xl sygma-fab-nuevo hand shadow" id="btnNuevo">
+
+            <button type="button" class="btn btn-success btn-xl btn-circle sygma-fab-nuevo hand shadow" id="btnNuevo" title="Nuevo documento">
                 <i class="fal fa-plus"></i>
             </button>
+            </div>
             `
         },
         modal_nuevo:()=>{
             return `
-              <div id="modal_nuevo" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-right modal-xl">
-                    <div class="modal-content">
-                        <div class="dropdown-header bg-base d-flex justify-content-center align-items-center w-100">
-                            <h4 class="m-0 text-center color-white" id="">
-                                DATOS DEL DOCUMENTO
-                            </h4>
+              <div id="modal_nuevo" class="modal fade sygma-empleados-modal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable" role="document">
+                    <div class="modal-content sygma-empleados-modal__content">
+                        <div class="sygma-empleados-modal__header">
+                            <h4 class="sygma-empleados-modal__title mb-0">Datos del documento</h4>
+                            <button type="button" class="sygma-empleados-modal__close" data-dismiss="modal" aria-label="Cerrar">
+                                <i class="fal fa-times"></i>
+                            </button>
                         </div>
-                        <div class="modal-body p-4">
-                            
-                            <div class="card card-rounded col-12">
-                                <div class="card-body p-4">
+                        <div class="modal-body sygma-empleados-modal__body">
 
-                                    <div class="form-group">
-                                        <label class="negrita text-base">Tipo de Documento</label>
-                                        <select class="form-control negrita" id="cmbTipodocumento">
-                                        </select>
+                            <div class="form-group sygma-empleados-field mb-2">
+                                <label class="sygma-empleados-label negrita text-secondary mb-1">Tipo de documento</label>
+                                <select class="form-control form-control-sm negrita" id="cmbTipodocumento"></select>
+                            </div>
+
+                            <div class="form-group sygma-empleados-field mb-2">
+                                <label class="sygma-empleados-label negrita text-secondary mb-1">Descripción</label>
+                                <input type="text" class="form-control form-control-sm negrita" maxlength="250" id="txtDescripcion">
+                            </div>
+
+                            <div class="row mx-0">
+                                <div class="col-md-6 pl-0 pr-md-2 pr-0">
+                                    <div class="form-group sygma-empleados-field mb-2">
+                                        <label class="sygma-empleados-label negrita text-secondary mb-1">Serie / Coddoc</label>
+                                        <input type="text" class="form-control form-control-sm negrita" maxlength="50" id="txtCoddoc">
                                     </div>
-                                    
-                                    <div class="form-group">
-                                        <label class="negrita text-base">Descripcion</label>
-                                        <input type="text" class="form-control negrita" maxlength="250" id="txtDescripcion"/> 
+                                </div>
+                                <div class="col-md-6 pl-md-2 pl-0 pr-0">
+                                    <div class="form-group sygma-empleados-field mb-2">
+                                        <label class="sygma-empleados-label negrita text-secondary mb-1">Correlativo</label>
+                                        <input type="number" class="form-control form-control-sm negrita" id="txtCorrelativo">
                                     </div>
-
-                                    <br>
-                                    <div class="row">
-                                        <div class="col-6">
-                                            <div class="form-group">
-                                                <label class="negrita text-base">Serie / Coddoc</label>
-                                                <input type="text" class="form-control negrita" maxlength="50" id="txtCoddoc" /> 
-                                            </div>
-                                        </div>
-                                        <div class="col-6">
-                                            <div class="form-group">
-                                                <label class="negrita text-base">Correlativo</label>
-                                                <input type="number" class="form-control negrita" id="txtCorrelativo" /> 
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <br>
-                                    <div class="row">
-                                        <div class="col-6">
-                                            <div class="form-group">
-                                                <label class="negrita text-base">Formato Contable Contado</label>
-                                                <select class="form-control negrita" id="cmbFContaCon">
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-6">
-                                            <div class="form-group">
-                                                <label class="negrita text-base">Formato Contable Crédito</label>
-                                                <select class="form-control negrita" id="cmbFContaCre">
-                                                </select> 
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <br>
-                                    <div class="row">
-                                        <div class="col-6">
-                                            <button class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
-                                                <i class="fal fa-arrow-left"></i>
-                                            </button>
-                                        </div>
-                                        <div class="col-6">
-                                            <button class="btn btn-info btn-circle btn-xl hand shadow" id="btnGuardar">
-                                                <i class="fal fa-save"></i>
-                                            </button>
-                                        </div>
-                                        
-                                    </div>
-
-
                                 </div>
                             </div>
 
-                                
-                           
-
+                            <div class="row mx-0">
+                                <div class="col-md-6 pl-0 pr-md-2 pr-0">
+                                    <div class="form-group sygma-empleados-field mb-0">
+                                        <label class="sygma-empleados-label negrita text-secondary mb-1">Formato contable contado</label>
+                                        <select class="form-control form-control-sm negrita" id="cmbFContaCon"></select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 pl-md-2 pl-0 pr-0">
+                                    <div class="form-group sygma-empleados-field mb-0">
+                                        <label class="sygma-empleados-label negrita text-secondary mb-1">Formato contable crédito</label>
+                                        <select class="form-control form-control-sm negrita" id="cmbFContaCre"></select>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    
+
+                        <div class="sygma-empleados-modal__footer">
+                            <button type="button" class="btn btn-secondary btn-sm sygma-empleados-modal__btn hand shadow-sm" data-dismiss="modal">
+                                <i class="fal fa-arrow-left mr-1"></i> Volver
+                            </button>
+                            <button type="button" class="btn btn-base btn-sm sygma-empleados-modal__btn hand shadow-sm" id="btnGuardar">
+                                <i class="fal fa-save mr-1"></i> Guardar
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
+              </div>
             `
         }
     }
@@ -208,7 +190,7 @@ function addListeners(){
                         let cmbFContaCre = document.getElementById('cmbFContaCre').value;
     
                         btnGuardar.disabled = true;
-                        btnGuardar.innerHTML = `<i class="fal fa-save fa-spin"></i>`;
+                        btnGuardar.innerHTML = `<i class="fal fa-save fa-spin mr-1"></i> Guardando...`;
     
                         classTipodocumentos.edit_tipodocumento(txtCoddoc,txtCorrelativo,txtDescripcion,cmbFContaCon,cmbFContaCre)
                         .then(()=>{
@@ -218,7 +200,7 @@ function addListeners(){
                             $("#modal_nuevo").modal("hide");
 
                             btnGuardar.disabled = false;
-                            btnGuardar.innerHTML = `<i class="fal fa-save"></i>`;
+                            btnGuardar.innerHTML = `<i class="fal fa-save mr-1"></i> Guardar`;
 
     
                             get_tbl_documentos();
@@ -227,7 +209,7 @@ function addListeners(){
                             F.AvisoError("No se pudo actualizar");
 
                             btnGuardar.disabled = false;
-                            btnGuardar.innerHTML = `<i class="fal fa-save"></i>`;
+                            btnGuardar.innerHTML = `<i class="fal fa-save mr-1"></i> Guardar`;
 
                         })
     
@@ -252,7 +234,7 @@ function addListeners(){
                             if(txtCoddoc==''){F.AvisoError("Escriba una serie válida");return;}
                             
                             btnGuardar.disabled = true;
-                            btnGuardar.innerHTML = `<i class="fal fa-save fa-spin"></i>`;
+                            btnGuardar.innerHTML = `<i class="fal fa-save fa-spin mr-1"></i> Guardando...`;
     
                             classTipodocumentos.insert_tipodocumento(cmbTipodocumento,txtCoddoc,txtCorrelativo,txtDescripcion,cmbFContaCon,cmbFContaCre)
                             .then(()=>{
@@ -261,7 +243,7 @@ function addListeners(){
                                 $("#modal_nuevo").modal("hide");
 
                                 btnGuardar.disabled = false;
-                                btnGuardar.innerHTML = `<i class="fal fa-save"></i>`;
+                                btnGuardar.innerHTML = `<i class="fal fa-save mr-1"></i> Guardar`;
 
                                 get_tbl_documentos();
                             })
@@ -269,7 +251,7 @@ function addListeners(){
                                 F.AvisoError("No se pudo guardar");
 
                                 btnGuardar.disabled = false;
-                                btnGuardar.innerHTML = `<i class="fal fa-save"></i>`;
+                                btnGuardar.innerHTML = `<i class="fal fa-save mr-1"></i> Guardar`;
                             })
 
                         }
@@ -368,7 +350,7 @@ function get_tbl_documentos(){
         let str = '';
         data.recordset.map((r)=>{
 
-            let strClassHabilitado = ""; if(r.HABILITADO=='SI'){strClassHabilitado='btn-success'}else{strClassHabilitado='btn-danger'};
+            let btnStatusClass = (r.HABILITADO == 'SI') ? 'sygma-empleados-action-btn--success' : 'sygma-empleados-action-btn--danger';
             let idBtnStatus = `btnStatus${r.CODDOC}${r.TIPODOC}`;
             let idBtnEliminar = `btnEliminar${r.ID}`;
             let idBtnCorrel = `btnCorrel${r.ID}`;
@@ -381,27 +363,31 @@ function get_tbl_documentos(){
                         <td>${r.DESCRIPCION}</td>
                         <td>${r.CONTA_CON}</td>
                         <td>${r.CONTA_CRE}</td>
-                        <td>
-                            <button id="${idBtnCorrel}" class="btn btn-primary btn-circle btn-md hand shadow" 
-                            onclick="update_correlativo('${r.CODDOC}','${idBtnCorrel}')">
+                        <td class="sygma-empleados-col-action text-center text-nowrap">
+                            <button type="button" id="${idBtnCorrel}" title="Actualizar correlativo"
+                                class="sygma-empleados-action-btn sygma-empleados-action-btn--primary hand"
+                                onclick="update_correlativo('${r.CODDOC}','${idBtnCorrel}')">
                                 <i class="fal fa-spinner"></i>
                             </button>
                         </td>
-                        <td>
-                            <button id='${idBtnStatus}' class="btn ${strClassHabilitado} btn-circle btn-md hand shadow" 
+                        <td class="sygma-empleados-col-action text-center text-nowrap">
+                            <button type="button" id="${idBtnStatus}" title="Cambiar status"
+                                class="sygma-empleados-action-btn ${btnStatusClass} hand"
                                 onclick="fcn_set_tipo_status('${r.CODDOC}','${r.HABILITADO}','${idBtnStatus}')">
                                 <i class="fal fa-sync"></i>
                             </button>
                         </td>
-                         <td>
-                            <button class="btn btn-info btn-circle btn-md hand shadow" 
-                            onclick="editar_documento('${r.TIPODOC}','${r.CODDOC}','${r.CORRELATIVO}','${r.DESCRIPCION}','${r.CONTA_CON}','${r.CONTA_CRE}')">
+                        <td class="sygma-empleados-col-action text-center text-nowrap">
+                            <button type="button" title="Editar documento"
+                                class="sygma-empleados-action-btn sygma-empleados-action-btn--info hand"
+                                onclick="editar_documento('${r.TIPODOC}','${r.CODDOC}','${r.CORRELATIVO}','${r.DESCRIPCION}','${r.CONTA_CON}','${r.CONTA_CRE}')">
                                 <i class="fal fa-edit"></i>
                             </button>
                         </td>
-                        <td>
-                            <button id="${idBtnEliminar}" class="btn btn-danger btn-circle btn-md hand shadow" 
-                            onclick="eliminar_documento('${r.CODDOC}','${idBtnEliminar}')">
+                        <td class="sygma-empleados-col-action text-center text-nowrap">
+                            <button type="button" id="${idBtnEliminar}" title="Eliminar documento"
+                                class="sygma-empleados-action-btn sygma-empleados-action-btn--danger hand"
+                                onclick="eliminar_documento('${r.CODDOC}','${idBtnEliminar}')">
                                 <i class="fal fa-trash"></i>
                             </button>
                         </td>

@@ -265,11 +265,6 @@
                                         </a>
                                     </li>
                                     <li>
-                                        <a href="#" title="Layout Options" data-filter-tags="theme settings layout options" onclick="Menu.pendiente()">
-                                            <span class="nav-link-text" data-i18n="nav.theme_settings_layout_options">USUARIOS</span>
-                                        </a>
-                                    </li>
-                                    <li>
                                         <a title="Skin Options" data-filter-tags="theme settings skin options" href="#" onclick="Menu.empresas()">
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_skin_options">EMPRESAS</span>
                                         </a>

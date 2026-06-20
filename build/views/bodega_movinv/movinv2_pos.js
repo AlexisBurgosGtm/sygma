@@ -130,16 +130,6 @@ function movinv2_listener_coddoc() {
     });
 }
 
-function movinv2_validar_destino() {
-    const dest = document.getElementById('cmbEmpresas')?.value || '';
-    if (!dest || dest === 'SN') {
-        F.AvisoError('Seleccione sucursal destino');
-        document.getElementById('cmbEmpresas')?.focus();
-        return false;
-    }
-    return true;
-}
-
 function movinv2_get_vendedores() {
     GF.get_data_empleados_tipo(2)
         .then((data) => {
@@ -605,8 +595,6 @@ function movinv2_guardar_click() {
 function movinv2_finalizar_movinv() {
     const doc = movinv2_get_doc_activo();
     if (!doc) return Promise.resolve();
-
-    if (!movinv2_validar_destino()) return Promise.resolve();
 
     if (Number(GlobalTotalDocumento || 0) === 0) {
         F.AvisoError('No hay productos agregados');
