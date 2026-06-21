@@ -56,7 +56,7 @@ let Navegar = {
 
     usaMenuSoloCards: () => {
         const nivel = Number(GlobalNivelUsuario);
-        return nivel === 2 || nivel === 3 || nivel === 7 || nivel === 8;
+        return nivel === 2 || nivel === 3 || nivel === 4 || nivel === 7 || nivel === 8;
     },
 
     getMenuRole: () => {
@@ -101,6 +101,7 @@ let Navegar = {
 
         if (Navegar.usaMenuSoloCards()) {
             document.body.classList.add('spa-nav-hidden');
+            if (sidebar) sidebar.style.display = 'none';
             if (nav) {
                 nav.innerHTML = '';
                 nav.style.visibility = 'hidden';
@@ -202,7 +203,7 @@ let Navegar = {
 
     inicio_despacho: () => {
         if (Number(GlobalNivelUsuario) === 0) return;
-        F.loadScript('../views/menu/inicio_despacho.js', 'root').then(() => initView());
+        F.loadScript('../views/menu/INICIO_DESPACHO/inicio_despacho.js', 'root').then(() => initView());
     },
 
     inicio_proveedor: () => {

@@ -14,7 +14,7 @@ Patrón vigente: clic → `Menu.*` / `Navegar.*` → `F.loadScript` → `initVie
 | 1     | Gerencia      | `views/menu/inicio_gerencia.js`                      | **Sí** — menú general (`menu_principal`) |
 | 2     | Supervisor    | `views/menu/INICIO_SUPERVISOR/inicio_supervisor.js`  | **No** — solo cards (`#supervisorSidebar`) |
 | 3     | Vendedor      | `views/menu/INICIO_VENTAS/inicio_ventas.js`          | **No** — solo cards (`#ventasSidebar`) |
-| 4     | Repartidor    | `views/menu/inicio_despacho.js`                      | Menú repartidor (vacío por ahora) |
+| 4     | Repartidor    | `views/menu/INICIO_DESPACHO/inicio_despacho.js`      | **No** — pantalla completa (sin `#root_navbar`) |
 | 5     | Digitador     | `views/menu/INICIO_DIGITADOR/inicio_digitador.js`    | **Sí** — menú general (`menu_principal`) |
 | 6     | Compras/Bodega| `views/menu/inicio_compras.js`                       | Pendiente definir |
 | 7     | Proveedor     | `views/menu/INICIO_PROVEEDOR/inicio_proveedor.js`    | **No** — solo cards (`#proveedorSidebar`) |

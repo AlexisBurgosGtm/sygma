@@ -37,7 +37,8 @@ SpaRouter.registerMany({
         title: 'Inicio - Digitador'
     },
     'inicio/despacho': {
-        script: '../views/menu/inicio_despacho.js',
+        script: '../views/menu/INICIO_DESPACHO/inicio_despacho.js',
+        showNavbar: false,
         title: 'Inicio - Despacho'
     },
     'inicio/proveedor': {
