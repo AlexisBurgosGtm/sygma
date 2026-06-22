@@ -951,6 +951,8 @@ function getView(){
                         </div>    
                     </div>
 
+                    ${view.modal_embarque_producto_facturas()}
+
                     <ul class="nav nav-tabs hidden" id="myTabHome" role="tablist">
                         <li class="nav-item">
                             <a class="nav-link active negrita text-success" id="tab-Funo" data-toggle="tab" href="#Funo" role="tab" aria-controls="profile" aria-selected="false">
@@ -1141,6 +1143,55 @@ function getView(){
                 </div>
             </div>
             `
+        },
+        modal_embarque_producto_facturas:()=>{
+            return `
+            <div id="modal_embarque_producto_facturas" class="modal fade sygma-doc-detalle-modal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content sygma-doc-detalle-modal__content">
+                        <div class="sygma-doc-detalle-modal__header">
+                            <div class="sygma-doc-detalle-modal__header-top">
+                                <div>
+                                    <h4 class="sygma-doc-detalle-modal__title">Facturas del producto</h4>
+                                    <p class="sygma-doc-detalle-modal__doc-ref mb-0" id="lbEmbProdFacTitulo"></p>
+                                </div>
+                                <button type="button" class="sygma-doc-detalle-modal__close" data-dismiss="modal" aria-label="Cerrar">
+                                    <i class="fal fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="sygma-doc-detalle-modal__meta">
+                                <div class="sygma-doc-detalle-modal__meta-row">
+                                    <span class="sygma-doc-detalle-modal__label-inline">Embarque:</span>
+                                    <span class="sygma-doc-detalle-modal__embarque" id="lbEmbProdFacCodembarque">—</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-body sygma-doc-detalle-modal__body">
+                            <div class="sygma-doc-detalle-modal__table-wrap">
+                                <table class="table sygma-doc-detalle-modal__table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Vendedor</th>
+                                            <th>Documento</th>
+                                            <th>Fecha</th>
+                                            <th>Cliente</th>
+                                            <th class="text-center">Unidades</th>
+                                            <th class="text-right">Importe</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDataEmbProdFacturas"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="modal-footer sygma-doc-detalle-modal__footer">
+                            <button type="button" class="btn btn-secondary sygma-doc-detalle-modal__btn-close" data-dismiss="modal">
+                                <i class="fal fa-times mr-1"></i> Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>`
         },
         facturacion_embarque_productos_bonif:()=>{
             return `
@@ -2887,7 +2938,7 @@ function tbl_productos_embarque(codembarque){
             contador +=1;
             varTotal += Number(r.IMPORTE);
             str += `
-                <tr>
+                <tr class="sygma-embarque-prod-row hand" data-codprod="${String(r.CODPROD).replace(/"/g, '&quot;')}" data-desprod="${F.limpiarTexto(r.DESPROD).replace(/"/g, '&quot;')}" onclick="embarque_abrir_facturas_producto(this)" title="Ver facturas de este producto">
                     <td class="sygma-embarque-rpt__cod">
                         <span class="sygma-embarque-rpt__cod-main">${r.CODPROD}</span>
                         <span class="sygma-embarque-rpt__cod-sub">${r.TOTALUNIDADES} uds.</span>
@@ -2926,6 +2977,56 @@ function tbl_productos_embarque(codembarque){
 
 
 };
+
+function embarque_abrir_facturas_producto(rowEl) {
+
+    const codprod = rowEl?.getAttribute('data-codprod') || '';
+    const desprod = rowEl?.getAttribute('data-desprod') || codprod;
+    const codembarque = document.getElementById('cmbFEmbarques')?.value || '';
+
+    if (!codembarque) {
+        F.AvisoError('Seleccione un embarque');
+        return;
+    }
+    if (!codprod) {
+        return;
+    }
+
+    document.getElementById('lbEmbProdFacTitulo').textContent = `${codprod} — ${desprod}`;
+    document.getElementById('lbEmbProdFacCodembarque').textContent = codembarque;
+
+    const tbody = document.getElementById('tblDataEmbProdFacturas');
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-3">' + GlobalLoader + '</td></tr>';
+
+    $('#modal_embarque_producto_facturas').modal('show');
+
+    GF.get_data_embarque_producto_facturas(GlobalEmpnit, codembarque, codprod)
+    .then((data) => {
+        let str = '';
+        (data.recordset || []).forEach((r) => {
+            str += `
+                <tr>
+                    <td>${r.VENDEDOR || ''}</td>
+                    <td class="negrita text-info">${r.CODDOC || ''}-${r.CORRELATIVO || ''}</td>
+                    <td>${F.convertDateNormal(r.FECHA)}</td>
+                    <td>${r.CLIENTE || ''}</td>
+                    <td class="text-center negrita">${Number(r.TOTALUNIDADES || 0)}</td>
+                    <td class="text-right negrita">${F.setMoneda(r.IMPORTE, 'Q')}</td>
+                    <td>
+                        <button class="btn btn-info btn-md btn-circle hand shadow" onclick="fcn_editar_factura('${r.CODDOC || ''}','${r.CORRELATIVO || ''}','${r.VENDEDOR || ''}','${r.CLIENTE || ''}')">
+                            <i class="fal fa-edit"></i>
+                        </button>
+                    </td>
+                </tr>`;
+        });
+        tbody.innerHTML = str || '<tr><td colspan="6" class="text-center text-muted py-3">Sin facturas para este producto</td></tr>';
+    })
+    .catch(() => {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No se cargaron facturas</td></tr>';
+    });
+
+}
+
 function tbl_productos_embarque_bonif(codembarque){
 
     let container = document.getElementById('tblDataFProductosB');

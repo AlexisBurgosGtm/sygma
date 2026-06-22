@@ -1,5 +1,5 @@
 {
-  "version": "M.19.06.26 20:59",
+  "version": "M.22.06.26 11:43",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -1735,6 +1735,36 @@
       "FECHA": "19-06-2026",
       "HORA": "20:59",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.19.06.26 20:59"
+    },
+    {
+      "FECHA": "22-06-2026",
+      "HORA": "11:39",
+      "DESCRIPCION": "INICIO DESPACHO: CARPETA INICIO_DESPACHO, REDISEÑO RESPONSIVE, REPORTE PRODUCTOS Y MAPA CON PINS GPS"
+    },
+    {
+      "FECHA": "22-06-2026",
+      "HORA": "11:39",
+      "DESCRIPCION": "INICIO DIGITADOR: MODAL FACTURAS POR PRODUCTO EN REPORTE PRODUCTOS DEL EMBARQUE"
+    },
+    {
+      "FECHA": "22-06-2026",
+      "HORA": "11:39",
+      "DESCRIPCION": "API DESPACHO: pedidos_pendientes_embarque_producto_facturas POR CODPROD Y CODEMBARQUE"
+    },
+    {
+      "FECHA": "22-06-2026",
+      "HORA": "11:39",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.22.06.26 11:39"
+    },
+    {
+      "FECHA": "22-06-2026",
+      "HORA": "11:43",
+      "DESCRIPCION": "INICIO DIGITADOR: MODAL FACTURAS POR PRODUCTO INCLUYE TOTAL UNIDADES POR FACTURA"
+    },
+    {
+      "FECHA": "22-06-2026",
+      "HORA": "11:43",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.22.06.26 11:43"
     }
   ]
 }

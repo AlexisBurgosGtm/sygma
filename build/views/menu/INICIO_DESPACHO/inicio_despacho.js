@@ -465,6 +465,7 @@ function addListeners(){
 
 
     F.slideAnimationTabs();
+    
 };
 
 function despacho_hideGeneralMenu() {

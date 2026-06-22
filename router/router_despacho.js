@@ -715,6 +715,37 @@ router.post("/pedidos_pendientes_embarque_productos", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+router.post("/pedidos_pendientes_embarque_producto_facturas", async(req,res)=>{
+   
+    const { token, sucursal, codembarque, codprod } = req.body;
+
+    let qry = `
+            SELECT DOCUMENTOS.FECHA,
+                DOCUMENTOS.CODDOC,
+                DOCUMENTOS.CORRELATIVO,
+                DOCUMENTOS.DOC_NOMCLIE AS CLIENTE,
+                DOCUMENTOS.TOTALPRECIO AS IMPORTE,
+                SUM(DOCPRODUCTOS.TOTALUNIDADES) AS TOTALUNIDADES,
+                EMPLEADOS.NOMEMPLEADO AS VENDEDOR
+            FROM TIPODOCUMENTOS RIGHT OUTER JOIN
+                DOCUMENTOS INNER JOIN
+                DOCPRODUCTOS ON DOCUMENTOS.EMPNIT = DOCPRODUCTOS.EMPNIT AND DOCUMENTOS.CODDOC = DOCPRODUCTOS.CODDOC AND
+                DOCUMENTOS.CORRELATIVO = DOCPRODUCTOS.CORRELATIVO ON TIPODOCUMENTOS.CODDOC = DOCUMENTOS.CODDOC AND
+                TIPODOCUMENTOS.EMPNIT = DOCUMENTOS.EMPNIT LEFT OUTER JOIN
+                EMPLEADOS ON DOCUMENTOS.EMPNIT = EMPLEADOS.EMPNIT AND DOCUMENTOS.CODEMP = EMPLEADOS.CODEMPLEADO
+            WHERE (DOCUMENTOS.EMPNIT = '${sucursal}')
+            AND (DOCUMENTOS.CODEMBARQUE = '${codembarque}')
+            AND (DOCPRODUCTOS.CODPROD = '${codprod}')
+            AND (DOCUMENTOS.STATUS <> 'A')
+            AND (TIPODOCUMENTOS.TIPODOC IN ('FAC', 'FEF', 'FEC', 'FCP', 'FES', 'FPC'))
+            GROUP BY DOCUMENTOS.FECHA, DOCUMENTOS.CODDOC, DOCUMENTOS.CORRELATIVO,
+                DOCUMENTOS.DOC_NOMCLIE, DOCUMENTOS.TOTALPRECIO, EMPLEADOS.NOMEMPLEADO
+            ORDER BY VENDEDOR, DOCUMENTOS.CODDOC, DOCUMENTOS.CORRELATIVO
+            `;
+    
+    execute.QueryToken(res,qry,token);
+     
+});
 router.post("/pedidos_pendientes_embarque_productos_bonif", async(req,res)=>{
    
     const { token, sucursal, codembarque,codmedida } = req.body;
