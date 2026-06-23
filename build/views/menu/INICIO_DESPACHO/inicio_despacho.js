@@ -84,6 +84,7 @@ function getView(){
                 </div>
                 <div class="despacho-content">
                     <div class="tab-content" id="myTabHomeContent">
+                     
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
                             ${view.vista_listado()}
                         </div>
@@ -111,8 +112,9 @@ function getView(){
                     </div>
 
                     <ul class="nav nav-tabs hidden" id="myTabHome" role="tablist">
+                       
                         <li class="nav-item">
-                            <a class="nav-link active negrita text-success" id="tab-uno" data-toggle="tab" href="#uno" role="tab" aria-controls="profile" aria-selected="false">
+                            <a class="nav-link active negrita text-success" id="tab-uno" data-toggle="tab" href="#uno" role="tab" aria-controls="profile" aria-selected="true">
                                 <i class="fal fa-list"></i></a>
                         </li>
                         <li class="nav-item">
@@ -447,6 +449,76 @@ function getView(){
                     </div>
                 </div>
             </div>
+            `
+        },
+        vista_embarques:()=>{
+            return `
+            <div class="sygma-embarque-rpt card card-rounded shadow-sm col-12 border-0" id="rpt_embarques_picking">
+                <div class="card-body sygma-embarque-rpt__body p-2">
+                    <header class="sygma-embarque-rpt__header">
+                        <div class="sygma-embarque-rpt__brand">
+                            <img class="sygma-embarque-rpt__logo" src="./favicon.png" width="40" height="40" alt="Logo">
+                            <div class="sygma-embarque-rpt__brand-text">
+                                <h4 class="sygma-embarque-rpt__title mb-0">Embarques</h4>
+                                <span class="sygma-embarque-rpt__embarque-date">Gestión de picking</span>
+                            </div>
+                        </div>
+                        <div class="sygma-embarque-rpt__detail oculto-impresion">
+                            <span class="sygma-embarque-rpt__stat sygma-embarque-rpt__stat--items" id="lbEmbGridTotal"></span>
+                            <span class="d-none" id="lbTotalEmb"></span>
+                        </div>
+                    </header>
+
+                    <div class="sygma-embarque-rpt__toolbar sygma-embarques-filtros oculto-impresion">
+                        <div class="sygma-embarques-filtros__row">
+                            <input type="text" class="form-control sygma-embarque-rpt__search sygma-embarques-filtros__search" id="txtBuscarEmbarques"
+                                placeholder="Buscar embarque, repartidor o descripción..."
+                                oninput="F.FiltrarTabla('tblEmbarques','txtBuscarEmbarques')">
+                            <div class="sygma-embarques-filtros__field">
+                                <label class="sygma-embarques-filtros__label" for="cmbMes">Mes</label>
+                                <select class="form-control sygma-embarques-filtros__select" id="cmbMes"></select>
+                            </div>
+                            <div class="sygma-embarques-filtros__field">
+                                <label class="sygma-embarques-filtros__label" for="cmbAnio">Año</label>
+                                <select class="form-control sygma-embarques-filtros__select" id="cmbAnio"></select>
+                            </div>
+                            <div class="sygma-embarques-filtros__field">
+                                <label class="sygma-embarques-filtros__label" for="cmbStatus">Estado</label>
+                                <select class="form-control sygma-embarques-filtros__select" id="cmbStatus">
+                                    <option value="NO">Pendientes</option>
+                                    <option value="SI">Finalizados</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive sygma-embarque-rpt__table-wrap">
+                        <table class="table sygma-embarque-rpt__table mb-0" id="tblEmbarques">
+                            <thead>
+                                <tr>
+                                    <th>FECHA</th>
+                                    <th>EMBARQUE</th>
+                                    <th>REPARTIDOR</th>
+                                    <th class="text-right">IMPORTE</th>
+                                    <th class="text-right">DEVOL.</th>
+                                    <th class="sygma-embarque-rpt__col-action oculto-impresion text-center" title="Finalizar / Activar"></th>
+                                    <th class="sygma-embarque-rpt__col-action oculto-impresion text-center" title="Editar"></th>
+                                    <th class="sygma-embarque-rpt__col-action oculto-impresion text-center" title="Imprimir"></th>
+                                    <th class="sygma-embarque-rpt__col-action oculto-impresion text-center" title="Eliminar"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDatalEmbarques"></tbody>
+                        </table>
+                    </div>
+                    <div class="sygma-embarque-rpt__total-block" id="lbEmbGridTotalBlock"></div>
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-success btn-lg btn-circle hand shadow sygma-embarques-fab sygma-fab-nuevo oculto-impresion" id="btnEmbarquesNuevo" title="Nuevo embarque">
+                <i class="fal fa-plus"></i>
+            </button>
+
+            <div id="sygma_embarque_print_host" class="sygma-embarque-print-host" aria-hidden="true"></div>
             `
         },
     }
