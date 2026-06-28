@@ -176,7 +176,9 @@ let Navegar = {
 
     inicio_compras: () => {
         if (Number(GlobalNivelUsuario) === 0) return;
-        F.loadScript('../views/menu/inicio_compras.js', 'root').then(() => initView());
+        F.loadScript('../views/menu/inicio_compras_cxc.js', 'root')
+            .then(() => F.loadScript('../views/menu/inicio_compras.js', 'root'))
+            .then(() => initView());
     },
 
     inicio_ventas: () => {

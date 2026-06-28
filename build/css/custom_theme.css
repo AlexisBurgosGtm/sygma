@@ -649,6 +649,20 @@ body.spa-nav-hidden .page-content.proveedor-page {
 .proveedor-header-card #cmbProveedorModoVentas {
   min-width: 12rem;
 }
+.compras-bodega-header {
+  margin-bottom: 0.5rem !important;
+}
+.compras-bodega-header .card-body {
+  padding-top: 0.4rem !important;
+  padding-bottom: 0.4rem !important;
+}
+.compras-bodega-header h5 {
+  font-size: 1rem;
+  line-height: 1.2;
+}
+.compras-embedded-panel {
+  min-height: 200px;
+}
 .proveedor-menu-toggle {
   position: fixed;
   bottom: 1rem;
@@ -4804,9 +4818,10 @@ body.spa-nav-hidden .page-content.proveedor-page #despachoPaneListado {
   }
 
   body.sygma-print-edo-cuenta-active #rpt_cuentas_cobrar,
-  body.sygma-print-edo-cuenta-active #modalCxcOpciones,
-  body.sygma-print-edo-cuenta-active #modalCxcHistorial,
-  body.sygma-print-edo-cuenta-active #modalCxcAbono,
+  body.sygma-print-edo-cuenta-active #rpt_compras_cuentas_cobrar,
+  body.sygma-print-edo-cuenta-active #modalComprasCxcOpciones,
+  body.sygma-print-edo-cuenta-active #modalComprasCxcHistorial,
+  body.sygma-print-edo-cuenta-active #modalComprasCxcAbono,
   body.sygma-print-edo-cuenta-active .modal-backdrop {
     display: none !important;
   }

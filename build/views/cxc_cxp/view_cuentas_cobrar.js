@@ -46,6 +46,13 @@ function getView() {
                                 <label class="sygma-embarques-filtros__label" for="cmbCxcAnio">Año</label>
                                 <select class="form-control sygma-embarques-filtros__select" id="cmbCxcAnio"></select>
                             </div>
+                            <div class="sygma-embarques-filtros__field">
+                                <label class="sygma-embarques-filtros__label" for="cmbCxcAlcance">Alcance</label>
+                                <select class="form-control sygma-embarques-filtros__select" id="cmbCxcAlcance">
+                                    <option value="MES">POR MES</option>
+                                    <option value="TODAS">TODAS</option>
+                                </select>
+                            </div>
                             <div class="sygma-embarques-filtros__field d-flex align-items-end">
                                 <button type="button" class="btn btn-base btn-sm hand" id="btnCxcRecargar">
                                     <i class="fal fa-sync mr-1"></i> Actualizar
@@ -301,6 +308,7 @@ function addListeners() {
     document.getElementById('btnCxcCorregirSaldos')?.addEventListener('click', cxc_corregir_saldos);
     document.getElementById('cmbCxcMes')?.addEventListener('change', cargar_cuentas_cobrar);
     document.getElementById('cmbCxcAnio')?.addEventListener('change', cargar_cuentas_cobrar);
+    document.getElementById('cmbCxcAlcance')?.addEventListener('change', cxc_on_alcance_change);
 
     document.getElementById('btnCxcHistorial')?.addEventListener('click', cxc_mostrar_historial);
     document.getElementById('btnCxcEstadoCuenta')?.addEventListener('click', cxc_mostrar_estado_cuenta);
@@ -649,12 +657,29 @@ function cxc_guardar_abono() {
         });
 }
 
+function cxc_get_periodo_filtro() {
+    const alcance = document.getElementById('cmbCxcAlcance')?.value || 'MES';
+    if (alcance === 'TODAS') return { mes: 'TODOS', anio: 'TODOS' };
+    return {
+        mes: document.getElementById('cmbCxcMes')?.value || 'TODOS',
+        anio: document.getElementById('cmbCxcAnio')?.value || String(new Date().getFullYear())
+    };
+}
+
+function cxc_on_alcance_change() {
+    const todas = document.getElementById('cmbCxcAlcance')?.value === 'TODAS';
+    const mesEl = document.getElementById('cmbCxcMes');
+    const anioEl = document.getElementById('cmbCxcAnio');
+    if (mesEl) mesEl.disabled = todas;
+    if (anioEl) anioEl.disabled = todas;
+    cargar_cuentas_cobrar();
+}
+
 function cargar_cuentas_cobrar() {
     const container = document.getElementById('tblDataCxcDocumentos');
     if (!container) return;
 
-    const mes = document.getElementById('cmbCxcMes')?.value || 'TODOS';
-    const anio = document.getElementById('cmbCxcAnio')?.value || String(new Date().getFullYear());
+    const { mes, anio } = cxc_get_periodo_filtro();
 
     container.innerHTML = `<tr><td colspan="9" class="text-center py-3">${GlobalLoader}</td></tr>`;
 

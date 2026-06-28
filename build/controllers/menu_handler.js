@@ -32,7 +32,8 @@
     inicio_compras:()=>{
         if(Menu.verify()==true){
             Menu.salidaMenu();
-            F.loadScript('../views/menu/inicio_compras.js','root')
+            F.loadScript('../views/menu/inicio_compras_cxc.js','root')
+            .then(()=> F.loadScript('../views/menu/inicio_compras.js','root'))
             .then(async()=>{
                 initView();
             })

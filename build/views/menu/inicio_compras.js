@@ -1,59 +1,154 @@
+var embarque_print_codembarque = '';
+var embarque_print_fecha = '';
+var compras_currentPane = 'uno';
+
+function compras_getMes() {
+    return document.getElementById('cmbMesHeader')?.value || document.getElementById('cmbMes')?.value || F.get_mes_curso();
+}
+
+function compras_getAnio() {
+    return document.getElementById('cmbAnioHeader')?.value || document.getElementById('cmbAnio')?.value || F.get_anio_curso();
+}
+
+function compras_setupSucursalHeader() {
+    const cmb = document.getElementById('cmbSucursalHeader');
+    if (!cmb) return;
+    const emp = GlobalEmpnit || '';
+    const nom = GlobalNomEmpresa || 'Sede';
+    cmb.innerHTML = `<option value="${emp}">${nom}</option>`;
+    cmb.value = emp;
+    cmb.disabled = true;
+}
+
+function compras_hideGeneralMenu() {
+    document.body.classList.add('spa-nav-hidden');
+    const sidebar = document.getElementById('root_navbar');
+    const nav = document.getElementById('js-primary-nav');
+    if (sidebar) sidebar.style.display = 'none';
+    if (nav) {
+        nav.innerHTML = '';
+        nav.style.visibility = 'hidden';
+    }
+}
+
+function compras_setActiveCard(cardId) {
+    document.querySelectorAll('#comprasSidebar .proveedor-menu-card').forEach(el => {
+        el.classList.toggle('proveedor-menu-card--active', !!cardId && el.id === cardId);
+    });
+}
+
+function compras_toggleSidebar(forceOpen) {
+    const sidebar = document.getElementById('comprasSidebar');
+    const backdrop = document.getElementById('comprasSidebarBackdrop');
+    if (!sidebar) return;
+    const open = typeof forceOpen === 'boolean' ? forceOpen : !sidebar.classList.contains('proveedor-sidebar--open');
+    sidebar.classList.toggle('proveedor-sidebar--open', open);
+    backdrop?.classList.toggle('proveedor-sidebar-backdrop--visible', open);
+    document.body.classList.toggle('proveedor-sidebar-open', open);
+}
+
+function compras_closeSidebarMobile() {
+    if (window.innerWidth < 768) compras_toggleSidebar(false);
+}
+
+function compras_showPanel(paneId, cardId, afterShow) {
+    compras_currentPane = paneId;
+    compras_closeSidebarMobile();
+    document.querySelectorAll('#myTabHomeContent .tab-pane').forEach(p => {
+        p.classList.remove('show', 'active');
+    });
+    const pane = document.getElementById(paneId);
+    if (pane) pane.classList.add('show', 'active');
+    document.querySelectorAll('#myTabHome .nav-link').forEach(l => {
+        l.classList.remove('active');
+        l.setAttribute('aria-selected', 'false');
+    });
+    const tabLink = document.querySelector(`#myTabHome a[href="#${paneId}"]`);
+    if (tabLink) {
+        tabLink.classList.add('active');
+        tabLink.setAttribute('aria-selected', 'true');
+    }
+    compras_setActiveCard(cardId);
+    if (typeof afterShow === 'function') afterShow();
+}
+
+function compras_showHome() {
+    compras_showPanel('uno', 'btnMenuEmbarques', () => cargar_grid_embarques());
+}
+
+function compras_onHeaderFiltersChange() {
+    if (compras_currentPane === 'uno') cargar_grid_embarques();
+    if (compras_currentPane === 'dos' && typeof compras_cxc_cargar_listado === 'function') {
+        const alcance = document.getElementById('comprasCxcAlcance')?.value || 'MES';
+        if (alcance !== 'TODAS') compras_cxc_cargar_listado();
+    }
+}
+
+function compras_init_inventario() {
+    get_tbl_surtido(GlobalEmpnit);
+}
+
+function compras_setupMenuListeners() {
+    document.getElementById('btnMenuEmbarques')?.addEventListener('click', () => {
+        compras_showPanel('uno', 'btnMenuEmbarques', () => cargar_grid_embarques());
+    });
+    document.getElementById('btnMenuCreditos')?.addEventListener('click', () => {
+        compras_showPanel('dos', 'btnMenuCreditos', () => compras_init_creditos());
+    });
+    document.getElementById('btnMenuInventarios')?.addEventListener('click', () => {
+        compras_showPanel('tres', 'btnMenuInventarios', () => compras_init_inventario());
+    });
+    document.getElementById('btnComprasMenuToggle')?.addEventListener('click', () => compras_toggleSidebar());
+    document.getElementById('comprasSidebarBackdrop')?.addEventListener('click', () => compras_toggleSidebar(false));
+}
+
 function getView(){
+    root = document.getElementById('root');
+    if (!root) return;
     let view = {
         body:()=>{
             return `
-               <div id="compras_main_content">
-               <div class="row">                
-                    ${view.menu_superior()}            
-                </div>
-                <br>
+            <div id="compras_main_content" class="proveedor-layout">
+                ${view.menu_superior()}
 
-                <div class="col-12 p-0 bg-white">
-                    <div class="tab-content" id="myTabHomeContent">
-                        <div class="tab-pane fade show active fixed" id="uno" role="tabpanel" aria-labelledby="receta-tab">
-                            ${view.vista_embarques() }
-                            
+                <button type="button" class="btn proveedor-menu-toggle d-md-none" id="btnComprasMenuToggle" title="Menú de opciones">
+                    <i class="fal fa-bars"></i><span>Menú</span>
+                </button>
+                <div class="proveedor-sidebar-backdrop d-md-none" id="comprasSidebarBackdrop"></div>
+
+                <div class="row proveedor-main-row">
+                    <div class="col-12 col-md-2 proveedor-sidebar" id="comprasSidebar">
+                        <div class="proveedor-sidebar__scroll">
+                            ${view.menu()}
                         </div>
-                        <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
-                           ${view.productos_relleno() + view.modal_existencia_sucursales()}
-                            
-                        </div>
-                        <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
-                           
-                        </div>  
-                        <div class="tab-pane fade" id="cuatro" role="tabpanel" aria-labelledby="home-tab">
-                            
-                        </div>  
-                        <div class="tab-pane fade" id="cinco" role="tabpanel" aria-labelledby="home-tab">
-                            
-                        </div>    
                     </div>
-                    <ul class="nav nav-tabs hidden" id="myTabHome" role="tablist">
-                        <li class="nav-item">
-                            <a class="nav-link active negrita text-success" id="tab-uno" data-toggle="tab" href="#uno" role="tab" aria-controls="profile" aria-selected="false">
-                                <i class="fal fa-list"></i></a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link negrita text-danger" id="tab-dos" data-toggle="tab" href="#dos" role="tab" aria-controls="home" aria-selected="true">
-                                <i class="fal fa-comments"></i></a>
-                        </li>  
-                        <li class="nav-item">
-                            <a class="nav-link negrita text-danger" id="tab-tres" data-toggle="tab" href="#tres" role="tab" aria-controls="home" aria-selected="true">
-                                <i class="fal fa-comments"></i></a>
-                        </li>
-                         <li class="nav-item">
-                            <a class="nav-link negrita text-danger" id="tab-cuatro" data-toggle="tab" href="#cuatro" role="tab" aria-controls="home" aria-selected="true">
-                                <i class="fal fa-comments"></i></a>
-                        </li>  
-                         <li class="nav-item">
-                            <a class="nav-link negrita text-danger" id="tab-cinco" data-toggle="tab" href="#cinco" role="tab" aria-controls="home" aria-selected="true">
-                                <i class="fal fa-comments"></i></a>
-                        </li>           
-                    </ul>
+                    <div class="col-12 col-md-10 proveedor-tab-area">
+                        <div id="comprasPanelContent">
+                            <div class="tab-content" id="myTabHomeContent">
+                                <div class="tab-pane fade show active" id="uno" role="tabpanel">
+                                    ${view.vista_embarques()}
+                                </div>
+                                <div class="tab-pane fade" id="dos" role="tabpanel">
+                                    ${view.vista_creditos_vendedores()}
+                                </div>
+                                <div class="tab-pane fade" id="tres" role="tabpanel">
+                                    ${view.productos_relleno() + view.modal_existencia_sucursales()}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-               </div>
 
-                <div id="sygma_embarque_print_host" class="sygma-embarque-print-host" aria-hidden="true"></div>
+                <ul class="nav nav-tabs hidden" id="myTabHome" role="tablist">
+                    <li class="nav-item"><a class="nav-link active" id="tab-uno" data-toggle="tab" href="#uno" role="tab"></a></li>
+                    <li class="nav-item"><a class="nav-link" id="tab-dos" data-toggle="tab" href="#dos" role="tab"></a></li>
+                    <li class="nav-item"><a class="nav-link" id="tab-tres" data-toggle="tab" href="#tres" role="tab"></a></li>
+                </ul>
+            </div>
+
+            ${view.vista_creditos_modales()}
+
+            <div id="sygma_embarque_print_host" class="sygma-embarque-print-host" aria-hidden="true"></div>
             `
         },
         vista_embarques:()=>{
@@ -116,38 +211,197 @@ function getView(){
         },
         menu_superior:()=>{
             return `
-            <div class="card card-rounded col-12 border-base text-base">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-3">
-                            <img src="./favicon.png" width="50" height="50">
+            <div class="proveedor-header-card card shadow-sm mb-2 compras-bodega-header">
+                <div class="card-body py-2 px-3">
+                    <div class="row align-items-center no-gutters">
+                        <div class="col-auto pr-2">
+                            <img src="./favicon.png" width="40" height="40" alt="Logo">
                         </div>
-                        <div class="col-9">
-                            <h5 class="negrita">Inicio Bodega</h5>
-
-                            <div class="sygma-embarques-filtros__row">
-                                <div class="sygma-embarques-filtros__field">
-                                    <label class="sygma-embarques-filtros__label" for="cmbSucursal">Sucursal</label>
-                                    <select class="form-control sygma-embarques-filtros__select" id="cmbSucursal">
-                                    </select>
-                                </div>
-                                <div class="sygma-embarques-filtros__field">
-                                    <label class="sygma-embarques-filtros__label" for="cmbMes">Mes</label>
-                                    <select class="form-control sygma-embarques-filtros__select" id="cmbMes"></select>
-                                </div>
-                                <div class="sygma-embarques-filtros__field">
-                                    <label class="sygma-embarques-filtros__label" for="cmbAnio">Año</label>
-                                    <select class="form-control sygma-embarques-filtros__select" id="cmbAnio"></select>
-                                </div>
-
-                            </div>
-
+                        <div class="col-auto pr-3">
+                            <h5 class="negrita text-white mb-0">Inicio Bodega</h5>
+                            <small class="text-white-50 negrita d-block" id="lbComprasEmpresa">${GlobalNomEmpresa || ''}</small>
+                        </div>
+                        <div class="col">
+                            <select class="form-control form-control-sm negrita" id="cmbSucursalHeader" title="Sucursal"></select>
+                        </div>
+                        <div class="col-auto pl-2">
+                            <select class="form-control form-control-sm negrita" id="cmbMesHeader"></select>
+                        </div>
+                        <div class="col-auto pl-2">
+                            <select class="form-control form-control-sm negrita" id="cmbAnioHeader"></select>
                         </div>
                     </div>
-                    
                 </div>
             </div>
             `;
+        },
+        menu:()=>{
+            const items = [
+                { id: 'btnMenuEmbarques', label: 'Embarques', icon: 'fa-truck', color: 'info' },
+                { id: 'btnMenuCreditos', label: 'Créditos vendedores', icon: 'fa-dollar-sign', color: 'success' },
+                { id: 'btnMenuInventarios', label: 'Inventarios', icon: 'fa-warehouse', color: 'secondary' },
+            ];
+            return items.map(item => `
+                <div class="card proveedor-menu-card hand" id="${item.id}">
+                    <div class="card-body d-flex align-items-center flex-wrap">
+                        <i class="fal ${item.icon} text-${item.color} mr-2 proveedor-menu-icon"></i>
+                        <span class="negrita proveedor-menu-label">${item.label}</span>
+                    </div>
+                </div>
+            `).join('');
+        },
+        vista_creditos_vendedores:()=>{
+            return `
+            <div class="sygma-embarque-rpt card card-rounded shadow-sm col-12 border-0" id="rpt_compras_cuentas_cobrar">
+                <div id="comprasCxcLoaderOverlay" class="cxc-loader-overlay d-none">
+                    <div class="cxc-loader-overlay__box">
+                        ${GlobalLoader}
+                        <div class="cxc-loader-overlay__text">Procesando...</div>
+                    </div>
+                </div>
+                <div class="card-body sygma-embarque-rpt__body p-2 p-md-3">
+                    <header class="sygma-embarque-rpt__header">
+                        <div class="sygma-embarque-rpt__brand">
+                            <img class="sygma-embarque-rpt__logo" src="./favicon.png" width="44" height="44" alt="Logo">
+                            <div class="sygma-embarque-rpt__brand-text">
+                                <h4 class="sygma-embarque-rpt__title mb-0">Créditos vendedores</h4>
+                                <span class="sygma-embarque-rpt__embarque-date">Facturas al crédito con saldo pendiente</span>
+                            </div>
+                        </div>
+                        <div class="sygma-embarque-rpt__detail oculto-impresion">
+                            <span class="sygma-embarque-rpt__stat sygma-embarque-rpt__stat--items" id="lbComprasCxcTotalDocs">Docs: 0</span>
+                            <button type="button" class="btn btn-info btn-md btn-circle hand shadow sygma-embarque-rpt__print-btn" title="Imprimir" onclick="F.imprimirSelec('rpt_compras_cuentas_cobrar')">
+                                <i class="fal fa-print"></i>
+                            </button>
+                        </div>
+                    </header>
+                    <div class="sygma-embarque-rpt__toolbar sygma-embarques-filtros oculto-impresion">
+                        <div class="sygma-embarques-filtros__row">
+                            <div class="sygma-embarques-filtros__field">
+                                <label class="sygma-embarques-filtros__label" for="comprasCxcVendedor">Vendedor</label>
+                                <select class="form-control sygma-embarques-filtros__select" id="comprasCxcVendedor">
+                                    <option value="TODOS">TODOS</option>
+                                </select>
+                            </div>
+                            <div class="sygma-embarques-filtros__field">
+                                <label class="sygma-embarques-filtros__label" for="comprasCxcAlcance">Alcance</label>
+                                <select class="form-control sygma-embarques-filtros__select" id="comprasCxcAlcance">
+                                    <option value="MES">POR MES</option>
+                                    <option value="TODAS">TODAS</option>
+                                </select>
+                            </div>
+                            <div class="sygma-embarques-filtros__field d-flex align-items-end">
+                                <button type="button" class="btn btn-base btn-sm hand" id="btnComprasCxcRecargar">
+                                    <i class="fal fa-sync mr-1"></i> Actualizar
+                                </button>
+                            </div>
+                            <div class="sygma-embarques-filtros__field d-flex align-items-end">
+                                <button type="button" class="btn btn-warning btn-sm hand" id="btnComprasCxcCorregirSaldos">
+                                    <i class="fal fa-wrench mr-1"></i> Corregir saldos
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sygma-embarque-rpt__toolbar oculto-impresion mb-2">
+                        <input type="search" class="form-control sygma-embarque-rpt__search"
+                            placeholder="Buscar documento, cliente, NIT..."
+                            oninput="F.FiltrarTabla('tblComprasCxcDocumentos','txtComprasCxcBuscar')"
+                            id="txtComprasCxcBuscar">
+                    </div>
+                    <div class="table-responsive sygma-embarque-rpt__table-wrap">
+                        <table class="table sygma-embarque-rpt__table mb-0" id="tblComprasCxcDocumentos">
+                            <thead>
+                                <tr>
+                                    <th>FECHA</th>
+                                    <th>DOCUMENTO</th>
+                                    <th>NIT</th>
+                                    <th>CLIENTE</th>
+                                    <th>VENCIMIENTO</th>
+                                    <th class="text-right">IMPORTE</th>
+                                    <th class="text-right">ABONOS</th>
+                                    <th class="text-right">SALDO</th>
+                                    <th class="text-center">DIAS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataComprasCxcDocumentos"></tbody>
+                        </table>
+                    </div>
+                    <div class="sygma-embarque-rpt__total-block" id="lbComprasCxcTotalBlock"></div>
+                </div>
+            </div>`;
+        },
+        vista_creditos_modales:()=>{
+            return `
+            <div class="modal fade" id="modalComprasCxcOpciones" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-base py-2">
+                            <h5 class="modal-title text-white negrita mb-0" id="lbComprasCxcModalTitulo">Factura</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+                        </div>
+                        <div class="modal-body p-3">
+                            <p class="mb-3 text-muted text-center" id="lbComprasCxcModalSubtitulo"></p>
+                            <div class="row cxc-opciones-grid">
+                                <div class="col-6 mb-3"><button type="button" class="cxc-opcion-card hand w-100" id="btnComprasCxcHistorial"><i class="fal fa-history cxc-opcion-card__icon text-info"></i><span class="cxc-opcion-card__label">HISTORIAL</span></button></div>
+                                <div class="col-6 mb-3"><button type="button" class="cxc-opcion-card hand w-100" id="btnComprasCxcAbono"><i class="fal fa-dollar-sign cxc-opcion-card__icon text-success"></i><span class="cxc-opcion-card__label">ABONO</span></button></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="modalComprasCxcHistorial" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-base py-2">
+                            <h5 class="modal-title text-white negrita mb-0" id="lbComprasCxcHistorialTitulo">Historial de abonos</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+                        </div>
+                        <div class="modal-body p-3">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped mb-0">
+                                    <thead><tr><th>FECHA</th><th>TIPO</th><th>DOCUMENTO</th><th class="text-right">MONTO</th><th>FORMA PAGO</th><th>USUARIO</th></tr></thead>
+                                    <tbody id="tblComprasCxcHistorialBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="modalComprasCxcAbono" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-base py-2">
+                            <h5 class="modal-title text-white negrita mb-0">Registrar abono</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+                        </div>
+                        <div class="modal-body p-3">
+                            <div class="row">
+                                <div class="col-md-4 form-group"><label class="negrita" for="comprasCxcAbonoCoddoc">CODDOC (RCC)</label><select class="form-control" id="comprasCxcAbonoCoddoc"></select></div>
+                                <div class="col-md-4 form-group"><label class="negrita" for="txtComprasCxcAbonoCorrelativo">Correlativo</label><input type="text" class="form-control" id="txtComprasCxcAbonoCorrelativo" readonly></div>
+                                <div class="col-md-4 form-group"><label class="negrita" for="txtComprasCxcAbonoFecha">Fecha</label><input type="date" class="form-control" id="txtComprasCxcAbonoFecha"></div>
+                            </div>
+                            <div class="alert alert-light border mb-3">
+                                <div class="negrita mb-1">Factura a abonar</div>
+                                <div id="lbComprasCxcAbonoFactura">—</div>
+                                <div class="row mt-2">
+                                    <div class="col-4"><small class="text-muted">Total factura</small><div class="negrita" id="lbComprasCxcAbonoTotalFac">Q 0.00</div></div>
+                                    <div class="col-4"><small class="text-muted">Total abonos</small><div class="negrita" id="lbComprasCxcAbonoTotalAbonos">Q 0.00</div></div>
+                                    <div class="col-4"><small class="text-muted">Total saldo</small><div class="negrita text-danger" id="lbComprasCxcAbonoTotalSaldo">Q 0.00</div></div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 form-group"><label class="negrita" for="comprasCxcFpagoTipo">Forma de pago</label><select class="form-control" id="comprasCxcFpagoTipo"><option value="EFECTIVO">EFECTIVO</option><option value="DEPOSITO">DEPOSITO</option><option value="CHEQUE">CHEQUE</option><option value="OTROS">OTROS</option></select></div>
+                                <div class="col-md-6 form-group"><label class="negrita" for="txtComprasCxcFpagoDetalle">Detalle forma de pago</label><input type="text" class="form-control" id="txtComprasCxcFpagoDetalle" placeholder="Banco, boleta o no. de cheque"></div>
+                            </div>
+                            <div class="form-group mb-0"><label class="negrita" for="txtComprasCxcAbonoMonto">Monto a abonar</label><input type="number" class="form-control negrita text-danger cxc-abono-monto-input" id="txtComprasCxcAbonoMonto" min="0" step="0.01" placeholder="0.00"></div>
+                        </div>
+                        <div class="modal-footer py-2 px-3">
+                            <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancelar</button>
+                            <button type="button" class="btn btn-success btn-sm hand" id="btnComprasCxcGuardarAbono"><i class="fal fa-save mr-1"></i> Guardar abono</button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
         },
         panel_inicio:()=>{
             return `
@@ -228,9 +482,8 @@ function getView(){
                                     <h4 class="negrita text-danger" id="lbTotalPendientes"></h4>
                                </div>
                                <div class="form-group">
-                                    <label class="negrita text-secondary">Seleccione la Sucursal a consultar</label>
+                                    <label class="negrita text-secondary">Clasificación de productos</label>
                                     <div class="input-group">
-                                     
                                         <select class="form-control negrita text-base border-base" id="cmbTipoRentabilidad">
                                         </select>
                                     </div>
@@ -262,14 +515,6 @@ function getView(){
                                         
                         </div>
                     </div>
-                
-
-             
-
-
-                    <button class="btn btn-secondary btn-circle btn-circle btn-bottom-l btn-xl hand shadow" onclick="document.getElementById('tab-uno').click()">
-                        <i class="fal fa-arrow-left"></i>
-                    </button>
             `;
         },
         modal_existencia_sucursales:()=>{
@@ -369,110 +614,63 @@ function getView(){
 };
 
 
-var embarque_print_codembarque = '';
-var embarque_print_fecha = '';
-
-
 function addListeners(){
 
-    
-    document.title = "Inicio Compras";
+    document.title = 'Inicio Compras';
 
-    F.slideAnimationTabs();
+    compras_setupSucursalHeader();
 
-    let cmbTipoDoc = document.getElementById('cmbTipoDoc');
-    
-    let cmdSucursal = document.getElementById('cmbSucursal');
-
-   
-    let cmbMesHeader = document.getElementById('cmbMes');
-    let cmbAnioHeader = document.getElementById('cmbAnio');
-   
-
+    const cmbMesHeader = document.getElementById('cmbMesHeader');
+    const cmbAnioHeader = document.getElementById('cmbAnioHeader');
     if (cmbMesHeader) {
         cmbMesHeader.innerHTML = F.ComboMeses();
         cmbMesHeader.value = F.get_mes_curso();
+        cmbMesHeader.addEventListener('change', compras_onHeaderFiltersChange);
     }
     if (cmbAnioHeader) {
         cmbAnioHeader.innerHTML = F.ComboAnio();
         cmbAnioHeader.value = F.get_anio_curso();
+        cmbAnioHeader.addEventListener('change', compras_onHeaderFiltersChange);
     }
 
+    compras_setupMenuListeners();
 
-    GF.get_data_empresas()
-    .then((data)=>{
-        let str = '';//'<option value="TODAS">TODAS LAS SUCURSALES</option>';
-        data.recordset.map((r)=>{
-            str += `
-                <option value="${r.EMPNIT}">${r.NOMBRE}</option>
-            `
-        })
-        cmdSucursal.innerHTML = str;
-        cmbSucursal.value = GlobalEmpnit;
-        get_tbl_surtido(cmbSucursal.value); 
-       
-        cargar_grid_embarques();
-    })
-    .catch(()=>{
-        cmdSucursal.innerHTML = "<option value=''>NO SE CARGARON LAS SEDES</option>"
-    })
-    
-
-
-    cmdSucursal.addEventListener('change',()=>{
-        get_tbl_surtido(cmbSucursal.value);
-        cargar_grid_embarques();  
-    })
-
- 
-
-    get_total_rellenos()
-    .then((data)=>{
-       document.getElementById('lbTotalRelleno').innerHTML = `${F.setMoneda(data.recordset[0].CONTEO,'').replace('.00','')}<small class="m-0 l-h-n">Productos en mínimo</small>` 
-    })
-    .catch(()=>{
-        document.getElementById('lbTotalRelleno').innerText = '----'
-    })
+    document.getElementById('cmbStatus')?.addEventListener('change', () => cargar_grid_embarques());
 
     GF.get_clasificaciones_listado('BI')
-    .then((data)=>{
-
-        let str = "<option value='0'>TODAS</option>";
-        
-        data.recordset.map((r)=>{
-            str += `<option value='${r.CODIGO}'>${r.DESCRIPCION}</option>`
+        .then((data) => {
+            let str = "<option value='0'>TODAS</option>";
+            data.recordset.map((r) => {
+                str += `<option value='${r.CODIGO}'>${r.DESCRIPCION}</option>`;
+            });
+            const cmbTipo = document.getElementById('cmbTipoRentabilidad');
+            if (cmbTipo) cmbTipo.innerHTML = str;
         })
-        document.getElementById('cmbTipoRentabilidad').innerHTML = str;
-    })
-    .catch(()=>{
-        document.getElementById('cmbTipoRentabilidad').innerHTML = '';
-    })
- 
+        .catch(() => {
+            const cmbTipo = document.getElementById('cmbTipoRentabilidad');
+            if (cmbTipo) cmbTipo.innerHTML = '';
+        });
 
-
-
-    document.getElementById('cmbMes').addEventListener('change',()=>{
-        cargar_grid_embarques();
+    document.getElementById('cmbTipoRentabilidad')?.addEventListener('change', () => {
+        get_tbl_surtido(GlobalEmpnit);
     });
-
-    document.getElementById('cmbAnio').addEventListener('change',()=>{
-        cargar_grid_embarques();
-    });
-
-    document.getElementById('cmbStatus').addEventListener('change',()=>{
-        cargar_grid_embarques();
-    });
-
-
- 
 };
 
 function initView(){
-
+    compras_hideGeneralMenu();
+    document.getElementById('js-page-content')?.classList.add('proveedor-page');
+    if (typeof compras_cxc_listeners_ready !== 'undefined') compras_cxc_listeners_ready = false;
+    if (typeof compras_cxc_vendedores_ready !== 'undefined') compras_cxc_vendedores_ready = false;
     getView();
     addListeners();
+    compras_showHome();
+}
 
-};
+function destroyView() {
+    compras_toggleSidebar(false);
+    document.body.classList.remove('proveedor-sidebar-open');
+    document.getElementById('js-page-content')?.classList.remove('proveedor-page');
+}
 
 
 
@@ -481,8 +679,8 @@ function initView(){
 function cargar_grid_embarques(){
 
     let statusEmbarque = document.getElementById('cmbStatus').value;
-    let mes =document.getElementById('cmbMes').value;
-    let anio = document.getElementById('cmbAnio').value;
+    let mes = compras_getMes();
+    let anio = compras_getAnio();
 
     tbl_embarques('tblDatalEmbarques',statusEmbarque,mes,anio);
 
@@ -939,7 +1137,7 @@ function get_existencia_sucursales(codprod,desprod,desmarca){
     window.__spaViewHooks = window.__spaViewHooks || {};
     window.__spaViewHooks['inicio/compras'] = {
         initView: initView,
-        destroyView: function () {}
+        destroyView: destroyView
     };
 })();
 
