@@ -2010,7 +2010,7 @@ body.app-pos2-theme #root .btn.btn-circle {
   }
 }
 
-/* Reporte productos del embarque (digitador) */
+/* Reporte Picking (productos consolidados por embarque) */
 .sygma-embarque-rpt__body {
   padding: 0.85rem 1rem !important;
 }
@@ -3830,6 +3830,10 @@ body.fac2-en-ingreso #btnFac2Nuevo {
     opacity: 1 !important;
     pointer-events: auto !important;
   }
+
+  body.sygma-print-embarque-active #compras_main_content {
+    display: none !important;
+  }
 }
 
 /* Vista mantenimiento empleados — listado compacto y modal centrado */
@@ -4321,6 +4325,19 @@ body.spa-nav-hidden .page-content.proveedor-page #despachoPaneListado {
 .despacho-action-btn--info {
   background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
 }
+.despacho-action-btn--concre {
+  background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
+}
+.despacho-action-btn--credito {
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+  color: #1a1a1a;
+}
+.despacho-action-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+  pointer-events: none;
+}
 .despacho-action-btn--secondary {
   background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
 }
@@ -4401,6 +4418,23 @@ body.spa-nav-hidden .page-content.proveedor-page #despachoPaneListado {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.4rem;
+}
+.despacho-doc-actions--triple {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.despacho-facturas-filters {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+.despacho-facturas-filters__search {
+  flex: 1;
+  min-width: 0;
+}
+.despacho-facturas-filters__concre {
+  flex: 0 0 auto;
+  min-width: 7.5rem;
+  max-width: 9.5rem;
 }
 .despacho-doc-amount {
   text-align: right !important;
@@ -4628,5 +4662,225 @@ body.spa-nav-hidden .page-content.proveedor-page #despachoPaneListado {
 @media (min-width: 576px) {
   .despacho-table--emb-prod .despacho-emb-prod__th-product {
     min-width: 12rem;
+  }
+}
+
+/* Cuentas por cobrar — monto de abono */
+.cxc-abono-monto-input {
+  font-size: 1.65rem !important;
+  font-weight: 700 !important;
+  color: #c0392b !important;
+}
+
+.cxc-dias-badge {
+  font-size: 0.85rem;
+  font-weight: 700;
+  min-width: 2.2rem;
+  height: 2.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.cxc-opcion-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 7.5rem;
+  padding: 1rem 0.75rem;
+  border: 1px solid #dee2e6;
+  border-radius: 0.65rem;
+  background: #fff;
+  color: #495057;
+}
+
+.cxc-opcion-card:hover,
+.cxc-opcion-card:focus,
+.cxc-opcion-card:active {
+  background: #fff;
+  color: #495057;
+  border-color: #dee2e6;
+  box-shadow: none;
+  outline: none;
+  transform: none;
+}
+
+.cxc-opcion-card__icon {
+  font-size: 1.65rem;
+  margin-bottom: 0.45rem;
+}
+
+.cxc-opcion-card__label {
+  font-weight: 700;
+  font-size: 0.78rem;
+  line-height: 1.2;
+  text-align: center;
+  color: #343a40;
+}
+
+.cxc-loader-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.82);
+  border-radius: inherit;
+}
+
+#rpt_cuentas_cobrar,
+#rpt_cuentas_pagar {
+  position: relative;
+}
+
+.cxc-loader-overlay__box {
+  text-align: center;
+}
+
+.cxc-loader-overlay__text {
+  margin-top: 0.5rem;
+  font-weight: 700;
+  color: #495057;
+}
+
+@media print {
+  body.sygma-print-edo-cuenta-active * {
+    visibility: hidden !important;
+  }
+
+  body.sygma-print-edo-cuenta-active #modalCxcEstadoCuenta,
+  body.sygma-print-edo-cuenta-active #modalCxcEstadoCuenta .modal-dialog,
+  body.sygma-print-edo-cuenta-active #modalCxcEstadoCuenta .modal-content,
+  body.sygma-print-edo-cuenta-active #modalCxcEstadoCuenta .modal-body,
+  body.sygma-print-edo-cuenta-active #rpt_estado_cuenta_cliente,
+  body.sygma-print-edo-cuenta-active #rpt_estado_cuenta_cliente * {
+    visibility: visible !important;
+  }
+
+  body.sygma-print-edo-cuenta-active #modalCxcEstadoCuenta {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    display: block !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  body.sygma-print-edo-cuenta-active #modalCxcEstadoCuenta .modal-dialog,
+  body.sygma-print-edo-cuenta-active #modalCxcEstadoCuenta .modal-content,
+  body.sygma-print-edo-cuenta-active #modalCxcEstadoCuenta .modal-body {
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+
+  body.sygma-print-edo-cuenta-active #rpt_estado_cuenta_cliente {
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  body.sygma-print-edo-cuenta-active #rpt_cuentas_cobrar,
+  body.sygma-print-edo-cuenta-active #modalCxcOpciones,
+  body.sygma-print-edo-cuenta-active #modalCxcHistorial,
+  body.sygma-print-edo-cuenta-active #modalCxcAbono,
+  body.sygma-print-edo-cuenta-active .modal-backdrop {
+    display: none !important;
+  }
+
+  #modalCxcEstadoCuenta .modal-header,
+  #modalCxcEstadoCuenta .modal-content > .oculto-impresion {
+    display: none !important;
+  }
+
+  body.sygma-print-edo-cuenta-proveedor-active * {
+    visibility: hidden !important;
+  }
+
+  body.sygma-print-edo-cuenta-proveedor-active #modalCxpEstadoCuenta,
+  body.sygma-print-edo-cuenta-proveedor-active #modalCxpEstadoCuenta .modal-dialog,
+  body.sygma-print-edo-cuenta-proveedor-active #modalCxpEstadoCuenta .modal-content,
+  body.sygma-print-edo-cuenta-proveedor-active #modalCxpEstadoCuenta .modal-body,
+  body.sygma-print-edo-cuenta-proveedor-active #rpt_estado_cuenta_proveedor,
+  body.sygma-print-edo-cuenta-proveedor-active #rpt_estado_cuenta_proveedor * {
+    visibility: visible !important;
+  }
+
+  body.sygma-print-edo-cuenta-proveedor-active #modalCxpEstadoCuenta {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    display: block !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  body.sygma-print-edo-cuenta-proveedor-active #modalCxpEstadoCuenta .modal-dialog,
+  body.sygma-print-edo-cuenta-proveedor-active #modalCxpEstadoCuenta .modal-content,
+  body.sygma-print-edo-cuenta-proveedor-active #modalCxpEstadoCuenta .modal-body {
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+
+  body.sygma-print-edo-cuenta-proveedor-active #rpt_estado_cuenta_proveedor {
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  body.sygma-print-edo-cuenta-proveedor-active #rpt_cuentas_pagar,
+  body.sygma-print-edo-cuenta-proveedor-active #modalCxpOpciones,
+  body.sygma-print-edo-cuenta-proveedor-active #modalCxpHistorial,
+  body.sygma-print-edo-cuenta-proveedor-active #modalCxpAbono,
+  body.sygma-print-edo-cuenta-proveedor-active .modal-backdrop {
+    display: none !important;
+  }
+
+  #modalCxpEstadoCuenta .modal-header,
+  #modalCxpEstadoCuenta .modal-content > .oculto-impresion {
+    display: none !important;
   }
 }

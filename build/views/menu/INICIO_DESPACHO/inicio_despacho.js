@@ -1,6 +1,7 @@
 var despacho_currentPane = 'uno';
 var despacho_backTarget = 'uno';
 var despacho_mapInstance = null;
+var despacho_facturas_docs = [];
 
 function despacho_showPanel(paneId, opts) {
     opts = opts || {};
@@ -191,9 +192,17 @@ function getView(){
                         <select class="form-control form-control-sm negrita" id="cmbEmpleadosFac"></select>
                     </div>
                     <div class="form-group despacho-field mb-2">
-                        <input type="search" class="form-control form-control-sm negrita border-base"
-                            placeholder="Buscar factura, cliente, dirección..."
-                            oninput="F.FiltrarTabla('tblDocumentos','txtBuscarDocumento')" id="txtBuscarDocumento">
+                        <div class="despacho-facturas-filters">
+                            <input type="search" class="form-control form-control-sm negrita border-base despacho-facturas-filters__search"
+                                placeholder="Buscar factura, cliente, dirección..."
+                                oninput="despacho_aplicar_filtros_facturas()" id="txtBuscarDocumento">
+                            <select class="form-control form-control-sm negrita despacho-facturas-filters__concre" id="cmbFiltroConcreFac"
+                                onchange="despacho_aplicar_filtros_facturas()">
+                                <option value="TODAS">TODAS</option>
+                                <option value="CON">CONTADO</option>
+                                <option value="CRE">CRÉDITO</option>
+                            </select>
+                        </div>
                     </div>
                     ${view.despacho_table_shell('tblDocumentos', '<tr><th>Factura / cliente</th><th class="text-right">Importe</th></tr>', 'tblDataDocumentos')}
                 </div>
@@ -409,7 +418,7 @@ function getView(){
             return `
             <div class="despacho-pane card border-0 shadow-sm">
                 <div class="card-body p-2 p-md-3">
-                    ${view.despacho_panel_toolbar('Productos del embarque', 'lbEmbarqueProd')}
+                    ${view.despacho_panel_toolbar(GlobalRptPicking, 'lbEmbarqueProd')}
                     <div class="d-flex flex-wrap gap-2 mb-2">
                         <div class="despacho-stat-pill mb-0" id="lbEmbProdItems"></div>
                         <div class="despacho-stat-pill mb-0" id="lbEmbProdTotal"></div>
@@ -876,7 +885,7 @@ function get_tbl_embarques_pendientes(){
                         </button>
                     </div>
                     <button type="button" class="despacho-embarque-card__report hand" onclick="get_reporte_productos_embarque('${r.CODEMBARQUE}')">
-                        <i class="fal fa-boxes"></i><span>Productos del embarque</span>
+                        <i class="fal fa-boxes"></i><span>${GlobalRptPicking}</span>
                     </button>
                 </div>
             </article>`;
@@ -900,6 +909,11 @@ function get_data_embarque(codembarque){
 
     document.getElementById('cmbEmpleadosFac').innerHTML = `<option value='TODOS'>TODOS</option>`;
     document.getElementById('cmbEmpleadosFac').value = 'TODOS';
+
+    const cmbFiltroConcre = document.getElementById('cmbFiltroConcreFac');
+    if (cmbFiltroConcre) cmbFiltroConcre.value = 'TODAS';
+    const txtBuscar = document.getElementById('txtBuscarDocumento');
+    if (txtBuscar) txtBuscar.value = '';
 
     get_tbl_documentos_embarque(selected_codembarque);
 
@@ -950,30 +964,25 @@ function get_data_documentos_embarque(codembarque,codemp){
     })
 
 };
-function get_tbl_documentos_embarque(codembarque){
+function despacho_label_concre(concre) {
+    if (concre === 'CRE') return 'CRÉDITO';
+    if (concre === 'CON') return 'CONTADO';
+    return concre || 'CONTADO';
+}
 
-    let container = document.getElementById('tblDataDocumentos');
-    container.innerHTML = GlobalLoader;
+function despacho_concre_btn_class(concre) {
+    if (concre === 'CRE') return 'despacho-action-btn--credito';
+    return 'despacho-action-btn--concre';
+}
 
-    let varTotal = 0;
+function despacho_build_factura_row(r, codembarque) {
+    let strBtnDevuelto = Number(r.DEVUELTO) === 0 ? '' : 'hidden';
+    const concreVal = (r.CONCRE === 'CRE') ? 'CRE' : 'CON';
+    const concreLabel = despacho_label_concre(concreVal);
+    const concreBtnClass = despacho_concre_btn_class(concreVal);
 
-    let codemp = document.getElementById('cmbEmpleadosFac').value;
-
-    let empleados = [];
-
-
-    get_data_documentos_embarque(codembarque,codemp)
-    .then((data)=>{
-        let str = '';
-        data.recordset.map((r)=>{
-            
-            empleados.push({codemp:r.CODVEN, nombre:r.VENDEDOR});
-
-            let strBtnDevuelto = '';
-            if(Number(r.DEVUELTO)==0){strBtnDevuelto = ''}else{strBtnDevuelto = 'hidden'};
-            varTotal += Number(r.IMPORTE);
-            str += `
-            <tr class="despacho-doc-row">
+    return `
+            <tr class="despacho-doc-row" data-concre="${concreVal}" data-importe="${Number(r.IMPORTE) || 0}">
                 <td class="despacho-doc-cell">
                     <div class="despacho-doc-card">
                         <div class="despacho-doc-card__tags">${r.TIPONEGOCIO} ${r.NEGOCIO}</div>
@@ -983,7 +992,7 @@ function get_tbl_documentos_embarque(codembarque){
                             <span class="despacho-doc-card__doc">Doc: ${r.CODDOC}-${r.CORRELATIVO}</span>
                             <span class="despacho-doc-card__seller text-danger negrita">${r.VENDEDOR.toUpperCase()}</span>
                         </div>
-                        <div class="despacho-doc-actions">
+                        <div class="despacho-doc-actions despacho-doc-actions--triple">
                             <button type="button" class="despacho-action-btn despacho-action-btn--base hand"
                             onclick="get_detalle_factura('${r.CODDOC}','${r.CORRELATIVO}','${r.TIPONEGOCIO}','${r.NEGOCIO}','${r.CLIENTE}','FAC')">
                                 <i class="fal fa-list"></i><span>Detalle</span>
@@ -991,6 +1000,10 @@ function get_tbl_documentos_embarque(codembarque){
                             <button type="button" class="${strBtnDevuelto} despacho-action-btn despacho-action-btn--primary hand"
                             onclick="get_devolucion_factura('${codembarque}','${r.CODDOC}','${r.CORRELATIVO}','${r.CODVEN}','${r.CODCLIENTE}','${r.NIT}','${r.TIPONEGOCIO}','${r.NEGOCIO}','${r.CLIENTE}','${F.limpiarTexto(r.DIRECCION)}','${r.FECHA.replace('T00:00:00.000Z','')}')">
                                 <i class="fal fa-download"></i><span>Devolución</span>
+                            </button>
+                            <button type="button" class="despacho-action-btn ${concreBtnClass} hand" id="btnConCre${r.CODDOC}-${r.CORRELATIVO}"
+                            onclick="despacho_toggle_concre_factura('${r.CODDOC}','${r.CORRELATIVO}','${concreVal}','btnConCre${r.CODDOC}-${r.CORRELATIVO}')">
+                                <i class="fal fa-money-bill-wave"></i><span>${concreLabel}</span>
                             </button>
                         </div>
                     </div>
@@ -1004,10 +1017,92 @@ function get_tbl_documentos_embarque(codembarque){
                     <div class="despacho-doc-amount__dev small text-danger negrita">Dev: ${F.setMoneda(r.DEVUELTO,'Q')}</div>
                 </td>
             </tr>`;
-        })
-        container.innerHTML = str;
-        document.getElementById('lbTotalEmbarque').innerText = `Total: ${F.setMoneda(varTotal,'Q')}`;
+}
 
+function despacho_aplicar_filtros_facturas() {
+    const table = document.getElementById('tblDocumentos');
+    const lbTotal = document.getElementById('lbTotalEmbarque');
+    if (!table || !lbTotal) return;
+
+    const filtroConcre = document.getElementById('cmbFiltroConcreFac')?.value || 'TODAS';
+    const texto = (document.getElementById('txtBuscarDocumento')?.value || '').toLowerCase();
+    let total = 0;
+
+    for (let i = 1; i < table.rows.length; i++) {
+        const tr = table.rows[i];
+        const concre = tr.getAttribute('data-concre') || 'CON';
+        const matchConcre = filtroConcre === 'TODAS' || concre === filtroConcre;
+
+        const cells = tr.getElementsByTagName('td');
+        let matchText = texto.length === 0;
+        if (!matchText) {
+            for (let j = 0; j < cells.length && !matchText; j++) {
+                if (cells[j].innerHTML.toLowerCase().indexOf(texto) > -1) {
+                    matchText = true;
+                }
+            }
+        }
+
+        const visible = matchConcre && matchText;
+        tr.style.display = visible ? '' : 'none';
+        if (visible) {
+            total += Number(tr.getAttribute('data-importe') || 0);
+        }
+    }
+
+    lbTotal.innerText = `Total: ${F.setMoneda(total,'Q')}`;
+}
+
+function despacho_render_facturas_embarque(codembarque, records) {
+    const container = document.getElementById('tblDataDocumentos');
+    if (!container) return;
+
+    let str = '';
+    records.forEach((r) => {
+        str += despacho_build_factura_row(r, codembarque);
+    });
+
+    container.innerHTML = str || '<tr><td colspan="2" class="text-center text-muted py-3">No hay datos...</td></tr>';
+    despacho_aplicar_filtros_facturas();
+}
+
+function despacho_update_concre_fila(coddoc, correlativo, nuevoConcre) {
+    const doc = despacho_facturas_docs.find((d) =>
+        d.CODDOC === coddoc && String(d.CORRELATIVO) === String(correlativo)
+    );
+    if (doc) doc.CONCRE = nuevoConcre;
+
+    const btn = document.getElementById(`btnConCre${coddoc}-${correlativo}`);
+    const tr = btn ? btn.closest('tr') : null;
+
+    if (btn) {
+        btn.disabled = false;
+        btn.className = `despacho-action-btn ${despacho_concre_btn_class(nuevoConcre)} hand`;
+        const span = btn.querySelector('span');
+        if (span) span.textContent = despacho_label_concre(nuevoConcre);
+        btn.setAttribute('onclick', `despacho_toggle_concre_factura('${coddoc}','${correlativo}','${nuevoConcre}','btnConCre${coddoc}-${correlativo}')`);
+    }
+    if (tr) tr.setAttribute('data-concre', nuevoConcre);
+
+    despacho_aplicar_filtros_facturas();
+}
+
+function get_tbl_documentos_embarque(codembarque){
+
+    let container = document.getElementById('tblDataDocumentos');
+    container.innerHTML = GlobalLoader;
+
+    let codemp = document.getElementById('cmbEmpleadosFac').value;
+
+    let empleados = [];
+
+
+    get_data_documentos_embarque(codembarque,codemp)
+    .then((data)=>{
+        despacho_facturas_docs = data.recordset || [];
+        empleados = despacho_facturas_docs.map((r) => ({ codemp: r.CODVEN, nombre: r.VENDEDOR }));
+
+        despacho_render_facturas_embarque(codembarque, despacho_facturas_docs);
 
         //OBTENER LA LISTA UNICA DE EMPLEADOS DEL PICKING
         let strComboEmpleados = `<option value='TODOS'>TODOS</option>`;
@@ -1019,15 +1114,47 @@ function get_tbl_documentos_embarque(codembarque){
             strComboEmpleados += `<option value='${r.codemp}'>${r.nombre}</option>`
         });
         document.getElementById('cmbEmpleadosFac').innerHTML = strComboEmpleados;
+        document.getElementById('cmbEmpleadosFac').value = codemp;
        
         
                 
     })
     .catch(()=>{
+        despacho_facturas_docs = [];
         container.innerHTML = 'No hay datos...';
         document.getElementById('lbTotalEmbarque').innerText = '';
     })
 };
+
+function despacho_toggle_concre_factura(coddoc, correlativo, concreActual, idbtn) {
+    const nuevoConcre = (concreActual === 'CRE') ? 'CON' : 'CRE';
+    const labelActual = despacho_label_concre(concreActual);
+    const labelNuevo = despacho_label_concre(nuevoConcre);
+    const btn = document.getElementById(idbtn);
+
+    if (btn) btn.disabled = true;
+
+    F.Confirmacion(`¿Está seguro que desea cambiar de ${labelActual} a ${labelNuevo} en ${coddoc}-${correlativo}?`)
+        .then((value) => {
+            if (value !== true) {
+                if (btn) btn.disabled = false;
+                return;
+            }
+
+            F.showToast(`Cambiando de ${labelActual} a ${labelNuevo}...`);
+
+            GF.documento_update_concre(GlobalEmpnit, coddoc, correlativo, nuevoConcre)
+                .then(() => {
+                    F.Aviso('Forma de pago actualizada');
+                    despacho_update_concre_fila(coddoc, correlativo, nuevoConcre);
+                })
+                .catch(() => {
+                    if (btn) btn.disabled = false;
+                    F.AvisoError('No se pudo actualizar la forma de pago');
+                });
+        });
+}
+
 function obtener_lista_no_duplicada(json_original){
 
         let personasNoDuplicadas = [];
@@ -1313,7 +1440,7 @@ function get_tbl_productos_embarque_devueltos(codembarque){
 };
 
 //----------------------------------
-// reporte productos del embarque (misma data que digitador / imprimir)
+// reporte Picking (misma data que digitador / compras)
 //----------------------------------
 function get_reporte_productos_embarque(codembarque){
 
@@ -1346,7 +1473,6 @@ function get_tbl_productos_embarque_reporte(codembarque){
                     <td class="despacho-emb-prod__product">
                         <div class="despacho-emb-prod__name">${r.DESPROD}</div>
                         <div class="despacho-emb-prod__code">${r.CODPROD}</div>
-                        ${r.DESMARCA ? `<div class="despacho-emb-prod__brand">${r.DESMARCA}</div>` : ''}
                     </td>
                     <td class="text-center despacho-emb-prod__num">${r.UXC}</td>
                     <td class="text-center despacho-emb-prod__num">${r.CAJAS}</td>

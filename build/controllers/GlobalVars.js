@@ -29,6 +29,11 @@ let GlobalCodUsuario = 0;
 let GlobalBolEditando = false;
 let GlobalSignoMoneda = 'Q'
 
+/** Nombre oficial del reporte de productos consolidados por embarque (usar en todo el proyecto). */
+let GlobalRptPicking = 'Picking';
+let GlobalRptEstadoCuentaCliente = 'Estado de Cuenta de Cliente';
+let GlobalRptEstadoCuentaProveedor = 'Estado de Cuenta de Proveedor';
+
 let data_config_general = [];
 //0 = 1) permite venta sin existencia (sino)
 //

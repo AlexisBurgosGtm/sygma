@@ -912,7 +912,7 @@ function getView(){
                             <select class="form-control border-danger negrita text-danger" id="cmbFTipo">
                                 <option value='PENDIENTES'>FACTURAS PENDIENTES</option>
                                 <option value='FACTURAS'>FACTURAS EMBARQUE</option>
-                                <option value='PRODUCTOS'>PRODUCTOS EMBARQUE</option>
+                                <option value='PRODUCTOS'>${GlobalRptPicking.toUpperCase()}</option>
                                 <option value='BONIFICACIONES'>PRODUCTOS BONIFICADOS EMBARQUE</option>
                                 <option value='VENDEDORES'>RESUMEN VENDEDOR</option>
                                 <option value='ANULADAS'>FACTURAS ANULADAS</option>
@@ -1108,7 +1108,7 @@ function getView(){
                         <div class="sygma-embarque-rpt__brand">
                             <img class="sygma-embarque-rpt__logo" src="./favicon.png" width="44" height="44" alt="Logo">
                             <div class="sygma-embarque-rpt__brand-text">
-                                <h4 class="sygma-embarque-rpt__title mb-0">Productos del Embarque</h4>
+                                <h4 class="sygma-embarque-rpt__title mb-0">${GlobalRptPicking}</h4>
                                 <div class="sygma-embarque-rpt__embarque-info">
                                     <span class="sygma-embarque-rpt__embarque-code" id="lbProdCodembarque"></span>
                                     <span class="sygma-embarque-rpt__embarque-date" id="lbProdFechaEmbarque"></span>
@@ -2945,7 +2945,6 @@ function tbl_productos_embarque(codembarque){
                     </td>
                     <td class="sygma-embarque-rpt__prod">
                         <span class="sygma-embarque-rpt__prod-main">${r.DESPROD}</span>
-                        <span class="sygma-embarque-rpt__prod-sub">${r.DESMARCA || ''}</span>
                     </td>
                     <td class="text-center">${r.UXC}</td>
                     <td class="text-center">${r.CAJAS}</td>
@@ -3590,7 +3589,7 @@ function embarque_imprimir_productos(){
     if (!codembarque) return;
     const host = document.getElementById('sygma_embarque_print_host');
     if (!host) return;
-    embarque_print_show_loader('Generando reporte de productos...');
+    embarque_print_show_loader(`Generando ${GlobalRptPicking}...`);
     Promise.all([
         GF.get_data_embarque_productos(GlobalEmpnit, codembarque),
         embarque_fetch_resumen_vendedor(codembarque)
@@ -3605,7 +3604,7 @@ function embarque_imprimir_productos(){
             strRows += `
                 <tr>
                     <td><span class="sygma-embarque-rpt__cod-main">${r.CODPROD}</span></td>
-                    <td><span class="sygma-embarque-rpt__prod-main">${r.DESPROD}</span><span class="sygma-embarque-rpt__prod-sub">${r.DESMARCA || ''}</span></td>
+                    <td><span class="sygma-embarque-rpt__prod-main">${r.DESPROD}</span></td>
                     <td class="text-center">${r.UXC}</td>
                     <td class="text-center">${r.CAJAS}</td>
                     <td class="text-center">${r.UNIDADES}</td>
@@ -3614,7 +3613,7 @@ function embarque_imprimir_productos(){
                 </tr>`;
         });
         if (!strRows) strRows = `<tr><td colspan="7" class="text-center text-muted py-2">Sin productos</td></tr>`;
-        host.innerHTML = embarque_print_sheet_open('Productos del Embarque') + `
+        host.innerHTML = embarque_print_sheet_open(GlobalRptPicking) + `
             <div class="table-responsive sygma-embarque-rpt__table-wrap">
                 <table class="table sygma-embarque-rpt__table mb-0">
                     <thead><tr>
@@ -3637,7 +3636,7 @@ function embarque_imprimir_productos(){
     })
     .catch(() => {
         embarque_print_hide_loader(true);
-        F.AvisoError('No se pudo generar el reporte de productos');
+        F.AvisoError(`No se pudo generar el reporte ${GlobalRptPicking}`);
         host.innerHTML = '';
     });
 }

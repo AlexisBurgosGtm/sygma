@@ -533,6 +533,27 @@ router.post("/update_fecha_documento", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+router.post("/update_concre_documento", async(req,res)=>{
+   
+    const { token, sucursal, coddoc, correlativo, concre, fecha} = req.body;
+    const tipoPago = (concre === 'CRE') ? 'CRE' : 'CON';
+    const setSaldos = (tipoPago === 'CRE')
+        ? `DOC_SALDO=TOTALPRECIO, DOC_ABONOS=0`
+        : `DOC_ABONOS=TOTALPRECIO, DOC_SALDO=0`;
+
+    let qry = `UPDATE DOCUMENTOS 
+                    SET CONCRE='${tipoPago}',
+                        ${setSaldos},
+                        LASTUPDATE='${fecha}'
+                    WHERE EMPNIT='${sucursal}' AND 
+                        CODDOC='${coddoc}' AND 
+                        CORRELATIVO=${correlativo} AND
+                        STATUS <> 'A';    
+                `
+    
+    execute.QueryToken(res,qry,token);
+     
+});
 
 
 router.post("/listado_documentos", async(req,res)=>{
@@ -615,5 +636,602 @@ FROM     DOCUMENTOS LEFT OUTER JOIN
 
 
 
+
+
+router.post("/listado_cuentas_cobrar", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio} = req.body;
+
+    let filtroPeriodo = '';
+    if (anio && String(anio) !== 'TODOS') {
+        filtroPeriodo += ` AND (DOCUMENTOS.ANIO = ${Number(anio)})`;
+    }
+    if (mes && String(mes) !== 'TODOS') {
+        filtroPeriodo += ` AND (DOCUMENTOS.MES = ${Number(mes)})`;
+    }
+
+    let qry = `SELECT 
+                    DOCUMENTOS.FECHA, 
+                    DOCUMENTOS.CODDOC, 
+                    DOCUMENTOS.CORRELATIVO, 
+                    DOCUMENTOS.DOC_NIT AS NIT, 
+                    DOCUMENTOS.DOC_NOMCLIE AS NOMBRE, 
+                    DOCUMENTOS.DOC_DIRCLIE AS DIRECCION, 
+                    DOCUMENTOS.TOTALVENTA, 
+                    DOCUMENTOS.TOTALPRECIO, 
+                    ISNULL(DOCUMENTOS.DOC_SALDO, 0) AS DOC_SALDO, 
+                    ISNULL(DOCUMENTOS.DOC_ABONOS, 0) AS DOC_ABONOS, 
+                    DOCUMENTOS.STATUS, 
+                    DOCUMENTOS.CONCRE, 
+                    DOCUMENTOS.VENCIMIENTO, 
+                    DOCUMENTOS.CODEMP, 
+                    DOCUMENTOS.CODCLIENTE,
+                    EMPLEADOS.NOMEMPLEADO AS EMPLEADO,
+                    TIPODOCUMENTOS.TIPODOC
+            FROM DOCUMENTOS 
+            INNER JOIN TIPODOCUMENTOS 
+                ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC 
+                AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT 
+            LEFT OUTER JOIN EMPLEADOS 
+                ON DOCUMENTOS.CODEMP = EMPLEADOS.CODEMPLEADO 
+                AND DOCUMENTOS.EMPNIT = EMPLEADOS.EMPNIT
+            WHERE (DOCUMENTOS.EMPNIT = '${sucursal}') 
+                AND (TIPODOCUMENTOS.TIPODOC = 'FAC') 
+                AND (DOCUMENTOS.CONCRE = 'CRE') 
+                AND (ISNULL(DOCUMENTOS.DOC_SALDO, 0) > 0) 
+                AND (DOCUMENTOS.STATUS <> 'A')
+                ${filtroPeriodo}
+            ORDER BY DOCUMENTOS.FECHA DESC, DOCUMENTOS.CORRELATIVO DESC`;
+    
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/historial_abonos_cxc", async(req,res)=>{
+   
+    const { token, sucursal, fac_coddoc, fac_correlativo} = req.body;
+
+    let qry = `SELECT 
+                    DOCUMENTOS.FECHA, 
+                    DOCUMENTOS.CODDOC, 
+                    DOCUMENTOS.CORRELATIVO, 
+                    DOCUMENTOS.TOTALPRECIO, 
+                    DOCUMENTOS.USUARIO, 
+                    DOCUMENTOS.STATUS,
+                    TIPODOCUMENTOS.TIPODOC,
+                    ISNULL(DOCUMENTOS.FPAGO_TIPO, '') AS FPAGO_TIPO,
+                    ISNULL(DOCUMENTOS.FPAGO_DETALLE, '') AS FPAGO_DETALLE
+            FROM DOCUMENTOS 
+            INNER JOIN TIPODOCUMENTOS 
+                ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC 
+                AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT 
+            WHERE (DOCUMENTOS.EMPNIT = '${sucursal}') 
+                AND (DOCUMENTOS.STATUS <> 'A')
+                AND (
+                    (
+                        TIPODOCUMENTOS.TIPODOC = 'RCC'
+                        AND DOCUMENTOS.SERIEFAC = '${fac_coddoc}'
+                        AND DOCUMENTOS.NOFAC = '${fac_correlativo}'
+                    )
+                    OR (
+                        TIPODOCUMENTOS.TIPODOC = 'DEV'
+                        AND DOCUMENTOS.CODDOC_ORIGEN = '${fac_coddoc}'
+                        AND DOCUMENTOS.CORRELATIVO_ORIGEN = '${fac_correlativo}'
+                    )
+                )
+            ORDER BY DOCUMENTOS.FECHA DESC, DOCUMENTOS.CORRELATIVO DESC`;
+    
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/insert_abono_cxc", async(req,res)=>{
+   
+    const { token, sucursal,
+            coddoc, correlativo, fecha, monto,
+            fac_coddoc, fac_correlativo,
+            codcliente, nitclie, nomclie, dirclie, codven, usuario, hora, codcaja, iva,
+            fpago_tipo, fpago_detalle} = req.body;
+
+    const montoNum = Number(monto);
+    if (!montoNum || montoNum <= 0) {
+        res.send('error');
+        return;
+    }
+
+    const nom = (nomclie || '').replace(/'/g, "''");
+    const dir = (dirclie || '').replace(/'/g, "''");
+    const nit = (nitclie || '').replace(/'/g, "''");
+    const obs = `Abono factura ${fac_coddoc}-${fac_correlativo}`.replace(/'/g, "''");
+    const fpagoTipo = (fpago_tipo || 'EFECTIVO').replace(/'/g, "''");
+    const fpagoDetalle = (fpago_detalle || '').replace(/'/g, "''");
+
+    let qryDocumentos = str_qry_documentos('[]',sucursal,'',
+        coddoc,correlativo,0,0,fecha,fecha,'',
+        '0',codcliente || 0,nom,0,montoNum,0,
+        nit,dir,obs,'',usuario,
+        codven || 0,'0','0',hora,'CON','RCC',
+        '','','','','0','0',
+        codcaja || 1,iva || 12,fac_coddoc,fac_correlativo,'MEDIA','','0');
+
+    let nuevoCorrelativo = Number(correlativo) + 1;
+    let qryTipodocumentos = `UPDATE TIPODOCUMENTOS SET CORRELATIVO=${nuevoCorrelativo} WHERE EMPNIT='${sucursal}' AND CODDOC='${coddoc}';`;
+
+    let qryUpdateFac = `UPDATE DOCUMENTOS 
+                            SET DOC_ABONOS = ISNULL(DOC_ABONOS, 0) + ${montoNum},
+                                DOC_SALDO = CASE 
+                                    WHEN ISNULL(DOC_SALDO, 0) - ${montoNum} < 0 THEN 0 
+                                    ELSE ISNULL(DOC_SALDO, 0) - ${montoNum} 
+                                END,
+                                LASTUPDATE='${fecha}'
+                            WHERE EMPNIT='${sucursal}' 
+                                AND CODDOC='${fac_coddoc}' 
+                                AND CORRELATIVO=${fac_correlativo} 
+                                AND STATUS <> 'A'
+                                AND ISNULL(DOC_SALDO, 0) >= ${montoNum};`;
+
+    let qryUpdateFpago = `UPDATE DOCUMENTOS 
+                            SET FPAGO_TIPO='${fpagoTipo}',
+                                FPAGO_DETALLE='${fpagoDetalle}'
+                            WHERE EMPNIT='${sucursal}' 
+                                AND CODDOC='${coddoc}' 
+                                AND CORRELATIVO=${correlativo};`;
+
+    let qry = qryDocumentos + qryUpdateFpago + qryTipodocumentos + qryUpdateFac;
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/estado_cuenta_cliente", async(req,res)=>{
+   
+    const { token, sucursal, codcliente} = req.body;
+    const codClie = Number(codcliente) || 0;
+    if (!codClie) {
+        res.send('error');
+        return;
+    }
+
+    let qry = `
+            SELECT 
+                DOCUMENTOS.FECHA AS FECHA,
+                0 AS ORDEN,
+                CAST('CARGO' AS VARCHAR(10)) AS MOV_TIPO,
+                CAST(TIPODOCUMENTOS.TIPODOC AS VARCHAR(10)) AS TIPODOC,
+                CAST(DOCUMENTOS.CODDOC AS VARCHAR(20)) AS CODDOC,
+                DOCUMENTOS.CORRELATIVO AS CORRELATIVO,
+                CAST(ISNULL(DOCUMENTOS.TOTALPRECIO, 0) AS DECIMAL(18,2)) AS MONTO,
+                CAST(RTRIM(DOCUMENTOS.CODDOC) + '-' + CAST(DOCUMENTOS.CORRELATIVO AS VARCHAR(20)) AS VARCHAR(60)) AS REFERENCIA,
+                CAST(ISNULL(DOCUMENTOS.DOC_NOMCLIE, '') AS VARCHAR(200)) AS NOMBRE,
+                CAST(ISNULL(DOCUMENTOS.DOC_NIT, '') AS VARCHAR(40)) AS NIT,
+                CAST(ISNULL(DOCUMENTOS.FPAGO_TIPO, '') AS VARCHAR(40)) AS FPAGO_TIPO,
+                CAST(ISNULL(DOCUMENTOS.FPAGO_DETALLE, '') AS VARCHAR(200)) AS FPAGO_DETALLE
+            FROM DOCUMENTOS
+            INNER JOIN TIPODOCUMENTOS
+                ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC
+                AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+            WHERE DOCUMENTOS.EMPNIT = '${sucursal}'
+                AND DOCUMENTOS.CODCLIENTE = ${codClie}
+                AND TIPODOCUMENTOS.TIPODOC = 'FAC'
+                AND DOCUMENTOS.CONCRE = 'CRE'
+                AND DOCUMENTOS.STATUS <> 'A'
+
+            UNION ALL
+
+            SELECT 
+                DOCUMENTOS.FECHA AS FECHA,
+                1 AS ORDEN,
+                CAST('ABONO' AS VARCHAR(10)) AS MOV_TIPO,
+                CAST(TIPODOCUMENTOS.TIPODOC AS VARCHAR(10)) AS TIPODOC,
+                CAST(DOCUMENTOS.CODDOC AS VARCHAR(20)) AS CODDOC,
+                DOCUMENTOS.CORRELATIVO AS CORRELATIVO,
+                CAST(ISNULL(DOCUMENTOS.TOTALPRECIO, 0) AS DECIMAL(18,2)) AS MONTO,
+                CAST(ISNULL(DOCUMENTOS.SERIEFAC, '') + CASE WHEN ISNULL(DOCUMENTOS.NOFAC, '') <> '' THEN '-' + DOCUMENTOS.NOFAC ELSE '' END AS VARCHAR(60)) AS REFERENCIA,
+                CAST(ISNULL(DOCUMENTOS.DOC_NOMCLIE, '') AS VARCHAR(200)) AS NOMBRE,
+                CAST(ISNULL(DOCUMENTOS.DOC_NIT, '') AS VARCHAR(40)) AS NIT,
+                CAST(ISNULL(DOCUMENTOS.FPAGO_TIPO, '') AS VARCHAR(40)) AS FPAGO_TIPO,
+                CAST(ISNULL(DOCUMENTOS.FPAGO_DETALLE, '') AS VARCHAR(200)) AS FPAGO_DETALLE
+            FROM DOCUMENTOS
+            INNER JOIN TIPODOCUMENTOS
+                ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC
+                AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+            WHERE DOCUMENTOS.EMPNIT = '${sucursal}'
+                AND DOCUMENTOS.CODCLIENTE = ${codClie}
+                AND TIPODOCUMENTOS.TIPODOC = 'RCC'
+                AND DOCUMENTOS.STATUS <> 'A'
+
+            UNION ALL
+
+            SELECT 
+                DOCUMENTOS.FECHA AS FECHA,
+                1 AS ORDEN,
+                CAST('ABONO' AS VARCHAR(10)) AS MOV_TIPO,
+                CAST(TIPODOCUMENTOS.TIPODOC AS VARCHAR(10)) AS TIPODOC,
+                CAST(DOCUMENTOS.CODDOC AS VARCHAR(20)) AS CODDOC,
+                DOCUMENTOS.CORRELATIVO AS CORRELATIVO,
+                CAST(ISNULL(DOCUMENTOS.TOTALPRECIO, 0) AS DECIMAL(18,2)) AS MONTO,
+                CAST(ISNULL(DOCUMENTOS.CODDOC_ORIGEN, '') + CASE WHEN ISNULL(DOCUMENTOS.CORRELATIVO_ORIGEN, '') <> '' THEN '-' + DOCUMENTOS.CORRELATIVO_ORIGEN ELSE '' END AS VARCHAR(60)) AS REFERENCIA,
+                CAST(ISNULL(DOCUMENTOS.DOC_NOMCLIE, '') AS VARCHAR(200)) AS NOMBRE,
+                CAST(ISNULL(DOCUMENTOS.DOC_NIT, '') AS VARCHAR(40)) AS NIT,
+                CAST(ISNULL(DOCUMENTOS.FPAGO_TIPO, '') AS VARCHAR(40)) AS FPAGO_TIPO,
+                CAST(ISNULL(DOCUMENTOS.FPAGO_DETALLE, '') AS VARCHAR(200)) AS FPAGO_DETALLE
+            FROM DOCUMENTOS
+            INNER JOIN TIPODOCUMENTOS
+                ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC
+                AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+            WHERE DOCUMENTOS.EMPNIT = '${sucursal}'
+                AND DOCUMENTOS.CODCLIENTE = ${codClie}
+                AND TIPODOCUMENTOS.TIPODOC = 'DEV'
+                AND DOCUMENTOS.STATUS <> 'A'
+
+            ORDER BY FECHA ASC, ORDEN ASC, CODDOC ASC, CORRELATIVO ASC`;
+    
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/corregir_saldos_cxc", async(req,res)=>{
+   
+    const { token, sucursal, fecha} = req.body;
+    const fechaUpd = fecha || new Date().toISOString().substring(0, 10);
+
+    let qry = `;WITH AbonosCalc AS (
+            SELECT 
+                d.EMPNIT,
+                d.CODDOC,
+                d.CORRELATIVO,
+                ISNULL(d.TOTALPRECIO, 0) AS TOTALPRECIO,
+                ISNULL(ab.SUMA_ABONOS, 0) AS SUMA_ABONOS
+            FROM DOCUMENTOS d
+            INNER JOIN TIPODOCUMENTOS tf
+                ON d.CODDOC = tf.CODDOC
+                AND d.EMPNIT = tf.EMPNIT
+            OUTER APPLY (
+                SELECT SUM(ISNULL(x.TOTALPRECIO, 0)) AS SUMA_ABONOS
+                FROM (
+                    SELECT r.TOTALPRECIO
+                    FROM DOCUMENTOS r
+                    INNER JOIN TIPODOCUMENTOS tr
+                        ON r.CODDOC = tr.CODDOC
+                        AND r.EMPNIT = tr.EMPNIT
+                    WHERE r.EMPNIT = d.EMPNIT
+                        AND tr.TIPODOC = 'RCC'
+                        AND r.SERIEFAC = d.CODDOC
+                        AND r.NOFAC = CAST(d.CORRELATIVO AS VARCHAR(20))
+                        AND r.STATUS <> 'A'
+
+                    UNION ALL
+
+                    SELECT dev.TOTALPRECIO
+                    FROM DOCUMENTOS dev
+                    INNER JOIN TIPODOCUMENTOS td
+                        ON dev.CODDOC = td.CODDOC
+                        AND dev.EMPNIT = td.EMPNIT
+                    WHERE dev.EMPNIT = d.EMPNIT
+                        AND td.TIPODOC = 'DEV'
+                        AND dev.CODDOC_ORIGEN = d.CODDOC
+                        AND dev.CORRELATIVO_ORIGEN = CAST(d.CORRELATIVO AS VARCHAR(20))
+                        AND dev.STATUS <> 'A'
+                ) x
+            ) ab
+            WHERE d.EMPNIT = '${sucursal}'
+                AND tf.TIPODOC = 'FAC'
+                AND d.CONCRE = 'CRE'
+                AND d.STATUS <> 'A'
+        )
+        UPDATE d
+        SET d.DOC_ABONOS = a.SUMA_ABONOS,
+            d.DOC_SALDO = CASE 
+                WHEN a.TOTALPRECIO - a.SUMA_ABONOS < 0 THEN 0 
+                ELSE a.TOTALPRECIO - a.SUMA_ABONOS 
+            END,
+            d.LASTUPDATE = '${fechaUpd}'
+        FROM DOCUMENTOS d
+        INNER JOIN AbonosCalc a
+            ON d.EMPNIT = a.EMPNIT
+            AND d.CODDOC = a.CODDOC
+            AND d.CORRELATIVO = a.CORRELATIVO;`;
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/listado_cuentas_pagar", async(req,res)=>{
+   
+    const { token, sucursal, mes, anio} = req.body;
+
+    let filtroPeriodo = '';
+    if (anio && String(anio) !== 'TODOS') {
+        filtroPeriodo += ` AND (DOCUMENTOS.ANIO = ${Number(anio)})`;
+    }
+    if (mes && String(mes) !== 'TODOS') {
+        filtroPeriodo += ` AND (DOCUMENTOS.MES = ${Number(mes)})`;
+    }
+
+    let qry = `SELECT 
+                    DOCUMENTOS.FECHA, 
+                    DOCUMENTOS.CODDOC, 
+                    DOCUMENTOS.CORRELATIVO, 
+                    DOCUMENTOS.DOC_NIT AS NIT, 
+                    DOCUMENTOS.DOC_NOMCLIE AS NOMBRE, 
+                    DOCUMENTOS.DOC_DIRCLIE AS DIRECCION, 
+                    DOCUMENTOS.TOTALVENTA, 
+                    DOCUMENTOS.TOTALPRECIO, 
+                    ISNULL(DOCUMENTOS.DOC_SALDO, 0) AS DOC_SALDO, 
+                    ISNULL(DOCUMENTOS.DOC_ABONOS, 0) AS DOC_ABONOS, 
+                    DOCUMENTOS.STATUS, 
+                    DOCUMENTOS.CONCRE, 
+                    DOCUMENTOS.VENCIMIENTO, 
+                    DOCUMENTOS.CODEMP, 
+                    DOCUMENTOS.CODCLIENTE,
+                    EMPLEADOS.NOMEMPLEADO AS EMPLEADO,
+                    TIPODOCUMENTOS.TIPODOC
+            FROM DOCUMENTOS 
+            INNER JOIN TIPODOCUMENTOS 
+                ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC 
+                AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT 
+            LEFT OUTER JOIN EMPLEADOS 
+                ON DOCUMENTOS.CODEMP = EMPLEADOS.CODEMPLEADO 
+                AND DOCUMENTOS.EMPNIT = EMPLEADOS.EMPNIT
+            WHERE (DOCUMENTOS.EMPNIT = '${sucursal}') 
+                AND (TIPODOCUMENTOS.TIPODOC = 'COM') 
+                AND (DOCUMENTOS.CONCRE = 'CRE') 
+                AND (ISNULL(DOCUMENTOS.DOC_SALDO, 0) > 0) 
+                AND (DOCUMENTOS.STATUS <> 'A')
+                ${filtroPeriodo}
+            ORDER BY DOCUMENTOS.FECHA DESC, DOCUMENTOS.CORRELATIVO DESC`;
+    
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/historial_abonos_cxp", async(req,res)=>{
+   
+    const { token, sucursal, fac_coddoc, fac_correlativo} = req.body;
+
+    let qry = `SELECT 
+                    DOCUMENTOS.FECHA, 
+                    DOCUMENTOS.CODDOC, 
+                    DOCUMENTOS.CORRELATIVO, 
+                    DOCUMENTOS.TOTALPRECIO, 
+                    DOCUMENTOS.USUARIO, 
+                    DOCUMENTOS.STATUS,
+                    TIPODOCUMENTOS.TIPODOC,
+                    ISNULL(DOCUMENTOS.FPAGO_TIPO, '') AS FPAGO_TIPO,
+                    ISNULL(DOCUMENTOS.FPAGO_DETALLE, '') AS FPAGO_DETALLE
+            FROM DOCUMENTOS 
+            INNER JOIN TIPODOCUMENTOS 
+                ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC 
+                AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT 
+            WHERE (DOCUMENTOS.EMPNIT = '${sucursal}') 
+                AND (DOCUMENTOS.STATUS <> 'A')
+                AND (
+                    (
+                        TIPODOCUMENTOS.TIPODOC = 'RCP'
+                        AND DOCUMENTOS.SERIEFAC = '${fac_coddoc}'
+                        AND DOCUMENTOS.NOFAC = '${fac_correlativo}'
+                    )
+                    OR (
+                        TIPODOCUMENTOS.TIPODOC = 'DVP'
+                        AND DOCUMENTOS.CODDOC_ORIGEN = '${fac_coddoc}'
+                        AND DOCUMENTOS.CORRELATIVO_ORIGEN = '${fac_correlativo}'
+                    )
+                )
+            ORDER BY DOCUMENTOS.FECHA DESC, DOCUMENTOS.CORRELATIVO DESC`;
+    
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/insert_abono_cxp", async(req,res)=>{
+   
+    const { token, sucursal,
+            coddoc, correlativo, fecha, monto,
+            fac_coddoc, fac_correlativo,
+            codcliente, nitclie, nomclie, dirclie, codven, usuario, hora, codcaja, iva,
+            fpago_tipo, fpago_detalle} = req.body;
+
+    const montoNum = Number(monto);
+    if (!montoNum || montoNum <= 0) {
+        res.send('error');
+        return;
+    }
+
+    const nom = (nomclie || '').replace(/'/g, "''");
+    const dir = (dirclie || '').replace(/'/g, "''");
+    const nit = (nitclie || '').replace(/'/g, "''");
+    const obs = `Abono compra ${fac_coddoc}-${fac_correlativo}`.replace(/'/g, "''");
+    const fpagoTipo = (fpago_tipo || 'EFECTIVO').replace(/'/g, "''");
+    const fpagoDetalle = (fpago_detalle || '').replace(/'/g, "''");
+
+    let qryDocumentos = str_qry_documentos('[]',sucursal,'',
+        coddoc,correlativo,0,0,fecha,fecha,'',
+        '0',codcliente || 0,nom,0,montoNum,0,
+        nit,dir,obs,'',usuario,
+        codven || 0,'0','0',hora,'CON','RCP',
+        '','','','','0','0',
+        codcaja || 1,iva || 12,fac_coddoc,fac_correlativo,'MEDIA','','0');
+
+    let nuevoCorrelativo = Number(correlativo) + 1;
+    let qryTipodocumentos = `UPDATE TIPODOCUMENTOS SET CORRELATIVO=${nuevoCorrelativo} WHERE EMPNIT='${sucursal}' AND CODDOC='${coddoc}';`;
+
+    let qryUpdateCom = `UPDATE DOCUMENTOS 
+                            SET DOC_ABONOS = ISNULL(DOC_ABONOS, 0) + ${montoNum},
+                                DOC_SALDO = CASE 
+                                    WHEN ISNULL(DOC_SALDO, 0) - ${montoNum} < 0 THEN 0 
+                                    ELSE ISNULL(DOC_SALDO, 0) - ${montoNum} 
+                                END,
+                                LASTUPDATE='${fecha}'
+                            WHERE EMPNIT='${sucursal}' 
+                                AND CODDOC='${fac_coddoc}' 
+                                AND CORRELATIVO=${fac_correlativo} 
+                                AND STATUS <> 'A'
+                                AND ISNULL(DOC_SALDO, 0) >= ${montoNum};`;
+
+    let qryUpdateFpago = `UPDATE DOCUMENTOS 
+                            SET FPAGO_TIPO='${fpagoTipo}',
+                                FPAGO_DETALLE='${fpagoDetalle}'
+                            WHERE EMPNIT='${sucursal}' 
+                                AND CODDOC='${coddoc}' 
+                                AND CORRELATIVO=${correlativo};`;
+
+    let qry = qryDocumentos + qryUpdateFpago + qryTipodocumentos + qryUpdateCom;
+
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/estado_cuenta_proveedor", async(req,res)=>{
+   
+    const { token, sucursal, codcliente} = req.body;
+    const codClie = Number(codcliente) || 0;
+    if (!codClie) {
+        res.send('error');
+        return;
+    }
+
+    let qry = `
+            SELECT 
+                DOCUMENTOS.FECHA AS FECHA,
+                0 AS ORDEN,
+                CAST('CARGO' AS VARCHAR(10)) AS MOV_TIPO,
+                CAST(TIPODOCUMENTOS.TIPODOC AS VARCHAR(10)) AS TIPODOC,
+                CAST(DOCUMENTOS.CODDOC AS VARCHAR(20)) AS CODDOC,
+                DOCUMENTOS.CORRELATIVO AS CORRELATIVO,
+                CAST(ISNULL(DOCUMENTOS.TOTALPRECIO, 0) AS DECIMAL(18,2)) AS MONTO,
+                CAST(RTRIM(DOCUMENTOS.CODDOC) + '-' + CAST(DOCUMENTOS.CORRELATIVO AS VARCHAR(20)) AS VARCHAR(60)) AS REFERENCIA,
+                CAST(ISNULL(DOCUMENTOS.DOC_NOMCLIE, '') AS VARCHAR(200)) AS NOMBRE,
+                CAST(ISNULL(DOCUMENTOS.DOC_NIT, '') AS VARCHAR(40)) AS NIT,
+                CAST(ISNULL(DOCUMENTOS.FPAGO_TIPO, '') AS VARCHAR(40)) AS FPAGO_TIPO,
+                CAST(ISNULL(DOCUMENTOS.FPAGO_DETALLE, '') AS VARCHAR(200)) AS FPAGO_DETALLE
+            FROM DOCUMENTOS
+            INNER JOIN TIPODOCUMENTOS
+                ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC
+                AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+            WHERE DOCUMENTOS.EMPNIT = '${sucursal}'
+                AND DOCUMENTOS.CODCLIENTE = ${codClie}
+                AND TIPODOCUMENTOS.TIPODOC = 'COM'
+                AND DOCUMENTOS.CONCRE = 'CRE'
+                AND DOCUMENTOS.STATUS <> 'A'
+
+            UNION ALL
+
+            SELECT 
+                DOCUMENTOS.FECHA AS FECHA,
+                1 AS ORDEN,
+                CAST('ABONO' AS VARCHAR(10)) AS MOV_TIPO,
+                CAST(TIPODOCUMENTOS.TIPODOC AS VARCHAR(10)) AS TIPODOC,
+                CAST(DOCUMENTOS.CODDOC AS VARCHAR(20)) AS CODDOC,
+                DOCUMENTOS.CORRELATIVO AS CORRELATIVO,
+                CAST(ISNULL(DOCUMENTOS.TOTALPRECIO, 0) AS DECIMAL(18,2)) AS MONTO,
+                CAST(ISNULL(DOCUMENTOS.SERIEFAC, '') + CASE WHEN ISNULL(DOCUMENTOS.NOFAC, '') <> '' THEN '-' + DOCUMENTOS.NOFAC ELSE '' END AS VARCHAR(60)) AS REFERENCIA,
+                CAST(ISNULL(DOCUMENTOS.DOC_NOMCLIE, '') AS VARCHAR(200)) AS NOMBRE,
+                CAST(ISNULL(DOCUMENTOS.DOC_NIT, '') AS VARCHAR(40)) AS NIT,
+                CAST(ISNULL(DOCUMENTOS.FPAGO_TIPO, '') AS VARCHAR(40)) AS FPAGO_TIPO,
+                CAST(ISNULL(DOCUMENTOS.FPAGO_DETALLE, '') AS VARCHAR(200)) AS FPAGO_DETALLE
+            FROM DOCUMENTOS
+            INNER JOIN TIPODOCUMENTOS
+                ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC
+                AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+            WHERE DOCUMENTOS.EMPNIT = '${sucursal}'
+                AND DOCUMENTOS.CODCLIENTE = ${codClie}
+                AND TIPODOCUMENTOS.TIPODOC = 'RCP'
+                AND DOCUMENTOS.STATUS <> 'A'
+
+            UNION ALL
+
+            SELECT 
+                DOCUMENTOS.FECHA AS FECHA,
+                1 AS ORDEN,
+                CAST('ABONO' AS VARCHAR(10)) AS MOV_TIPO,
+                CAST(TIPODOCUMENTOS.TIPODOC AS VARCHAR(10)) AS TIPODOC,
+                CAST(DOCUMENTOS.CODDOC AS VARCHAR(20)) AS CODDOC,
+                DOCUMENTOS.CORRELATIVO AS CORRELATIVO,
+                CAST(ISNULL(DOCUMENTOS.TOTALPRECIO, 0) AS DECIMAL(18,2)) AS MONTO,
+                CAST(ISNULL(DOCUMENTOS.CODDOC_ORIGEN, '') + CASE WHEN ISNULL(DOCUMENTOS.CORRELATIVO_ORIGEN, '') <> '' THEN '-' + DOCUMENTOS.CORRELATIVO_ORIGEN ELSE '' END AS VARCHAR(60)) AS REFERENCIA,
+                CAST(ISNULL(DOCUMENTOS.DOC_NOMCLIE, '') AS VARCHAR(200)) AS NOMBRE,
+                CAST(ISNULL(DOCUMENTOS.DOC_NIT, '') AS VARCHAR(40)) AS NIT,
+                CAST(ISNULL(DOCUMENTOS.FPAGO_TIPO, '') AS VARCHAR(40)) AS FPAGO_TIPO,
+                CAST(ISNULL(DOCUMENTOS.FPAGO_DETALLE, '') AS VARCHAR(200)) AS FPAGO_DETALLE
+            FROM DOCUMENTOS
+            INNER JOIN TIPODOCUMENTOS
+                ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC
+                AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+            WHERE DOCUMENTOS.EMPNIT = '${sucursal}'
+                AND DOCUMENTOS.CODCLIENTE = ${codClie}
+                AND TIPODOCUMENTOS.TIPODOC = 'DVP'
+                AND DOCUMENTOS.STATUS <> 'A'
+
+            ORDER BY FECHA ASC, ORDEN ASC, CODDOC ASC, CORRELATIVO ASC`;
+    
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/corregir_saldos_cxp", async(req,res)=>{
+   
+    const { token, sucursal, fecha} = req.body;
+    const fechaUpd = fecha || new Date().toISOString().substring(0, 10);
+
+    let qry = `;WITH AbonosCalc AS (
+            SELECT 
+                d.EMPNIT,
+                d.CODDOC,
+                d.CORRELATIVO,
+                ISNULL(d.TOTALPRECIO, 0) AS TOTALPRECIO,
+                ISNULL(ab.SUMA_ABONOS, 0) AS SUMA_ABONOS
+            FROM DOCUMENTOS d
+            INNER JOIN TIPODOCUMENTOS tf
+                ON d.CODDOC = tf.CODDOC
+                AND d.EMPNIT = tf.EMPNIT
+            OUTER APPLY (
+                SELECT SUM(ISNULL(x.TOTALPRECIO, 0)) AS SUMA_ABONOS
+                FROM (
+                    SELECT r.TOTALPRECIO
+                    FROM DOCUMENTOS r
+                    INNER JOIN TIPODOCUMENTOS tr
+                        ON r.CODDOC = tr.CODDOC
+                        AND r.EMPNIT = tr.EMPNIT
+                    WHERE r.EMPNIT = d.EMPNIT
+                        AND tr.TIPODOC = 'RCP'
+                        AND r.SERIEFAC = d.CODDOC
+                        AND r.NOFAC = CAST(d.CORRELATIVO AS VARCHAR(20))
+                        AND r.STATUS <> 'A'
+
+                    UNION ALL
+
+                    SELECT dev.TOTALPRECIO
+                    FROM DOCUMENTOS dev
+                    INNER JOIN TIPODOCUMENTOS td
+                        ON dev.CODDOC = td.CODDOC
+                        AND dev.EMPNIT = td.EMPNIT
+                    WHERE dev.EMPNIT = d.EMPNIT
+                        AND td.TIPODOC = 'DVP'
+                        AND dev.CODDOC_ORIGEN = d.CODDOC
+                        AND dev.CORRELATIVO_ORIGEN = CAST(d.CORRELATIVO AS VARCHAR(20))
+                        AND dev.STATUS <> 'A'
+                ) x
+            ) ab
+            WHERE d.EMPNIT = '${sucursal}'
+                AND tf.TIPODOC = 'COM'
+                AND d.CONCRE = 'CRE'
+                AND d.STATUS <> 'A'
+        )
+        UPDATE d
+        SET d.DOC_ABONOS = a.SUMA_ABONOS,
+            d.DOC_SALDO = CASE 
+                WHEN a.TOTALPRECIO - a.SUMA_ABONOS < 0 THEN 0 
+                ELSE a.TOTALPRECIO - a.SUMA_ABONOS 
+            END,
+            d.LASTUPDATE = '${fechaUpd}'
+        FROM DOCUMENTOS d
+        INNER JOIN AbonosCalc a
+            ON d.EMPNIT = a.EMPNIT
+            AND d.CODDOC = a.CODDOC
+            AND d.CORRELATIVO = a.CORRELATIVO;`;
+
+    execute.QueryToken(res,qry,token);
+     
+});
 
 module.exports = router;

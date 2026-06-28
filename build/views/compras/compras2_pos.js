@@ -256,7 +256,7 @@ function compras2_leer_encabezado_form() {
         hora: F.getHora(),
         serie_fac: document.getElementById('txtSerieFac')?.value || '',
         numero_fac: document.getElementById('txtNumeroFac')?.value || '',
-        etiqueta: document.getElementById('cmbPrioridad')?.value || 'MEDIA',
+        etiqueta: 'MEDIA',
         coddoc_origen: document.getElementById('txtCoddocOrigen')?.value || '',
         correlativo_origen: document.getElementById('txtCorrelativoOrigen')?.value || '0',
         coddoc: document.getElementById('cmbCoddoc')?.value || '',
@@ -316,6 +316,10 @@ function compras2_reset_campos_form() {
     document.getElementById('txtCoddocOrigen').value = '';
     document.getElementById('txtCorrelativoOrigen').value = '';
     document.getElementById('txtObs').value = '';
+
+    const cmbConCre = document.getElementById('cmbConCre');
+    if (cmbConCre) cmbConCre.value = 'CON';
+    compras2_toggle_sidebar_fecha_pago();
 
     compras2_bloquear_serie_doc(false);
     compras2_actualizar_ref_doc();
@@ -526,7 +530,6 @@ function compras2_get_tbl_pedido() {
 function compras2_get_buscar_producto(filtro) {
     const doc = compras2_get_doc_activo();
     if (!doc) return;
-    if (!compras2_validar_proveedor_seleccionado()) return;
 
     $('#modal_lista_precios').modal('show');
     const container = document.getElementById('tblDataProductos');
@@ -750,6 +753,21 @@ function compras2_insert_cliente(nit, nombre, direccion, telefono) {
     });
 }
 
+function compras2_toggle_sidebar_fecha_pago() {
+    const concre = document.getElementById('cmbConCre')?.value || 'CON';
+    const wrap = document.getElementById('wrapCompras2FechaPago');
+    if (!wrap) return;
+    if (concre === 'CRE') {
+        wrap.classList.remove('d-none');
+        const txtFechaPago = document.getElementById('txtFechaPago');
+        if (txtFechaPago && !txtFechaPago.value) {
+            txtFechaPago.value = document.getElementById('txtFecha')?.value || F.getFecha();
+        }
+    } else {
+        wrap.classList.add('d-none');
+    }
+}
+
 function compras2_toggle_finalizar_fecha_pago() {
     const concre = document.getElementById('cmbCompras2FinalizarPago')?.value || 'CON';
     const wrap = document.getElementById('wrapCompras2FinalizarFechaPago');
@@ -940,6 +958,7 @@ function compras2_finalizar_compra() {
             }
 
             return compras2_sync_encabezado()
+                .then(() => GF.aplicar_saldos_compra(doc.coddoc, doc.correlativo))
                 .then(() => GF.update_costos_documento(doc.coddoc, doc.correlativo))
                 .then(() => {
                     F.Aviso(compras2_modoEdicion ? 'Cambios guardados exitosamente' : 'Compra finalizada exitosamente');
@@ -1012,7 +1031,7 @@ function compras2_aplicar_encabezado_form(r) {
     setVal('cmbConCre', r.CONCRE || 'CON');
     setVal('cmbCaja', r.CODCAJA);
     setVal('cmbVendedor', r.CODEMP);
-    setVal('cmbPrioridad', r.ETIQUETA || 'MEDIA');
+    compras2_toggle_sidebar_fecha_pago();
 
     if (r.FECHA) setVal('txtFecha', compras2_fecha_para_input(r.FECHA));
     if (r.FECHAENTREGA) setVal('txtFechaPago', compras2_fecha_para_input(r.FECHAENTREGA));
@@ -1273,12 +1292,13 @@ function compras2_setup_ingreso_listeners() {
     if (compras2_ingresoListenersReady) return;
     compras2_ingresoListenersReady = true;
 
-    const cmbPrioridad = document.getElementById('cmbPrioridad');
-    if (cmbPrioridad) cmbPrioridad.innerHTML = F.get_prioridades();
-
     compras2_get_vendedores();
     compras2_get_cajas();
     compras2_listener_coddoc();
+
+    const cmbConCre = document.getElementById('cmbConCre');
+    if (cmbConCre && !cmbConCre.value) cmbConCre.value = 'CON';
+    compras2_toggle_sidebar_fecha_pago();
 
     document.getElementById('btnCompras2VolverListado')?.addEventListener('click', () => {
         if (typeof compras2_volver_listado === 'function') compras2_volver_listado();
@@ -1298,10 +1318,13 @@ function compras2_setup_ingreso_listeners() {
     ['txtObs', 'txtSerieFac', 'txtNumeroFac', 'txtCoddocOrigen', 'txtCorrelativoOrigen'].forEach((id) => {
         document.getElementById(id)?.addEventListener('input', compras2_programar_sync_encabezado);
     });
-    ['cmbConCre', 'cmbCaja', 'cmbVendedor', 'cmbPrioridad', 'txtFecha', 'txtFechaPago', 'cmbCompras2Proveedor'].forEach((id) => {
+    ['cmbConCre', 'cmbCaja', 'cmbVendedor', 'txtFecha', 'txtFechaPago', 'cmbCompras2Proveedor'].forEach((id) => {
         document.getElementById(id)?.addEventListener('change', () => {
             if (id === 'cmbCompras2Proveedor') compras2_on_proveedor_select_change();
-            else compras2_programar_sync_encabezado();
+            else if (id === 'cmbConCre') {
+                compras2_toggle_sidebar_fecha_pago();
+                compras2_programar_sync_encabezado();
+            } else compras2_programar_sync_encabezado();
         });
     });
 
@@ -1322,7 +1345,6 @@ function compras2_setup_ingreso_listeners() {
 
         const doc = compras2_get_doc_activo();
         if (!doc) return;
-        if (!compras2_validar_proveedor_seleccionado()) return;
 
         const cantidad = Number(document.getElementById('txtMCCantidad').value || 1);
         const preciounitario = Number(document.getElementById('txtMCPrecio').value || 0);

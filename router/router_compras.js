@@ -552,6 +552,24 @@ router.post("/update_encabezado_compra", async(req,res)=>{
 
 });
 
+router.post("/aplicar_saldos_compra", async(req,res)=>{
+
+    const { token, sucursal, coddoc, correlativo, fecha} = req.body;
+    const fechaUpd = fecha || new Date().toISOString().substring(0, 10);
+
+    let qry = `UPDATE DOCUMENTOS SET
+            DOC_SALDO = CASE WHEN CONCRE = 'CRE' THEN ISNULL(TOTALPRECIO, 0) ELSE 0 END,
+            DOC_ABONOS = CASE WHEN CONCRE = 'CRE' THEN 0 ELSE ISNULL(TOTALPRECIO, 0) END,
+            LASTUPDATE='${fechaUpd}'
+        WHERE EMPNIT='${sucursal}'
+            AND CODDOC='${coddoc}'
+            AND CORRELATIVO=${correlativo}
+            AND STATUS <> 'A';`;
+
+    execute.QueryToken(res,qry,token);
+
+});
+
 router.post("/insert_item_compra", async(req,res)=>{
 
     const { token, sucursal, coddoc, correlativo, codbodega,
@@ -770,6 +788,11 @@ function str_qry_documentos(jsondocproductos,sucursal,
     entrega_referencia, entrega_lat, entrega_long,
     codcaja, iva,serie_fac,numero_fac,etiqueta,coddoc_origen,correlativo_origen){
 
+    const netTotal = (Number(totalprecio) - Number(totaldescuento));
+    const tipoPago = (tipo_pago === 'CRE') ? 'CRE' : 'CON';
+    const docSaldo = tipoPago === 'CRE' ? netTotal : 0;
+    const docAbonos = tipoPago === 'CRE' ? 0 : netTotal;
+
     let qry = `INSERT INTO DOCUMENTOS (
             EMPNIT,
             ANIO,
@@ -832,7 +855,7 @@ function str_qry_documentos(jsondocproductos,sucursal,
             ${totalprecio} AS TOTALVENTA,
             ${totaldescuento} AS TOTALDESCUENTO, 
             0 AS RECARGOTARJETA,
-            ${(Number(totalprecio)-Number(totaldescuento))} AS TOTALPRECIO, 
+            ${netTotal} AS TOTALPRECIO, 
             0 AS PAGO, 
             0 AS VUELTO,
             'O' AS STATUS,
@@ -841,15 +864,15 @@ function str_qry_documentos(jsondocproductos,sucursal,
             0 AS TOTAL_DEPOSITOS,
             0 AS TOTAL_CHEQUES,
             '${usuario}' AS USUARIO, 
-            '${tipo_pago}' AS CONCRE,
+            '${tipoPago}' AS CONCRE,
             ${codcaja} AS CODCAJA, 
             0 AS NOCORTE, 
             '${serie_fac}' AS SERIEFAC,
             '${numero_fac}' AS NOFAC, 
             ${codven} AS CODEMP,
             '${obs}' AS OBS,
-            0 AS DOC_SALDO, 
-            0 AS DOC_ABONOS, 
+            ${docSaldo} AS DOC_SALDO, 
+            ${docAbonos} AS DOC_ABONOS, 
             '${direntrega}' AS DIRENTREGA,
             0 AS TOTALEXENTO, 
             ${lat} AS LAT, 

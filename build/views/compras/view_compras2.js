@@ -222,13 +222,12 @@ function compras2_tpl_card_documento() {
                 <div class="col-6 pl-0 pr-1 form-group mb-2"><label class="small text-secondary">Caja</label><select class="form-control form-control-sm" id="cmbCaja"></select></div>
                 <div class="col-6 pr-0 pl-1 form-group mb-2"><label class="small text-secondary">Fecha</label><input type="date" id="txtFecha" class="form-control form-control-sm negrita border-base"></div>
             </div>
-            <div class="row mx-0 d-none">
-                <div class="col-6 pl-0 pr-1 form-group mb-2"><label class="small text-secondary">Forma de pago</label><select class="form-control form-control-sm negrita" id="cmbConCre"><option value="CON">CONTADO</option><option value="CRE">CREDITO</option></select></div>
-                <div class="col-6 pr-0 pl-1 form-group mb-2"><label class="small text-secondary">Fecha pago</label><input type="date" class="form-control form-control-sm negrita" id="txtFechaPago"></div>
-            </div>
             <div class="row mx-0">
                 <div class="col-6 pl-0 pr-1 form-group mb-2"><label class="small text-secondary">Empleado</label><select class="form-control form-control-sm" id="cmbVendedor"></select></div>
-                <div class="col-6 pr-0 pl-1 form-group mb-2"><label class="small text-secondary">Prioridad</label><select class="form-control form-control-sm negrita" id="cmbPrioridad"></select></div>
+                <div class="col-6 pr-0 pl-1 form-group mb-2"><label class="small text-secondary">Forma de pago</label><select class="form-control form-control-sm negrita" id="cmbConCre"><option value="CON" selected>CONTADO</option><option value="CRE">CRÉDITO</option></select></div>
+            </div>
+            <div class="row mx-0 d-none" id="wrapCompras2FechaPago">
+                <div class="col-12 form-group mb-2"><label class="small text-secondary">Fecha pago</label><input type="date" class="form-control form-control-sm negrita" id="txtFechaPago"></div>
             </div>
             <div class="form-group mb-2"><label class="small text-secondary">Serie / número factura compra</label><div class="input-group input-group-sm"><input type="text" class="form-control negrita" id="txtSerieFac" placeholder="Serie"><input type="text" class="form-control negrita" id="txtNumeroFac" placeholder="Número"></div></div>
             <div class="form-group mb-2"><label class="small text-secondary">No. orden de compra</label><div class="input-group input-group-sm"><input type="text" class="form-control negrita" id="txtCoddocOrigen" placeholder="Serie"><input type="text" class="form-control negrita" id="txtCorrelativoOrigen" placeholder="Número"></div></div>

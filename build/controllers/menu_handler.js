@@ -578,4 +578,28 @@
         }
 
     },
+    cuentas_por_cobrar:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            const url = '../views/cxc_cxp/view_cuentas_cobrar.js?_=' + Date.now();
+            F.loadScript(url,'root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        }
+    },
+    cuentas_por_pagar:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            const url = '../views/cxc_cxp/view_cuentas_pagar.js?_=' + Date.now();
+            F.loadScript(url,'root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        }
+    },
 }

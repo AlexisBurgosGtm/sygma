@@ -869,6 +869,252 @@ let GF = {
             });
         })     
     },
+    get_data_cuentas_cobrar:(mes, anio)=>{
+        return new Promise((resolve,reject)=>{
+    
+            axios.post(GlobalUrlCalls + '/documentos/listado_cuentas_cobrar',
+                {
+                    sucursal:GlobalEmpnit,
+                    token:TOKEN,
+                    mes:mes,
+                    anio:anio
+                })
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        resolve(data);
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        })     
+    },
+    get_estado_cuenta_cliente:(codcliente)=>{
+        return new Promise((resolve,reject)=>{
+            axios.post(GlobalUrlCalls + '/documentos/estado_cuenta_cliente',
+                {
+                    sucursal:GlobalEmpnit,
+                    token:TOKEN,
+                    codcliente:codcliente
+                })
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        resolve(data);
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        })     
+    },
+    corregir_saldos_cxc:()=>{
+        return new Promise((resolve,reject)=>{
+            axios.post(GlobalUrlCalls + '/documentos/corregir_saldos_cxc',
+                {
+                    sucursal:GlobalEmpnit,
+                    token:TOKEN,
+                    fecha:F.getFecha()
+                })
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        resolve(data);
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        })     
+    },
+    get_historial_abonos_cxc:(fac_coddoc, fac_correlativo)=>{
+        return new Promise((resolve,reject)=>{
+            axios.post(GlobalUrlCalls + '/documentos/historial_abonos_cxc',
+                {
+                    sucursal:GlobalEmpnit,
+                    token:TOKEN,
+                    fac_coddoc:fac_coddoc,
+                    fac_correlativo:String(fac_correlativo)
+                })
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        resolve(data);
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        })     
+    },
+    insert_abono_cxc:(payload)=>{
+        return new Promise((resolve,reject)=>{
+            axios.post(GlobalUrlCalls + '/documentos/insert_abono_cxc',
+                Object.assign({ sucursal:GlobalEmpnit, token:TOKEN }, payload))
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        })     
+    },
+    get_data_cuentas_pagar:(mes, anio)=>{
+        return new Promise((resolve,reject)=>{
+    
+            axios.post(GlobalUrlCalls + '/documentos/listado_cuentas_pagar',
+                {
+                    sucursal:GlobalEmpnit,
+                    token:TOKEN,
+                    mes:mes,
+                    anio:anio
+                })
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        resolve(data);
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        })     
+    },
+    get_estado_cuenta_proveedor:(codcliente)=>{
+        return new Promise((resolve,reject)=>{
+            axios.post(GlobalUrlCalls + '/documentos/estado_cuenta_proveedor',
+                {
+                    sucursal:GlobalEmpnit,
+                    token:TOKEN,
+                    codcliente:codcliente
+                })
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        resolve(data);
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        })     
+    },
+    corregir_saldos_cxp:()=>{
+        return new Promise((resolve,reject)=>{
+            axios.post(GlobalUrlCalls + '/documentos/corregir_saldos_cxp',
+                {
+                    sucursal:GlobalEmpnit,
+                    token:TOKEN,
+                    fecha:F.getFecha()
+                })
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        resolve(data);
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        })     
+    },
+    get_historial_abonos_cxp:(fac_coddoc, fac_correlativo)=>{
+        return new Promise((resolve,reject)=>{
+            axios.post(GlobalUrlCalls + '/documentos/historial_abonos_cxp',
+                {
+                    sucursal:GlobalEmpnit,
+                    token:TOKEN,
+                    fac_coddoc:fac_coddoc,
+                    fac_correlativo:String(fac_correlativo)
+                })
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        resolve(data);
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        })     
+    },
+    insert_abono_cxp:(payload)=>{
+        return new Promise((resolve,reject)=>{
+            axios.post(GlobalUrlCalls + '/documentos/insert_abono_cxp',
+                Object.assign({ sucursal:GlobalEmpnit, token:TOKEN }, payload))
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        })     
+    },
     get_data_documentos_fechas:(sucursal,tipo,fi,ff)=>{
         return new Promise((resolve,reject)=>{
     
@@ -1877,6 +2123,9 @@ let GF = {
                 
                 if(res.status.toString()=='200'){
                     let data = res.data;
+                    if (data.recordset) {
+                        data.recordset = GF.sort_rpt_picking_rows(data.recordset);
+                    }
                     if(Number(data.rowsAffected[0])>0){
                         resolve(data);             
                     }else{
@@ -1891,6 +2140,11 @@ let GF = {
             })
     
         })
+    },
+    sort_rpt_picking_rows: (rows) => {
+        return [...(rows || [])].sort((a, b) =>
+            String(a.CODPROD || '').localeCompare(String(b.CODPROD || ''), 'es', { numeric: true, sensitivity: 'base' })
+        );
     },
     get_data_embarque_producto_facturas: (empnit, codembarque, codprod)=>{
         
@@ -4222,6 +4476,64 @@ let GF = {
                     token:TOKEN,
                     coddoc:coddoc,
                     correlativo:correlativo
+                })
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        if(Number(data.rowsAffected[0])>0){
+                            resolve(data);             
+                        }else{
+                            reject();
+                        } 
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        })     
+    },
+    aplicar_saldos_compra:(coddoc,correlativo)=>{
+        return new Promise((resolve,reject)=>{
+            axios.post(GlobalUrlCalls + '/compras/aplicar_saldos_compra',
+                {
+                    sucursal:GlobalEmpnit,
+                    token:TOKEN,
+                    coddoc:coddoc,
+                    correlativo:correlativo,
+                    fecha:F.getFecha()
+                })
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        resolve(data);
+                    }       
+                }else{
+                    reject();
+                }                   
+            }, (error) => {
+                reject();
+            });
+        })     
+    },
+    documento_update_concre:(sucursal,coddoc,correlativo,concre)=>{
+        return new Promise((resolve,reject)=>{
+    
+            axios.post(GlobalUrlCalls + '/documentos/update_concre_documento',
+                {
+                    sucursal:sucursal,
+                    token:TOKEN,
+                    coddoc:coddoc,
+                    correlativo:correlativo,
+                    concre:concre,
+                    fecha:F.getFecha()
                 })
             .then((response) => {
                 if(response.status.toString()=='200'){

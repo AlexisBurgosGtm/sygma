@@ -64,6 +64,25 @@
                                     
                                 </ul>
                             </li>
+
+                            <li>
+                                <a title="Cuentas CXC CXP" data-filter-tags="cuentas cxc cxp cobrar pagar credito saldo">
+                                    <i class="fal fa-dollar-sign"></i>
+                                    <span class="nav-link-text" data-i18n="nav.application_intel">CUENTAS CXC CXP</span>
+                                </a>
+                                <ul>
+                                    <li>
+                                        <a title="Cuentas por Cobrar" data-filter-tags="cuentas por cobrar cxc credito saldo" href="#" onclick="Menu.cuentas_por_cobrar()">
+                                            <span class="nav-link-text" data-i18n="nav.application_intel_introduction">CUENTAS POR COBRAR</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a title="Cuentas por Pagar" data-filter-tags="cuentas por pagar cxp" href="#" onclick="Menu.cuentas_por_pagar()">
+                                            <span class="nav-link-text" data-i18n="nav.application_intel_introduction">CUENTAS POR PAGAR</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
                             
                             <li>
                                 <a title="Application Intel" data-filter-tags="application intel">

@@ -2,6 +2,7 @@ function getView(){
     let view = {
         body:()=>{
             return `
+               <div id="compras_main_content">
                <div class="row">                
                     ${view.menu_superior()}            
                 </div>
@@ -50,7 +51,9 @@ function getView(){
                         </li>           
                     </ul>
                 </div>
-               
+               </div>
+
+                <div id="sygma_embarque_print_host" class="sygma-embarque-print-host" aria-hidden="true"></div>
             `
         },
         vista_embarques:()=>{
@@ -109,8 +112,6 @@ function getView(){
             <button type="button" class="btn btn-success btn-lg btn-circle hand shadow sygma-embarques-fab sygma-fab-nuevo oculto-impresion" id="btnEmbarquesNuevo" title="Nuevo embarque">
                 <i class="fal fa-plus"></i>
             </button>
-
-            <div id="sygma_embarque_print_host" class="sygma-embarque-print-host" aria-hidden="true"></div>
             `
         },
         menu_superior:()=>{
@@ -528,7 +529,7 @@ function tbl_embarques(idContainer,status,mes,anio){
                  
                     <td class="sygma-embarque-rpt__col-action oculto-impresion text-center">
                         <button type="button" class="btn btn-outline-info btn-md btn-circle hand shadow sygma-embarques-btn-action"
-                            onclick="embarque_imprimir_productos('${r.CODEMBARQUE}')" title="Imprimir embarque">
+                            onclick="embarque_imprimir_productos('${r.CODEMBARQUE}','${F.convertDateNormal(r.FECHA)}')" title="Imprimir ${GlobalRptPicking}">
                             <i class="fal fa-print"></i>
                         </button>
                     </td>
@@ -576,12 +577,14 @@ function tbl_embarques(idContainer,status,mes,anio){
 
 };
 
-function embarque_imprimir_productos(embarque){
+function embarque_imprimir_productos(embarque, fechaLabel){
     const codembarque = embarque;
     if (!codembarque) return;
     const host = document.getElementById('sygma_embarque_print_host');
     if (!host) return;
-    embarque_print_show_loader('Generando reporte de productos...');
+    embarque_print_codembarque = codembarque;
+    embarque_print_fecha = fechaLabel || '';
+    embarque_print_show_loader(`Generando ${GlobalRptPicking}...`);
     Promise.all([
         GF.get_data_embarque_productos(GlobalEmpnit, codembarque),
         embarque_fetch_resumen_vendedor(codembarque)
@@ -596,7 +599,7 @@ function embarque_imprimir_productos(embarque){
             strRows += `
                 <tr>
                     <td><span class="sygma-embarque-rpt__cod-main">${r.CODPROD}</span></td>
-                    <td><span class="sygma-embarque-rpt__prod-main">${r.DESPROD}</span><span class="sygma-embarque-rpt__prod-sub">${r.DESMARCA || ''}</span></td>
+                    <td><span class="sygma-embarque-rpt__prod-main">${r.DESPROD}</span></td>
                     <td class="text-center">${r.UXC}</td>
                     <td class="text-center">${r.CAJAS}</td>
                     <td class="text-center">${r.UNIDADES}</td>
@@ -605,7 +608,7 @@ function embarque_imprimir_productos(embarque){
                 </tr>`;
         });
         if (!strRows) strRows = `<tr><td colspan="7" class="text-center text-muted py-2">Sin productos</td></tr>`;
-        host.innerHTML = embarque_print_sheet_open('Productos del Embarque') + `
+        host.innerHTML = embarque_print_sheet_open(GlobalRptPicking) + `
             <div class="table-responsive sygma-embarque-rpt__table-wrap">
                 <table class="table sygma-embarque-rpt__table mb-0">
                     <thead><tr>
@@ -629,7 +632,7 @@ function embarque_imprimir_productos(embarque){
     .catch((error) => {
         console.log(error);
         embarque_print_hide_loader(true);
-        F.AvisoError('No se pudo generar el reporte de productos');
+        F.AvisoError(`No se pudo generar el reporte ${GlobalRptPicking}`);
         host.innerHTML = '';
     });
 };

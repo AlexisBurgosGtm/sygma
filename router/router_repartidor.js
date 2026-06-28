@@ -69,6 +69,7 @@ router.post("/embarque_documentos", async(req,res)=>{
             DOCUMENTOS.CODEMP AS CODVEN, 
             EMPLEADOS.NOMEMPLEADO AS VENDEDOR, 
             DOCUMENTOS.STATUS AS ST, 
+            ISNULL(DOCUMENTOS.CONCRE,'CON') AS CONCRE,
             ISNULL(view_rpt_devoluciones_embarque.DEVUELTO,0) AS DEVUELTO
         FROM     TIPODOCUMENTOS RIGHT OUTER JOIN
                   DOCUMENTOS LEFT OUTER JOIN
@@ -106,6 +107,7 @@ router.post("/embarque_documentos", async(req,res)=>{
             DOCUMENTOS.CODEMP AS CODVEN, 
             EMPLEADOS.NOMEMPLEADO AS VENDEDOR, 
             DOCUMENTOS.STATUS AS ST, 
+            ISNULL(DOCUMENTOS.CONCRE,'CON') AS CONCRE,
             ISNULL(view_rpt_devoluciones_embarque.DEVUELTO,0) AS DEVUELTO
         FROM     TIPODOCUMENTOS RIGHT OUTER JOIN
                   DOCUMENTOS LEFT OUTER JOIN
