@@ -4523,18 +4523,23 @@ let GF = {
             });
         })     
     },
-    documento_update_concre:(sucursal,coddoc,correlativo,concre)=>{
+    documento_update_concre:(sucursal,coddoc,correlativo,concre,diascredito,vencimiento)=>{
         return new Promise((resolve,reject)=>{
     
-            axios.post(GlobalUrlCalls + '/documentos/update_concre_documento',
-                {
+            const payload = {
                     sucursal:sucursal,
                     token:TOKEN,
                     coddoc:coddoc,
                     correlativo:correlativo,
                     concre:concre,
                     fecha:F.getFecha()
-                })
+                };
+            if (diascredito !== undefined && diascredito !== null && diascredito !== '') {
+                payload.diascredito = diascredito;
+            }
+            if (vencimiento) payload.vencimiento = vencimiento;
+
+            axios.post(GlobalUrlCalls + '/documentos/update_concre_documento', payload)
             .then((response) => {
                 if(response.status.toString()=='200'){
                     let data = response.data;

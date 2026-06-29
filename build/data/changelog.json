@@ -1,5 +1,5 @@
 {
-  "version": "M.27.06.26 20:26",
+  "version": "M.28.06.26 20:02",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -2205,6 +2205,41 @@
       "FECHA": "27-06-2026",
       "HORA": "20:26",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.27.06.26 20:26"
+    },
+    {
+      "FECHA": "28-06-2026",
+      "HORA": "19:53",
+      "DESCRIPCION": "DESPACHO: MODAL DIAS CREDITO Y VENCIMIENTO AL CAMBIAR FACTURA A CREDITO"
+    },
+    {
+      "FECHA": "28-06-2026",
+      "HORA": "19:53",
+      "DESCRIPCION": "UPDATE CONCRE: VENCIMIENTO Y DIASCREDITO AL CAMBIAR CREDITO O CONTADO"
+    },
+    {
+      "FECHA": "28-06-2026",
+      "HORA": "19:53",
+      "DESCRIPCION": "CXC: BADGE ROJO DIAS VENCIDOS Y COLUMNA DIAS CREDITO"
+    },
+    {
+      "FECHA": "28-06-2026",
+      "HORA": "19:53",
+      "DESCRIPCION": "CREDITOS VENDEDORES COMPRAS: BADGE VENCIDO Y COLUMNA DIAS CREDITO"
+    },
+    {
+      "FECHA": "28-06-2026",
+      "HORA": "19:53",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.28.06.26 19:53"
+    },
+    {
+      "FECHA": "28-06-2026",
+      "HORA": "20:02",
+      "DESCRIPCION": "CXC: BADGE VENCIDO ROJO SI MAYOR A CERO Y VERDE SI ES CERO"
+    },
+    {
+      "FECHA": "28-06-2026",
+      "HORA": "20:02",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.28.06.26 20:02"
     }
   ]
 }

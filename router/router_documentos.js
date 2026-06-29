@@ -535,16 +535,26 @@ router.post("/update_fecha_documento", async(req,res)=>{
 });
 router.post("/update_concre_documento", async(req,res)=>{
    
-    const { token, sucursal, coddoc, correlativo, concre, fecha} = req.body;
+    const { token, sucursal, coddoc, correlativo, concre, fecha, diascredito, vencimiento} = req.body;
     const tipoPago = (concre === 'CRE') ? 'CRE' : 'CON';
     const setSaldos = (tipoPago === 'CRE')
         ? `DOC_SALDO=TOTALPRECIO, DOC_ABONOS=0`
         : `DOC_ABONOS=TOTALPRECIO, DOC_SALDO=0`;
 
+    let setCredito = '';
+    if (tipoPago === 'CRE') {
+        const dias = Number(diascredito) || 0;
+        const venc = vencimiento || fecha;
+        setCredito = `, DIASCREDITO=${dias}, VENCIMIENTO='${venc}'`;
+    } else {
+        setCredito = `, DIASCREDITO=0, VENCIMIENTO=FECHA`;
+    }
+
     let qry = `UPDATE DOCUMENTOS 
                     SET CONCRE='${tipoPago}',
                         ${setSaldos},
                         LASTUPDATE='${fecha}'
+                        ${setCredito}
                     WHERE EMPNIT='${sucursal}' AND 
                         CODDOC='${coddoc}' AND 
                         CORRELATIVO=${correlativo} AND
@@ -664,6 +674,7 @@ router.post("/listado_cuentas_cobrar", async(req,res)=>{
                     DOCUMENTOS.STATUS, 
                     DOCUMENTOS.CONCRE, 
                     DOCUMENTOS.VENCIMIENTO, 
+                    ISNULL(DOCUMENTOS.DIASCREDITO, 0) AS DIASCREDITO,
                     DOCUMENTOS.CODEMP, 
                     DOCUMENTOS.CODCLIENTE,
                     EMPLEADOS.NOMEMPLEADO AS EMPLEADO,

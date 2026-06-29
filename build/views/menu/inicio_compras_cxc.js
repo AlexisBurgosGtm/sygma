@@ -15,19 +15,27 @@ function compras_cxc_hide_loader() {
     document.getElementById('comprasCxcLoaderOverlay')?.classList.add('d-none');
 }
 
-function compras_cxc_calc_dias(fecha) {
+function compras_cxc_calc_dias_vencido(fechaVenc) {
+    if (!fechaVenc) return 0;
     try {
-        const raw = String(fecha || '').replace('T00:00:00.000Z', '').substring(0, 10);
+        const raw = String(fechaVenc).replace('T00:00:00.000Z', '').substring(0, 10);
         const [yy, mm, dd] = raw.split('-').map(Number);
-        const fDoc = new Date(yy, mm - 1, dd);
+        const fVenc = new Date(yy, mm - 1, dd);
         const hoy = new Date();
         hoy.setHours(0, 0, 0, 0);
-        fDoc.setHours(0, 0, 0, 0);
-        const diff = Math.floor((hoy - fDoc) / (1000 * 60 * 60 * 24));
-        return diff >= 0 ? diff : 0;
+        fVenc.setHours(0, 0, 0, 0);
+        const diff = Math.floor((hoy - fVenc) / (1000 * 60 * 60 * 24));
+        return diff > 0 ? diff : 0;
     } catch (e) {
         return 0;
     }
+}
+
+function compras_cxc_format_vencimiento_cell(fechaVenc) {
+    const vencimiento = fechaVenc ? F.convertDateNormal(fechaVenc) : '—';
+    const diasVencido = compras_cxc_calc_dias_vencido(fechaVenc);
+    const badgeClass = diasVencido > 0 ? 'badge-danger' : 'badge-success';
+    return `<span class="cxc-vencimiento-cell"><span>${vencimiento}</span><span class="badge ${badgeClass} cxc-vencido-badge">${diasVencido}</span></span>`;
 }
 
 function compras_cxc_get_factura_importe(r) {
@@ -283,11 +291,10 @@ function compras_cxc_render_filas(rows) {
         const importe = compras_cxc_get_factura_importe(r);
         const abonos = Number(r.DOC_ABONOS || 0);
         const saldo = Number(r.DOC_SALDO || 0);
-        const dias = compras_cxc_calc_dias(r.FECHA);
+        const diasCredito = Number(r.DIASCREDITO || 0);
         totalImporte += importe;
         totalAbonos += abonos;
         totalSaldo += saldo;
-        const vencimiento = r.VENCIMIENTO ? F.convertDateNormal(r.VENCIMIENTO) : '—';
         str += `<tr class="hand" onclick="compras_cxc_abrir_opciones(${idx})" title="Ver opciones">
             <td class="sygma-embarque-rpt__cell-stack">
                 <span class="sygma-embarque-rpt__cell-main">${F.convertDateNormal(r.FECHA)}</span>
@@ -299,11 +306,11 @@ function compras_cxc_render_filas(rows) {
                 <span class="sygma-embarque-rpt__cell-main">${r.NOMBRE || ''}</span>
                 <span class="sygma-embarque-rpt__cell-sub">${F.limpiarTexto(r.DIRECCION || '')}</span>
             </td>
-            <td>${vencimiento}</td>
+            <td>${compras_cxc_format_vencimiento_cell(r.VENCIMIENTO)}</td>
             <td class="text-right">${F.setMoneda(importe, 'Q')}</td>
             <td class="text-right">${F.setMoneda(abonos, 'Q')}</td>
             <td class="text-right negrita text-danger">${F.setMoneda(saldo, 'Q')}</td>
-            <td class="text-center"><span class="badge badge-success cxc-dias-badge">${dias}</span></td>
+            <td class="text-center"><span class="badge badge-secondary cxc-dias-badge">${diasCredito}</span></td>
         </tr>`;
     });
 

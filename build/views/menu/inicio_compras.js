@@ -320,7 +320,7 @@ function getView(){
                                     <th class="text-right">IMPORTE</th>
                                     <th class="text-right">ABONOS</th>
                                     <th class="text-right">SALDO</th>
-                                    <th class="text-center">DIAS</th>
+                                    <th class="text-center">DIAS CREDITO</th>
                                 </tr>
                             </thead>
                             <tbody id="tblDataComprasCxcDocumentos"></tbody>

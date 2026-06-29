@@ -4698,6 +4698,26 @@ body.spa-nav-hidden .page-content.proveedor-page #despachoPaneListado {
   border-radius: 50%;
 }
 
+.cxc-vencimiento-cell {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.cxc-vencido-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.2rem;
+  border-radius: 0.35rem;
+  line-height: 1;
+}
+
 .cxc-opcion-card {
   display: flex;
   flex-direction: column;
