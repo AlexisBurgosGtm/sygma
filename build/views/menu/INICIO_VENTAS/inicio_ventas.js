@@ -16,6 +16,16 @@ function ventas_getAnio() {
     return document.getElementById('cmbAnioHeader')?.value || F.get_anio_curso();
 }
 
+function ventas_onHeaderFiltersChange() {
+    if (selected_tab) cargar_grid();
+    if (ventas_currentPane === 'uno') ventas_loadDashboard();
+    if (typeof window.proveedor_embedRefresh === 'function') window.proveedor_embedRefresh();
+    if (ventas_currentPane === 'ocho' && typeof ventas_cxc_cargar_listado === 'function') {
+        const alcance = document.getElementById('ventasCxcAlcance')?.value || 'MES';
+        if (alcance !== 'TODAS') ventas_cxc_cargar_listado();
+    }
+}
+
 function ventas_getSucursal() {
     return GlobalEmpnit || document.getElementById('cmbSucursalHeader')?.value || '%';
 }
@@ -224,6 +234,9 @@ function getView(){
                         <div class="tab-pane fade" id="siete" role="tabpanel" aria-labelledby="home-tab">
                             ${view.rpt_cobertura()}
                         </div>
+                        <div class="tab-pane fade" id="ocho" role="tabpanel" aria-labelledby="home-tab">
+                            ${view.vista_creditos_pendientes()}
+                        </div>
                     </div>
                     </div>
                 </div>
@@ -258,8 +271,13 @@ function getView(){
                             <a class="nav-link negrita text-danger" id="tab-siete" data-toggle="tab" href="#siete" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-ocho" data-toggle="tab" href="#ocho" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>
+                        </li>
                     </ul>
 
+                ${view.vista_creditos_modales()}
                 ${view.modal_detalle_documento()}
             </div>
             `
@@ -332,6 +350,7 @@ function getView(){
                 { id: 'btnMenuRptProductos', label: 'Reporte productos', icon: 'fa-box', color: 'secondary' },
                 { id: 'btnMenuRptGoles', label: 'Goles y cobertura', icon: 'fa-futbol', color: 'secondary' },
                 { id: 'btnMenuRptHistorial', label: 'Historial clientes', icon: 'fa-user', color: 'secondary' },
+                { id: 'btnMenuCreditosPendientes', label: 'Creditos pendientes', icon: 'fa-dollar-sign', color: 'warning' },
             ];
             return items.map(item => `
                 <div class="card proveedor-menu-card hand" id="${item.id}">
@@ -341,6 +360,98 @@ function getView(){
                     </div>
                 </div>
             `).join('');
+        },
+        vista_creditos_pendientes:()=>{
+            return `
+            <div class="sygma-embarque-rpt card card-rounded shadow-sm col-12 border-0" id="rpt_ventas_cuentas_cobrar">
+                <div id="ventasCxcLoaderOverlay" class="cxc-loader-overlay d-none">
+                    <div class="cxc-loader-overlay__box">
+                        ${GlobalLoader}
+                        <div class="cxc-loader-overlay__text">Procesando...</div>
+                    </div>
+                </div>
+                <div class="card-body sygma-embarque-rpt__body p-2 p-md-3">
+                    <header class="sygma-embarque-rpt__header">
+                        <div class="sygma-embarque-rpt__brand">
+                            <img class="sygma-embarque-rpt__logo" src="./favicon.png" width="44" height="44" alt="Logo">
+                            <div class="sygma-embarque-rpt__brand-text">
+                                <h4 class="sygma-embarque-rpt__title mb-0">Créditos pendientes</h4>
+                                <span class="sygma-embarque-rpt__embarque-date">Mis facturas al crédito con saldo pendiente</span>
+                            </div>
+                        </div>
+                        <div class="sygma-embarque-rpt__detail oculto-impresion">
+                            <span class="sygma-embarque-rpt__stat sygma-embarque-rpt__stat--items" id="lbVentasCxcTotalDocs">Docs: 0</span>
+                            <button type="button" class="btn btn-info btn-md btn-circle hand shadow sygma-embarque-rpt__print-btn" title="Imprimir" onclick="F.imprimirSelec('rpt_ventas_cuentas_cobrar')">
+                                <i class="fal fa-print"></i>
+                            </button>
+                        </div>
+                    </header>
+                    <div class="sygma-embarque-rpt__toolbar sygma-embarques-filtros oculto-impresion">
+                        <div class="sygma-embarques-filtros__row">
+                            <div class="sygma-embarques-filtros__field">
+                                <label class="sygma-embarques-filtros__label" for="ventasCxcAlcance">Alcance</label>
+                                <select class="form-control sygma-embarques-filtros__select" id="ventasCxcAlcance">
+                                    <option value="MES">POR MES</option>
+                                    <option value="TODAS">TODAS</option>
+                                </select>
+                            </div>
+                            <div class="sygma-embarques-filtros__field d-flex align-items-end">
+                                <button type="button" class="btn btn-base btn-sm hand" id="btnVentasCxcRecargar">
+                                    <i class="fal fa-sync mr-1"></i> Actualizar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sygma-embarque-rpt__toolbar oculto-impresion mb-2">
+                        <input type="search" class="form-control sygma-embarque-rpt__search"
+                            placeholder="Buscar documento, cliente, NIT..."
+                            oninput="F.FiltrarTabla('tblVentasCxcDocumentos','txtVentasCxcBuscar')"
+                            id="txtVentasCxcBuscar">
+                    </div>
+                    <div class="table-responsive sygma-embarque-rpt__table-wrap cxc-ventas-table-wrap">
+                        <table class="table sygma-embarque-rpt__table cxc-ventas-table mb-0" id="tblVentasCxcDocumentos">
+                            <thead>
+                                <tr>
+                                    <th>FECHA</th>
+                                    <th>DOCUMENTO</th>
+                                    <th>NIT</th>
+                                    <th>CLIENTE</th>
+                                    <th>VENCIMIENTO</th>
+                                    <th class="text-right">IMPORTE</th>
+                                    <th class="text-right">DESCUENTO</th>
+                                    <th class="text-right">A PAGAR</th>
+                                    <th class="text-right">ABONOS</th>
+                                    <th class="text-right">SALDO</th>
+                                    <th class="text-center">DIAS CREDITO</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataVentasCxcDocumentos"></tbody>
+                        </table>
+                    </div>
+                    <div class="sygma-embarque-rpt__total-block" id="lbVentasCxcTotalBlock"></div>
+                </div>
+            </div>`;
+        },
+        vista_creditos_modales:()=>{
+            return `
+            <div class="modal fade" id="modalVentasCxcHistorial" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-base py-2">
+                            <h5 class="modal-title text-white negrita mb-0" id="lbVentasCxcHistorialTitulo">Historial de abonos</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+                        </div>
+                        <div class="modal-body p-2 p-md-3">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped mb-0">
+                                    <thead><tr><th>FECHA</th><th>TIPO</th><th>DOCUMENTO</th><th class="text-right">MONTO</th><th>FORMA PAGO</th><th>USUARIO</th></tr></thead>
+                                    <tbody id="tblVentasCxcHistorialBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
         },
         rpt_ventas: ()=>{
             return `
@@ -836,20 +947,12 @@ function addListeners(){
     if (cmbMesHeader) {
         cmbMesHeader.innerHTML = F.ComboMeses();
         cmbMesHeader.value = F.get_mes_curso();
-        cmbMesHeader.addEventListener('change', () => {
-            if (selected_tab) cargar_grid();
-            if (ventas_currentPane === 'uno') ventas_loadDashboard();
-            if (typeof window.proveedor_embedRefresh === 'function') window.proveedor_embedRefresh();
-        });
+        cmbMesHeader.addEventListener('change', ventas_onHeaderFiltersChange);
     }
     if (cmbAnioHeader) {
         cmbAnioHeader.innerHTML = F.ComboAnio();
         cmbAnioHeader.value = F.get_anio_curso();
-        cmbAnioHeader.addEventListener('change', () => {
-            if (selected_tab) cargar_grid();
-            if (ventas_currentPane === 'uno') ventas_loadDashboard();
-            if (typeof window.proveedor_embedRefresh === 'function') window.proveedor_embedRefresh();
-        });
+        cmbAnioHeader.addEventListener('change', ventas_onHeaderFiltersChange);
     }
     ventas_setupSucursalHeader();
     ventas_setActiveCard('btnMenuHome');
@@ -898,6 +1001,12 @@ function addListeners(){
         ventas_showPanel('seis', 'btnMenuRptGoles', () => {
             selected_tab = 'GOLES-COBERTURA';
             cargar_grid();
+        });
+    });
+
+    document.getElementById('btnMenuCreditosPendientes')?.addEventListener('click', () => {
+        ventas_showPanel('ocho', 'btnMenuCreditosPendientes', () => {
+            if (typeof ventas_init_creditos === 'function') ventas_init_creditos();
         });
     });
     
@@ -965,6 +1074,7 @@ function addListeners(){
 function initView(){
     root = document.getElementById('root');
     document.getElementById('js-page-content')?.classList.add('proveedor-page');
+    if (typeof ventas_cxc_listeners_ready !== 'undefined') ventas_cxc_listeners_ready = false;
     try {
         getView();
         addListeners();
@@ -977,6 +1087,7 @@ function initView(){
 
 function destroyView(){
     ventas_teardownEmbed();
+    if (typeof ventas_cxc_listeners_ready !== 'undefined') ventas_cxc_listeners_ready = false;
     ventas_currentPane = 'uno';
     ventas_toggleSidebar(false);
     document.body.classList.remove('proveedor-sidebar-open');

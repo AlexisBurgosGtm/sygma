@@ -4718,6 +4718,99 @@ body.spa-nav-hidden .page-content.proveedor-page #despachoPaneListado {
   line-height: 1;
 }
 
+/* Créditos pendientes vendedor — tabla responsive */
+#rpt_ventas_cuentas_cobrar .cxc-ventas-table-wrap {
+  -webkit-overflow-scrolling: touch;
+}
+
+#rpt_ventas_cuentas_cobrar .cxc-ventas-table {
+  min-width: 720px;
+}
+
+#rpt_ventas_cuentas_cobrar .cxc-ventas-row:active {
+  background-color: rgba(0, 68, 163, 0.08);
+}
+
+#rpt_ventas_cuentas_cobrar .cxc-ventas-totals {
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+}
+
+@media (max-width: 767.98px) {
+  #rpt_ventas_cuentas_cobrar .cxc-ventas-table-wrap {
+    overflow: visible;
+  }
+
+  #rpt_ventas_cuentas_cobrar .cxc-ventas-table {
+    min-width: 0;
+    border: 0;
+  }
+
+  #rpt_ventas_cuentas_cobrar .cxc-ventas-table thead {
+    display: none;
+  }
+
+  #rpt_ventas_cuentas_cobrar .cxc-ventas-table tbody tr.cxc-ventas-row {
+    display: block;
+    margin-bottom: 0.65rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+  }
+
+  #rpt_ventas_cuentas_cobrar .cxc-ventas-table tbody td {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.45rem 0.65rem;
+    border: 0;
+    border-bottom: 1px solid #f1f3f5;
+    text-align: right !important;
+    font-size: 0.88rem;
+  }
+
+  #rpt_ventas_cuentas_cobrar .cxc-ventas-table tbody td:last-child {
+    border-bottom: 0;
+  }
+
+  #rpt_ventas_cuentas_cobrar .cxc-ventas-table tbody td::before {
+    content: attr(data-label);
+    flex: 0 0 38%;
+    max-width: 38%;
+    text-align: left;
+    font-weight: 700;
+    font-size: 0.72rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    padding-top: 0.1rem;
+  }
+
+  #rpt_ventas_cuentas_cobrar .cxc-ventas-table tbody td.d-none {
+    display: none !important;
+  }
+
+  #rpt_ventas_cuentas_cobrar .cxc-ventas-table tbody td[data-label="CLIENTE"] {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: left !important;
+  }
+
+  #rpt_ventas_cuentas_cobrar .cxc-ventas-table tbody td[data-label="CLIENTE"]::before {
+    max-width: 100%;
+    flex: none;
+    margin-bottom: 0.15rem;
+  }
+
+  #rpt_ventas_cuentas_cobrar .cxc-ventas-table tbody td[data-label="DOCUMENTO"] {
+    background: rgba(0, 68, 163, 0.06);
+    font-size: 0.95rem;
+  }
+}
+
 .cxc-opcion-card {
   display: flex;
   flex-direction: column;

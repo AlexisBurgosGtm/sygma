@@ -569,11 +569,16 @@ router.post("/update_fecha_documento", async(req,res)=>{
 });
 router.post("/update_concre_documento", async(req,res)=>{
    
-    const { token, sucursal, coddoc, correlativo, concre, fecha, diascredito, vencimiento} = req.body;
+    const { token, sucursal, coddoc, correlativo, concre, fecha, diascredito, vencimiento, totaldescuento} = req.body;
     const tipoPago = (concre === 'CRE') ? 'CRE' : 'CON';
-    const setSaldos = (tipoPago === 'CRE')
-        ? `DOC_SALDO=TOTALPRECIO, DOC_ABONOS=0`
-        : `DOC_ABONOS=TOTALPRECIO, DOC_SALDO=0`;
+    const desc = Number(totaldescuento) || 0;
+
+    let setSaldos = '';
+    if (tipoPago === 'CRE') {
+        setSaldos = `DOC_SALDO=CASE WHEN ISNULL(TOTALPRECIO, 0) - ${desc} < 0 THEN 0 ELSE ISNULL(TOTALPRECIO, 0) - ${desc} END, DOC_ABONOS=0, TOTALDESCUENTO=${desc}`;
+    } else {
+        setSaldos = `DOC_ABONOS=TOTALPRECIO, DOC_SALDO=0`;
+    }
 
     let setCredito = '';
     if (tipoPago === 'CRE') {
@@ -704,6 +709,7 @@ router.post("/listado_cuentas_cobrar", async(req,res)=>{
                     DOCUMENTOS.DOC_DIRCLIE AS DIRECCION, 
                     DOCUMENTOS.TOTALVENTA, 
                     DOCUMENTOS.TOTALPRECIO, 
+                    ISNULL(DOCUMENTOS.TOTALDESCUENTO, 0) AS TOTALDESCUENTO,
                     ISNULL(DOCUMENTOS.DOC_SALDO, 0) AS DOC_SALDO, 
                     ISNULL(DOCUMENTOS.DOC_ABONOS, 0) AS DOC_ABONOS, 
                     DOCUMENTOS.STATUS, 
@@ -767,6 +773,30 @@ router.post("/historial_abonos_cxc", async(req,res)=>{
                 )
             ORDER BY DOCUMENTOS.FECHA DESC, DOCUMENTOS.CORRELATIVO DESC`;
     
+    execute.QueryToken(res,qry,token);
+     
+});
+
+router.post("/verificar_fpago_detalle_cxc", async(req,res)=>{
+   
+    const { token, sucursal, fpago_detalle } = req.body;
+    const fpagoDetalle = (fpago_detalle || '').replace(/'/g, "''").trim();
+
+    if (!fpagoDetalle) {
+        res.send({ recordset: [{ CNT: 0 }] });
+        return;
+    }
+
+    let qry = `SELECT COUNT(*) AS CNT
+            FROM DOCUMENTOS 
+            INNER JOIN TIPODOCUMENTOS 
+                ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC 
+                AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT 
+            WHERE (DOCUMENTOS.EMPNIT = '${sucursal}') 
+                AND (TIPODOCUMENTOS.TIPODOC = 'RCC')
+                AND (DOCUMENTOS.STATUS <> 'A')
+                AND (ISNULL(DOCUMENTOS.FPAGO_DETALLE, '') = '${fpagoDetalle}')`;
+
     execute.QueryToken(res,qry,token);
      
 });
@@ -927,6 +957,7 @@ router.post("/corregir_saldos_cxc", async(req,res)=>{
                 d.CODDOC,
                 d.CORRELATIVO,
                 ISNULL(d.TOTALPRECIO, 0) AS TOTALPRECIO,
+                ISNULL(d.TOTALDESCUENTO, 0) AS TOTALDESCUENTO,
                 ISNULL(ab.SUMA_ABONOS, 0) AS SUMA_ABONOS
             FROM DOCUMENTOS d
             INNER JOIN TIPODOCUMENTOS tf
@@ -968,8 +999,8 @@ router.post("/corregir_saldos_cxc", async(req,res)=>{
         UPDATE d
         SET d.DOC_ABONOS = a.SUMA_ABONOS,
             d.DOC_SALDO = CASE 
-                WHEN a.TOTALPRECIO - a.SUMA_ABONOS < 0 THEN 0 
-                ELSE a.TOTALPRECIO - a.SUMA_ABONOS 
+                WHEN (a.TOTALPRECIO - a.TOTALDESCUENTO) - a.SUMA_ABONOS < 0 THEN 0 
+                ELSE (a.TOTALPRECIO - a.TOTALDESCUENTO) - a.SUMA_ABONOS 
             END,
             d.LASTUPDATE = '${fechaUpd}'
         FROM DOCUMENTOS d

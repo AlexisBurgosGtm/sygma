@@ -39,7 +39,20 @@ function compras_cxc_format_vencimiento_cell(fechaVenc) {
 }
 
 function compras_cxc_get_factura_importe(r) {
-    return Number(r.TOTALVENTA || r.TOTALPRECIO || 0);
+    return Number(r.TOTALPRECIO || r.TOTALVENTA || 0);
+}
+
+function compras_cxc_get_factura_descuento(r) {
+    return Number(r.TOTALDESCUENTO || 0);
+}
+
+function compras_cxc_get_factura_a_pagar(r) {
+    return Math.max(0, compras_cxc_get_factura_importe(r) - compras_cxc_get_factura_descuento(r));
+}
+
+function compras_cxc_get_saldo_pendiente(r) {
+    const abonos = Number(r.DOC_ABONOS || 0);
+    return Math.max(0, compras_cxc_get_factura_a_pagar(r) - abonos);
 }
 
 function compras_cxc_get_mes() {
@@ -108,7 +121,7 @@ function compras_cxc_abrir_opciones(idx) {
     if (!r) return;
     compras_cxc_factura_sel = r;
     document.getElementById('lbComprasCxcModalTitulo').innerText = `${r.CODDOC}-${r.CORRELATIVO}`;
-    document.getElementById('lbComprasCxcModalSubtitulo').innerText = `${r.NOMBRE || ''} · Saldo ${F.setMoneda(Number(r.DOC_SALDO || 0), 'Q')}`;
+    document.getElementById('lbComprasCxcModalSubtitulo').innerText = `${r.NOMBRE || ''} · Saldo ${F.setMoneda(compras_cxc_get_saldo_pendiente(r), 'Q')}`;
     $('#modalComprasCxcOpciones').modal('show');
 }
 
@@ -162,15 +175,20 @@ function compras_cxc_abrir_modal_abono() {
     $('#modalComprasCxcOpciones').modal('hide');
 
     const importe = compras_cxc_get_factura_importe(r);
+    const descuento = compras_cxc_get_factura_descuento(r);
+    const aPagar = compras_cxc_get_factura_a_pagar(r);
     const abonos = Number(r.DOC_ABONOS || 0);
-    const saldo = Number(r.DOC_SALDO || 0);
+    const saldo = compras_cxc_get_saldo_pendiente(r);
 
     document.getElementById('lbComprasCxcAbonoFactura').innerText = `${r.CODDOC}-${r.CORRELATIVO} · ${r.NOMBRE || ''}`;
     document.getElementById('lbComprasCxcAbonoTotalFac').innerText = F.setMoneda(importe, 'Q');
+    document.getElementById('lbComprasCxcAbonoTotalDesc').innerText = F.setMoneda(descuento, 'Q');
+    document.getElementById('lbComprasCxcAbonoTotalAPagar').innerText = F.setMoneda(aPagar, 'Q');
     document.getElementById('lbComprasCxcAbonoTotalAbonos').innerText = F.setMoneda(abonos, 'Q');
     document.getElementById('lbComprasCxcAbonoTotalSaldo').innerText = F.setMoneda(saldo, 'Q');
     document.getElementById('txtComprasCxcAbonoMonto').value = '';
     document.getElementById('comprasCxcFpagoTipo').value = 'EFECTIVO';
+    document.getElementById('comprasCxcFpagoBanco').value = 'EFECTIVO';
     document.getElementById('txtComprasCxcFpagoDetalle').value = '';
     document.getElementById('txtComprasCxcAbonoFecha').value = F.getFecha();
 
@@ -202,57 +220,50 @@ function compras_cxc_guardar_abono() {
     const correlativo = document.getElementById('txtComprasCxcAbonoCorrelativo')?.value;
     const fecha = document.getElementById('txtComprasCxcAbonoFecha')?.value;
     const monto = Number(document.getElementById('txtComprasCxcAbonoMonto')?.value || 0);
-    const saldo = Number(r.DOC_SALDO || 0);
+    const saldo = compras_cxc_get_saldo_pendiente(r);
     const fpago_tipo = document.getElementById('comprasCxcFpagoTipo')?.value || 'EFECTIVO';
-    const fpago_detalle = F.limpiarTexto(document.getElementById('txtComprasCxcFpagoDetalle')?.value || '');
+    const fpago_banco = document.getElementById('comprasCxcFpagoBanco')?.value || 'EFECTIVO';
+    const fpago_detalle_raw = F.limpiarTexto(document.getElementById('txtComprasCxcFpagoDetalle')?.value || '');
+    const fpago_detalle = GF.cxc_build_fpago_detalle(fpago_banco, fpago_detalle_raw);
 
     if (!coddoc) { F.AvisoError('Seleccione un tipo de documento RCC'); return; }
     if (!correlativo || correlativo === '0') { F.AvisoError('No hay correlativo disponible'); return; }
     if (!fecha) { F.AvisoError('Indique la fecha del abono'); return; }
     if (!monto || monto <= 0) { F.AvisoError('Indique un monto válido'); return; }
     if (monto > saldo) { F.AvisoError('El monto no puede ser mayor al saldo'); return; }
-    if ((fpago_tipo === 'DEPOSITO' || fpago_tipo === 'CHEQUE' || fpago_tipo === 'OTROS') && !fpago_detalle) {
+    if ((fpago_tipo === 'DEPOSITO' || fpago_tipo === 'CHEQUE' || fpago_tipo === 'OTROS') && !fpago_detalle_raw) {
         F.AvisoError('Indique el detalle de la forma de pago');
         return;
     }
 
-    const btn = document.getElementById('btnComprasCxcGuardarAbono');
-    btn.disabled = true;
-
-    F.Confirmacion(`¿Registrar abono de ${F.setMoneda(monto, 'Q')} a la factura ${r.CODDOC}-${r.CORRELATIVO}?`)
-        .then((value) => {
-            if (value !== true) {
-                btn.disabled = false;
-                return;
-            }
-            GF.insert_abono_cxc({
-                coddoc,
-                correlativo,
-                fecha,
-                monto,
-                fac_coddoc: r.CODDOC,
-                fac_correlativo: r.CORRELATIVO,
-                codcliente: r.CODCLIENTE || 0,
-                nitclie: r.NIT || '',
-                nomclie: F.limpiarTexto(r.NOMBRE || ''),
-                dirclie: F.limpiarTexto(r.DIRECCION || ''),
-                codven: r.CODEMP || 0,
-                usuario: GlobalUsuario,
-                hora: F.getHora(),
-                codcaja: 1,
-                iva: GlobalConfigIVA,
-                fpago_tipo,
-                fpago_detalle
-            })
-                .then(() => {
-                    F.Aviso('Abono registrado correctamente');
-                    $('#modalComprasCxcAbono').modal('hide');
-                    compras_cxc_cargar_listado();
-                })
-                .catch(() => F.AvisoError('No se pudo registrar el abono'))
-                .finally(() => { btn.disabled = false; });
-        })
-        .catch(() => { btn.disabled = false; });
+    GF.cxc_confirmar_y_guardar_abono({
+        btn: document.getElementById('btnComprasCxcGuardarAbono'),
+        monto,
+        facturaLabel: `${r.CODDOC}-${r.CORRELATIVO}`,
+        fpago_detalle,
+        verificarBoleta: !!fpago_detalle_raw,
+        onModalHide: () => $('#modalComprasCxcAbono').modal('hide'),
+        onSuccess: () => compras_cxc_cargar_listado(),
+        payload: {
+            coddoc,
+            correlativo,
+            fecha,
+            monto,
+            fac_coddoc: r.CODDOC,
+            fac_correlativo: r.CORRELATIVO,
+            codcliente: r.CODCLIENTE || 0,
+            nitclie: r.NIT || '',
+            nomclie: F.limpiarTexto(r.NOMBRE || ''),
+            dirclie: F.limpiarTexto(r.DIRECCION || ''),
+            codven: r.CODEMP || 0,
+            usuario: GlobalUsuario,
+            hora: F.getHora(),
+            codcaja: 1,
+            iva: GlobalConfigIVA,
+            fpago_tipo,
+            fpago_detalle
+        }
+    });
 }
 
 function compras_cxc_corregir_saldos() {
@@ -283,16 +294,22 @@ function compras_cxc_render_filas(rows) {
     let contador = 0;
     let totalSaldo = 0;
     let totalImporte = 0;
+    let totalDescuento = 0;
+    let totalAPagar = 0;
     let totalAbonos = 0;
 
     compras_cxc_rows_data = rows || [];
     compras_cxc_rows_data.forEach((r, idx) => {
         contador += 1;
         const importe = compras_cxc_get_factura_importe(r);
+        const descuento = compras_cxc_get_factura_descuento(r);
+        const aPagar = compras_cxc_get_factura_a_pagar(r);
         const abonos = Number(r.DOC_ABONOS || 0);
-        const saldo = Number(r.DOC_SALDO || 0);
+        const saldo = compras_cxc_get_saldo_pendiente(r);
         const diasCredito = Number(r.DIASCREDITO || 0);
         totalImporte += importe;
+        totalDescuento += descuento;
+        totalAPagar += aPagar;
         totalAbonos += abonos;
         totalSaldo += saldo;
         str += `<tr class="hand" onclick="compras_cxc_abrir_opciones(${idx})" title="Ver opciones">
@@ -308,13 +325,15 @@ function compras_cxc_render_filas(rows) {
             </td>
             <td>${compras_cxc_format_vencimiento_cell(r.VENCIMIENTO)}</td>
             <td class="text-right">${F.setMoneda(importe, 'Q')}</td>
+            <td class="text-right">${F.setMoneda(descuento, 'Q')}</td>
+            <td class="text-right negrita text-info">${F.setMoneda(aPagar, 'Q')}</td>
             <td class="text-right">${F.setMoneda(abonos, 'Q')}</td>
             <td class="text-right negrita text-danger">${F.setMoneda(saldo, 'Q')}</td>
             <td class="text-center"><span class="badge badge-secondary cxc-dias-badge">${diasCredito}</span></td>
         </tr>`;
     });
 
-    container.innerHTML = str || `<tr><td colspan="9" class="text-center text-muted py-4">No hay facturas al crédito con saldo pendiente</td></tr>`;
+    container.innerHTML = str || `<tr><td colspan="11" class="text-center text-muted py-4">No hay facturas al crédito con saldo pendiente</td></tr>`;
 
     const lbDocs = document.getElementById('lbComprasCxcTotalDocs');
     if (lbDocs) lbDocs.innerText = `Docs: ${contador}`;
@@ -327,6 +346,10 @@ function compras_cxc_render_filas(rows) {
                 <span class="sygma-embarque-rpt__foot-total">${contador}</span>
                 <span class="sygma-embarque-rpt__foot-label">IMPORTE</span>
                 <span class="sygma-embarque-rpt__foot-total">${F.setMoneda(totalImporte, 'Q')}</span>
+                <span class="sygma-embarque-rpt__foot-label">DESCUENTO</span>
+                <span class="sygma-embarque-rpt__foot-total">${F.setMoneda(totalDescuento, 'Q')}</span>
+                <span class="sygma-embarque-rpt__foot-label">A PAGAR</span>
+                <span class="sygma-embarque-rpt__foot-total">${F.setMoneda(totalAPagar, 'Q')}</span>
                 <span class="sygma-embarque-rpt__foot-label">ABONOS</span>
                 <span class="sygma-embarque-rpt__foot-total">${F.setMoneda(totalAbonos, 'Q')}</span>
                 <span class="sygma-embarque-rpt__foot-label">SALDO</span>
@@ -345,7 +368,7 @@ function compras_cxc_cargar_listado() {
     const { mes, anio } = compras_cxc_get_periodo_filtro();
     const codven = document.getElementById('comprasCxcVendedor')?.value || 'TODOS';
 
-    container.innerHTML = `<tr><td colspan="9" class="text-center py-3">${GlobalLoader}</td></tr>`;
+    container.innerHTML = `<tr><td colspan="11" class="text-center py-3">${GlobalLoader}</td></tr>`;
 
     GF.get_data_cuentas_cobrar(mes, anio)
         .then((data) => {
@@ -357,7 +380,7 @@ function compras_cxc_cargar_listado() {
         })
         .catch(() => {
             compras_cxc_rows_data = [];
-            container.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-4">No se cargaron datos</td></tr>`;
+            container.innerHTML = `<tr><td colspan="11" class="text-center text-muted py-4">No se cargaron datos</td></tr>`;
             const lbDocs = document.getElementById('lbComprasCxcTotalDocs');
             if (lbDocs) lbDocs.innerText = 'Docs: 0';
             const totalBlock = document.getElementById('lbComprasCxcTotalBlock');

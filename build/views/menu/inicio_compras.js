@@ -318,6 +318,8 @@ function getView(){
                                     <th>CLIENTE</th>
                                     <th>VENCIMIENTO</th>
                                     <th class="text-right">IMPORTE</th>
+                                    <th class="text-right">DESCUENTO</th>
+                                    <th class="text-right">A PAGAR</th>
                                     <th class="text-right">ABONOS</th>
                                     <th class="text-right">SALDO</th>
                                     <th class="text-center">DIAS CREDITO</th>
@@ -384,14 +386,17 @@ function getView(){
                                 <div class="negrita mb-1">Factura a abonar</div>
                                 <div id="lbComprasCxcAbonoFactura">—</div>
                                 <div class="row mt-2">
-                                    <div class="col-4"><small class="text-muted">Total factura</small><div class="negrita" id="lbComprasCxcAbonoTotalFac">Q 0.00</div></div>
-                                    <div class="col-4"><small class="text-muted">Total abonos</small><div class="negrita" id="lbComprasCxcAbonoTotalAbonos">Q 0.00</div></div>
-                                    <div class="col-4"><small class="text-muted">Total saldo</small><div class="negrita text-danger" id="lbComprasCxcAbonoTotalSaldo">Q 0.00</div></div>
+                                    <div class="col"><small class="text-muted">Importe</small><div class="negrita" id="lbComprasCxcAbonoTotalFac">Q 0.00</div></div>
+                                    <div class="col"><small class="text-muted">Descuento</small><div class="negrita" id="lbComprasCxcAbonoTotalDesc">Q 0.00</div></div>
+                                    <div class="col"><small class="text-muted">A pagar</small><div class="negrita text-info" id="lbComprasCxcAbonoTotalAPagar">Q 0.00</div></div>
+                                    <div class="col"><small class="text-muted">Abonos</small><div class="negrita" id="lbComprasCxcAbonoTotalAbonos">Q 0.00</div></div>
+                                    <div class="col"><small class="text-muted">Saldo</small><div class="negrita text-danger" id="lbComprasCxcAbonoTotalSaldo">Q 0.00</div></div>
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-md-6 form-group"><label class="negrita" for="comprasCxcFpagoTipo">Forma de pago</label><select class="form-control" id="comprasCxcFpagoTipo"><option value="EFECTIVO">EFECTIVO</option><option value="DEPOSITO">DEPOSITO</option><option value="CHEQUE">CHEQUE</option><option value="OTROS">OTROS</option></select></div>
-                                <div class="col-md-6 form-group"><label class="negrita" for="txtComprasCxcFpagoDetalle">Detalle forma de pago</label><input type="text" class="form-control" id="txtComprasCxcFpagoDetalle" placeholder="Banco, boleta o no. de cheque"></div>
+                                <div class="col-md-4 form-group"><label class="negrita" for="comprasCxcFpagoTipo">Forma de pago</label><select class="form-control" id="comprasCxcFpagoTipo"><option value="EFECTIVO">EFECTIVO</option><option value="DEPOSITO">DEPOSITO</option><option value="CHEQUE">CHEQUE</option><option value="OTROS">OTROS</option></select></div>
+                                <div class="col-md-4 form-group"><label class="negrita" for="comprasCxcFpagoBanco">Banco / entidad</label><select class="form-control" id="comprasCxcFpagoBanco">${GF.cxc_fpago_bancos_options_html()}</select></div>
+                                <div class="col-md-4 form-group"><label class="negrita" for="txtComprasCxcFpagoDetalle">Detalle forma de pago</label><input type="text" class="form-control" id="txtComprasCxcFpagoDetalle" placeholder="No. boleta, cheque u otro detalle"></div>
                             </div>
                             <div class="form-group mb-0"><label class="negrita" for="txtComprasCxcAbonoMonto">Monto a abonar</label><input type="number" class="form-control negrita text-danger cxc-abono-monto-input" id="txtComprasCxcAbonoMonto" min="0" step="0.01" placeholder="0.00"></div>
                         </div>

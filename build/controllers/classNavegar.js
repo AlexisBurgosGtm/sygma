@@ -183,7 +183,9 @@ let Navegar = {
 
     inicio_ventas: () => {
         if (Number(GlobalNivelUsuario) === 0) return;
-        F.loadScript('../views/menu/INICIO_VENTAS/inicio_ventas.js', 'root').then(() => initView());
+        F.loadScript('../views/menu/inicio_ventas_cxc.js', 'root')
+            .then(() => F.loadScript('../views/menu/INICIO_VENTAS/inicio_ventas.js', 'root'))
+            .then(() => initView());
     },
 
     inicio_vendedor: () => {
@@ -195,7 +197,9 @@ let Navegar = {
             ventas_showHome();
             return;
         }
-        F.loadScript('../views/menu/INICIO_VENTAS/inicio_ventas.js', 'root').then(() => initView());
+        F.loadScript('../views/menu/inicio_ventas_cxc.js', 'root')
+            .then(() => F.loadScript('../views/menu/INICIO_VENTAS/inicio_ventas.js', 'root'))
+            .then(() => initView());
     },
 
     inicio_digitador: () => {

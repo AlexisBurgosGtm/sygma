@@ -965,6 +965,78 @@ let GF = {
             });
         })     
     },
+    cxc_fpago_bancos: ['EFECTIVO', 'BANRURAL', 'GyT', 'INTERNACIONAL', 'CHN', 'MICOPE', 'BAM', 'INDUSTRIAL', 'BANTRAB', 'BAC', 'AZTECA', 'PROMERICA', 'INMOBILIARIO'],
+    cxc_fpago_bancos_options_html:(selected)=>{
+        const sel = selected || 'EFECTIVO';
+        return GF.cxc_fpago_bancos.map((b) => `<option value="${b}"${b === sel ? ' selected' : ''}>${b}</option>`).join('');
+    },
+    cxc_build_fpago_detalle:(banco, detalle)=>{
+        const b = F.limpiarTexto(banco || '');
+        const d = F.limpiarTexto(detalle || '');
+        if (!b) return d;
+        if (!d) return b;
+        return `${b}-${d}`;
+    },
+    verificar_fpago_detalle_cxc:(fpago_detalle)=>{
+        return new Promise((resolve,reject)=>{
+            axios.post(GlobalUrlCalls + '/documentos/verificar_fpago_detalle_cxc', {
+                sucursal: GlobalEmpnit,
+                token: TOKEN,
+                fpago_detalle
+            })
+            .then((response) => {
+                if (response.status.toString() === '200') {
+                    const data = response.data;
+                    if (data && data.toString && data.toString() === 'error') {
+                        reject();
+                        return;
+                    }
+                    const cnt = Number(data?.recordset?.[0]?.CNT ?? 0);
+                    resolve(cnt > 0);
+                } else {
+                    reject();
+                }
+            }, () => reject());
+        });
+    },
+    cxc_confirmar_y_guardar_abono:({ btn, monto, facturaLabel, fpago_detalle, verificarBoleta, payload, onSuccess, onModalHide })=>{
+        if (!btn) return;
+        btn.disabled = true;
+        F.Aviso('Verificando boleta...');
+
+        const verificar = verificarBoleta
+            ? GF.verificar_fpago_detalle_cxc(fpago_detalle)
+            : Promise.resolve(false);
+
+        verificar
+            .then((existe) => {
+                if (existe) {
+                    F.AvisoError('Este documento de pago ya existe');
+                    btn.disabled = false;
+                    return;
+                }
+                F.Confirmacion(`¿Registrar abono de ${F.setMoneda(monto, 'Q')} a la factura ${facturaLabel}?`)
+                    .then((value) => {
+                        if (value !== true) {
+                            btn.disabled = false;
+                            return;
+                        }
+                        GF.insert_abono_cxc(payload)
+                            .then(() => {
+                                F.Aviso('Abono registrado correctamente');
+                                if (typeof onModalHide === 'function') onModalHide();
+                                if (typeof onSuccess === 'function') onSuccess();
+                            })
+                            .catch(() => F.AvisoError('No se pudo registrar el abono'))
+                            .finally(() => { btn.disabled = false; });
+                    })
+                    .catch(() => { btn.disabled = false; });
+            })
+            .catch(() => {
+                F.AvisoError('No se pudo verificar la boleta');
+                btn.disabled = false;
+            });
+    },
     insert_abono_cxc:(payload)=>{
         return new Promise((resolve,reject)=>{
             axios.post(GlobalUrlCalls + '/documentos/insert_abono_cxc',
@@ -4558,7 +4630,7 @@ let GF = {
             .catch(() => reject());
         });
     },
-    documento_update_concre:(sucursal,coddoc,correlativo,concre,diascredito,vencimiento)=>{
+    documento_update_concre:(sucursal,coddoc,correlativo,concre,diascredito,vencimiento,totaldescuento)=>{
         return new Promise((resolve,reject)=>{
     
             const payload = {
@@ -4573,6 +4645,9 @@ let GF = {
                 payload.diascredito = diascredito;
             }
             if (vencimiento) payload.vencimiento = vencimiento;
+            if (totaldescuento !== undefined && totaldescuento !== null && totaldescuento !== '') {
+                payload.totaldescuento = totaldescuento;
+            }
 
             axios.post(GlobalUrlCalls + '/documentos/update_concre_documento', payload)
             .then((response) => {

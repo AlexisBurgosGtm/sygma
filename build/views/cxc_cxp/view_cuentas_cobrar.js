@@ -83,6 +83,8 @@ function getView() {
                                     <th>CLIENTE</th>
                                     <th>VENCIMIENTO</th>
                                     <th class="text-right">IMPORTE</th>
+                                    <th class="text-right">DESCUENTO</th>
+                                    <th class="text-right">A PAGAR</th>
                                     <th class="text-right">ABONOS</th>
                                     <th class="text-right">SALDO</th>
                                     <th class="text-center">DIAS CREDITO</th>
@@ -197,13 +199,15 @@ function getView() {
                                 <div class="negrita mb-1">Factura a abonar</div>
                                 <div id="lbCxcAbonoFactura">—</div>
                                 <div class="row mt-2">
-                                    <div class="col-4"><small class="text-muted">Total factura</small><div class="negrita" id="lbCxcAbonoTotalFac">Q 0.00</div></div>
-                                    <div class="col-4"><small class="text-muted">Total abonos</small><div class="negrita" id="lbCxcAbonoTotalAbonos">Q 0.00</div></div>
-                                    <div class="col-4"><small class="text-muted">Total saldo</small><div class="negrita text-danger" id="lbCxcAbonoTotalSaldo">Q 0.00</div></div>
+                                    <div class="col"><small class="text-muted">Importe</small><div class="negrita" id="lbCxcAbonoTotalFac">Q 0.00</div></div>
+                                    <div class="col"><small class="text-muted">Descuento</small><div class="negrita" id="lbCxcAbonoTotalDesc">Q 0.00</div></div>
+                                    <div class="col"><small class="text-muted">A pagar</small><div class="negrita text-info" id="lbCxcAbonoTotalAPagar">Q 0.00</div></div>
+                                    <div class="col"><small class="text-muted">Abonos</small><div class="negrita" id="lbCxcAbonoTotalAbonos">Q 0.00</div></div>
+                                    <div class="col"><small class="text-muted">Saldo</small><div class="negrita text-danger" id="lbCxcAbonoTotalSaldo">Q 0.00</div></div>
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-md-6 form-group">
+                                <div class="col-md-4 form-group">
                                     <label class="negrita" for="cmbCxcFpagoTipo">Forma de pago</label>
                                     <select class="form-control" id="cmbCxcFpagoTipo">
                                         <option value="EFECTIVO">EFECTIVO</option>
@@ -212,9 +216,13 @@ function getView() {
                                         <option value="OTROS">OTROS</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6 form-group">
+                                <div class="col-md-4 form-group">
+                                    <label class="negrita" for="cmbCxcFpagoBanco">Banco / entidad</label>
+                                    <select class="form-control" id="cmbCxcFpagoBanco">${GF.cxc_fpago_bancos_options_html()}</select>
+                                </div>
+                                <div class="col-md-4 form-group">
                                     <label class="negrita" for="txtCxcFpagoDetalle">Detalle forma de pago</label>
-                                    <input type="text" class="form-control" id="txtCxcFpagoDetalle" placeholder="Banco, boleta o no. de cheque">
+                                    <input type="text" class="form-control" id="txtCxcFpagoDetalle" placeholder="No. boleta, cheque u otro detalle">
                                 </div>
                             </div>
                             <div class="form-group mb-0">
@@ -376,7 +384,20 @@ function cxc_format_vencimiento_cell(fechaVenc) {
 }
 
 function cxc_get_factura_importe(r) {
-    return Number(r.TOTALVENTA || r.TOTALPRECIO || 0);
+    return Number(r.TOTALPRECIO || r.TOTALVENTA || 0);
+}
+
+function cxc_get_factura_descuento(r) {
+    return Number(r.TOTALDESCUENTO || 0);
+}
+
+function cxc_get_factura_a_pagar(r) {
+    return Math.max(0, cxc_get_factura_importe(r) - cxc_get_factura_descuento(r));
+}
+
+function cxc_get_saldo_pendiente(r) {
+    const abonos = Number(r.DOC_ABONOS || 0);
+    return Math.max(0, cxc_get_factura_a_pagar(r) - abonos);
 }
 
 function cxc_abrir_opciones(idx) {
@@ -385,7 +406,7 @@ function cxc_abrir_opciones(idx) {
     cxc_factura_sel = r;
 
     document.getElementById('lbCxcModalTitulo').innerText = `${r.CODDOC}-${r.CORRELATIVO}`;
-    document.getElementById('lbCxcModalSubtitulo').innerText = `${r.NOMBRE || ''} · Saldo ${F.setMoneda(Number(r.DOC_SALDO || 0), 'Q')}`;
+    document.getElementById('lbCxcModalSubtitulo').innerText = `${r.NOMBRE || ''} · Saldo ${F.setMoneda(cxc_get_saldo_pendiente(r), 'Q')}`;
     $('#modalCxcOpciones').modal('show');
 }
 
@@ -565,15 +586,20 @@ function cxc_abrir_modal_abono() {
     $('#modalCxcOpciones').modal('hide');
 
     const importe = cxc_get_factura_importe(r);
+    const descuento = cxc_get_factura_descuento(r);
+    const aPagar = cxc_get_factura_a_pagar(r);
     const abonos = Number(r.DOC_ABONOS || 0);
-    const saldo = Number(r.DOC_SALDO || 0);
+    const saldo = cxc_get_saldo_pendiente(r);
 
     document.getElementById('lbCxcAbonoFactura').innerText = `${r.CODDOC}-${r.CORRELATIVO} · ${r.NOMBRE || ''}`;
     document.getElementById('lbCxcAbonoTotalFac').innerText = F.setMoneda(importe, 'Q');
+    document.getElementById('lbCxcAbonoTotalDesc').innerText = F.setMoneda(descuento, 'Q');
+    document.getElementById('lbCxcAbonoTotalAPagar').innerText = F.setMoneda(aPagar, 'Q');
     document.getElementById('lbCxcAbonoTotalAbonos').innerText = F.setMoneda(abonos, 'Q');
     document.getElementById('lbCxcAbonoTotalSaldo').innerText = F.setMoneda(saldo, 'Q');
     document.getElementById('txtCxcAbonoMonto').value = '';
     document.getElementById('cmbCxcFpagoTipo').value = 'EFECTIVO';
+    document.getElementById('cmbCxcFpagoBanco').value = 'EFECTIVO';
     document.getElementById('txtCxcFpagoDetalle').value = '';
     document.getElementById('txtCxcAbonoFecha').value = F.getFecha();
 
@@ -605,64 +631,50 @@ function cxc_guardar_abono() {
     const correlativo = document.getElementById('txtCxcAbonoCorrelativo')?.value;
     const fecha = document.getElementById('txtCxcAbonoFecha')?.value;
     const monto = Number(document.getElementById('txtCxcAbonoMonto')?.value || 0);
-    const saldo = Number(r.DOC_SALDO || 0);
+    const saldo = cxc_get_saldo_pendiente(r);
     const fpago_tipo = document.getElementById('cmbCxcFpagoTipo')?.value || 'EFECTIVO';
-    const fpago_detalle = F.limpiarTexto(document.getElementById('txtCxcFpagoDetalle')?.value || '');
+    const fpago_banco = document.getElementById('cmbCxcFpagoBanco')?.value || 'EFECTIVO';
+    const fpago_detalle_raw = F.limpiarTexto(document.getElementById('txtCxcFpagoDetalle')?.value || '');
+    const fpago_detalle = GF.cxc_build_fpago_detalle(fpago_banco, fpago_detalle_raw);
 
     if (!coddoc) { F.AvisoError('Seleccione un tipo de documento RCC'); return; }
     if (!correlativo || correlativo === '0') { F.AvisoError('No hay correlativo disponible'); return; }
     if (!fecha) { F.AvisoError('Indique la fecha del abono'); return; }
     if (!monto || monto <= 0) { F.AvisoError('Indique un monto válido'); return; }
     if (monto > saldo) { F.AvisoError('El monto no puede ser mayor al saldo'); return; }
-    if ((fpago_tipo === 'DEPOSITO' || fpago_tipo === 'CHEQUE' || fpago_tipo === 'OTROS') && !fpago_detalle) {
+    if ((fpago_tipo === 'DEPOSITO' || fpago_tipo === 'CHEQUE' || fpago_tipo === 'OTROS') && !fpago_detalle_raw) {
         F.AvisoError('Indique el detalle de la forma de pago');
         return;
     }
 
-    const btn = document.getElementById('btnCxcGuardarAbono');
-    btn.disabled = true;
-
-    F.Confirmacion(`¿Registrar abono de ${F.setMoneda(monto, 'Q')} a la factura ${r.CODDOC}-${r.CORRELATIVO}?`)
-        .then((value) => {
-            if (value !== true) {
-                btn.disabled = false;
-                return;
-            }
-
-            GF.insert_abono_cxc({
-                coddoc,
-                correlativo,
-                fecha,
-                monto,
-                fac_coddoc: r.CODDOC,
-                fac_correlativo: r.CORRELATIVO,
-                codcliente: r.CODCLIENTE || 0,
-                nitclie: r.NIT || '',
-                nomclie: F.limpiarTexto(r.NOMBRE || ''),
-                dirclie: F.limpiarTexto(r.DIRECCION || ''),
-                codven: r.CODEMP || 0,
-                usuario: GlobalUsuario,
-                hora: F.getHora(),
-                codcaja: 1,
-                iva: GlobalConfigIVA,
-                fpago_tipo,
-                fpago_detalle
-            })
-                .then(() => {
-                    F.Aviso('Abono registrado correctamente');
-                    $('#modalCxcAbono').modal('hide');
-                    cargar_cuentas_cobrar();
-                })
-                .catch(() => {
-                    F.AvisoError('No se pudo registrar el abono');
-                })
-                .finally(() => {
-                    btn.disabled = false;
-                });
-        })
-        .catch(() => {
-            btn.disabled = false;
-        });
+    GF.cxc_confirmar_y_guardar_abono({
+        btn: document.getElementById('btnCxcGuardarAbono'),
+        monto,
+        facturaLabel: `${r.CODDOC}-${r.CORRELATIVO}`,
+        fpago_detalle,
+        verificarBoleta: !!fpago_detalle_raw,
+        onModalHide: () => $('#modalCxcAbono').modal('hide'),
+        onSuccess: () => cargar_cuentas_cobrar(),
+        payload: {
+            coddoc,
+            correlativo,
+            fecha,
+            monto,
+            fac_coddoc: r.CODDOC,
+            fac_correlativo: r.CORRELATIVO,
+            codcliente: r.CODCLIENTE || 0,
+            nitclie: r.NIT || '',
+            nomclie: F.limpiarTexto(r.NOMBRE || ''),
+            dirclie: F.limpiarTexto(r.DIRECCION || ''),
+            codven: r.CODEMP || 0,
+            usuario: GlobalUsuario,
+            hora: F.getHora(),
+            codcaja: 1,
+            iva: GlobalConfigIVA,
+            fpago_tipo,
+            fpago_detalle
+        }
+    });
 }
 
 function cxc_get_periodo_filtro() {
@@ -689,7 +701,7 @@ function cargar_cuentas_cobrar() {
 
     const { mes, anio } = cxc_get_periodo_filtro();
 
-    container.innerHTML = `<tr><td colspan="9" class="text-center py-3">${GlobalLoader}</td></tr>`;
+    container.innerHTML = `<tr><td colspan="11" class="text-center py-3">${GlobalLoader}</td></tr>`;
 
     GF.get_data_cuentas_cobrar(mes, anio)
         .then((data) => {
@@ -700,13 +712,20 @@ function cargar_cuentas_cobrar() {
             let totalImporte = 0;
             let totalAbonos = 0;
 
+            let totalDescuento = 0;
+            let totalAPagar = 0;
+
             cxc_rows_data.forEach((r, idx) => {
                 contador += 1;
                 const importe = cxc_get_factura_importe(r);
+                const descuento = cxc_get_factura_descuento(r);
+                const aPagar = cxc_get_factura_a_pagar(r);
                 const abonos = Number(r.DOC_ABONOS || 0);
-                const saldo = Number(r.DOC_SALDO || 0);
+                const saldo = cxc_get_saldo_pendiente(r);
                 const diasCredito = Number(r.DIASCREDITO || 0);
                 totalImporte += importe;
+                totalDescuento += descuento;
+                totalAPagar += aPagar;
                 totalAbonos += abonos;
                 totalSaldo += saldo;
 
@@ -724,13 +743,15 @@ function cargar_cuentas_cobrar() {
                     </td>
                     <td>${cxc_format_vencimiento_cell(r.VENCIMIENTO)}</td>
                     <td class="text-right">${F.setMoneda(importe, 'Q')}</td>
+                    <td class="text-right">${F.setMoneda(descuento, 'Q')}</td>
+                    <td class="text-right negrita text-info">${F.setMoneda(aPagar, 'Q')}</td>
                     <td class="text-right">${F.setMoneda(abonos, 'Q')}</td>
                     <td class="text-right negrita text-danger">${F.setMoneda(saldo, 'Q')}</td>
                     <td class="text-center"><span class="badge badge-secondary cxc-dias-badge">${diasCredito}</span></td>
                 </tr>`;
             });
 
-            container.innerHTML = str || `<tr><td colspan="9" class="text-center text-muted py-4">No hay facturas al crédito con saldo pendiente</td></tr>`;
+            container.innerHTML = str || `<tr><td colspan="11" class="text-center text-muted py-4">No hay facturas al crédito con saldo pendiente</td></tr>`;
 
             const lbDocs = document.getElementById('lbCxcTotalDocs');
             if (lbDocs) lbDocs.innerText = `Docs: ${contador}`;
@@ -743,6 +764,10 @@ function cargar_cuentas_cobrar() {
                         <span class="sygma-embarque-rpt__foot-total">${contador}</span>
                         <span class="sygma-embarque-rpt__foot-label">IMPORTE</span>
                         <span class="sygma-embarque-rpt__foot-total">${F.setMoneda(totalImporte, 'Q')}</span>
+                        <span class="sygma-embarque-rpt__foot-label">DESCUENTO</span>
+                        <span class="sygma-embarque-rpt__foot-total">${F.setMoneda(totalDescuento, 'Q')}</span>
+                        <span class="sygma-embarque-rpt__foot-label">A PAGAR</span>
+                        <span class="sygma-embarque-rpt__foot-total">${F.setMoneda(totalAPagar, 'Q')}</span>
                         <span class="sygma-embarque-rpt__foot-label">ABONOS</span>
                         <span class="sygma-embarque-rpt__foot-total">${F.setMoneda(totalAbonos, 'Q')}</span>
                         <span class="sygma-embarque-rpt__foot-label">SALDO</span>
@@ -755,7 +780,7 @@ function cargar_cuentas_cobrar() {
         })
         .catch(() => {
             cxc_rows_data = [];
-            container.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-4">No se cargaron datos</td></tr>`;
+            container.innerHTML = `<tr><td colspan="11" class="text-center text-muted py-4">No se cargaron datos</td></tr>`;
             const lbDocs = document.getElementById('lbCxcTotalDocs');
             if (lbDocs) lbDocs.innerText = 'Docs: 0';
             const totalBlock = document.getElementById('lbCxcTotalBlock');

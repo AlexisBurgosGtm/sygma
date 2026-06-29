@@ -234,9 +234,21 @@ function getView(){
                                     <option value="90">90</option>
                                 </select>
                             </div>
-                            <div class="form-group mb-0">
+                            <div class="form-group mb-2">
                                 <label class="negrita text-secondary mb-1" for="txtDespachoVencimientoCredito">Fecha de vencimiento</label>
                                 <input type="date" class="form-control form-control-sm negrita" id="txtDespachoVencimientoCredito">
+                            </div>
+                            <div class="form-group mb-2">
+                                <label class="negrita text-secondary mb-1" for="txtDespachoCreditoImporte">Importe</label>
+                                <input type="text" class="form-control form-control-sm negrita text-right" id="txtDespachoCreditoImporte" readonly>
+                            </div>
+                            <div class="form-group mb-2">
+                                <label class="negrita text-secondary mb-1" for="txtDespachoDescuentoCredito">Descuento</label>
+                                <input type="number" class="form-control form-control-sm negrita text-right" id="txtDespachoDescuentoCredito" min="0" step="0.01" value="0">
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="negrita text-secondary mb-1" for="txtDespachoCreditoAPagar">A pagar</label>
+                                <input type="text" class="form-control form-control-sm negrita text-danger text-right" id="txtDespachoCreditoAPagar" readonly>
                             </div>
                         </div>
                         <div class="modal-footer py-2 px-3 justify-content-between">
@@ -606,18 +618,40 @@ function despacho_calc_vencimiento_credito() {
     if (txt) txt.value = despacho_sumar_dias_fecha(dias);
 }
 
+function despacho_calc_credito_totales() {
+    const importe = Number(despacho_concre_pendiente?.importe || 0);
+    const descuento = Number(document.getElementById('txtDespachoDescuentoCredito')?.value || 0);
+    const descuentoOk = descuento > importe ? importe : descuento;
+    const txtDesc = document.getElementById('txtDespachoDescuentoCredito');
+    if (txtDesc && descuento !== descuentoOk) txtDesc.value = descuentoOk;
+    const aPagar = Math.max(0, importe - descuentoOk);
+    const txtAPagar = document.getElementById('txtDespachoCreditoAPagar');
+    if (txtAPagar) txtAPagar.value = F.setMoneda(aPagar, 'Q');
+}
+
 function despacho_abrir_modal_credito(coddoc, correlativo, idbtn) {
-    despacho_concre_pendiente = { coddoc, correlativo, idbtn };
+    const doc = despacho_facturas_docs.find((d) =>
+        d.CODDOC === coddoc && String(d.CORRELATIVO) === String(correlativo)
+    );
+    const importe = Number(doc?.IMPORTE || 0);
+    const descuento = Number(doc?.TOTALDESCUENTO || 0);
+    despacho_concre_pendiente = { coddoc, correlativo, idbtn, importe };
     const lb = document.getElementById('lbDespachoConcreCreditoDoc');
     if (lb) lb.innerText = `${coddoc}-${correlativo}`;
     const cmb = document.getElementById('cmbDespachoDiasCredito');
     if (cmb) cmb.value = '7';
+    const txtImporte = document.getElementById('txtDespachoCreditoImporte');
+    if (txtImporte) txtImporte.value = F.setMoneda(importe, 'Q');
+    const txtDesc = document.getElementById('txtDespachoDescuentoCredito');
+    if (txtDesc) txtDesc.value = descuento > 0 ? descuento : 0;
     despacho_calc_vencimiento_credito();
+    despacho_calc_credito_totales();
     $('#modalDespachoConcreCredito').modal('show');
 }
 
 function despacho_setup_concre_credito_listeners() {
     document.getElementById('cmbDespachoDiasCredito')?.addEventListener('change', despacho_calc_vencimiento_credito);
+    document.getElementById('txtDespachoDescuentoCredito')?.addEventListener('input', despacho_calc_credito_totales);
     document.getElementById('btnDespachoConfirmarCredito')?.addEventListener('click', despacho_confirmar_credito);
     $('#modalDespachoConcreCredito')?.on('hidden.bs.modal', () => {
         const btn = despacho_concre_pendiente?.idbtn ? document.getElementById(despacho_concre_pendiente.idbtn) : null;
@@ -632,15 +666,25 @@ function despacho_confirmar_credito() {
 
     const diascredito = Number(document.getElementById('cmbDespachoDiasCredito')?.value || 7);
     const vencimiento = document.getElementById('txtDespachoVencimientoCredito')?.value;
+    const importe = Number(p.importe || 0);
+    const descuento = Number(document.getElementById('txtDespachoDescuentoCredito')?.value || 0);
     if (!vencimiento) {
         F.AvisoError('Indique la fecha de vencimiento');
+        return;
+    }
+    if (descuento < 0) {
+        F.AvisoError('El descuento no puede ser negativo');
+        return;
+    }
+    if (descuento > importe) {
+        F.AvisoError('El descuento no puede ser mayor al importe');
         return;
     }
 
     const btnConfirm = document.getElementById('btnDespachoConfirmarCredito');
     if (btnConfirm) btnConfirm.disabled = true;
 
-    GF.documento_update_concre(GlobalEmpnit, p.coddoc, p.correlativo, 'CRE', diascredito, vencimiento)
+    GF.documento_update_concre(GlobalEmpnit, p.coddoc, p.correlativo, 'CRE', diascredito, vencimiento, descuento)
         .then(() => {
             F.Aviso('Forma de pago actualizada a CRÉDITO');
             $('#modalDespachoConcreCredito').modal('hide');
