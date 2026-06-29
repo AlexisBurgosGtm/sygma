@@ -50,10 +50,9 @@ router.post("/empresas_listado", async (req, res) => {
             NOMBRE,
             ISNULL(DIRECCION, '') AS DIRECCION,
             ISNULL(TIPO_PRECIO, '') AS TIPO_PRECIO,
-            ISNULL(CODTIPOEMPRESA, 0) AS CODTIPOEMPRESA,
             ISNULL(OBJETIVO_VENTAS, 0) AS OBJETIVO_VENTAS,
             ISNULL(OBJETIVO_RENTABILIDAD, 0) AS OBJETIVO_RENTABILIDAD,
-            ISNULL(DISTRITO, 0) AS DISTRITO
+            ISNULL(CLAVE, '') AS CLAVE
         FROM EMPRESAS
         ORDER BY NOMBRE
     `;
@@ -68,10 +67,9 @@ router.post("/empresa_update", async (req, res) => {
         nombre,
         direccion,
         tipo_precio,
-        codtipoempresa,
         objetivo_ventas,
         objetivo_rentabilidad,
-        distrito
+        clave
     } = req.body;
 
     let qry = `
@@ -79,11 +77,25 @@ router.post("/empresa_update", async (req, res) => {
             NOMBRE = '${esc(nombre)}',
             DIRECCION = '${esc(direccion)}',
             TIPO_PRECIO = '${esc(tipo_precio)}',
-            CODTIPOEMPRESA = ${Number(codtipoempresa) || 0},
             OBJETIVO_VENTAS = ${Number(objetivo_ventas) || 0},
             OBJETIVO_RENTABILIDAD = ${Number(objetivo_rentabilidad) || 0},
-            DISTRITO = ${Number(distrito) || 0}
+            CLAVE = '${esc(clave || '')}'
         WHERE EMPNIT = '${esc(empnit)}'
+    `;
+
+    execute.QueryToken(res, qry, TOKEN);
+});
+
+router.post("/empresa_verificar_clave", async (req, res) => {
+    const { TOKEN, empnit, clave } = req.body;
+    const emp = esc(empnit);
+    const clv = esc(clave || '');
+
+    let qry = `
+        SELECT COUNT(*) AS OK
+        FROM EMPRESAS
+        WHERE EMPNIT = '${emp}'
+            AND ISNULL(CLAVE, '') = '${clv}'
     `;
 
     execute.QueryToken(res, qry, TOKEN);

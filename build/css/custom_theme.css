@@ -4919,3 +4919,247 @@ body.spa-nav-hidden .page-content.proveedor-page #despachoPaneListado {
     display: none !important;
   }
 }
+
+/* Vista archivo documentos — tabla compacta, modales y imprimible */
+
+.sygma-archivo-docs__card {
+  border: 0;
+}
+
+.sygma-archivo-docs__label {
+  font-size: 0.78rem;
+  margin-bottom: 0.15rem;
+}
+
+.sygma-archivo-docs__toolbar {
+  gap: 0.5rem;
+}
+
+.sygma-archivo-docs__search {
+  max-width: 22rem;
+  font-size: 0.82rem;
+}
+
+.sygma-archivo-docs__count {
+  white-space: nowrap;
+}
+
+.sygma-archivo-docs__table-wrap {
+  max-height: calc(100vh - 17rem);
+  overflow: auto;
+}
+
+.sygma-archivo-docs__table {
+  font-size: 0.78rem;
+}
+
+.sygma-archivo-docs__table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 0.35rem 0.45rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.sygma-archivo-docs__table tbody td {
+  padding: 0.3rem 0.45rem;
+  vertical-align: middle;
+}
+
+.sygma-archivo-docs__cell-main {
+  display: block;
+  line-height: 1.2;
+}
+
+.sygma-archivo-docs__cell-sub {
+  display: block;
+  font-size: 0.68rem;
+  color: #6c757d;
+  line-height: 1.15;
+}
+
+.sygma-archivo-docs__actions {
+  width: 2rem;
+  padding-left: 0.15rem !important;
+  padding-right: 0.15rem !important;
+}
+
+.sygma-archivo-docs__btn {
+  width: 1.65rem;
+  height: 1.65rem;
+  padding: 0;
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.sygma-archivo-docs-opt {
+  font-size: 0.82rem;
+}
+
+.sygma-archivo-docs-opt__section {
+  padding: 0.65rem 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.sygma-archivo-docs-opt__section:last-child {
+  border-bottom: 0;
+}
+
+.sygma-archivo-docs-opt__section--busy {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.sygma-archivo-docs-opt__title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #6c757d;
+  margin-bottom: 0.35rem;
+}
+
+.sygma-archivo-docs-opt__action {
+  font-size: 0.78rem;
+}
+
+.sygma-archivo-docs__det-table {
+  font-size: 0.78rem;
+}
+
+.sygma-archivo-docs__det-table th,
+.sygma-archivo-docs__det-table td {
+  padding: 0.3rem 0.4rem;
+}
+
+.sygma-archivo-docs-print-host {
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.sygma-archivo-doc-print {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0.5rem 0.75rem 1rem;
+  color: #111;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.sygma-archivo-doc-print__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 2px solid #111;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.sygma-archivo-doc-print__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.sygma-archivo-doc-print__title {
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.sygma-archivo-doc-print__empresa {
+  font-size: 0.85rem;
+  color: #444;
+}
+
+.sygma-archivo-doc-print__doc {
+  font-size: 1.1rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.sygma-archivo-doc-print__meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.25rem 1rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.82rem;
+}
+
+.sygma-archivo-doc-print__table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0.75rem;
+}
+
+.sygma-archivo-doc-print__table th,
+.sygma-archivo-doc-print__table td {
+  border: 1px solid #333;
+  padding: 0.25rem 0.35rem;
+  font-size: 0.78rem;
+}
+
+.sygma-archivo-doc-print__table th {
+  background: #f1f3f5;
+  font-weight: 700;
+}
+
+.sygma-archivo-doc-print__total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 2px solid #111;
+  padding-top: 0.5rem;
+  margin-top: 0.25rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.sygma-archivo-doc-print__total-amount {
+  font-size: 1.05rem;
+}
+
+.sygma-archivo-doc-print__obs {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+}
+
+@media print {
+  body.sygma-print-archivo-docs-active * {
+    visibility: hidden !important;
+  }
+
+  body.sygma-print-archivo-docs-active #archivo_docs_print_host,
+  body.sygma-print-archivo-docs-active #archivo_docs_print_host * {
+    visibility: visible !important;
+  }
+
+  body.sygma-print-archivo-docs-active #archivo_docs_print_host {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  .sygma-archivo-doc-print {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .sygma-archivo-doc-print__total {
+    page-break-inside: avoid;
+  }
+}

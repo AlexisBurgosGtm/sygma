@@ -1,5 +1,5 @@
 {
-  "version": "M.28.06.26 20:02",
+  "version": "M.28.06.26 20:46",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -2240,6 +2240,41 @@
       "FECHA": "28-06-2026",
       "HORA": "20:02",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.28.06.26 20:02"
+    },
+    {
+      "FECHA": "28-06-2026",
+      "HORA": "20:46",
+      "DESCRIPCION": "EMPRESAS: CAMPO CLAVE Y QUITA DISTRITO Y TIPO EMPRESA"
+    },
+    {
+      "FECHA": "28-06-2026",
+      "HORA": "20:46",
+      "DESCRIPCION": "FUNCION CLAVEEMPRESA PARA VERIFICACION DE EMPRESA ACTIVA"
+    },
+    {
+      "FECHA": "28-06-2026",
+      "HORA": "20:46",
+      "DESCRIPCION": "DOCUMENTOS: TABLA COMPACTA Y MODALES CENTRADOS"
+    },
+    {
+      "FECHA": "28-06-2026",
+      "HORA": "20:46",
+      "DESCRIPCION": "DOCUMENTOS: IMPRIMIBLE ESTANDAR POR TIPO DE DOCUMENTO"
+    },
+    {
+      "FECHA": "28-06-2026",
+      "HORA": "20:46",
+      "DESCRIPCION": "DOCUMENTOS: ELIMINAR PIDE CLAVE DE EMPRESA"
+    },
+    {
+      "FECHA": "28-06-2026",
+      "HORA": "20:46",
+      "DESCRIPCION": "DOCUMENTOS: OPCIONES SEPARADAS CON FUENTES MAS PEQUEÑAS"
+    },
+    {
+      "FECHA": "28-06-2026",
+      "HORA": "20:46",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.28.06.26 20:46"
     }
   ]
 }

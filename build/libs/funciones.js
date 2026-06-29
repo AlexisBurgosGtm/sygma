@@ -512,6 +512,30 @@ let F = {
             });
         });     
       },
+      ClaveEmpresa: function(){
+        return new Promise((resolve,reject)=>{
+            Swal.fire({
+              title: 'Clave de empresa',
+              text: 'Escriba la clave de la empresa activa',
+              input: 'text',
+              inputAttributes: { autocomplete: 'off' },
+              showCancelButton: true,
+              confirmButtonText: 'Verificar',
+              cancelButtonText: 'Cancelar'
+            }).then((result) => {
+              if (!swalFueConfirmado(result) || result.value == null || result.value === '') {
+                  reject('no');
+                  return;
+              }
+              GF.empresa_verificar_clave(GlobalEmpnit, result.value)
+                .then(() => resolve(true))
+                .catch(() => {
+                    F.AvisoError('Clave de empresa incorrecta');
+                    reject('wrong');
+                });
+            });
+        });
+      },
       solicitarCantidad: function(){
         return new Promise((resolve,reject)=>{
             Swal.fire({
@@ -1503,3 +1527,7 @@ let F = {
         return peso.toFixed(2) + '%'
       },
 };
+
+function ClaveEmpresa() {
+    return F.ClaveEmpresa();
+}

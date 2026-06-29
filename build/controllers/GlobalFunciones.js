@@ -834,9 +834,6 @@ let GF = {
                 resolve('No hay datos....');
             })
         })
-
-        
-
     },
     get_data_documentos:(tipo,mes,anio)=>{
         return new Promise((resolve,reject)=>{
@@ -4522,6 +4519,44 @@ let GF = {
                 reject();
             });
         })     
+    },
+    empresa_verificar_clave:(empnit, clave)=>{
+        return new Promise((resolve,reject)=>{
+            axios.post(GlobalUrlCalls + '/general/empresa_verificar_clave', {
+                TOKEN: TOKEN,
+                empnit: empnit,
+                clave: clave
+            })
+            .then((response) => {
+                if (response.status.toString() === '200' && response.data.toString() !== 'error') {
+                    const ok = Number(response.data.recordset?.[0]?.OK || 0);
+                    if (ok > 0) resolve(true);
+                    else reject();
+                } else {
+                    reject();
+                }
+            })
+            .catch(() => reject());
+        });
+    },
+    get_data_encabezado_documento:(empnit, coddoc, correlativo)=>{
+        return new Promise((resolve,reject)=>{
+            axios.post(GlobalUrlCalls + '/documentos/encabezado_documento', {
+                sucursal: empnit,
+                token: TOKEN,
+                coddoc: coddoc,
+                correlativo: correlativo
+            })
+            .then((response) => {
+                if (response.status.toString() === '200' && response.data.toString() !== 'error') {
+                    if (Number(response.data.rowsAffected?.[0] || 0) > 0) resolve(response.data.recordset[0]);
+                    else reject();
+                } else {
+                    reject();
+                }
+            })
+            .catch(() => reject());
+        });
     },
     documento_update_concre:(sucursal,coddoc,correlativo,concre,diascredito,vencimiento)=>{
         return new Promise((resolve,reject)=>{

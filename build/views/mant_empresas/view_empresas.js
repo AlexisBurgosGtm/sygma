@@ -76,36 +76,30 @@ function getView() {
                                 <input type="text" class="form-control" id="txtEmpDireccion">
                             </div>
                             <div class="row">
-                                <div class="col-6">
-                                    <div class="form-group">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-2">
                                         <label>Tipo precio</label>
                                         <input type="text" class="form-control" id="txtEmpTipoPrecio" placeholder="A, B, C...">
                                     </div>
                                 </div>
-                                <div class="col-6">
-                                    <div class="form-group">
-                                        <label>Cód. tipo empresa</label>
-                                        <input type="number" class="form-control" id="txtEmpCodTipo">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-2">
+                                        <label>Clave</label>
+                                        <input type="text" class="form-control negrita" id="txtEmpClave" autocomplete="off">
                                     </div>
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-4">
-                                    <div class="form-group">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-2">
                                         <label>Objetivo ventas</label>
                                         <input type="number" step="0.01" class="form-control" id="txtEmpObjVentas">
                                     </div>
                                 </div>
-                                <div class="col-4">
-                                    <div class="form-group">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-2">
                                         <label>Objetivo rentabilidad</label>
                                         <input type="number" step="0.01" class="form-control" id="txtEmpObjRent">
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="form-group">
-                                        <label>Distrito</label>
-                                        <input type="number" class="form-control" id="txtEmpDistrito">
                                     </div>
                                 </div>
                             </div>
@@ -136,10 +130,9 @@ function cargar_form_empresa(r) {
     document.getElementById('txtEmpNombre').value = r.NOMBRE || '';
     document.getElementById('txtEmpDireccion').value = r.DIRECCION || '';
     document.getElementById('txtEmpTipoPrecio').value = r.TIPO_PRECIO || '';
-    document.getElementById('txtEmpCodTipo').value = r.CODTIPOEMPRESA || 0;
+    document.getElementById('txtEmpClave').value = r.CLAVE || '';
     document.getElementById('txtEmpObjVentas').value = r.OBJETIVO_VENTAS || 0;
     document.getElementById('txtEmpObjRent').value = r.OBJETIVO_RENTABILIDAD || 0;
-    document.getElementById('txtEmpDistrito').value = r.DISTRITO || 0;
 }
 
 function empresas_bindTablaAcciones() {
@@ -232,10 +225,9 @@ function guardar_empresa() {
         nombre: document.getElementById('txtEmpNombre').value.trim(),
         direccion: document.getElementById('txtEmpDireccion').value.trim(),
         tipo_precio: document.getElementById('txtEmpTipoPrecio').value.trim(),
-        codtipoempresa: document.getElementById('txtEmpCodTipo').value,
+        clave: document.getElementById('txtEmpClave').value,
         objetivo_ventas: document.getElementById('txtEmpObjVentas').value,
-        objetivo_rentabilidad: document.getElementById('txtEmpObjRent').value,
-        distrito: document.getElementById('txtEmpDistrito').value
+        objetivo_rentabilidad: document.getElementById('txtEmpObjRent').value
     };
 
     if (!payload.nombre) {

@@ -425,6 +425,40 @@ router.post("/detalle_documento", async(req,res)=>{
      
 });
 
+router.post("/encabezado_documento", async(req,res)=>{
+
+    const { token, sucursal, coddoc, correlativo } = req.body;
+
+    let qry = `
+        SELECT
+            DOCUMENTOS.CODDOC,
+            DOCUMENTOS.CORRELATIVO,
+            DOCUMENTOS.DOC_NIT AS NIT,
+            DOCUMENTOS.DOC_NOMCLIE AS NOMCLIE,
+            DOCUMENTOS.DOC_DIRCLIE AS DIRCLIE,
+            DOCUMENTOS.FECHA,
+            DOCUMENTOS.HORA,
+            DOCUMENTOS.VENCIMIENTO,
+            DOCUMENTOS.CONCRE,
+            DOCUMENTOS.OBS,
+            DOCUMENTOS.TOTALVENTA,
+            DOCUMENTOS.TOTALPRECIO,
+            DOCUMENTOS.STATUS AS ST,
+            TIPODOCUMENTOS.TIPODOC,
+            ISNULL(TIPODOCUMENTOS.DESCRIPCION, TIPODOCUMENTOS.TIPODOC) AS DESCTIPODOC,
+            EMPLEADOS.NOMEMPLEADO
+        FROM DOCUMENTOS LEFT OUTER JOIN
+            TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT LEFT OUTER JOIN
+            EMPLEADOS ON DOCUMENTOS.CODEMP = EMPLEADOS.CODEMPLEADO AND DOCUMENTOS.EMPNIT = EMPLEADOS.EMPNIT
+        WHERE DOCUMENTOS.EMPNIT='${sucursal}'
+            AND DOCUMENTOS.CODDOC='${coddoc}'
+            AND DOCUMENTOS.CORRELATIVO=${correlativo};
+    `;
+
+    execute.QueryToken(res,qry,token);
+
+});
+
 
 router.post("/detalle_documento_json", async(req,res)=>{
    
@@ -595,6 +629,7 @@ router.post("/listado_documentos", async(req,res)=>{
                     DOCUMENTOS.CORRELATIVO_ORIGEN,
                     DOCUMENTOS.CODEMP, 
                     EMPLEADOS.NOMEMPLEADO AS EMPLEADO,
+                    DOCUMENTOS.VENCIMIENTO,
                     ISNULL(DOCUMENTOS.LASTUPDATE,'2000-01-01') AS LASTUPDATE
             FROM  DOCUMENTOS LEFT OUTER JOIN
                   EMPLEADOS ON DOCUMENTOS.CODEMP = EMPLEADOS.CODEMPLEADO AND DOCUMENTOS.EMPNIT = EMPLEADOS.EMPNIT LEFT OUTER JOIN
