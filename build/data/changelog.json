@@ -1,5 +1,5 @@
 {
-  "version": "M.29.06.26 12:14",
+  "version": "M.30.06.26 17:16",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -2360,6 +2360,16 @@
       "FECHA": "29-06-2026",
       "HORA": "12:14",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.29.06.26 12:14"
+    },
+    {
+      "FECHA": "30-06-2026",
+      "HORA": "17:16",
+      "DESCRIPCION": "TABLAS HTML: SCROLL HORIZONTAL RESTAURADO EN PANTALLAS PEQUEÑAS"
+    },
+    {
+      "FECHA": "30-06-2026",
+      "HORA": "17:16",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.30.06.26 17:16"
     }
   ]
 }
