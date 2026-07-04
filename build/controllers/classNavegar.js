@@ -16,6 +16,7 @@ let Navegar = {
                 if (value !== true) return;
 
                 GlobalNivelUsuario = 0;
+                GlobalCodRutaCliente = 0;
                 if (typeof sygma_updateHeaderUsuario === 'function') {
                     sygma_updateHeaderUsuario();
                 }
@@ -28,6 +29,7 @@ let Navegar = {
 
     login: () => {
         GlobalNivelUsuario = 0;
+        GlobalCodRutaCliente = 0;
         if (typeof sygma_updateHeaderUsuario === 'function') {
             sygma_updateHeaderUsuario();
         }

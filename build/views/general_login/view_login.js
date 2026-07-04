@@ -404,9 +404,17 @@ function login_submit() {
                 GlobalUsuario = r.NOMBRE;
                 GlobalNivelUsuario = Number(r.NIVEL);
                 GlobalCodUsuario = Number(r.CODIGO);
+                GlobalCodRutaCliente = 0;
                 Selected_coddoc_env = r.CODDOC_ENV;
                 Selected_coddoc_cot = r.CODDOC_COT;
             });
+
+                const nivelLogin = Number(GlobalNivelUsuario);
+                const cargarRutaVendedor = (nivelLogin === 3 || nivelLogin === 8)
+                    ? (typeof cargar_ruta_vendedor_sesion === 'function'
+                        ? cargar_ruta_vendedor_sesion()
+                        : Promise.resolve(0))
+                    : Promise.resolve(0);
 
                 GF.get_data_empresa_config(GlobalEmpnit)
                 .then((data) => {
@@ -423,7 +431,7 @@ function login_submit() {
                     }).catch(() => { data_config_general = []; });
 
                     data_empresa_config = data.recordset[0];
-                    Navegar.inicio();
+                    cargarRutaVendedor.finally(() => Navegar.inicio());
                 })
                 .catch(() => {
                     F.AvisoError('No se pudieron cargar los datos de la empresa');

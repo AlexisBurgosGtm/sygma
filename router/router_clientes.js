@@ -146,12 +146,29 @@ router.post("/insert_ruta", async(req,res)=>{
 
 router.post("/update_ruta", async (req, res) => {
     const { token, sucursal, codigo, descripcion, codemp } = req.body;
+    const emp = esc(sucursal);
+    const codruta = Number(codigo) || 0;
+    const codempNuevo = Number(codemp) || 0;
 
+    // Si cambia el vendedor de la ruta, sincroniza CLIENTES.CODEMPLEADO (reportes usan ese campo)
     let qry = `
+        DECLARE @CODEMP_ANTERIOR INT;
+        SELECT @CODEMP_ANTERIOR = ISNULL(CODEMP, 0)
+          FROM RUTAS_CLIENTES
+         WHERE EMPNIT = '${emp}' AND CODRUTA = ${codruta};
+
         UPDATE RUTAS_CLIENTES SET
             DESRUTA = '${esc(descripcion)}',
-            CODEMP = ${Number(codemp) || 0}
-        WHERE EMPNIT = '${esc(sucursal)}' AND CODRUTA = ${Number(codigo)}
+            CODEMP = ${codempNuevo}
+        WHERE EMPNIT = '${emp}' AND CODRUTA = ${codruta};
+
+        IF ISNULL(@CODEMP_ANTERIOR, 0) <> ${codempNuevo}
+        BEGIN
+            UPDATE CLIENTES
+               SET CODEMPLEADO = ${codempNuevo}
+             WHERE EMPNIT = '${emp}'
+               AND CODRUTA = ${codruta};
+        END
     `;
 
     execute.QueryToken(res, qry, token);
@@ -466,16 +483,23 @@ router.post("/censo_lista_clientes", async(req,res)=>{
 
 router.post("/censo_insert", async(req,res)=>{
 
-    const{sucursal,codven,fecha,nitclie,tiponegocio,negocio,categoria,nomclie,dirclie,codmun,coddepto,referencia,obs,telefono,visita,lat,long,sector} = req.body;
+    const{sucursal,codven,fecha,nitclie,tiponegocio,negocio,categoria,nomclie,dirclie,codmun,coddepto,referencia,obs,telefono,visita,lat,long,sector,codruta} = req.body;
+    const emp = esc(sucursal);
+    const ven = Number(codven) || 0;
+    const rutaBody = Number(codruta) || 0;
+    // Ruta del vendedor creador (RUTAS_CLIENTES.CODEMP); si no viene, se resuelve en BD
+    const rutaSql = rutaBody > 0
+        ? String(rutaBody)
+        : `ISNULL((SELECT TOP 1 CODRUTA FROM RUTAS_CLIENTES WHERE EMPNIT = '${emp}' AND CODEMP = ${ven}), 0)`;
 
     let qry = `
         INSERT INTO CLIENTES (EMPNIT,CODEMPLEADO,DIAVISITA,DPI,NIT,TIPONEGOCIO,NEGOCIO,NOMBRE,DIRECCION,REFERENCIA,CODMUN,CODDEPTO,CODSECTOR,TELEFONO,
                     EMAIL,FECHANACIMIENTO,LATITUD,LONGITUD,CATEGORIA,CODRUTA,SALDO,FECHAINICIO,HABILITADO,LIMITECREDITO,DIASCREDITO,LASTSALE)
-        SELECT '${sucursal}' AS EMPNIT,${codven} AS CODEMPLEADO,'${visita}' AS DIAVISITA,
+        SELECT '${emp}' AS EMPNIT,${ven} AS CODEMPLEADO,'${visita}' AS DIAVISITA,
                 '' AS DPI, '${nitclie}' AS NIT, '${tiponegocio}' AS TIPONEGOCIO, '${negocio}' AS NEGOCIO, '${nomclie}' AS NOMBRE,'${dirclie}' AS DIRECCION,
                 '${referencia}' AS REFERENCIA, ${codmun} AS CODMUN, ${coddepto} AS CODDEPTO, ${sector} AS CODSECTOR,
                 '${telefono}' AS TELEFONO, '' AS EMAIL, '${fecha}' AS FECHANACIMIENTO,
-                '${lat}' AS LATITUD, '${long}' AS LONGITUD, '${categoria}' AS CATEGORIA, 0 AS CODRUTA, 0 AS SALDO,
+                '${lat}' AS LATITUD, '${long}' AS LONGITUD, '${categoria}' AS CATEGORIA, ${rutaSql} AS CODRUTA, 0 AS SALDO,
                 '${fecha}' AS FECHAINICIO, 'NA' AS HABILITADO, 0 AS LIMITECREDITO, 0 AS DIASCREDITO,
                 '${fecha}' AS LASTSALE
             `
@@ -986,10 +1010,32 @@ router.post("/buscar_cliente_vendedor_comodin", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+router.post("/ruta_por_empleado", async (req, res) => {
+    const { token, sucursal, codemp } = req.body;
+    const emp = esc(sucursal);
+    const ven = Number(codemp) || 0;
+
+    let qry = `
+        SELECT TOP 1 CODRUTA
+          FROM RUTAS_CLIENTES
+         WHERE EMPNIT = '${emp}'
+           AND CODEMP = ${ven}
+         ORDER BY CODRUTA
+    `;
+
+    execute.QueryToken(res, qry, token);
+});
+
 router.post("/buscar_cliente_vendedor", async(req,res)=>{
    
-    const { token, sucursal, filtro, codven, dia, fecha} = req.body;
-
+    const { token, sucursal, filtro, codven, codruta, dia, fecha} = req.body;
+    const emp = esc(sucursal);
+    const ven = Number(codven) || 0;
+    const rutaBody = Number(codruta) || 0;
+    // Filtra por ruta del vendedor en RUTAS_CLIENTES (CODEMP), no por CLIENTES.CODEMPLEADO
+    const filtroRuta = rutaBody > 0
+        ? `(CLIENTES.CODRUTA = ${rutaBody})`
+        : `(CLIENTES.CODRUTA = ISNULL((SELECT TOP 1 CODRUTA FROM RUTAS_CLIENTES WHERE EMPNIT = '${emp}' AND CODEMP = ${ven}), -1))`;
 
     let qry = '';
 
@@ -1012,8 +1058,8 @@ router.post("/buscar_cliente_vendedor", async(req,res)=>{
             DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO LEFT OUTER JOIN
             MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
         WHERE
-            (CLIENTES.EMPNIT='${sucursal}') AND 
-            (CLIENTES.CODEMPLEADO=${codven}) AND
+            (CLIENTES.EMPNIT='${emp}') AND 
+            ${filtroRuta} AND
             (CLIENTES.DIAVISITA='${dia}') AND
             (CLIENTES.HABILITADO='SI')
         ORDER BY CLIENTES.LASTSALE;
@@ -1041,21 +1087,21 @@ router.post("/buscar_cliente_vendedor", async(req,res)=>{
                     DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO LEFT OUTER JOIN
                     MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
                 WHERE
-                    (CLIENTES.EMPNIT='${sucursal}') AND 
+                    (CLIENTES.EMPNIT='${emp}') AND 
                     (CLIENTES.NOMBRE LIKE '%${filtro}%') AND
-                    (CLIENTES.CODEMPLEADO=${codven}) AND
+                    ${filtroRuta} AND
                     (CLIENTES.DIAVISITA='${dia}') AND
                     (CLIENTES.HABILITADO='SI')
                 OR 
-                    (CLIENTES.EMPNIT='${sucursal}') AND 
+                    (CLIENTES.EMPNIT='${emp}') AND 
                     (CLIENTES.NIT='${filtro}') AND
-                    (CLIENTES.CODEMPLEADO=${codven}) AND
+                    ${filtroRuta} AND
                     (CLIENTES.DIAVISITA='${dia}') AND
                     (CLIENTES.HABILITADO='SI')
                 OR 
-                    (CLIENTES.EMPNIT='${sucursal}') AND 
+                    (CLIENTES.EMPNIT='${emp}') AND 
                     (CLIENTES.NEGOCIO LIKE '%${filtro}%') AND
-                    (CLIENTES.CODEMPLEADO=${codven}) AND
+                    ${filtroRuta} AND
                     (CLIENTES.DIAVISITA='${dia}') AND
                     (CLIENTES.HABILITADO='SI')
                 ORDER BY CLIENTES.LASTSALE;
@@ -1081,27 +1127,28 @@ router.post("/buscar_cliente_vendedor", async(req,res)=>{
                     DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO LEFT OUTER JOIN
                     MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
                 WHERE
-                    (CLIENTES.EMPNIT='${sucursal}') AND 
+                    (CLIENTES.EMPNIT='${emp}') AND 
                     (CLIENTES.NOMBRE LIKE '%${filtro}%') AND
-                    (CLIENTES.CODEMPLEADO=${codven}) AND
+                    ${filtroRuta} AND
                     (CLIENTES.DIAVISITA='${dia}') AND
                     (CLIENTES.HABILITADO='SI')
 
                 OR 
-                    (CLIENTES.EMPNIT='${sucursal}') AND 
+                    (CLIENTES.EMPNIT='${emp}') AND 
                     (CLIENTES.NIT='${filtro}') AND
-                    (CLIENTES.CODEMPLEADO=${codven}) AND
+                    ${filtroRuta} AND
                     (CLIENTES.DIAVISITA='${dia}') AND
                     (CLIENTES.HABILITADO='SI')
                 OR 
-                    (CLIENTES.EMPNIT='${sucursal}') AND 
+                    (CLIENTES.EMPNIT='${emp}') AND 
                     (CLIENTES.NEGOCIO='${filtro}') AND
-                    (CLIENTES.CODEMPLEADO=${codven}) AND
+                    ${filtroRuta} AND
                     (CLIENTES.DIAVISITA='${dia}') AND
                     (CLIENTES.HABILITADO='SI')
                 OR 
-                    (CLIENTES.EMPNIT='${sucursal}') AND 
+                    (CLIENTES.EMPNIT='${emp}') AND 
                     (CLIENTES.CODCLIENTE=${filtro}) AND
+                    ${filtroRuta} AND
                     (CLIENTES.HABILITADO='SI')
                 ORDER BY CLIENTES.LASTSALE;
             `

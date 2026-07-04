@@ -446,13 +446,11 @@ function fcnGuardarCliente(){
         let txtTelefono = document.getElementById('txtTelefono');
         let txtLatitud = document.getElementById('txtLatitud');
         let txtLongitud = document.getElementById('txtLongitud');
-        let codruta = 1;
         let categoria = document.getElementById('cmbCategoria').value;
 
         if(nomclie==''){F.AvisoError('Escriba un nombre de cliente');return;}
-       
-   
-        axios.post('/clientes/censo_insert',{
+
+        const enviarCenso = (codruta) => axios.post('/clientes/censo_insert',{
             sucursal:GlobalEmpnit,
             codven:cmbVendedor.value,
             codruta:codruta,
@@ -473,15 +471,11 @@ function fcnGuardarCliente(){
             long:txtLongitud.innerText
         })
         .then((response) => {
-        
-           
-            
             if(response.status.toString()=='200'){
                     let data = response.data;
                     if(data.toString()=="error"){
                         reject();
                     }else{
-
                         if(Number(data.rowsAffected[0])>0){
                             resolve(data);             
                         }else{
@@ -491,13 +485,24 @@ function fcnGuardarCliente(){
             }else{
                     reject();
             }
-            
         }, (error) => {
             console.log(error);
             reject();
-        });      
+        });
 
+        const rutaSesion = (typeof GlobalCodRutaCliente !== 'undefined' ? Number(GlobalCodRutaCliente) : 0) || 0;
+        if (rutaSesion > 0) {
+            enviarCenso(rutaSesion);
+            return;
+        }
 
+        const cargarRuta = (typeof cargar_ruta_vendedor_sesion === 'function')
+            ? cargar_ruta_vendedor_sesion()
+            : Promise.resolve(0);
+
+        cargarRuta
+            .then((ruta) => enviarCenso(Number(ruta) || 0))
+            .catch(() => enviarCenso(0));
     });
 };
 

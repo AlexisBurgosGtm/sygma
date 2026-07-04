@@ -2022,6 +2022,7 @@ function tbl_clientes(filtro,qr){
         sucursal: GlobalEmpnit,
         filtro:filtro,
         codven:GlobalCodUsuario,
+        codruta: (typeof GlobalCodRutaCliente !== 'undefined' ? GlobalCodRutaCliente : 0),
         dia:dia,
         fecha:F.getFecha()
     })
@@ -2230,6 +2231,7 @@ function buscar_cliente_vendedor(dia,filtro){
                 sucursal: GlobalEmpnit,
                 filtro:filtro,
                 codven:GlobalCodUsuario,
+                codruta: (typeof GlobalCodRutaCliente !== 'undefined' ? GlobalCodRutaCliente : 0),
                 dia:dia,
                 fecha:F.getFecha()
             })

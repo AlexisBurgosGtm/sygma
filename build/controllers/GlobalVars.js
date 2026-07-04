@@ -25,6 +25,28 @@ let GlobalUsuario = '';
 let GlobalPass = '';
 let GlobalNivelUsuario = 0;
 let GlobalCodUsuario = 0;
+/** CODRUTA del vendedor en RUTAS_CLIENTES (CODEMP = GlobalCodUsuario). */
+let GlobalCodRutaCliente = 0;
+
+function cargar_ruta_vendedor_sesion() {
+    GlobalCodRutaCliente = 0;
+    if (!GlobalCodUsuario || !GlobalEmpnit) return Promise.resolve(0);
+
+    return axios.post('/clientes/ruta_por_empleado', {
+        token: TOKEN,
+        sucursal: GlobalEmpnit,
+        codemp: GlobalCodUsuario,
+    }).then((res) => {
+        if (res.status.toString() === '200' && res.data && res.data.toString() !== 'error') {
+            const row = (res.data.recordset || [])[0];
+            GlobalCodRutaCliente = Number(row && row.CODRUTA) || 0;
+        }
+        return GlobalCodRutaCliente;
+    }).catch(() => {
+        GlobalCodRutaCliente = 0;
+        return 0;
+    });
+}
 
 let GlobalBolEditando = false;
 let GlobalSignoMoneda = 'Q'
