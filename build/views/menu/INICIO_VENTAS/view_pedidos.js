@@ -57,10 +57,18 @@ function getView(){
                         <div class="card border-base card-rounded shadow p-2 col-12">
                             <div class="row">
 
-                                <div class="col-4 text-left">   
-                                    <label class="text-base negrita h5" style="font-size:120%">Nuevo Pedido</label>
-                                    <br>
-                                    <label class="text-base negrita h5" style="font-size:120%" id="lbTotalItems">0 items</label>
+                                <div class="col-4 text-left d-flex align-items-start flex-wrap">
+                                    <button type="button"
+                                        class="btn btn-outline-secondary btn-circle hand shadow mr-2 mt-1 d-none d-md-inline-flex ventas-pedido-back-clientes--header"
+                                        id="btnAtrasVentasClientesHdr"
+                                        title="Volver a búsqueda de clientes">
+                                        <i class="fal fa-arrow-left"></i>
+                                    </button>
+                                    <div>
+                                        <label class="text-base negrita h5 mb-0" style="font-size:120%">Nuevo Pedido</label>
+                                        <br>
+                                        <label class="text-base negrita h5 mb-0" style="font-size:120%" id="lbTotalItems">0 items</label>
+                                    </div>
                                 </div>
                                 
                                 <div class="col-8 text-right">
@@ -132,8 +140,11 @@ function getView(){
             </div>
 
             
-            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" 
-                id="btnAtrasVentasClientes">
+            <button type="button"
+                class="btn btn-secondary btn-xl btn-circle hand shadow ventas-pedido-back-clientes d-md-none"
+                id="btnAtrasVentasClientes"
+                data-ventas-keep="true"
+                title="Volver a búsqueda de clientes">
                 <i class="fal fa-arrow-left"></i>
             </button>
             
@@ -1384,24 +1395,22 @@ function addListeners(){
 
     });
 
-    document.getElementById('btnAtrasVentasClientes').addEventListener('click',()=>{
-
-        switch (selected_tab) {
-            case 'tab_lista':
-                document.getElementById('tab-uno').click();
-                break;
-            case 'tab_mapa':
-                document.getElementById('tab-cinco').click();
-                break;
-            default:
-                document.getElementById('tab-uno').click();
-                break;
-        }
-
-
-    })
+    document.getElementById('btnAtrasVentasClientes')?.addEventListener('click', volver_busqueda_clientes);
+    document.getElementById('btnAtrasVentasClientesHdr')?.addEventListener('click', volver_busqueda_clientes);
 
 };
+
+function volver_busqueda_clientes() {
+    switch (selected_tab) {
+        case 'tab_mapa':
+            document.getElementById('tab-cinco').click();
+            break;
+        case 'tab_lista':
+        default:
+            document.getElementById('tab-uno').click();
+            break;
+    }
+}
 
 
 

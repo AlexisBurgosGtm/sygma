@@ -126,17 +126,22 @@ router.post("/select_rutas", async(req,res)=>{
 
 
 router.post("/insert_ruta", async(req,res)=>{
-   
-    const { token, sucursal, codigo, descripcion, codemp} = req.body;
+
+    const { token, sucursal, descripcion, codemp} = req.body;
+    const emp = esc(sucursal);
 
     let qry = `
            INSERT INTO RUTAS_CLIENTES
-            (EMPNIT,CODRUTA,DESRUTA,CODEMP)
-            SELECT '${esc(sucursal)}' AS EMPNIT, ${Number(codigo)} AS CODRUTA, '${esc(descripcion)}' AS DESRUTA, ${Number(codemp) || 0} AS CODEMP;
+            (EMPNIT, DESRUTA, CODEMP)
+            VALUES (
+                '${emp}',
+                '${esc(descripcion)}',
+                ${Number(codemp) || 0}
+            );
         `;
 
     execute.QueryToken(res,qry,token);
-     
+
 });
 
 router.post("/update_ruta", async (req, res) => {
@@ -164,6 +169,73 @@ router.post("/delete_ruta", async (req, res) => {
         )
         BEGIN
             DELETE FROM RUTAS_CLIENTES
+            WHERE EMPNIT = '${emp}' AND CODRUTA = ${cod};
+        END
+    `;
+
+    execute.QueryToken(res, qry, token);
+});
+
+router.post("/select_rutas_mercaderistas", async (req, res) => {
+    const { token, sucursal } = req.body;
+
+    let qry = `
+          SELECT RUTAS_MERCADERISTAS.CODRUTA,
+                 RUTAS_MERCADERISTAS.DESRUTA AS RUTA,
+                 RUTAS_MERCADERISTAS.CODEMP,
+                 EMPLEADOS.NOMEMPLEADO AS EMPLEADO
+            FROM RUTAS_MERCADERISTAS
+            LEFT OUTER JOIN EMPLEADOS
+                ON RUTAS_MERCADERISTAS.CODEMP = EMPLEADOS.CODEMPLEADO
+               AND RUTAS_MERCADERISTAS.EMPNIT = EMPLEADOS.EMPNIT
+           WHERE (RUTAS_MERCADERISTAS.EMPNIT = '${esc(sucursal)}')
+           ORDER BY RUTAS_MERCADERISTAS.CODRUTA`;
+
+    execute.QueryToken(res, qry, token);
+});
+
+router.post("/insert_ruta_mercaderista", async (req, res) => {
+    const { token, sucursal, descripcion, codemp } = req.body;
+    const emp = esc(sucursal);
+
+    let qry = `
+           INSERT INTO RUTAS_MERCADERISTAS
+            (EMPNIT, DESRUTA, CODEMP)
+            VALUES (
+                '${emp}',
+                '${esc(descripcion)}',
+                ${Number(codemp) || 0}
+            );
+        `;
+
+    execute.QueryToken(res, qry, token);
+});
+
+router.post("/update_ruta_mercaderista", async (req, res) => {
+    const { token, sucursal, codigo, descripcion, codemp } = req.body;
+
+    let qry = `
+        UPDATE RUTAS_MERCADERISTAS SET
+            DESRUTA = '${esc(descripcion)}',
+            CODEMP = ${Number(codemp) || 0}
+        WHERE EMPNIT = '${esc(sucursal)}' AND CODRUTA = ${Number(codigo)}
+    `;
+
+    execute.QueryToken(res, qry, token);
+});
+
+router.post("/delete_ruta_mercaderista", async (req, res) => {
+    const { token, sucursal, codigo } = req.body;
+    const cod = Number(codigo);
+    const emp = esc(sucursal);
+
+    let qry = `
+        IF (
+            (SELECT COUNT(*) FROM EMPLEADOS
+              WHERE EMPNIT = '${emp}' AND CODRUTA = ${cod} AND CODPUESTO = 9) = 0
+        )
+        BEGIN
+            DELETE FROM RUTAS_MERCADERISTAS
             WHERE EMPNIT = '${emp}' AND CODRUTA = ${cod};
         END
     `;
@@ -203,7 +275,10 @@ router.post("/lista_clientes_general", async(req,res)=>{
                 CLIENTES.SALDO, CLIENTES.HABILITADO, 
                 CLIENTES.LASTSALE, CLIENTES.DIASCREDITO, 
                 CLIENTES.REFERENCIA, EMPLEADOS.NOMEMPLEADO,
-                CLIENTES.DIAVISITA AS VISITA
+                CLIENTES.DIAVISITA AS VISITA,
+                ISNULL(CLIENTES.VISITAM, '') AS VISITAM,
+                ISNULL(CLIENTES.CODRUTA, 0) AS CODRUTA,
+                ISNULL(CLIENTES.CODRUTAM, 0) AS CODRUTAM
         FROM CLIENTES LEFT OUTER JOIN
                EMPLEADOS ON CLIENTES.CODEMPLEADO = EMPLEADOS.CODEMPLEADO LEFT OUTER JOIN
                SECTORES ON CLIENTES.CODSECTOR = SECTORES.CODSECTOR LEFT OUTER JOIN
@@ -234,7 +309,10 @@ router.post("/lista_clientes_general", async(req,res)=>{
                 CLIENTES.SALDO, CLIENTES.HABILITADO, 
                 CLIENTES.LASTSALE, CLIENTES.DIASCREDITO, 
                 CLIENTES.REFERENCIA, EMPLEADOS.NOMEMPLEADO,
-                CLIENTES.DIAVISITA AS VISITA
+                CLIENTES.DIAVISITA AS VISITA,
+                ISNULL(CLIENTES.VISITAM, '') AS VISITAM,
+                ISNULL(CLIENTES.CODRUTA, 0) AS CODRUTA,
+                ISNULL(CLIENTES.CODRUTAM, 0) AS CODRUTAM
         FROM CLIENTES LEFT OUTER JOIN
                EMPLEADOS ON CLIENTES.CODEMPLEADO = EMPLEADOS.CODEMPLEADO LEFT OUTER JOIN
                SECTORES ON CLIENTES.CODSECTOR = SECTORES.CODSECTOR LEFT OUTER JOIN
@@ -409,16 +487,18 @@ router.post("/censo_insert", async(req,res)=>{
 
 router.post("/cliente_insert", async(req,res)=>{
 
-    const{sucursal,codven,fecha,nitclie,tiponegocio,negocio,categoria,nomclie,dirclie,codmun,coddepto,referencia,obs,telefono,visita,lat,long,sector} = req.body;
+    const{sucursal,codven,fecha,nitclie,tiponegocio,negocio,categoria,nomclie,dirclie,codmun,coddepto,referencia,obs,telefono,visita,visitam,lat,long,sector,codruta,codrutam} = req.body;
+    const ruta = Number(codruta) || 0;
+    const rutam = Number(codrutam) || 0;
 
     let qry = `
-        INSERT INTO CLIENTES (EMPNIT,CODEMPLEADO,DIAVISITA,DPI,NIT,TIPONEGOCIO,NEGOCIO,NOMBRE,DIRECCION,REFERENCIA,CODMUN,CODDEPTO,CODSECTOR,TELEFONO,
-                    EMAIL,FECHANACIMIENTO,LATITUD,LONGITUD,CATEGORIA,CODRUTA,SALDO,FECHAINICIO,HABILITADO,LIMITECREDITO,DIASCREDITO,LASTSALE)
-        SELECT '${sucursal}' AS EMPNIT,${codven} AS CODEMPLEADO,'${visita}' AS DIAVISITA,
+        INSERT INTO CLIENTES (EMPNIT,CODEMPLEADO,DIAVISITA,VISITAM,DPI,NIT,TIPONEGOCIO,NEGOCIO,NOMBRE,DIRECCION,REFERENCIA,CODMUN,CODDEPTO,CODSECTOR,TELEFONO,
+                    EMAIL,FECHANACIMIENTO,LATITUD,LONGITUD,CATEGORIA,CODRUTA,CODRUTAM,SALDO,FECHAINICIO,HABILITADO,LIMITECREDITO,DIASCREDITO,LASTSALE)
+        SELECT '${sucursal}' AS EMPNIT,${codven} AS CODEMPLEADO,'${visita}' AS DIAVISITA,'${visitam || ''}' AS VISITAM,
                 '' AS DPI, '${nitclie}' AS NIT, '${tiponegocio}' AS TIPONEGOCIO, '${negocio}' AS NEGOCIO, '${nomclie}' AS NOMBRE,'${dirclie}' AS DIRECCION,
                 '${referencia}' AS REFERENCIA, ${codmun} AS CODMUN, ${coddepto} AS CODDEPTO, ${sector} AS CODSECTOR,
                 '${telefono}' AS TELEFONO, '' AS EMAIL, '${fecha}' AS FECHANACIMIENTO,
-                '${lat}' AS LATITUD, '${long}' AS LONGITUD, '${categoria}' AS CATEGORIA, 0 AS CODRUTA, 0 AS SALDO,
+                '${lat}' AS LATITUD, '${long}' AS LONGITUD, '${categoria}' AS CATEGORIA, ${ruta} AS CODRUTA, ${rutam} AS CODRUTAM, 0 AS SALDO,
                 '${fecha}' AS FECHAINICIO, 'SI' AS HABILITADO, 0 AS LIMITECREDITO, 0 AS DIASCREDITO,
                 '${fecha}' AS LASTSALE
             `
@@ -430,12 +510,15 @@ router.post("/cliente_insert", async(req,res)=>{
 
 router.post("/cliente_edit", async(req,res)=>{
 
-    const{sucursal,codclie,codven,fecha,nitclie,tiponegocio,negocio,categoria,nomclie,dirclie,codmun,coddepto,referencia,obs,telefono,visita,lat,long,sector} = req.body;
+    const{sucursal,codclie,codven,fecha,nitclie,tiponegocio,negocio,categoria,nomclie,dirclie,codmun,coddepto,referencia,obs,telefono,visita,visitam,lat,long,sector,codruta,codrutam} = req.body;
+    const ruta = Number(codruta) || 0;
+    const rutam = Number(codrutam) || 0;
 
     let qry = `
         UPDATE CLIENTES SET
                 CODEMPLEADO= ${codven},
                 DIAVISITA='${visita}',
+                VISITAM='${visitam || ''}',
                 NIT='${nitclie}',
                 TIPONEGOCIO='${tiponegocio}',
                 NEGOCIO='${negocio}',
@@ -449,6 +532,8 @@ router.post("/cliente_edit", async(req,res)=>{
                 LATITUD='${lat}',
                 LONGITUD='${long}',
                 CATEGORIA='${categoria}',
+                CODRUTA=${ruta},
+                CODRUTAM=${rutam},
                 LASTSALE='${fecha}'
             WHERE CODCLIENTE=${codclie}
             `

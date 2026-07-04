@@ -45,8 +45,6 @@ function supervisor_initDashboard() {
 var SUPERVISOR_EMBED_BASE = '../views/menu/INICIO_SUPERVISOR/';
 var SUPERVISOR_EMBED_SCRIPTS = {
     btnMenuClientes: SUPERVISOR_EMBED_BASE + 'view_clientes.js',
-    btnMenuNuevoPedido: SUPERVISOR_EMBED_BASE + 'view_pedidos_comodin.js',
-    btnMenuCenso: SUPERVISOR_EMBED_BASE + 'view_censo.js',
     btnMenuObjetivos: SUPERVISOR_EMBED_BASE + 'view_avance_procter_vendedor.js',
     btnMenuCoberturaMunicipio: SUPERVISOR_EMBED_BASE + 'view_cobertura_municipios_mapa.js',
     btnMenuRptVisitasMapa: SUPERVISOR_EMBED_BASE + 'view_visitas_vendedores_gps.js',
@@ -130,7 +128,7 @@ function supervisor_rewireEmbedActions(container) {
     if (!container) return;
     container.querySelectorAll('[data-spa-action="inicio"]').forEach(btn => btn.remove());
     container.querySelectorAll('button.btn-bottom-l').forEach(btn => {
-        if (!btn.hasAttribute('data-dismiss')) btn.remove();
+        if (!btn.hasAttribute('data-dismiss') && !btn.hasAttribute('data-supervisor-keep')) btn.remove();
     });
 }
 
@@ -243,6 +241,9 @@ function getView(){
                         <div class="tab-pane fade" id="ocho" role="tabpanel" aria-labelledby="home-tab">
                             ${view.objetivos() + view.modal_categorias_marca() + view.modal_categorias_vendedor()}
                         </div>
+                        <div class="tab-pane fade" id="nueve" role="tabpanel" aria-labelledby="home-tab">
+                            ${view.vista_gestion_rutas()}
+                        </div>
                     </div>
                     </div>
                 </div>
@@ -280,6 +281,10 @@ function getView(){
                         <li class="nav-item">
                             <a class="nav-link negrita text-danger" id="tab-ocho" data-toggle="tab" href="#ocho" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-nueve" data-toggle="tab" href="#nueve" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>
                         </li>         
                     </ul>
             </div>
@@ -289,8 +294,6 @@ function getView(){
             const items = [
                 { id: 'btnMenuDashboard', label: 'Dashboard', icon: 'fa-chart-line', color: 'primary' },
                 { id: 'btnMenuClientes', label: 'Catálogo clientes', icon: 'fa-user', color: 'info' },
-                { id: 'btnMenuNuevoPedido', label: 'Nuevo pedido', icon: 'fa-shopping-cart', color: 'info' },
-                { id: 'btnMenuCenso', label: 'Crear clientes (censo)', icon: 'fa-users', color: 'info' },
                 { id: 'btnMenuObjetivos', label: 'Logro objetivos P&G', icon: 'fa-chart-pie', color: 'danger' },
                 { id: 'btnMenuCoberturaMunicipio', label: 'Cobertura municipios', icon: 'fa-globe', color: 'primary' },
                 { id: 'btnMenuRptVisitasMapa', label: 'Visitas vendedor mapa', icon: 'fa-map-signs', color: 'secondary' },
@@ -300,6 +303,7 @@ function getView(){
                 { id: 'btnMenuRptDocumentos', label: 'Reporte facturas', icon: 'fa-chart-pie', color: 'secondary' },
                 { id: 'btnMenuRptProductos', label: 'Reporte productos', icon: 'fa-box', color: 'secondary' },
                 { id: 'btnMenuRptClientesVendedor', label: 'Clientes por vendedor', icon: 'fa-map', color: 'secondary' },
+                { id: 'btnMenuGestionRutas', label: 'Gestion de Rutas', icon: 'fa-road', color: 'warning' },
             ];
             return items.map(item => `
                 <div class="card proveedor-menu-card hand" id="${item.id}">
@@ -826,6 +830,76 @@ function getView(){
 
             `
         },
+        vista_gestion_rutas:()=>{
+            return `
+            <div class="card card-rounded shadow col-12 border-0 sygma-gestion-rutas">
+                <div class="card-body p-3 p-md-4">
+                    <div class="row align-items-end mb-3">
+                        <div class="col-12 col-md-4 mb-2 mb-md-0">
+                            <label class="negrita text-secondary mb-1" for="cmbSupervisorGestionRutasTipo">Tipo de rutas</label>
+                            <select class="form-control negrita" id="cmbSupervisorGestionRutasTipo">
+                                <option value="clientes">Rutas Clientes</option>
+                                <option value="mercaderistas">Rutas Mercaderistas</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-8 text-md-right">
+                            <h5 class="negrita text-base mb-1" id="lbSupervisorGestionRutasTitulo">Rutas Clientes</h5>
+                            <small class="text-muted" id="lbSupervisorGestionRutasTotal">0 rutas</small>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <input type="search" class="form-control"
+                            id="txtSupervisorGestionRutasBuscar"
+                            placeholder="Buscar código, ruta o empleado..."
+                            oninput="F.FiltrarTabla('tblSupervisorGestionRutas','txtSupervisorGestionRutasBuscar')">
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover table-bordered mb-0" id="tblSupervisorGestionRutas">
+                            <thead class="bg-base text-white">
+                                <tr>
+                                    <th>CÓDIGO</th>
+                                    <th>RUTA</th>
+                                    <th id="thSupervisorRutaEmpleado">VENDEDOR</th>
+                                    <th class="text-center">EDITAR</th>
+                                    <th class="text-center">ELIMINAR</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataSupervisorGestionRutas"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn sygma-fab-nuevo btn-success btn-xl btn-circle shadow hand" id="btnSupervisorRutaNuevo" title="Nueva ruta">
+                <i class="fal fa-plus"></i>
+            </button>
+            <div class="modal fade" id="modalSupervisorGestionRuta" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-base py-2">
+                            <h5 class="modal-title text-white negrita mb-0">Datos de la ruta</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"><span>&times;</span></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <div class="form-group">
+                                <label class="negrita" for="txtSupervisorRutaNombre">Ruta</label>
+                                <input type="text" class="form-control negrita" id="txtSupervisorRutaNombre">
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="negrita" for="cmbSupervisorRutaEmpleado" id="lbSupervisorRutaEmpleadoModal">Vendedor</label>
+                                <select class="form-control" id="cmbSupervisorRutaEmpleado"></select>
+                            </div>
+                        </div>
+                        <div class="modal-footer py-2 px-3">
+                            <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancelar</button>
+                            <button type="button" class="btn btn-success btn-sm hand" id="btnSupervisorRutaGuardar">
+                                <i class="fal fa-save mr-1"></i> Guardar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
+        },
         objetivos:()=>{
            return `
            ${view.frag_parametros()}
@@ -1231,6 +1305,14 @@ function addListeners(){
         });
     });
 
+    document.getElementById('btnMenuGestionRutas')?.addEventListener('click', () => {
+        supervisor_showPanel('nueve', 'btnMenuGestionRutas', () => {
+            if (typeof supervisor_init_gestion_rutas === 'function') {
+                supervisor_init_gestion_rutas();
+            }
+        });
+    });
+
 
 
 
@@ -1373,6 +1455,7 @@ function supervisor_tbl_dashboard_ventas_marca() {
 
 function initView(){
     document.getElementById('js-page-content')?.classList.add('proveedor-page');
+    if (typeof supervisor_rutas_listeners_ready !== 'undefined') supervisor_rutas_listeners_ready = false;
     getView();
     addListeners();
     supervisor_showHome();

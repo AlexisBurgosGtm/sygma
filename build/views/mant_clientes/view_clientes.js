@@ -37,20 +37,17 @@ function getView(){
         },
         vista_listado:()=>{
             return `
-            <div class="card card-rounded shadow">
-                <div class="card-body p-4">
+            <div class="card card-rounded shadow border-0">
+                <div class="card-body p-2 p-md-4">
 
-                    <div class="row">
-                        <div class="col-6">
-                        
-                            <h3 class="negrita text-base">Catálogo de Clientes</h3>
-                            <h3 class="negrita text-danger" id="lbTotalClientes"></h3>
-                        
+                    <div class="row align-items-end">
+                        <div class="col-12 col-md-6 mb-2 mb-md-0">
+                            <h4 class="negrita text-base mb-1">Catálogo de Clientes</h4>
+                            <h5 class="negrita text-danger mb-0" id="lbTotalClientes"></h5>
                         </div>
-                        <div class="col-6">
-                        
-                            <div class"form-group">
-                                <label class="negrita text-secondary">Seleccione el Tipo de Lista</label>
+                        <div class="col-12 col-md-6">
+                            <div class="form-group mb-0">
+                                <label class="negrita text-secondary small mb-1">Tipo de lista</label>
                                 <select class="form-control negrita text-base" id="cmbTipo">
                                     <option value="NA">CENSO</option>
                                     <option value="SI">ACTIVOS</option>
@@ -58,46 +55,38 @@ function getView(){
                                     <option value="NOGPS">SIN UBICACION GPS</option>
                                 </select>
                             </div>
-                        
                         </div>
                     </div>
 
-                    <br>
-
-                    <div class="table-responsive col-12">
-                        
-                        <div class"form-group">
-                                <label class="negrita text-secondary">Escriba para buscar...</label>
-                                <div class="input-group">
-                                    <input type="text" class="negrita text-info form-control" 
-                                        placeholder="Escriba para filtrar..." 
-                                        id="txtBuscar" 
-                                        oninput="F.FiltrarTabla('tblClientes','txtBuscar')">
-                                    <button class="btn btn-md btn-success hand"
-                                        id="btnExportar">
-                                        <i class="fal fa-share"></i>Excel
-                                    </button>
-                                </div>
+                    <div class="form-group mt-3 mb-2">
+                        <label class="negrita text-secondary small mb-1">Buscar</label>
+                        <div class="input-group">
+                            <input type="text" class="negrita text-info form-control"
+                                placeholder="Filtrar clientes..."
+                                id="txtBuscar"
+                                oninput="mant_clientes_filtrar()">
+                            <button class="btn btn-md btn-success hand" id="btnExportar" type="button">
+                                <i class="fal fa-share"></i><span class="d-none d-sm-inline"> Excel</span>
+                            </button>
                         </div>
+                    </div>
 
-                        <br>
+                    <div id="tblDataClientesCards" class="d-md-none"></div>
 
-                        <table class="table table-bordered table-hover col-12" id="tblClientes">
+                    <div class="table-responsive d-none d-md-block">
+                        <table class="table table-sm table-bordered table-hover mb-0" id="tblClientes" style="min-width:780px">
                             <thead class="bg-base text-white">
                                 <tr>
-                                    <td>VENDEDOR</td>
-                                    <td>NIT / CODIGO</td>
-                                    <td>NEGOCIO</td>
-                                    <td>NOMBRE</td>
-                                    <td>DIRECCION/REF</td>
-                                    <td>MUNICIPIO</td>
-                                    <td>QR</td>
-                                    <td>A/D</td>
-                                    <td>E</td>
+                                    <th>VENDEDOR</th>
+                                    <th>NIT / CÓDIGO</th>
+                                    <th>NEGOCIO</th>
+                                    <th>NOMBRE</th>
+                                    <th>DIRECCIÓN/REF</th>
+                                    <th>MUNICIPIO</th>
+                                    <th class="text-center">ACCIONES</th>
                                 </tr>
                             </thead>
-                            <tbody id="tblDataClientes">
-                            </tbody>
+                            <tbody id="tblDataClientes"></tbody>
                         </table>
                     </div>
                 </div>
@@ -122,22 +111,49 @@ function getView(){
                                 </div>
 
                                 <div class="row">
-                                    
                                     <div class="col-6">
                                         <div class="form-group">
-                                            <label class="negrita text-secondary">NIT:</label>
-                                            <input id="txtNit" class="form-control" type="text" placeholder="Escriba el NIT ..."  maxlenght="20">
-                                        </div>    
+                                            <label class="negrita text-secondary">Ruta</label>
+                                            <select id="cmbRutaCliente" class="form-control"></select>
+                                        </div>
                                     </div>
                                     <div class="col-6">
                                         <div class="form-group">
                                             <label class="negrita text-secondary">Visita:</label>
                                             <select id="cmbVisitaCliente" class="form-control"></select>
-                                        </div>    
-                                    </div>   
-                                    
+                                        </div>
+                                    </div>
                                 </div>
-                                <br>
+
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <label class="negrita text-secondary">Ruta Mercaderista</label>
+                                            <select id="cmbRutaMercaderista" class="form-control"></select>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <label class="negrita text-secondary">Visita Mercaderista:</label>
+                                            <select id="cmbVisitaMercaderista" class="form-control"></select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <label class="negrita text-secondary">NIT:</label>
+                                            <input id="txtNit" class="form-control" type="text" placeholder="Escriba el NIT ..."  maxlenght="20">
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <label class="negrita text-secondary">Telefonos:</label>
+                                            <input id="txtTelefono" maxlength="8" class="form-control" type="number" placeholder="Telefono cliente">
+                                        </div>
+                                    </div>
+                                </div>
 
                                 <div class="form-group">
                                     <label class="negrita text-secondary">Giro de Negocio  /  Tipo (Categoria):</label>
@@ -157,7 +173,6 @@ function getView(){
                                     <input id="txtNegocio" class="form-control" type="text" placeholder="nombre del negocio"  maxlenght="150">    
                                 </div>
                    
-                                <br>
                                 <div class="form-group">
                                     <label class="negrita text-secondary">Nombre y Apellido:</label>
                                     <input id="txtNomcliente" class="form-control" type="text" maxlenght="200" placeholder="nombre completo">
@@ -167,7 +182,6 @@ function getView(){
                                     <label class="negrita text-secondary">Dirección:</label>
                                     <input id="txtDircliente" class="form-control" type="text" maxlenght="250" placeholder="Dirección cliente...">
                                 </div>
-                                <br>
                                 
                                 <div class="form-group">
                                     <label class="negrita text-secondary">Referencia:</label>
@@ -210,20 +224,6 @@ function getView(){
                                     </select>
                                 </div> 
                                 
-                                <br>
-
-                                <div class="row">
-                                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                                    
-                                        <div class="form-group">
-                                            <label class="negrita text-secondary">Telefonos:</label>
-                                            <input id="txtTelefono"  maxlength="8" class="form-control" type="number" placeholder="Telefono cliente">
-                                        </div>
-                                    
-                                    </div>
-                                </div>
-                                
-
                                 <br>
 
                                 <div class="row">
@@ -444,6 +444,8 @@ function addListeners(){
 
         let cmbVisitaCliente = document.getElementById('cmbVisitaCliente');
         cmbVisitaCliente.innerHTML = F.ComboSemana("LETRAS");
+        let cmbVisitaMercaderista = document.getElementById('cmbVisitaMercaderista');
+        if (cmbVisitaMercaderista) cmbVisitaMercaderista.innerHTML = F.ComboSemana("LETRAS");
     
         let cmbTipoNegocio = document.getElementById('cmbTipoNegocio')
         cmbTipoNegocio.innerHTML = F.getComboTipoClientes();
@@ -454,6 +456,7 @@ function addListeners(){
         get_combos_mun_deptos('cmbMunicipio','cmbDepartamento','cmbSector');
 
         get_empleados();
+        get_combos_rutas_cliente();
     
   
         
@@ -624,78 +627,128 @@ function initView(){
 
 };
 
+function mant_clientes_esc(val){
+    return String(val == null ? '' : val)
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'");
+}
 
+function mant_clientes_filtrar(){
+    const q = (document.getElementById('txtBuscar')?.value || '').toLowerCase().trim();
+    document.querySelectorAll('#tblDataClientes tr').forEach((tr) => {
+        tr.style.display = !q || tr.innerText.toLowerCase().includes(q) ? '' : 'none';
+    });
+    document.querySelectorAll('#tblDataClientesCards .mant-cliente-card').forEach((card) => {
+        card.style.display = !q || card.innerText.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
 
+function mant_clientes_acciones(r, st, idbtnE, strClassBtn){
+    const editArgs = [
+        r.CODCLIENTE, r.NIT, r.TIPONEGOCIO, r.NEGOCIO, r.VISITA, r.NOMBRE,
+        r.DIRECCION, r.REFERENCIA, r.CODMUN, r.CODDEPTO, r.CODSECTOR,
+        r.CODEMPLEADO, r.TELEFONO, r.LATITUD, r.LONGITUD, r.CATEGORIA,
+        r.CODRUTA || 0, r.CODRUTAM || 0, r.VISITAM || '',
+    ].map((v) => `'${mant_clientes_esc(v)}'`).join(',');
+
+    return `
+        <button class="btn btn-sm btn-warning btn-circle hand shadow" title="QR"
+            onclick="create_qr_code('${r.CODCLIENTE}','${mant_clientes_esc(r.NOMBRE)}')">
+            <i class="fal fa-barcode"></i>
+        </button>
+        <button class="btn ${strClassBtn} btn-sm btn-circle hand shadow" title="Activar/Desactivar"
+            id="${idbtnE}"
+            onclick="update_status_cliente('${r.CODCLIENTE}','${st}','${idbtnE}')">
+            <i class="fal fa-sync"></i>
+        </button>
+        <button class="btn btn-sm btn-info btn-circle hand shadow" title="Editar"
+            onclick="edit_cliente(${editArgs})">
+            <i class="fal fa-edit"></i>
+        </button>
+    `;
+}
 
 function tbl_clientes(){
 
     let container = document.getElementById('tblDataClientes');
-    container.innerHTML = GlobalLoader;
+    let cards = document.getElementById('tblDataClientesCards');
+    if (container) container.innerHTML = GlobalLoader;
+    if (cards) cards.innerHTML = GlobalLoader;
 
     let st = document.getElementById('cmbTipo').value;
     let contador = 0;
     let str = '';
+    let strCards = '';
 
     GF.get_data_clientes_listado(GlobalEmpnit,st)
     .then((data)=>{
         data.recordset.map((r)=>{
             
             let idbtnE = `btnE${r.CODCLIENTE}`;
+            let idbtnECard = `btnECard${r.CODCLIENTE}`;
             let strClassBtn = ``;
             if(st=='SI'){strClassBtn='btn-danger'}else{strClassBtn='btn-success'};
 
             contador +=1;
+            const acciones = mant_clientes_acciones(r, st, idbtnE, strClassBtn);
+            const accionesCard = mant_clientes_acciones(r, st, idbtnECard, strClassBtn);
+
             str += `
-            <tr >
-                <td>${r.NOMEMPLEADO}
+            <tr>
+                <td>${r.NOMEMPLEADO || ''}
                     <br>
-                    <small>${r.VISITA}</small>
+                    <small>${r.VISITA || ''}</small>
                 </td>
-                <td>${r.NIT}
+                <td>${r.NIT || ''}
                     <br>
                     <small>Cod: ${r.CODCLIENTE}</small>
                 </td>
-                <td>${r.TIPONEGOCIO}
+                <td>${r.TIPONEGOCIO || ''}
                     <br>
-                    <small>${r.NEGOCIO}</small>
+                    <small>${r.NEGOCIO || ''}</small>
                 </td>
-                <td>${r.NOMBRE}</td>
-                <td>${r.DIRECCION}
+                <td>${r.NOMBRE || ''}</td>
+                <td>${r.DIRECCION || ''}
                     <br>
-                    <small>${r.REFERENCIA}</small>
+                    <small>${r.REFERENCIA || ''}</small>
                 </td>
-                <td>${r.DESMUN}
+                <td>${r.DESMUN || ''}
                 <br>
-                <small>${r.DESDEPTO}</td>
-                <td>
-                    <button class="btn btn-md btn-warning btn-circle hand shadow"
-                        onclick="create_qr_code('${r.CODCLIENTE}','${r.NOMBRE}')">
-                        <i class="fal fa-barcode"></i>
-                    </button>
-                </td>
-                <td>
-                    <button class="btn ${strClassBtn} btn-md btn-circle hand shadow"
-                    id="${idbtnE}"
-                    onclick="update_status_cliente('${r.CODCLIENTE}','${st}','${idbtnE}')">
-                        <i class="fal fa-sync"></i>
-                    </button>
-                </td>
-                <td>
-                    <button class="btn btn-md btn-info btn-circle hand shadow"
-                    onclick="edit_cliente('${r.CODCLIENTE}','${r.NIT}','${r.TIPONEGOCIO}','${r.NEGOCIO}','${r.VISITA}','${r.NOMBRE}','${r.DIRECCION}','${r.REFERENCIA}','${r.CODMUN}','${r.CODDEPTO}','${r.CODSECTOR}','${r.CODEMPLEADO}','${r.TELEFONO}','${r.LATITUD}','${r.LONGITUD}','${r.CATEGORIA}')">
-                        <i class="fal fa-edit"></i>
-                    </button>
-                </td>
+                <small>${r.DESDEPTO || ''}</small></td>
+                <td class="text-center text-nowrap">${acciones}</td>
             </tr>
-            `
+            `;
+
+            strCards += `
+            <div class="card mant-cliente-card shadow-sm mb-2 border">
+                <div class="card-body p-2">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="pr-2" style="min-width:0">
+                            <div class="negrita text-base text-truncate">${r.NOMBRE || ''}</div>
+                            <div class="small text-muted">${r.NEGOCIO || r.TIPONEGOCIO || ''}</div>
+                            <div class="small"><span class="negrita">NIT:</span> ${r.NIT || ''} · Cod ${r.CODCLIENTE}</div>
+                            <div class="small"><span class="negrita">Vend:</span> ${r.NOMEMPLEADO || ''} · ${r.VISITA || ''}</div>
+                            <div class="small text-truncate">${r.DIRECCION || ''}</div>
+                            <div class="small text-muted">${r.DESMUN || ''} ${r.DESDEPTO ? '· ' + r.DESDEPTO : ''}</div>
+                        </div>
+                        <div class="d-flex flex-column align-items-center" style="gap:4px">
+                            ${accionesCard}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
         })
-        container.innerHTML = str;
+        if (container) container.innerHTML = str || '<tr><td colspan="7" class="text-center text-muted py-3">Sin clientes</td></tr>';
+        if (cards) cards.innerHTML = strCards || '<div class="text-center text-muted py-3">Sin clientes</div>';
         document.getElementById('lbTotalClientes').innerText = `Total: ${contador}`;
+        mant_clientes_filtrar();
     })
     .catch((error)=>{
         console.log(error);
 
-        container.innerHTML = 'No se cargaron datos...';
+        if (container) container.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">No se cargaron datos...</td></tr>';
+        if (cards) cards.innerHTML = '<div class="text-center text-muted py-3">No se cargaron datos...</div>';
         document.getElementById('lbTotalClientes').innerText = '';
 
     })
@@ -765,7 +818,7 @@ function update_status_cliente(codclie,st,idbtn){
 
 
 function edit_cliente(codclie,nit,tiponegocio,negocio,visita,nomclie,dirclie,referencia,municipio,departamento,sector,
-                    codven,telefono,latitud,longitud,categoria
+                    codven,telefono,latitud,longitud,categoria,codruta,codrutam,visitam
 ){
 
 
@@ -775,6 +828,8 @@ function edit_cliente(codclie,nit,tiponegocio,negocio,visita,nomclie,dirclie,ref
         document.getElementById('txtNit').value = nit;
         document.getElementById('cmbTipoNegocio').value = tiponegocio;
         document.getElementById('cmbVisitaCliente').value = visita;
+        const cmbVisitaM = document.getElementById('cmbVisitaMercaderista');
+        if (cmbVisitaM) cmbVisitaM.value = visitam || '';
         document.getElementById('txtNegocio').value = negocio;
         document.getElementById('txtNomcliente').value= nomclie;
         document.getElementById('txtDircliente').value = dirclie;
@@ -800,7 +855,7 @@ function edit_cliente(codclie,nit,tiponegocio,negocio,visita,nomclie,dirclie,ref
                 document.getElementById('cmbSector').value = sector;
             })
             .catch(()=>{
-                contenedor3.innerHTML = `<option value='0'>NO SE CARGARON</option>`
+                document.getElementById('cmbSector').innerHTML = `<option value='0'>NO SE CARGARON</option>`
             })
         })
 
@@ -812,6 +867,8 @@ function edit_cliente(codclie,nit,tiponegocio,negocio,visita,nomclie,dirclie,ref
         document.getElementById('txtLatitud').value = latitud;
         document.getElementById('txtLongitud').value = longitud;
         document.getElementById('cmbCategoria').value = categoria;
+
+        get_combos_rutas_cliente(codruta, codrutam);
 
 
 };
@@ -831,8 +888,47 @@ function clean_data(){
     document.getElementById('txtTelefono').value = "";
    // document.getElementById('txtObs').value = "SN";
 
+    get_combos_rutas_cliente(0, 0);
 
 };
+
+function get_combos_rutas_cliente(codruta, codrutam){
+    const cmbRuta = document.getElementById('cmbRutaCliente');
+    const cmbRutaM = document.getElementById('cmbRutaMercaderista');
+    if (!cmbRuta || !cmbRutaM) return Promise.resolve();
+
+    const fillCombo = (cmb, rows, selected) => {
+        let str = '<option value="0">SIN ASIGNAR</option>';
+        (rows || []).forEach((r) => {
+            str += `<option value="${r.CODRUTA}">${r.RUTA || ''}</option>`;
+        });
+        cmb.innerHTML = str;
+        cmb.value = String(selected || 0);
+        if (cmb.value !== String(selected || 0)) cmb.value = '0';
+    };
+
+    const loadRutas = axios.post('/clientes/select_rutas', { token: TOKEN, sucursal: GlobalEmpnit })
+        .then((res) => {
+            if (res.status.toString() === '200' && res.data && res.data.toString() !== 'error') {
+                fillCombo(cmbRuta, res.data.recordset, codruta);
+            } else {
+                fillCombo(cmbRuta, [], codruta);
+            }
+        })
+        .catch(() => fillCombo(cmbRuta, [], codruta));
+
+    const loadRutasM = axios.post('/clientes/select_rutas_mercaderistas', { token: TOKEN, sucursal: GlobalEmpnit })
+        .then((res) => {
+            if (res.status.toString() === '200' && res.data && res.data.toString() !== 'error') {
+                fillCombo(cmbRutaM, res.data.recordset, codrutam);
+            } else {
+                fillCombo(cmbRutaM, [], codrutam);
+            }
+        })
+        .catch(() => fillCombo(cmbRutaM, [], codrutam));
+
+    return Promise.all([loadRutas, loadRutasM]);
+}
 
 function get_empleados(){
 
@@ -1058,6 +1154,7 @@ function fcnGuardarCliente(){
         let txtNit = document.getElementById('txtNit');
         let cmbTipoNegocio = document.getElementById('cmbTipoNegocio');
         let cmbVisitaCliente = document.getElementById('cmbVisitaCliente');
+        let cmbVisitaMercaderista = document.getElementById('cmbVisitaMercaderista');
         let txtNegocio = document.getElementById('txtNegocio'); 
         let nomclie = document.getElementById('txtNomcliente').value || '';
         let dirclie = document.getElementById('txtDircliente').value || 'CIUDAD';
@@ -1069,7 +1166,8 @@ function fcnGuardarCliente(){
         let txtTelefono = document.getElementById('txtTelefono');
         let txtLatitud = document.getElementById('txtLatitud');
         let txtLongitud = document.getElementById('txtLongitud');
-        let codruta = 1;
+        let codruta = document.getElementById('cmbRutaCliente')?.value || '0';
+        let codrutam = document.getElementById('cmbRutaMercaderista')?.value || '0';
         let categoria = document.getElementById('cmbCategoria').value;
 
 
@@ -1080,6 +1178,7 @@ function fcnGuardarCliente(){
             sucursal:GlobalEmpnit,
             codven:cmbVendedor.value,
             codruta:codruta,
+            codrutam:codrutam,
             sector: cmbSector.value,
             categoria:categoria,
             fecha:F.getFecha(),
@@ -1093,6 +1192,7 @@ function fcnGuardarCliente(){
             referencia: F.limpiarTexto(txtReferencia.value), 
             telefono:txtTelefono.value,
             visita:cmbVisitaCliente.value,
+            visitam:cmbVisitaMercaderista?.value || '',
             lat:txtLatitud.innerText,
             long:txtLongitud.innerText
         })
@@ -1135,6 +1235,7 @@ function fcnEditarCliente(){
         let txtNit = document.getElementById('txtNit');
         let cmbTipoNegocio = document.getElementById('cmbTipoNegocio');
         let cmbVisitaCliente = document.getElementById('cmbVisitaCliente');
+        let cmbVisitaMercaderista = document.getElementById('cmbVisitaMercaderista');
         let txtNegocio = document.getElementById('txtNegocio'); 
         let nomclie = document.getElementById('txtNomcliente').value || '';
         let dirclie = document.getElementById('txtDircliente').value || 'CIUDAD';
@@ -1146,7 +1247,8 @@ function fcnEditarCliente(){
         let txtTelefono = document.getElementById('txtTelefono');
         let txtLatitud = document.getElementById('txtLatitud');
         let txtLongitud = document.getElementById('txtLongitud');
-        let codruta = 1;
+        let codruta = document.getElementById('cmbRutaCliente')?.value || '0';
+        let codrutam = document.getElementById('cmbRutaMercaderista')?.value || '0';
         let categoria = document.getElementById('cmbCategoria').value;
 
         if(nomclie==''){F.AvisoError('Escriba un nombre de cliente');return;}
@@ -1157,6 +1259,7 @@ function fcnEditarCliente(){
             codclie:codclie,
             codven:cmbVendedor.value,
             codruta:codruta,
+            codrutam:codrutam,
             sector: cmbSector.value,
             categoria:categoria,
             fecha:F.getFecha(),
@@ -1170,6 +1273,7 @@ function fcnEditarCliente(){
             referencia: F.limpiarTexto(txtReferencia.value), 
             telefono:txtTelefono.value,
             visita:cmbVisitaCliente.value,
+            visitam:cmbVisitaMercaderista?.value || '',
             lat:txtLatitud.innerText,
             long:txtLongitud.innerText
         })

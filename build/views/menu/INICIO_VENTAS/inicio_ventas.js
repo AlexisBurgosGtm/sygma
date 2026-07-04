@@ -125,7 +125,7 @@ function ventas_rewireEmbedActions(container) {
     if (!container) return;
     container.querySelectorAll('[data-spa-action="inicio"]').forEach(btn => btn.remove());
     container.querySelectorAll('button.btn-bottom-l').forEach(btn => {
-        if (!btn.hasAttribute('data-dismiss')) btn.remove();
+        if (!btn.hasAttribute('data-dismiss') && !btn.hasAttribute('data-ventas-keep')) btn.remove();
     });
 }
 

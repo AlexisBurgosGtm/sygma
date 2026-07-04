@@ -171,7 +171,9 @@ let Navegar = {
             supervisor_showHome();
             return;
         }
-        F.loadScript('../views/menu/INICIO_SUPERVISOR/inicio_supervisor.js', 'root').then(() => initView());
+        F.loadScript('../views/menu/INICIO_SUPERVISOR/view_gestion_rutas.js', 'root')
+            .then(() => F.loadScript('../views/menu/INICIO_SUPERVISOR/inicio_supervisor.js', 'root'))
+            .then(() => initView());
     },
 
     inicio_compras: () => {

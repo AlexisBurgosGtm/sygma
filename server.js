@@ -45,6 +45,7 @@ var router_usuarios = require('./router/router_usuarios.js');
 var router_vehiculos = require('./router/router_vehiculos.js');
 
 var router_print = require('./router/router_print.js');
+var router_storage = require('./router/router_storage.js');
 
 
 
@@ -468,6 +469,7 @@ app.use('/repartidor', router_repartidor);
 app.use('/vehiculos', router_vehiculos);
 
 app.use('/print', router_print);
+app.use('/storage', router_storage);
 
 
 
