@@ -17,6 +17,7 @@ let Navegar = {
 
                 GlobalNivelUsuario = 0;
                 GlobalCodRutaCliente = 0;
+                GlobalCodRutaMercaderista = 0;
                 if (typeof sygma_updateHeaderUsuario === 'function') {
                     sygma_updateHeaderUsuario();
                 }
@@ -30,6 +31,7 @@ let Navegar = {
     login: () => {
         GlobalNivelUsuario = 0;
         GlobalCodRutaCliente = 0;
+        GlobalCodRutaMercaderista = 0;
         if (typeof sygma_updateHeaderUsuario === 'function') {
             sygma_updateHeaderUsuario();
         }
@@ -58,7 +60,7 @@ let Navegar = {
 
     usaMenuSoloCards: () => {
         const nivel = Number(GlobalNivelUsuario);
-        return nivel === 2 || nivel === 3 || nivel === 4 || nivel === 7 || nivel === 8;
+        return nivel === 2 || nivel === 3 || nivel === 4 || nivel === 7 || nivel === 8 || nivel === 9;
     },
 
     getMenuRole: () => {
@@ -73,6 +75,8 @@ let Navegar = {
                 return 'DIGITADOR';
             case 8:
                 return 'VENDEDOR_COMODIN';
+            case 9:
+                return 'MERCADERISTA';
             default:
                 return 'DIGITADOR';
         }
@@ -84,6 +88,7 @@ let Navegar = {
                 return 'js-nav-menu';
             case 'VENDEDOR':
             case 'VENDEDOR_COMODIN':
+            case 'MERCADERISTA':
                 return 'js-nav-menu_vendedor';
             case 'DIGITADOR':
                 return 'js-nav-menu';
@@ -154,6 +159,9 @@ let Navegar = {
             case 8:
                 Navegar.inicio_vendedor();
                 break;
+            case 9:
+                Navegar.inicio_mercaderista();
+                break;
             default:
                 F.AvisoError('No hay inicio configurado para su perfil.');
         }
@@ -203,6 +211,16 @@ let Navegar = {
         }
         F.loadScript('../views/menu/inicio_ventas_cxc.js', 'root')
             .then(() => F.loadScript('../views/menu/INICIO_VENTAS/inicio_ventas.js', 'root'))
+            .then(() => initView());
+    },
+
+    inicio_mercaderista: () => {
+        if (Number(GlobalNivelUsuario) === 0) return;
+        if (Navegar.enVistaPerfil('mercaderistaSidebar') && typeof mercaderista_showHome === 'function') {
+            mercaderista_showHome();
+            return;
+        }
+        F.loadScript('../views/menu/INICIO_MERCADERISTA/inicio_mercaderista.js', 'root')
             .then(() => initView());
     },
 

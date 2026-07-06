@@ -347,6 +347,93 @@ router.post("/lista_clientes_general", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+
+router.post("/lista_clientes_supervisor_buscar", async (req, res) => {
+    const { token, sucursal, st, codven, dia, filtro } = req.body;
+    const emp = esc(sucursal);
+    const ven = Number(codven) || 0;
+    const diaVal = esc((dia || '').trim());
+    const filtroText = esc((filtro || '').trim());
+    const tieneFiltroVen = ven > 0;
+    const tieneFiltroDia = diaVal !== '' && diaVal !== 'TODOS';
+    const topClause = (tieneFiltroVen || tieneFiltroDia) ? '' : 'TOP 50';
+
+    let whereSt = '';
+    if (st === 'NOGPS') {
+        whereSt = `AND (ISNULL(CLIENTES.LATITUD,'0')='0')`;
+    } else {
+        whereSt = `AND (CLIENTES.HABILITADO='${esc(st)}')`;
+    }
+
+    let whereVen = tieneFiltroVen ? `AND (CLIENTES.CODEMPLEADO = ${ven})` : '';
+    let whereDia = tieneFiltroDia ? `AND (CLIENTES.DIAVISITA = '${diaVal}')` : '';
+
+    let whereFiltro = '';
+    if (filtroText) {
+        if (isNaN(filtroText)) {
+            whereFiltro = `
+                AND (
+                    CLIENTES.NOMBRE LIKE '%${filtroText}%'
+                    OR CLIENTES.NEGOCIO LIKE '%${filtroText}%'
+                    OR CLIENTES.NIT LIKE '%${filtroText}%'
+                )`;
+        } else {
+            whereFiltro = `
+                AND (
+                    CLIENTES.NOMBRE LIKE '%${filtroText}%'
+                    OR CLIENTES.NEGOCIO LIKE '%${filtroText}%'
+                    OR CLIENTES.NIT = '${filtroText}'
+                    OR CLIENTES.CODCLIENTE = ${Number(filtroText)}
+                )`;
+        }
+    }
+
+    const qry = `
+        SELECT ${topClause}
+                CLIENTES.CODEMPLEADO,
+                CLIENTES.CODCLIENTE,
+                CLIENTES.NIT,
+                CLIENTES.NOMBRE,
+                CLIENTES.TIPONEGOCIO,
+                CLIENTES.NEGOCIO,
+                CLIENTES.CATEGORIA,
+                CLIENTES.DIRECCION,
+                CLIENTES.CODMUN,
+                MUNICIPIOS.DESMUN,
+                CLIENTES.CODDEPTO,
+                DEPARTAMENTOS.DESDEPTO,
+                CLIENTES.CODSECTOR,
+                SECTORES.DESSECTOR,
+                CLIENTES.TELEFONO,
+                CLIENTES.LATITUD, CLIENTES.LONGITUD,
+                CLIENTES.SALDO, CLIENTES.HABILITADO,
+                CLIENTES.LASTSALE, CLIENTES.DIASCREDITO,
+                CLIENTES.REFERENCIA, EMPLEADOS.NOMEMPLEADO,
+                CLIENTES.DIAVISITA AS VISITA,
+                ISNULL(CLIENTES.VISITAM, '') AS VISITAM,
+                ISNULL(CLIENTES.CODRUTA, 0) AS CODRUTA,
+                ISNULL(CLIENTES.CODRUTAM, 0) AS CODRUTAM,
+                ISNULL(EMP_MERC.NOMEMPLEADO, '') AS NOMMERCADERISTA
+        FROM CLIENTES LEFT OUTER JOIN
+               EMPLEADOS ON CLIENTES.CODEMPLEADO = EMPLEADOS.CODEMPLEADO LEFT OUTER JOIN
+               RUTAS_MERCADERISTAS ON CLIENTES.CODRUTAM = RUTAS_MERCADERISTAS.CODRUTA
+                AND CLIENTES.EMPNIT = RUTAS_MERCADERISTAS.EMPNIT LEFT OUTER JOIN
+               EMPLEADOS AS EMP_MERC ON RUTAS_MERCADERISTAS.CODEMP = EMP_MERC.CODEMPLEADO
+                AND RUTAS_MERCADERISTAS.EMPNIT = EMP_MERC.EMPNIT LEFT OUTER JOIN
+               SECTORES ON CLIENTES.CODSECTOR = SECTORES.CODSECTOR LEFT OUTER JOIN
+               DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO LEFT OUTER JOIN
+               MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+        WHERE (CLIENTES.EMPNIT = '${emp}')
+         ${whereSt}
+         ${whereVen}
+         ${whereDia}
+         ${whereFiltro}
+        ORDER BY CLIENTES.NOMBRE
+    `;
+
+    execute.QueryToken(res, qry, token);
+});
+
 router.post("/lista_clientes_general_export", async(req,res)=>{
    
     const { token, sucursal, st} = req.body;
@@ -1021,6 +1108,130 @@ router.post("/ruta_por_empleado", async (req, res) => {
          WHERE EMPNIT = '${emp}'
            AND CODEMP = ${ven}
          ORDER BY CODRUTA
+    `;
+
+    execute.QueryToken(res, qry, token);
+});
+
+router.post("/ruta_mercaderista_por_empleado", async (req, res) => {
+    const { token, sucursal, codemp } = req.body;
+    const emp = esc(sucursal);
+    const ven = Number(codemp) || 0;
+
+    let qry = `
+        SELECT TOP 1 CODRUTA, DESRUTA AS RUTA
+          FROM RUTAS_MERCADERISTAS
+         WHERE EMPNIT = '${emp}'
+           AND CODEMP = ${ven}
+         ORDER BY CODRUTA
+    `;
+
+    execute.QueryToken(res, qry, token);
+});
+
+router.post("/buscar_cliente_mercaderista", async (req, res) => {
+    const { token, sucursal, codemp, codruta, dia, fecha, estado } = req.body;
+    const emp = esc(sucursal);
+    const ven = Number(codemp) || 0;
+    const rutaBody = Number(codruta) || 0;
+    const diaVisita = esc(dia || '');
+    const fechaVal = esc((fecha || '').trim());
+    const estadoVal = String(estado || 'PENDIENTE').toUpperCase();
+
+    const filtroRuta = rutaBody > 0
+        ? `(CLIENTES.CODRUTAM = ${rutaBody})`
+        : `(CLIENTES.CODRUTAM = ISNULL((SELECT TOP 1 CODRUTA FROM RUTAS_MERCADERISTAS WHERE EMPNIT = '${emp}' AND CODEMP = ${ven}), -1))`;
+
+    let filtroVisita = '';
+    if (fechaVal && ven > 0) {
+        const existsVisita = `
+            SELECT 1 FROM MERCADERISTAS_VISITAS MV
+             WHERE MV.EMPNIT = CLIENTES.EMPNIT
+               AND MV.CODCLIENTE = CLIENTES.CODCLIENTE
+               AND MV.CODEMP = ${ven}
+               AND MV.FECHA = '${fechaVal}'`;
+        if (estadoVal === 'VISITADO') {
+            filtroVisita = `AND EXISTS (${existsVisita})`;
+        } else {
+            filtroVisita = `AND NOT EXISTS (${existsVisita})`;
+        }
+    }
+
+    let qry = `
+        SELECT CLIENTES.CODCLIENTE,
+               CLIENTES.TIPONEGOCIO,
+               CLIENTES.NEGOCIO,
+               CLIENTES.NOMBRE,
+               CLIENTES.DIRECCION,
+               MUNICIPIOS.DESMUN,
+               CLIENTES.LATITUD,
+               CLIENTES.LONGITUD,
+               ISNULL(CLIENTES.VISITAM, '') AS VISITAM,
+               ISNULL(CLIENTES.CODRUTAM, 0) AS CODRUTAM
+          FROM CLIENTES
+          LEFT OUTER JOIN MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+         WHERE (CLIENTES.EMPNIT = '${emp}')
+           AND ${filtroRuta}
+           AND (CLIENTES.VISITAM = '${diaVisita}')
+           AND (CLIENTES.HABILITADO = 'SI')
+           ${filtroVisita}
+         ORDER BY CLIENTES.NOMBRE
+    `;
+
+    execute.QueryToken(res, qry, token);
+});
+
+router.post("/mercaderista_visita_guardar", async (req, res) => {
+    const {
+        token, sucursal, codemp, codclie, fecha, mes, anio,
+        hora_inicio, novisitado, ota, vitrinas, pop,
+    } = req.body;
+
+    const emp = esc(sucursal);
+    const ven = Number(codemp) || 0;
+    const clie = Number(codclie) || 0;
+    const fechaVal = esc((fecha || '').trim());
+    const mesVal = Number(mes) || 0;
+    const anioVal = Number(anio) || 0;
+    const horaVal = esc((hora_inicio || '').trim());
+    const motivoVal = esc((novisitado || '').trim());
+    const otaVal = Number(ota) ? 1 : 0;
+    const vitVal = Number(vitrinas) ? 1 : 0;
+    const popVal = Number(pop) ? 1 : 0;
+
+    if (!fechaVal || ven <= 0 || clie <= 0) {
+        return res.status(400).send('error');
+    }
+
+    const qry = `
+        IF EXISTS (
+            SELECT 1 FROM MERCADERISTAS_VISITAS
+             WHERE EMPNIT = '${emp}'
+               AND CODEMP = ${ven}
+               AND CODCLIENTE = ${clie}
+               AND FECHA = '${fechaVal}'
+        )
+        BEGIN
+            UPDATE MERCADERISTAS_VISITAS SET
+                MES = ${mesVal},
+                ANIO = ${anioVal},
+                HORA_INICIO = '${horaVal}',
+                NOVISITADO = '${motivoVal}',
+                OTA = ${otaVal},
+                VITRINAS = ${vitVal},
+                POP = ${popVal}
+             WHERE EMPNIT = '${emp}'
+               AND CODEMP = ${ven}
+               AND CODCLIENTE = ${clie}
+               AND FECHA = '${fechaVal}';
+        END
+        ELSE
+        BEGIN
+            INSERT INTO MERCADERISTAS_VISITAS
+                (EMPNIT, CODEMP, CODCLIENTE, FECHA, MES, ANIO, HORA_INICIO, NOVISITADO, OTA, VITRINAS, POP)
+            VALUES
+                ('${emp}', ${ven}, ${clie}, '${fechaVal}', ${mesVal}, ${anioVal}, '${horaVal}', '${motivoVal}', ${otaVal}, ${vitVal}, ${popVal});
+        END
     `;
 
     execute.QueryToken(res, qry, token);

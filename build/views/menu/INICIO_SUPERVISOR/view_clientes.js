@@ -42,42 +42,54 @@ function getView(){
 
                     <div class="row align-items-end">
                         <div class="col-12 col-md-6 mb-2 mb-md-0">
-                            <h4 class="negrita text-base mb-1">Catálogo de Clientes</h4>
+                            <h4 class="negrita text-base mb-1">Gestión de Clientes</h4>
                             <h5 class="negrita text-danger mb-0" id="lbTotalClientes"></h5>
                         </div>
                         <div class="col-12 col-md-6">
                             <div class="form-group mb-0">
                                 <label class="negrita text-secondary small mb-1">Tipo de lista</label>
                                 <select class="form-control negrita text-base" id="cmbTipo">
-                                    <option value="NA">CENSO</option>
-                                    <option value="SI">ACTIVOS</option>
-                                    <option value="NO">DESACTIVADOS</option>
+                                    <option value="SI" selected>ACTIVOS</option>
                                     <option value="NOGPS">SIN UBICACION GPS</option>
                                 </select>
                             </div>
                         </div>
                     </div>
 
-                    <div class="form-group mt-3 mb-2">
-                        <label class="negrita text-secondary small mb-1">Buscar</label>
-                        <div class="input-group">
-                            <input type="text" class="negrita text-info form-control"
-                                placeholder="Filtrar clientes..."
-                                id="txtBuscar"
-                                oninput="supervisor_clientes_filtrar()">
-                            <button class="btn btn-md btn-success hand" id="btnExportar" type="button">
-                                <i class="fal fa-share"></i><span class="d-none d-sm-inline"> Excel</span>
-                            </button>
+                    <div class="row align-items-end mt-3 mb-2">
+                        <div class="col-6 col-md-3 mb-2 mb-md-0">
+                            <label class="negrita text-secondary small mb-1">Vendedor</label>
+                            <select class="form-control negrita text-base" id="cmbFiltroVendedor">
+                                <option value="0">TODOS</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-2 mb-2 mb-md-0">
+                            <label class="negrita text-secondary small mb-1">Día visita</label>
+                            <select class="form-control negrita text-base" id="cmbFiltroDia">
+                                <option value="">TODOS</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md mb-2 mb-md-0">
+                            <label class="negrita text-secondary small mb-1">Buscar cliente</label>
+                            <div class="input-group">
+                                <input type="text" class="negrita text-info form-control"
+                                    placeholder="Presione Enter para buscar..."
+                                    id="txtBuscar">
+                                <button class="btn btn-md btn-success hand" id="btnExportar" type="button">
+                                    <i class="fal fa-share"></i><span class="d-none d-sm-inline"> Excel</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
                     <div id="tblDataClientesCards" class="d-md-none"></div>
 
                     <div class="table-responsive d-none d-md-block">
-                        <table class="table table-sm table-bordered table-hover mb-0" id="tblClientes" style="min-width:780px">
+                        <table class="table table-sm table-bordered table-hover mb-0" id="tblClientes" style="min-width:920px">
                             <thead class="bg-base text-white">
                                 <tr>
                                     <th>VENDEDOR</th>
+                                    <th>MERCADERISTA</th>
                                     <th>NIT / CÓDIGO</th>
                                     <th>NEGOCIO</th>
                                     <th>NOMBRE</th>
@@ -408,24 +420,35 @@ function addListeners(){
 
         F.slideAnimationTabs();
     
-        document.getElementById('cmbTipo').addEventListener('change',()=>{
-            tbl_clientes();    
+        document.getElementById('cmbTipo').addEventListener('change', () => {
+            supervisor_clientes_limpiar_listado();
         });
 
+        supervisor_clientes_limpiar_listado();
 
-        tbl_clientes();
+        const txtBuscar = document.getElementById('txtBuscar');
+        if (txtBuscar) {
+            txtBuscar.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    tbl_clientes();
+                }
+            });
+        }
 
+        const cmbFiltroDia = document.getElementById('cmbFiltroDia');
+        if (cmbFiltroDia) {
+            cmbFiltroDia.innerHTML = '<option value="">TODOS</option>' + F.ComboSemana('LETRAS');
+        }
 
         document.getElementById('btnExportar').addEventListener('click',()=>{
 
             F.showToast('Cargando datos...');
 
-                let st = document.getElementById('cmbTipo').value;
-
                 document.getElementById('btnExportar').disabled = true;
                 document.getElementById('btnExportar').innerHTML = `<i class="fal fa-share fa-spin"></i>`;
          
-                GF.get_data_clientes_listado_export(GlobalEmpnit,st)
+                GF.get_data_clientes_listado_export(GlobalEmpnit, 'SI')
                 .then((data)=>{
                    
                     let datos = data.recordset;
@@ -658,14 +681,22 @@ function supervisor_clientes_esc(val){
         .replace(/'/g, "\\'");
 }
 
-function supervisor_clientes_filtrar(){
-    const q = (document.getElementById('txtBuscar')?.value || '').toLowerCase().trim();
-    document.querySelectorAll('#tblDataClientes tr').forEach((tr) => {
-        tr.style.display = !q || tr.innerText.toLowerCase().includes(q) ? '' : 'none';
-    });
-    document.querySelectorAll('#tblDataClientesCards .supervisor-cliente-card').forEach((card) => {
-        card.style.display = !q || card.innerText.toLowerCase().includes(q) ? '' : 'none';
-    });
+function supervisor_clientes_mercaderista_txt(r){
+    const nom = (r.NOMMERCADERISTA || '').trim();
+    const visitam = (r.VISITAM || '').trim();
+    if (nom && visitam) return `${nom} - ${visitam}`;
+    return nom || visitam || '';
+}
+
+function supervisor_clientes_limpiar_listado(){
+    const container = document.getElementById('tblDataClientes');
+    const cards = document.getElementById('tblDataClientesCards');
+    const msg = '<tr><td colspan="8" class="text-center text-muted py-3">Presione Enter para buscar clientes</td></tr>';
+    const msgCard = '<div class="text-center text-muted py-3">Presione Enter para buscar clientes</div>';
+    if (container) container.innerHTML = msg;
+    if (cards) cards.innerHTML = msgCard;
+    const lb = document.getElementById('lbTotalClientes');
+    if (lb) lb.innerText = '';
 }
 
 function supervisor_clientes_acciones(r, st, idbtnE, strClassBtn){
@@ -701,12 +732,26 @@ function tbl_clientes(){
     if (cards) cards.innerHTML = GlobalLoader;
 
     let st = document.getElementById('cmbTipo').value;
+    const codven = document.getElementById('cmbFiltroVendedor')?.value || '0';
+    const dia = document.getElementById('cmbFiltroDia')?.value || '';
+    const filtro = (document.getElementById('txtBuscar')?.value || '').trim();
     let contador = 0;
     let str = '';
     let strCards = '';
 
-    GF.get_data_clientes_listado(GlobalEmpnit,st)
-    .then((data)=>{
+    axios.post(GlobalUrlCalls + '/clientes/lista_clientes_supervisor_buscar', {
+        token: TOKEN,
+        sucursal: GlobalEmpnit,
+        st,
+        codven,
+        dia,
+        filtro,
+    })
+    .then((response) => {
+        const data = response.data;
+        if (!data || data.toString() === 'error' || !data.recordset) {
+            throw new Error('sin datos');
+        }
         data.recordset.map((r)=>{
             
             let idbtnE = `btnE${r.CODCLIENTE}`;
@@ -718,12 +763,15 @@ function tbl_clientes(){
             const acciones = supervisor_clientes_acciones(r, st, idbtnE, strClassBtn);
             const accionesCard = supervisor_clientes_acciones(r, st, idbtnECard, strClassBtn);
 
+            const mercTxt = supervisor_clientes_mercaderista_txt(r);
+
             str += `
             <tr>
                 <td>${r.NOMEMPLEADO || ''}
                     <br>
                     <small>${r.VISITA || ''}</small>
                 </td>
+                <td>${mercTxt}</td>
                 <td>${r.NIT || ''}
                     <br>
                     <small>Cod: ${r.CODCLIENTE}</small>
@@ -753,6 +801,7 @@ function tbl_clientes(){
                             <div class="small text-muted">${r.NEGOCIO || r.TIPONEGOCIO || ''}</div>
                             <div class="small"><span class="negrita">NIT:</span> ${r.NIT || ''} · Cod ${r.CODCLIENTE}</div>
                             <div class="small"><span class="negrita">Vend:</span> ${r.NOMEMPLEADO || ''} · ${r.VISITA || ''}</div>
+                            <div class="small"><span class="negrita">Mercaderista:</span> ${mercTxt}</div>
                             <div class="small text-truncate">${r.DIRECCION || ''}</div>
                             <div class="small text-muted">${r.DESMUN || ''} ${r.DESDEPTO ? '· ' + r.DESDEPTO : ''}</div>
                         </div>
@@ -764,15 +813,17 @@ function tbl_clientes(){
             </div>
             `;
         })
-        if (container) container.innerHTML = str || '<tr><td colspan="7" class="text-center text-muted py-3">Sin clientes</td></tr>';
+        if (container) container.innerHTML = str || '<tr><td colspan="8" class="text-center text-muted py-3">Sin clientes</td></tr>';
         if (cards) cards.innerHTML = strCards || '<div class="text-center text-muted py-3">Sin clientes</div>';
-        document.getElementById('lbTotalClientes').innerText = `Total: ${contador}`;
-        supervisor_clientes_filtrar();
+        const venSel = Number(codven) > 0;
+        const diaSel = dia && dia !== 'TODOS';
+        const limiteMsg = (!venSel && !diaSel) ? ' (máx. 50)' : '';
+        document.getElementById('lbTotalClientes').innerText = `Total: ${contador}${limiteMsg}`;
     })
     .catch((error)=>{
         console.log(error);
 
-        if (container) container.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">No se cargaron datos...</td></tr>';
+        if (container) container.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-3">No se cargaron datos...</td></tr>';
         if (cards) cards.innerHTML = '<div class="text-center text-muted py-3">No se cargaron datos...</div>';
         document.getElementById('lbTotalClientes').innerText = '';
 
@@ -962,23 +1013,22 @@ function get_empleados(){
     .then((data)=>{
 
         let str = '';
+        let strFiltro = '<option value="0">TODOS</option>';
         data.recordset.map((r)=>{
-            str += `<option value='${r.CODEMPLEADO}'>${r.NOMEMPLEADO}</option>`
+            str += `<option value='${r.CODEMPLEADO}'>${r.NOMEMPLEADO}</option>`;
+            strFiltro += `<option value='${r.CODEMPLEADO}'>${r.NOMEMPLEADO}</option>`;
         })
 
-        //document.getElementById('cmbVendedor').innerHTML = str;
         document.getElementById('cmbVendedorCliente').innerHTML = str;
-
-       
-        //carga la lista de clientes luego de tener al primer vendedor
-        tbl_clientes();
-
+        const cmbFiltroVendedor = document.getElementById('cmbFiltroVendedor');
+        if (cmbFiltroVendedor) cmbFiltroVendedor.innerHTML = strFiltro;
 
     })
     .catch(()=>{
 
-        //document.getElementById('cmbVendedor').innerHTML = '';
         document.getElementById('cmbVendedorCliente').innerHTML = '';
+        const cmbFiltroVendedor = document.getElementById('cmbFiltroVendedor');
+        if (cmbFiltroVendedor) cmbFiltroVendedor.innerHTML = '<option value="0">TODOS</option>';
 
     })
 

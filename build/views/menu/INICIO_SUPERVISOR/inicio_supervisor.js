@@ -293,7 +293,7 @@ function getView(){
         menu:()=>{
             const items = [
                 { id: 'btnMenuDashboard', label: 'Dashboard', icon: 'fa-chart-line', color: 'primary' },
-                { id: 'btnMenuClientes', label: 'Catálogo clientes', icon: 'fa-user', color: 'info' },
+                { id: 'btnMenuClientes', label: 'Gestión Clientes', icon: 'fa-user', color: 'info' },
                 { id: 'btnMenuObjetivos', label: 'Logro objetivos P&G', icon: 'fa-chart-pie', color: 'danger' },
                 { id: 'btnMenuCoberturaMunicipio', label: 'Cobertura municipios', icon: 'fa-globe', color: 'primary' },
                 { id: 'btnMenuRptVisitasMapa', label: 'Visitas vendedor mapa', icon: 'fa-map-signs', color: 'secondary' },

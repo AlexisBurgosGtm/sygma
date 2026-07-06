@@ -125,7 +125,7 @@ function getView(){
         modal_opciones_producto:()=>{
             return `
             <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true" id="modal_menu_producto">
-                <div class="modal-dialog modal-dialog-left modal-lg">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
                     <div class="modal-content">
                         <div class="dropdown-header bg-base d-flex justify-content-center align-items-center w-100">
                             <h4 class="m-0 text-center color-white">
@@ -366,7 +366,7 @@ function getView(){
                     </div>
                    
                      <br>
-                    <label class="negrita text-base">Tipo Rentabilidad</label>
+                    <label class="negrita text-base">Control Mercaderista</label>
                     <div class="input-group">
                         <select class="form-control" id="cmbTipoRentabilidad">
                         </select>
@@ -383,7 +383,14 @@ function getView(){
                        
                     </div>
                                         
-                    <br>
+                 
+                                        
+                   
+                </div>
+            </div>
+            
+            <div class="hidden">
+               <br>
                     <label class="negrita text-base">Clasificación 3</label>
                     <div class="input-group">
                         <select class="form-control" id="cmbTipoImpulso">
@@ -414,9 +421,6 @@ function getView(){
                         </select>
                        
                     </div>
-                                        
-                   
-                </div>
             </div>
             `
         },
@@ -469,7 +473,7 @@ function getView(){
                                 </div>
                                 <br>
 
-                                <table class="table table-responsive h-full">
+                                <table class="table table-responsive h-full f-med">
                                     <thead class="bg-secondary text-white">
                                         <tr>
                                             <td>CODMEDIDA</td>

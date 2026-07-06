@@ -800,6 +800,27 @@ body.proveedor-sidebar-open {
   line-height: 1.2;
   color: #333;
 }
+
+/* Mercaderista: acciones cliente — móvil 2×2 ancho completo; desktop columna */
+.merc-cliente-acciones {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  width: 100%;
+}
+.merc-cliente-acciones .btn {
+  width: 100%;
+  white-space: nowrap;
+  padding-left: 0.35rem;
+  padding-right: 0.35rem;
+}
+@media (min-width: 768px) {
+  .merc-cliente-acciones {
+    display: flex;
+    flex-direction: column;
+    min-width: 140px;
+  }
+}
 .proveedor-content-card {
   background: rgba(255, 255, 255, 0.78) !important;
   backdrop-filter: blur(10px);
