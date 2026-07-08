@@ -107,6 +107,7 @@ function getView() {
                 ${view.modal_actividades()}
                 ${view.modal_no_visitado()}
                 ${view.modal_faltantes()}
+                ${view.modal_detalle_visita()}
             </div>
         `,
         menu: () => {
@@ -359,6 +360,24 @@ function getView() {
                 </div>
             </div>
         `,
+        modal_detalle_visita: () => `
+            <div class="modal fade" id="modalMercaderistaDetalleVisita" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-secondary py-2">
+                            <h5 class="modal-title text-white negrita mb-0">Detalle de visita</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"><span>&times;</span></button>
+                        </div>
+                        <div class="modal-body p-3" id="bodyMercaderistaDetalleVisita">
+                            <div class="text-center text-muted py-3">Cargando...</div>
+                        </div>
+                        <div class="modal-footer py-2">
+                            <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `,
     };
 
     const root = document.getElementById('root');
@@ -423,6 +442,53 @@ function mercaderista_actividad_tiene_foto(prefijo) {
     return !!(mercaderista_act_fotos[`${prefijo}_antes`] || mercaderista_act_fotos[`${prefijo}_despues`]);
 }
 
+// Carpeta destino en pCloud (webdav) para las fotos del mercaderista
+var MERCADERISTA_STORAGE_FOLDER = '/XELASOL';
+
+function mercaderista_fecha_ddmmyy(fecha) {
+    // fecha llega como YYYY-MM-DD
+    const p = String(fecha || '').split('-');
+    if (p.length < 3) return String(fecha || '');
+    const yy = String(p[0]).slice(-2);
+    return `${p[2]}-${p[1]}-${yy}`;
+}
+
+function mercaderista_file_ext(file) {
+    const name = (file && file.name) || '';
+    const dot = name.lastIndexOf('.');
+    let ext = dot >= 0 ? name.slice(dot).toLowerCase() : '';
+    if (!ext) ext = '.jpg';
+    return ext;
+}
+
+function mercaderista_file_to_hex(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const bytes = new Uint8Array(reader.result);
+            const hexParts = new Array(bytes.length);
+            for (let i = 0; i < bytes.length; i++) {
+                hexParts[i] = bytes[i].toString(16).padStart(2, '0');
+            }
+            resolve(hexParts.join(''));
+        };
+        reader.onerror = (e) => reject(e);
+        reader.readAsArrayBuffer(file);
+    });
+}
+
+function mercaderista_subir_foto(file, filename) {
+    return mercaderista_file_to_hex(file).then((hex) => axios.post('/storage/upload', {
+        hex,
+        filename,
+        folder: MERCADERISTA_STORAGE_FOLDER,
+        overwrite: true,
+    })).then((resp) => {
+        if (!resp.data || resp.data.ok !== true) throw new Error('upload');
+        return filename;
+    });
+}
+
 function mercaderista_guardar_visita(payload) {
     return axios.post('/clientes/mercaderista_visita_guardar', {
         token: TOKEN,
@@ -447,6 +513,24 @@ function mercaderista_acciones(r) {
     const lng = r.LONGITUD || '0';
     const cod = r.CODCLIENTE;
     const nombre = mercaderista_esc(r.NOMBRE || '');
+    const estado = (document.getElementById('cmbMercaderistaEstadoVisita')?.value || 'PENDIENTE').toUpperCase();
+
+    if (estado === 'VISITADO') {
+        return `
+        <div class="merc-cliente-acciones merc-cliente-acciones--visitado w-100">
+            <button type="button" class="btn btn-sm btn-info hand shadow w-100"
+                title="Ver detalles"
+                onclick="mercaderista_ver_detalle_visita(${cod},'${nombre}')">
+                <i class="fal fa-eye mr-1"></i> Ver detalles
+            </button>
+            <button type="button" class="btn btn-sm btn-danger hand shadow w-100"
+                id="btnMercEliminarVisita${cod}"
+                title="Eliminar visita"
+                onclick="mercaderista_eliminar_visita(${cod},'${nombre}', this)">
+                <i class="fal fa-trash mr-1"></i> Eliminar visita
+            </button>
+        </div>`;
+    }
 
     return `
         <div class="merc-cliente-acciones w-100">
@@ -508,6 +592,113 @@ function mercaderista_abrir_ubicacion(lat, lng) {
     F.gotoGoogleMaps(la, lo);
 }
 
+function mercaderista_fmt_si_no(val) {
+    return Number(val) ? 'SI' : 'NO';
+}
+
+function mercaderista_fmt_fecha_detalle(fecha) {
+    if (!fecha) return '--';
+    if (typeof fecha === 'string' && fecha.includes('-')) {
+        const p = fecha.substring(0, 10).split('-');
+        if (p.length === 3) return `${p[2]}/${p[1]}/${p[0]}`;
+        return fecha.substring(0, 10);
+    }
+    try {
+        const d = new Date(fecha);
+        if (!isNaN(d.getTime())) {
+            return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+        }
+    } catch (e) { /* ignore */ }
+    return String(fecha);
+}
+
+function mercaderista_ver_detalle_visita(codclie, nombre) {
+    const { fecha } = mercaderista_fecha_partes();
+    const body = document.getElementById('bodyMercaderistaDetalleVisita');
+    if (body) body.innerHTML = `<div class="text-center py-3">${GlobalLoader}</div>`;
+    $('#modalMercaderistaDetalleVisita').modal('show');
+
+    axios.post('/clientes/mercaderista_visita_detalle', {
+        token: TOKEN,
+        sucursal: GlobalEmpnit,
+        codemp: GlobalCodUsuario,
+        codclie,
+        fecha,
+    })
+        .then((response) => {
+            if (response.data === 'error' || !response.data?.recordset?.length) {
+                throw new Error('sin datos');
+            }
+            const r = response.data.recordset[0];
+            const nom = r.NOMBRE || nombre || `Cliente ${codclie}`;
+            const motivo = (r.NOVISITADO || '').trim();
+            if (body) {
+                body.innerHTML = `
+                    <div class="mb-2">
+                        <div class="negrita text-base">${nom}</div>
+                        <div class="small text-muted">${r.NEGOCIO || ''} · Cod ${r.CODCLIENTE || codclie}</div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered mb-0">
+                            <tbody>
+                                <tr><th class="bg-light" style="width:42%">Fecha</th><td>${mercaderista_fmt_fecha_detalle(r.FECHA)}</td></tr>
+                                <tr><th class="bg-light">Mes / Año</th><td>${r.MES || '--'} / ${r.ANIO || '--'}</td></tr>
+                                <tr><th class="bg-light">Hora inicio</th><td>${r.HORA_INICIO || '--'}</td></tr>
+                                <tr><th class="bg-light">No visitado</th><td>${motivo || '—'}</td></tr>
+                                <tr><th class="bg-light">OTA</th><td>${mercaderista_fmt_si_no(r.OTA)}</td></tr>
+                                <tr><th class="bg-light">Vitrinas</th><td>${mercaderista_fmt_si_no(r.VITRINAS)}</td></tr>
+                                <tr><th class="bg-light">POP</th><td>${mercaderista_fmt_si_no(r.POP)}</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+        })
+        .catch(() => {
+            if (body) {
+                body.innerHTML = '<div class="text-center text-danger py-3">No se pudo cargar el detalle de la visita</div>';
+            }
+        });
+}
+
+function mercaderista_eliminar_visita(codclie, nombre, btnEl) {
+    const { fecha } = mercaderista_fecha_partes();
+    const label = nombre || `Cliente ${codclie}`;
+    const btn = btnEl || document.getElementById(`btnMercEliminarVisita${codclie}`);
+    const btnHtmlOriginal = btn ? btn.innerHTML : '';
+
+    F.Confirmacion(`¿Está seguro que desea ELIMINAR la visita de ${label}? Se borrarán también las fotos asociadas.`)
+        .then((ok) => {
+            if (!ok) return;
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fal fa-spinner fa-spin mr-1"></i> Eliminando...';
+            }
+            F.showToast('Eliminando visita y fotos...');
+
+            axios.post('/clientes/mercaderista_visita_eliminar', {
+                token: TOKEN,
+                sucursal: GlobalEmpnit,
+                codemp: GlobalCodUsuario,
+                codclie,
+                fecha,
+            })
+                .then((response) => {
+                    if (!response.data || response.data.ok !== true) throw new Error('error');
+                    F.Aviso('Visita eliminada correctamente');
+                    mercaderista_cargar_clientes();
+                })
+                .catch(() => {
+                    F.AvisoError('No se pudo eliminar la visita');
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = btnHtmlOriginal || '<i class="fal fa-trash mr-1"></i> Eliminar visita';
+                    }
+                });
+        });
+}
+
 function mercaderista_registrar_no_visita() {
     if (!mercaderista_cliente_sel) return;
     const motivo = document.getElementById('cmbMercaderistaMotivoNoVisita')?.value || '';
@@ -556,44 +747,85 @@ function mercaderista_registrar_no_visita() {
 function mercaderista_registrar_actividades() {
     if (!mercaderista_cliente_sel) return;
 
-    const btn = document.getElementById('btnMercaderistaGuardarActividades');
-    const { fecha, mes, anio } = mercaderista_fecha_partes();
-    const ota = mercaderista_actividad_tiene_foto('ota') ? 1 : 0;
-    const vitrinas = mercaderista_actividad_tiene_foto('vitrinas') ? 1 : 0;
-    const pop = mercaderista_actividad_tiene_foto('pop') ? 1 : 0;
+    // [key en mercaderista_act_fotos, grupo, momento]
+    const requeridos = [
+        ['ota_antes', 'ota', 'antes'],
+        ['ota_despues', 'ota', 'despues'],
+        ['vitrinas_antes', 'vitrinas', 'antes'],
+        ['vitrinas_despues', 'vitrinas', 'despues'],
+        ['pop_antes', 'pop', 'antes'],
+        ['pop_despues', 'pop', 'despues'],
+    ];
 
-    if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fal fa-spinner fa-spin"></i>';
+    const falta = requeridos.some(([key]) => !mercaderista_act_fotos[key]);
+    if (falta) {
+        F.AvisoError('Debe agregar la foto ANTES y DESPUÉS de OTA, VITRINAS y POP.');
+        return;
     }
 
-    mercaderista_guardar_visita({
-        codclie: mercaderista_cliente_sel.codclie,
-        fecha,
-        mes,
-        anio,
-        hora_inicio: mercaderista_hora_actual(),
-        novisitado: '',
-        ota,
-        vitrinas,
-        pop,
-    })
-        .then((response) => {
-            if (response.data === 'error') throw new Error('error');
-            F.Aviso('Actividades registradas correctamente');
-            mercaderista_limpiar_fotos_actividades();
-            $('#modalMercaderistaActividades').modal('hide');
-            mercaderista_cliente_sel = null;
-            mercaderista_cargar_clientes();
-        })
-        .catch(() => {
-            F.AvisoError('No se pudo guardar las actividades');
-        })
-        .finally(() => {
+    const { fecha, mes, anio } = mercaderista_fecha_partes();
+    const cod = mercaderista_cliente_sel.codclie;
+    const ddmmyy = mercaderista_fecha_ddmmyy(fecha);
+
+    F.Confirmacion('¿Está seguro que desea enviar la información?')
+        .then((ok) => {
+            if (!ok) return;
+
+            const btn = document.getElementById('btnMercaderistaGuardarActividades');
+            const cancelarBtn = document.getElementById('btnMercaderistaCancelarActividades');
             if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fal fa-save mr-1"></i> Guardar';
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fal fa-spinner fa-spin mr-1"></i> Subiendo fotos...';
             }
+            if (cancelarBtn) cancelarBtn.disabled = true;
+            F.showToast('Subiendo las fotos, espere por favor...');
+
+            const nombres = {};
+            const subidas = requeridos.map(([key, grupo, momento]) => {
+                const file = mercaderista_act_fotos[key];
+                const ext = mercaderista_file_ext(file);
+                const filename = `${cod} - ${ddmmyy} - ${grupo} - ${momento}${ext}`;
+                return mercaderista_subir_foto(file, filename).then((nombre) => {
+                    nombres[`${grupo}_${momento}`] = nombre;
+                });
+            });
+
+            Promise.all(subidas)
+                .then(() => mercaderista_guardar_visita({
+                    codclie: cod,
+                    fecha,
+                    mes,
+                    anio,
+                    hora_inicio: mercaderista_hora_actual(),
+                    novisitado: '',
+                    ota: 1,
+                    vitrinas: 1,
+                    pop: 1,
+                    ota_f_antes: nombres['ota_antes'] || '',
+                    ota_f_despues: nombres['ota_despues'] || '',
+                    vitrinas_f_antes: nombres['vitrinas_antes'] || '',
+                    vitrinas_f_despues: nombres['vitrinas_despues'] || '',
+                    pop_f_antes: nombres['pop_antes'] || '',
+                    pop_f_despues: nombres['pop_despues'] || '',
+                }))
+                .then((response) => {
+                    if (response.data === 'error') throw new Error('error');
+                    F.Aviso('Actividades registradas correctamente');
+                    mercaderista_limpiar_fotos_actividades();
+                    $('#modalMercaderistaActividades').modal('hide');
+                    mercaderista_cliente_sel = null;
+                    mercaderista_cargar_clientes();
+                })
+                .catch(() => {
+                    F.AvisoError('No se pudo subir las fotos o guardar la información');
+                })
+                .finally(() => {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fal fa-save mr-1"></i> Guardar';
+                    }
+                    if (cancelarBtn) cancelarBtn.disabled = false;
+                });
         });
 }
 

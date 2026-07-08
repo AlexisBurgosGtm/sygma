@@ -117,4 +117,25 @@ router.post('/status', async (req, res) => {
     }
 });
 
+router.post('/delete', async (req, res) => {
+    try {
+        const { filename, folder, remote_path } = req.body || {};
+
+        if (!filename && !remote_path) {
+            return res.status(400).send({ ok: false, error: 'filename o remote_path requerido', code: 'INVALID_FILENAME' });
+        }
+
+        const result = await storage.deleteFile({
+            filename,
+            folder,
+            remote_path,
+        });
+
+        res.send(result);
+    } catch (err) {
+        console.error('[storage/delete]', err.message);
+        sendError(res, err, 'No se pudo eliminar el archivo');
+    }
+});
+
 module.exports = router;

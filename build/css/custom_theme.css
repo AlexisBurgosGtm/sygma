@@ -821,6 +821,14 @@ body.proveedor-sidebar-open {
     min-width: 140px;
   }
 }
+.merc-cliente-acciones--visitado {
+  grid-template-columns: 1fr;
+}
+@media (min-width: 768px) {
+  .merc-cliente-acciones--visitado {
+    min-width: 150px;
+  }
+}
 .proveedor-content-card {
   background: rgba(255, 255, 255, 0.78) !important;
   backdrop-filter: blur(10px);

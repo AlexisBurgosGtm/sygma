@@ -179,10 +179,37 @@ async function readFile(remotePath) {
     };
 }
 
+async function deleteFile({ filename, folder, remote_path }) {
+    const remotePath = remote_path
+        ? sanitizeRemotePath(remote_path)
+        : buildRemotePath(folder, filename);
+
+    const client = getWebdavClient();
+    const exists = await client.exists(remotePath);
+
+    if (!exists) {
+        return {
+            ok: true,
+            deleted: false,
+            remote_path: remotePath,
+            reason: 'NOT_FOUND',
+        };
+    }
+
+    await client.deleteFile(remotePath);
+
+    return {
+        ok: true,
+        deleted: true,
+        remote_path: remotePath,
+    };
+}
+
 module.exports = {
     DEFAULT_FOLDER,
     uploadFromHex,
     readFile,
+    deleteFile,
     getMimeType,
     isImageMime,
     sanitizeRemotePath,

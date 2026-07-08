@@ -1,6 +1,7 @@
 const execute = require('../connection');
 const express = require('express');
 const router = express.Router();
+const storage = require('../services/webdavStorage');
 
 function esc(val) {
     if (val === null || val === undefined) return '';
@@ -1185,6 +1186,9 @@ router.post("/mercaderista_visita_guardar", async (req, res) => {
     const {
         token, sucursal, codemp, codclie, fecha, mes, anio,
         hora_inicio, novisitado, ota, vitrinas, pop,
+        ota_f_antes, ota_f_despues,
+        vitrinas_f_antes, vitrinas_f_despues,
+        pop_f_antes, pop_f_despues,
     } = req.body;
 
     const emp = esc(sucursal);
@@ -1198,6 +1202,12 @@ router.post("/mercaderista_visita_guardar", async (req, res) => {
     const otaVal = Number(ota) ? 1 : 0;
     const vitVal = Number(vitrinas) ? 1 : 0;
     const popVal = Number(pop) ? 1 : 0;
+    const otaFA = esc((ota_f_antes || '').trim());
+    const otaFD = esc((ota_f_despues || '').trim());
+    const vitFA = esc((vitrinas_f_antes || '').trim());
+    const vitFD = esc((vitrinas_f_despues || '').trim());
+    const popFA = esc((pop_f_antes || '').trim());
+    const popFD = esc((pop_f_despues || '').trim());
 
     if (!fechaVal || ven <= 0 || clie <= 0) {
         return res.status(400).send('error');
@@ -1219,7 +1229,13 @@ router.post("/mercaderista_visita_guardar", async (req, res) => {
                 NOVISITADO = '${motivoVal}',
                 OTA = ${otaVal},
                 VITRINAS = ${vitVal},
-                POP = ${popVal}
+                POP = ${popVal},
+                OTA_F_ANTES = '${otaFA}',
+                OTA_F_DESPUES = '${otaFD}',
+                VITRINAS_F_ANTES = '${vitFA}',
+                VITRINAS_F_DESPUES = '${vitFD}',
+                POP_F_ANTES = '${popFA}',
+                POP_F_DESPUES = '${popFD}'
              WHERE EMPNIT = '${emp}'
                AND CODEMP = ${ven}
                AND CODCLIENTE = ${clie}
@@ -1228,13 +1244,135 @@ router.post("/mercaderista_visita_guardar", async (req, res) => {
         ELSE
         BEGIN
             INSERT INTO MERCADERISTAS_VISITAS
-                (EMPNIT, CODEMP, CODCLIENTE, FECHA, MES, ANIO, HORA_INICIO, NOVISITADO, OTA, VITRINAS, POP)
+                (EMPNIT, CODEMP, CODCLIENTE, FECHA, MES, ANIO, HORA_INICIO, NOVISITADO, OTA, VITRINAS, POP,
+                 OTA_F_ANTES, OTA_F_DESPUES, VITRINAS_F_ANTES, VITRINAS_F_DESPUES, POP_F_ANTES, POP_F_DESPUES)
             VALUES
-                ('${emp}', ${ven}, ${clie}, '${fechaVal}', ${mesVal}, ${anioVal}, '${horaVal}', '${motivoVal}', ${otaVal}, ${vitVal}, ${popVal});
+                ('${emp}', ${ven}, ${clie}, '${fechaVal}', ${mesVal}, ${anioVal}, '${horaVal}', '${motivoVal}', ${otaVal}, ${vitVal}, ${popVal},
+                 '${otaFA}', '${otaFD}', '${vitFA}', '${vitFD}', '${popFA}', '${popFD}');
         END
     `;
 
     execute.QueryToken(res, qry, token);
+});
+
+router.post("/mercaderista_visita_detalle", async (req, res) => {
+    const { token, sucursal, codemp, codclie, fecha } = req.body;
+    const emp = esc(sucursal);
+    const ven = Number(codemp) || 0;
+    const clie = Number(codclie) || 0;
+    const fechaVal = esc((fecha || '').trim());
+
+    if (!fechaVal || ven <= 0 || clie <= 0) {
+        return res.status(400).send('error');
+    }
+
+    const qry = `
+        SELECT TOP 1
+               MV.EMPNIT,
+               MV.CODEMP,
+               MV.CODCLIENTE,
+               CLIENTES.NOMBRE,
+               CLIENTES.NEGOCIO,
+               MV.FECHA,
+               MV.MES,
+               MV.ANIO,
+               ISNULL(MV.HORA_INICIO, '') AS HORA_INICIO,
+               ISNULL(MV.NOVISITADO, '') AS NOVISITADO,
+               ISNULL(MV.OTA, 0) AS OTA,
+               ISNULL(MV.VITRINAS, 0) AS VITRINAS,
+               ISNULL(MV.POP, 0) AS POP,
+               ISNULL(MV.OTA_F_ANTES, '') AS OTA_F_ANTES,
+               ISNULL(MV.OTA_F_DESPUES, '') AS OTA_F_DESPUES,
+               ISNULL(MV.VITRINAS_F_ANTES, '') AS VITRINAS_F_ANTES,
+               ISNULL(MV.VITRINAS_F_DESPUES, '') AS VITRINAS_F_DESPUES,
+               ISNULL(MV.POP_F_ANTES, '') AS POP_F_ANTES,
+               ISNULL(MV.POP_F_DESPUES, '') AS POP_F_DESPUES
+          FROM MERCADERISTAS_VISITAS MV
+          LEFT OUTER JOIN CLIENTES
+            ON CLIENTES.EMPNIT = MV.EMPNIT
+           AND CLIENTES.CODCLIENTE = MV.CODCLIENTE
+         WHERE MV.EMPNIT = '${emp}'
+           AND MV.CODEMP = ${ven}
+           AND MV.CODCLIENTE = ${clie}
+           AND MV.FECHA = '${fechaVal}'
+    `;
+
+    execute.QueryToken(res, qry, token);
+});
+
+router.post("/mercaderista_visita_eliminar", async (req, res) => {
+    const { token, sucursal, codemp, codclie, fecha } = req.body;
+    const emp = esc(sucursal);
+    const ven = Number(codemp) || 0;
+    const clie = Number(codclie) || 0;
+    const fechaVal = esc((fecha || '').trim());
+    const folder = '/XELASOL';
+
+    if (!fechaVal || ven <= 0 || clie <= 0) {
+        return res.status(400).send({ ok: false, error: 'datos incompletos' });
+    }
+
+    try {
+        const qrySelect = `
+            SELECT TOP 1
+                   ISNULL(OTA_F_ANTES, '') AS OTA_F_ANTES,
+                   ISNULL(OTA_F_DESPUES, '') AS OTA_F_DESPUES,
+                   ISNULL(VITRINAS_F_ANTES, '') AS VITRINAS_F_ANTES,
+                   ISNULL(VITRINAS_F_DESPUES, '') AS VITRINAS_F_DESPUES,
+                   ISNULL(POP_F_ANTES, '') AS POP_F_ANTES,
+                   ISNULL(POP_F_DESPUES, '') AS POP_F_DESPUES
+              FROM MERCADERISTAS_VISITAS
+             WHERE EMPNIT = '${emp}'
+               AND CODEMP = ${ven}
+               AND CODCLIENTE = ${clie}
+               AND FECHA = '${fechaVal}'
+        `;
+
+        const data = await execute.get_data_qry(qrySelect, token);
+        const row = (data && data.recordset && data.recordset[0]) ? data.recordset[0] : null;
+
+        if (!row) {
+            return res.status(404).send({ ok: false, error: 'Visita no encontrada' });
+        }
+
+        const fotos = [
+            row.OTA_F_ANTES,
+            row.OTA_F_DESPUES,
+            row.VITRINAS_F_ANTES,
+            row.VITRINAS_F_DESPUES,
+            row.POP_F_ANTES,
+            row.POP_F_DESPUES,
+        ].filter((n) => n && String(n).trim());
+
+        const deletedFiles = [];
+        for (const filename of fotos) {
+            try {
+                const result = await storage.deleteFile({ filename, folder });
+                deletedFiles.push(result);
+            } catch (fileErr) {
+                console.error('[mercaderista_visita_eliminar] foto', filename, fileErr.message);
+                deletedFiles.push({ ok: false, filename, error: fileErr.message });
+            }
+        }
+
+        const qryDelete = `
+            DELETE FROM MERCADERISTAS_VISITAS
+             WHERE EMPNIT = '${emp}'
+               AND CODEMP = ${ven}
+               AND CODCLIENTE = ${clie}
+               AND FECHA = '${fechaVal}'
+        `;
+        await execute.get_data_qry(qryDelete, token);
+
+        res.send({
+            ok: true,
+            deleted_db: true,
+            deleted_files: deletedFiles,
+        });
+    } catch (err) {
+        console.error('[mercaderista_visita_eliminar]', err.message || err);
+        res.status(500).send({ ok: false, error: 'No se pudo eliminar la visita' });
+    }
 });
 
 router.post("/buscar_cliente_vendedor", async(req,res)=>{
