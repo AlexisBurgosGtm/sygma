@@ -1,5 +1,6 @@
 var mercaderista_currentPane = 'uno';
 var mercaderista_cliente_sel = null;
+var mercaderista_faltantes_productos = [];
 var mercaderista_act_fotos = {
     ota_antes: null, ota_despues: null,
     vitrinas_antes: null, vitrinas_despues: null,
@@ -334,7 +335,7 @@ function getView() {
                         </div>
                         <div class="modal-body p-3">
                             <p class="negrita mb-2" id="lbMercFaltantesCliente"></p>
-                            <p class="text-muted small mb-3">Lista de productos (pendiente de implementar). Marque los faltantes del cliente.</p>
+                            <p class="text-muted small mb-3">Marque los productos faltantes del cliente.</p>
                             <div class="table-responsive" style="max-height:55vh;overflow-y:auto">
                                 <table class="table table-sm table-bordered table-hover mb-0">
                                     <thead class="bg-base text-white">
@@ -342,10 +343,11 @@ function getView() {
                                             <th class="text-center" style="width:48px"></th>
                                             <th>CÓDIGO</th>
                                             <th>PRODUCTO</th>
+                                            <th>MARCA</th>
                                         </tr>
                                     </thead>
                                     <tbody id="tblMercaderistaFaltantes">
-                                        <tr><td colspan="3" class="text-center text-muted py-4">Catálogo de productos pendiente de implementar</td></tr>
+                                        <tr><td colspan="4" class="text-center text-muted py-4">Cargando productos...</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -566,11 +568,61 @@ function mercaderista_abrir_actividades(codclie, nombre) {
     $('#modalMercaderistaActividades').modal('show');
 }
 
+function mercaderista_limpiar_campo_faltante(val) {
+    return String(val == null ? '' : val)
+        .replace(/[\u0000-\u001F\u007F-\u009F"\\']/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function mercaderista_render_faltantes(productos) {
+    const tbody = document.getElementById('tblMercaderistaFaltantes');
+    if (!tbody) return;
+
+    if (!productos.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">No hay productos configurados</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = productos.map((p, idx) => `
+        <tr>
+            <td class="text-center align-middle">
+                <input type="checkbox" class="merc-faltante-chk" data-idx="${idx}">
+            </td>
+            <td class="align-middle">${p.CODPROD || ''}</td>
+            <td class="align-middle">${p.DESPROD || ''}</td>
+            <td class="align-middle">${p.DESMARCA || ''}</td>
+        </tr>
+    `).join('');
+}
+
+function mercaderista_cargar_productos_faltantes() {
+    const tbody = document.getElementById('tblMercaderistaFaltantes');
+    if (tbody) tbody.innerHTML = `<tr><td colspan="4" class="text-center py-3">${GlobalLoader}</td></tr>`;
+    mercaderista_faltantes_productos = [];
+
+    return axios.post('/clientes/mercaderista_productos_faltantes', {
+        token: TOKEN,
+        sucursal: GlobalEmpnit,
+    })
+        .then((response) => {
+            if (response.data === 'error') throw new Error('error');
+            mercaderista_faltantes_productos = response.data.recordset || [];
+            mercaderista_render_faltantes(mercaderista_faltantes_productos);
+        })
+        .catch(() => {
+            if (tbody) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-danger py-4">No se pudo cargar el catálogo de productos</td></tr>';
+            }
+        });
+}
+
 function mercaderista_abrir_faltantes(codclie, nombre) {
     mercaderista_cliente_sel = { codclie, nombre };
     const lb = document.getElementById('lbMercFaltantesCliente');
     if (lb) lb.innerText = nombre || `Cliente ${codclie}`;
     $('#modalMercaderistaFaltantes').modal('show');
+    mercaderista_cargar_productos_faltantes();
 }
 
 function mercaderista_abrir_no_visitado(codclie, nombre) {
@@ -594,6 +646,24 @@ function mercaderista_abrir_ubicacion(lat, lng) {
 
 function mercaderista_fmt_si_no(val) {
     return Number(val) ? 'SI' : 'NO';
+}
+
+function mercaderista_fmt_si_no_html(val) {
+    const si = Number(val) ? true : false;
+    const texto = si ? 'SI' : 'NO';
+    const cls = si ? 'text-success negrita' : 'text-danger negrita';
+    return `<span class="${cls}">${texto}</span>`;
+}
+
+function mercaderista_tiene_faltantes(val) {
+    const s = (val || '').trim();
+    if (!s) return false;
+    try {
+        const arr = JSON.parse(s);
+        return Array.isArray(arr) && arr.length > 0;
+    } catch (e) {
+        return false;
+    }
 }
 
 function mercaderista_fmt_fecha_detalle(fecha) {
@@ -645,9 +715,10 @@ function mercaderista_ver_detalle_visita(codclie, nombre) {
                                 <tr><th class="bg-light">Mes / Año</th><td>${r.MES || '--'} / ${r.ANIO || '--'}</td></tr>
                                 <tr><th class="bg-light">Hora inicio</th><td>${r.HORA_INICIO || '--'}</td></tr>
                                 <tr><th class="bg-light">No visitado</th><td>${motivo || '—'}</td></tr>
-                                <tr><th class="bg-light">OTA</th><td>${mercaderista_fmt_si_no(r.OTA)}</td></tr>
-                                <tr><th class="bg-light">Vitrinas</th><td>${mercaderista_fmt_si_no(r.VITRINAS)}</td></tr>
-                                <tr><th class="bg-light">POP</th><td>${mercaderista_fmt_si_no(r.POP)}</td></tr>
+                                <tr><th class="bg-light">OTA</th><td>${mercaderista_fmt_si_no_html(r.OTA)}</td></tr>
+                                <tr><th class="bg-light">Vitrinas</th><td>${mercaderista_fmt_si_no_html(r.VITRINAS)}</td></tr>
+                                <tr><th class="bg-light">POP</th><td>${mercaderista_fmt_si_no_html(r.POP)}</td></tr>
+                                <tr><th class="bg-light">Faltantes</th><td>${mercaderista_fmt_si_no_html(mercaderista_tiene_faltantes(r.FALTANTES) ? 1 : 0)}</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -748,7 +819,7 @@ function mercaderista_registrar_actividades() {
     if (!mercaderista_cliente_sel) return;
 
     // [key en mercaderista_act_fotos, grupo, momento]
-    const requeridos = [
+    const fotosOpcionales = [
         ['ota_antes', 'ota', 'antes'],
         ['ota_despues', 'ota', 'despues'],
         ['vitrinas_antes', 'vitrinas', 'antes'],
@@ -757,9 +828,9 @@ function mercaderista_registrar_actividades() {
         ['pop_despues', 'pop', 'despues'],
     ];
 
-    const falta = requeridos.some(([key]) => !mercaderista_act_fotos[key]);
-    if (falta) {
-        F.AvisoError('Debe agregar la foto ANTES y DESPUÉS de OTA, VITRINAS y POP.');
+    const conFoto = fotosOpcionales.filter(([key]) => mercaderista_act_fotos[key]);
+    if (!conFoto.length) {
+        F.AvisoError('Debe agregar al menos una foto.');
         return;
     }
 
@@ -781,7 +852,7 @@ function mercaderista_registrar_actividades() {
             F.showToast('Subiendo las fotos, espere por favor...');
 
             const nombres = {};
-            const subidas = requeridos.map(([key, grupo, momento]) => {
+            const subidas = conFoto.map(([key, grupo, momento]) => {
                 const file = mercaderista_act_fotos[key];
                 const ext = mercaderista_file_ext(file);
                 const filename = `${cod} - ${ddmmyy} - ${grupo} - ${momento}${ext}`;
@@ -798,9 +869,9 @@ function mercaderista_registrar_actividades() {
                     anio,
                     hora_inicio: mercaderista_hora_actual(),
                     novisitado: '',
-                    ota: 1,
-                    vitrinas: 1,
-                    pop: 1,
+                    ota: mercaderista_actividad_tiene_foto('ota') ? 1 : 0,
+                    vitrinas: mercaderista_actividad_tiene_foto('vitrinas') ? 1 : 0,
+                    pop: mercaderista_actividad_tiene_foto('pop') ? 1 : 0,
                     ota_f_antes: nombres['ota_antes'] || '',
                     ota_f_despues: nombres['ota_despues'] || '',
                     vitrinas_f_antes: nombres['vitrinas_antes'] || '',
@@ -835,7 +906,61 @@ function mercaderista_cancelar_actividades() {
 }
 
 function mercaderista_guardar_faltantes() {
-    F.Aviso('Registro de faltantes pendiente de implementar');
+    if (!mercaderista_cliente_sel) return;
+
+    const seleccionados = [];
+    document.querySelectorAll('#tblMercaderistaFaltantes .merc-faltante-chk:checked').forEach((chk) => {
+        const idx = Number(chk.getAttribute('data-idx'));
+        const prod = mercaderista_faltantes_productos[idx];
+        if (!prod) return;
+        seleccionados.push({
+            CODPROD: mercaderista_limpiar_campo_faltante(prod.CODPROD),
+            DESPROD: mercaderista_limpiar_campo_faltante(prod.DESPROD),
+        });
+    });
+
+    if (!seleccionados.length) {
+        F.AvisoError('Seleccione al menos un producto faltante');
+        return;
+    }
+
+    const btn = document.getElementById('btnMercaderistaGuardarFaltantes');
+    const { fecha, mes, anio } = mercaderista_fecha_partes();
+    const faltantesJson = JSON.stringify(seleccionados);
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fal fa-spinner fa-spin mr-1"></i> Guardando...';
+    }
+
+    mercaderista_guardar_visita({
+        codclie: mercaderista_cliente_sel.codclie,
+        fecha,
+        mes,
+        anio,
+        hora_inicio: mercaderista_hora_actual(),
+        novisitado: '',
+        ota: 0,
+        vitrinas: 0,
+        pop: 0,
+        faltantes: faltantesJson,
+    })
+        .then((response) => {
+            if (response.data === 'error') throw new Error('error');
+            F.Aviso('Faltantes registrados correctamente');
+            $('#modalMercaderistaFaltantes').modal('hide');
+            mercaderista_cliente_sel = null;
+            mercaderista_cargar_clientes();
+        })
+        .catch(() => {
+            F.AvisoError('No se pudo registrar los faltantes');
+        })
+        .finally(() => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fal fa-save mr-1"></i> Guardar';
+            }
+        });
 }
 
 function mercaderista_cargar_clientes() {

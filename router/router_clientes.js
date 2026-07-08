@@ -1182,6 +1182,23 @@ router.post("/buscar_cliente_mercaderista", async (req, res) => {
     execute.QueryToken(res, qry, token);
 });
 
+router.post("/mercaderista_productos_faltantes", async (req, res) => {
+    const { token } = req.body;
+
+    const qry = `
+        SELECT PRODUCTOS.CODPROD,
+               PRODUCTOS.DESPROD,
+               ISNULL(MARCAS.DESMARCA, '') AS DESMARCA
+          FROM PRODUCTOS
+          LEFT OUTER JOIN MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA
+         WHERE PRODUCTOS.CLASIF_BI = 78
+           AND PRODUCTOS.HABILITADO = 'SI'
+         ORDER BY PRODUCTOS.DESPROD
+    `;
+
+    execute.QueryToken(res, qry, token);
+});
+
 router.post("/mercaderista_visita_guardar", async (req, res) => {
     const {
         token, sucursal, codemp, codclie, fecha, mes, anio,
@@ -1189,6 +1206,7 @@ router.post("/mercaderista_visita_guardar", async (req, res) => {
         ota_f_antes, ota_f_despues,
         vitrinas_f_antes, vitrinas_f_despues,
         pop_f_antes, pop_f_despues,
+        faltantes,
     } = req.body;
 
     const emp = esc(sucursal);
@@ -1208,6 +1226,7 @@ router.post("/mercaderista_visita_guardar", async (req, res) => {
     const vitFD = esc((vitrinas_f_despues || '').trim());
     const popFA = esc((pop_f_antes || '').trim());
     const popFD = esc((pop_f_despues || '').trim());
+    const faltantesVal = esc((faltantes || '').trim());
 
     if (!fechaVal || ven <= 0 || clie <= 0) {
         return res.status(400).send('error');
@@ -1235,7 +1254,8 @@ router.post("/mercaderista_visita_guardar", async (req, res) => {
                 VITRINAS_F_ANTES = '${vitFA}',
                 VITRINAS_F_DESPUES = '${vitFD}',
                 POP_F_ANTES = '${popFA}',
-                POP_F_DESPUES = '${popFD}'
+                POP_F_DESPUES = '${popFD}',
+                FALTANTES = '${faltantesVal}'
              WHERE EMPNIT = '${emp}'
                AND CODEMP = ${ven}
                AND CODCLIENTE = ${clie}
@@ -1245,10 +1265,10 @@ router.post("/mercaderista_visita_guardar", async (req, res) => {
         BEGIN
             INSERT INTO MERCADERISTAS_VISITAS
                 (EMPNIT, CODEMP, CODCLIENTE, FECHA, MES, ANIO, HORA_INICIO, NOVISITADO, OTA, VITRINAS, POP,
-                 OTA_F_ANTES, OTA_F_DESPUES, VITRINAS_F_ANTES, VITRINAS_F_DESPUES, POP_F_ANTES, POP_F_DESPUES)
+                 OTA_F_ANTES, OTA_F_DESPUES, VITRINAS_F_ANTES, VITRINAS_F_DESPUES, POP_F_ANTES, POP_F_DESPUES, FALTANTES)
             VALUES
                 ('${emp}', ${ven}, ${clie}, '${fechaVal}', ${mesVal}, ${anioVal}, '${horaVal}', '${motivoVal}', ${otaVal}, ${vitVal}, ${popVal},
-                 '${otaFA}', '${otaFD}', '${vitFA}', '${vitFD}', '${popFA}', '${popFD}');
+                 '${otaFA}', '${otaFD}', '${vitFA}', '${vitFD}', '${popFA}', '${popFD}', '${faltantesVal}');
         END
     `;
 
@@ -1286,7 +1306,8 @@ router.post("/mercaderista_visita_detalle", async (req, res) => {
                ISNULL(MV.VITRINAS_F_ANTES, '') AS VITRINAS_F_ANTES,
                ISNULL(MV.VITRINAS_F_DESPUES, '') AS VITRINAS_F_DESPUES,
                ISNULL(MV.POP_F_ANTES, '') AS POP_F_ANTES,
-               ISNULL(MV.POP_F_DESPUES, '') AS POP_F_DESPUES
+               ISNULL(MV.POP_F_DESPUES, '') AS POP_F_DESPUES,
+               ISNULL(MV.FALTANTES, '') AS FALTANTES
           FROM MERCADERISTAS_VISITAS MV
           LEFT OUTER JOIN CLIENTES
             ON CLIENTES.EMPNIT = MV.EMPNIT
