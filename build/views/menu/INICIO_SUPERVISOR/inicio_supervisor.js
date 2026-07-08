@@ -3,7 +3,9 @@ var supervisor_currentPane = 'uno';
 var supervisor_dashboardCharts = {};
 
 function supervisor_getSucursal() {
-    return GlobalEmpnit || document.getElementById('cmbSucursalHeader')?.value || '%';
+    const cmb = document.getElementById('cmbSucursalHeader')?.value;
+    if (cmb) return cmb;
+    return GlobalEmpnit || '%';
 }
 
 function supervisor_getMes() {
@@ -25,16 +27,29 @@ function supervisor_labelModoVentas() {
 function supervisor_setupSucursalHeader() {
     const cmb = document.getElementById('cmbSucursalHeader');
     if (!cmb) return;
-    const emp = GlobalEmpnit || '%';
-    const nom = GlobalNomEmpresa || 'Sede';
-    cmb.innerHTML = `<option value="${emp}">${nom}</option>`;
-    cmb.value = emp;
-    cmb.disabled = true;
+    GF.get_data_empresas()
+        .then((data) => {
+            let str = '<option value="%">TODAS LAS SEDES</option>';
+            (data.recordset || []).forEach((r) => {
+                str += `<option value="${r.EMPNIT}">${r.NOMBRE}</option>`;
+            });
+            cmb.innerHTML = str;
+            cmb.value = GlobalEmpnit || '%';
+            cmb.disabled = false;
+            cmb.addEventListener('change', supervisor_onHeaderFiltersChange);
+        })
+        .catch(() => {
+            cmb.innerHTML = `<option value="${GlobalEmpnit || '%'}">${GlobalNomEmpresa || 'Sede'}</option>`;
+            cmb.value = GlobalEmpnit || '%';
+        });
 }
 
 function supervisor_onHeaderFiltersChange() {
     if (supervisor_currentPane === 'uno') {
         supervisor_initDashboard();
+    }
+    if (typeof window.supervisor_mercaderistas_refresh === 'function') {
+        window.supervisor_mercaderistas_refresh();
     }
 }
 
@@ -43,18 +58,21 @@ function supervisor_initDashboard() {
 }
 
 var SUPERVISOR_EMBED_BASE = '../views/menu/INICIO_SUPERVISOR/';
+var MERC_VISITAS_CORE_URL = '../views/shared/view_mercaderistas_visitas_core.js';
 var SUPERVISOR_EMBED_SCRIPTS = {
     btnMenuClientes: SUPERVISOR_EMBED_BASE + 'view_clientes.js',
     btnMenuObjetivos: SUPERVISOR_EMBED_BASE + 'view_avance_procter_vendedor.js',
     btnMenuCoberturaMunicipio: SUPERVISOR_EMBED_BASE + 'view_cobertura_municipios_mapa.js',
     btnMenuRptVisitasMapa: SUPERVISOR_EMBED_BASE + 'view_visitas_vendedores_gps.js',
+    btnMenuMercaderistas: SUPERVISOR_EMBED_BASE + 'view_mercaderistas.js',
 };
 
 function supervisor_bindEmbedMenu(cardId) {
     const scriptUrl = SUPERVISOR_EMBED_SCRIPTS[cardId];
     if (!scriptUrl) return;
     document.getElementById(cardId)?.addEventListener('click', () => {
-        supervisor_loadEmbed(scriptUrl, cardId);
+        const deps = cardId === 'btnMenuMercaderistas' ? [MERC_VISITAS_CORE_URL] : null;
+        supervisor_loadEmbed(scriptUrl, cardId, deps);
     });
 }
 
@@ -111,7 +129,8 @@ function supervisor_teardownEmbed() {
         try { supervisor_embedDestroy(); } catch (e) { /* vista embebida sin teardown */ }
         supervisor_embedDestroy = null;
     }
-    document.querySelector('script[data-supervisor-embed]')?.remove();
+    document.querySelectorAll('script[data-supervisor-embed]').forEach((s) => s.remove());
+    window.supervisor_mercaderistas_refresh = null;
     const embed = document.getElementById('supervisorPanelEmbed');
     if (embed) {
         embed.classList.add('d-none');
@@ -132,7 +151,29 @@ function supervisor_rewireEmbedActions(container) {
     });
 }
 
-function supervisor_loadEmbed(scriptUrl, cardId) {
+function supervisor_loadScriptChain(urls) {
+    return new Promise((resolve, reject) => {
+        let idx = 0;
+        const loadNext = () => {
+            if (idx >= urls.length) {
+                resolve();
+                return;
+            }
+            const script = document.createElement('script');
+            script.src = urls[idx] + (urls[idx].includes('?') ? '&' : '?') + '_se=' + Date.now();
+            script.setAttribute('data-supervisor-embed', 'true');
+            script.onload = () => {
+                idx += 1;
+                loadNext();
+            };
+            script.onerror = () => reject(new Error('No se pudo cargar: ' + urls[idx]));
+            document.getElementById('root').appendChild(script);
+        };
+        loadNext();
+    });
+}
+
+function supervisor_loadEmbed(scriptUrl, cardId, deps) {
     supervisor_closeSidebarMobile();
     supervisor_teardownEmbed();
     document.getElementById('myTabHomeContent')?.classList.add('d-none');
@@ -141,11 +182,10 @@ function supervisor_loadEmbed(scriptUrl, cardId) {
     embed.classList.remove('d-none');
     embed.innerHTML = GlobalLoader;
 
-    return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = scriptUrl + (scriptUrl.includes('?') ? '&' : '?') + '_se=' + Date.now();
-        script.setAttribute('data-supervisor-embed', 'true');
-        script.onload = () => {
+    const chain = Array.isArray(deps) && deps.length ? [...deps, scriptUrl] : [scriptUrl];
+
+    return supervisor_loadScriptChain(chain)
+        .then(() => {
             const embedRoot = embed;
             const savedRoot = root;
             root = embedRoot;
@@ -159,11 +199,7 @@ function supervisor_loadEmbed(scriptUrl, cardId) {
                 window.destroyView = window._supervisorCore.destroyView;
             }
             supervisor_rewireEmbedActions(embedRoot);
-            resolve();
-        };
-        script.onerror = () => reject(new Error('No se pudo cargar: ' + scriptUrl));
-        document.getElementById('root').appendChild(script);
-    });
+        });
 }
 
 function getView(){
@@ -297,6 +333,7 @@ function getView(){
                 { id: 'btnMenuObjetivos', label: 'Logro objetivos P&G', icon: 'fa-chart-pie', color: 'danger' },
                 { id: 'btnMenuCoberturaMunicipio', label: 'Cobertura municipios', icon: 'fa-globe', color: 'primary' },
                 { id: 'btnMenuRptVisitasMapa', label: 'Visitas vendedor mapa', icon: 'fa-map-signs', color: 'secondary' },
+                { id: 'btnMenuMercaderistas', label: 'Mercaderistas', icon: 'fa-clipboard-list', color: 'info' },
                 { id: 'btnMenuRptInventario', label: 'Inventario', icon: 'fa-warehouse', color: 'secondary' },
                 { id: 'btnMenuRptVendedores', label: 'Ventas vendedores', icon: 'fa-chart-bar', color: 'secondary' },
                 { id: 'btnMenuRptMarcas', label: 'Reporte marcas', icon: 'fa-list', color: 'secondary' },

@@ -14,6 +14,7 @@ function proveedor_labelModoVentas() {
 }
 
 var PROVEEDOR_EMBED_BASE = '../views/menu/INICIO_PROVEEDOR/';
+var MERC_VISITAS_CORE_URL = '../views/shared/view_mercaderistas_visitas_core.js';
 
 function proveedor_getSucursal() {
     return document.getElementById('cmbSucursalHeader')?.value || '%';
@@ -41,6 +42,7 @@ var PROVEEDOR_EMBED_SCRIPTS = {
     btnMenuCoberturaMunicipios: PROVEEDOR_EMBED_BASE + 'view_cobertura_municipios_mapa.js',
     btnMenuCoberturaClientes: PROVEEDOR_EMBED_BASE + 'view_objetivo_cobertura.js',
     btnMenuCoberturaMarcas: PROVEEDOR_EMBED_BASE + 'view_cobertura_marcas.js',
+    btnMenuMercaderistas: PROVEEDOR_EMBED_BASE + 'view_mercaderistas.js',
 };
 
 var PROVEEDOR_MODERN_EMBEDS = new Set([
@@ -49,6 +51,7 @@ var PROVEEDOR_MODERN_EMBEDS = new Set([
     'btnMenuCoberturaMunicipios',
     'btnMenuCoberturaClientes',
     'btnMenuCoberturaMarcas',
+    'btnMenuMercaderistas',
 ]);
 
 function proveedor_toggleSidebar(forceOpen) {
@@ -81,7 +84,7 @@ function proveedor_teardownEmbed() {
         try { proveedor_embedDestroy(); } catch (e) { /* vista embebida sin teardown */ }
         proveedor_embedDestroy = null;
     }
-    document.querySelector('script[data-proveedor-embed]')?.remove();
+    document.querySelectorAll('script[data-proveedor-embed]').forEach((s) => s.remove());
     const embed = document.getElementById('proveedorPanelEmbed');
     if (embed) {
         embed.classList.add('d-none');
@@ -127,7 +130,29 @@ function proveedor_rewireEmbedActions(container) {
     });
 }
 
-function proveedor_loadEmbed(scriptUrl, cardId) {
+function proveedor_loadScriptChain(urls) {
+    return new Promise((resolve, reject) => {
+        let idx = 0;
+        const loadNext = () => {
+            if (idx >= urls.length) {
+                resolve();
+                return;
+            }
+            const script = document.createElement('script');
+            script.src = urls[idx] + (urls[idx].includes('?') ? '&' : '?') + '_pe=' + Date.now();
+            script.setAttribute('data-proveedor-embed', 'true');
+            script.onload = () => {
+                idx += 1;
+                loadNext();
+            };
+            script.onerror = () => reject(new Error('No se pudo cargar: ' + urls[idx]));
+            document.getElementById('root').appendChild(script);
+        };
+        loadNext();
+    });
+}
+
+function proveedor_loadEmbed(scriptUrl, cardId, deps) {
     proveedor_closeSidebarMobile();
     proveedor_teardownEmbed();
     document.getElementById('myTabHomeContent')?.classList.add('d-none');
@@ -137,11 +162,10 @@ function proveedor_loadEmbed(scriptUrl, cardId) {
     embed.innerHTML = GlobalLoader;
     proveedor_setActiveCard(cardId);
 
-    return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = scriptUrl + (scriptUrl.includes('?') ? '&' : '?') + '_pe=' + Date.now();
-        script.setAttribute('data-proveedor-embed', 'true');
-        script.onload = () => {
+    const chain = Array.isArray(deps) && deps.length ? [...deps, scriptUrl] : [scriptUrl];
+
+    return proveedor_loadScriptChain(chain)
+        .then(() => {
             const embedRoot = embed;
             const savedRoot = root;
             root = embedRoot;
@@ -155,10 +179,15 @@ function proveedor_loadEmbed(scriptUrl, cardId) {
                 window.destroyView = window._proveedorCore.destroyView;
             }
             proveedor_rewireEmbedActions(embedRoot);
-            resolve();
-        };
-        script.onerror = () => reject(new Error('No se pudo cargar: ' + scriptUrl));
-        document.getElementById('root').appendChild(script);
+        });
+}
+
+function proveedor_bindEmbedMenu(cardId) {
+    const scriptUrl = PROVEEDOR_EMBED_SCRIPTS[cardId];
+    if (!scriptUrl) return;
+    document.getElementById(cardId)?.addEventListener('click', () => {
+        const deps = cardId === 'btnMenuMercaderistas' ? [MERC_VISITAS_CORE_URL] : null;
+        proveedor_loadEmbed(scriptUrl, cardId, deps);
     });
 }
 
@@ -278,6 +307,7 @@ function getView(){
                 { id: 'btnMenuCoberturaClientes', label: 'Cobertura clientes',       icon: 'fa-users',      color: 'secondary' },
                 { id: 'btnMenuCoberturaMarcas',   label: 'Cobertura marcas',         icon: 'fa-tags',       color: 'info' },
                 { id: 'btnMenuRptVisitasMapa',   label: 'Visitas vendedor mapa',     icon: 'fa-map-signs',  color: 'secondary' },
+                { id: 'btnMenuMercaderistas',    label: 'Mercaderistas',             icon: 'fa-clipboard-list', color: 'info' },
                 { id: 'btnMenuObjetivos',        label: 'Objetivos',                 icon: 'fa-list',       color: 'base' },
                 { id: 'btnMenuInventarioRetroactivo', label: 'Inventario retroactivo', icon: 'fa-box',     color: 'secondary' },
             ];
@@ -1205,29 +1235,7 @@ function addListeners(){
 
      // inventarios
 
-     document.getElementById('btnMenuObjetivosLogro').addEventListener('click',()=>{
-        proveedor_loadEmbed(PROVEEDOR_EMBED_SCRIPTS.btnMenuObjetivosLogro, 'btnMenuObjetivosLogro');
-     });
-
-     document.getElementById('btnMenuInventarioRetroactivo').addEventListener('click',()=>{
-        proveedor_loadEmbed(PROVEEDOR_EMBED_SCRIPTS.btnMenuInventarioRetroactivo, 'btnMenuInventarioRetroactivo');
-     });
-
-     document.getElementById('btnMenuRptVisitasMapa').addEventListener('click',()=>{
-        proveedor_loadEmbed(PROVEEDOR_EMBED_SCRIPTS.btnMenuRptVisitasMapa, 'btnMenuRptVisitasMapa');
-     });
-
-     document.getElementById('btnMenuCoberturaMunicipios').addEventListener('click',()=>{
-        proveedor_loadEmbed(PROVEEDOR_EMBED_SCRIPTS.btnMenuCoberturaMunicipios, 'btnMenuCoberturaMunicipios');
-     });
-
-      document.getElementById('btnMenuCoberturaClientes').addEventListener('click',()=>{
-        proveedor_loadEmbed(PROVEEDOR_EMBED_SCRIPTS.btnMenuCoberturaClientes, 'btnMenuCoberturaClientes');
-     });
-
-     document.getElementById('btnMenuCoberturaMarcas').addEventListener('click',()=>{
-        proveedor_loadEmbed(PROVEEDOR_EMBED_SCRIPTS.btnMenuCoberturaMarcas, 'btnMenuCoberturaMarcas');
-     });
+     Object.keys(PROVEEDOR_EMBED_SCRIPTS).forEach(proveedor_bindEmbedMenu);
 
      listeners_objetivos();
 

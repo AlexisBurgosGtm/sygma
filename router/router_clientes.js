@@ -1193,7 +1193,68 @@ router.post("/mercaderista_productos_faltantes", async (req, res) => {
           LEFT OUTER JOIN MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA
          WHERE PRODUCTOS.CLASIF_BI = 78
            AND PRODUCTOS.HABILITADO = 'SI'
-         ORDER BY PRODUCTOS.DESPROD
+         ORDER BY PRODUCTOS.CODPROD
+    `;
+
+    execute.QueryToken(res, qry, token);
+});
+
+router.post("/mercaderista_lista_precios", async (req, res) => {
+    const { token } = req.body;
+
+    const qry = `
+        SELECT PRODUCTOS.CODPROD,
+               PRODUCTOS.DESPROD,
+               PRECIOS.CODMEDIDA,
+               PRECIOS.EQUIVALE,
+               ISNULL(PRECIOS.PRECIO, 0) AS PRECIO
+          FROM PRODUCTOS
+         INNER JOIN PRECIOS ON PRODUCTOS.CODPROD = PRECIOS.CODPROD
+         WHERE PRODUCTOS.HABILITADO = 'SI'
+           AND PRECIOS.HABILITADO = 'SI'
+         ORDER BY PRODUCTOS.DESPROD, PRECIOS.CODMEDIDA
+    `;
+
+    execute.QueryToken(res, qry, token);
+});
+
+router.post("/supervisor_mercaderistas_visitas", async (req, res) => {
+    const { token, sucursal, fi, ff } = req.body;
+    const emp = esc(sucursal);
+    const fiVal = esc((fi || '').trim());
+    const ffVal = esc((ff || '').trim());
+
+    if (!fiVal || !ffVal) {
+        return res.status(400).send('error');
+    }
+
+    const filtroEmp = (sucursal === '%' || !String(sucursal || '').trim())
+        ? '1=1'
+        : `MV.EMPNIT = '${emp}'`;
+
+    const qry = `
+        SELECT MV.EMPNIT,
+               MV.CODEMP,
+               MV.CODCLIENTE,
+               MV.FECHA,
+               ISNULL(MV.HORA_INICIO, '') AS HORA_INICIO,
+               ISNULL(E.NOMEMPLEADO, '') AS NOMMERCADERISTA,
+               ISNULL(C.NOMBRE, '') AS NOMBRE_CLIENTE,
+               ISNULL(C.NEGOCIO, '') AS NEGOCIO,
+               ISNULL(EMP.NOMBRE, MV.EMPNIT) AS NOMEMPRESA
+          FROM MERCADERISTAS_VISITAS MV
+          LEFT OUTER JOIN EMPLEADOS E
+            ON MV.EMPNIT = E.EMPNIT
+           AND MV.CODEMP = E.CODEMPLEADO
+          LEFT OUTER JOIN CLIENTES C
+            ON MV.EMPNIT = C.EMPNIT
+           AND MV.CODCLIENTE = C.CODCLIENTE
+          LEFT OUTER JOIN EMPRESAS EMP
+            ON MV.EMPNIT = EMP.EMPNIT
+         WHERE ${filtroEmp}
+           AND MV.FECHA >= '${fiVal}'
+           AND MV.FECHA <= '${ffVal}'
+         ORDER BY MV.FECHA DESC, MV.HORA_INICIO DESC, E.NOMEMPLEADO, C.NOMBRE
     `;
 
     execute.QueryToken(res, qry, token);

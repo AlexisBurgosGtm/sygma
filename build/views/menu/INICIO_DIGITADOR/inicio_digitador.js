@@ -1,18 +1,35 @@
 var digitador_currentPane = 'uno';
 var digitador_dashboardCharts = {};
+var digitador_embedDestroy = null;
+var DIGITADOR_EMBED_BASE = '../views/menu/INICIO_DIGITADOR/';
+var MERC_VISITAS_CORE_URL = '../views/shared/view_mercaderistas_visitas_core.js';
+var DIGITADOR_EMBED_SCRIPTS = {
+    btnMenuMercaderistas: DIGITADOR_EMBED_BASE + 'view_mercaderistas.js',
+};
 
 function digitador_getSucursal() {
-    return GlobalEmpnit || document.getElementById('cmbSucursalHeader')?.value || '%';
+    const cmb = document.getElementById('cmbSucursalHeader')?.value;
+    if (cmb) return cmb;
+    return GlobalEmpnit || '%';
 }
 
 function digitador_setupSucursalHeader() {
     const cmb = document.getElementById('cmbSucursalHeader');
     if (!cmb) return;
-    const emp = GlobalEmpnit || '%';
-    const nom = GlobalNomEmpresa || 'Sede';
-    cmb.innerHTML = `<option value="${emp}">${nom}</option>`;
-    cmb.value = emp;
-    cmb.disabled = true;
+    GF.get_data_empresas()
+        .then((data) => {
+            let str = '<option value="%">TODAS LAS SEDES</option>';
+            (data.recordset || []).forEach((r) => {
+                str += `<option value="${r.EMPNIT}">${r.NOMBRE}</option>`;
+            });
+            cmb.innerHTML = str;
+            cmb.value = GlobalEmpnit || '%';
+            cmb.disabled = false;
+        })
+        .catch(() => {
+            cmb.innerHTML = `<option value="${GlobalEmpnit || '%'}">${GlobalNomEmpresa || 'Sede'}</option>`;
+            cmb.value = GlobalEmpnit || '%';
+        });
 }
 
 function digitador_getMes() {
@@ -38,6 +55,87 @@ function digitador_onHeaderFiltersChange() {
     if (digitador_currentPane === 'siete') {
         tbl_rpt_sellout();
     }
+    if (typeof window.digitador_embedRefresh === 'function') {
+        window.digitador_embedRefresh();
+    }
+}
+
+function digitador_teardownEmbed() {
+    if (digitador_embedDestroy) {
+        try { digitador_embedDestroy(); } catch (e) { /* vista embebida sin teardown */ }
+        digitador_embedDestroy = null;
+    }
+    document.querySelectorAll('script[data-digitador-embed]').forEach((s) => s.remove());
+    window.digitador_embedRefresh = null;
+    const embed = document.getElementById('digitadorPanelEmbed');
+    if (embed) {
+        embed.classList.add('d-none');
+        embed.innerHTML = '';
+    }
+    document.getElementById('myTabHomeContent')?.classList.remove('d-none');
+    if (window._digitadorCore) {
+        window.initView = window._digitadorCore.initView;
+        window.destroyView = window._digitadorCore.destroyView;
+    }
+}
+
+function digitador_loadScriptChain(urls) {
+    return new Promise((resolve, reject) => {
+        let idx = 0;
+        const loadNext = () => {
+            if (idx >= urls.length) {
+                resolve();
+                return;
+            }
+            const script = document.createElement('script');
+            script.src = urls[idx] + (urls[idx].includes('?') ? '&' : '?') + '_de=' + Date.now();
+            script.setAttribute('data-digitador-embed', 'true');
+            script.onload = () => {
+                idx += 1;
+                loadNext();
+            };
+            script.onerror = () => reject(new Error('No se pudo cargar: ' + urls[idx]));
+            document.getElementById('root').appendChild(script);
+        };
+        loadNext();
+    });
+}
+
+function digitador_loadEmbed(scriptUrl, cardId, deps) {
+    digitador_closeSidebarMobile();
+    digitador_teardownEmbed();
+    document.getElementById('myTabHomeContent')?.classList.add('d-none');
+    const embed = document.getElementById('digitadorPanelEmbed');
+    embed.classList.remove('d-none');
+    embed.innerHTML = GlobalLoader;
+    digitador_setActiveCard(cardId);
+
+    const chain = Array.isArray(deps) && deps.length ? [...deps, scriptUrl] : [scriptUrl];
+
+    return digitador_loadScriptChain(chain)
+        .then(() => {
+            const embedRoot = embed;
+            const savedRoot = root;
+            root = embedRoot;
+            if (typeof initView === 'function') {
+                initView();
+                digitador_embedDestroy = typeof destroyView === 'function' ? destroyView : null;
+            }
+            root = savedRoot;
+            if (window._digitadorCore) {
+                window.initView = window._digitadorCore.initView;
+                window.destroyView = window._digitadorCore.destroyView;
+            }
+        });
+}
+
+function digitador_bindEmbedMenu(cardId) {
+    const scriptUrl = DIGITADOR_EMBED_SCRIPTS[cardId];
+    if (!scriptUrl) return;
+    document.getElementById(cardId)?.addEventListener('click', () => {
+        const deps = cardId === 'btnMenuMercaderistas' ? [MERC_VISITAS_CORE_URL] : null;
+        digitador_loadEmbed(scriptUrl, cardId, deps);
+    });
 }
 
 function digitador_setActiveCard(cardId) {
@@ -71,6 +169,7 @@ function digitador_showHome() {
 function digitador_showPanel(paneId, cardId, afterShow) {
     digitador_currentPane = paneId;
     digitador_closeSidebarMobile();
+    digitador_teardownEmbed();
     document.querySelectorAll('#myTabHomeContent .tab-pane').forEach(p => {
         p.classList.remove('show', 'active');
     });
@@ -143,6 +242,7 @@ function getView(){
                 </div>
                 <div class="col-12 col-md-10 proveedor-tab-area">
                     <div id="proveedorPanelContent">
+                        <div id="digitadorPanelEmbed" class="d-none"></div>
                         <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
                             <div id="digitadorMainContent">
@@ -216,6 +316,7 @@ function getView(){
                 { id: 'btnMenuRelleno', label: 'Relleno de inventario', icon: 'fa-warehouse', color: 'secondary', badge: 'lbTotalMR' },
                 { id: 'btnMenuEmbarques', label: 'Embarques', icon: 'fa-truck', color: 'secondary', badge: 'lbTotalEmb' },
                 { id: 'btnMenuSellout', label: 'Sell out', icon: 'fa-chart-pie', color: 'success' },
+                { id: 'btnMenuMercaderistas', label: 'Mercaderistas', icon: 'fa-clipboard-list', color: 'info' },
             ];
             return items.map(item => `
                 <div class="card proveedor-menu-card hand" id="${item.id}">
@@ -1440,6 +1541,7 @@ function addListeners(){
 
     digitador_initDashboard();
     digitador_setActiveCard('btnMenuDashboard');
+    cmbSucursalHeader?.addEventListener('change', digitador_onHeaderFiltersChange);
     cmbMesHeader?.addEventListener('change', digitador_onHeaderFiltersChange);
     cmbAnioHeader?.addEventListener('change', digitador_onHeaderFiltersChange);
     document.getElementById('cmbProveedorModoVentas')?.addEventListener('change', digitador_onHeaderFiltersChange);
@@ -1447,6 +1549,8 @@ function addListeners(){
     document.getElementById('btnMenuDashboard')?.addEventListener('click', () => {
         digitador_showHome();
     });
+
+    Object.keys(DIGITADOR_EMBED_SCRIPTS).forEach(digitador_bindEmbedMenu);
 
     F.slideAnimationTabs();
 
@@ -1785,6 +1889,7 @@ function initView(){
 }
 
 function destroyView(){
+    digitador_teardownEmbed();
     Object.keys(digitador_dashboardCharts).forEach(digitador_destroyDashboardChart);
     digitador_toggleSidebar(false);
     document.body.classList.remove('proveedor-sidebar-open');

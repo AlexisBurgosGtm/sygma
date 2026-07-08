@@ -1,6 +1,7 @@
 var mercaderista_currentPane = 'uno';
 var mercaderista_cliente_sel = null;
 var mercaderista_faltantes_productos = [];
+var mercaderista_precios_cache = [];
 var mercaderista_act_fotos = {
     ota_antes: null, ota_despues: null,
     vitrinas_antes: null, vitrinas_despues: null,
@@ -52,6 +53,10 @@ function mercaderista_showHome() {
     mercaderista_showPanel('uno', 'btnMenuMercHome', () => mercaderista_cargar_clientes());
 }
 
+function mercaderista_showPrecios() {
+    mercaderista_showPanel('dos', 'btnMenuMercPrecios', () => mercaderista_cargar_precios());
+}
+
 function getView() {
     const view = {
         body: () => `
@@ -86,13 +91,7 @@ function getView() {
                                 ${view.vista_inicio()}
                             </div>
                             <div class="tab-pane fade" id="dos" role="tabpanel">
-                                <div class="card card-rounded shadow"><div class="card-body p-4 text-muted">Módulo pendiente de asignar.</div></div>
-                            </div>
-                            <div class="tab-pane fade" id="tres" role="tabpanel">
-                                <div class="card card-rounded shadow"><div class="card-body p-4 text-muted">Módulo pendiente de asignar.</div></div>
-                            </div>
-                            <div class="tab-pane fade" id="cuatro" role="tabpanel">
-                                <div class="card card-rounded shadow"><div class="card-body p-4 text-muted">Módulo pendiente de asignar.</div></div>
+                                ${view.vista_precios()}
                             </div>
                         </div>
                     </div>
@@ -101,8 +100,6 @@ function getView() {
                 <ul class="nav nav-tabs hidden" id="myTabHome" role="tablist">
                     <li class="nav-item"><a class="nav-link active" id="tab-uno" data-toggle="tab" href="#uno"></a></li>
                     <li class="nav-item"><a class="nav-link" id="tab-dos" data-toggle="tab" href="#dos"></a></li>
-                    <li class="nav-item"><a class="nav-link" id="tab-tres" data-toggle="tab" href="#tres"></a></li>
-                    <li class="nav-item"><a class="nav-link" id="tab-cuatro" data-toggle="tab" href="#cuatro"></a></li>
                 </ul>
 
                 ${view.modal_actividades()}
@@ -114,9 +111,7 @@ function getView() {
         menu: () => {
             const items = [
                 { id: 'btnMenuMercHome', label: 'Inicio', icon: 'fa-home', color: 'primary' },
-                { id: 'btnMenuMercOpcion1', label: 'Opción 1', icon: 'fa-folder', color: 'secondary' },
-                { id: 'btnMenuMercOpcion2', label: 'Opción 2', icon: 'fa-folder', color: 'secondary' },
-                { id: 'btnMenuMercOpcion3', label: 'Opción 3', icon: 'fa-folder', color: 'secondary' },
+                { id: 'btnMenuMercPrecios', label: 'Precios', icon: 'fa-tags', color: 'success' },
             ];
             return items.map((item) => `
                 <div class="card proveedor-menu-card hand" id="${item.id}">
@@ -199,6 +194,37 @@ function getView() {
                                 </tr>
                             </thead>
                             <tbody id="tblDataMercaderistaClientes"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `,
+        vista_precios: () => `
+            <div class="card card-rounded shadow border-0">
+                <div class="card-body p-2 p-md-3">
+                    <div class="row align-items-end mb-2">
+                        <div class="col-12">
+                            <label class="negrita text-secondary small mb-1" for="txtMercaderistaBuscarPrecios">Buscar</label>
+                            <input type="search" class="form-control" id="txtMercaderistaBuscarPrecios"
+                                placeholder="Buscar por código, producto o medida..."
+                                oninput="mercaderista_filtrar_precios()">
+                        </div>
+                    </div>
+                    <div id="tblMercaderistaPreciosCards" class="d-md-none"></div>
+
+                    <div class="table-responsive d-none d-md-block">
+                        <table class="table table-sm table-bordered table-hover mb-0" id="tblMercaderistaPrecios" style="min-width:640px">
+                            <thead class="bg-base text-white">
+                                <tr>
+                                    <th>PRODUCTO</th>
+                                    <th>MEDIDA</th>
+                                    <th class="text-center">EQUIVALE</th>
+                                    <th class="text-right">PRECIO</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataMercaderistaPrecios">
+                                <tr><td colspan="4" class="text-center text-muted py-3">Cargando precios...</td></tr>
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -508,6 +534,88 @@ function mercaderista_filtrar_clientes() {
     document.querySelectorAll('#tblMercaderistaClientesCards .merc-cliente-card').forEach((card) => {
         card.style.display = !q || card.innerText.toLowerCase().includes(q) ? '' : 'none';
     });
+}
+
+function mercaderista_precio_card_html(r) {
+    return `
+        <div class="card merc-precio-card shadow-sm mb-2 border">
+            <div class="card-body p-2">
+                <div class="negrita text-base">${r.DESPROD || ''}</div>
+                <small class="text-muted d-block mb-1">${r.CODPROD || ''}</small>
+                <div class="d-flex justify-content-between align-items-center small">
+                    <span>${r.CODMEDIDA || ''} · Eq. ${r.EQUIVALE != null ? r.EQUIVALE : ''}</span>
+                    <span class="negrita text-success">${F.setMoneda(r.PRECIO, 'Q')}</span>
+                </div>
+            </div>
+        </div>`;
+}
+
+function mercaderista_render_precios(rows) {
+    const tbody = document.getElementById('tblDataMercaderistaPrecios');
+    const cards = document.getElementById('tblMercaderistaPreciosCards');
+
+    if (!rows.length) {
+        const msg = '<tr><td colspan="4" class="text-center text-muted py-3">No hay precios para mostrar</td></tr>';
+        const msgCard = '<div class="text-center text-muted py-3">No hay precios para mostrar</div>';
+        if (tbody) tbody.innerHTML = msg;
+        if (cards) cards.innerHTML = msgCard;
+        return;
+    }
+
+    if (tbody) {
+        tbody.innerHTML = rows.map((r) => `
+            <tr>
+                <td>
+                    <div class="negrita text-base">${r.DESPROD || ''}</div>
+                    <small class="text-muted">${r.CODPROD || ''}</small>
+                </td>
+                <td class="align-middle">${r.CODMEDIDA || ''}</td>
+                <td class="text-center align-middle">${r.EQUIVALE != null ? r.EQUIVALE : ''}</td>
+                <td class="text-right align-middle negrita">${F.setMoneda(r.PRECIO, 'Q')}</td>
+            </tr>
+        `).join('');
+    }
+
+    if (cards) {
+        cards.innerHTML = rows.map((r) => mercaderista_precio_card_html(r)).join('');
+    }
+}
+
+function mercaderista_filtrar_precios() {
+    const q = (document.getElementById('txtMercaderistaBuscarPrecios')?.value || '').toLowerCase().trim();
+    const filtrados = !q
+        ? mercaderista_precios_cache
+        : mercaderista_precios_cache.filter((r) => {
+            const txt = `${r.CODPROD || ''} ${r.DESPROD || ''} ${r.CODMEDIDA || ''}`.toLowerCase();
+            return txt.includes(q);
+        });
+    mercaderista_render_precios(filtrados);
+}
+
+function mercaderista_cargar_precios() {
+    const tbody = document.getElementById('tblDataMercaderistaPrecios');
+    const cards = document.getElementById('tblMercaderistaPreciosCards');
+    if (tbody) tbody.innerHTML = `<tr><td colspan="4" class="text-center py-3">${GlobalLoader}</td></tr>`;
+    if (cards) cards.innerHTML = GlobalLoader;
+    mercaderista_precios_cache = [];
+
+    axios.post('/clientes/mercaderista_lista_precios', {
+        token: TOKEN,
+        sucursal: GlobalEmpnit,
+    })
+        .then((response) => {
+            if (response.data === 'error') throw new Error('error');
+            mercaderista_precios_cache = response.data.recordset || [];
+            mercaderista_filtrar_precios();
+        })
+        .catch(() => {
+            if (tbody) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-danger py-3">No se pudieron cargar los precios</td></tr>';
+            }
+            if (cards) {
+                cards.innerHTML = '<div class="text-center text-danger py-3">No se pudieron cargar los precios</div>';
+            }
+        });
 }
 
 function mercaderista_acciones(r) {
@@ -1068,15 +1176,7 @@ function addListeners() {
     document.getElementById('cmbMercaderistaEstadoVisita')?.addEventListener('change', () => mercaderista_cargar_clientes());
 
     document.getElementById('btnMenuMercHome')?.addEventListener('click', () => mercaderista_showHome());
-    document.getElementById('btnMenuMercOpcion1')?.addEventListener('click', () => {
-        mercaderista_showPanel('dos', 'btnMenuMercOpcion1');
-    });
-    document.getElementById('btnMenuMercOpcion2')?.addEventListener('click', () => {
-        mercaderista_showPanel('tres', 'btnMenuMercOpcion2');
-    });
-    document.getElementById('btnMenuMercOpcion3')?.addEventListener('click', () => {
-        mercaderista_showPanel('cuatro', 'btnMenuMercOpcion3');
-    });
+    document.getElementById('btnMenuMercPrecios')?.addEventListener('click', () => mercaderista_showPrecios());
 
     document.getElementById('btnMercaderistaGuardarNoVisita')?.addEventListener('click', mercaderista_registrar_no_visita);
     document.getElementById('btnMercaderistaGuardarActividades')?.addEventListener('click', mercaderista_registrar_actividades);
