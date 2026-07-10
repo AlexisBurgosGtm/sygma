@@ -1,5 +1,6 @@
 var mercaderista_currentPane = 'uno';
 var mercaderista_cliente_sel = null;
+var mercaderista_detalle_actual = null;
 var mercaderista_faltantes_productos = [];
 var mercaderista_precios_cache = [];
 var mercaderista_act_fotos = {
@@ -106,6 +107,8 @@ function getView() {
                 ${view.modal_no_visitado()}
                 ${view.modal_faltantes()}
                 ${view.modal_detalle_visita()}
+                ${view.modal_fotos_actividad()}
+                ${view.modal_faltantes_lista()}
             </div>
         `,
         menu: () => {
@@ -164,7 +167,8 @@ function getView() {
                             <label class="negrita text-secondary small mb-1" for="cmbMercaderistaEstadoVisita">Estado</label>
                             <select class="form-control negrita text-base" id="cmbMercaderistaEstadoVisita">
                                 <option value="PENDIENTE" selected>PENDIENTE</option>
-                                <option value="VISITADO">VISITADO</option>
+                                <option value="ENCURSO">EN CURSO</option>
+                                <option value="VISITADO">FINALIZADO</option>
                             </select>
                         </div>
                    
@@ -406,6 +410,38 @@ function getView() {
                 </div>
             </div>
         `,
+        modal_fotos_actividad: () => `
+            <div class="modal fade" id="modalMercaderistaFotosActividad" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-info py-2">
+                            <h5 class="modal-title text-white negrita mb-0" id="lbMercaderistaFotosTitulo">Fotos</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"><span>&times;</span></button>
+                        </div>
+                        <div class="modal-body p-3" id="bodyMercaderistaFotosActividad"></div>
+                        <div class="modal-footer py-2">
+                            <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `,
+        modal_faltantes_lista: () => `
+            <div class="modal fade" id="modalMercaderistaFaltantesLista" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-primary py-2">
+                            <h5 class="modal-title text-white negrita mb-0">Faltantes registrados</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"><span>&times;</span></button>
+                        </div>
+                        <div class="modal-body p-3" id="bodyMercaderistaFaltantesLista"></div>
+                        <div class="modal-footer py-2">
+                            <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `,
     };
 
     const root = document.getElementById('root');
@@ -526,6 +562,150 @@ function mercaderista_guardar_visita(payload) {
     });
 }
 
+function mercaderista_iniciar_visita_api(payload) {
+    return axios.post('/clientes/mercaderista_visita_iniciar', {
+        token: TOKEN,
+        sucursal: GlobalEmpnit,
+        codemp: GlobalCodUsuario,
+        ...payload,
+    });
+}
+
+function mercaderista_finalizar_visita_api(payload) {
+    return axios.post('/clientes/mercaderista_visita_finalizar', {
+        token: TOKEN,
+        sucursal: GlobalEmpnit,
+        codemp: GlobalCodUsuario,
+        ...payload,
+    });
+}
+
+function mercaderista_sanitize_filename(filename) {
+    return String(filename || '')
+        .replace(/[/\\]/g, '_')
+        .replace(/\s+/g, '_')
+        .trim();
+}
+
+function mercaderista_remote_path(filename) {
+    const name = mercaderista_sanitize_filename(filename);
+    if (!name) return '';
+    return `${MERCADERISTA_STORAGE_FOLDER}/${name}`;
+}
+
+function mercaderista_cargar_foto_pcloud(filename) {
+    const rp = mercaderista_remote_path(filename);
+    if (!rp) return Promise.resolve(null);
+    return axios.post('/storage/file', { remote_path: rp, as_base64: true })
+        .then((resp) => {
+            if (!resp.data || resp.data.ok !== true || !resp.data.data_base64) return null;
+            const mime = resp.data.mime_type || 'image/jpeg';
+            return `data:${mime};base64,${resp.data.data_base64}`;
+        })
+        .catch(() => null);
+}
+
+function mercaderista_foto_bloque_html(label, dataUrl, filename) {
+    if (!dataUrl) {
+        const hint = String(filename || '').trim()
+            ? `<small class="text-muted d-block mt-1">${String(filename).trim()}</small>`
+            : '';
+        return `
+            <div class="col-6 mb-2">
+                <label class="small negrita text-secondary d-block mb-1">${label}</label>
+                <div class="border rounded text-center text-muted py-4 small">Sin foto en pCloud${hint}</div>
+            </div>`;
+    }
+    return `
+        <div class="col-6 mb-2">
+            <label class="small negrita text-secondary d-block mb-1">${label}</label>
+            <img src="${dataUrl}" alt="${label}" class="img-fluid rounded border shadow-sm" style="max-height:280px;object-fit:contain;width:100%">
+        </div>`;
+}
+
+function mercaderista_celda_actividad_detalle(val, tipo, etiquetaBtn) {
+    const si = Number(val) ? true : false;
+    const btn = si
+        ? `<button type="button" class="btn btn-outline-info btn-sm py-0 ml-2 merc-merc-btn-extra" data-tipo="${tipo}" title="${etiquetaBtn}">
+                <i class="fal fa-eye mr-1"></i> Ver
+           </button>`
+        : '';
+    return `
+        <div class="d-flex align-items-center flex-wrap">
+            ${mercaderista_fmt_si_no_html(si ? 1 : 0)}
+            ${btn}
+        </div>`;
+}
+
+function mercaderista_parse_faltantes_json(val) {
+    const s = (val || '').trim();
+    if (!s) return [];
+    try {
+        const arr = JSON.parse(s);
+        return Array.isArray(arr) ? arr : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function mercaderista_ver_fotos_actividad(tipo) {
+    const r = mercaderista_detalle_actual;
+    if (!r) return;
+    const map = {
+        ota: { titulo: 'Fotos OTA', antes: r.OTA_F_ANTES, despues: r.OTA_F_DESPUES },
+        vitrinas: { titulo: 'Fotos Vitrinas', antes: r.VITRINAS_F_ANTES, despues: r.VITRINAS_F_DESPUES },
+        pop: { titulo: 'Fotos POP', antes: r.POP_F_ANTES, despues: r.POP_F_DESPUES },
+    };
+    const c = map[tipo];
+    if (!c) return;
+    const lb = document.getElementById('lbMercaderistaFotosTitulo');
+    const body = document.getElementById('bodyMercaderistaFotosActividad');
+    if (lb) lb.innerText = c.titulo;
+    if (body) body.innerHTML = `<div class="text-center py-4">${GlobalLoader}</div>`;
+    $('#modalMercaderistaFotosActividad').modal('show');
+    Promise.all([mercaderista_cargar_foto_pcloud(c.antes), mercaderista_cargar_foto_pcloud(c.despues)])
+        .then(([urlAntes, urlDespues]) => {
+            if (body) {
+                body.innerHTML = `
+                    <div class="row">
+                        ${mercaderista_foto_bloque_html('Antes', urlAntes, c.antes)}
+                        ${mercaderista_foto_bloque_html('Después', urlDespues, c.despues)}
+                    </div>`;
+            }
+        });
+}
+
+function mercaderista_ver_faltantes_lista() {
+    const r = mercaderista_detalle_actual;
+    if (!r) return;
+    const items = mercaderista_parse_faltantes_json(r.FALTANTES);
+    const body = document.getElementById('bodyMercaderistaFaltantesLista');
+    if (!items.length) {
+        if (body) body.innerHTML = '<div class="text-center text-muted py-3">No hay faltantes registrados</div>';
+    } else if (body) {
+        body.innerHTML = `
+            <div class="table-responsive" style="max-height:55vh;overflow-y:auto">
+                <table class="table table-sm table-bordered table-hover mb-0">
+                    <thead class="bg-base text-white">
+                        <tr><th>CÓDIGO</th><th>PRODUCTO</th></tr>
+                    </thead>
+                    <tbody>
+                        ${items.map((p) => `<tr><td>${p.CODPROD || ''}</td><td>${p.DESPROD || ''}</td></tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+    }
+    $('#modalMercaderistaFaltantesLista').modal('show');
+}
+
+function mercaderista_on_detalle_extra_click(e) {
+    const btn = e.target.closest('.merc-merc-btn-extra');
+    if (!btn) return;
+    const tipo = btn.getAttribute('data-tipo');
+    if (tipo === 'faltantes') mercaderista_ver_faltantes_lista();
+    else if (tipo === 'ota' || tipo === 'vitrinas' || tipo === 'pop') mercaderista_ver_fotos_actividad(tipo);
+}
+
 function mercaderista_filtrar_clientes() {
     const q = (document.getElementById('txtMercaderistaBuscar')?.value || '').toLowerCase().trim();
     document.querySelectorAll('#tblDataMercaderistaClientes tr').forEach((tr) => {
@@ -624,6 +804,12 @@ function mercaderista_acciones(r) {
     const cod = r.CODCLIENTE;
     const nombre = mercaderista_esc(r.NOMBRE || '');
     const estado = (document.getElementById('cmbMercaderistaEstadoVisita')?.value || 'PENDIENTE').toUpperCase();
+    const mapaBtn = `
+            <button type="button" class="btn btn-sm btn-secondary hand shadow w-100"
+                title="Ubicación"
+                onclick="mercaderista_abrir_ubicacion('${mercaderista_esc(lat)}','${mercaderista_esc(lng)}')">
+                <i class="fal fa-map-marker-alt mr-1"></i> Mapa
+            </button>`;
 
     if (estado === 'VISITADO') {
         return `
@@ -642,30 +828,113 @@ function mercaderista_acciones(r) {
         </div>`;
     }
 
-    return `
+    if (estado === 'ENCURSO') {
+        return `
         <div class="merc-cliente-acciones w-100">
             <button type="button" class="btn btn-sm btn-info hand shadow w-100"
                 title="Actividades"
                 onclick="mercaderista_abrir_actividades(${cod},'${nombre}')">
                 <i class="fal fa-tasks mr-1"></i> Actividades
             </button>
-            <button type="button" class="btn btn-sm btn-warning hand shadow w-100"
-                title="No visitado"
-                onclick="mercaderista_abrir_no_visitado(${cod},'${nombre}')">
-                <i class="fal fa-times-circle mr-1"></i> No visitado
-            </button>
             <button type="button" class="btn btn-sm btn-primary hand shadow w-100"
                 title="Faltantes"
                 onclick="mercaderista_abrir_faltantes(${cod},'${nombre}')">
                 <i class="fal fa-clipboard-list mr-1"></i> Faltantes
             </button>
-            <button type="button" class="btn btn-sm btn-secondary hand shadow w-100"
-                title="Ubicación"
-                onclick="mercaderista_abrir_ubicacion('${mercaderista_esc(lat)}','${mercaderista_esc(lng)}')">
-                <i class="fal fa-map-marker-alt mr-1"></i> Mapa
+            <button type="button" class="btn btn-sm btn-success hand shadow w-100"
+                id="btnMercFinalizarVisita${cod}"
+                title="Finalizar visita"
+                onclick="mercaderista_finalizar_visita(${cod},'${nombre}', this)">
+                <i class="fal fa-flag-checkered mr-1"></i> Finalizar visita
             </button>
+        </div>`;
+    }
+
+    return `
+        <div class="merc-cliente-acciones w-100">
+            <button type="button" class="btn btn-sm btn-success hand shadow w-100"
+                id="btnMercIniciarVisita${cod}"
+                title="Iniciar visita"
+                onclick="mercaderista_iniciar_visita(${cod},'${nombre}', this)">
+                <i class="fal fa-play mr-1"></i> Iniciar visita
+            </button>
+            <button type="button" class="btn btn-sm btn-warning hand shadow w-100"
+                title="No visitado"
+                onclick="mercaderista_abrir_no_visitado(${cod},'${nombre}')">
+                <i class="fal fa-times-circle mr-1"></i> No visitado
+            </button>
+            ${mapaBtn}
         </div>
     `;
+}
+
+function mercaderista_iniciar_visita(codclie, nombre, btnEl) {
+    const label = nombre || `Cliente ${codclie}`;
+    const btn = btnEl || document.getElementById(`btnMercIniciarVisita${codclie}`);
+    const btnHtmlOriginal = btn ? btn.innerHTML : '';
+
+    F.Confirmacion(`¿Desea INICIAR la visita de ${label}?`)
+        .then((ok) => {
+            if (!ok) return;
+
+            const { fecha, mes, anio } = mercaderista_fecha_partes();
+            const hora = mercaderista_hora_actual();
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fal fa-spinner fa-spin mr-1"></i> Iniciando...';
+            }
+
+            mercaderista_iniciar_visita_api({ codclie, fecha, mes, anio, hora_inicio: hora })
+                .then((response) => {
+                    const rs = response.data?.recordset?.[0];
+                    if (response.data === 'error' || (rs && rs.RESULT === 'error')) throw new Error('error');
+                    F.Aviso('Visita iniciada correctamente');
+                    const cmbEstado = document.getElementById('cmbMercaderistaEstadoVisita');
+                    if (cmbEstado) cmbEstado.value = 'ENCURSO';
+                    mercaderista_cargar_clientes();
+                })
+                .catch(() => {
+                    F.AvisoError('No se pudo iniciar la visita');
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = btnHtmlOriginal || '<i class="fal fa-play mr-1"></i> Iniciar visita';
+                    }
+                });
+        });
+}
+
+function mercaderista_finalizar_visita(codclie, nombre, btnEl) {
+    const label = nombre || `Cliente ${codclie}`;
+    const btn = btnEl || document.getElementById(`btnMercFinalizarVisita${codclie}`);
+    const btnHtmlOriginal = btn ? btn.innerHTML : '';
+
+    F.Confirmacion(`¿Desea FINALIZAR la visita de ${label}?`)
+        .then((ok) => {
+            if (!ok) return;
+
+            const { fecha } = mercaderista_fecha_partes();
+            const hora = mercaderista_hora_actual();
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fal fa-spinner fa-spin mr-1"></i> Finalizando...';
+            }
+
+            mercaderista_finalizar_visita_api({ codclie, fecha, hora_fin: hora })
+                .then((response) => {
+                    if (response.data === 'error') throw new Error('error');
+                    F.Aviso('Visita finalizada correctamente');
+                    mercaderista_cargar_clientes();
+                })
+                .catch(() => {
+                    F.AvisoError('No se pudo finalizar la visita');
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = btnHtmlOriginal || '<i class="fal fa-flag-checkered mr-1"></i> Finalizar visita';
+                    }
+                });
+        });
 }
 
 function mercaderista_abrir_actividades(codclie, nombre) {
@@ -794,6 +1063,7 @@ function mercaderista_ver_detalle_visita(codclie, nombre) {
     const { fecha } = mercaderista_fecha_partes();
     const body = document.getElementById('bodyMercaderistaDetalleVisita');
     if (body) body.innerHTML = `<div class="text-center py-3">${GlobalLoader}</div>`;
+    mercaderista_detalle_actual = null;
     $('#modalMercaderistaDetalleVisita').modal('show');
 
     axios.post('/clientes/mercaderista_visita_detalle', {
@@ -808,8 +1078,10 @@ function mercaderista_ver_detalle_visita(codclie, nombre) {
                 throw new Error('sin datos');
             }
             const r = response.data.recordset[0];
+            mercaderista_detalle_actual = r;
             const nom = r.NOMBRE || nombre || `Cliente ${codclie}`;
             const motivo = (r.NOVISITADO || '').trim();
+            const hayFaltantes = mercaderista_tiene_faltantes(r.FALTANTES);
             if (body) {
                 body.innerHTML = `
                     <div class="mb-2">
@@ -822,11 +1094,12 @@ function mercaderista_ver_detalle_visita(codclie, nombre) {
                                 <tr><th class="bg-light" style="width:42%">Fecha</th><td>${mercaderista_fmt_fecha_detalle(r.FECHA)}</td></tr>
                                 <tr><th class="bg-light">Mes / Año</th><td>${r.MES || '--'} / ${r.ANIO || '--'}</td></tr>
                                 <tr><th class="bg-light">Hora inicio</th><td>${r.HORA_INICIO || '--'}</td></tr>
+                                <tr><th class="bg-light">Hora fin</th><td>${r.HORA_FIN || '--'}</td></tr>
                                 <tr><th class="bg-light">No visitado</th><td>${motivo || '—'}</td></tr>
-                                <tr><th class="bg-light">OTA</th><td>${mercaderista_fmt_si_no_html(r.OTA)}</td></tr>
-                                <tr><th class="bg-light">Vitrinas</th><td>${mercaderista_fmt_si_no_html(r.VITRINAS)}</td></tr>
-                                <tr><th class="bg-light">POP</th><td>${mercaderista_fmt_si_no_html(r.POP)}</td></tr>
-                                <tr><th class="bg-light">Faltantes</th><td>${mercaderista_fmt_si_no_html(mercaderista_tiene_faltantes(r.FALTANTES) ? 1 : 0)}</td></tr>
+                                <tr><th class="bg-light">OTA</th><td>${mercaderista_celda_actividad_detalle(r.OTA, 'ota', 'Ver fotos OTA')}</td></tr>
+                                <tr><th class="bg-light">Vitrinas</th><td>${mercaderista_celda_actividad_detalle(r.VITRINAS, 'vitrinas', 'Ver fotos Vitrinas')}</td></tr>
+                                <tr><th class="bg-light">POP</th><td>${mercaderista_celda_actividad_detalle(r.POP, 'pop', 'Ver fotos POP')}</td></tr>
+                                <tr><th class="bg-light">Faltantes</th><td>${mercaderista_celda_actividad_detalle(hayFaltantes ? 1 : 0, 'faltantes', 'Ver faltantes')}</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -834,6 +1107,7 @@ function mercaderista_ver_detalle_visita(codclie, nombre) {
             }
         })
         .catch(() => {
+            mercaderista_detalle_actual = null;
             if (body) {
                 body.innerHTML = '<div class="text-center text-danger py-3">No se pudo cargar el detalle de la visita</div>';
             }
@@ -888,6 +1162,7 @@ function mercaderista_registrar_no_visita() {
 
     const btn = document.getElementById('btnMercaderistaGuardarNoVisita');
     const { fecha, mes, anio } = mercaderista_fecha_partes();
+    const hora = mercaderista_hora_actual();
 
     if (btn) {
         btn.disabled = true;
@@ -899,7 +1174,8 @@ function mercaderista_registrar_no_visita() {
         fecha,
         mes,
         anio,
-        hora_inicio: mercaderista_hora_actual(),
+        hora_inicio: hora,
+        hora_fin: hora,
         novisitado: motivo,
         ota: 0,
         vitrinas: 0,
@@ -975,7 +1251,6 @@ function mercaderista_registrar_actividades() {
                     fecha,
                     mes,
                     anio,
-                    hora_inicio: mercaderista_hora_actual(),
                     novisitado: '',
                     ota: mercaderista_actividad_tiene_foto('ota') ? 1 : 0,
                     vitrinas: mercaderista_actividad_tiene_foto('vitrinas') ? 1 : 0,
@@ -986,6 +1261,8 @@ function mercaderista_registrar_actividades() {
                     vitrinas_f_despues: nombres['vitrinas_despues'] || '',
                     pop_f_antes: nombres['pop_antes'] || '',
                     pop_f_despues: nombres['pop_despues'] || '',
+                    actualizar_solo: true,
+                    modo: 'actividades',
                 }))
                 .then((response) => {
                     if (response.data === 'error') throw new Error('error');
@@ -993,7 +1270,6 @@ function mercaderista_registrar_actividades() {
                     mercaderista_limpiar_fotos_actividades();
                     $('#modalMercaderistaActividades').modal('hide');
                     mercaderista_cliente_sel = null;
-                    mercaderista_cargar_clientes();
                 })
                 .catch(() => {
                     F.AvisoError('No se pudo subir las fotos o guardar la información');
@@ -1046,19 +1322,15 @@ function mercaderista_guardar_faltantes() {
         fecha,
         mes,
         anio,
-        hora_inicio: mercaderista_hora_actual(),
-        novisitado: '',
-        ota: 0,
-        vitrinas: 0,
-        pop: 0,
         faltantes: faltantesJson,
+        actualizar_solo: true,
+        modo: 'faltantes',
     })
         .then((response) => {
             if (response.data === 'error') throw new Error('error');
             F.Aviso('Faltantes registrados correctamente');
             $('#modalMercaderistaFaltantes').modal('hide');
             mercaderista_cliente_sel = null;
-            mercaderista_cargar_clientes();
         })
         .catch(() => {
             F.AvisoError('No se pudo registrar los faltantes');
@@ -1108,6 +1380,9 @@ function mercaderista_cargar_clientes() {
 
             rows.forEach((r) => {
                 const acciones = mercaderista_acciones(r);
+                const horaInicio = (estado === 'ENCURSO' && r.HORA_INICIO)
+                    ? `<div class="small text-info negrita mb-1"><i class="fal fa-clock mr-1"></i>Inicio ${r.HORA_INICIO}</div>`
+                    : '';
                 str += `
                 <tr>
                     <td>${r.TIPONEGOCIO || ''}</td>
@@ -1125,6 +1400,7 @@ function mercaderista_cargar_clientes() {
                         <div class="small text-muted">${r.TIPONEGOCIO || ''} · ${r.NEGOCIO || ''}</div>
                         <div class="small">${r.DIRECCION || ''}</div>
                         <div class="small text-muted mb-2">${r.DESMUN || ''}</div>
+                        ${horaInicio}
                         ${acciones}
                     </div>
                 </div>`;
@@ -1182,6 +1458,7 @@ function addListeners() {
     document.getElementById('btnMercaderistaGuardarActividades')?.addEventListener('click', mercaderista_registrar_actividades);
     document.getElementById('btnMercaderistaCancelarActividades')?.addEventListener('click', mercaderista_cancelar_actividades);
     document.getElementById('btnMercaderistaGuardarFaltantes')?.addEventListener('click', mercaderista_guardar_faltantes);
+    document.getElementById('bodyMercaderistaDetalleVisita')?.addEventListener('click', mercaderista_on_detalle_extra_click);
 
     mercaderista_setActiveCard('btnMenuMercHome');
 }
@@ -1202,6 +1479,10 @@ function destroyView() {
     mercaderista_toggleSidebar(false);
     document.body.classList.remove('proveedor-sidebar-open');
     document.getElementById('js-page-content')?.classList.remove('proveedor-page');
+    mercaderista_detalle_actual = null;
+    $('#modalMercaderistaDetalleVisita').modal('hide');
+    $('#modalMercaderistaFotosActividad').modal('hide');
+    $('#modalMercaderistaFaltantesLista').modal('hide');
 }
 
 window._mercaderistaCore = { initView, destroyView, getView, addListeners };

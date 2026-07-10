@@ -1144,17 +1144,46 @@ router.post("/buscar_cliente_mercaderista", async (req, res) => {
         : `(CLIENTES.CODRUTAM = ISNULL((SELECT TOP 1 CODRUTA FROM RUTAS_MERCADERISTAS WHERE EMPNIT = '${emp}' AND CODEMP = ${ven}), -1))`;
 
     let filtroVisita = '';
+    let joinVisita = '';
+    let orderBy = 'CLIENTES.NOMBRE';
+
     if (fechaVal && ven > 0) {
-        const existsVisita = `
+        const existsBase = `
             SELECT 1 FROM MERCADERISTAS_VISITAS MV
              WHERE MV.EMPNIT = CLIENTES.EMPNIT
                AND MV.CODCLIENTE = CLIENTES.CODCLIENTE
                AND MV.CODEMP = ${ven}
                AND MV.FECHA = '${fechaVal}'`;
+
         if (estadoVal === 'VISITADO') {
-            filtroVisita = `AND EXISTS (${existsVisita})`;
+            filtroVisita = `AND EXISTS (
+                ${existsBase}
+                   AND ISNULL(MV.HORA_FIN, '') <> ''
+            )`;
+            joinVisita = `
+          LEFT OUTER JOIN MERCADERISTAS_VISITAS MV
+            ON MV.EMPNIT = CLIENTES.EMPNIT
+           AND MV.CODCLIENTE = CLIENTES.CODCLIENTE
+           AND MV.CODEMP = ${ven}
+           AND MV.FECHA = '${fechaVal}'`;
+            orderBy = 'MV.HORA_FIN DESC, CLIENTES.NOMBRE';
+        } else if (estadoVal === 'ENCURSO') {
+            filtroVisita = `AND EXISTS (
+                ${existsBase}
+                   AND ISNULL(MV.HORA_INICIO, '') <> ''
+                   AND ISNULL(MV.HORA_FIN, '') = ''
+            )`;
+            joinVisita = `
+          INNER JOIN MERCADERISTAS_VISITAS MV
+            ON MV.EMPNIT = CLIENTES.EMPNIT
+           AND MV.CODCLIENTE = CLIENTES.CODCLIENTE
+           AND MV.CODEMP = ${ven}
+           AND MV.FECHA = '${fechaVal}'
+           AND ISNULL(MV.HORA_INICIO, '') <> ''
+           AND ISNULL(MV.HORA_FIN, '') = ''`;
+            orderBy = 'MV.HORA_INICIO DESC, CLIENTES.NOMBRE';
         } else {
-            filtroVisita = `AND NOT EXISTS (${existsVisita})`;
+            filtroVisita = `AND NOT EXISTS (${existsBase})`;
         }
     }
 
@@ -1168,15 +1197,24 @@ router.post("/buscar_cliente_mercaderista", async (req, res) => {
                CLIENTES.LATITUD,
                CLIENTES.LONGITUD,
                ISNULL(CLIENTES.VISITAM, '') AS VISITAM,
-               ISNULL(CLIENTES.CODRUTAM, 0) AS CODRUTAM
+               ISNULL(CLIENTES.CODRUTAM, 0) AS CODRUTAM,
+               ISNULL((
+                   SELECT TOP 1 MV2.HORA_INICIO
+                     FROM MERCADERISTAS_VISITAS MV2
+                    WHERE MV2.EMPNIT = CLIENTES.EMPNIT
+                      AND MV2.CODCLIENTE = CLIENTES.CODCLIENTE
+                      AND MV2.CODEMP = ${ven}
+                      AND MV2.FECHA = '${fechaVal}'
+               ), '') AS HORA_INICIO
           FROM CLIENTES
           LEFT OUTER JOIN MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+          ${joinVisita}
          WHERE (CLIENTES.EMPNIT = '${emp}')
            AND ${filtroRuta}
            AND (CLIENTES.VISITAM = '${diaVisita}')
            AND (CLIENTES.HABILITADO = 'SI')
            ${filtroVisita}
-         ORDER BY CLIENTES.NOMBRE
+         ORDER BY ${orderBy}
     `;
 
     execute.QueryToken(res, qry, token);
@@ -1219,10 +1257,11 @@ router.post("/mercaderista_lista_precios", async (req, res) => {
 });
 
 router.post("/supervisor_mercaderistas_visitas", async (req, res) => {
-    const { token, sucursal, fi, ff } = req.body;
+    const { token, sucursal, fi, ff, codemp } = req.body;
     const emp = esc(sucursal);
     const fiVal = esc((fi || '').trim());
     const ffVal = esc((ff || '').trim());
+    const merc = Number(codemp) || 0;
 
     if (!fiVal || !ffVal) {
         return res.status(400).send('error');
@@ -1231,6 +1270,7 @@ router.post("/supervisor_mercaderistas_visitas", async (req, res) => {
     const filtroEmp = (sucursal === '%' || !String(sucursal || '').trim())
         ? '1=1'
         : `MV.EMPNIT = '${emp}'`;
+    const filtroMerc = merc > 0 ? `AND MV.CODEMP = ${merc}` : '';
 
     const qry = `
         SELECT MV.EMPNIT,
@@ -1252,6 +1292,7 @@ router.post("/supervisor_mercaderistas_visitas", async (req, res) => {
           LEFT OUTER JOIN EMPRESAS EMP
             ON MV.EMPNIT = EMP.EMPNIT
          WHERE ${filtroEmp}
+           ${filtroMerc}
            AND MV.FECHA >= '${fiVal}'
            AND MV.FECHA <= '${ffVal}'
          ORDER BY MV.FECHA DESC, MV.HORA_INICIO DESC, E.NOMEMPLEADO, C.NOMBRE
@@ -1260,14 +1301,140 @@ router.post("/supervisor_mercaderistas_visitas", async (req, res) => {
     execute.QueryToken(res, qry, token);
 });
 
+router.post("/supervisor_mercaderistas_resumen", async (req, res) => {
+    const { token, sucursal, fi, ff, codemp } = req.body;
+    const emp = esc(sucursal);
+    const fiVal = esc((fi || '').trim());
+    const ffVal = esc((ff || '').trim());
+    const merc = Number(codemp) || 0;
+
+    if (!fiVal || !ffVal) {
+        return res.status(400).send('error');
+    }
+
+    const filtroEmp = (sucursal === '%' || !String(sucursal || '').trim())
+        ? '1=1'
+        : `E.EMPNIT = '${emp}'`;
+    const filtroMerc = merc > 0 ? `AND E.CODEMPLEADO = ${merc}` : '';
+
+    const qry = `
+        SELECT E.EMPNIT,
+               E.CODEMPLEADO AS CODEMP,
+               ISNULL(E.NOMEMPLEADO, '') AS NOMMERCADERISTA,
+               ISNULL(EMP.NOMBRE, E.EMPNIT) AS NOMEMPRESA,
+               ISNULL(V.TOTAL_VISITAS, 0) AS TOTAL_VISITAS,
+               ISNULL(V.TOTAL_NOVISITADO, 0) AS TOTAL_NOVISITADO,
+               ISNULL(V.MINUTOS_VISITAS, 0) AS MINUTOS_VISITAS
+          FROM EMPLEADOS E
+          LEFT OUTER JOIN EMPRESAS EMP
+            ON E.EMPNIT = EMP.EMPNIT
+          LEFT OUTER JOIN (
+                SELECT MV.EMPNIT,
+                       MV.CODEMP,
+                       SUM(CASE WHEN LTRIM(RTRIM(ISNULL(MV.NOVISITADO, ''))) = '' THEN 1 ELSE 0 END) AS TOTAL_VISITAS,
+                       SUM(CASE WHEN LTRIM(RTRIM(ISNULL(MV.NOVISITADO, ''))) <> '' THEN 1 ELSE 0 END) AS TOTAL_NOVISITADO,
+                       SUM(CASE
+                             WHEN LTRIM(RTRIM(ISNULL(MV.NOVISITADO, ''))) = ''
+                              AND ISNULL(MV.HORA_INICIO, '') <> ''
+                              AND ISNULL(MV.HORA_FIN, '') <> ''
+                              AND TRY_CAST(MV.HORA_INICIO AS TIME) IS NOT NULL
+                              AND TRY_CAST(MV.HORA_FIN AS TIME) IS NOT NULL
+                             THEN DATEDIFF(MINUTE, TRY_CAST(MV.HORA_INICIO AS TIME), TRY_CAST(MV.HORA_FIN AS TIME))
+                             ELSE 0
+                           END) AS MINUTOS_VISITAS
+                  FROM MERCADERISTAS_VISITAS MV
+                 WHERE MV.FECHA >= '${fiVal}'
+                   AND MV.FECHA <= '${ffVal}'
+                 GROUP BY MV.EMPNIT, MV.CODEMP
+          ) V
+            ON E.EMPNIT = V.EMPNIT
+           AND E.CODEMPLEADO = V.CODEMP
+         WHERE E.CODPUESTO = 9
+           AND E.ACTIVO = 'SI'
+           AND ${filtroEmp}
+           ${filtroMerc}
+         ORDER BY E.NOMEMPLEADO
+    `;
+
+    execute.QueryToken(res, qry, token);
+});
+
+router.post("/mercaderista_visita_iniciar", async (req, res) => {
+    const { token, sucursal, codemp, codclie, fecha, mes, anio, hora_inicio } = req.body;
+    const emp = esc(sucursal);
+    const ven = Number(codemp) || 0;
+    const clie = Number(codclie) || 0;
+    const fechaVal = esc((fecha || '').trim());
+    const mesVal = Number(mes) || 0;
+    const anioVal = Number(anio) || 0;
+    const horaVal = esc((hora_inicio || '').trim());
+
+    if (!fechaVal || !horaVal || ven <= 0 || clie <= 0) {
+        return res.status(400).send('error');
+    }
+
+    const qry = `
+        IF EXISTS (
+            SELECT 1 FROM MERCADERISTAS_VISITAS
+             WHERE EMPNIT = '${emp}'
+               AND CODEMP = ${ven}
+               AND CODCLIENTE = ${clie}
+               AND FECHA = '${fechaVal}'
+        )
+        BEGIN
+            SELECT 'error' AS RESULT;
+        END
+        ELSE
+        BEGIN
+            INSERT INTO MERCADERISTAS_VISITAS
+                (EMPNIT, CODEMP, CODCLIENTE, FECHA, MES, ANIO, HORA_INICIO, HORA_FIN,
+                 NOVISITADO, OTA, VITRINAS, POP,
+                 OTA_F_ANTES, OTA_F_DESPUES, VITRINAS_F_ANTES, VITRINAS_F_DESPUES, POP_F_ANTES, POP_F_DESPUES, FALTANTES)
+            VALUES
+                ('${emp}', ${ven}, ${clie}, '${fechaVal}', ${mesVal}, ${anioVal}, '${horaVal}', NULL,
+                 '', 0, 0, 0, '', '', '', '', '', '', '');
+        END
+    `;
+
+    execute.QueryToken(res, qry, token);
+});
+
+router.post("/mercaderista_visita_finalizar", async (req, res) => {
+    const { token, sucursal, codemp, codclie, fecha, hora_fin } = req.body;
+    const emp = esc(sucursal);
+    const ven = Number(codemp) || 0;
+    const clie = Number(codclie) || 0;
+    const fechaVal = esc((fecha || '').trim());
+    const horaFinVal = esc((hora_fin || '').trim());
+
+    if (!fechaVal || !horaFinVal || ven <= 0 || clie <= 0) {
+        return res.status(400).send('error');
+    }
+
+    const qry = `
+        UPDATE MERCADERISTAS_VISITAS SET
+            HORA_FIN = '${horaFinVal}'
+         WHERE EMPNIT = '${emp}'
+           AND CODEMP = ${ven}
+           AND CODCLIENTE = ${clie}
+           AND FECHA = '${fechaVal}'
+           AND ISNULL(HORA_INICIO, '') <> ''
+           AND ISNULL(HORA_FIN, '') = '';
+    `;
+
+    execute.QueryToken(res, qry, token);
+});
+
 router.post("/mercaderista_visita_guardar", async (req, res) => {
     const {
         token, sucursal, codemp, codclie, fecha, mes, anio,
-        hora_inicio, novisitado, ota, vitrinas, pop,
+        hora_inicio, hora_fin, novisitado, ota, vitrinas, pop,
         ota_f_antes, ota_f_despues,
         vitrinas_f_antes, vitrinas_f_despues,
         pop_f_antes, pop_f_despues,
         faltantes,
+        actualizar_solo,
+        modo,
     } = req.body;
 
     const emp = esc(sucursal);
@@ -1288,12 +1455,58 @@ router.post("/mercaderista_visita_guardar", async (req, res) => {
     const popFA = esc((pop_f_antes || '').trim());
     const popFD = esc((pop_f_despues || '').trim());
     const faltantesVal = esc((faltantes || '').trim());
+    const horaFinVal = esc((hora_fin || '').trim());
+    const soloActualizar = actualizar_solo === true || actualizar_solo === 'true' || actualizar_solo === 1 || actualizar_solo === '1';
+    const modoVal = esc((modo || '').trim().toLowerCase());
 
     if (!fechaVal || ven <= 0 || clie <= 0) {
         return res.status(400).send('error');
     }
 
-    const qry = `
+    let setActualizar = '';
+    if (modoVal === 'actividades') {
+        setActualizar = `
+            MES = ${mesVal},
+            ANIO = ${anioVal},
+            OTA = CASE WHEN ${otaVal} = 1 OR '${otaFA}' <> '' OR '${otaFD}' <> '' THEN 1 ELSE OTA END,
+            VITRINAS = CASE WHEN ${vitVal} = 1 OR '${vitFA}' <> '' OR '${vitFD}' <> '' THEN 1 ELSE VITRINAS END,
+            POP = CASE WHEN ${popVal} = 1 OR '${popFA}' <> '' OR '${popFD}' <> '' THEN 1 ELSE POP END,
+            OTA_F_ANTES = CASE WHEN '${otaFA}' <> '' THEN '${otaFA}' ELSE OTA_F_ANTES END,
+            OTA_F_DESPUES = CASE WHEN '${otaFD}' <> '' THEN '${otaFD}' ELSE OTA_F_DESPUES END,
+            VITRINAS_F_ANTES = CASE WHEN '${vitFA}' <> '' THEN '${vitFA}' ELSE VITRINAS_F_ANTES END,
+            VITRINAS_F_DESPUES = CASE WHEN '${vitFD}' <> '' THEN '${vitFD}' ELSE VITRINAS_F_DESPUES END,
+            POP_F_ANTES = CASE WHEN '${popFA}' <> '' THEN '${popFA}' ELSE POP_F_ANTES END,
+            POP_F_DESPUES = CASE WHEN '${popFD}' <> '' THEN '${popFD}' ELSE POP_F_DESPUES END`;
+    } else if (modoVal === 'faltantes') {
+        setActualizar = `
+            MES = ${mesVal},
+            ANIO = ${anioVal},
+            FALTANTES = '${faltantesVal}'`;
+    } else {
+        setActualizar = `
+            MES = ${mesVal},
+            ANIO = ${anioVal},
+            NOVISITADO = '${motivoVal}',
+            OTA = ${otaVal},
+            VITRINAS = ${vitVal},
+            POP = ${popVal},
+            OTA_F_ANTES = CASE WHEN '${otaFA}' <> '' THEN '${otaFA}' ELSE OTA_F_ANTES END,
+            OTA_F_DESPUES = CASE WHEN '${otaFD}' <> '' THEN '${otaFD}' ELSE OTA_F_DESPUES END,
+            VITRINAS_F_ANTES = CASE WHEN '${vitFA}' <> '' THEN '${vitFA}' ELSE VITRINAS_F_ANTES END,
+            VITRINAS_F_DESPUES = CASE WHEN '${vitFD}' <> '' THEN '${vitFD}' ELSE VITRINAS_F_DESPUES END,
+            POP_F_ANTES = CASE WHEN '${popFA}' <> '' THEN '${popFA}' ELSE POP_F_ANTES END,
+            POP_F_DESPUES = CASE WHEN '${popFD}' <> '' THEN '${popFD}' ELSE POP_F_DESPUES END,
+            FALTANTES = CASE WHEN '${faltantesVal}' <> '' THEN '${faltantesVal}' ELSE FALTANTES END`;
+    }
+
+    const qry = soloActualizar ? `
+        UPDATE MERCADERISTAS_VISITAS SET
+            ${setActualizar}
+         WHERE EMPNIT = '${emp}'
+           AND CODEMP = ${ven}
+           AND CODCLIENTE = ${clie}
+           AND FECHA = '${fechaVal}';
+    ` : `
         IF EXISTS (
             SELECT 1 FROM MERCADERISTAS_VISITAS
              WHERE EMPNIT = '${emp}'
@@ -1305,7 +1518,8 @@ router.post("/mercaderista_visita_guardar", async (req, res) => {
             UPDATE MERCADERISTAS_VISITAS SET
                 MES = ${mesVal},
                 ANIO = ${anioVal},
-                HORA_INICIO = '${horaVal}',
+                HORA_INICIO = CASE WHEN '${horaVal}' <> '' THEN '${horaVal}' ELSE HORA_INICIO END,
+                HORA_FIN = CASE WHEN '${horaFinVal}' <> '' THEN '${horaFinVal}' ELSE HORA_FIN END,
                 NOVISITADO = '${motivoVal}',
                 OTA = ${otaVal},
                 VITRINAS = ${vitVal},
@@ -1325,10 +1539,10 @@ router.post("/mercaderista_visita_guardar", async (req, res) => {
         ELSE
         BEGIN
             INSERT INTO MERCADERISTAS_VISITAS
-                (EMPNIT, CODEMP, CODCLIENTE, FECHA, MES, ANIO, HORA_INICIO, NOVISITADO, OTA, VITRINAS, POP,
+                (EMPNIT, CODEMP, CODCLIENTE, FECHA, MES, ANIO, HORA_INICIO, HORA_FIN, NOVISITADO, OTA, VITRINAS, POP,
                  OTA_F_ANTES, OTA_F_DESPUES, VITRINAS_F_ANTES, VITRINAS_F_DESPUES, POP_F_ANTES, POP_F_DESPUES, FALTANTES)
             VALUES
-                ('${emp}', ${ven}, ${clie}, '${fechaVal}', ${mesVal}, ${anioVal}, '${horaVal}', '${motivoVal}', ${otaVal}, ${vitVal}, ${popVal},
+                ('${emp}', ${ven}, ${clie}, '${fechaVal}', ${mesVal}, ${anioVal}, '${horaVal}', ${horaFinVal ? `'${horaFinVal}'` : 'NULL'}, '${motivoVal}', ${otaVal}, ${vitVal}, ${popVal},
                  '${otaFA}', '${otaFD}', '${vitFA}', '${vitFD}', '${popFA}', '${popFD}', '${faltantesVal}');
         END
     `;
@@ -1358,6 +1572,7 @@ router.post("/mercaderista_visita_detalle", async (req, res) => {
                MV.MES,
                MV.ANIO,
                ISNULL(MV.HORA_INICIO, '') AS HORA_INICIO,
+               ISNULL(MV.HORA_FIN, '') AS HORA_FIN,
                ISNULL(MV.NOVISITADO, '') AS NOVISITADO,
                ISNULL(MV.OTA, 0) AS OTA,
                ISNULL(MV.VITRINAS, 0) AS VITRINAS,

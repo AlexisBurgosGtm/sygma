@@ -39,6 +39,75 @@ window.MercVisitasCore = (function () {
         return `<span class="${cls}">${texto}</span>`;
     }
 
+    function fmtMinutos(min) {
+        const m = Math.max(0, Number(min) || 0);
+        if (m <= 0) return '0 min';
+        const h = Math.floor(m / 60);
+        const r = m % 60;
+        if (h <= 0) return `${r} min`;
+        if (r <= 0) return `${h} h`;
+        return `${h} h ${r} min`;
+    }
+
+    function getCodMercaderista() {
+        return Number(el('CmbMercaderista')?.value) || 0;
+    }
+
+    function getTipoReporte() {
+        return (el('CmbTipoReporte')?.value || 'VISITAS').toUpperCase();
+    }
+
+    function validarFechas() {
+        const fi = el('TxtFechaIni')?.value || '';
+        const ff = el('TxtFechaFin')?.value || '';
+        if (!fi || !ff) {
+            F.AvisoError('Seleccione fecha inicial y final');
+            return null;
+        }
+        if (fi > ff) {
+            F.AvisoError('La fecha inicial no puede ser mayor que la final');
+            return null;
+        }
+        return { fi, ff };
+    }
+
+    function togglePanelesReporte() {
+        const esResumen = getTipoReporte() === 'RESUMEN';
+        el('PanelVisitas')?.classList.toggle('d-none', esResumen);
+        el('PanelResumen')?.classList.toggle('d-none', !esResumen);
+    }
+
+    function cargarMercaderistas() {
+        const cmb = el('CmbMercaderista');
+        if (!cmb) return Promise.resolve();
+        const valorPrev = cmb.value || '0';
+        cmb.innerHTML = '<option value="0">TODOS</option>';
+        cmb.disabled = true;
+
+        return axios.post('/empleados/empleados_tipo', {
+            token: TOKEN,
+            sucursal: getSucursal(),
+            tipo: 9,
+        })
+            .then((response) => {
+                if (response.data === 'error') throw new Error('error');
+                const rows = response.data.recordset || [];
+                rows.forEach((r) => {
+                    const cod = r.CODEMPLEADO;
+                    const nom = r.NOMEMPLEADO || `Empleado ${cod}`;
+                    cmb.insertAdjacentHTML('beforeend', `<option value="${cod}">${nom}</option>`);
+                });
+                const existe = Array.from(cmb.options).some((o) => o.value === valorPrev);
+                cmb.value = existe ? valorPrev : '0';
+            })
+            .catch(() => {
+                F.AvisoError('No se pudo cargar el listado de mercaderistas');
+            })
+            .finally(() => {
+                cmb.disabled = false;
+            });
+    }
+
     function tieneFaltantes(val) {
         const s = (val || '').trim();
         if (!s) return false;
@@ -207,6 +276,7 @@ window.MercVisitasCore = (function () {
                                     <tr><th class="bg-light" style="width:42%">Fecha</th><td>${fmtFecha(r.FECHA)}</td></tr>
                                     <tr><th class="bg-light">Mes / Año</th><td>${r.MES || '--'} / ${r.ANIO || '--'}</td></tr>
                                     <tr><th class="bg-light">Hora inicio</th><td>${r.HORA_INICIO || '--'}</td></tr>
+                                    <tr><th class="bg-light">Hora fin</th><td>${r.HORA_FIN || '--'}</td></tr>
                                     <tr><th class="bg-light">No visitado</th><td>${motivo || '—'}</td></tr>
                                     <tr><th class="bg-light">OTA</th><td>${celdaActividad(r.OTA, 'ota', 'Ver fotos OTA')}</td></tr>
                                     <tr><th class="bg-light">Vitrinas</th><td>${celdaActividad(r.VITRINAS, 'vitrinas', 'Ver fotos Vitrinas')}</td></tr>
@@ -288,22 +358,75 @@ window.MercVisitasCore = (function () {
             : `<tr><th>MERCADERISTA</th><th>CLIENTE</th><th>FECHA</th><th>HORA</th></tr>`;
     }
 
+    function actualizarCabeceraResumen() {
+        const thead = el('TblResumenThead');
+        if (!thead) return;
+        const todas = esTodasSucursales();
+        thead.innerHTML = todas
+            ? `<tr><th>SUCURSAL</th><th>MERCADERISTA</th><th class="text-center">VISITAS</th><th class="text-center">NO VISITADO</th><th class="text-center">HORAS</th></tr>`
+            : `<tr><th>MERCADERISTA</th><th class="text-center">VISITAS</th><th class="text-center">NO VISITADO</th><th class="text-center">HORAS</th></tr>`;
+    }
+
+    function resumenCardHtml(r) {
+        const todas = esTodasSucursales();
+        const sucursalHtml = todas
+            ? `<div class="small text-secondary mb-1">${r.NOMEMPRESA || r.EMPNIT || ''}</div>`
+            : '';
+        return `
+            <div class="card merc-resumen-card shadow-sm mb-2 border">
+                <div class="card-body p-2">
+                    ${sucursalHtml}
+                    <div class="negrita text-base mb-2">${r.NOMMERCADERISTA || ''}</div>
+                    <div class="row small text-center">
+                        <div class="col-4"><div class="text-muted">Visitas</div><div class="negrita text-success">${r.TOTAL_VISITAS || 0}</div></div>
+                        <div class="col-4"><div class="text-muted">No visit.</div><div class="negrita text-warning">${r.TOTAL_NOVISITADO || 0}</div></div>
+                        <div class="col-4"><div class="text-muted">Horas</div><div class="negrita text-info">${fmtMinutos(r.MINUTOS_VISITAS)}</div></div>
+                    </div>
+                </div>
+            </div>`;
+    }
+
+    function renderResumen(rows) {
+        const tbody = el('TblDataResumen');
+        const cards = el('TblResumenCards');
+        const lbTotal = el('LbTotalVisitas');
+        const todas = esTodasSucursales();
+        const colspan = todas ? 5 : 4;
+
+        if (!rows.length) {
+            const msg = `<tr><td colspan="${colspan}" class="text-center text-muted py-3">No hay datos en el rango seleccionado</td></tr>`;
+            const msgCard = '<div class="text-center text-muted py-3">No hay datos en el rango seleccionado</div>';
+            if (tbody) tbody.innerHTML = msg;
+            if (cards) cards.innerHTML = msgCard;
+            if (lbTotal) lbTotal.innerText = '0 mercaderistas';
+            return;
+        }
+
+        if (tbody) {
+            tbody.innerHTML = rows.map((r) => {
+                const colSuc = todas ? `<td class="small">${r.NOMEMPRESA || r.EMPNIT || ''}</td>` : '';
+                return `
+                <tr>
+                    ${colSuc}
+                    <td class="negrita">${r.NOMMERCADERISTA || ''}</td>
+                    <td class="text-center negrita text-success">${r.TOTAL_VISITAS || 0}</td>
+                    <td class="text-center negrita text-warning">${r.TOTAL_NOVISITADO || 0}</td>
+                    <td class="text-center negrita text-info">${fmtMinutos(r.MINUTOS_VISITAS)}</td>
+                </tr>`;
+            }).join('');
+        }
+        if (cards) cards.innerHTML = rows.map((r) => resumenCardHtml(r)).join('');
+        if (lbTotal) lbTotal.innerText = `${rows.length} mercaderista${rows.length === 1 ? '' : 's'}`;
+    }
+
     function cargarVisitas() {
-        const fi = el('TxtFechaIni')?.value || '';
-        const ff = el('TxtFechaFin')?.value || '';
+        const fechas = validarFechas();
+        if (!fechas) return;
+        const { fi, ff } = fechas;
         const tbody = el('TblDataVisitas');
         const cards = el('TblVisitasCards');
         const todas = esTodasSucursales();
         const colspan = todas ? 5 : 4;
-
-        if (!fi || !ff) {
-            F.AvisoError('Seleccione fecha inicial y final');
-            return;
-        }
-        if (fi > ff) {
-            F.AvisoError('La fecha inicial no puede ser mayor que la final');
-            return;
-        }
 
         actualizarCabeceraTabla();
         if (tbody) tbody.innerHTML = `<tr><td colspan="${colspan}" class="text-center py-3">${GlobalLoader}</td></tr>`;
@@ -314,6 +437,7 @@ window.MercVisitasCore = (function () {
             sucursal: getSucursal(),
             fi,
             ff,
+            codemp: getCodMercaderista(),
         })
             .then((response) => {
                 if (response.data === 'error') throw new Error('error');
@@ -327,6 +451,48 @@ window.MercVisitasCore = (function () {
                 const lb = el('LbTotalVisitas');
                 if (lb) lb.innerText = '0 visitas';
             });
+    }
+
+    function cargarResumen() {
+        const fechas = validarFechas();
+        if (!fechas) return;
+        const { fi, ff } = fechas;
+        const tbody = el('TblDataResumen');
+        const cards = el('TblResumenCards');
+        const todas = esTodasSucursales();
+        const colspan = todas ? 5 : 4;
+
+        actualizarCabeceraResumen();
+        if (tbody) tbody.innerHTML = `<tr><td colspan="${colspan}" class="text-center py-3">${GlobalLoader}</td></tr>`;
+        if (cards) cards.innerHTML = GlobalLoader;
+
+        axios.post('/clientes/supervisor_mercaderistas_resumen', {
+            token: TOKEN,
+            sucursal: getSucursal(),
+            fi,
+            ff,
+            codemp: getCodMercaderista(),
+        })
+            .then((response) => {
+                if (response.data === 'error') throw new Error('error');
+                renderResumen(response.data.recordset || []);
+            })
+            .catch(() => {
+                if (tbody) tbody.innerHTML = `<tr><td colspan="${colspan}" class="text-center text-danger py-3">No se pudo cargar el resumen</td></tr>`;
+                if (cards) cards.innerHTML = '<div class="text-center text-danger py-3">No se pudo cargar el resumen</div>';
+                const lb = el('LbTotalVisitas');
+                if (lb) lb.innerText = '0 mercaderistas';
+            });
+    }
+
+    function cargarDatos() {
+        togglePanelesReporte();
+        if (getTipoReporte() === 'RESUMEN') cargarResumen();
+        else cargarVisitas();
+    }
+
+    function refrescarVista() {
+        return cargarMercaderistas().then(() => cargarDatos());
     }
 
     function onVisitaClick(e) {
@@ -347,7 +513,7 @@ window.MercVisitasCore = (function () {
                 <div class="card card-rounded shadow border-0">
                     <div class="card-body p-2 p-md-3">
                         <h5 class="negrita text-base mb-3">Visitas de mercaderistas</h5>
-                        <div class="row align-items-end mb-3">
+                        <div class="row align-items-end mb-2">
                             <div class="col-6 col-md-3 mb-2 mb-md-0">
                                 <label class="negrita text-secondary small mb-1" for="${Pfx}TxtFechaIni">Fecha inicial</label>
                                 <input type="date" class="form-control negrita" id="${Pfx}TxtFechaIni">
@@ -356,25 +522,50 @@ window.MercVisitasCore = (function () {
                                 <label class="negrita text-secondary small mb-1" for="${Pfx}TxtFechaFin">Fecha final</label>
                                 <input type="date" class="form-control negrita" id="${Pfx}TxtFechaFin">
                             </div>
-                            <div class="col-12 col-md-3 mb-2 mb-md-0">
-                                <button type="button" class="btn btn-info btn-sm negrita hand w-100" id="${Pfx}BtnBuscar">
-                                    <i class="fal fa-search mr-1"></i> Buscar
-                                </button>
-                            </div>
-                            <div class="col-12 col-md-3">
+                            <div class="col-12 col-md-6">
                                 <h6 class="negrita text-secondary mb-0" id="${Pfx}LbTotalVisitas">0 visitas</h6>
                             </div>
                         </div>
-                        <div id="${Pfx}TblVisitasCards" class="d-md-none"></div>
-                        <div class="table-responsive d-none d-md-block">
-                            <table class="table table-sm table-bordered table-hover mb-0" style="min-width:720px">
-                                <thead class="bg-base text-white" id="${Pfx}TblVisitasThead">
-                                    <tr><th>MERCADERISTA</th><th>CLIENTE</th><th>FECHA</th><th>HORA</th></tr>
-                                </thead>
-                                <tbody id="${Pfx}TblDataVisitas">
-                                    <tr><td colspan="4" class="text-center text-muted py-3">Seleccione rango y presione Buscar</td></tr>
-                                </tbody>
-                            </table>
+                        <div class="row align-items-end mb-3">
+                            <div class="col-6 col-md-6 mb-2 mb-md-0">
+                                <label class="negrita text-secondary small mb-1" for="${Pfx}CmbMercaderista">Mercaderista</label>
+                                <select class="form-control negrita" id="${Pfx}CmbMercaderista">
+                                    <option value="0">TODOS</option>
+                                </select>
+                            </div>
+                            <div class="col-6 col-md-6 mb-2 mb-md-0">
+                                <label class="negrita text-secondary small mb-1" for="${Pfx}CmbTipoReporte">Reporte</label>
+                                <select class="form-control negrita" id="${Pfx}CmbTipoReporte">
+                                    <option value="VISITAS">VISITAS</option>
+                                    <option value="RESUMEN">RESUMEN</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="${Pfx}PanelVisitas">
+                            <div id="${Pfx}TblVisitasCards" class="d-md-none"></div>
+                            <div class="table-responsive d-none d-md-block">
+                                <table class="table table-sm table-bordered table-hover mb-0" style="min-width:720px">
+                                    <thead class="bg-base text-white" id="${Pfx}TblVisitasThead">
+                                        <tr><th>MERCADERISTA</th><th>CLIENTE</th><th>FECHA</th><th>HORA</th></tr>
+                                    </thead>
+                                    <tbody id="${Pfx}TblDataVisitas">
+                                        <tr><td colspan="4" class="text-center text-muted py-3">Cargando visitas...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div id="${Pfx}PanelResumen" class="d-none">
+                            <div id="${Pfx}TblResumenCards" class="d-md-none"></div>
+                            <div class="table-responsive d-none d-md-block">
+                                <table class="table table-sm table-bordered table-hover mb-0" style="min-width:640px">
+                                    <thead class="bg-base text-white" id="${Pfx}TblResumenThead">
+                                        <tr><th>MERCADERISTA</th><th class="text-center">VISITAS</th><th class="text-center">NO VISITADO</th><th class="text-center">HORAS</th></tr>
+                                    </thead>
+                                    <tbody id="${Pfx}TblDataResumen">
+                                        <tr><td colspan="4" class="text-center text-muted py-3">Cargando resumen...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -429,7 +620,10 @@ window.MercVisitasCore = (function () {
         const txtFin = el('TxtFechaFin');
         if (txtIni) txtIni.value = hoy;
         if (txtFin) txtFin.value = hoy;
-        el('BtnBuscar')?.addEventListener('click', cargarVisitas);
+        txtIni?.addEventListener('change', cargarDatos);
+        txtFin?.addEventListener('change', cargarDatos);
+        el('CmbMercaderista')?.addEventListener('change', cargarDatos);
+        el('CmbTipoReporte')?.addEventListener('change', cargarDatos);
         el('TblDataVisitas')?.addEventListener('click', onVisitaClick);
         el('TblVisitasCards')?.addEventListener('click', onVisitaClick);
         el('BodyDetalleVisita')?.addEventListener('click', onDetalleExtraClick);
@@ -442,9 +636,9 @@ window.MercVisitasCore = (function () {
             detalleActual = null;
             root.innerHTML = getViewHtml();
             addListeners();
-            cargarVisitas();
+            refrescarVista();
             if (typeof cfg.registerRefresh === 'function') {
-                cfg.registerRefresh(cargarVisitas);
+                cfg.registerRefresh(refrescarVista);
             }
         },
         destroy() {
@@ -459,5 +653,7 @@ window.MercVisitasCore = (function () {
             cfg = null;
         },
         cargarVisitas,
+        cargarDatos,
+        refrescarVista,
     };
 })();
