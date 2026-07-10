@@ -1,5 +1,5 @@
 {
-  "version": "M.10.07.26 01:13",
+  "version": "M.10.07.26 10:38",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -2930,6 +2930,26 @@
       "FECHA": "10-07-2026",
       "HORA": "01:13",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.10.07.26 01:13"
+    },
+    {
+      "FECHA": "10-07-2026",
+      "HORA": "10:38",
+      "DESCRIPCION": "INICIO MERCADERISTA: CODIGO CLIENTE EN LISTA PENDIENTES Y FILTRO BUSQUEDA"
+    },
+    {
+      "FECHA": "10-07-2026",
+      "HORA": "10:38",
+      "DESCRIPCION": "INICIO MERCADERISTA: BOTON QR CENTRAL CON CAMARA E INICIO VISITA"
+    },
+    {
+      "FECHA": "10-07-2026",
+      "HORA": "10:38",
+      "DESCRIPCION": "BACKEND: BUSCAR CLIENTE MERCADERISTA QR Y EN CURSO SIN FILTRO DIA RUTA"
+    },
+    {
+      "FECHA": "10-07-2026",
+      "HORA": "10:38",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.10.07.26 10:38"
     }
   ]
 }

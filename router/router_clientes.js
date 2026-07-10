@@ -1187,7 +1187,42 @@ router.post("/buscar_cliente_mercaderista", async (req, res) => {
         }
     }
 
-    let qry = `
+    let qry = '';
+
+    if (fechaVal && ven > 0 && (estadoVal === 'ENCURSO' || estadoVal === 'VISITADO')) {
+        const filtroFin = estadoVal === 'VISITADO'
+            ? `AND ISNULL(MV.HORA_FIN, '') <> ''`
+            : `AND ISNULL(MV.HORA_INICIO, '') <> ''
+               AND ISNULL(MV.HORA_FIN, '') = ''`;
+        const orderVisita = estadoVal === 'VISITADO'
+            ? 'MV.HORA_FIN DESC, CLIENTES.NOMBRE'
+            : 'MV.HORA_INICIO DESC, CLIENTES.NOMBRE';
+
+        qry = `
+        SELECT CLIENTES.CODCLIENTE,
+               CLIENTES.TIPONEGOCIO,
+               CLIENTES.NEGOCIO,
+               CLIENTES.NOMBRE,
+               CLIENTES.DIRECCION,
+               MUNICIPIOS.DESMUN,
+               CLIENTES.LATITUD,
+               CLIENTES.LONGITUD,
+               ISNULL(CLIENTES.VISITAM, '') AS VISITAM,
+               ISNULL(CLIENTES.CODRUTAM, 0) AS CODRUTAM,
+               ISNULL(MV.HORA_INICIO, '') AS HORA_INICIO
+          FROM MERCADERISTAS_VISITAS MV
+          INNER JOIN CLIENTES
+            ON CLIENTES.EMPNIT = MV.EMPNIT
+           AND CLIENTES.CODCLIENTE = MV.CODCLIENTE
+          LEFT OUTER JOIN MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+         WHERE MV.EMPNIT = '${emp}'
+           AND MV.CODEMP = ${ven}
+           AND MV.FECHA = '${fechaVal}'
+           AND CLIENTES.HABILITADO = 'SI'
+           ${filtroFin}
+         ORDER BY ${orderVisita}`;
+    } else {
+        qry = `
         SELECT CLIENTES.CODCLIENTE,
                CLIENTES.TIPONEGOCIO,
                CLIENTES.NEGOCIO,
@@ -1214,8 +1249,8 @@ router.post("/buscar_cliente_mercaderista", async (req, res) => {
            AND (CLIENTES.VISITAM = '${diaVisita}')
            AND (CLIENTES.HABILITADO = 'SI')
            ${filtroVisita}
-         ORDER BY ${orderBy}
-    `;
+         ORDER BY ${orderBy}`;
+    }
 
     execute.QueryToken(res, qry, token);
 });
@@ -1870,6 +1905,34 @@ router.post("/buscar_cliente_vendedor_supervisor", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+router.post("/buscar_cliente_mercaderista_qr", async (req, res) => {
+    const { token, sucursal, filtro } = req.body;
+    const emp = esc(sucursal);
+    const cod = Number(filtro) || 0;
+
+    if (cod <= 0) {
+        return res.status(400).send('error');
+    }
+
+    const qry = `
+        SELECT CLIENTES.CODCLIENTE,
+               CLIENTES.NOMBRE,
+               CLIENTES.NEGOCIO,
+               CLIENTES.TIPONEGOCIO,
+               CLIENTES.DIRECCION,
+               ISNULL(MUNICIPIOS.DESMUN, '') AS DESMUN,
+               ISNULL(CLIENTES.VISITAM, '') AS VISITAM,
+               ISNULL(CLIENTES.HABILITADO, '') AS HABILITADO
+          FROM CLIENTES
+          LEFT OUTER JOIN MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+         WHERE CLIENTES.CODCLIENTE = ${cod}
+           AND CLIENTES.EMPNIT = '${emp}'
+           AND CLIENTES.HABILITADO = 'SI';
+    `;
+
+    execute.QueryToken(res, qry, token);
+});
+
 router.post("/buscar_cliente_vendedor_qr", async(req,res)=>{
    
     const { token, sucursal, filtro,fecha} = req.body;

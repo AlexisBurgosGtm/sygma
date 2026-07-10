@@ -8,6 +8,7 @@ var mercaderista_act_fotos = {
     vitrinas_antes: null, vitrinas_despues: null,
     pop_antes: null, pop_despues: null,
 };
+var mercaderista_barcode_stream = null;
 
 function mercaderista_setActiveCard(cardId) {
     document.querySelectorAll('.proveedor-menu-card').forEach((el) => {
@@ -51,11 +52,22 @@ function mercaderista_showPanel(paneId, cardId, afterShow) {
 }
 
 function mercaderista_showHome() {
-    mercaderista_showPanel('uno', 'btnMenuMercHome', () => mercaderista_cargar_clientes());
+    mercaderista_showPanel('uno', 'btnMenuMercHome', () => {
+        mercaderista_toggle_qr_btn(true);
+        mercaderista_cargar_clientes();
+    });
 }
 
 function mercaderista_showPrecios() {
-    mercaderista_showPanel('dos', 'btnMenuMercPrecios', () => mercaderista_cargar_precios());
+    mercaderista_showPanel('dos', 'btnMenuMercPrecios', () => {
+        mercaderista_toggle_qr_btn(false);
+        mercaderista_cargar_precios();
+    });
+}
+
+function mercaderista_toggle_qr_btn(visible) {
+    const btn = document.getElementById('btnMercaderistaCameraQR');
+    if (btn) btn.style.display = visible ? '' : 'none';
 }
 
 function getView() {
@@ -109,6 +121,12 @@ function getView() {
                 ${view.modal_detalle_visita()}
                 ${view.modal_fotos_actividad()}
                 ${view.modal_faltantes_lista()}
+                ${view.modal_camara_qr()}
+
+                <button type="button" class="btn btn-danger btn-xl btn-bottom-middle btn-circle shadow hand"
+                    id="btnMercaderistaCameraQR" title="Buscar cliente por QR">
+                    <i class="fal fa-camera"></i>
+                </button>
             </div>
         `,
         menu: () => {
@@ -178,7 +196,7 @@ function getView() {
                         <div class="col-12">
                             <label class="negrita text-secondary small mb-1" for="txtMercaderistaBuscar">Buscar</label>
                             <input type="search" class="form-control" id="txtMercaderistaBuscar"
-                                placeholder="Buscar cliente, negocio o dirección..."
+                                placeholder="Buscar por código, cliente, negocio o dirección..."
                                 oninput="mercaderista_filtrar_clientes()">
                         </div>
                     </div>
@@ -435,6 +453,24 @@ function getView() {
                             <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"><span>&times;</span></button>
                         </div>
                         <div class="modal-body p-3" id="bodyMercaderistaFaltantesLista"></div>
+                        <div class="modal-footer py-2">
+                            <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `,
+        modal_camara_qr: () => `
+            <div class="modal fade" id="modalMercaderistaBarcode" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-danger py-2">
+                            <h5 class="modal-title text-white negrita mb-0">Lectura de código QR</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"><span>&times;</span></button>
+                        </div>
+                        <div class="modal-body p-3">
+                            <div id="rootMercaderistaBarcode" class="text-center"></div>
+                        </div>
                         <div class="modal-footer py-2">
                             <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</button>
                         </div>
@@ -714,6 +750,163 @@ function mercaderista_filtrar_clientes() {
     document.querySelectorAll('#tblMercaderistaClientesCards .merc-cliente-card').forEach((card) => {
         card.style.display = !q || card.innerText.toLowerCase().includes(q) ? '' : 'none';
     });
+}
+
+function mercaderista_detener_barcode() {
+    if (mercaderista_barcode_stream) {
+        mercaderista_barcode_stream.getTracks().forEach((track) => track.stop());
+        mercaderista_barcode_stream = null;
+    }
+    const root = document.getElementById('rootMercaderistaBarcode');
+    if (root) root.innerHTML = '';
+}
+
+function mercaderista_abrir_camara_qr() {
+    $('#modalMercaderistaBarcode').modal('show');
+    mercaderista_iniciar_barcode();
+}
+
+async function mercaderista_iniciar_barcode() {
+    const root = document.getElementById('rootMercaderistaBarcode');
+    if (!root) return;
+
+    mercaderista_detener_barcode();
+
+    if (!('BarcodeDetector' in window)) {
+        root.innerHTML = '<div class="text-danger py-3">No se puede usar el lector QR en este dispositivo</div>';
+        return;
+    }
+
+    root.innerHTML = GlobalLoader;
+
+    try {
+        const mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment' },
+        });
+        mercaderista_barcode_stream = mediaStream;
+
+        const barcodeDetector = new BarcodeDetector({
+            formats: ['code_39', 'codabar', 'ean_13', 'code_128', 'qr_code'],
+        });
+
+        const video = document.createElement('video');
+        video.width = 400;
+        video.height = 500;
+        video.srcObject = mediaStream;
+        video.autoplay = true;
+        video.id = 'mercaderista_barcode_video';
+        video.className = 'img-fluid rounded border shadow-sm';
+        root.innerHTML = '';
+        root.appendChild(video);
+
+        let leido = false;
+        const render = () => {
+            if (leido) return;
+            barcodeDetector.detect(video)
+                .then((barcodes) => {
+                    if (!barcodes.length || leido) return;
+                    leido = true;
+                    const cod = String(barcodes[0].rawValue || '').replace(/XELASOL-/gi, '').trim();
+                    $('#modalMercaderistaBarcode').modal('hide');
+                    mercaderista_detener_barcode();
+                    mercaderista_procesar_qr_codigo(cod);
+                })
+                .catch(() => {});
+        };
+
+        const renderLoop = () => {
+            if (!leido && mercaderista_barcode_stream) {
+                requestAnimationFrame(renderLoop);
+                render();
+            }
+        };
+        renderLoop();
+    } catch (e) {
+        root.innerHTML = '<div class="text-danger py-3">No se pudo acceder a la cámara</div>';
+    }
+}
+
+function mercaderista_procesar_qr_codigo(codStr) {
+    const cod = Number(String(codStr || '').replace(/XELASOL-/gi, '').trim());
+    if (!cod) {
+        F.AvisoError('Código QR no válido');
+        return;
+    }
+
+    F.showToast('Buscando cliente...');
+
+    axios.post('/clientes/buscar_cliente_mercaderista_qr', {
+        token: TOKEN,
+        sucursal: GlobalEmpnit,
+        filtro: cod,
+    })
+        .then((response) => {
+            if (response.data === 'error' || !response.data?.recordset?.length) {
+                throw new Error('no encontrado');
+            }
+            const r = response.data.recordset[0];
+            mercaderista_qr_iniciar_visita(r.CODCLIENTE, r.NOMBRE);
+        })
+        .catch(() => {
+            F.AvisoError('Cliente no encontrado');
+        });
+}
+
+function mercaderista_qr_iniciar_visita(codclie, nombre) {
+    const { fecha, mes, anio } = mercaderista_fecha_partes();
+    const hora = mercaderista_hora_actual();
+    const label = nombre || `Cliente ${codclie}`;
+
+    axios.post('/clientes/mercaderista_visita_detalle', {
+        token: TOKEN,
+        sucursal: GlobalEmpnit,
+        codemp: GlobalCodUsuario,
+        codclie,
+        fecha,
+    })
+        .then((det) => {
+            const visita = det.data?.recordset?.[0];
+            if (visita) {
+                const fin = (visita.HORA_FIN || '').trim();
+                if (fin) {
+                    F.AvisoError(`La visita de ${label} ya fue finalizada hoy`);
+                    return null;
+                }
+                return 'encurso';
+            }
+            return mercaderista_iniciar_visita_api({
+                codclie,
+                fecha,
+                mes,
+                anio,
+                hora_inicio: hora,
+            }).then((response) => {
+                const rs = response.data?.recordset?.[0];
+                if (response.data === 'error' || (rs && rs.RESULT === 'error')) return 'encurso';
+                return 'iniciada';
+            });
+        })
+        .then((result) => {
+            if (!result) return;
+            F.Aviso(result === 'iniciada' ? `Visita iniciada: ${label}` : `Cliente en curso: ${label}`);
+            const cmbEstado = document.getElementById('cmbMercaderistaEstadoVisita');
+            if (cmbEstado) cmbEstado.value = 'ENCURSO';
+            const txtBuscar = document.getElementById('txtMercaderistaBuscar');
+            if (txtBuscar) txtBuscar.value = String(codclie);
+            mercaderista_cargar_clientes();
+        })
+        .catch(() => {
+            F.AvisoError('No se pudo iniciar la visita');
+        });
+}
+
+function mercaderista_cliente_celda_html(r, estado) {
+    if (estado === 'PENDIENTE') {
+        return `
+            <div class="negrita text-base">${r.NOMBRE || ''}</div>
+            <small class="text-muted">Cód. ${r.CODCLIENTE || ''}</small>`;
+    }
+    return `${r.NOMBRE || ''}`;
 }
 
 function mercaderista_precio_card_html(r) {
@@ -1383,11 +1576,15 @@ function mercaderista_cargar_clientes() {
                 const horaInicio = (estado === 'ENCURSO' && r.HORA_INICIO)
                     ? `<div class="small text-info negrita mb-1"><i class="fal fa-clock mr-1"></i>Inicio ${r.HORA_INICIO}</div>`
                     : '';
+                const clienteHtml = mercaderista_cliente_celda_html(r, estado);
+                const codCard = estado === 'PENDIENTE'
+                    ? `<div class="small text-muted mb-1">Cód. ${r.CODCLIENTE || ''}</div>`
+                    : '';
                 str += `
                 <tr>
                     <td>${r.TIPONEGOCIO || ''}</td>
                     <td>${r.NEGOCIO || ''}</td>
-                    <td>${r.NOMBRE || ''}</td>
+                    <td>${clienteHtml}</td>
                     <td>${r.DIRECCION || ''}</td>
                     <td>${r.DESMUN || ''}</td>
                     <td class="text-center">${acciones}</td>
@@ -1397,6 +1594,7 @@ function mercaderista_cargar_clientes() {
                 <div class="card merc-cliente-card shadow-sm mb-2 border">
                     <div class="card-body p-2">
                         <div class="negrita text-base">${r.NOMBRE || ''}</div>
+                        ${codCard}
                         <div class="small text-muted">${r.TIPONEGOCIO || ''} · ${r.NEGOCIO || ''}</div>
                         <div class="small">${r.DIRECCION || ''}</div>
                         <div class="small text-muted mb-2">${r.DESMUN || ''}</div>
@@ -1460,6 +1658,10 @@ function addListeners() {
     document.getElementById('btnMercaderistaGuardarFaltantes')?.addEventListener('click', mercaderista_guardar_faltantes);
     document.getElementById('bodyMercaderistaDetalleVisita')?.addEventListener('click', mercaderista_on_detalle_extra_click);
 
+    document.getElementById('btnMercaderistaCameraQR')?.addEventListener('click', mercaderista_abrir_camara_qr);
+    $('#modalMercaderistaBarcode').on('hidden.bs.modal', mercaderista_detener_barcode);
+
+    mercaderista_toggle_qr_btn(true);
     mercaderista_setActiveCard('btnMenuMercHome');
 }
 
@@ -1480,9 +1682,11 @@ function destroyView() {
     document.body.classList.remove('proveedor-sidebar-open');
     document.getElementById('js-page-content')?.classList.remove('proveedor-page');
     mercaderista_detalle_actual = null;
+    mercaderista_detener_barcode();
     $('#modalMercaderistaDetalleVisita').modal('hide');
     $('#modalMercaderistaFotosActividad').modal('hide');
     $('#modalMercaderistaFaltantesLista').modal('hide');
+    $('#modalMercaderistaBarcode').modal('hide');
 }
 
 window._mercaderistaCore = { initView, destroyView, getView, addListeners };
