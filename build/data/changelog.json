@@ -1,5 +1,5 @@
 {
-  "version": "M.10.07.26 10:38",
+  "version": "M.11.07.26 10:04",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -2950,6 +2950,16 @@
       "FECHA": "10-07-2026",
       "HORA": "10:38",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.10.07.26 10:38"
+    },
+    {
+      "FECHA": "11-07-2026",
+      "HORA": "10:04",
+      "DESCRIPCION": "INICIO MERCADERISTA: CODIGO CLIENTE Y BUSQUEDA EN EN CURSO Y VISITADOS"
+    },
+    {
+      "FECHA": "11-07-2026",
+      "HORA": "10:04",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.11.07.26 10:04"
     }
   ]
 }

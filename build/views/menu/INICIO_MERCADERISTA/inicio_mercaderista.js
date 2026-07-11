@@ -900,13 +900,10 @@ function mercaderista_qr_iniciar_visita(codclie, nombre) {
         });
 }
 
-function mercaderista_cliente_celda_html(r, estado) {
-    if (estado === 'PENDIENTE') {
-        return `
-            <div class="negrita text-base">${r.NOMBRE || ''}</div>
-            <small class="text-muted">Cód. ${r.CODCLIENTE || ''}</small>`;
-    }
-    return `${r.NOMBRE || ''}`;
+function mercaderista_cliente_celda_html(r) {
+    return `
+        <div class="negrita text-base">${r.NOMBRE || ''}</div>
+        <small class="text-muted">Cód. ${r.CODCLIENTE || ''}</small>`;
 }
 
 function mercaderista_precio_card_html(r) {
@@ -1576,10 +1573,8 @@ function mercaderista_cargar_clientes() {
                 const horaInicio = (estado === 'ENCURSO' && r.HORA_INICIO)
                     ? `<div class="small text-info negrita mb-1"><i class="fal fa-clock mr-1"></i>Inicio ${r.HORA_INICIO}</div>`
                     : '';
-                const clienteHtml = mercaderista_cliente_celda_html(r, estado);
-                const codCard = estado === 'PENDIENTE'
-                    ? `<div class="small text-muted mb-1">Cód. ${r.CODCLIENTE || ''}</div>`
-                    : '';
+                const clienteHtml = mercaderista_cliente_celda_html(r);
+                const codCard = `<div class="small text-muted mb-1">Cód. ${r.CODCLIENTE || ''}</div>`;
                 str += `
                 <tr>
                     <td>${r.TIPONEGOCIO || ''}</td>
