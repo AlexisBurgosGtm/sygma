@@ -548,14 +548,16 @@ function selectTempVentasPOS(sucursal) {
     return new Promise(async(resolve,reject)=>{
         var response = await connection.select({
             from: "temp_pos",
-            order: { by: 'ID', type: 'desc' }
+            where: {
+                EMPNIT: String(sucursal || ''),
+            },
+            order: { by: 'ID', type: 'asc' }
         });
-        let datos = JSON.stringify(response);
-        datos = datos.replace('[','');
-        datos = datos.replace(']','');
-        let result = '[' + datos + ']';
-        let data = JSON.parse(result);
-        resolve(data);
+        if(Number(response.length)>0){
+            resolve(response);
+        }else{
+            reject('No hay productos agregados');
+        }
     });
 };
 

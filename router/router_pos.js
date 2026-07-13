@@ -2,6 +2,29 @@ const execute = require('./../connection');
 const express = require('express');
 const router = express.Router();
 
+function esc(val) {
+    if (val === null || val === undefined) return '';
+    return String(val).replace(/'/g, "''");
+}
+
+function num(val, fallback = 0) {
+    const n = Number(val);
+    return Number.isFinite(n) ? n : fallback;
+}
+
+function wrapTransaction(qryBody) {
+    return `
+        BEGIN TRY
+            BEGIN TRANSACTION;
+            ${qryBody}
+            COMMIT TRANSACTION;
+        END TRY
+        BEGIN CATCH
+            IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+            THROW;
+        END CATCH;
+    `;
+}
 
 router.post("/insertventa_factura", async(req,res)=>{
    
@@ -27,14 +50,14 @@ router.post("/insertventa_factura", async(req,res)=>{
     let qryDocproductos = str_qry_docproductos(sucursal,coddoc,correlativo,anio,mes,iva,codbodega,fecha,jsondocproductos);
    
     let nuevoCorrelativo = Number(correlativo) + 1;
-    let qryTipodocumentos = `UPDATE TIPODOCUMENTOS SET CORRELATIVO=${nuevoCorrelativo} WHERE EMPNIT='${sucursal}' AND CODDOC='${coddoc}';`;
-    let qry_last_sale_cliente = `UPDATE CLIENTES SET LASTSALE='${fecha}' WHERE CODCLIENTE=${codcliente};`
+    let qryTipodocumentos = `UPDATE TIPODOCUMENTOS SET CORRELATIVO=${nuevoCorrelativo} WHERE EMPNIT='${esc(sucursal)}' AND CODDOC='${esc(coddoc)}';`;
+    let qry_last_sale_cliente = `UPDATE CLIENTES SET LASTSALE='${esc(fecha)}' WHERE CODCLIENTE=${num(codcliente)};`
     let qry_visita = `INSERT INTO CLIENTES_VISITAS (EMPNIT,CODCLIENTE,FECHA,HORA,CODEMP,MOTIVO,LATITUD,LONGITUD)
-                    SELECT '${sucursal}' AS EMPNIT,${codcliente} AS CODCLIENTE,
-                    '${fecha}' AS FECHA,'${hora}' AS HORA,${codven} AS CODEMP,
-                    'VENTA' AS MOTIVO,${Number(entrega_lat)} AS LATITUD,${Number(entrega_long)} AS LONGITUD; `
+                    SELECT '${esc(sucursal)}' AS EMPNIT,${num(codcliente)} AS CODCLIENTE,
+                    '${esc(fecha)}' AS FECHA,'${esc(hora)}' AS HORA,${num(codven)} AS CODEMP,
+                    'VENTA' AS MOTIVO,${num(entrega_lat)} AS LATITUD,${num(entrega_long)} AS LONGITUD; `
     
-    let qry = qryDocumentos + qryDocproductos + qryTipodocumentos + qry_last_sale_cliente + qry_visita;
+    let qry = wrapTransaction(qryDocumentos + qryDocproductos + qryTipodocumentos + qry_last_sale_cliente + qry_visita);
 
     
     execute.QueryToken(res,qry,token);
@@ -200,22 +223,22 @@ function str_qry_documentos(jsondocproductos,sucursal,
             CODEMBARQUE,
             JSONDOCPRODUCTOS)
         SELECT
-            '${sucursal}' AS EMPNIT,
-            ${anio} AS ANIO, 
-            ${mes} AS MES,
-            '${fecha}' AS FECHA, 
-            '${hora}' AS HORA,
-            '${coddoc}' AS CODDOC, 
-            ${correlativo} AS CORRELATIVO,
-            ${codcliente} AS CODCLIENTE, 
-            '${nitclie}' AS DOC_NIT,
-            '${nomclie}' AS DOC_NOMCLIE, 
-            '${dirclie}' AS DOC_DIRCLIE,
-            ${totalcosto} AS TOTALCOSTO, 
-            ${totalprecio} AS TOTALVENTA,
-            ${totaldescuento} AS TOTALDESCUENTO, 
+            '${esc(sucursal)}' AS EMPNIT,
+            ${num(anio)} AS ANIO, 
+            ${num(mes)} AS MES,
+            '${esc(fecha)}' AS FECHA, 
+            '${esc(hora)}' AS HORA,
+            '${esc(coddoc)}' AS CODDOC, 
+            ${num(correlativo)} AS CORRELATIVO,
+            ${num(codcliente)} AS CODCLIENTE, 
+            '${esc(nitclie)}' AS DOC_NIT,
+            '${esc(nomclie)}' AS DOC_NOMCLIE, 
+            '${esc(dirclie)}' AS DOC_DIRCLIE,
+            ${num(totalcosto)} AS TOTALCOSTO, 
+            ${num(totalprecio)} AS TOTALVENTA,
+            ${num(totaldescuento)} AS TOTALDESCUENTO, 
             0 AS RECARGOTARJETA,
-            ${(Number(totalprecio)-Number(totaldescuento))} AS TOTALPRECIO, 
+            ${(num(totalprecio) - num(totaldescuento))} AS TOTALPRECIO, 
             0 AS PAGO, 
             0 AS VUELTO,
             'O' AS STATUS,
@@ -223,27 +246,27 @@ function str_qry_documentos(jsondocproductos,sucursal,
             0 AS TOTAL_TARJETA, 
             0 AS TOTAL_DEPOSITOS,
             0 AS TOTAL_CHEQUES,
-            '${usuario}' AS USUARIO, 
-            '${tipo_pago}' AS CONCRE,
-            ${codcaja} AS CODCAJA, 
+            '${esc(usuario)}' AS USUARIO, 
+            '${esc(tipo_pago)}' AS CONCRE,
+            ${num(codcaja)} AS CODCAJA, 
             0 AS NOCORTE, 
-            '${coddoc}' AS SERIEFAC,
-            '${correlativo}' AS NOFAC, 
-            ${codven} AS CODEMP,
-            '${obs}' AS OBS,
+            '${esc(coddoc)}' AS SERIEFAC,
+            '${esc(correlativo)}' AS NOFAC, 
+            ${num(codven)} AS CODEMP,
+            '${esc(obs)}' AS OBS,
             0 AS DOC_SALDO, 
             0 AS DOC_ABONOS, 
-            '${direntrega}' AS DIRENTREGA,
+            '${esc(direntrega)}' AS DIRENTREGA,
             0 AS TOTALEXENTO, 
-            ${lat} AS LAT, 
-            ${long} AS LONG,
-            '${fecha}' AS VENCIMIENTO,
+            ${num(lat)} AS LAT, 
+            ${num(long)} AS LONG,
+            '${esc(fecha)}' AS VENCIMIENTO,
             'NO' AS ENTREGADO, 
-            ${iva} POR_IVA,
-            '${tipo_doc}' AS TIPO_VENTA,
-            '${etiqueta}' AS ETIQUETA,
+            ${num(iva)} AS POR_IVA,
+            '${esc(tipo_doc)}' AS TIPO_VENTA,
+            '${esc(etiqueta)}' AS ETIQUETA,
             '' AS CODEMBARQUE,            
-            '${jsondocproductos}' AS JSONDOCPRODUCTOS;
+            '${esc(jsondocproductos)}' AS JSONDOCPRODUCTOS;
         `
 
     return qry;
@@ -252,11 +275,30 @@ function str_qry_documentos(jsondocproductos,sucursal,
 
 function str_qry_docproductos(sucursal,coddoc,correlativo,anio,mes,iva,codbodega,fecha,jsondocproductos){
 
-    let qry = '';    
+    const jsonRaw = typeof jsondocproductos === 'string'
+        ? jsondocproductos
+        : JSON.stringify(jsondocproductos || []);
+    let items = [];
+    try {
+        const parsed = JSON.parse(jsonRaw);
+        items = Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+        items = [];
+    }
+    if (!items.length) return '';
 
-    let data = JSON.parse(jsondocproductos);
-    data.map((r)=>{
-        qry += `
+    const jsonEsc = esc(jsonRaw);
+    const emp = esc(sucursal);
+    const doc = esc(coddoc);
+    const fec = esc(fecha);
+    const bod = esc(String(codbodega == null ? '' : codbodega));
+    const corr = num(correlativo);
+    const an = num(anio);
+    const me = num(mes);
+    const iv = num(iva);
+
+    return `
+        DECLARE @jsonDoc NVARCHAR(MAX) = N'${jsonEsc}';
         INSERT INTO DOCPRODUCTOS (
             EMPNIT,
             ANIO,
@@ -291,49 +333,61 @@ function str_qry_docproductos(sucursal,coddoc,correlativo,anio,mes,iva,codbodega
             EXISTENCIA,
             BONO,
             TOTALBONO
-            )
-        SELECT 
-            '${sucursal}' AS EMPNIT,
-            ${anio} AS ANIO,
-            ${mes} AS MES,
-            '${coddoc}' AS CODDOC,
-            ${correlativo} AS CORRELATIVO,
-            '${r.CODPROD}' AS CODPROD,
-            '${r.DESPROD}' AS DESPROD,
-            '${r.CODMEDIDA}' AS CODMEDIDA,
-            ${r.CANTIDAD} AS CANTIDAD,
+        )
+        SELECT
+            '${emp}' AS EMPNIT,
+            ${an} AS ANIO,
+            ${me} AS MES,
+            '${doc}' AS CODDOC,
+            ${corr} AS CORRELATIVO,
+            LEFT(ISNULL(j.CODPROD, ''), 50) AS CODPROD,
+            LEFT(ISNULL(j.DESPROD, ''), 500) AS DESPROD,
+            LEFT(ISNULL(j.CODMEDIDA, ''), 20) AS CODMEDIDA,
+            ISNULL(j.CANTIDAD, 0) AS CANTIDAD,
             0 AS CANTIDADBONIF,
-            ${r.EQUIVALE} AS EQUIVALE,
-            ${r.TOTALUNIDADES} AS TOTALUNIDADES,
+            ISNULL(j.EQUIVALE, 0) AS EQUIVALE,
+            ISNULL(j.TOTALUNIDADES, 0) AS TOTALUNIDADES,
             0 AS TOTALBONIF,
-            ${r.COSTO} AS COSTO,
-            ${r.PRECIO} AS PRECIO,
-            ${r.TOTALCOSTO} AS TOTALCOSTO,
-            ${r.DESCUENTO} AS DESCUENTO,
-            ${r.TOTALPRECIO} AS TOTALPRECIO,
+            ISNULL(j.COSTO, 0) AS COSTO,
+            ISNULL(j.PRECIO, 0) AS PRECIO,
+            ISNULL(j.TOTALCOSTO, 0) AS TOTALCOSTO,
+            ISNULL(j.DESCUENTO, 0) AS DESCUENTO,
+            ISNULL(j.TOTALPRECIO, 0) AS TOTALPRECIO,
             0 AS ENTREGADOS_TOTALUNIDADES,
-            ${r.COSTO} AS COSTOANTERIOR,
-            ${r.COSTO} AS COSTOPROMEDIO,
-            ${codbodega} AS CODBODEGA,
+            ISNULL(j.COSTO, 0) AS COSTOANTERIOR,
+            ISNULL(j.COSTO, 0) AS COSTOPROMEDIO,
+            '${bod}' AS CODBODEGA,
             '' AS NOSERIE,
-            ${r.EXENTO} AS EXENTO,
+            ISNULL(j.EXENTO, 0) AS EXENTO,
             '' AS OBS,
-            '${r.TIPOPROD}' AS TIPOPROD,
-            '${r.TIPOPRECIO}' AS TIPOPRECIO,
-            '${fecha}' AS LASTUPDATE,
+            LEFT(ISNULL(j.TIPOPROD, ''), 20) AS TIPOPROD,
+            LEFT(ISNULL(j.TIPOPRECIO, ''), 20) AS TIPOPRECIO,
+            '${fec}' AS LASTUPDATE,
             0 AS TOTALUNIDADES_DEVUELTAS,
-            ${iva} AS POR_IVA,
-            ${r.EXISTENCIA} AS EXISTENCIA,
-            ${r.BONO} AS BONO,
-            ${Number(r.BONO) * Number(r.CANTIDAD)} AS TOTALBONO;
-        `
-
-    })
-
-
-    
-
-    return qry;
+            ${iv} AS POR_IVA,
+            ISNULL(j.EXISTENCIA, 0) AS EXISTENCIA,
+            ISNULL(j.BONO, 0) AS BONO,
+            ISNULL(j.BONO, 0) * ISNULL(j.CANTIDAD, 0) AS TOTALBONO
+        FROM OPENJSON(@jsonDoc)
+        WITH (
+            CODPROD NVARCHAR(100) '$.CODPROD',
+            DESPROD NVARCHAR(500) '$.DESPROD',
+            CODMEDIDA NVARCHAR(50) '$.CODMEDIDA',
+            CANTIDAD FLOAT '$.CANTIDAD',
+            EQUIVALE FLOAT '$.EQUIVALE',
+            TOTALUNIDADES FLOAT '$.TOTALUNIDADES',
+            COSTO FLOAT '$.COSTO',
+            PRECIO FLOAT '$.PRECIO',
+            TOTALCOSTO FLOAT '$.TOTALCOSTO',
+            DESCUENTO FLOAT '$.DESCUENTO',
+            TOTALPRECIO FLOAT '$.TOTALPRECIO',
+            EXENTO FLOAT '$.EXENTO',
+            TIPOPROD NVARCHAR(50) '$.TIPOPROD',
+            TIPOPRECIO NVARCHAR(50) '$.TIPOPRECIO',
+            EXISTENCIA FLOAT '$.EXISTENCIA',
+            BONO FLOAT '$.BONO'
+        ) j;
+    `;
 
 };
 
@@ -776,7 +830,7 @@ router.post("/insert_item_venta", async(req,res)=>{
         SELECT
             EMPNIT, ANIO, MES, CODDOC, CORRELATIVO,
             '${codprod}' AS CODPROD,
-            '${desprod}' AS DESPROD,
+            '${esc(desprod)}' AS DESPROD,
             '${codmedida}' AS CODMEDIDA,
             ${cantidad} AS CANTIDAD,
             0 AS CANTIDADBONIF,

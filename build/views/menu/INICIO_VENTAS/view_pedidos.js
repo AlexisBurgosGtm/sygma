@@ -3186,16 +3186,12 @@ function finalizar_pedido(latitud,longitud){
         let entrega_lat = '0';
         let entrega_long = '0';
     
-        
-        get_tbl_pedido();
-    
-            //VERIFICACIONES
         if(Number(GlobalTotalDocumento)==0){F.AvisoError('No hay productos agregados');return;}
         
         btnGuardarFactura.disabled = true;
         btnGuardarFactura.innerHTML = `<i class="fal fa-save fa-spin"></i>`;
     
-            gettempDocproductos_pos(GlobalUsuario)
+            selectTempVentasPOS(GlobalEmpnit)
             .then((response)=>{
                 axios.post('/pos/insertventa_factura', {
                     jsondocproductos:JSON.stringify(response),

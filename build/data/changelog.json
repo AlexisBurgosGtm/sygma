@@ -1,5 +1,5 @@
 {
-  "version": "M.11.07.26 10:04",
+  "version": "M.13.07.26 11:45",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -2960,6 +2960,21 @@
       "FECHA": "11-07-2026",
       "HORA": "10:04",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.11.07.26 10:04"
+    },
+    {
+      "FECHA": "13-07-2026",
+      "HORA": "11:45",
+      "DESCRIPCION": "INICIO VENTAS PEDIDOS: DOCPRODUCTOS CON OPENJSON Y TRANSACCION AL GUARDAR"
+    },
+    {
+      "FECHA": "13-07-2026",
+      "HORA": "11:45",
+      "DESCRIPCION": "INICIO VENTAS PEDIDOS: LECTURA TEMP_POS ALINEADA CON LISTA AL FINALIZAR"
+    },
+    {
+      "FECHA": "13-07-2026",
+      "HORA": "11:45",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.13.07.26 11:45"
     }
   ]
 }
