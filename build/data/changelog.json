@@ -1,5 +1,5 @@
 {
-  "version": "M.13.07.26 11:45",
+  "version": "M.13.07.26 14:09",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -2975,6 +2975,16 @@
       "FECHA": "13-07-2026",
       "HORA": "11:45",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.13.07.26 11:45"
+    },
+    {
+      "FECHA": "13-07-2026",
+      "HORA": "14:09",
+      "DESCRIPCION": "MERCADERISTA ACTIVIDADES: EXIGIR FOTO ANTES Y DESPUES POR OPCION OTA VITRINAS POP"
+    },
+    {
+      "FECHA": "13-07-2026",
+      "HORA": "14:09",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.13.07.26 14:09"
     }
   ]
 }

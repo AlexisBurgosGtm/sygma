@@ -539,7 +539,32 @@ function mercaderista_act_foto_change(key, input) {
 }
 
 function mercaderista_actividad_tiene_foto(prefijo) {
-    return !!(mercaderista_act_fotos[`${prefijo}_antes`] || mercaderista_act_fotos[`${prefijo}_despues`]);
+    return !!(mercaderista_act_fotos[`${prefijo}_antes`] && mercaderista_act_fotos[`${prefijo}_despues`]);
+}
+
+function mercaderista_actividad_validar_pares_foto() {
+    const grupos = [
+        { key: 'ota', label: 'OTA' },
+        { key: 'vitrinas', label: 'VITRINAS' },
+        { key: 'pop', label: 'POP' },
+    ];
+
+    for (const g of grupos) {
+        const antes = !!mercaderista_act_fotos[`${g.key}_antes`];
+        const despues = !!mercaderista_act_fotos[`${g.key}_despues`];
+        if (antes && !despues) {
+            return `En ${g.label} agregó la foto ANTES; también debe agregar la foto DESPUÉS.`;
+        }
+        if (despues && !antes) {
+            return `En ${g.label} agregó la foto DESPUÉS; también debe agregar la foto ANTES.`;
+        }
+    }
+
+    const completo = grupos.some((g) => mercaderista_actividad_tiene_foto(g.key));
+    if (!completo) {
+        return 'Debe completar al menos una actividad con foto ANTES y DESPUÉS (OTA, Vitrinas o POP).';
+    }
+    return '';
 }
 
 // Carpeta destino en pCloud (webdav) para las fotos del mercaderista
@@ -1402,11 +1427,13 @@ function mercaderista_registrar_actividades() {
         ['pop_despues', 'pop', 'despues'],
     ];
 
-    const conFoto = fotosOpcionales.filter(([key]) => mercaderista_act_fotos[key]);
-    if (!conFoto.length) {
-        F.AvisoError('Debe agregar al menos una foto.');
+    const errorFotos = mercaderista_actividad_validar_pares_foto();
+    if (errorFotos) {
+        F.AvisoError(errorFotos);
         return;
     }
+
+    const conFoto = fotosOpcionales.filter(([key]) => mercaderista_act_fotos[key]);
 
     const { fecha, mes, anio } = mercaderista_fecha_partes();
     const cod = mercaderista_cliente_sel.codclie;
