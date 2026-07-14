@@ -5,6 +5,7 @@ var DIGITADOR_EMBED_BASE = '../views/menu/INICIO_DIGITADOR/';
 var MERC_VISITAS_CORE_URL = '../views/shared/view_mercaderistas_visitas_core.js';
 var DIGITADOR_EMBED_SCRIPTS = {
     btnMenuMercaderistas: DIGITADOR_EMBED_BASE + 'view_mercaderistas.js',
+    btnMenuGestionRutas: DIGITADOR_EMBED_BASE + 'view_gestion_rutas.js',
 };
 
 function digitador_getSucursal() {
@@ -317,6 +318,7 @@ function getView(){
                 { id: 'btnMenuEmbarques', label: 'Embarques', icon: 'fa-truck', color: 'secondary', badge: 'lbTotalEmb' },
                 { id: 'btnMenuSellout', label: 'Sell out', icon: 'fa-chart-pie', color: 'success' },
                 { id: 'btnMenuMercaderistas', label: 'Mercaderistas', icon: 'fa-clipboard-list', color: 'info' },
+                { id: 'btnMenuGestionRutas', label: 'Gestion de Rutas', icon: 'fa-road', color: 'warning' },
             ];
             return items.map(item => `
                 <div class="card proveedor-menu-card hand" id="${item.id}">
