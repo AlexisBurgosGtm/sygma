@@ -13,13 +13,34 @@ const upload = multer({
 function sendError(res, err, fallbackMessage) {
     const status = err.code === 'NOT_FOUND'
         ? 404
-        : (err.code === 'INVALID_HEX' || err.code === 'INVALID_PATH' || err.code === 'INVALID_FILENAME' ? 400 : 500);
+        : (err.code === 'INVALID_HEX' || err.code === 'INVALID_PATH' || err.code === 'INVALID_FILENAME' || err.code === 'INVALID_FILE' || err.code === 'UPLOAD_PARSE' ? 400 : 500);
 
     res.status(status).send({
         ok: false,
         error: err.message || fallbackMessage || 'error',
         code: err.code || 'ERROR',
     });
+}
+
+function multerSingle(fieldName) {
+    return (req, res, next) => {
+        upload.single(fieldName)(req, res, (err) => {
+            if (!err) return next();
+            console.error('[storage/upload-file] multer', err.message || err);
+            if (err.code === 'LIMIT_FILE_SIZE') {
+                return res.status(413).send({
+                    ok: false,
+                    error: 'Archivo demasiado grande. Maximo 10MB por foto.',
+                    code: 'FILE_TOO_LARGE',
+                });
+            }
+            return res.status(400).send({
+                ok: false,
+                error: err.message || 'No se pudo leer el archivo enviado',
+                code: 'UPLOAD_PARSE',
+            });
+        });
+    };
 }
 
 router.post('/upload', async (req, res) => {
@@ -52,7 +73,7 @@ router.post('/upload', async (req, res) => {
     }
 });
 
-router.post('/upload-file', upload.single('file'), async (req, res) => {
+router.post('/upload-file', multerSingle('file'), async (req, res) => {
     try {
         const { filename, folder, remote_path, overwrite } = req.body || {};
 
@@ -60,7 +81,7 @@ router.post('/upload-file', upload.single('file'), async (req, res) => {
             return res.status(400).send({ ok: false, error: 'file requerido', code: 'INVALID_FILE' });
         }
 
-        if (!filename && !remote_path) {
+        if (!filename && !remote_path && !req.file.originalname) {
             return res.status(400).send({ ok: false, error: 'filename o remote_path requerido', code: 'INVALID_FILENAME' });
         }
 
@@ -69,7 +90,7 @@ router.post('/upload-file', upload.single('file'), async (req, res) => {
             filename: filename || req.file.originalname,
             folder,
             remote_path,
-            overwrite,
+            overwrite: overwrite === false || overwrite === 'false' ? false : true,
         });
 
         res.send({
@@ -77,14 +98,7 @@ router.post('/upload-file', upload.single('file'), async (req, res) => {
             ...result,
         });
     } catch (err) {
-        console.error('[storage/upload-file]', err.message);
-        if (err.code === 'LIMIT_FILE_SIZE') {
-            return res.status(413).send({
-                ok: false,
-                error: 'Archivo demasiado grande. Maximo 10MB por foto.',
-                code: 'FILE_TOO_LARGE',
-            });
-        }
+        console.error('[storage/upload-file]', err.message || err);
         sendError(res, err, 'No se pudo subir el archivo');
     }
 });

@@ -656,7 +656,12 @@ async function mercaderista_comprimir_foto(file) {
             bestBlob = blob;
             if (blob.size <= maxBytes) {
                 const baseName = String(file.name || 'foto').replace(/\.[^.]+$/, '');
-                return new File([blob], `${baseName}.jpg`, { type: 'image/jpeg', lastModified: Date.now() });
+                try {
+                    return new File([blob], `${baseName}.jpg`, { type: 'image/jpeg', lastModified: Date.now() });
+                } catch (e) {
+                    blob.name = `${baseName}.jpg`;
+                    return blob;
+                }
             }
             quality = Math.max(0.45, quality - 0.08);
         }
@@ -665,10 +670,43 @@ async function mercaderista_comprimir_foto(file) {
 
     if (bestBlob && bestBlob.size <= maxBytes) {
         const baseName = String(file.name || 'foto').replace(/\.[^.]+$/, '');
-        return new File([bestBlob], `${baseName}.jpg`, { type: 'image/jpeg', lastModified: Date.now() });
+        try {
+            return new File([bestBlob], `${baseName}.jpg`, { type: 'image/jpeg', lastModified: Date.now() });
+        } catch (e) {
+            bestBlob.name = `${baseName}.jpg`;
+            return bestBlob;
+        }
     }
 
     throw new Error(`No se pudo reducir la foto ${file.name || ''} a ${MERCADERISTA_FOTO_MAX_MB}MB`);
+}
+
+function mercaderista_blob_to_hex(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const bytes = new Uint8Array(reader.result);
+            const hexParts = new Array(bytes.length);
+            for (let i = 0; i < bytes.length; i++) {
+                hexParts[i] = bytes[i].toString(16).padStart(2, '0');
+            }
+            resolve(hexParts.join(''));
+        };
+        reader.onerror = (e) => reject(e);
+        reader.readAsArrayBuffer(blob);
+    });
+}
+
+function mercaderista_subir_foto_hex(fileComp, nameOut) {
+    return mercaderista_blob_to_hex(fileComp).then((hex) => axios.post('/storage/upload', {
+        hex,
+        filename: nameOut,
+        folder: MERCADERISTA_STORAGE_FOLDER,
+        overwrite: true,
+    }, { timeout: 120000 })).then((resp) => {
+        if (!resp.data || resp.data.ok !== true) throw new Error(resp.data?.error || 'upload');
+        return nameOut;
+    });
 }
 
 function mercaderista_subir_foto(file, filename) {
@@ -682,12 +720,16 @@ function mercaderista_subir_foto(file, filename) {
         formData.append('folder', MERCADERISTA_STORAGE_FOLDER);
         formData.append('overwrite', 'true');
 
+        // No forzar Content-Type: el navegador debe poner el boundary de multipart
         return axios.post('/storage/upload-file', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' },
             timeout: 120000,
         }).then((resp) => {
-            if (!resp.data || resp.data.ok !== true) throw new Error('upload');
+            if (!resp.data || resp.data.ok !== true) throw new Error(resp.data?.error || 'upload');
             return nameOut;
+        }).catch((err) => {
+            // Fallback al endpoint hex (compatible) si multipart falla
+            console.warn('[mercaderista] upload-file fallo, intentando hex', err?.response?.status || err?.message);
+            return mercaderista_subir_foto_hex(fileComp, nameOut);
         });
     });
 }
@@ -1566,9 +1608,10 @@ function mercaderista_registrar_actividades() {
                     mercaderista_cliente_sel = null;
                 })
                 .catch((err) => {
-                    const msg = err && err.message && err.message !== 'upload'
-                        ? err.message
-                        : 'No se pudo subir las fotos o guardar la información';
+                    const apiMsg = err?.response?.data?.error;
+                    const msg = apiMsg
+                        || (err && err.message && err.message !== 'upload' ? err.message : null)
+                        || 'No se pudo subir las fotos o guardar la información';
                     F.AvisoError(msg);
                 })
                 .finally(() => {

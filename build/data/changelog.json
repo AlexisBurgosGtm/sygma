@@ -1,5 +1,5 @@
 {
-  "version": "M.16.07.26 12:26",
+  "version": "M.16.07.26 13:38",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -3040,6 +3040,21 @@
       "FECHA": "16-07-2026",
       "HORA": "12:26",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.16.07.26 12:26"
+    },
+    {
+      "FECHA": "16-07-2026",
+      "HORA": "13:38",
+      "DESCRIPCION": "CORRECCION SUBIDA FOTOS: QUITAR CONTENT-TYPE MANUAL QUE ROMPIA MULTIPART"
+    },
+    {
+      "FECHA": "16-07-2026",
+      "HORA": "13:38",
+      "DESCRIPCION": "STORAGE: MANEJO DE ERRORES MULTER Y FALLBACK HEX SI FALLA UPLOAD-FILE"
+    },
+    {
+      "FECHA": "16-07-2026",
+      "HORA": "13:38",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.16.07.26 13:38"
     }
   ]
 }
