@@ -1,6 +1,14 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const storage = require('../services/webdavStorage');
+
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 30 * 1024 * 1024,
+    },
+});
 
 function sendError(res, err, fallbackMessage) {
     const status = err.code === 'NOT_FOUND'
@@ -40,6 +48,43 @@ router.post('/upload', async (req, res) => {
         });
     } catch (err) {
         console.error('[storage/upload]', err.message);
+        sendError(res, err, 'No se pudo subir el archivo');
+    }
+});
+
+router.post('/upload-file', upload.single('file'), async (req, res) => {
+    try {
+        const { filename, folder, remote_path, overwrite } = req.body || {};
+
+        if (!req.file || !req.file.buffer) {
+            return res.status(400).send({ ok: false, error: 'file requerido', code: 'INVALID_FILE' });
+        }
+
+        if (!filename && !remote_path) {
+            return res.status(400).send({ ok: false, error: 'filename o remote_path requerido', code: 'INVALID_FILENAME' });
+        }
+
+        const result = await storage.uploadFromBuffer({
+            buffer: req.file.buffer,
+            filename: filename || req.file.originalname,
+            folder,
+            remote_path,
+            overwrite,
+        });
+
+        res.send({
+            ok: true,
+            ...result,
+        });
+    } catch (err) {
+        console.error('[storage/upload-file]', err.message);
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            return res.status(413).send({
+                ok: false,
+                error: 'Archivo demasiado grande. Maximo 30MB por foto.',
+                code: 'FILE_TOO_LARGE',
+            });
+        }
         sendError(res, err, 'No se pudo subir el archivo');
     }
 });

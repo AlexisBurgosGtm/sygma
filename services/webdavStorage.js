@@ -135,6 +135,16 @@ async function ensureParentDirectory(remotePath) {
 
 async function uploadFromHex({ hex, filename, folder, remote_path, overwrite = true }) {
     const buffer = parseHexToBuffer(hex);
+    return uploadFromBuffer({ buffer, filename, folder, remote_path, overwrite });
+}
+
+async function uploadFromBuffer({ buffer, filename, folder, remote_path, overwrite = true }) {
+    if (!Buffer.isBuffer(buffer) || !buffer.length) {
+        const err = new Error('Contenido de archivo invalido');
+        err.code = 'INVALID_FILE';
+        throw err;
+    }
+
     const remotePath = remote_path
         ? sanitizeRemotePath(remote_path)
         : buildRemotePath(folder, filename);
@@ -208,6 +218,7 @@ async function deleteFile({ filename, folder, remote_path }) {
 module.exports = {
     DEFAULT_FOLDER,
     uploadFromHex,
+    uploadFromBuffer,
     readFile,
     deleteFile,
     getMimeType,

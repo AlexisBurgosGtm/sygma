@@ -569,6 +569,7 @@ function mercaderista_actividad_validar_pares_foto() {
 
 // Carpeta destino en pCloud (webdav) para las fotos del mercaderista
 var MERCADERISTA_STORAGE_FOLDER = '/XELASOL';
+var MERCADERISTA_FOTO_MAX_MB = 30;
 
 function mercaderista_fecha_ddmmyy(fecha) {
     // fecha llega como YYYY-MM-DD
@@ -603,12 +604,22 @@ function mercaderista_file_to_hex(file) {
 }
 
 function mercaderista_subir_foto(file, filename) {
-    return mercaderista_file_to_hex(file).then((hex) => axios.post('/storage/upload', {
-        hex,
-        filename,
-        folder: MERCADERISTA_STORAGE_FOLDER,
-        overwrite: true,
-    })).then((resp) => {
+    if (!file) return Promise.reject(new Error('foto requerida'));
+    const maxBytes = MERCADERISTA_FOTO_MAX_MB * 1024 * 1024;
+    if (file.size > maxBytes) {
+        return Promise.reject(new Error(`La foto ${file.name || filename} supera ${MERCADERISTA_FOTO_MAX_MB}MB`));
+    }
+
+    const formData = new FormData();
+    formData.append('file', file, filename);
+    formData.append('filename', filename);
+    formData.append('folder', MERCADERISTA_STORAGE_FOLDER);
+    formData.append('overwrite', 'true');
+
+    return axios.post('/storage/upload-file', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 120000,
+    }).then((resp) => {
         if (!resp.data || resp.data.ok !== true) throw new Error('upload');
         return filename;
     });
@@ -1488,8 +1499,11 @@ function mercaderista_registrar_actividades() {
                     $('#modalMercaderistaActividades').modal('hide');
                     mercaderista_cliente_sel = null;
                 })
-                .catch(() => {
-                    F.AvisoError('No se pudo subir las fotos o guardar la información');
+                .catch((err) => {
+                    const msg = err && err.message && err.message !== 'upload'
+                        ? err.message
+                        : 'No se pudo subir las fotos o guardar la información';
+                    F.AvisoError(msg);
                 })
                 .finally(() => {
                     if (btn) {
