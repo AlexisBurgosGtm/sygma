@@ -3193,8 +3193,32 @@ function finalizar_pedido(latitud,longitud){
     
             selectTempVentasPOS(GlobalEmpnit)
             .then((response)=>{
+                const productosLimpios = (response || []).map((r) => ({
+                    CODPROD: String(r.CODPROD || ''),
+                    DESPROD: String(r.DESPROD || ''),
+                    CODMEDIDA: String(r.CODMEDIDA || ''),
+                    CANTIDAD: Number(r.CANTIDAD) || 0,
+                    EQUIVALE: Number(r.EQUIVALE) || 0,
+                    TOTALUNIDADES: Number(r.TOTALUNIDADES) || 0,
+                    COSTO: Number(r.COSTO) || 0,
+                    PRECIO: Number(r.PRECIO) || 0,
+                    TOTALCOSTO: Number(r.TOTALCOSTO) || 0,
+                    DESCUENTO: Number(r.DESCUENTO) || 0,
+                    TOTALPRECIO: Number(r.TOTALPRECIO) || 0,
+                    EXENTO: Number(r.EXENTO) || 0,
+                    TIPOPROD: String(r.TIPOPROD || ''),
+                    TIPOPRECIO: String(r.TIPOPRECIO || ''),
+                    EXISTENCIA: Number(r.EXISTENCIA) || 0,
+                    BONO: Number(r.BONO) || 0,
+                }));
+                if (!productosLimpios.length) {
+                    F.AvisoError('No hay productos agregados');
+                    btnGuardarFactura.disabled = false;
+                    btnGuardarFactura.innerHTML = `<i class="fal fa-save"></i>`;
+                    return;
+                }
                 axios.post('/pos/insertventa_factura', {
-                    jsondocproductos:JSON.stringify(response),
+                    jsondocproductos:JSON.stringify(productosLimpios),
                     sucursal:GlobalEmpnit,
                     coddoc:coddoc,
                     correlativo: correlativoDoc,

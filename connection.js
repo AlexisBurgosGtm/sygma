@@ -13,7 +13,8 @@ function get_conf_token(token){
 			pool: {	max: 100,	min: 0,	idleTimeoutMillis: 30000},
 			options: {
     			encrypt: false, // for azure
-    			trustServerCertificate: true // change to true for local dev / self-signed certs
+    			trustServerCertificate: true, // change to true for local dev / self-signed certs
+				requestTimeout: 120000
   			}
 		};
 	
@@ -80,6 +81,33 @@ let execute = {
 		  res.send('error')   
 		  sql.close();
 		}
+	},
+	/**
+	 * Ejecuta trabajo dentro de una transacción mssql con request parametrizable.
+	 * workFn(transaction, sql) debe retornar Promise.
+	 */
+	TransactionToken : (token, workFn) => {
+		return new Promise(async (resolve, reject) => {
+			const config = get_conf_token(token);
+			const pool = new sql.ConnectionPool(config);
+			try {
+				await pool.connect();
+				const transaction = new sql.Transaction(pool);
+				await transaction.begin();
+				try {
+					const result = await workFn(transaction, sql);
+					await transaction.commit();
+					resolve(result);
+				} catch (err) {
+					try { await transaction.rollback(); } catch (e) { /* ignore */ }
+					reject(err);
+				}
+			} catch (err) {
+				reject(err);
+			} finally {
+				try { await pool.close(); } catch (e) { /* ignore */ }
+			}
+		});
 	},
 	QueryJsonDocproductos : (token,sucursal,coddoc,correlativo)=>{	
 
