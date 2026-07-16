@@ -6,7 +6,7 @@ const storage = require('../services/webdavStorage');
 const upload = multer({
     storage: multer.memoryStorage(),
     limits: {
-        fileSize: 30 * 1024 * 1024,
+        fileSize: 12 * 1024 * 1024,
     },
 });
 
@@ -81,7 +81,7 @@ router.post('/upload-file', upload.single('file'), async (req, res) => {
         if (err.code === 'LIMIT_FILE_SIZE') {
             return res.status(413).send({
                 ok: false,
-                error: 'Archivo demasiado grande. Maximo 30MB por foto.',
+                error: 'Archivo demasiado grande. Maximo 10MB por foto.',
                 code: 'FILE_TOO_LARGE',
             });
         }

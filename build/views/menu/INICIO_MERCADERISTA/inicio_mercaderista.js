@@ -569,7 +569,9 @@ function mercaderista_actividad_validar_pares_foto() {
 
 // Carpeta destino en pCloud (webdav) para las fotos del mercaderista
 var MERCADERISTA_STORAGE_FOLDER = '/XELASOL';
-var MERCADERISTA_FOTO_MAX_MB = 30;
+var MERCADERISTA_FOTO_MAX_MB = 10;
+var MERCADERISTA_FOTO_ORIGEN_MAX_MB = 50;
+var MERCADERISTA_FOTO_MAX_LADO = 1920;
 
 function mercaderista_fecha_ddmmyy(fecha) {
     // fecha llega como YYYY-MM-DD
@@ -587,41 +589,106 @@ function mercaderista_file_ext(file) {
     return ext;
 }
 
-function mercaderista_file_to_hex(file) {
+function mercaderista_load_image(file) {
     return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-            const bytes = new Uint8Array(reader.result);
-            const hexParts = new Array(bytes.length);
-            for (let i = 0; i < bytes.length; i++) {
-                hexParts[i] = bytes[i].toString(16).padStart(2, '0');
-            }
-            resolve(hexParts.join(''));
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+            URL.revokeObjectURL(url);
+            resolve(img);
         };
-        reader.onerror = (e) => reject(e);
-        reader.readAsArrayBuffer(file);
+        img.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error('No se pudo leer la imagen'));
+        };
+        img.src = url;
     });
+}
+
+function mercaderista_canvas_to_blob(canvas, quality) {
+    return new Promise((resolve, reject) => {
+        canvas.toBlob((blob) => {
+            if (!blob) reject(new Error('No se pudo comprimir la imagen'));
+            else resolve(blob);
+        }, 'image/jpeg', quality);
+    });
+}
+
+function mercaderista_draw_scaled(img, maxLado) {
+    let width = img.naturalWidth || img.width;
+    let height = img.naturalHeight || img.height;
+    if (!width || !height) throw new Error('Dimensiones de imagen invalidas');
+
+    const scale = Math.min(1, maxLado / Math.max(width, height));
+    width = Math.max(1, Math.round(width * scale));
+    height = Math.max(1, Math.round(height * scale));
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, width, height);
+    ctx.drawImage(img, 0, 0, width, height);
+    return canvas;
+}
+
+/** Reduce la foto a JPEG <= 10MB (redimensiona y baja calidad si hace falta). */
+async function mercaderista_comprimir_foto(file) {
+    if (!file) throw new Error('foto requerida');
+
+    const origenMax = MERCADERISTA_FOTO_ORIGEN_MAX_MB * 1024 * 1024;
+    if (file.size > origenMax) {
+        throw new Error(`La foto ${file.name || ''} supera ${MERCADERISTA_FOTO_ORIGEN_MAX_MB}MB y no se puede procesar`);
+    }
+
+    const maxBytes = MERCADERISTA_FOTO_MAX_MB * 1024 * 1024;
+    const img = await mercaderista_load_image(file);
+
+    let maxLado = MERCADERISTA_FOTO_MAX_LADO;
+    let bestBlob = null;
+
+    for (let intento = 0; intento < 4; intento++) {
+        const canvas = mercaderista_draw_scaled(img, maxLado);
+        let quality = 0.82;
+        for (let q = 0; q < 6; q++) {
+            const blob = await mercaderista_canvas_to_blob(canvas, quality);
+            bestBlob = blob;
+            if (blob.size <= maxBytes) {
+                const baseName = String(file.name || 'foto').replace(/\.[^.]+$/, '');
+                return new File([blob], `${baseName}.jpg`, { type: 'image/jpeg', lastModified: Date.now() });
+            }
+            quality = Math.max(0.45, quality - 0.08);
+        }
+        maxLado = Math.max(960, Math.round(maxLado * 0.75));
+    }
+
+    if (bestBlob && bestBlob.size <= maxBytes) {
+        const baseName = String(file.name || 'foto').replace(/\.[^.]+$/, '');
+        return new File([bestBlob], `${baseName}.jpg`, { type: 'image/jpeg', lastModified: Date.now() });
+    }
+
+    throw new Error(`No se pudo reducir la foto ${file.name || ''} a ${MERCADERISTA_FOTO_MAX_MB}MB`);
 }
 
 function mercaderista_subir_foto(file, filename) {
     if (!file) return Promise.reject(new Error('foto requerida'));
-    const maxBytes = MERCADERISTA_FOTO_MAX_MB * 1024 * 1024;
-    if (file.size > maxBytes) {
-        return Promise.reject(new Error(`La foto ${file.name || filename} supera ${MERCADERISTA_FOTO_MAX_MB}MB`));
-    }
 
-    const formData = new FormData();
-    formData.append('file', file, filename);
-    formData.append('filename', filename);
-    formData.append('folder', MERCADERISTA_STORAGE_FOLDER);
-    formData.append('overwrite', 'true');
+    return mercaderista_comprimir_foto(file).then((fileComp) => {
+        const nameOut = String(filename || fileComp.name || 'foto.jpg').replace(/\.[^.]+$/, '.jpg');
+        const formData = new FormData();
+        formData.append('file', fileComp, nameOut);
+        formData.append('filename', nameOut);
+        formData.append('folder', MERCADERISTA_STORAGE_FOLDER);
+        formData.append('overwrite', 'true');
 
-    return axios.post('/storage/upload-file', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        timeout: 120000,
-    }).then((resp) => {
-        if (!resp.data || resp.data.ok !== true) throw new Error('upload');
-        return filename;
+        return axios.post('/storage/upload-file', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+            timeout: 120000,
+        }).then((resp) => {
+            if (!resp.data || resp.data.ok !== true) throw new Error('upload');
+            return nameOut;
+        });
     });
 }
 
@@ -1461,13 +1528,12 @@ function mercaderista_registrar_actividades() {
                 btn.innerHTML = '<i class="fal fa-spinner fa-spin mr-1"></i> Subiendo fotos...';
             }
             if (cancelarBtn) cancelarBtn.disabled = true;
-            F.showToast('Subiendo las fotos, espere por favor...');
+            F.showToast('Comprimiendo y subiendo las fotos, espere por favor...');
 
             const nombres = {};
             const subidas = conFoto.map(([key, grupo, momento]) => {
                 const file = mercaderista_act_fotos[key];
-                const ext = mercaderista_file_ext(file);
-                const filename = `${cod} - ${ddmmyy} - ${grupo} - ${momento}${ext}`;
+                const filename = `${cod} - ${ddmmyy} - ${grupo} - ${momento}.jpg`;
                 return mercaderista_subir_foto(file, filename).then((nombre) => {
                     nombres[`${grupo}_${momento}`] = nombre;
                 });

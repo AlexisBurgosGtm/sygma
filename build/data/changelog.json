@@ -1,5 +1,5 @@
 {
-  "version": "M.16.07.26 11:28",
+  "version": "M.16.07.26 12:26",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -3030,6 +3030,16 @@
       "FECHA": "16-07-2026",
       "HORA": "11:28",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.16.07.26 11:28"
+    },
+    {
+      "FECHA": "16-07-2026",
+      "HORA": "12:26",
+      "DESCRIPCION": "INICIO MERCADERISTA: COMPRESION AUTOMATICA DE FOTOS A MAXIMO 10MB"
+    },
+    {
+      "FECHA": "16-07-2026",
+      "HORA": "12:26",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.16.07.26 12:26"
     }
   ]
 }
