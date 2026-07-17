@@ -89,6 +89,36 @@ let data_config_general = [];
 
 let data_empresa_config = [];
 let data_usuario_config = [];
+/** Mapa EMPNIT -> OBJETIVO_SKUS (cargado al iniciar sesión). */
+let GlobalObjetivoSkus = {};
+
+function cargar_objetivos_skus_sesion() {
+    GlobalObjetivoSkus = {};
+    return GF.get_data_empresas()
+        .then((data) => {
+            (data.recordset || []).forEach((r) => {
+                GlobalObjetivoSkus[String(r.EMPNIT)] = Number(r.OBJETIVO_SKUS) || 0;
+            });
+            return GlobalObjetivoSkus;
+        })
+        .catch(() => {
+            GlobalObjetivoSkus = {};
+            return GlobalObjetivoSkus;
+        });
+}
+
+function get_objetivo_skus(sucursal) {
+    const key = String(sucursal || '');
+    if (key && GlobalObjetivoSkus && Object.prototype.hasOwnProperty.call(GlobalObjetivoSkus, key)) {
+        return Number(GlobalObjetivoSkus[key]) || 0;
+    }
+    if (typeof data_empresa_config !== 'undefined'
+        && data_empresa_config
+        && String(data_empresa_config.EMPNIT || '') === key) {
+        return Number(data_empresa_config.OBJETIVO_SKUS) || 0;
+    }
+    return 0;
+}
 
 let tbl_etiquetas = [
     {valor:"BAJA",color:"bg-info"},

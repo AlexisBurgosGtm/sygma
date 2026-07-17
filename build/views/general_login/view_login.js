@@ -437,7 +437,10 @@ function login_submit() {
                     }).catch(() => { data_config_general = []; });
 
                     data_empresa_config = data.recordset[0];
-                    cargarRutaPerfil.finally(() => Navegar.inicio());
+                    const cargarSkus = (typeof cargar_objetivos_skus_sesion === 'function')
+                        ? cargar_objetivos_skus_sesion()
+                        : Promise.resolve();
+                    Promise.all([cargarRutaPerfil, cargarSkus]).finally(() => Navegar.inicio());
                 })
                 .catch(() => {
                     F.AvisoError('No se pudieron cargar los datos de la empresa');

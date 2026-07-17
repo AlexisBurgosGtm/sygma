@@ -1,5 +1,5 @@
 {
-  "version": "M.16.07.26 13:38",
+  "version": "M.17.07.26 11:19",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -3055,6 +3055,41 @@
       "FECHA": "16-07-2026",
       "HORA": "13:38",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.16.07.26 13:38"
+    },
+    {
+      "FECHA": "16-07-2026",
+      "HORA": "16:18",
+      "DESCRIPCION": "MERCADERISTAS: RESUMEN COMO VISTA POR DEFECTO EN DIGITADOR PROVEEDOR Y SUPERVISOR"
+    },
+    {
+      "FECHA": "16-07-2026",
+      "HORA": "16:18",
+      "DESCRIPCION": "MERCADERISTAS: MODAL DE VISITAS AL CLIC EN REGISTRO DEL RESUMEN"
+    },
+    {
+      "FECHA": "16-07-2026",
+      "HORA": "16:18",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.16.07.26 16:18"
+    },
+    {
+      "FECHA": "17-07-2026",
+      "HORA": "11:19",
+      "DESCRIPCION": "OBJETIVO SKUS POR EMPRESA CARGADO AL INICIO DE SESION"
+    },
+    {
+      "FECHA": "17-07-2026",
+      "HORA": "11:19",
+      "DESCRIPCION": "AVANCE PROCTER: SKUS TIENDA DESDE EMPRESAS.OBJETIVO_SKUS"
+    },
+    {
+      "FECHA": "17-07-2026",
+      "HORA": "11:19",
+      "DESCRIPCION": "EMPRESAS: CAMPO OBJETIVO_SKUS EN LISTADO Y EDICION"
+    },
+    {
+      "FECHA": "17-07-2026",
+      "HORA": "11:19",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.17.07.26 11:19"
     }
   ]
 }

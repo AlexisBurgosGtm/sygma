@@ -42,6 +42,7 @@ function getView() {
                                         <th>TIPO PRECIO</th>
                                         <th>OBJ. VENTAS</th>
                                         <th>OBJ. RENT.</th>
+                                        <th>OBJ. SKUS</th>
                                         <th></th>
                                         <th></th>
                                     </tr>
@@ -90,16 +91,22 @@ function getView() {
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="form-group mb-2">
                                         <label>Objetivo ventas</label>
                                         <input type="number" step="0.01" class="form-control" id="txtEmpObjVentas">
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="form-group mb-2">
                                         <label>Objetivo rentabilidad</label>
                                         <input type="number" step="0.01" class="form-control" id="txtEmpObjRent">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group mb-2">
+                                        <label>Objetivo SKUS</label>
+                                        <input type="number" step="1" min="0" class="form-control" id="txtEmpObjSkus">
                                     </div>
                                 </div>
                             </div>
@@ -133,6 +140,7 @@ function cargar_form_empresa(r) {
     document.getElementById('txtEmpClave').value = r.CLAVE || '';
     document.getElementById('txtEmpObjVentas').value = r.OBJETIVO_VENTAS || 0;
     document.getElementById('txtEmpObjRent').value = r.OBJETIVO_RENTABILIDAD || 0;
+    document.getElementById('txtEmpObjSkus').value = r.OBJETIVO_SKUS || 0;
 }
 
 function empresas_bindTablaAcciones() {
@@ -162,15 +170,15 @@ function tbl_empresas() {
 
     axios.post(GlobalUrlCalls + '/general/empresas_listado', { TOKEN: TOKEN })
         .then((response) => {
-            if (response.status.toString() !== '200') {
-                container.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No se cargaron datos...</td></tr>';
+                if (response.status.toString() !== '200') {
+                container.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No se cargaron datos...</td></tr>';
                 return;
             }
             let data = response.data;
             if (data.toString() === 'error' || Number(data.rowsAffected[0]) === 0) {
                 document.getElementById('lbTotalEmpresas').innerText = '0';
                 _cacheEmpresas = [];
-                container.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No hay empresas registradas.</td></tr>';
+                container.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No hay empresas registradas.</td></tr>';
                 return;
             }
 
@@ -186,6 +194,7 @@ function tbl_empresas() {
                     <td>${r.TIPO_PRECIO || ''}</td>
                     <td>${F.setMoneda(r.OBJETIVO_VENTAS, 'Q')}</td>
                     <td>${F.setMoneda(r.OBJETIVO_RENTABILIDAD, 'Q')}</td>
+                    <td class="text-center negrita">${Number(r.OBJETIVO_SKUS) || 0}</td>
                     <td>
                         <button type="button" title="Editar empresa"
                             class="btn btn-md btn-circle btn-info hand shadow"
@@ -207,7 +216,7 @@ function tbl_empresas() {
         })
         .catch(() => {
             _cacheEmpresas = [];
-            container.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Error al cargar empresas...</td></tr>';
+            container.innerHTML = '<tr><td colspan="9" class="text-center text-muted">Error al cargar empresas...</td></tr>';
         });
 }
 
@@ -227,7 +236,8 @@ function guardar_empresa() {
         tipo_precio: document.getElementById('txtEmpTipoPrecio').value.trim(),
         clave: document.getElementById('txtEmpClave').value,
         objetivo_ventas: document.getElementById('txtEmpObjVentas').value,
-        objetivo_rentabilidad: document.getElementById('txtEmpObjRent').value
+        objetivo_rentabilidad: document.getElementById('txtEmpObjRent').value,
+        objetivo_skus: document.getElementById('txtEmpObjSkus').value
     };
 
     if (!payload.nombre) {
@@ -242,6 +252,14 @@ function guardar_empresa() {
             document.getElementById('btnGuardarEmp').disabled = false;
             if (response.status.toString() === '200' && response.data.toString() !== 'error' && Number(response.data.rowsAffected[0]) > 0) {
                 F.Aviso('Empresa actualizada correctamente.');
+                if (typeof GlobalObjetivoSkus !== 'undefined') {
+                    GlobalObjetivoSkus[String(payload.empnit)] = Number(payload.objetivo_skus) || 0;
+                }
+                if (typeof data_empresa_config !== 'undefined'
+                    && data_empresa_config
+                    && String(data_empresa_config.EMPNIT || '') === String(payload.empnit)) {
+                    data_empresa_config.OBJETIVO_SKUS = Number(payload.objetivo_skus) || 0;
+                }
                 $('#modal_empresa').modal('hide');
                 tbl_empresas();
             } else {

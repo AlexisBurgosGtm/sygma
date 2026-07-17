@@ -3,24 +3,10 @@
 
 let data_objetivos = {
     skus_tienda:(sucursal)=>{
-        
-        let objetivo = 0;
-
-        switch (sucursal) {
-            case 'XELASOL000': //SOLOLA
-                objetivo = 5.5;
-                break;
-            case 'XELASOL001': //QUICHE SUR
-                objetivo = 5.5;
-                break;
-            case 'XELASOL002': //QUICHE NORTE
-                objetivo = 5.5;
-                break;
-            case 'XELASOL003': //IXCAN
-                objetivo = 6;
-                break;
-            }
-        return objetivo;
+        if (typeof get_objetivo_skus === 'function') {
+            return get_objetivo_skus(sucursal);
+        }
+        return 0;
     }
 };
 

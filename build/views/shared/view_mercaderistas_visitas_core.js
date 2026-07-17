@@ -54,7 +54,7 @@ window.MercVisitasCore = (function () {
     }
 
     function getTipoReporte() {
-        return (el('CmbTipoReporte')?.value || 'VISITAS').toUpperCase();
+        return (el('CmbTipoReporte')?.value || 'RESUMEN').toUpperCase();
     }
 
     function validarFechas() {
@@ -373,7 +373,8 @@ window.MercVisitasCore = (function () {
             ? `<div class="small text-secondary mb-1">${r.NOMEMPRESA || r.EMPNIT || ''}</div>`
             : '';
         return `
-            <div class="card merc-resumen-card shadow-sm mb-2 border">
+            <div class="card merc-resumen-card shadow-sm mb-2 border hand merc-resumen-row"
+                data-codemp="${r.CODEMP || 0}" data-empnit="${r.EMPNIT || ''}" data-nom="${String(r.NOMMERCADERISTA || '').replace(/"/g, '&quot;')}">
                 <div class="card-body p-2">
                     ${sucursalHtml}
                     <div class="negrita text-base mb-2">${r.NOMMERCADERISTA || ''}</div>
@@ -406,7 +407,8 @@ window.MercVisitasCore = (function () {
             tbody.innerHTML = rows.map((r) => {
                 const colSuc = todas ? `<td class="small">${r.NOMEMPRESA || r.EMPNIT || ''}</td>` : '';
                 return `
-                <tr>
+                <tr class="hand merc-resumen-row"
+                    data-codemp="${r.CODEMP || 0}" data-empnit="${r.EMPNIT || ''}" data-nom="${String(r.NOMMERCADERISTA || '').replace(/"/g, '&quot;')}">
                     ${colSuc}
                     <td class="negrita">${r.NOMMERCADERISTA || ''}</td>
                     <td class="text-center negrita text-success">${r.TOTAL_VISITAS || 0}</td>
@@ -417,6 +419,94 @@ window.MercVisitasCore = (function () {
         }
         if (cards) cards.innerHTML = rows.map((r) => resumenCardHtml(r)).join('');
         if (lbTotal) lbTotal.innerText = `${rows.length} mercaderista${rows.length === 1 ? '' : 's'}`;
+    }
+
+    function renderVisitasModal(rows) {
+        const body = el('BodyVisitasMerc');
+        const lbTotal = el('LbTotalVisitasMerc');
+        if (!body) return;
+
+        if (!rows.length) {
+            body.innerHTML = '<div class="text-center text-muted py-3">No hay visitas en el rango seleccionado</div>';
+            if (lbTotal) lbTotal.innerText = '0 visitas';
+            return;
+        }
+
+        const todas = esTodasSucursales();
+        body.innerHTML = `
+            <div class="table-responsive" style="max-height:60vh;overflow-y:auto">
+                <table class="table table-sm table-bordered table-hover mb-0">
+                    <thead class="bg-base text-white">
+                        <tr>
+                            ${todas ? '<th>SUCURSAL</th>' : ''}
+                            <th>CLIENTE</th>
+                            <th>FECHA</th>
+                            <th>HORA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows.map((r) => {
+                            const fechaVal = String(r.FECHA || '').substring(0, 10);
+                            const colSuc = todas ? `<td class="small">${r.NOMEMPRESA || r.EMPNIT || ''}</td>` : '';
+                            return `
+                            <tr class="hand merc-visita-row"
+                                data-codemp="${r.CODEMP}" data-codclie="${r.CODCLIENTE}" data-fecha="${fechaVal}" data-empnit="${r.EMPNIT || ''}">
+                                ${colSuc}
+                                <td><div class="negrita">${r.NOMBRE_CLIENTE || ''}</div><small class="text-muted">${r.NEGOCIO || ''}</small></td>
+                                <td>${fmtFecha(r.FECHA)}</td>
+                                <td>${r.HORA_INICIO || '--'}</td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+        if (lbTotal) lbTotal.innerText = `${rows.length} visita${rows.length === 1 ? '' : 's'}`;
+    }
+
+    function verVisitasMercaderista(codemp, empnit, nom) {
+        const fechas = validarFechas();
+        if (!fechas) return;
+        const { fi, ff } = fechas;
+        const merc = Number(codemp) || 0;
+        if (!merc) {
+            F.AvisoError('Mercaderista no válido');
+            return;
+        }
+
+        const titulo = el('LbTituloVisitasMerc');
+        const body = el('BodyVisitasMerc');
+        const lbTotal = el('LbTotalVisitasMerc');
+        if (titulo) titulo.innerText = nom || 'Visitas del mercaderista';
+        if (lbTotal) lbTotal.innerText = '';
+        if (body) body.innerHTML = `<div class="text-center py-4">${GlobalLoader}</div>`;
+        $(`#${P()}ModalVisitasMerc`).modal('show');
+
+        const suc = (empnit || '').trim() || getSucursal();
+        axios.post('/clientes/supervisor_mercaderistas_visitas', {
+            token: TOKEN,
+            sucursal: suc,
+            fi,
+            ff,
+            codemp: merc,
+        })
+            .then((response) => {
+                if (response.data === 'error') throw new Error('error');
+                renderVisitasModal(response.data.recordset || []);
+            })
+            .catch(() => {
+                if (body) body.innerHTML = '<div class="text-center text-danger py-3">No se pudieron cargar las visitas</div>';
+                if (lbTotal) lbTotal.innerText = '0 visitas';
+            });
+    }
+
+    function onResumenClick(e) {
+        const row = e.target.closest('.merc-resumen-row');
+        if (!row) return;
+        verVisitasMercaderista(
+            Number(row.dataset.codemp),
+            row.dataset.empnit || '',
+            row.dataset.nom || ''
+        );
     }
 
     function cargarVisitas() {
@@ -523,7 +613,7 @@ window.MercVisitasCore = (function () {
                                 <input type="date" class="form-control negrita" id="${Pfx}TxtFechaFin">
                             </div>
                             <div class="col-12 col-md-6">
-                                <h6 class="negrita text-secondary mb-0" id="${Pfx}LbTotalVisitas">0 visitas</h6>
+                                <h6 class="negrita text-secondary mb-0" id="${Pfx}LbTotalVisitas">0 mercaderistas</h6>
                             </div>
                         </div>
                         <div class="row align-items-end mb-3">
@@ -536,12 +626,12 @@ window.MercVisitasCore = (function () {
                             <div class="col-6 col-md-6 mb-2 mb-md-0">
                                 <label class="negrita text-secondary small mb-1" for="${Pfx}CmbTipoReporte">Reporte</label>
                                 <select class="form-control negrita" id="${Pfx}CmbTipoReporte">
+                                    <option value="RESUMEN" selected>RESUMEN</option>
                                     <option value="VISITAS">VISITAS</option>
-                                    <option value="RESUMEN">RESUMEN</option>
                                 </select>
                             </div>
                         </div>
-                        <div id="${Pfx}PanelVisitas">
+                        <div id="${Pfx}PanelVisitas" class="d-none">
                             <div id="${Pfx}TblVisitasCards" class="d-md-none"></div>
                             <div class="table-responsive d-none d-md-block">
                                 <table class="table table-sm table-bordered table-hover mb-0" style="min-width:720px">
@@ -554,7 +644,7 @@ window.MercVisitasCore = (function () {
                                 </table>
                             </div>
                         </div>
-                        <div id="${Pfx}PanelResumen" class="d-none">
+                        <div id="${Pfx}PanelResumen">
                             <div id="${Pfx}TblResumenCards" class="d-md-none"></div>
                             <div class="table-responsive d-none d-md-block">
                                 <table class="table table-sm table-bordered table-hover mb-0" style="min-width:640px">
@@ -565,6 +655,23 @@ window.MercVisitasCore = (function () {
                                         <tr><td colspan="4" class="text-center text-muted py-3">Cargando resumen...</td></tr>
                                     </tbody>
                                 </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade" id="${Pfx}ModalVisitasMerc" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                        <div class="modal-content border-0 shadow">
+                            <div class="modal-header bg-base py-2">
+                                <div>
+                                    <h5 class="modal-title text-white negrita mb-0" id="${Pfx}LbTituloVisitasMerc">Visitas del mercaderista</h5>
+                                    <small class="text-white-50" id="${Pfx}LbTotalVisitasMerc"></small>
+                                </div>
+                                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+                            </div>
+                            <div class="modal-body p-3" id="${Pfx}BodyVisitasMerc"></div>
+                            <div class="modal-footer py-2">
+                                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</button>
                             </div>
                         </div>
                     </div>
@@ -626,6 +733,9 @@ window.MercVisitasCore = (function () {
         el('CmbTipoReporte')?.addEventListener('change', cargarDatos);
         el('TblDataVisitas')?.addEventListener('click', onVisitaClick);
         el('TblVisitasCards')?.addEventListener('click', onVisitaClick);
+        el('TblDataResumen')?.addEventListener('click', onResumenClick);
+        el('TblResumenCards')?.addEventListener('click', onResumenClick);
+        el('BodyVisitasMerc')?.addEventListener('click', onVisitaClick);
         el('BodyDetalleVisita')?.addEventListener('click', onDetalleExtraClick);
     }
 
@@ -646,6 +756,7 @@ window.MercVisitasCore = (function () {
             visitasCache = [];
             detalleActual = null;
             if (pfx) {
+                $(`#${pfx}ModalVisitasMerc`).modal('hide');
                 $(`#${pfx}ModalDetalleVisita`).modal('hide');
                 $(`#${pfx}ModalFotosActividad`).modal('hide');
                 $(`#${pfx}ModalFaltantesLista`).modal('hide');

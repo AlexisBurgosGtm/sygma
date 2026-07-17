@@ -32,7 +32,8 @@ router.post("/empresas", async(req,res)=>{
 
     let qry = `
         SELECT 
-            EMPNIT,NOMBRE,CODTIPOEMPRESA,TIPO_PRECIO,OBJETIVO_VENTAS,OBJETIVO_RENTABILIDAD 
+            EMPNIT,NOMBRE,CODTIPOEMPRESA,TIPO_PRECIO,OBJETIVO_VENTAS,OBJETIVO_RENTABILIDAD,
+            ISNULL(OBJETIVO_SKUS, 0) AS OBJETIVO_SKUS
         FROM EMPRESAS
          `
          //   WHERE NOSUCURSAL='SI';
@@ -52,6 +53,7 @@ router.post("/empresas_listado", async (req, res) => {
             ISNULL(TIPO_PRECIO, '') AS TIPO_PRECIO,
             ISNULL(OBJETIVO_VENTAS, 0) AS OBJETIVO_VENTAS,
             ISNULL(OBJETIVO_RENTABILIDAD, 0) AS OBJETIVO_RENTABILIDAD,
+            ISNULL(OBJETIVO_SKUS, 0) AS OBJETIVO_SKUS,
             ISNULL(CLAVE, '') AS CLAVE
         FROM EMPRESAS
         ORDER BY NOMBRE
@@ -69,6 +71,7 @@ router.post("/empresa_update", async (req, res) => {
         tipo_precio,
         objetivo_ventas,
         objetivo_rentabilidad,
+        objetivo_skus,
         clave
     } = req.body;
 
@@ -79,6 +82,7 @@ router.post("/empresa_update", async (req, res) => {
             TIPO_PRECIO = '${esc(tipo_precio)}',
             OBJETIVO_VENTAS = ${Number(objetivo_ventas) || 0},
             OBJETIVO_RENTABILIDAD = ${Number(objetivo_rentabilidad) || 0},
+            OBJETIVO_SKUS = ${Number(objetivo_skus) || 0},
             CLAVE = '${esc(clave || '')}'
         WHERE EMPNIT = '${esc(empnit)}'
     `;
