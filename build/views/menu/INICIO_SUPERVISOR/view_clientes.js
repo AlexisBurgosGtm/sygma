@@ -49,6 +49,7 @@ function getView(){
                             <div class="form-group mb-0">
                                 <label class="negrita text-secondary small mb-1">Tipo de lista</label>
                                 <select class="form-control negrita text-base" id="cmbTipo">
+                                    <option value="NA">CENSO</option>
                                     <option value="SI" selected>ACTIVOS</option>
                                     <option value="NOGPS">SIN UBICACION GPS</option>
                                 </select>

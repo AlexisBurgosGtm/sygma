@@ -466,5 +466,31 @@ router.post("/insert_item_movinv", async(req,res)=>{
 });
 
 
+router.post("/inventario_saldos_unidades", async(req,res)=>{
+
+    const { token, sucursal } = req.body;
+
+    let qry = `
+        SELECT V.CODPROD,
+               ISNULL(P.DESPROD,'') AS DESPROD,
+               ISNULL(P.TIPOPROD,'') AS TIPOPROD,
+               ISNULL(P.EXENTO,0) AS EXENTO,
+               ISNULL(V.TOTALUNIDADES,0) AS EXISTENCIA,
+               ISNULL((SELECT TOP 1 PR.COSTO / NULLIF(PR.EQUIVALE,0)
+                        FROM PRECIOS PR
+                        WHERE PR.CODPROD = V.CODPROD
+                        ORDER BY PR.EQUIVALE ASC),0) AS COSTO_UNIDAD
+        FROM view_invsaldo V LEFT OUTER JOIN
+             PRODUCTOS P ON V.CODPROD = P.CODPROD
+        WHERE V.EMPNIT='${sucursal}'
+          AND ISNULL(V.TOTALUNIDADES,0) <> 0
+        ORDER BY V.CODPROD;
+    `;
+
+    execute.QueryToken(res,qry,token);
+
+});
+
+
 module.exports = router;
 

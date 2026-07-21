@@ -206,9 +206,13 @@ function movinv2_tpl_card_documento() {
                 <label class="small text-secondary negrita">Sucursal de destino</label>
                 <select class="negrita form-control form-control-sm" id="cmbEmpresas"></select>
             </div>
-            <div class="form-group mb-0">
-                <label class="small text-secondary negrita">Prioridad</label>
+            <div class="d-none">
                 <select class="form-control form-control-sm negrita text-base" id="cmbPrioridad"></select>
+            </div>
+            <div class="form-group mb-0">
+                <button type="button" class="btn btn-outline-danger btn-sm btn-block hand" id="btnMovinv2QuitarTodos">
+                    <i class="fal fa-trash-alt mr-1"></i> Quitar todos los items
+                </button>
             </div>
         </div>
     </div>
@@ -290,6 +294,10 @@ function movinv2_tpl_ingreso() {
                 <div class="pos2-sidebar">${movinv2_tpl_sidebar_datos()}</div>
             </div>
         </div>
+        <button type="button" class="btn btn-danger shadow hand oculto-impresion d-none" id="btnMovinv2InvCero"
+            style="position:fixed;left:18px;bottom:18px;z-index:1040;border-radius:24px" title="Dejar todo el inventario en cero">
+            <i class="fal fa-eraser mr-1"></i> Dejar Inv Cero
+        </button>
         ${movinv2_tpl_modals()}
     </div>`;
 }
@@ -439,6 +447,8 @@ function movinv2_show_ingreso(opts) {
 
     const cmbTipo = document.getElementById('cmbTipoDocumento');
     if (cmbTipo) cmbTipo.value = movinv2_tipoDoc;
+
+    document.getElementById('btnMovinv2InvCero')?.classList.toggle('d-none', movinv2_tipoDoc !== 'ENT');
 
     if (typeof movinv2_setup_ingreso_listeners === 'function') movinv2_setup_ingreso_listeners();
     if (!opts.skipNuevo && typeof movinv2_iniciar_documento_nuevo === 'function') {

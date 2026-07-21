@@ -1,5 +1,5 @@
 {
-  "version": "M.17.07.26 11:19",
+  "version": "M.21.07.26 00:12",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -3090,6 +3090,26 @@
       "FECHA": "17-07-2026",
       "HORA": "11:19",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.17.07.26 11:19"
+    },
+    {
+      "FECHA": "21-07-2026",
+      "HORA": "00:12",
+      "DESCRIPCION": "ENTRADAS INVENTARIO: BOTON FLOTANTE DEJAR INV CERO CON DOBLE CONFIRMACION"
+    },
+    {
+      "FECHA": "21-07-2026",
+      "HORA": "00:12",
+      "DESCRIPCION": "ENTRADAS INVENTARIO: BOTON QUITAR TODOS LOS ITEMS EN LUGAR DE PRIORIDAD"
+    },
+    {
+      "FECHA": "21-07-2026",
+      "HORA": "00:12",
+      "DESCRIPCION": "MOVIMIENTOS INVENTARIO: PRIORIDAD POR DEFECTO BAJA EN DOCUMENTOS NUEVOS"
+    },
+    {
+      "FECHA": "21-07-2026",
+      "HORA": "00:12",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.21.07.26 00:12"
     }
   ]
 }

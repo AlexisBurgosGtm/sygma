@@ -190,7 +190,7 @@ function movinv2_leer_encabezado_form() {
         hora: F.getHora(),
         serie_fac: document.getElementById('txtSerieFac')?.value || '',
         numero_fac: document.getElementById('txtNumeroFac')?.value || '',
-        etiqueta: document.getElementById('cmbPrioridad')?.value || 'MEDIA',
+        etiqueta: document.getElementById('cmbPrioridad')?.value || 'BAJA',
         coddoc_origen: document.getElementById('txtCoddocOrigen')?.value || '',
         correlativo_origen: document.getElementById('txtCorrelativoOrigen')?.value || '0',
         coddoc: document.getElementById('cmbCoddoc')?.value || '',
@@ -679,7 +679,7 @@ function movinv2_aplicar_encabezado_form(r) {
     setVal('cmbConCre', r.CONCRE || 'CON');
     setVal('cmbCaja', r.CODCAJA);
     setVal('cmbVendedor', r.CODEMP);
-    setVal('cmbPrioridad', r.ETIQUETA || 'MEDIA');
+    setVal('cmbPrioridad', r.ETIQUETA || 'BAJA');
 
     if (r.FECHA) setVal('txtFecha', movinv2_fecha_para_input(r.FECHA));
     if (r.FECHAENTREGA) setVal('txtFechaPago', movinv2_fecha_para_input(r.FECHAENTREGA));
@@ -943,12 +943,147 @@ function movinv2_reset_modal_bindings() {
     movinv2_ingresoListenersReady = false;
 }
 
+function movinv2_loader_progress(mensaje) {
+    const label = document.querySelector('#movinv2IngresoLoaderInner .sygma-loader__label');
+    if (label) {
+        label.textContent = mensaje;
+    } else if (typeof movinv2_show_ingreso_loader === 'function') {
+        movinv2_show_ingreso_loader(mensaje);
+    }
+}
+
+function movinv2_inv_cero() {
+    const doc = movinv2_get_doc_activo();
+    if (!doc) return;
+
+    F.Confirmacion('¿Desea dejar TODO el inventario en CERO? Se agregará una línea por cada producto con existencia.')
+        .then((v1) => {
+            if (v1 !== true) return;
+            F.Confirmacion('SEGUNDA CONFIRMACIÓN: este proceso agregará ajustes negativos/positivos para llevar el inventario a cero. ¿Está TOTALMENTE seguro de iniciar?')
+                .then((v2) => {
+                    if (v2 !== true) return;
+                    movinv2_inv_cero_ejecutar(doc);
+                });
+        });
+}
+
+function movinv2_inv_cero_ejecutar(doc) {
+    movinv2_show_ingreso_loader('Cargando inventario...');
+
+    axios.post('/inventarios/inventario_saldos_unidades', {
+        token: TOKEN,
+        sucursal: GlobalEmpnit
+    })
+        .then((response) => {
+            if (response.data === 'error') throw new Error('error');
+            const rows = (response.data.recordset || []).filter((r) => Number(r.EXISTENCIA) !== 0);
+            if (!rows.length) {
+                movinv2_hide_ingreso_loader();
+                F.Aviso('No hay productos con existencia distinta de cero.');
+                return;
+            }
+
+            const tipoprecio = data_empresa_config?.TIPO_PRECIO || '';
+            const total = rows.length;
+            let agregados = 0;
+
+            const procesar = (idx) => {
+                if (idx >= total) {
+                    // Observaciones y cierre del proceso
+                    const txtObs = document.getElementById('txtObs');
+                    if (txtObs) txtObs.value = 'INVENTARIO A CERO';
+                    return movinv2_sync_encabezado()
+                        .catch(() => {})
+                        .then(() => {
+                            movinv2_hide_ingreso_loader();
+                            movinv2_get_tbl_pedido();
+                            F.Aviso(`Proceso terminado: se agregaron ${agregados} de ${total} productos al documento. Ahora debe FINALIZAR el documento con el botón "Guardar movimiento".`);
+                        });
+                }
+
+                const r = rows[idx];
+                const existencia = Number(r.EXISTENCIA) || 0;
+                const cantidad = -existencia; // >0 inventario → negativo; <0 inventario → positivo
+                const costo = Number(r.COSTO_UNIDAD) || 0;
+
+                movinv2_loader_progress(`Agregando línea ${idx + 1} de ${total}...`);
+
+                return movinv2_insert_item_api(doc.coddoc, doc.correlativo, r.CODPROD, r.DESPROD || r.CODPROD,
+                    'UNIDAD', cantidad, 1, costo, costo, 0, r.TIPOPROD || '', tipoprecio,
+                    existencia, 0, Number(r.EXENTO) || 0)
+                    .then(() => { agregados += 1; })
+                    .catch(() => { /* continuar con el siguiente producto */ })
+                    .then(() => procesar(idx + 1));
+            };
+
+            return procesar(0);
+        })
+        .catch(() => {
+            movinv2_hide_ingreso_loader();
+            F.AvisoError('No se pudo cargar el inventario para el proceso');
+        });
+}
+
+function movinv2_quitar_todos_items() {
+    const doc = movinv2_get_doc_activo();
+    if (!doc) return;
+
+    F.Confirmacion('¿Está seguro que desea QUITAR TODOS los items del documento?')
+        .then((value) => {
+            if (value !== true) return;
+
+            movinv2_show_ingreso_loader('Cargando items...');
+
+            GF.get_data_detalle_documento(GlobalEmpnit, doc.coddoc, doc.correlativo)
+                .then((data) => {
+                    const rows = data.recordset || [];
+                    if (!rows.length) {
+                        movinv2_hide_ingreso_loader();
+                        F.Aviso('El documento no tiene items.');
+                        return;
+                    }
+
+                    const total = rows.length;
+                    let quitados = 0;
+
+                    const procesar = (idx) => {
+                        if (idx >= total) {
+                            movinv2_hide_ingreso_loader();
+                            movinv2_get_tbl_pedido();
+                            F.Aviso(`Se quitaron ${quitados} de ${total} items del documento.`);
+                            return Promise.resolve();
+                        }
+                        movinv2_loader_progress(`Quitando item ${idx + 1} de ${total}...`);
+                        return GF.get_documento_eliminar_item(rows[idx].ID)
+                            .then(() => { quitados += 1; })
+                            .catch(() => { /* continuar con el siguiente item */ })
+                            .then(() => procesar(idx + 1));
+                    };
+
+                    return procesar(0);
+                })
+                .catch(() => {
+                    movinv2_hide_ingreso_loader();
+                    F.AvisoError('No se pudieron cargar los items del documento');
+                });
+        });
+}
+
+window.movinv2_inv_cero = movinv2_inv_cero;
+window.movinv2_quitar_todos_items = movinv2_quitar_todos_items;
+
 function movinv2_setup_ingreso_listeners() {
     if (movinv2_ingresoListenersReady) return;
     movinv2_ingresoListenersReady = true;
 
     const cmbPrioridad = document.getElementById('cmbPrioridad');
-    if (cmbPrioridad) cmbPrioridad.innerHTML = F.get_prioridades();
+    if (cmbPrioridad) {
+        cmbPrioridad.innerHTML = F.get_prioridades();
+        cmbPrioridad.value = 'BAJA';
+    }
+
+    document.getElementById('btnMovinv2QuitarTodos')?.addEventListener('click', movinv2_quitar_todos_items);
+    document.getElementById('btnMovinv2InvCero')?.addEventListener('click', movinv2_inv_cero);
 
     movinv2_get_vendedores();
     movinv2_get_cajas();
