@@ -357,7 +357,8 @@ router.post("/lista_clientes_supervisor_buscar", async (req, res) => {
     const filtroText = esc((filtro || '').trim());
     const tieneFiltroVen = ven > 0;
     const tieneFiltroDia = diaVal !== '' && diaVal !== 'TODOS';
-    const topClause = (tieneFiltroVen || tieneFiltroDia) ? '' : 'TOP 50';
+    // CENSO (NA): siempre el 100% de clientes del filtro. Resto: TOP 50 si no hay vendedor/día.
+    const topClause = (st === 'NA' || tieneFiltroVen || tieneFiltroDia) ? '' : 'TOP 50';
 
     let whereSt = '';
     if (st === 'NOGPS') {
@@ -437,11 +438,24 @@ router.post("/lista_clientes_supervisor_buscar", async (req, res) => {
 
 router.post("/lista_clientes_general_export", async(req,res)=>{
    
-    const { token, sucursal, st} = req.body;
+    const { token, sucursal, st, codven, dia } = req.body;
+    const emp = esc(sucursal);
+    const ven = Number(codven) || 0;
+    const diaVal = esc((dia || '').trim());
+    const tieneFiltroVen = ven > 0;
+    const tieneFiltroDia = diaVal !== '' && diaVal !== 'TODOS';
 
-    let qry = '';
+    let whereSt = '';
+    if (st === 'NOGPS') {
+        whereSt = `AND (ISNULL(CLIENTES.LATITUD,'0')='0')`;
+    } else {
+        whereSt = `AND (CLIENTES.HABILITADO='${esc(st || 'SI')}')`;
+    }
 
-        qry = `
+    const whereVen = tieneFiltroVen ? `AND (CLIENTES.CODEMPLEADO = ${ven})` : '';
+    const whereDia = tieneFiltroDia ? `AND (CLIENTES.DIAVISITA = '${diaVal}')` : '';
+
+    let qry = `
         SELECT 
                 EMPLEADOS.NOMEMPLEADO AS EMPLEADO,
                 CLIENTES.DIAVISITA AS VISITA,
@@ -463,12 +477,12 @@ router.post("/lista_clientes_general_export", async(req,res)=>{
                SECTORES ON CLIENTES.CODSECTOR = SECTORES.CODSECTOR LEFT OUTER JOIN
                DEPARTAMENTOS ON CLIENTES.CODDEPTO = DEPARTAMENTOS.CODDEPTO LEFT OUTER JOIN
                MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
-        WHERE (CLIENTES.EMPNIT = '${sucursal}')       
-         AND (CLIENTES.HABILITADO='${st}')
-        `
-
- 
-
+        WHERE (CLIENTES.EMPNIT = '${emp}')       
+         ${whereSt}
+         ${whereVen}
+         ${whereDia}
+        ORDER BY CLIENTES.NOMBRE
+        `;
 
     execute.QueryToken(res,qry,token);
      

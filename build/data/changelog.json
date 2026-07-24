@@ -1,5 +1,5 @@
 {
-  "version": "M.21.07.26 00:12",
+  "version": "M.24.07.26 13:33",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -3110,6 +3110,31 @@
       "FECHA": "21-07-2026",
       "HORA": "00:12",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.21.07.26 00:12"
+    },
+    {
+      "FECHA": "24-07-2026",
+      "HORA": "12:56",
+      "DESCRIPCION": "SUPERVISOR GESTION CLIENTES: TIPO DE LISTA CENSO POR DEFECTO"
+    },
+    {
+      "FECHA": "24-07-2026",
+      "HORA": "12:56",
+      "DESCRIPCION": "SUPERVISOR GESTION CLIENTES: CENSO CARGA EL 100% SIN LIMITE TOP 50"
+    },
+    {
+      "FECHA": "24-07-2026",
+      "HORA": "12:56",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.24.07.26 12:56"
+    },
+    {
+      "FECHA": "24-07-2026",
+      "HORA": "13:33",
+      "DESCRIPCION": "SUPERVISOR GESTION CLIENTES: EXPORTAR EXCEL CON TODOS LOS REGISTROS DEL FILTRO"
+    },
+    {
+      "FECHA": "24-07-2026",
+      "HORA": "13:33",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.24.07.26 13:33"
     }
   ]
 }

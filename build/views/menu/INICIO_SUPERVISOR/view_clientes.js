@@ -49,8 +49,8 @@ function getView(){
                             <div class="form-group mb-0">
                                 <label class="negrita text-secondary small mb-1">Tipo de lista</label>
                                 <select class="form-control negrita text-base" id="cmbTipo">
-                                    <option value="NA">CENSO</option>
-                                    <option value="SI" selected>ACTIVOS</option>
+                                    <option value="NA" selected>CENSO</option>
+                                    <option value="SI">ACTIVOS</option>
                                     <option value="NOGPS">SIN UBICACION GPS</option>
                                 </select>
                             </div>
@@ -422,10 +422,13 @@ function addListeners(){
         F.slideAnimationTabs();
     
         document.getElementById('cmbTipo').addEventListener('change', () => {
-            supervisor_clientes_limpiar_listado();
+            const st = document.getElementById('cmbTipo')?.value || '';
+            if (st === 'NA') {
+                tbl_clientes();
+            } else {
+                supervisor_clientes_limpiar_listado();
+            }
         });
-
-        supervisor_clientes_limpiar_listado();
 
         const txtBuscar = document.getElementById('txtBuscar');
         if (txtBuscar) {
@@ -440,7 +443,20 @@ function addListeners(){
         const cmbFiltroDia = document.getElementById('cmbFiltroDia');
         if (cmbFiltroDia) {
             cmbFiltroDia.innerHTML = '<option value="">TODOS</option>' + F.ComboSemana('LETRAS');
+            cmbFiltroDia.addEventListener('change', () => {
+                if ((document.getElementById('cmbTipo')?.value || '') === 'NA') tbl_clientes();
+            });
         }
+
+        const cmbFiltroVendedor = document.getElementById('cmbFiltroVendedor');
+        if (cmbFiltroVendedor) {
+            cmbFiltroVendedor.addEventListener('change', () => {
+                if ((document.getElementById('cmbTipo')?.value || '') === 'NA') tbl_clientes();
+            });
+        }
+
+        // Por defecto: CENSO carga el 100% de clientes aplicables al filtro
+        tbl_clientes();
 
         document.getElementById('btnExportar').addEventListener('click',()=>{
 
@@ -448,8 +464,12 @@ function addListeners(){
 
                 document.getElementById('btnExportar').disabled = true;
                 document.getElementById('btnExportar').innerHTML = `<i class="fal fa-share fa-spin"></i>`;
+
+                const st = document.getElementById('cmbTipo')?.value || 'NA';
+                const codven = document.getElementById('cmbFiltroVendedor')?.value || '0';
+                const dia = document.getElementById('cmbFiltroDia')?.value || '';
          
-                GF.get_data_clientes_listado_export(GlobalEmpnit, 'SI')
+                GF.get_data_clientes_listado_export(GlobalEmpnit, st, codven, dia)
                 .then((data)=>{
                    
                     let datos = data.recordset;
@@ -818,7 +838,7 @@ function tbl_clientes(){
         if (cards) cards.innerHTML = strCards || '<div class="text-center text-muted py-3">Sin clientes</div>';
         const venSel = Number(codven) > 0;
         const diaSel = dia && dia !== 'TODOS';
-        const limiteMsg = (!venSel && !diaSel) ? ' (máx. 50)' : '';
+        const limiteMsg = (st !== 'NA' && !venSel && !diaSel) ? ' (máx. 50)' : '';
         document.getElementById('lbTotalClientes').innerText = `Total: ${contador}${limiteMsg}`;
     })
     .catch((error)=>{

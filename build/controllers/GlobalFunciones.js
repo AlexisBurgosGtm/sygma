@@ -2959,14 +2959,16 @@ let GF = {
 
 
     },
-    get_data_clientes_listado_export:(empnit,st)=>{
+    get_data_clientes_listado_export:(empnit,st,codven,dia)=>{
 
         return new Promise((resolve,reject)=>{
 
             let data = {
                 token:TOKEN,
                 sucursal:empnit,
-                st:st
+                st:st,
+                codven: Number(codven) || 0,
+                dia: dia || ''
             }
 
             axios.post(GlobalUrlCalls + '/clientes/lista_clientes_general_export', data)
