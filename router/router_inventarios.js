@@ -492,5 +492,37 @@ router.post("/inventario_saldos_unidades", async(req,res)=>{
 });
 
 
+/**
+ * STOCK2 (INV_STOCK) — paralelo a STOCK1 (view_invsaldo).
+ * Crea tabla + triggers y permite recálculo manual desde Configuraciones.
+ */
+router.post('/stock2_ensure', async (req, res) => {
+    const { token } = req.body || {};
+    try {
+        const invStock = require('../services/invStockStock2');
+        await invStock.ensureSchema(token);
+        res.send({ ok: true, proceso: 'STOCK2', mensaje: 'INV_STOCK y triggers listos' });
+    } catch (err) {
+        console.error('[stock2_ensure]', err.message || err);
+        res.status(500).send({ ok: false, error: err.message || 'No se pudo preparar INV_STOCK' });
+    }
+});
+
+router.post('/stock2_rebuild', async (req, res) => {
+    const { token } = req.body || {};
+    try {
+        const invStock = require('../services/invStockStock2');
+        const result = await invStock.rebuildFromDocumentos(token);
+        res.send(result);
+    } catch (err) {
+        console.error('[stock2_rebuild]', err);
+        res.status(500).send({
+            ok: false,
+            error: err.message || String(err) || 'No se pudo recalcular INV_STOCK',
+        });
+    }
+});
+
+
 module.exports = router;
 

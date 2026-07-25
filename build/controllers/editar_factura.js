@@ -390,13 +390,10 @@ function addListeners_EF_Agregar_item(){
                 let existencia = Selected_existencia;
                 let bono = Selected_bono;
                 let exento = Selected_exento;
-                
-                let varExistencia = Number(existencia * equivale);
 
-
-                //PERMITE VENTAS SIN EXISTENCIA
-                if(data_config_general[0].VALOR.toString()=="NO"){
-                    if(totalunidades > Number(varExistencia)){F.AvisoError('Existencia menor a la cantidad pedida');return;}
+                // PERMITE INVENTARIO NEGATIVO = NO → no superar stock (EXISTENCIA en unidades base)
+                if (!validar_cantidad_vs_existencia(cantidad, equivale, existencia, 'base')) {
+                    return;
                 };
 
 

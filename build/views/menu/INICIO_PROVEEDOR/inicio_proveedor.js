@@ -168,15 +168,22 @@ function proveedor_loadEmbed(scriptUrl, cardId, deps) {
         .then(() => {
             const embedRoot = embed;
             const savedRoot = root;
+            const coreInit = window._proveedorCore?.initView;
+            const coreDestroy = window._proveedorCore?.destroyView;
+            const embedInit = window.initView;
+            const embedDestroyCand = window.destroyView;
+
             root = embedRoot;
-            if (typeof initView === 'function') {
-                initView();
-                proveedor_embedDestroy = typeof destroyView === 'function' ? destroyView : null;
+            if (typeof embedInit === 'function') {
+                embedInit();
             }
+            proveedor_embedDestroy = (typeof embedDestroyCand === 'function' && embedDestroyCand !== coreDestroy)
+                ? embedDestroyCand
+                : null;
             root = savedRoot;
             if (window._proveedorCore) {
-                window.initView = window._proveedorCore.initView;
-                window.destroyView = window._proveedorCore.destroyView;
+                window.initView = coreInit;
+                window.destroyView = coreDestroy;
             }
             proveedor_rewireEmbedActions(embedRoot);
         });

@@ -42,6 +42,8 @@ router.post("/update_codprod", async(req,res)=>{
             UPDATE DOCPRODUCTOS SET CODPROD='${codprod_new}' WHERE CODPROD='${codprod_old}';
             UPDATE PRECIOS SET CODPROD='${codprod_new}' WHERE CODPROD='${codprod_old}';
             UPDATE INVSALDO SET CODPROD='${codprod_new}' WHERE CODPROD='${codprod_old}';
+            IF OBJECT_ID('dbo.INV_STOCK', 'U') IS NOT NULL
+                UPDATE INV_STOCK SET CODPROD='${codprod_new}', LASTUPDATE=GETDATE() WHERE CODPROD='${codprod_old}';
             UPDATE PRODUCTOS SET CODPROD='${codprod_new}' WHERE CODPROD='${codprod_old}';
     `
 
@@ -126,7 +128,17 @@ router.post("/insert_producto", async(req,res)=>{
 	    1 AS CODBODEGA, '' AS NOLOTE,
 	    0 AS MINIMO, 0 AS MAXIMO, 
         'SI' AS HABILITADO, 0 AS SELLOUT
-    FROM EMPRESAS; 
+    FROM EMPRESAS;
+    IF OBJECT_ID('dbo.INV_STOCK', 'U') IS NOT NULL
+    BEGIN
+        INSERT INTO INV_STOCK (EMPNIT, CODPROD, EXISTENCIA, LASTUPDATE)
+        SELECT E.EMPNIT, '${codprod}' AS CODPROD, 0 AS EXISTENCIA, GETDATE() AS LASTUPDATE
+        FROM EMPRESAS E
+        WHERE NOT EXISTS (
+            SELECT 1 FROM INV_STOCK S
+            WHERE S.EMPNIT = E.EMPNIT AND S.CODPROD = '${codprod}'
+        );
+    END
     `
 
 
@@ -376,7 +388,9 @@ router.post("/delete_producto", async(req,res)=>{
     let qry = `
     DELETE FROM PRODUCTOS WHERE CODPROD='${codprod}';
     DELETE FROM PRECIOS WHERE CODPROD='${codprod}';
-     DELETE FROM INVSALDO WHERE CODPROD='${codprod}';
+    DELETE FROM INVSALDO WHERE CODPROD='${codprod}';
+    IF OBJECT_ID('dbo.INV_STOCK', 'U') IS NOT NULL
+        DELETE FROM INV_STOCK WHERE CODPROD='${codprod}';
     `
 
     execute.QueryToken(res,qry,token);

@@ -1,8 +1,304 @@
 function getView(){
     let view = {
+        styles:()=>{
+            return `
+            <style id="ppViewStyles">
+                #ppView {
+                    --pp-radius: 16px;
+                    --pp-radius-sm: 10px;
+                    --pp-border: rgba(15, 23, 42, 0.08);
+                    --pp-muted: #64748b;
+                    --pp-ink: #0f172a;
+                    --pp-surface: #ffffff;
+                    --pp-soft: #f1f5f9;
+                    padding: 0.75rem 0.85rem 5rem;
+                    background:
+                        radial-gradient(900px 280px at 0% -10%, rgba(14, 165, 233, 0.10), transparent 60%),
+                        radial-gradient(700px 240px at 100% 0%, rgba(34, 197, 94, 0.08), transparent 55%),
+                        linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+                    min-height: 70vh;
+                    color: var(--pp-ink);
+                }
+                #ppView .pp-hero {
+                    display: flex;
+                    flex-wrap: wrap;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 0.85rem;
+                    padding: 0.95rem 1.1rem;
+                    margin-bottom: 0.85rem;
+                    border-radius: var(--pp-radius);
+                    border: 1px solid var(--pp-border);
+                    background: rgba(255,255,255,0.78);
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
+                    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+                }
+                #ppView .pp-hero__brand {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                    min-width: 220px;
+                }
+                #ppView .pp-hero__brand img {
+                    width: 42px;
+                    height: 42px;
+                    border-radius: 12px;
+                    box-shadow: 0 4px 12px rgba(15,23,42,0.12);
+                }
+                #ppView .pp-hero__title {
+                    margin: 0;
+                    font-size: 1.05rem;
+                    font-weight: 700;
+                    letter-spacing: -0.02em;
+                    color: var(--pp-ink);
+                }
+                #ppView .pp-hero__sub {
+                    margin: 0;
+                    font-size: 0.72rem;
+                    color: var(--pp-muted);
+                }
+                #ppView .pp-hero__meta {
+                    display: flex;
+                    flex-wrap: wrap;
+                    align-items: flex-end;
+                    gap: 0.75rem;
+                }
+                #ppView .pp-stat {
+                    background: var(--pp-soft);
+                    border-radius: var(--pp-radius-sm);
+                    padding: 0.45rem 0.75rem;
+                    min-width: 110px;
+                }
+                #ppView .pp-stat label {
+                    display: block;
+                    margin: 0;
+                    font-size: 0.68rem;
+                    color: var(--pp-muted);
+                    text-transform: uppercase;
+                    letter-spacing: 0.04em;
+                }
+                #ppView .pp-stat strong {
+                    font-size: 0.95rem;
+                }
+                #ppView .pp-card {
+                    border: 1px solid var(--pp-border) !important;
+                    border-radius: var(--pp-radius) !important;
+                    background: rgba(255,255,255,0.92) !important;
+                    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+                    overflow: hidden;
+                }
+                #ppView .pp-card .card-body {
+                    padding: 0.85rem !important;
+                }
+                #ppView .pp-toolbar label {
+                    font-size: 0.72rem;
+                    margin-bottom: 0.3rem;
+                    color: var(--pp-muted);
+                }
+                #ppView .form-control,
+                #ppView .input-group .form-control,
+                #ppView select.form-control {
+                    font-size: 0.82rem;
+                    border-radius: 10px;
+                    min-height: 36px;
+                }
+                #ppView .input-group .btn {
+                    border-radius: 10px;
+                    font-size: 0.78rem;
+                }
+                #ppView h3, #ppView h5 {
+                    font-size: 0.95rem !important;
+                }
+                #ppView h2 {
+                    font-size: 1.1rem !important;
+                }
+                #ppView label.negrita,
+                #ppView label.text-base {
+                    font-size: 0.78rem !important;
+                }
+                #ppView table.table,
+                #ppView .table {
+                    font-size: 0.72rem !important;
+                    margin-bottom: 0;
+                }
+                #ppView table.table thead td,
+                #ppView table.table thead th,
+                #ppView .table thead td,
+                #ppView .table thead th {
+                    font-size: 0.68rem !important;
+                    font-weight: 700;
+                    letter-spacing: 0.02em;
+                    white-space: nowrap;
+                    padding: 0.4rem 0.45rem !important;
+                    vertical-align: middle;
+                    border: none;
+                }
+                #ppView table.table tbody td,
+                #ppView .table tbody td {
+                    padding: 0.32rem 0.45rem !important;
+                    vertical-align: middle;
+                    border-color: rgba(15,23,42,0.06) !important;
+                }
+                #ppView table.table tbody tr:hover {
+                    background: rgba(14, 165, 233, 0.05);
+                }
+                #ppView .table-responsive {
+                    border-radius: 12px;
+                    border: 1px solid var(--pp-border);
+                    background: #fff;
+                }
+                #ppView .btn-circle.btn-md,
+                #ppView .btn-md.btn-circle {
+                    width: 30px;
+                    height: 30px;
+                    font-size: 0.75rem;
+                }
+                #ppView .pp-section-title {
+                    margin: 0 0 0.75rem;
+                    font-size: 0.95rem;
+                    font-weight: 700;
+                    color: var(--pp-ink);
+                }
+                /* Modales glass */
+                .pp-modal .modal-dialog {
+                    margin: 1.25rem auto;
+                }
+                .pp-modal .modal-content {
+                    border: 1px solid rgba(255,255,255,0.45);
+                    border-radius: 18px !important;
+                    overflow: hidden;
+                    background: rgba(255, 255, 255, 0.86);
+                    backdrop-filter: blur(18px);
+                    -webkit-backdrop-filter: blur(18px);
+                    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
+                }
+                .pp-modal .dropdown-header,
+                .pp-modal .modal-header {
+                    border: none;
+                    padding: 0.85rem 1rem;
+                }
+                .pp-modal .dropdown-header h4,
+                .pp-modal .modal-header h4 {
+                    font-size: 0.95rem !important;
+                    font-weight: 700;
+                }
+                .pp-modal .modal-body {
+                    padding: 0.9rem 1rem !important;
+                    font-size: 0.82rem;
+                }
+                .pp-modal .modal-body h3 {
+                    font-size: 1rem !important;
+                    margin-bottom: 0.15rem;
+                }
+                .pp-modal .modal-footer {
+                    border-top: 1px solid rgba(15,23,42,0.06);
+                    padding: 0.65rem 1rem;
+                    background: rgba(248, 250, 252, 0.7);
+                }
+                .pp-modal table.table,
+                .pp-modal .table {
+                    font-size: 0.72rem !important;
+                }
+                .pp-modal table.table thead td,
+                .pp-modal table.table tbody td,
+                .pp-modal .table thead td,
+                .pp-modal .table tbody td {
+                    padding: 0.32rem 0.4rem !important;
+                }
+                .pp-modal .card,
+                .pp-modal .card-rounded {
+                    border-radius: 12px !important;
+                    border: 1px solid rgba(15,23,42,0.06);
+                    background: rgba(255,255,255,0.65);
+                }
+                .modal-backdrop.pp-backdrop-blur,
+                .modal-backdrop.pp-backdrop-blur.modal-backdrop-transparent {
+                    background-color: rgba(15, 23, 42, 0.45) !important;
+                    backdrop-filter: blur(10px) !important;
+                    -webkit-backdrop-filter: blur(10px) !important;
+                    opacity: 1 !important;
+                }
+                #ppView .pp-kardex-stats {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.5rem;
+                    align-items: stretch;
+                }
+                #ppView .pp-kardex-stat {
+                    background: var(--pp-soft);
+                    border-radius: var(--pp-radius-sm);
+                    padding: 0.4rem 0.65rem;
+                    min-width: 92px;
+                }
+                #ppView .pp-kardex-stat label {
+                    display: block;
+                    margin: 0;
+                    font-size: 0.65rem;
+                    color: var(--pp-muted);
+                    text-transform: uppercase;
+                    letter-spacing: 0.03em;
+                }
+                #ppView .pp-kardex-stat strong {
+                    font-size: 0.9rem;
+                }
+                #ppView .pp-kardex-actions {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.5rem;
+                    align-items: flex-end;
+                }
+                #ppView .pp-btn-atras-inline {
+                    border-radius: 10px;
+                    font-size: 0.78rem;
+                    white-space: nowrap;
+                }
+                #ppView.pp-ficha-mode,
+                #ppView .pp-ficha {
+                    font-size: 0.78rem;
+                }
+                #ppView .pp-ficha .pp-card .card-body {
+                    padding: 0.55rem 0.7rem !important;
+                }
+                #ppView .pp-ficha label.negrita,
+                #ppView .pp-ficha label.text-base {
+                    font-size: 0.68rem !important;
+                    margin-bottom: 0.15rem !important;
+                }
+                #ppView .pp-ficha .form-control {
+                    font-size: 0.78rem;
+                    min-height: 32px;
+                    padding: 0.2rem 0.45rem;
+                }
+                #ppView .pp-ficha br {
+                    display: none;
+                }
+                #ppView .pp-ficha .form-group,
+                #ppView .pp-ficha .input-group {
+                    margin-bottom: 0.45rem !important;
+                }
+                #ppView .pp-ficha .pp-card {
+                    margin-bottom: 0.5rem;
+                }
+                #ppView .pp-ficha .pp-section-title {
+                    margin: 0.35rem 0 0.4rem !important;
+                    font-size: 0.82rem !important;
+                }
+                #ppView #txtKardexBuscar {
+                    min-width: 160px;
+                    max-width: 220px;
+                }
+                @media (max-width: 768px) {
+                    #ppView { padding: 0.5rem 0.5rem 5rem; }
+                    #ppView .pp-hero { padding: 0.75rem; }
+                }
+            </style>
+            `;
+        },
         body:()=>{
             return `
-                <div class="col-12 p-0 bg-white">
+                ${view.styles()}
+                <div class="col-12 p-0" id="ppView">
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
                             ${view.vista_listado() + view.modal_opciones_producto() + view.modal_opciones_producto_deshabilitar_medidas()}
@@ -49,67 +345,63 @@ function getView(){
         },
         vista_listado:()=>{
             return `
-            <div class="card card-rounded col-12 border-base">
-                <div class="card-body p-4">
-
-                    <div class="row">
-                        <div class="col-3">
-                            <img src="./favicon.png" width="50px" height="50px">
-                        </div>    
-                        <div class="col-3">
-                            <h5 class="text-base negrita">Catálogo de Productos</h5>
-                            
-                            <select class="form-control" id="cmbTipoLista">
-                                <option value="SI" class="negrita text-info">HABILITADOS</option>
-                                <option value="NO" class="negrita text-danger">DESHABILITADOS</option>
-                            </select>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label class="text-secondary">Total Productos</label>
-                                <br>
-                                <label class="negrita text-danger h4" id="lbTotalProductos"></label> / <label class="negrita text-success h5" id="lbTotalItemsLista"></label>
-
-                            </div>
-                        </div>
-                      
-                    </div>    
-
+            <div class="pp-hero">
+                <div class="pp-hero__brand">
+                    <img src="./favicon.png" alt="SYGMA">
+                    <div>
+                        <h5 class="pp-hero__title">Productos y precios</h5>
+                        <p class="pp-hero__sub">Catálogo, medidas y costos</p>
+                    </div>
+                </div>
+                <div class="pp-hero__meta">
+                    <div>
+                        <label class="text-secondary mb-1 d-block" style="font-size:0.68rem">Estado</label>
+                        <select class="form-control" id="cmbTipoLista" style="min-width:150px">
+                            <option value="SI" class="negrita text-info">HABILITADOS</option>
+                            <option value="NO" class="negrita text-danger">DESHABILITADOS</option>
+                        </select>
+                    </div>
+                    <div class="pp-stat">
+                        <label>Total / Lista</label>
+                        <strong><span class="text-danger" id="lbTotalProductos">0</span> / <span class="text-success" id="lbTotalItemsLista">0</span></strong>
+                    </div>
                 </div>
             </div>
-            <br>
-            <div class="card card-rounded col-12 border-base">
-                <div class="card-body p-2">
 
-                    <div class="form-group">
-                        <label class="text-secondary">Búsqueda de productos</label>
+            <div class="card card-rounded col-12 pp-card">
+                <div class="card-body pp-toolbar">
+
+                    <div class="form-group mb-2">
+                        <label>Búsqueda de productos</label>
                         <div class="input-group">
                             <select class="form-control" id="cmbFiltroMarca">
                             </select>
                             <input type="text" class="form-control border-base negrita text-base" placeholder="Escriba para filtrar..." id="txtBuscar" autocomplete="off">
                             <button class="btn btn-success btn-md hand" id="btnExportar">
-                                <i class="fal fa-share"></i>Excel
+                                <i class="fal fa-share mr-1"></i>Excel
                             </button>
                         </div>
                     </div>
-                    <table class="table table-responsive h-full" id="tblProductos">
-                        <thead class="bg-base text-white f-med">
-                            <tr>
-                                <td>CÓDIGO</td>
-                                 <td>CÓDIGO DUN</td>
-                                <td>DESCRIPCIÓN</td>
-                                <td>DESCRIPCIÓN 2</td>
-                                <td>MARCA</td>
-                                <td>TIPO PROD</td>
-                                <td>COSTO ULTIMO/ANTERIOR</td>
-                                <td>B/S</td>
-                                <td>ACT</td>
-                            </tr>
-                        </thead>
-                        <tbody id="tblDataProductos">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="tblProductos">
+                            <thead class="bg-base text-white">
+                                <tr>
+                                    <td>CÓDIGO</td>
+                                    <td>CÓDIGO DUN</td>
+                                    <td>DESCRIPCIÓN</td>
+                                    <td>DESCRIPCIÓN 2</td>
+                                    <td>MARCA</td>
+                                    <td>TIPO PROD</td>
+                                    <td>COSTO ULTIMO/ANTERIOR</td>
+                                    <td>B/S</td>
+                                    <td>ACT</td>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataProductos">
 
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
                 
                 </div>
             </div>
@@ -124,7 +416,7 @@ function getView(){
         },
         modal_opciones_producto:()=>{
             return `
-            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true" id="modal_menu_producto">
+            <div class="modal fade js-modal-settings modal-with-scroll pp-modal" tabindex="-1" role="dialog" aria-hidden="true" id="modal_menu_producto" data-backdrop="true">
                 <div class="modal-dialog modal-dialog-centered modal-lg">
                     <div class="modal-content">
                         <div class="dropdown-header bg-base d-flex justify-content-center align-items-center w-100">
@@ -224,7 +516,7 @@ function getView(){
         },
         modal_opciones_producto_deshabilitar_medidas:()=>{
             return `
-            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true" 
+            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll pp-modal" tabindex="-1" role="dialog" aria-hidden="true" 
                 id="modal_menu_producto_deshabilitar_medida">
                 <div class="modal-dialog modal-dialog modal-lg">
                     <div class="modal-content">
@@ -273,12 +565,24 @@ function getView(){
         },
         vista_ficha_producto:()=>{
             return `
-            <h3 class="negrita text-danger">Datos del Producto</h3>
+            <div class="pp-ficha">
+            <div class="pp-hero mb-2">
+                <div class="pp-hero__brand">
+                    <button type="button" class="btn btn-secondary btn-sm pp-btn-atras-inline hand shadow-sm mr-1" id="btnAtrasTabDos" title="Volver al listado">
+                        <i class="fal fa-arrow-left mr-1"></i> Atrás
+                    </button>
+                    <img src="./favicon.png" alt="SYGMA">
+                    <div>
+                        <h5 class="pp-hero__title">Ficha del producto</h5>
+                        <p class="pp-hero__sub">Datos, clasificaciones y precios</p>
+                    </div>
+                </div>
+            </div>
             <div class="row">
 
                 <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        <div class="card card-rounded col-12 border-base">
-                            <div class="card-body p-4" style="font-size:80%">
+                        <div class="card card-rounded col-12 pp-card">
+                            <div class="card-body">
 
                                     <div class="row">
                                         <div class="col-4">
@@ -294,20 +598,13 @@ function getView(){
                                             <input type="text" class="form-control" id="txtDesprod3" maxlength="255">
                                         </div>
                                     </div>
-                                                                       
-                                    <br>
                                         <label class="negrita text-base">Descripción</label>
                                         <input type="text" class="form-control" id="txtDesprod" maxlength="255">
-                                    <br>
                                         <label class="negrita text-base">Descripción 2</label>
                                         <input type="text" class="form-control" id="txtDesprod2" maxlength="255">
-                                    
-                                    <br>
                                      
                             </div>                   
                         </div>
-                        
-                        <br>
 
                 <div class="row">
                     ${view.ficha_producto_clasificaciones()}
@@ -328,10 +625,6 @@ function getView(){
            
 
 
-            <button class="btn btn-secondary btn-bottom-l btn-xl btn-circle hand shadow" id="btnAtrasTabDos">
-                <i class="fal fa-arrow-left"></i>
-            </button>
-
             <button class="btn btn-info btn-bottom-r btn-xl btn-circle hand shadow" id="btnGuardarProducto">
                 <i class="fal fa-save"></i>
             </button>
@@ -339,14 +632,15 @@ function getView(){
             <button class="btn btn-info btn-bottom-r btn-xl btn-circle hand shadow" id="btnGuardarProductoEditar">
                 <i class="fal fa-save"></i>
             </button>
+            </div>
 
             
             `
         },
         ficha_producto_clasificaciones:()=>{
             return `
-            <div class="card card-rounded col-12 border-base">
-                <div class="card-body p-4" style="font-size:80%">
+            <div class="card card-rounded col-12 pp-card">
+                <div class="card-body">
 
                     <label class="negrita text-base">Marca</label>
                     <div class="input-group">
@@ -357,7 +651,6 @@ function getView(){
                         </button>
                     </div>
 
-                    <br>
                     <label class="negrita text-base">Categoria (Tipo)</label>
                     <div class="input-group">
                         <select class="form-control" id="cmbTipoTipo">
@@ -365,7 +658,6 @@ function getView(){
                         
                     </div>
                    
-                     <br>
                     <label class="negrita text-base">Control Mercaderista</label>
                     <div class="input-group">
                         <select class="form-control" id="cmbTipoRentabilidad">
@@ -373,9 +665,6 @@ function getView(){
                       
                     </div>
 
-                    
-
-                    <br>
                     <label class="negrita text-base">Clasificación 2</label>
                     <div class="input-group">
                         <select class="form-control" id="cmbTipoLaboratorio">
@@ -426,8 +715,8 @@ function getView(){
         },
         ficha_producto_precios:()=>{
             return `
-                        <div class="card card-rounded col-12 border-base">
-                            <div class="card-body p-4"> 
+                        <div class="card card-rounded col-12 pp-card">
+                            <div class="card-body"> 
 
                                 
                                         <div class="row">
@@ -450,17 +739,12 @@ function getView(){
                                                 </select>
                                             </div>
                                         </div>
-                                                                                   
-                                        <br><br>
                                             <label class="negrita text-base">Color Alerta</label>
                                             <select class="form-control" id="cmbColor">
                                                          
                                             </select>
-                                        <br><br>
 
-
-                                <h5 class="negrita text-danger">Gestión de Precios</h5>
-                                <br>
+                                <h5 class="pp-section-title text-danger">Gestión de Precios</h5>
                                 <label class="negrita text-base">Costo Unitario</label>
                                 <div class="input-group">
                                     <input type="number" class="form-control text-danger col-3 negrita" id="txtCosto">
@@ -471,9 +755,9 @@ function getView(){
                                         <i class="fal fa-plus"></i> Nuevo Precio
                                     </button>
                                 </div>
-                                <br>
 
-                                <table class="table table-responsive h-full f-med">
+                                <div class="table-responsive">
+                                <table class="table table-hover mb-0">
                                     <thead class="bg-secondary text-white">
                                         <tr>
                                             <td>CODMEDIDA</td>
@@ -491,6 +775,7 @@ function getView(){
                                     </thead>
                                     <tbody id="tblDataPrecios"></tbody>
                                 </table>
+                                </div>
 
                             </div>
                         </div>
@@ -498,7 +783,7 @@ function getView(){
         },
         modal_nuevo_precio:()=>{
             return `
-            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true" id="modal_nuevo_precio">
+            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll pp-modal" tabindex="-1" role="dialog" aria-hidden="true" id="modal_nuevo_precio">
                 <div class="modal-dialog modal-dialog-right modal-xl">
                     <div class="modal-content">
                         <div class="dropdown-header bg-base d-flex justify-content-center align-items-center w-100">
@@ -724,7 +1009,7 @@ function getView(){
         },
         modal_sucursales_precio:()=>{
             return `
-            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true" id="modal_sucursales_precio">
+            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll pp-modal" tabindex="-1" role="dialog" aria-hidden="true" id="modal_sucursales_precio">
                 <div class="modal-dialog modal-dialog-right modal-xl">
                     <div class="modal-content">
                         <div class="dropdown-header bg-secondary d-flex justify-content-center align-items-center w-100">
@@ -771,7 +1056,7 @@ function getView(){
         },
         modal_medidas:()=>{
             return `
-            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true" id="modal_medidas">
+            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll pp-modal" tabindex="-1" role="dialog" aria-hidden="true" id="modal_medidas">
                 <div class="modal-dialog modal-dialog-right modal-xl">
                     <div class="modal-content">
                         <div class="dropdown-header bg-secondary d-flex justify-content-center align-items-center w-100">
@@ -836,7 +1121,7 @@ function getView(){
         },
         modal_marcas:()=>{
             return `
-            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true" id="modal_marcas">
+            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll pp-modal" tabindex="-1" role="dialog" aria-hidden="true" id="modal_marcas">
                 <div class="modal-dialog modal-dialog-right modal-xl">
                     <div class="modal-content">
                         <div class="dropdown-header bg-secondary d-flex justify-content-center align-items-center w-100">
@@ -908,7 +1193,7 @@ function getView(){
         },
         modal_claseuno:()=>{
             return `
-            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true" id="modal_claseuno">
+            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll pp-modal" tabindex="-1" role="dialog" aria-hidden="true" id="modal_claseuno">
                 <div class="modal-dialog modal-dialog-right modal-xl">
                     <div class="modal-content">
                         <div class="dropdown-header bg-secondary d-flex justify-content-center align-items-center w-100">
@@ -980,7 +1265,7 @@ function getView(){
         },
         modal_proveedores:()=>{
             return `
-            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true" id="modal_proveedores">
+            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll pp-modal" tabindex="-1" role="dialog" aria-hidden="true" id="modal_proveedores">
                 <div class="modal-dialog modal-dialog-right modal-xl">
                     <div class="modal-content">
                         <div class="dropdown-header bg-secondary d-flex justify-content-center align-items-center w-100">
@@ -1052,15 +1337,54 @@ function getView(){
         },
         vista_movimientos_kardex:()=>{
             return `
-            <div class="card card-rounded col-12 shadow">
-                <div class="card-body p-4">
-
-                    <h5 class="negrita text-secondary">Movimientos del producto</h5>
-                    <h2 class="negrita text-base" id="lbMovimientosDesprod">PRODUCTO</h2>
-                    
+            <div class="pp-hero mb-2">
+                <div class="pp-hero__brand">
+                    <button type="button" class="btn btn-secondary btn-sm pp-btn-atras-inline hand shadow-sm mr-1" id="btnKardexAtras" title="Volver al listado">
+                        <i class="fal fa-arrow-left mr-1"></i> Atrás
+                    </button>
+                    <img src="./favicon.png" alt="SYGMA">
+                    <div>
+                        <h5 class="pp-hero__title">Kardex de movimientos</h5>
+                        <p class="pp-hero__sub" id="lbMovimientosDesprod">PRODUCTO</p>
+                    </div>
+                </div>
+                <div class="pp-hero__meta">
+                    <div class="pp-kardex-actions">
+                        <div>
+                            <label class="d-block mb-1" style="font-size:0.65rem;color:#64748b">Buscar</label>
+                            <input type="search" class="form-control" id="txtKardexBuscar"
+                                placeholder="Documento, fecha..." autocomplete="off">
+                        </div>
+                        <div>
+                            <label class="d-block mb-1" style="font-size:0.65rem;color:#64748b">Mes</label>
+                            <select class="form-control" id="cmbKardexMes" style="min-width:120px"></select>
+                        </div>
+                        <div>
+                            <label class="d-block mb-1" style="font-size:0.65rem;color:#64748b">Año</label>
+                            <select class="form-control" id="cmbKardexAnio" style="min-width:90px"></select>
+                        </div>
+                    </div>
+                    <div class="pp-kardex-stats">
+                        <div class="pp-kardex-stat">
+                            <label>Entradas</label>
+                            <strong class="text-success" id="lbKardexTotEntradas">0</strong>
+                        </div>
+                        <div class="pp-kardex-stat">
+                            <label>Salidas</label>
+                            <strong class="text-danger" id="lbKardexTotSalidas">0</strong>
+                        </div>
+                        <div class="pp-kardex-stat">
+                            <label>Saldo</label>
+                            <strong class="text-info" id="lbKardexTotSaldo">0</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card card-rounded col-12 pp-card">
+                <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-responsive h-full col-12 table-hover table-bordered" id="tblMovimientosProducto">
-                            <thead class="bg-base text-white negrita">
+                        <table class="table table-hover table-bordered mb-0" id="tblMovimientosProducto">
+                            <thead class="bg-base text-white">
                                 <tr>
                                     <td>FECHA</td>
                                     <td>DOCUMENTO</td>
@@ -1077,11 +1401,6 @@ function getView(){
                     </div>
                 </div>
             </div>
-
-            <button class="btn btn-secondary btn-bottom-l btn-xl btn-circle hand shadow" onclick="document.getElementById('tab-uno').click()">
-                <i class="fal fa-arrow-left"></i>
-            </button>
-
             `
         }
     }
@@ -1094,6 +1413,26 @@ function getView(){
 function addListeners(){
 
     document.title = "Lista Productos";
+
+    // Blur en backdrop de modales de esta vista (sobreescribe backdrop transparente del tema)
+    $(document).off('show.bs.modal.ppBlur').on('show.bs.modal.ppBlur', '.pp-modal', function () {
+        var applyBlur = function () {
+            document.querySelectorAll('.modal-backdrop').forEach(function (el) {
+                el.classList.remove('modal-backdrop-transparent');
+                el.classList.add('pp-backdrop-blur');
+            });
+        };
+        setTimeout(applyBlur, 0);
+        setTimeout(applyBlur, 50);
+        setTimeout(applyBlur, 150);
+    });
+    $(document).off('hidden.bs.modal.ppBlur').on('hidden.bs.modal.ppBlur', '.pp-modal', function () {
+        if (!document.querySelector('.pp-modal.show')) {
+            document.querySelectorAll('.modal-backdrop.pp-backdrop-blur').forEach(function (el) {
+                el.classList.remove('pp-backdrop-blur');
+            });
+        }
+    });
     
     GF.get_data_color()
     .then((data)=>{
@@ -1496,19 +1835,14 @@ function listeners_menu_productos(){
             document.getElementById('lbMovimientosDesprod').innerText = GlobalSelected_Desprod;
             document.getElementById('tab-tres').click();
 
-            let container = document.getElementById('tblDataMovimientosProducto');
-            container.innerHTML = GlobalLoader;
-
-
-            GF.get_tbl_movimientos_producto(GlobalSelected_Codprod)
-            .then((tbl)=>{
-                container.innerHTML = tbl;    
-            })
-            .catch(()=>{
-                container.innerHTML = 'No hay datos....';
-            })
+            pp_kardex_init_filters();
+            pp_kardex_cargar(GlobalSelected_Codprod);
 
         })
+
+        document.getElementById('btnKardexAtras')?.addEventListener('click', () => {
+            document.getElementById('tab-uno').click();
+        });
 
 };
 
@@ -2506,6 +2840,144 @@ function data_delete_medida(codmedida){
     })   
 };
 
+
+var ppKardexRows = [];
+var ppKardexFiltersReady = false;
+
+function pp_kardex_parse_fecha(fecha) {
+    if (!fecha) return null;
+    if (fecha instanceof Date && !isNaN(fecha.getTime())) return fecha;
+    var s = String(fecha);
+    // ISO / SQL: 2026-07-25...
+    if (s.indexOf('-') >= 0) {
+        var p = s.substring(0, 10).split('-');
+        if (p.length === 3) return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+    }
+    // DD/MM/YYYY o DD-MM-YYYY
+    if (s.indexOf('/') >= 0 || /^\d{2}-\d{2}-\d{4}/.test(s)) {
+        var sep = s.indexOf('/') >= 0 ? '/' : '-';
+        var q = s.substring(0, 10).split(sep);
+        if (q.length === 3) return new Date(Number(q[2]), Number(q[1]) - 1, Number(q[0]));
+    }
+    var d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+}
+
+function pp_kardex_init_filters() {
+    var cmbMes = document.getElementById('cmbKardexMes');
+    var cmbAnio = document.getElementById('cmbKardexAnio');
+    if (!cmbMes || !cmbAnio) return;
+
+    if (!ppKardexFiltersReady) {
+        cmbMes.innerHTML = `<option value="%">TODOS</option>` + F.ComboMeses();
+        cmbAnio.innerHTML = `<option value="%">TODOS</option>` + F.ComboAnio();
+        cmbMes.value = String(F.get_mes_curso());
+        cmbAnio.value = String(F.get_anio_curso());
+        cmbMes.addEventListener('change', pp_kardex_render);
+        cmbAnio.addEventListener('change', pp_kardex_render);
+        var txtBuscar = document.getElementById('txtKardexBuscar');
+        if (txtBuscar) txtBuscar.addEventListener('input', pp_kardex_render);
+        ppKardexFiltersReady = true;
+    }
+}
+
+function pp_kardex_cargar(codprod) {
+    var container = document.getElementById('tblDataMovimientosProducto');
+    if (container) container.innerHTML = GlobalLoader;
+    ppKardexRows = [];
+
+    GF.get_data_movimientos_producto(codprod)
+        .then((data) => {
+            ppKardexRows = (data && data.recordset) ? data.recordset : [];
+            pp_kardex_render();
+        })
+        .catch(() => {
+            ppKardexRows = [];
+            pp_kardex_render_totales(0, 0, 0);
+            if (container) container.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">No hay datos....</td></tr>';
+        });
+}
+
+function pp_kardex_render_totales(entradas, salidas, saldo) {
+    var elE = document.getElementById('lbKardexTotEntradas');
+    var elS = document.getElementById('lbKardexTotSalidas');
+    var elB = document.getElementById('lbKardexTotSaldo');
+    var fmt = function (n) {
+        return Number(n || 0).toLocaleString('es-GT', { maximumFractionDigits: 4 });
+    };
+    if (elE) elE.textContent = fmt(entradas);
+    if (elS) elS.textContent = fmt(salidas);
+    if (elB) {
+        elB.textContent = fmt(saldo);
+        elB.classList.toggle('text-danger', Number(saldo) < 0);
+        elB.classList.toggle('text-info', Number(saldo) >= 0);
+    }
+}
+
+function pp_kardex_render() {
+    var container = document.getElementById('tblDataMovimientosProducto');
+    if (!container) return;
+
+    var mesSel = (document.getElementById('cmbKardexMes') || {}).value || '%';
+    var anioSel = (document.getElementById('cmbKardexAnio') || {}).value || '%';
+    var q = String((document.getElementById('txtKardexBuscar') || {}).value || '').toLowerCase().trim();
+
+    var totEntradas = 0;
+    var totSalidas = 0;
+    var saldo = 0;
+    var str = '';
+
+    (ppKardexRows || []).forEach((r) => {
+        var entrada = 0;
+        var salida = 0;
+        if (Number(r.INV) == 1) {
+            entrada = Number(r.TOTALUNIDADES) || 0;
+            salida = 0;
+        } else {
+            entrada = 0;
+            salida = Number(r.TOTALUNIDADES) || 0;
+        }
+
+        // Totales de TODO el historial (no solo el filtro)
+        totEntradas += entrada;
+        totSalidas += salida;
+        saldo += (Number(r.TOTALUNIDADES) || 0) * (Number(r.INV) || 0);
+
+        var f = pp_kardex_parse_fecha(r.FECHA);
+        var mesOk = mesSel === '%' || (f && (f.getMonth() + 1) === Number(mesSel));
+        var anioOk = anioSel === '%' || (f && f.getFullYear() === Number(anioSel));
+        if (!mesOk || !anioOk) return;
+
+        if (q) {
+            var blob = [
+                F.convertDateNormal(r.FECHA),
+                r.CODDOC,
+                r.CORRELATIVO,
+                entrada,
+                salida,
+                F.setMoneda(r.PRECIO, 'Q'),
+                F.convertDateNormal(r.LASTUPDATE)
+            ].join(' ').toLowerCase();
+            if (blob.indexOf(q) < 0) return;
+        }
+
+        var strSaldoClass = saldo < 0 ? 'negrita text-danger' : 'negrita text-info';
+        str += `
+            <tr>
+                <td>${F.convertDateNormal(r.FECHA)}</td>
+                <td>${r.CODDOC}-${r.CORRELATIVO}</td>
+                <td>${entrada}</td>
+                <td>${salida}</td>
+                <td class="${strSaldoClass}">${saldo}</td>
+                <td>${F.setMoneda(r.PRECIO, 'Q')}</td>
+                <td>${F.convertDateNormal(r.LASTUPDATE)}</td>
+            </tr>
+        `;
+    });
+
+    pp_kardex_render_totales(totEntradas, totSalidas, saldo);
+    container.innerHTML = str || '<tr><td colspan="7" class="text-center text-muted py-3">Sin movimientos en el periodo</td></tr>';
+}
 
 function initView(){
 

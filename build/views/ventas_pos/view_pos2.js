@@ -990,8 +990,8 @@ function listener_vista_pedido(){
             document.getElementById('txtPosCodprod').focus();
 
         })
-        .catch(()=>{
-            F.AvisoError('No se pudo agregar');
+        .catch((err)=>{
+            if (err !== 'sin_existencia') F.AvisoError('No se pudo agregar');
         })
 
     });
@@ -1887,6 +1887,11 @@ function calcular_descuento(idDescuento,idTotalPrecio,idTotalPrecioDescuento){
 
 
 function insert_producto_pedido(codprod,desprod,desprod2,codmedida,equivale,costo,precio,cantidad,exento,tipoprod,tipoprecio,existencia,bono,descuento){
+
+    // EXISTENCIA cruda en unidades base (POS2)
+    if (!validar_cantidad_vs_existencia(cantidad, equivale, existencia, 'base')) {
+        return Promise.reject('sin_existencia');
+    }
     
     let datos = 
         {

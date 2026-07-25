@@ -188,15 +188,23 @@ function supervisor_loadEmbed(scriptUrl, cardId, deps) {
         .then(() => {
             const embedRoot = embed;
             const savedRoot = root;
+            const coreInit = window._supervisorCore?.initView;
+            const coreDestroy = window._supervisorCore?.destroyView;
+            const embedInit = window.initView;
+            const embedDestroyCand = window.destroyView;
+
             root = embedRoot;
-            if (typeof initView === 'function') {
-                initView();
-                supervisor_embedDestroy = typeof destroyView === 'function' ? destroyView : null;
+            if (typeof embedInit === 'function') {
+                embedInit();
             }
+            // Nunca usar destroyView del shell: vistas sin destroyView propio dejarían el padre roto
+            supervisor_embedDestroy = (typeof embedDestroyCand === 'function' && embedDestroyCand !== coreDestroy)
+                ? embedDestroyCand
+                : null;
             root = savedRoot;
             if (window._supervisorCore) {
-                window.initView = window._supervisorCore.initView;
-                window.destroyView = window._supervisorCore.destroyView;
+                window.initView = coreInit;
+                window.destroyView = coreDestroy;
             }
             supervisor_rewireEmbedActions(embedRoot);
         });

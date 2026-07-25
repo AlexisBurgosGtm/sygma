@@ -1437,11 +1437,12 @@ router.post("/mercaderista_visita_iniciar", async (req, res) => {
         BEGIN
             INSERT INTO MERCADERISTAS_VISITAS
                 (EMPNIT, CODEMP, CODCLIENTE, FECHA, MES, ANIO, HORA_INICIO, HORA_FIN,
-                 NOVISITADO, OTA, VITRINAS, POP,
-                 OTA_F_ANTES, OTA_F_DESPUES, VITRINAS_F_ANTES, VITRINAS_F_DESPUES, POP_F_ANTES, POP_F_DESPUES, FALTANTES)
+                 NOVISITADO, OTA, VITRINAS, DETERGENTES, POP,
+                 OTA_F_ANTES, OTA_F_DESPUES, VITRINAS_F_ANTES, VITRINAS_F_DESPUES,
+                 DETERGENTES_F_ANTES, DETERGENTES_F_DESPUES, POP_F_ANTES, POP_F_DESPUES, FALTANTES)
             VALUES
                 ('${emp}', ${ven}, ${clie}, '${fechaVal}', ${mesVal}, ${anioVal}, '${horaVal}', NULL,
-                 '', 0, 0, 0, '', '', '', '', '', '', '');
+                 '', 0, 0, 0, 0, '', '', '', '', '', '', '', '', '');
         END
     `;
 
@@ -1477,9 +1478,10 @@ router.post("/mercaderista_visita_finalizar", async (req, res) => {
 router.post("/mercaderista_visita_guardar", async (req, res) => {
     const {
         token, sucursal, codemp, codclie, fecha, mes, anio,
-        hora_inicio, hora_fin, novisitado, ota, vitrinas, pop,
+        hora_inicio, hora_fin, novisitado, ota, vitrinas, detergentes, pop,
         ota_f_antes, ota_f_despues,
         vitrinas_f_antes, vitrinas_f_despues,
+        detergentes_f_antes, detergentes_f_despues,
         pop_f_antes, pop_f_despues,
         faltantes,
         actualizar_solo,
@@ -1496,11 +1498,14 @@ router.post("/mercaderista_visita_guardar", async (req, res) => {
     const motivoVal = esc((novisitado || '').trim());
     const otaVal = Number(ota) ? 1 : 0;
     const vitVal = Number(vitrinas) ? 1 : 0;
+    const detVal = Number(detergentes) ? 1 : 0;
     const popVal = Number(pop) ? 1 : 0;
     const otaFA = esc((ota_f_antes || '').trim());
     const otaFD = esc((ota_f_despues || '').trim());
     const vitFA = esc((vitrinas_f_antes || '').trim());
     const vitFD = esc((vitrinas_f_despues || '').trim());
+    const detFA = esc((detergentes_f_antes || '').trim());
+    const detFD = esc((detergentes_f_despues || '').trim());
     const popFA = esc((pop_f_antes || '').trim());
     const popFD = esc((pop_f_despues || '').trim());
     const faltantesVal = esc((faltantes || '').trim());
@@ -1519,11 +1524,14 @@ router.post("/mercaderista_visita_guardar", async (req, res) => {
             ANIO = ${anioVal},
             OTA = CASE WHEN ${otaVal} = 1 OR '${otaFA}' <> '' OR '${otaFD}' <> '' THEN 1 ELSE OTA END,
             VITRINAS = CASE WHEN ${vitVal} = 1 OR '${vitFA}' <> '' OR '${vitFD}' <> '' THEN 1 ELSE VITRINAS END,
+            DETERGENTES = CASE WHEN ${detVal} = 1 OR '${detFA}' <> '' OR '${detFD}' <> '' THEN 1 ELSE DETERGENTES END,
             POP = CASE WHEN ${popVal} = 1 OR '${popFA}' <> '' OR '${popFD}' <> '' THEN 1 ELSE POP END,
             OTA_F_ANTES = CASE WHEN '${otaFA}' <> '' THEN '${otaFA}' ELSE OTA_F_ANTES END,
             OTA_F_DESPUES = CASE WHEN '${otaFD}' <> '' THEN '${otaFD}' ELSE OTA_F_DESPUES END,
             VITRINAS_F_ANTES = CASE WHEN '${vitFA}' <> '' THEN '${vitFA}' ELSE VITRINAS_F_ANTES END,
             VITRINAS_F_DESPUES = CASE WHEN '${vitFD}' <> '' THEN '${vitFD}' ELSE VITRINAS_F_DESPUES END,
+            DETERGENTES_F_ANTES = CASE WHEN '${detFA}' <> '' THEN '${detFA}' ELSE DETERGENTES_F_ANTES END,
+            DETERGENTES_F_DESPUES = CASE WHEN '${detFD}' <> '' THEN '${detFD}' ELSE DETERGENTES_F_DESPUES END,
             POP_F_ANTES = CASE WHEN '${popFA}' <> '' THEN '${popFA}' ELSE POP_F_ANTES END,
             POP_F_DESPUES = CASE WHEN '${popFD}' <> '' THEN '${popFD}' ELSE POP_F_DESPUES END`;
     } else if (modoVal === 'faltantes') {
@@ -1538,11 +1546,14 @@ router.post("/mercaderista_visita_guardar", async (req, res) => {
             NOVISITADO = '${motivoVal}',
             OTA = ${otaVal},
             VITRINAS = ${vitVal},
+            DETERGENTES = ${detVal},
             POP = ${popVal},
             OTA_F_ANTES = CASE WHEN '${otaFA}' <> '' THEN '${otaFA}' ELSE OTA_F_ANTES END,
             OTA_F_DESPUES = CASE WHEN '${otaFD}' <> '' THEN '${otaFD}' ELSE OTA_F_DESPUES END,
             VITRINAS_F_ANTES = CASE WHEN '${vitFA}' <> '' THEN '${vitFA}' ELSE VITRINAS_F_ANTES END,
             VITRINAS_F_DESPUES = CASE WHEN '${vitFD}' <> '' THEN '${vitFD}' ELSE VITRINAS_F_DESPUES END,
+            DETERGENTES_F_ANTES = CASE WHEN '${detFA}' <> '' THEN '${detFA}' ELSE DETERGENTES_F_ANTES END,
+            DETERGENTES_F_DESPUES = CASE WHEN '${detFD}' <> '' THEN '${detFD}' ELSE DETERGENTES_F_DESPUES END,
             POP_F_ANTES = CASE WHEN '${popFA}' <> '' THEN '${popFA}' ELSE POP_F_ANTES END,
             POP_F_DESPUES = CASE WHEN '${popFD}' <> '' THEN '${popFD}' ELSE POP_F_DESPUES END,
             FALTANTES = CASE WHEN '${faltantesVal}' <> '' THEN '${faltantesVal}' ELSE FALTANTES END`;
@@ -1572,11 +1583,14 @@ router.post("/mercaderista_visita_guardar", async (req, res) => {
                 NOVISITADO = '${motivoVal}',
                 OTA = ${otaVal},
                 VITRINAS = ${vitVal},
+                DETERGENTES = ${detVal},
                 POP = ${popVal},
                 OTA_F_ANTES = '${otaFA}',
                 OTA_F_DESPUES = '${otaFD}',
                 VITRINAS_F_ANTES = '${vitFA}',
                 VITRINAS_F_DESPUES = '${vitFD}',
+                DETERGENTES_F_ANTES = '${detFA}',
+                DETERGENTES_F_DESPUES = '${detFD}',
                 POP_F_ANTES = '${popFA}',
                 POP_F_DESPUES = '${popFD}',
                 FALTANTES = '${faltantesVal}'
@@ -1588,11 +1602,12 @@ router.post("/mercaderista_visita_guardar", async (req, res) => {
         ELSE
         BEGIN
             INSERT INTO MERCADERISTAS_VISITAS
-                (EMPNIT, CODEMP, CODCLIENTE, FECHA, MES, ANIO, HORA_INICIO, HORA_FIN, NOVISITADO, OTA, VITRINAS, POP,
-                 OTA_F_ANTES, OTA_F_DESPUES, VITRINAS_F_ANTES, VITRINAS_F_DESPUES, POP_F_ANTES, POP_F_DESPUES, FALTANTES)
+                (EMPNIT, CODEMP, CODCLIENTE, FECHA, MES, ANIO, HORA_INICIO, HORA_FIN, NOVISITADO, OTA, VITRINAS, DETERGENTES, POP,
+                 OTA_F_ANTES, OTA_F_DESPUES, VITRINAS_F_ANTES, VITRINAS_F_DESPUES,
+                 DETERGENTES_F_ANTES, DETERGENTES_F_DESPUES, POP_F_ANTES, POP_F_DESPUES, FALTANTES)
             VALUES
-                ('${emp}', ${ven}, ${clie}, '${fechaVal}', ${mesVal}, ${anioVal}, '${horaVal}', ${horaFinVal ? `'${horaFinVal}'` : 'NULL'}, '${motivoVal}', ${otaVal}, ${vitVal}, ${popVal},
-                 '${otaFA}', '${otaFD}', '${vitFA}', '${vitFD}', '${popFA}', '${popFD}', '${faltantesVal}');
+                ('${emp}', ${ven}, ${clie}, '${fechaVal}', ${mesVal}, ${anioVal}, '${horaVal}', ${horaFinVal ? `'${horaFinVal}'` : 'NULL'}, '${motivoVal}', ${otaVal}, ${vitVal}, ${detVal}, ${popVal},
+                 '${otaFA}', '${otaFD}', '${vitFA}', '${vitFD}', '${detFA}', '${detFD}', '${popFA}', '${popFD}', '${faltantesVal}');
         END
     `;
 
@@ -1625,11 +1640,14 @@ router.post("/mercaderista_visita_detalle", async (req, res) => {
                ISNULL(MV.NOVISITADO, '') AS NOVISITADO,
                ISNULL(MV.OTA, 0) AS OTA,
                ISNULL(MV.VITRINAS, 0) AS VITRINAS,
+               ISNULL(MV.DETERGENTES, 0) AS DETERGENTES,
                ISNULL(MV.POP, 0) AS POP,
                ISNULL(MV.OTA_F_ANTES, '') AS OTA_F_ANTES,
                ISNULL(MV.OTA_F_DESPUES, '') AS OTA_F_DESPUES,
                ISNULL(MV.VITRINAS_F_ANTES, '') AS VITRINAS_F_ANTES,
                ISNULL(MV.VITRINAS_F_DESPUES, '') AS VITRINAS_F_DESPUES,
+               ISNULL(MV.DETERGENTES_F_ANTES, '') AS DETERGENTES_F_ANTES,
+               ISNULL(MV.DETERGENTES_F_DESPUES, '') AS DETERGENTES_F_DESPUES,
                ISNULL(MV.POP_F_ANTES, '') AS POP_F_ANTES,
                ISNULL(MV.POP_F_DESPUES, '') AS POP_F_DESPUES,
                ISNULL(MV.FALTANTES, '') AS FALTANTES
@@ -1665,6 +1683,8 @@ router.post("/mercaderista_visita_eliminar", async (req, res) => {
                    ISNULL(OTA_F_DESPUES, '') AS OTA_F_DESPUES,
                    ISNULL(VITRINAS_F_ANTES, '') AS VITRINAS_F_ANTES,
                    ISNULL(VITRINAS_F_DESPUES, '') AS VITRINAS_F_DESPUES,
+                   ISNULL(DETERGENTES_F_ANTES, '') AS DETERGENTES_F_ANTES,
+                   ISNULL(DETERGENTES_F_DESPUES, '') AS DETERGENTES_F_DESPUES,
                    ISNULL(POP_F_ANTES, '') AS POP_F_ANTES,
                    ISNULL(POP_F_DESPUES, '') AS POP_F_DESPUES
               FROM MERCADERISTAS_VISITAS
@@ -1686,6 +1706,8 @@ router.post("/mercaderista_visita_eliminar", async (req, res) => {
             row.OTA_F_DESPUES,
             row.VITRINAS_F_ANTES,
             row.VITRINAS_F_DESPUES,
+            row.DETERGENTES_F_ANTES,
+            row.DETERGENTES_F_DESPUES,
             row.POP_F_ANTES,
             row.POP_F_DESPUES,
         ].filter((n) => n && String(n).trim());

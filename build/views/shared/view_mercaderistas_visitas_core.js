@@ -169,8 +169,105 @@ window.MercVisitasCore = (function () {
         return `
             <div class="col-6 mb-2">
                 <label class="small negrita text-secondary d-block mb-1">${label}</label>
-                <img src="${dataUrl}" alt="${label}" class="img-fluid rounded border shadow-sm" style="max-height:280px;object-fit:contain;width:100%">
+                <img src="${dataUrl}" alt="${label}"
+                    class="img-fluid rounded border shadow-sm merc-foto-preview hand"
+                    title="Doble clic para ver a tamaño completo"
+                    style="max-height:280px;object-fit:contain;width:100%;cursor:zoom-in"
+                    data-merc-foto-label="${String(label).replace(/"/g, '&quot;')}">
+                <small class="text-muted d-block mt-1">Doble clic para ampliar</small>
             </div>`;
+    }
+
+    function ensureLightbox() {
+        if (document.getElementById('mercVisitasFotoLightbox')) return;
+        const wrap = document.createElement('div');
+        wrap.id = 'mercVisitasFotoLightbox';
+        wrap.innerHTML = `
+            <style>
+                #mercVisitasFotoLightbox {
+                    display: none;
+                    position: fixed;
+                    inset: 0;
+                    z-index: 20000;
+                    background: rgba(15, 23, 42, 0.88);
+                    backdrop-filter: blur(6px);
+                    -webkit-backdrop-filter: blur(6px);
+                    align-items: center;
+                    justify-content: center;
+                    padding: 1rem;
+                }
+                #mercVisitasFotoLightbox.is-open { display: flex; }
+                #mercVisitasFotoLightbox img {
+                    max-width: 96vw;
+                    max-height: 90vh;
+                    object-fit: contain;
+                    border-radius: 8px;
+                    box-shadow: 0 16px 48px rgba(0,0,0,.45);
+                    background: #111;
+                }
+                #mercVisitasFotoLightbox .merc-lb-caption {
+                    position: absolute;
+                    top: 12px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    color: #fff;
+                    font-weight: 700;
+                    font-size: 0.95rem;
+                    text-shadow: 0 1px 3px rgba(0,0,0,.6);
+                }
+                #mercVisitasFotoLightbox .merc-lb-close {
+                    position: absolute;
+                    top: 10px;
+                    right: 14px;
+                    border: 0;
+                    background: rgba(255,255,255,.15);
+                    color: #fff;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    font-size: 1.25rem;
+                    cursor: pointer;
+                }
+            </style>
+            <button type="button" class="merc-lb-close" title="Cerrar" aria-label="Cerrar">&times;</button>
+            <div class="merc-lb-caption" id="mercVisitasFotoLightboxCaption"></div>
+            <img id="mercVisitasFotoLightboxImg" alt="Foto ampliada" src="">
+        `;
+        document.body.appendChild(wrap);
+        wrap.addEventListener('click', (e) => {
+            if (e.target === wrap || e.target.classList.contains('merc-lb-close')) {
+                cerrarFotoCompleta();
+            }
+        });
+        document.addEventListener('keydown', onLightboxKeydown);
+    }
+
+    function onLightboxKeydown(e) {
+        if (e.key === 'Escape') cerrarFotoCompleta();
+    }
+
+    function verFotoCompleta(src, label) {
+        if (!src) return;
+        ensureLightbox();
+        const box = document.getElementById('mercVisitasFotoLightbox');
+        const img = document.getElementById('mercVisitasFotoLightboxImg');
+        const cap = document.getElementById('mercVisitasFotoLightboxCaption');
+        if (img) img.src = src;
+        if (cap) cap.textContent = label || 'Foto';
+        if (box) box.classList.add('is-open');
+    }
+
+    function cerrarFotoCompleta() {
+        const box = document.getElementById('mercVisitasFotoLightbox');
+        const img = document.getElementById('mercVisitasFotoLightboxImg');
+        if (box) box.classList.remove('is-open');
+        if (img) img.removeAttribute('src');
+    }
+
+    function onFotosDblClick(e) {
+        const img = e.target.closest('img.merc-foto-preview');
+        if (!img || !img.src) return;
+        verFotoCompleta(img.src, img.getAttribute('data-merc-foto-label') || img.alt || 'Foto');
     }
 
     function celdaActividad(val, tipo, etiquetaBtn) {
@@ -193,6 +290,7 @@ window.MercVisitasCore = (function () {
         const map = {
             ota: { titulo: 'Fotos OTA', antes: r.OTA_F_ANTES, despues: r.OTA_F_DESPUES },
             vitrinas: { titulo: 'Fotos Vitrinas', antes: r.VITRINAS_F_ANTES, despues: r.VITRINAS_F_DESPUES },
+            detergentes: { titulo: 'Fotos Detergentes', antes: r.DETERGENTES_F_ANTES, despues: r.DETERGENTES_F_DESPUES },
             pop: { titulo: 'Fotos POP', antes: r.POP_F_ANTES, despues: r.POP_F_DESPUES },
         };
         const c = map[tipo];
@@ -242,7 +340,7 @@ window.MercVisitasCore = (function () {
         if (!btn) return;
         const tipo = btn.getAttribute('data-tipo');
         if (tipo === 'faltantes') verFaltantesLista();
-        else if (tipo === 'ota' || tipo === 'vitrinas' || tipo === 'pop') verFotosActividad(tipo);
+        else if (tipo === 'ota' || tipo === 'vitrinas' || tipo === 'detergentes' || tipo === 'pop') verFotosActividad(tipo);
     }
 
     function verDetalle(codemp, codclie, fecha, empnit) {
@@ -280,6 +378,7 @@ window.MercVisitasCore = (function () {
                                     <tr><th class="bg-light">No visitado</th><td>${motivo || '—'}</td></tr>
                                     <tr><th class="bg-light">OTA</th><td>${celdaActividad(r.OTA, 'ota', 'Ver fotos OTA')}</td></tr>
                                     <tr><th class="bg-light">Vitrinas</th><td>${celdaActividad(r.VITRINAS, 'vitrinas', 'Ver fotos Vitrinas')}</td></tr>
+                                    <tr><th class="bg-light">Detergentes</th><td>${celdaActividad(r.DETERGENTES, 'detergentes', 'Ver fotos Detergentes')}</td></tr>
                                     <tr><th class="bg-light">POP</th><td>${celdaActividad(r.POP, 'pop', 'Ver fotos POP')}</td></tr>
                                     <tr><th class="bg-light">Faltantes</th><td>${celdaActividad(hayFaltantes ? 1 : 0, 'faltantes', 'Ver faltantes')}</td></tr>
                                 </tbody>
@@ -737,6 +836,7 @@ window.MercVisitasCore = (function () {
         el('TblResumenCards')?.addEventListener('click', onResumenClick);
         el('BodyVisitasMerc')?.addEventListener('click', onVisitaClick);
         el('BodyDetalleVisita')?.addEventListener('click', onDetalleExtraClick);
+        el('BodyFotosActividad')?.addEventListener('dblclick', onFotosDblClick);
     }
 
     return {
@@ -755,6 +855,8 @@ window.MercVisitasCore = (function () {
             const pfx = cfg ? cfg.prefix : null;
             visitasCache = [];
             detalleActual = null;
+            cerrarFotoCompleta();
+            document.removeEventListener('keydown', onLightboxKeydown);
             if (pfx) {
                 $(`#${pfx}ModalVisitasMerc`).modal('hide');
                 $(`#${pfx}ModalDetalleVisita`).modal('hide');

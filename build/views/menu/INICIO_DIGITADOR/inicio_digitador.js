@@ -117,15 +117,22 @@ function digitador_loadEmbed(scriptUrl, cardId, deps) {
         .then(() => {
             const embedRoot = embed;
             const savedRoot = root;
+            const coreInit = window._digitadorCore?.initView;
+            const coreDestroy = window._digitadorCore?.destroyView;
+            const embedInit = window.initView;
+            const embedDestroyCand = window.destroyView;
+
             root = embedRoot;
-            if (typeof initView === 'function') {
-                initView();
-                digitador_embedDestroy = typeof destroyView === 'function' ? destroyView : null;
+            if (typeof embedInit === 'function') {
+                embedInit();
             }
+            digitador_embedDestroy = (typeof embedDestroyCand === 'function' && embedDestroyCand !== coreDestroy)
+                ? embedDestroyCand
+                : null;
             root = savedRoot;
             if (window._digitadorCore) {
-                window.initView = window._digitadorCore.initView;
-                window.destroyView = window._digitadorCore.destroyView;
+                window.initView = coreInit;
+                window.destroyView = coreDestroy;
             }
         });
 }
@@ -1220,6 +1227,9 @@ function getView(){
                         </div>
                         <div class="sygma-embarque-rpt__detail oculto-impresion">
                             <span class="sygma-embarque-rpt__stat sygma-embarque-rpt__stat--items" id="lbProdTotalPedidos"></span>
+                            <button type="button" class="btn btn-secondary btn-md btn-circle hand shadow sygma-embarque-rpt__print-btn mr-1" id="btnProdRecargar" title="Recargar">
+                                <i class="fal fa-sync"></i>
+                            </button>
                             <button type="button" class="btn btn-info btn-md btn-circle hand shadow sygma-embarque-rpt__print-btn" title="Imprimir" onclick="F.imprimirSelec('rpt_productos_embarque')">
                                 <i class="fal fa-print"></i>
                             </button>
@@ -1237,6 +1247,7 @@ function getView(){
                                     <th class="text-center">UNIDADES</th>
                                     <th class="text-center">BONI</th>
                                     <th class="text-right">IMPORTE</th>
+                                    <th class="text-right">EXISTENCIA</th>
                                 </tr>
                             </thead>
                             <tbody id="tblDataFProductos"></tbody>
@@ -2074,10 +2085,30 @@ function listeners_pedidos_pendientes(){
 
     });
 
+    document.getElementById('btnProdRecargar')?.addEventListener('click', digitador_recargar_picking);
+
     
 
 
 };
+
+function digitador_recargar_picking(){
+    const codembarque = document.getElementById('cmbFEmbarques')?.value || '';
+    if (!codembarque || codembarque === 'SN') {
+        F.AvisoError('Seleccione un embarque');
+        return;
+    }
+    tbl_productos_embarque(codembarque);
+}
+
+function digitador_picking_set_recargar_busy(busy){
+    const btn = document.getElementById('btnProdRecargar');
+    if (!btn) return;
+    btn.disabled = !!busy;
+    btn.innerHTML = busy
+        ? '<i class="fal fa-sync fa-spin"></i>'
+        : '<i class="fal fa-sync"></i>';
+}
 
 function pendientes_normalizar_fecha(fecha){
     if (!fecha) return '';
@@ -3033,6 +3064,7 @@ function tbl_productos_embarque(codembarque){
     let contador = 0;
     let varTotal = 0;
 
+    digitador_picking_set_recargar_busy(true);
     embarque_rpt_syncEncabezado(codembarque, 'lbProdCodembarque', 'lbProdFechaEmbarque');
 
     GF.get_data_embarque_productos(GlobalEmpnit,codembarque)
@@ -3044,6 +3076,10 @@ function tbl_productos_embarque(codembarque){
          
             contador +=1;
             varTotal += Number(r.IMPORTE);
+            const existencia = Number(r.EXISTENCIA) || 0;
+            const clsExist = existencia > 0
+                ? 'text-success'
+                : (existencia < 0 ? 'text-danger' : 'text-dark');
             str += `
                 <tr class="sygma-embarque-prod-row hand" data-codprod="${String(r.CODPROD).replace(/"/g, '&quot;')}" data-desprod="${F.limpiarTexto(r.DESPROD).replace(/"/g, '&quot;')}" onclick="embarque_abrir_facturas_producto(this)" title="Ver facturas de este producto">
                     <td class="sygma-embarque-rpt__cod">
@@ -3058,6 +3094,7 @@ function tbl_productos_embarque(codembarque){
                     <td class="text-center">${r.UNIDADES}</td>
                     <td class="text-center">${Number(r.BONI || 0)}</td>
                     <td class="text-right sygma-embarque-rpt__importe">${F.setMoneda(r.IMPORTE,'Q')}</td>
+                    <td class="text-right negrita ${clsExist}">${existencia.toFixed(2)}</td>
                 </tr>
                 `
         })
@@ -3075,10 +3112,13 @@ function tbl_productos_embarque(codembarque){
 
     })
     .catch((error)=>{
-        container.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">No se cargaron datos.</td></tr>';
+        container.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-3">No se cargaron datos.</td></tr>';
         document.getElementById('lbProdTotalPedidos').innerText = '';
         const totalBlock = document.getElementById('lbProdTotalBlock');
         if (totalBlock) totalBlock.innerHTML = '';
+    })
+    .finally(() => {
+        digitador_picking_set_recargar_busy(false);
     })
 
 
@@ -3708,6 +3748,10 @@ function embarque_imprimir_productos(){
         (prodData.recordset || []).forEach((r) => {
             contador += 1;
             varTotal += Number(r.IMPORTE) || 0;
+            const existencia = Number(r.EXISTENCIA) || 0;
+            const clsExist = existencia > 0
+                ? 'text-success'
+                : (existencia < 0 ? 'text-danger' : 'text-dark');
             strRows += `
                 <tr>
                     <td><span class="sygma-embarque-rpt__cod-main">${r.CODPROD}</span></td>
@@ -3717,9 +3761,10 @@ function embarque_imprimir_productos(){
                     <td class="text-center">${r.UNIDADES}</td>
                     <td class="text-center">${Number(r.BONI || 0)}</td>
                     <td class="text-right sygma-embarque-rpt__importe">${F.setMoneda(r.IMPORTE, 'Q')}</td>
+                    <td class="text-right negrita ${clsExist}">${existencia.toFixed(2)}</td>
                 </tr>`;
         });
-        if (!strRows) strRows = `<tr><td colspan="7" class="text-center text-muted py-2">Sin productos</td></tr>`;
+        if (!strRows) strRows = `<tr><td colspan="8" class="text-center text-muted py-2">Sin productos</td></tr>`;
         host.innerHTML = embarque_print_sheet_open(GlobalRptPicking) + `
             <div class="table-responsive sygma-embarque-rpt__table-wrap">
                 <table class="table sygma-embarque-rpt__table mb-0">
@@ -3728,6 +3773,7 @@ function embarque_imprimir_productos(){
                         <th class="text-center">UXC</th><th class="text-center">CAJAS</th><th class="text-center">UNIDADES</th>
                         <th class="text-center">BONI</th>
                         <th class="text-right">IMPORTE</th>
+                        <th class="text-right">EXISTENCIA</th>
                     </tr></thead>
                     <tbody>${strRows}</tbody>
                 </table>

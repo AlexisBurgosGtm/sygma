@@ -334,6 +334,10 @@ function initView(){
 
 };
 
+function destroyView(){
+    // Vista embebida: no destruir el shell de ventas
+};
+
 function calcular_porcentaje(){
 
     let dias_laborales = Number(document.getElementById('cmbDiasLaborales').value);

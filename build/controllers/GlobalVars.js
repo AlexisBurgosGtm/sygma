@@ -79,6 +79,9 @@ let GlobalRptEstadoCuentaCliente = 'Estado de Cuenta de Cliente';
 let GlobalRptEstadoCuentaProveedor = 'Estado de Cuenta de Proveedor';
 
 let data_config_general = [];
+/** Filas de SETTINGS (OPCION/VALOR) cargadas al iniciar sesión. */
+let data_settings = [];
+let data_settings_map = {};
 //0 = 1) permite venta sin existencia (sino)
 //
 //
@@ -91,6 +94,79 @@ let data_empresa_config = [];
 let data_usuario_config = [];
 /** Mapa EMPNIT -> OBJETIVO_SKUS (cargado al iniciar sesión). */
 let GlobalObjetivoSkus = {};
+
+/**
+ * Proceso de inventario activo en lecturas de UI.
+ * STOCK1 = view_invsaldo (actual)
+ * STOCK2 = INV_STOCK materializado (paralelo)
+ */
+let GlobalStockProceso = 'STOCK1';
+
+function settings_aplicar_globales() {
+    data_settings_map = {};
+    (data_settings || []).forEach((r) => {
+        const k = String(r.OPCION || '').trim().toUpperCase();
+        if (k) data_settings_map[k] = String(r.VALOR == null ? '' : r.VALOR);
+    });
+    const tipo = String(get_setting('TIPO DE STOCK A USAR EN REPORTES') || 'STOCK1').toUpperCase();
+    GlobalStockProceso = (tipo === 'STOCK2') ? 'STOCK2' : 'STOCK1';
+}
+
+function get_setting(opcion, fallback) {
+    const k = String(opcion || '').trim().toUpperCase();
+    if (k && data_settings_map && Object.prototype.hasOwnProperty.call(data_settings_map, k)) {
+        return data_settings_map[k];
+    }
+    const row = (data_settings || []).find((r) => String(r.OPCION || '').trim().toUpperCase() === k);
+    if (row) return String(row.VALOR == null ? '' : row.VALOR);
+    return fallback == null ? '' : fallback;
+}
+
+function set_setting_local(opcion, valor) {
+    const k = String(opcion || '').trim();
+    if (!k) return;
+    const up = k.toUpperCase();
+    let found = false;
+    data_settings = (data_settings || []).map((r) => {
+        if (String(r.OPCION || '').trim().toUpperCase() === up) {
+            found = true;
+            return { OPCION: r.OPCION, VALOR: String(valor == null ? '' : valor) };
+        }
+        return r;
+    });
+    if (!found) data_settings.push({ OPCION: k, VALOR: String(valor == null ? '' : valor) });
+    settings_aplicar_globales();
+}
+
+function permite_inventario_negativo() {
+    return String(get_setting('PERMITE INVENTARIO NEGATIVO', 'NO')).toUpperCase() === 'SI';
+}
+
+/**
+ * Valida cantidad vs stock al agregar líneas a facturas/pedidos.
+ * @param {number|string} cantidad - cantidad en la medida seleccionada
+ * @param {number|string} equivale - factor a unidades base
+ * @param {number|string} existencia - stock (base o en medida, según modo)
+ * @param {'base'|'medida'} [modo='base'] - 'medida' si viene de F.get_existencia(); 'base' si es EXISTENCIA cruda
+ * @param {boolean} [mostrarAviso=true]
+ * @returns {boolean} true si se permite agregar
+ */
+function validar_cantidad_vs_existencia(cantidad, equivale, existencia, modo, mostrarAviso) {
+    if (permite_inventario_negativo()) return true;
+
+    var totalUnidades = Number(cantidad || 0) * Number(equivale || 1);
+    var ex = Number(existencia || 0);
+    var eq = Number(equivale || 1) || 1;
+    var stockBase = (String(modo || 'base').toLowerCase() === 'medida') ? (ex * eq) : ex;
+
+    if (totalUnidades > stockBase) {
+        if (mostrarAviso !== false && typeof F !== 'undefined' && F.AvisoError) {
+            F.AvisoError('Existencia menor a la cantidad pedida');
+        }
+        return false;
+    }
+    return true;
+}
 
 function cargar_objetivos_skus_sesion() {
     GlobalObjetivoSkus = {};

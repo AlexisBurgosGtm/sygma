@@ -107,6 +107,39 @@ let GF = {
     
 
     },
+    get_data_settings:()=>{
+        return new Promise((resolve, reject)=>{
+            axios.post(GlobalUrlCalls + '/config/settings_list', { token: TOKEN })
+            .then((response) => {
+                if(response.status.toString()=='200'){
+                    let data = response.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        resolve(data);
+                    }
+                }else{
+                    reject();
+                }
+            }, () => reject());
+        });
+    },
+    update_setting:(opcion, valor)=>{
+        return new Promise((resolve, reject)=>{
+            axios.post(GlobalUrlCalls + '/config/settings_update', {
+                token: TOKEN,
+                opcion: opcion,
+                valor: valor
+            })
+            .then((response) => {
+                if(response.status.toString()=='200' && response.data !== 'error'){
+                    resolve(response.data);
+                }else{
+                    reject();
+                }
+            }, () => reject());
+        });
+    },
     login_empleado:(sucursal,u,p)=>{
     
         return new Promise((resolve,reject)=>{

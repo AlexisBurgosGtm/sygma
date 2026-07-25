@@ -436,6 +436,14 @@ function login_submit() {
                         global_var_dias_objetivo = Number(data_config_general[4].VALOR || 0);
                     }).catch(() => { data_config_general = []; });
 
+                    GF.get_data_settings().then((data) => {
+                        data_settings = data.recordset || [];
+                        if (typeof settings_aplicar_globales === 'function') settings_aplicar_globales();
+                    }).catch(() => {
+                        data_settings = [];
+                        if (typeof settings_aplicar_globales === 'function') settings_aplicar_globales();
+                    });
+
                     data_empresa_config = data.recordset[0];
                     const cargarSkus = (typeof cargar_objetivos_skus_sesion === 'function')
                         ? cargar_objetivos_skus_sesion()

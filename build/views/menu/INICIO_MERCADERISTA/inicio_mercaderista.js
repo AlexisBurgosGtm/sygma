@@ -6,6 +6,7 @@ var mercaderista_precios_cache = [];
 var mercaderista_act_fotos = {
     ota_antes: null, ota_despues: null,
     vitrinas_antes: null, vitrinas_despues: null,
+    detergentes_antes: null, detergentes_despues: null,
     pop_antes: null, pop_despues: null,
 };
 var mercaderista_barcode_stream = null;
@@ -309,6 +310,29 @@ function getView() {
                                 </div>
                             </div>
 
+                            <div class="card border shadow-sm mb-3">
+                                <div class="card-body p-2">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fal fa-tint fa-2x text-primary mr-2"></i>
+                                        <span class="negrita text-base">DETERGENTES</span>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label class="small negrita text-secondary">Foto antes</label>
+                                            <input type="file" accept="image/*" class="form-control-file" id="fileMercDetergentesAntes"
+                                                onchange="mercaderista_act_foto_change('detergentes_antes', this)">
+                                            <small class="text-muted" id="lblMercDetergentesAntes"></small>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="small negrita text-secondary">Foto después</label>
+                                            <input type="file" accept="image/*" class="form-control-file" id="fileMercDetergentesDespues"
+                                                onchange="mercaderista_act_foto_change('detergentes_despues', this)">
+                                            <small class="text-muted" id="lblMercDetergentesDespues"></small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="card border shadow-sm mb-2">
                                 <div class="card-body p-2">
                                     <div class="d-flex align-items-center mb-2">
@@ -509,14 +533,15 @@ function mercaderista_limpiar_fotos_actividades() {
     mercaderista_act_fotos = {
         ota_antes: null, ota_despues: null,
         vitrinas_antes: null, vitrinas_despues: null,
+        detergentes_antes: null, detergentes_despues: null,
         pop_antes: null, pop_despues: null,
     };
-    ['fileMercOtaAntes', 'fileMercOtaDespues', 'fileMercVitrinasAntes', 'fileMercVitrinasDespues', 'fileMercPopAntes', 'fileMercPopDespues']
+    ['fileMercOtaAntes', 'fileMercOtaDespues', 'fileMercVitrinasAntes', 'fileMercVitrinasDespues', 'fileMercDetergentesAntes', 'fileMercDetergentesDespues', 'fileMercPopAntes', 'fileMercPopDespues']
         .forEach((id) => {
             const el = document.getElementById(id);
             if (el) el.value = '';
         });
-    ['lblMercOtaAntes', 'lblMercOtaDespues', 'lblMercVitrinasAntes', 'lblMercVitrinasDespues', 'lblMercPopAntes', 'lblMercPopDespues']
+    ['lblMercOtaAntes', 'lblMercOtaDespues', 'lblMercVitrinasAntes', 'lblMercVitrinasDespues', 'lblMercDetergentesAntes', 'lblMercDetergentesDespues', 'lblMercPopAntes', 'lblMercPopDespues']
         .forEach((id) => {
             const el = document.getElementById(id);
             if (el) el.innerText = '';
@@ -531,6 +556,8 @@ function mercaderista_act_foto_change(key, input) {
         ota_despues: 'lblMercOtaDespues',
         vitrinas_antes: 'lblMercVitrinasAntes',
         vitrinas_despues: 'lblMercVitrinasDespues',
+        detergentes_antes: 'lblMercDetergentesAntes',
+        detergentes_despues: 'lblMercDetergentesDespues',
         pop_antes: 'lblMercPopAntes',
         pop_despues: 'lblMercPopDespues',
     };
@@ -546,6 +573,7 @@ function mercaderista_actividad_validar_pares_foto() {
     const grupos = [
         { key: 'ota', label: 'OTA' },
         { key: 'vitrinas', label: 'VITRINAS' },
+        { key: 'detergentes', label: 'DETERGENTES' },
         { key: 'pop', label: 'POP' },
     ];
 
@@ -562,7 +590,7 @@ function mercaderista_actividad_validar_pares_foto() {
 
     const completo = grupos.some((g) => mercaderista_actividad_tiene_foto(g.key));
     if (!completo) {
-        return 'Debe completar al menos una actividad con foto ANTES y DESPUÉS (OTA, Vitrinas o POP).';
+        return 'Debe completar al menos una actividad con foto ANTES y DESPUÉS (OTA, Vitrinas, Detergentes o POP).';
     }
     return '';
 }
@@ -800,8 +828,103 @@ function mercaderista_foto_bloque_html(label, dataUrl, filename) {
     return `
         <div class="col-6 mb-2">
             <label class="small negrita text-secondary d-block mb-1">${label}</label>
-            <img src="${dataUrl}" alt="${label}" class="img-fluid rounded border shadow-sm" style="max-height:280px;object-fit:contain;width:100%">
+            <img src="${dataUrl}" alt="${label}"
+                class="img-fluid rounded border shadow-sm merc-foto-preview hand"
+                title="Doble clic para ver a tamaño completo"
+                style="max-height:280px;object-fit:contain;width:100%;cursor:zoom-in"
+                data-merc-foto-label="${String(label).replace(/"/g, '&quot;')}">
+            <small class="text-muted d-block mt-1">Doble clic para ampliar</small>
         </div>`;
+}
+
+function mercaderista_ensure_lightbox() {
+    if (document.getElementById('mercFotoLightbox')) return;
+    const wrap = document.createElement('div');
+    wrap.id = 'mercFotoLightbox';
+    wrap.innerHTML = `
+        <style>
+            #mercFotoLightbox {
+                display: none;
+                position: fixed;
+                inset: 0;
+                z-index: 20000;
+                background: rgba(15, 23, 42, 0.88);
+                backdrop-filter: blur(6px);
+                -webkit-backdrop-filter: blur(6px);
+                align-items: center;
+                justify-content: center;
+                padding: 1rem;
+            }
+            #mercFotoLightbox.is-open { display: flex; }
+            #mercFotoLightbox img {
+                max-width: 96vw;
+                max-height: 90vh;
+                object-fit: contain;
+                border-radius: 8px;
+                box-shadow: 0 16px 48px rgba(0,0,0,.45);
+                background: #111;
+            }
+            #mercFotoLightbox .merc-lb-caption {
+                position: absolute;
+                top: 12px;
+                left: 50%;
+                transform: translateX(-50%);
+                color: #fff;
+                font-weight: 700;
+                font-size: 0.95rem;
+                text-shadow: 0 1px 3px rgba(0,0,0,.6);
+            }
+            #mercFotoLightbox .merc-lb-close {
+                position: absolute;
+                top: 10px;
+                right: 14px;
+                border: 0;
+                background: rgba(255,255,255,.15);
+                color: #fff;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                font-size: 1.25rem;
+                cursor: pointer;
+            }
+        </style>
+        <button type="button" class="merc-lb-close" title="Cerrar" aria-label="Cerrar">&times;</button>
+        <div class="merc-lb-caption" id="mercFotoLightboxCaption"></div>
+        <img id="mercFotoLightboxImg" alt="Foto ampliada" src="">
+    `;
+    document.body.appendChild(wrap);
+    wrap.addEventListener('click', (e) => {
+        if (e.target === wrap || e.target.classList.contains('merc-lb-close')) {
+            mercaderista_cerrar_foto_completa();
+        }
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') mercaderista_cerrar_foto_completa();
+    });
+}
+
+function mercaderista_ver_foto_completa(src, label) {
+    if (!src) return;
+    mercaderista_ensure_lightbox();
+    const box = document.getElementById('mercFotoLightbox');
+    const img = document.getElementById('mercFotoLightboxImg');
+    const cap = document.getElementById('mercFotoLightboxCaption');
+    if (img) img.src = src;
+    if (cap) cap.textContent = label || 'Foto';
+    if (box) box.classList.add('is-open');
+}
+
+function mercaderista_cerrar_foto_completa() {
+    const box = document.getElementById('mercFotoLightbox');
+    const img = document.getElementById('mercFotoLightboxImg');
+    if (box) box.classList.remove('is-open');
+    if (img) img.removeAttribute('src');
+}
+
+function mercaderista_on_fotos_dblclick(e) {
+    const img = e.target.closest('img.merc-foto-preview');
+    if (!img || !img.src) return;
+    mercaderista_ver_foto_completa(img.src, img.getAttribute('data-merc-foto-label') || img.alt || 'Foto');
 }
 
 function mercaderista_celda_actividad_detalle(val, tipo, etiquetaBtn) {
@@ -835,6 +958,7 @@ function mercaderista_ver_fotos_actividad(tipo) {
     const map = {
         ota: { titulo: 'Fotos OTA', antes: r.OTA_F_ANTES, despues: r.OTA_F_DESPUES },
         vitrinas: { titulo: 'Fotos Vitrinas', antes: r.VITRINAS_F_ANTES, despues: r.VITRINAS_F_DESPUES },
+        detergentes: { titulo: 'Fotos Detergentes', antes: r.DETERGENTES_F_ANTES, despues: r.DETERGENTES_F_DESPUES },
         pop: { titulo: 'Fotos POP', antes: r.POP_F_ANTES, despues: r.POP_F_DESPUES },
     };
     const c = map[tipo];
@@ -884,7 +1008,7 @@ function mercaderista_on_detalle_extra_click(e) {
     if (!btn) return;
     const tipo = btn.getAttribute('data-tipo');
     if (tipo === 'faltantes') mercaderista_ver_faltantes_lista();
-    else if (tipo === 'ota' || tipo === 'vitrinas' || tipo === 'pop') mercaderista_ver_fotos_actividad(tipo);
+    else if (tipo === 'ota' || tipo === 'vitrinas' || tipo === 'detergentes' || tipo === 'pop') mercaderista_ver_fotos_actividad(tipo);
 }
 
 function mercaderista_filtrar_clientes() {
@@ -1433,6 +1557,7 @@ function mercaderista_ver_detalle_visita(codclie, nombre) {
                                 <tr><th class="bg-light">No visitado</th><td>${motivo || '—'}</td></tr>
                                 <tr><th class="bg-light">OTA</th><td>${mercaderista_celda_actividad_detalle(r.OTA, 'ota', 'Ver fotos OTA')}</td></tr>
                                 <tr><th class="bg-light">Vitrinas</th><td>${mercaderista_celda_actividad_detalle(r.VITRINAS, 'vitrinas', 'Ver fotos Vitrinas')}</td></tr>
+                                <tr><th class="bg-light">Detergentes</th><td>${mercaderista_celda_actividad_detalle(r.DETERGENTES, 'detergentes', 'Ver fotos Detergentes')}</td></tr>
                                 <tr><th class="bg-light">POP</th><td>${mercaderista_celda_actividad_detalle(r.POP, 'pop', 'Ver fotos POP')}</td></tr>
                                 <tr><th class="bg-light">Faltantes</th><td>${mercaderista_celda_actividad_detalle(hayFaltantes ? 1 : 0, 'faltantes', 'Ver faltantes')}</td></tr>
                             </tbody>
@@ -1514,6 +1639,7 @@ function mercaderista_registrar_no_visita() {
         novisitado: motivo,
         ota: 0,
         vitrinas: 0,
+        detergentes: 0,
         pop: 0,
     })
         .then((response) => {
@@ -1543,6 +1669,8 @@ function mercaderista_registrar_actividades() {
         ['ota_despues', 'ota', 'despues'],
         ['vitrinas_antes', 'vitrinas', 'antes'],
         ['vitrinas_despues', 'vitrinas', 'despues'],
+        ['detergentes_antes', 'detergentes', 'antes'],
+        ['detergentes_despues', 'detergentes', 'despues'],
         ['pop_antes', 'pop', 'antes'],
         ['pop_despues', 'pop', 'despues'],
     ];
@@ -1590,11 +1718,14 @@ function mercaderista_registrar_actividades() {
                     novisitado: '',
                     ota: mercaderista_actividad_tiene_foto('ota') ? 1 : 0,
                     vitrinas: mercaderista_actividad_tiene_foto('vitrinas') ? 1 : 0,
+                    detergentes: mercaderista_actividad_tiene_foto('detergentes') ? 1 : 0,
                     pop: mercaderista_actividad_tiene_foto('pop') ? 1 : 0,
                     ota_f_antes: nombres['ota_antes'] || '',
                     ota_f_despues: nombres['ota_despues'] || '',
                     vitrinas_f_antes: nombres['vitrinas_antes'] || '',
                     vitrinas_f_despues: nombres['vitrinas_despues'] || '',
+                    detergentes_f_antes: nombres['detergentes_antes'] || '',
+                    detergentes_f_despues: nombres['detergentes_despues'] || '',
                     pop_f_antes: nombres['pop_antes'] || '',
                     pop_f_despues: nombres['pop_despues'] || '',
                     actualizar_solo: true,
@@ -1802,6 +1933,7 @@ function addListeners() {
     document.getElementById('btnMercaderistaCancelarActividades')?.addEventListener('click', mercaderista_cancelar_actividades);
     document.getElementById('btnMercaderistaGuardarFaltantes')?.addEventListener('click', mercaderista_guardar_faltantes);
     document.getElementById('bodyMercaderistaDetalleVisita')?.addEventListener('click', mercaderista_on_detalle_extra_click);
+    document.getElementById('bodyMercaderistaFotosActividad')?.addEventListener('dblclick', mercaderista_on_fotos_dblclick);
 
     document.getElementById('btnMercaderistaCameraQR')?.addEventListener('click', mercaderista_abrir_camara_qr);
     $('#modalMercaderistaBarcode').on('hidden.bs.modal', mercaderista_detener_barcode);
@@ -1828,6 +1960,7 @@ function destroyView() {
     document.getElementById('js-page-content')?.classList.remove('proveedor-page');
     mercaderista_detalle_actual = null;
     mercaderista_detener_barcode();
+    mercaderista_cerrar_foto_completa();
     $('#modalMercaderistaDetalleVisita').modal('hide');
     $('#modalMercaderistaFotosActividad').modal('hide');
     $('#modalMercaderistaFaltantesLista').modal('hide');

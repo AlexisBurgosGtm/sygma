@@ -145,15 +145,25 @@ function ventas_loadEmbed(scriptUrl, cardId) {
         script.onload = () => {
             const embedRoot = embed;
             const savedRoot = root;
+            const coreInit = window._ventasCore?.initView;
+            const coreDestroy = window._ventasCore?.destroyView;
+            const embedInit = window.initView;
+            const embedDestroyCand = window.destroyView;
+
             root = embedRoot;
-            if (typeof initView === 'function') {
-                initView();
-                ventas_embedDestroy = typeof destroyView === 'function' ? destroyView : null;
+            if (typeof embedInit === 'function' && embedInit !== coreInit) {
+                embedInit();
+            } else if (typeof embedInit === 'function') {
+                embedInit();
             }
+            // Nunca usar destroyView del shell: vistas sin destroyView propio dejarían el padre roto
+            ventas_embedDestroy = (typeof embedDestroyCand === 'function' && embedDestroyCand !== coreDestroy)
+                ? embedDestroyCand
+                : null;
             root = savedRoot;
             if (window._ventasCore) {
-                window.initView = window._ventasCore.initView;
-                window.destroyView = window._ventasCore.destroyView;
+                window.initView = coreInit;
+                window.destroyView = coreDestroy;
             }
             ventas_rewireEmbedActions(embedRoot);
             resolve();

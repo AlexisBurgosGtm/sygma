@@ -2202,16 +2202,12 @@ function insert_producto_pedido(codprod,desprod,codmedida,equivale,costo,precio,
     
 
     //RUTINA QUE COMPARA EXISTENCIA CON CANTIDAD
-   
-  
-    
+    // existencia viene en medida (F.get_existencia)
         let varTotalUnidades = Number(cantidad * equivale);
-        let varExistencia = Number(existencia * equivale);
 
-        console.log(varTotalUnidades)
-        console.log(varExistencia);
-    
-        if(varTotalUnidades > Number(varExistencia)){F.AvisoError('Existencia menor a la cantidad pedida');return;}
+        if (!validar_cantidad_vs_existencia(cantidad, equivale, existencia, 'medida')) {
+            return Promise.reject('sin_existencia');
+        };
     
 
     let datos = 
