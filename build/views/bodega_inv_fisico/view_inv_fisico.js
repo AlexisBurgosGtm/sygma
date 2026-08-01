@@ -1,3 +1,9 @@
+/**
+ * Inventario físico — menú general (Inventarios).
+ * Misma UX que INICIO_BODEGA/view_inventario.js, con selector de sucursal y Exportar Excel.
+ */
+var inv_fisico_cache = [];
+var inv_fisico_modo_existencia = 'TODOS'; // TODOS | SIN_EXISTENCIA
 
 function getView(){
     let view = {
@@ -8,12 +14,8 @@ function getView(){
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
                             ${view.vista_listado()}
                         </div>
-                        <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
-                           
-                        </div>
-                        <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
-                            
-                        </div>    
+                        <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab"></div>
+                        <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab"></div>
                     </div>
 
                     <ul class="nav nav-tabs hidden" id="myTabHome" role="tablist">
@@ -24,97 +26,83 @@ function getView(){
                         <li class="nav-item">
                             <a class="nav-link negrita text-danger" id="tab-dos" data-toggle="tab" href="#dos" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
-                        </li>  
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link negrita text-danger" id="tab-tres" data-toggle="tab" href="#tres" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
-                        </li>         
+                        </li>
                     </ul>
-                    
                 </div>
-               
             `
         },
         vista_listado:()=>{
             return `
-            <div class="card card-rounded shadow">
+            <div class="card card-rounded shadow bodega-inv-card" id="invFisicoCard">
                 <div class="card-body p-3">
-                    
-                    <h3 class="negrita text-danger">INVENTARIO ACTUAL</h3>
-                    <br>
-                    <div class="row">
-                        <div class="col-8">
-                            <div class="input-group">
-                                <select class="form-control negrita text-base" id="cmbSucursal">
-                                </select>
-                                <select class="form-control negrita text-danger" id="cmbSt">
-                                    <option value="SI">PRODUCTOS HABILITADOS</option>
-                                    <option value="NO">PRODUCTOS NO HABILITADOS</option>
-                                </select>
-                            </div>                            
-                        </div>
-                        <div class="col-4">
-                            <button class="btn btn-success btn-md hand shadow" id="btnExportarInventario">
-                                <i class="fal fa-share"></i> Exportar Excel
-                            </button>
+                    <div class="bodega-inv-header mb-3">
+                        <div class="bodega-inv-header__top">
+                            <div class="bodega-inv-header__title-block">
+                                <h4 class="negrita text-danger mb-1">Inventario actual</h4>
+                                <small class="text-muted d-block mb-2">Reporte de existencias por sucursal</small>
+                                <label class="bodega-inv-filters__label negrita text-secondary mb-1" for="cmbSucursal">Sucursal</label>
+                                <select class="form-control form-control-sm negrita text-base bodega-inv-filters__control bodega-inv-sucursal" id="cmbSucursal"></select>
+                            </div>
+                            <div class="bodega-inv-header__actions">
+                                <button type="button" class="btn btn-sm hand shadow bodega-inv-existencia-toggle is-todos"
+                                    id="btnInvFisicoExistenciaToggle" title="Alternar todos / sin existencia" aria-pressed="false">
+                                    <i class="fal fa-boxes mr-1"></i>
+                                    <span class="bodega-inv-existencia-toggle__label">TODOS</span>
+                                </button>
+                                <button type="button" class="btn btn-success btn-sm hand shadow bodega-inv-export-btn" id="btnExportarInventario">
+                                    <i class="fal fa-file-excel mr-1"></i> Exportar Excel
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    <br>
 
-                    <div class="table-responsive col-12">
-                        <table class="table h-full table-hover col-12" id="tblInventario">
+                    <div class="bodega-inv-filters bodega-inv-filters--bar mb-3">
+                        <div class="bodega-inv-filters__item">
+                            <label class="bodega-inv-filters__label negrita text-secondary mb-1" for="cmbSt">Estado</label>
+                            <select class="form-control form-control-sm negrita text-danger bodega-inv-filters__control" id="cmbSt">
+                                <option value="SI">HABILITADOS</option>
+                                <option value="NO">DESHABILITADOS</option>
+                            </select>
+                        </div>
+                        <div class="bodega-inv-filters__item">
+                            <label class="bodega-inv-filters__label negrita text-secondary mb-1" for="cmbInvFisicoMarca">Marca</label>
+                            <select class="form-control form-control-sm negrita bodega-inv-filters__control" id="cmbInvFisicoMarca">
+                                <option value="">TODAS LAS MARCAS</option>
+                            </select>
+                        </div>
+                        <div class="bodega-inv-filters__item bodega-inv-filters__item--grow">
+                            <label class="bodega-inv-filters__label negrita text-secondary mb-1" for="txtInvFisicoBuscar">Buscar</label>
+                            <div class="bodega-inv-search">
+                                <i class="fal fa-search bodega-inv-search__icon"></i>
+                                <input type="text" class="form-control form-control-sm bodega-inv-filters__control bodega-inv-search__input" id="txtInvFisicoBuscar"
+                                    placeholder="Código, producto o marca...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive bodega-inv-table-wrap">
+                        <table class="table table-hover table-sm col-12 mb-0 bodega-inv-table" id="tblInventario">
                             <thead class="bg-base text-white">
                                 <tr>
                                     <td>CODIGO</td>
                                     <td>CODIGO_DUN</td>
-                                    <td>CODIGO 3</td>
                                     <td>PRODUCTO</td>
                                     <td>MARCA</td>
-                                    <td>TOTALCOSTO</td>
                                     <td>EXISTENCIA(UNS)</td>
                                     <td>FARDOS</td>
+                                    <td>TOTALCOSTO</td>
                                 </tr>
                             </thead>
-                            <tbody id="tblDataInventario">
-                            </tbody>
+                            <tbody id="tblDataInventario"></tbody>
                         </table>
                     </div>
-                </div>
-            </div>
-
-            <button class="btn btn-success btn-circle btn-xl sygma-fab-nuevo hand shadow" id="btnNuevo">
-                <i class="fal fa-plus"></i>
-            </button>
-
-            `
-        },
-        modal:()=>{
-            return `
-              <div id="modal_" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-right modal-xl">
-                    <div class="modal-content">
-                        <div class="dropdown-header bg-secondary d-flex justify-content-center align-items-center w-100">
-                            <h4 class="m-0 text-center color-white" id="">
-                                TITULO
-                            </h4>
-                        </div>
-                        <div class="modal-body p-4">
-                            
-                            <div class="card card-rounded">
-                                <div class="card-body p-2">
-
-                                </div>
-                            </div>
-
-                                
-                            <div class="row">
-                                <button class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
-                                    <i class="fal fa-arrow-left"></i>
-                                </button>
-                            </div>
-
-                        </div>
-                    
+                    <div class="bodega-inv-total" id="lbInvFisicoTotalCosto">
+                        <span class="bodega-inv-total__label">TOTAL COSTO</span>
+                        <span class="bodega-inv-total__value">Q0.00</span>
                     </div>
                 </div>
             </div>
@@ -123,137 +111,224 @@ function getView(){
     }
 
     root.innerHTML = view.body();
-
 };
 
-function addListeners(){
+function inv_fisico_sync_toggle_ui() {
+    const btn = document.getElementById('btnInvFisicoExistenciaToggle');
+    if (!btn) return;
+    const sinExistencia = inv_fisico_modo_existencia === 'SIN_EXISTENCIA';
+    btn.classList.toggle('is-todos', !sinExistencia);
+    btn.classList.toggle('is-sin-existencia', sinExistencia);
+    btn.setAttribute('aria-pressed', sinExistencia ? 'true' : 'false');
+    const label = btn.querySelector('.bodega-inv-existencia-toggle__label');
+    const icon = btn.querySelector('i');
+    if (label) label.textContent = sinExistencia ? 'SIN EXISTENCIA' : 'TODOS';
+    if (icon) {
+        icon.className = sinExistencia
+            ? 'fal fa-exclamation-triangle mr-1'
+            : 'fal fa-boxes mr-1';
+    }
+}
 
+function inv_fisico_toggle_existencia() {
+    inv_fisico_modo_existencia = inv_fisico_modo_existencia === 'TODOS'
+        ? 'SIN_EXISTENCIA'
+        : 'TODOS';
+    inv_fisico_sync_toggle_ui();
+    inv_fisico_aplicar_filtros();
+}
 
-    let cmbSucursal = document.getElementById('cmbSucursal');
-    GF.get_data_empresas()
-    .then((data)=>{
+function inv_fisico_llenar_marcas(rows) {
+    const cmb = document.getElementById('cmbInvFisicoMarca');
+    if (!cmb) return;
+    const prev = cmb.value;
+    const marcas = Array.from(new Set(
+        (rows || [])
+            .map((r) => String(r.DESMARCA || '').trim())
+            .filter(Boolean)
+    )).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
 
-            let str = `<option value="%">TODAS</option>`;
-
-            data.recordset.map((r)=>{
-                str += `<option value="${r.EMPNIT}">${r.NOMBRE}</option>`;
-            })
-            cmbSucursal.innerHTML = str; 
-            
-            if(Number(GlobalNivelUsuario)==1){
-
-            }else{
-                cmbSucursal.value = GlobalEmpnit;
-                    
-                if(Number(GlobalNivelUsuario)==5){
-
-                }else{
-                    cmbSucursal.disabled = true;
-                };
-
-            };
-
-             tbl_inventario();
-
-    })
-    .catch(()=>{
-        cmbSucursal.innerHTML = `<option value="%">No se cargaron las sedes</option>`
-    })
-
-    cmbSucursal.addEventListener('change',()=>{
-        tbl_inventario();
+    let str = `<option value="">TODAS LAS MARCAS</option>`;
+    marcas.forEach((m) => {
+        str += `<option value="${String(m).replace(/"/g, '&quot;')}">${m}</option>`;
     });
-    
+    cmb.innerHTML = str;
+    if (prev && marcas.includes(prev)) cmb.value = prev;
+}
 
-    let btnExportarInventario = document.getElementById('btnExportarInventario');
-    btnExportarInventario.addEventListener('click',()=>{
+function inv_fisico_actualizar_total() {
+    const tbody = document.getElementById('tblDataInventario');
+    const lb = document.getElementById('lbInvFisicoTotalCosto');
+    if (!lb) return;
+    let total = 0;
+    if (tbody) {
+        Array.from(tbody.querySelectorAll('tr')).forEach((tr) => {
+            if (tr.dataset.invFisicoEmpty === '1') return;
+            if (tr.style.display === 'none') return;
+            total += Number(tr.dataset.totalcosto) || 0;
+        });
+    }
+    const value = lb.querySelector('.bodega-inv-total__value');
+    if (value) value.textContent = F.setMoneda(total, 'Q');
+}
 
-        //F.exportTableToExcel('tblInventario','Inventario actual')
+function inv_fisico_aplicar_filtros() {
+    const tbody = document.getElementById('tblDataInventario');
+    if (!tbody) return;
+    const marca = String(document.getElementById('cmbInvFisicoMarca')?.value || '').trim().toLowerCase();
+    const texto = String(document.getElementById('txtInvFisicoBuscar')?.value || '').trim().toLowerCase();
+    const soloSinExistencia = inv_fisico_modo_existencia === 'SIN_EXISTENCIA';
 
-        let st = document.getElementById('cmbSt').value;
-        let sucursal = document.getElementById('cmbSucursal').value;
+    Array.from(tbody.querySelectorAll('tr')).forEach((tr) => {
+        if (tr.dataset.invFisicoEmpty === '1') {
+            tr.style.display = '';
+            return;
+        }
+        const marcaRow = String(tr.dataset.marca || '').toLowerCase();
+        const existencia = Number(tr.dataset.existencia);
+        const marcaOk = !marca || marcaRow === marca;
+        const textoOk = !texto || String(tr.textContent || '').toLowerCase().includes(texto);
+        const existenciaOk = !soloSinExistencia || (!Number.isNaN(existencia) && existencia <= 0);
+        tr.style.display = (marcaOk && textoOk && existenciaOk) ? '' : 'none';
+    });
+    inv_fisico_actualizar_total();
+}
+
+function inv_fisico_render_rows(rows) {
+    const container = document.getElementById('tblDataInventario');
+    if (!container) return;
+
+    if (!rows || !rows.length) {
+        container.innerHTML = `<tr data-inv-fisico-empty="1"><td colspan="7" class="text-center text-muted py-3">No se cargaron datos...</td></tr>`;
+        inv_fisico_actualizar_total();
+        return;
+    }
+
+    let str = '';
+    rows.forEach((r) => {
+        const totalunidades = Number(r.TOTALUNIDADES) || 0;
+        const uxc = Number(r.UXC) || 1;
+        const cajas = uxc ? (totalunidades / uxc) : 0;
+        const marca = String(r.DESMARCA || '').trim();
+        const totalCosto = Number(r.COSTO || 0) * totalunidades;
+        str += `
+            <tr data-marca="${marca.replace(/"/g, '&quot;')}"
+                data-existencia="${totalunidades}"
+                data-codigodun="${String(r.CODPROD2 || '').replace(/"/g, '&quot;')}"
+                data-codigo3="${String(r.DESPROD3 || '').replace(/"/g, '&quot;')}"
+                data-totalcosto="${totalCosto}">
+                <td>${r.CODPROD || ''}</td>
+                <td>${r.CODPROD2 || ''}</td>
+                <td>${r.DESPROD || ''}</td>
+                <td>${marca}</td>
+                <td>${r.TOTALUNIDADES}</td>
+                <td>${F.setMoneda(cajas, '')}</td>
+                <td class="text-right">${F.setMoneda(totalCosto, 'Q')}</td>
+            </tr>
+        `;
+    });
+    container.innerHTML = str;
+    inv_fisico_aplicar_filtros();
+}
+
+function addListeners(){
+    const cmbSucursal = document.getElementById('cmbSucursal');
+
+    GF.get_data_empresas()
+        .then((data) => {
+            let str = `<option value="%">TODAS</option>`;
+            data.recordset.map((r) => {
+                str += `<option value="${r.EMPNIT}">${r.NOMBRE}</option>`;
+            });
+            cmbSucursal.innerHTML = str;
+
+            if (Number(GlobalNivelUsuario) != 1) {
+                cmbSucursal.value = GlobalEmpnit;
+                if (Number(GlobalNivelUsuario) != 5) {
+                    cmbSucursal.disabled = true;
+                }
+            }
+
+            tbl_inventario();
+        })
+        .catch(() => {
+            cmbSucursal.innerHTML = `<option value="%">No se cargaron las sedes</option>`;
+        });
+
+    cmbSucursal?.addEventListener('change', () => tbl_inventario());
+    document.getElementById('cmbSt')?.addEventListener('change', () => tbl_inventario());
+    document.getElementById('cmbInvFisicoMarca')?.addEventListener('change', () => inv_fisico_aplicar_filtros());
+    document.getElementById('txtInvFisicoBuscar')?.addEventListener('input', () => inv_fisico_aplicar_filtros());
+    document.getElementById('btnInvFisicoExistenciaToggle')?.addEventListener('click', () => inv_fisico_toggle_existencia());
+
+    const btnExportarInventario = document.getElementById('btnExportarInventario');
+    btnExportarInventario?.addEventListener('click', () => {
+        const st = document.getElementById('cmbSt')?.value || 'SI';
+        const sucursal = document.getElementById('cmbSucursal')?.value || '%';
 
         btnExportarInventario.disabled = true;
         btnExportarInventario.innerHTML = `<i class="fal fa-share fa-spin"></i>`;
 
-        GF.data_inventarios_general_export(sucursal,st)
-        .then((data)=>{
-
-            btnExportarInventario.disabled = false;
-            btnExportarInventario.innerHTML = `<i class="fal fa-share"></i> Exportar Excel`;
-        
-            let datos = data.recordset;
-            F.export_json_to_xlsx(datos,`Inventario ${F.getFecha().replace('/','.')}`)
-
-        })
-        .catch(()=>{
-            F.AvisoError('No se pudo exportar');
-            btnExportarInventario.disabled = false;
-            btnExportarInventario.innerHTML = `<i class="fal fa-share"></i> Exportar Excel`;
-        })
-
-        
+        GF.data_inventarios_general_export(sucursal, st)
+            .then((data) => {
+                let datos = data.recordset || [];
+                if (inv_fisico_modo_existencia === 'SIN_EXISTENCIA') {
+                    datos = datos.filter((r) => Number(r.TOTALUNIDADES) <= 0);
+                }
+                const marca = String(document.getElementById('cmbInvFisicoMarca')?.value || '').trim().toLowerCase();
+                const texto = String(document.getElementById('txtInvFisicoBuscar')?.value || '').trim().toLowerCase();
+                if (marca) {
+                    datos = datos.filter((r) => String(r.DESMARCA || '').trim().toLowerCase() === marca);
+                }
+                if (texto) {
+                    datos = datos.filter((r) => {
+                        const blob = `${r.CODPROD || ''} ${r.DESPROD || ''} ${r.DESMARCA || ''}`.toLowerCase();
+                        return blob.includes(texto);
+                    });
+                }
+                F.export_json_to_xlsx(datos, `Inventario ${F.getFecha().replace('/', '.')}`);
+            })
+            .catch(() => {
+                F.AvisoError('No se pudo exportar');
+            })
+            .finally(() => {
+                btnExportarInventario.disabled = false;
+                btnExportarInventario.innerHTML = `<i class="fal fa-share"></i> Exportar Excel`;
+            });
     });
 
-
-    document.getElementById('cmbSt').addEventListener('change',()=>{
-
-        tbl_inventario();
-
-    })
-
-    
-
-
+    inv_fisico_sync_toggle_ui();
 };
 
 function initView(){
-
+    inv_fisico_cache = [];
+    inv_fisico_modo_existencia = 'TODOS';
     getView();
     addListeners();
-
 };
 
-
 function tbl_inventario(){
+    const container = document.getElementById('tblDataInventario');
+    if (!container) return;
 
-        let container = document.getElementById('tblDataInventario');
-        container.innerHTML = GlobalLoader;
+    container.innerHTML = GlobalLoader;
+    inv_fisico_cache = [];
 
-        let sucursal = document.getElementById('cmbSucursal').value;
-        let st = document.getElementById('cmbSt').value;
+    const sucursal = document.getElementById('cmbSucursal')?.value || '%';
+    const st = document.getElementById('cmbSt')?.value || 'SI';
 
-        GF.get_data_inventarios_general(sucursal,st)
-        .then((data)=>{
-
-            let str = '';
-            data.recordset.map((r)=>{
-                let totalunidades = Number(r.TOTALUNIDADES);
-                let cajas = totalunidades / Number(r.UXC);
-                str += `
-                <tr>
-                    <td>${r.CODPROD}</td>
-                    <td>${r.CODPROD2}</td>
-                    <td>${r.DESPROD3}</td>
-                    <td>${r.DESPROD}</td>
-                    <td>${r.DESMARCA}</td>
-                    <td>${F.setMoneda((Number(r.COSTO)*Number(r.TOTALUNIDADES)),'Q')}</td>
-                    <td>${r.TOTALUNIDADES}</td>
-                    <td>${F.setMoneda(cajas,'')}</td>
-                </tr>
-                `
-            })
-            container.innerHTML = str;
-
-            F.initit_datatable('tblInventario', true);
-
+    GF.get_data_inventarios_general(sucursal, st)
+        .then((data) => {
+            inv_fisico_cache = data.recordset || [];
+            inv_fisico_llenar_marcas(inv_fisico_cache);
+            inv_fisico_render_rows(inv_fisico_cache);
+            inv_fisico_sync_toggle_ui();
         })
-        .catch(()=>{
-
-            container.innerHTML = 'No se cargaron datos...';
-        })
-
-
-        
-
+        .catch(() => {
+            inv_fisico_cache = [];
+            inv_fisico_llenar_marcas([]);
+            container.innerHTML = `<tr data-inv-fisico-empty="1"><td colspan="7" class="text-center text-muted py-3">No se cargaron datos...</td></tr>`;
+            inv_fisico_actualizar_total();
+            inv_fisico_sync_toggle_ui();
+        });
 };

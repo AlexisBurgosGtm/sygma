@@ -82,10 +82,42 @@ function compras_onHeaderFiltersChange() {
         const alcance = document.getElementById('comprasCxcAlcance')?.value || 'MES';
         if (alcance !== 'TODAS') compras_cxc_cargar_listado();
     }
+    if (compras_currentPane === 'tres' && typeof bodega_inv_cargar === 'function') {
+        bodega_inv_cargar();
+    }
 }
 
 function compras_init_inventario() {
-    get_tbl_surtido(GlobalEmpnit);
+    if (typeof bodega_inv_init === 'function') {
+        bodega_inv_init();
+        return;
+    }
+    compras_ensure_bodega_inv_script()
+        .then(() => {
+            if (typeof bodega_inv_init === 'function') bodega_inv_init();
+        })
+        .catch(() => F.AvisoError('No se pudo cargar el inventario'));
+}
+
+function compras_ensure_bodega_inv_script() {
+    return new Promise((resolve, reject) => {
+        if (typeof bodega_inv_html === 'function') {
+            resolve();
+            return;
+        }
+        const existing = document.querySelector('script[data-bodega-inv]');
+        if (existing) {
+            existing.addEventListener('load', () => resolve());
+            existing.addEventListener('error', () => reject());
+            return;
+        }
+        const script = document.createElement('script');
+        script.src = '../views/menu/INICIO_BODEGA/view_inventario.js?_bi=' + Date.now();
+        script.setAttribute('data-bodega-inv', 'true');
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('No se pudo cargar view_inventario.js'));
+        document.body.appendChild(script);
+    });
 }
 
 function compras_setupMenuListeners() {
@@ -132,7 +164,7 @@ function getView(){
                                     ${view.vista_creditos_vendedores()}
                                 </div>
                                 <div class="tab-pane fade" id="tres" role="tabpanel">
-                                    ${view.productos_relleno() + view.modal_existencia_sucursales()}
+                                    ${typeof bodega_inv_html === 'function' ? bodega_inv_html() : '<div id="bodegaInvPending" class="text-muted py-3">Cargando inventario...</div>'}
                                 </div>
                             </div>
                         </div>
@@ -239,7 +271,7 @@ function getView(){
             const items = [
                 { id: 'btnMenuEmbarques', label: 'Embarques', icon: 'fa-truck', color: 'info' },
                 { id: 'btnMenuCreditos', label: 'Créditos vendedores', icon: 'fa-dollar-sign', color: 'success' },
-                { id: 'btnMenuInventarios', label: 'Inventarios', icon: 'fa-warehouse', color: 'secondary' },
+                { id: 'btnMenuInventarios', label: 'Inventario físico', icon: 'fa-warehouse', color: 'secondary' },
             ];
             return items.map(item => `
                 <div class="card proveedor-menu-card hand" id="${item.id}">
@@ -621,7 +653,7 @@ function getView(){
 
 function addListeners(){
 
-    document.title = 'Inicio Compras';
+    document.title = 'Inicio Bodega';
 
     compras_setupSucursalHeader();
 
@@ -641,24 +673,6 @@ function addListeners(){
     compras_setupMenuListeners();
 
     document.getElementById('cmbStatus')?.addEventListener('change', () => cargar_grid_embarques());
-
-    GF.get_clasificaciones_listado('BI')
-        .then((data) => {
-            let str = "<option value='0'>TODAS</option>";
-            data.recordset.map((r) => {
-                str += `<option value='${r.CODIGO}'>${r.DESCRIPCION}</option>`;
-            });
-            const cmbTipo = document.getElementById('cmbTipoRentabilidad');
-            if (cmbTipo) cmbTipo.innerHTML = str;
-        })
-        .catch(() => {
-            const cmbTipo = document.getElementById('cmbTipoRentabilidad');
-            if (cmbTipo) cmbTipo.innerHTML = '';
-        });
-
-    document.getElementById('cmbTipoRentabilidad')?.addEventListener('change', () => {
-        get_tbl_surtido(GlobalEmpnit);
-    });
 };
 
 function initView(){
@@ -666,15 +680,31 @@ function initView(){
     document.getElementById('js-page-content')?.classList.add('proveedor-page');
     if (typeof compras_cxc_listeners_ready !== 'undefined') compras_cxc_listeners_ready = false;
     if (typeof compras_cxc_vendedores_ready !== 'undefined') compras_cxc_vendedores_ready = false;
-    getView();
-    addListeners();
-    compras_showHome();
+
+    compras_ensure_bodega_inv_script()
+        .catch(() => null)
+        .finally(() => {
+            if (typeof bodega_inv_listeners_bound !== 'undefined') {
+                bodega_inv_listeners_bound = false;
+            }
+            getView();
+            // Si el HTML quedó pendiente porque el script llegó tarde, montarlo ahora
+            const pending = document.getElementById('bodegaInvPending');
+            if (pending && typeof bodega_inv_html === 'function') {
+                pending.outerHTML = bodega_inv_html();
+            }
+            addListeners();
+            compras_showHome();
+        });
 }
 
 function destroyView() {
     compras_toggleSidebar(false);
     document.body.classList.remove('proveedor-sidebar-open');
     document.getElementById('js-page-content')?.classList.remove('proveedor-page');
+    if (typeof bodega_inv_listeners_bound !== 'undefined') {
+        bodega_inv_listeners_bound = false;
+    }
 }
 
 

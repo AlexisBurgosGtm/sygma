@@ -53,9 +53,6 @@ function digitador_onHeaderFiltersChange() {
     if (digitador_currentPane === 'uno') {
         digitador_initDashboard();
     }
-    if (digitador_currentPane === 'siete') {
-        tbl_rpt_sellout();
-    }
     if (typeof window.digitador_embedRefresh === 'function') {
         window.digitador_embedRefresh();
     }
@@ -1444,77 +1441,54 @@ function getView(){
         },
         vista_sellout:()=>{
             return `
-            <div class="card card-rounded shadow col-12">
-                <div class="card-body p-4">
+            <div class="proveedor-sellout-card card border-0 col-12">
+                <div class="card-body p-4 p-md-5">
+                    <div class="proveedor-sellout-card__header mb-4">
+                        <div class="proveedor-sellout-card__icon">
+                            <i class="fal fa-chart-pie"></i>
+                        </div>
+                        <div>
+                            <h4 class="negrita text-success mb-1">Sell Out</h4>
+                            <p class="text-secondary mb-0 small">
+                                Exporta el detalle de ventas por rango de fechas. Usa la sucursal del encabezado y las fechas de esta sección (no el mes/año).
+                            </p>
+                        </div>
+                    </div>
                     <div class="row align-items-end">
-                        <div class="col-12 col-md-2 col-lg-2 mb-3 mb-md-0">
-                            <h5 class="negrita text-success mb-0">SELL OUT</h5>
-                        </div>
-                        <div class="col-sm-6 col-md-3 col-lg-3">
+                        <div class="col-sm-6 col-lg-4 mb-3 mb-lg-0">
                             <div class="form-group mb-0">
-                                <label class="negrita text-secondary">Fecha Inicial</label>
-                                <input type="date" class="negrita form-control" id="txtSFechaInicial">
+                                <label class="negrita text-secondary small mb-1" for="txtSFechaInicial">Fecha inicial</label>
+                                <input type="date" class="negrita form-control proveedor-sellout-card__input" id="txtSFechaInicial">
                             </div>
                         </div>
-                        <div class="col-sm-6 col-md-3 col-lg-3">
+                        <div class="col-sm-6 col-lg-4 mb-3 mb-lg-0">
                             <div class="form-group mb-0">
-                                <label class="negrita text-secondary">Fecha Final</label>
-                                <input type="date" class="negrita form-control" id="txtSFechaFinal">
+                                <label class="negrita text-secondary small mb-1" for="txtSFechaFinal">Fecha final</label>
+                                <input type="date" class="negrita form-control proveedor-sellout-card__input" id="txtSFechaFinal">
                             </div>
                         </div>
-                        <div class="col-12 col-md-4 col-lg-4 text-md-right mb-2 mb-md-0">
-                            <button class="btn btn-success btn-md hand shadow" id="btnExportarSellOut">
-                                <i class="fal fa-share"></i> Exportar Excel
+                        <div class="col-12 col-lg-4">
+                            <button type="button" class="btn btn-success btn-lg hand shadow-sm w-100 proveedor-sellout-export-btn" id="btnExportarSellOut">
+                                <span class="proveedor-sellout-export-btn__shine" aria-hidden="true"></span>
+                                <span class="proveedor-sellout-export-btn__content">
+                                    <i class="fal fa-file-excel mr-2"></i>
+                                    <span class="proveedor-sellout-export-btn__label">Exportar Excel</span>
+                                </span>
+                                <span class="proveedor-sellout-export-btn__loader" aria-hidden="true">
+                                    <span class="proveedor-sellout-export-btn__spinner">
+                                        <span class="proveedor-sellout-export-btn__dot"></span>
+                                    </span>
+                                    <span class="proveedor-sellout-export-btn__loader-text">Generando...</span>
+                                </span>
+                                <span class="proveedor-sellout-export-btn__progress" aria-hidden="true"></span>
                             </button>
                         </div>
                     </div>
+                    <div class="proveedor-sellout-card__hint mt-3 small text-muted" id="lbSelloutExportHint">
+                        El archivo se genera en el servidor con sucursal, fecha inicial y fecha final.
+                    </div>
                 </div>
             </div>
-            <br>
-            <div class="card card-rounded shadow col-12">
-                <div class="card-body p-4">
-                        <div class="table-responsive sygma-sellout-table">
-                            <table class="table h-full table-bordered col-12" id="tblSellout">
-                                <thead class="bg-success text-white negrita">
-                                    <tr>
-                                        <td>RELOP</td>
-                                        <td>TRANSACCION</td>
-                                        <td>FECHA</td>
-                                        <td>CODIGO CLIENTE</td>
-                                        <td>CLIENTE</td>
-                                        <td>TIPO CLIENTE</td>
-                                        <td>CODIGO VENDEDOR</td>
-                                        <td>VENDEDOR</td>
-                                        <td>CATEGORIA</td>
-                                        <td>MARCA</td>
-                                        <td>CODIGO RUTA</td>
-                                        <td>GEO1-PAIS</td>
-                                        <td>GEO2-DEPARTAMENTO</td>
-                                        <td>GEO3-MUNICIPIO</td>
-                                        <td>CEO4-ALDEA-CASERIO</td>
-                                        <td>PRODUCTO</td>
-                                        <td>CODIGO DUN</td>
-                                        <td>CODIGO EAN</td>
-                                        <td>DESCRIPCION</td>
-                                        <td>VENTA EN CANTIDAD</td>
-                                        <td>FACTOR</td>
-                                        <td>UNIDADES POR CAJA</td>
-                                        <td>MEDIDA</td>
-                                        <td>VENTA EN QUETZALES</td>
-                                        <td>FACTURA SAT</td>
-                                    </tr>
-                                </thead>
-                                <tbody id="tblDataSellout"></tbody>
-                            </table>
-                        </div>
-                        
-                </div>
-            </div>
-           
-
-            
-
-            
             `
         },
     }
@@ -1590,18 +1564,8 @@ function addListeners(){
     if (txtSFechaInicial) txtSFechaInicial.value = F.getFecha();
     if (txtSFechaFinal) txtSFechaFinal.value = F.getFecha();
 
-    txtSFechaInicial?.addEventListener('change', () => {
-        tbl_rpt_sellout();
-    });
-
-    txtSFechaFinal?.addEventListener('change', () => {
-        tbl_rpt_sellout();
-    });
-
     btnMenuSellout?.addEventListener('click', () => {
-        digitador_showPanel('siete', 'btnMenuSellout', () => {
-            tbl_rpt_sellout();
-        });
+        digitador_showPanel('siete', 'btnMenuSellout');
     });
 
     btnMenuRelleno?.addEventListener('click', () => {
@@ -1613,26 +1577,7 @@ function addListeners(){
     });
 
     btnExportarSellOut?.addEventListener('click', () => {
-        const btn = document.getElementById('btnExportarSellOut');
-        const fi = F.devuelveFecha('txtSFechaInicial');
-        const ff = F.devuelveFecha('txtSFechaFinal');
-        const sucursal = digitador_getSucursal();
-
-        F.showToast('Cargando datos...');
-        btn.disabled = true;
-        btn.innerHTML = `<i class="fal fa-share fa-spin"></i>`;
-
-        RPT.data_sellout_export(sucursal, fi, ff)
-            .then((data) => {
-                F.export_json_to_xlsx(data.recordset, 'SellOut');
-                btn.disabled = false;
-                btn.innerHTML = `<i class="fal fa-share"></i> Exportar Excel`;
-            })
-            .catch(() => {
-                F.AvisoError('No se pudo exportar');
-                btn.disabled = false;
-                btn.innerHTML = `<i class="fal fa-share"></i> Exportar Excel`;
-            });
+        digitador_exportar_sellout();
     });
 
 
@@ -4163,78 +4108,57 @@ function finalizar_embarque(codembarque,idbtn){
 // SELL OUT
 //------------
 
+function digitador_sellout_set_export_busy(busy) {
+    const btn = document.getElementById('btnExportarSellOut');
+    const hint = document.getElementById('lbSelloutExportHint');
+    if (!btn) return;
+    btn.disabled = !!busy;
+    btn.classList.toggle('is-busy', !!busy);
+    btn.setAttribute('aria-busy', busy ? 'true' : 'false');
+    if (hint) {
+        hint.textContent = busy
+            ? 'Consultando datos en el servidor, no cierre esta ventana...'
+            : 'El archivo se genera en el servidor con sucursal, fecha inicial y fecha final.';
+    }
+}
 
-function tbl_rpt_sellout(){
+function digitador_exportar_sellout() {
+    const btn = document.getElementById('btnExportarSellOut');
+    if (!btn || btn.disabled) return;
 
-    let fi = F.devuelveFecha('txtSFechaInicial');
-    let ff = F.devuelveFecha('txtSFechaFinal');
+    const fi = F.devuelveFecha('txtSFechaInicial');
+    const ff = F.devuelveFecha('txtSFechaFinal');
+    const sucursal = digitador_getSucursal();
 
+    if (!fi || !ff) {
+        F.AvisoError('Seleccione fecha inicial y fecha final');
+        return;
+    }
+    if (String(fi) > String(ff)) {
+        F.AvisoError('La fecha inicial no puede ser mayor que la fecha final');
+        return;
+    }
 
-    let container = document.getElementById('tblDataSellout');
-    container.innerHTML = GlobalLoader;
+    F.showToast('Generando Sell Out...');
+    digitador_sellout_set_export_busy(true);
 
-    let contador = 0;
-    let varTotal = 0;
-
-    let sucursal = GlobalEmpnit; //document.getElementById('cmbSucursal').value;
-
-   
-    RPT.data_sellout(sucursal,fi,ff)
-    .then((data)=>{
-
-   
-        let str = '';
-
-        data.recordset.map((r)=>{
-        
-            contador +=1;
-            varTotal += Number(r.TOTALPRECIO);
-            str += `
-                                    <tr>
-                                        <td>${r.RELOP}</td>
-                                        <td>${r.TRANSACCION}</td>
-                                        <td>${F.convertDateNormal(r.FECHA)}</td>
-                                        <td>${r.CODIGO_CLIENTE}</td>
-                                        <td>${r.TIPONEGOCIO} ${F.limpiarTextoExport(r.NEGOCIO)} - ${F.limpiarTextoExport(r.CLIENTE)}</td>
-                                        <td>DETALLE</td>
-                                        <td>${r.CODIGO_VENDEDOR}</td>
-                                        <td>${r.VENDEDOR}</td>
-                                        <td>${r.CATEGORIA}</td>
-                                        <td>${r.MARCA}</td>
-                                        <td>${r.CODIGO_RUTA}</td>
-                                        <td>GUATEMALA</td>
-                                        <td>${r.GEO2_DEPARTAMENTO}</td>
-                                        <td>${r.GEO3_MUNICIPIO}</td>
-                                        <td>${r.GEO4_ALDEA_CASERIO}</td>
-                                        <td>${F.limpiarTextoExport(r.PRODUCTO)}</td>
-                                        <td>${r.CODIGO_DUN}</td>
-                                        <td>${r.CODIGO_BARRA_EAN}</td>
-                                        <td>${F.limpiarTextoExport(r.DESCRIPCION_PRODUCTO)}</td>
-                                        <td>${r.VENTA_EN_CANTIDAD}</td>
-                                        <td>${r.FACTOR}</td>
-                                        <td>${r.UNIDADES_POR_CAJA}</td>
-                                        <td>${r.MEDIDA}</td>
-                                        <td>${F.setMoneda(r.VENTA_EN_QUETZALES,'Q')}</td>
-                                        <td>${r.FACTURA_SAT_SERIE} - ${r.FACTURA_SAT_NUMERO}</td>
-                                    </tr>
-            `
+    RPT.data_sellout_export(sucursal, fi, ff)
+        .then((data) => {
+            const rows = data?.recordset || [];
+            if (!rows.length) {
+                F.AvisoError('No hay datos para el rango seleccionado');
+                return;
+            }
+            F.export_json_to_xlsx(rows, 'SellOut');
+            F.showToast('Excel generado');
         })
-        container.innerHTML = str;
-       
-        //document.getElementById('lbTotalMImporte').innerText =`Total: ${F.setMoneda(varTotal,'Q')}`;
-
-    })
-    .catch((err)=>{
-       
-
-        container.innerHTML = 'No se cargaron datos....';
-       
-        //document.getElementById('lbTotalMImporte').innerText = '';
-    })
-
-
-
-};
+        .catch(() => {
+            F.AvisoError('No se pudo exportar el Sell Out');
+        })
+        .finally(() => {
+            digitador_sellout_set_export_busy(false);
+        });
+}
 
 //------------
 // SELL OUT

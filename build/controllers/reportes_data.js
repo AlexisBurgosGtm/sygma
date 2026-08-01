@@ -315,11 +315,10 @@ let RPT = {
                
                 if(res.status.toString()=='200'){
                     let data = res.data;
-                    if(Number(data.rowsAffected[0])>0){
-                        resolve(data);             
-                    }else{
-                        reject();
-                    }            
+                    resolve({
+                        recordset: Array.isArray(data?.recordset) ? data.recordset : [],
+                        rowsAffected: data?.rowsAffected || [0]
+                    });
                 }else{
                     reject();
                 } 

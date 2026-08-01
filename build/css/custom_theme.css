@@ -1369,6 +1369,391 @@ body.app-pos2-theme #root .btn.btn-circle {
   font-size: 0.95em;
 }
 
+/* Proveedor — Sell Out export card */
+.proveedor-sellout-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px !important;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(236, 253, 245, 0.92) 55%, rgba(220, 252, 231, 0.88) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.22) !important;
+  box-shadow: 0 10px 28px rgba(16, 185, 129, 0.12);
+}
+.proveedor-sellout-card::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -12%;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.proveedor-sellout-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  position: relative;
+  z-index: 1;
+}
+.proveedor-sellout-card__icon {
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #047857;
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  font-size: 1.2rem;
+}
+.proveedor-sellout-card__input {
+  border-radius: 10px;
+  border-color: rgba(16, 185, 129, 0.28);
+  background: rgba(255, 255, 255, 0.92);
+  min-height: 2.6rem;
+}
+.proveedor-sellout-card__input:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 0.15rem rgba(16, 185, 129, 0.2);
+}
+.proveedor-sellout-card__hint {
+  position: relative;
+  z-index: 1;
+}
+.proveedor-sellout-export-btn {
+  position: relative;
+  overflow: hidden;
+  border: 0 !important;
+  border-radius: 12px !important;
+  min-height: 2.75rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  background: linear-gradient(135deg, #059669 0%, #10b981 55%, #34d399 100%) !important;
+  box-shadow: 0 8px 18px rgba(5, 150, 105, 0.28);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+.proveedor-sellout-export-btn__content {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.proveedor-sellout-export-btn__shine {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    110deg,
+    transparent 0%,
+    transparent 40%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 60%,
+    transparent 100%
+  );
+  transform: translateX(-120%);
+  animation: proveedor-sellout-shine 2.8s ease-in-out infinite;
+  pointer-events: none;
+}
+.proveedor-sellout-export-btn__loader {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  background: linear-gradient(135deg, rgba(4, 120, 87, 0.96) 0%, rgba(5, 150, 105, 0.96) 55%, rgba(16, 185, 129, 0.96) 100%);
+  color: #fff;
+  pointer-events: none;
+}
+.proveedor-sellout-export-btn__spinner {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+}
+.proveedor-sellout-export-btn__spinner::before,
+.proveedor-sellout-export-btn__spinner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+}
+.proveedor-sellout-export-btn__spinner::before {
+  border-top-color: #ffffff;
+  border-right-color: rgba(255, 255, 255, 0.25);
+  animation: sygma-loader-spin 0.75s cubic-bezier(0.45, 0.05, 0.35, 0.95) infinite;
+}
+.proveedor-sellout-export-btn__spinner::after {
+  inset: 4px;
+  border-bottom-color: #bbf7d0;
+  border-left-color: rgba(187, 247, 208, 0.25);
+  animation: sygma-loader-spin 1.05s cubic-bezier(0.45, 0.05, 0.35, 0.95) infinite reverse;
+}
+.proveedor-sellout-export-btn__dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.55);
+  animation: sygma-loader-pulse 1.3s ease-in-out infinite;
+}
+.proveedor-sellout-export-btn__loader-text {
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  animation: sygma-loader-fade 1.5s ease-in-out infinite;
+}
+.proveedor-sellout-export-btn__progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  height: 3px;
+  display: none;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.18);
+}
+.proveedor-sellout-export-btn__progress::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, #ffffff, transparent);
+  animation: proveedor-sellout-progress 1.1s ease-in-out infinite;
+}
+.proveedor-sellout-export-btn:hover:not(:disabled),
+.proveedor-sellout-export-btn:focus:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(5, 150, 105, 0.36);
+  filter: brightness(1.03);
+}
+.proveedor-sellout-export-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+.proveedor-sellout-export-btn:disabled,
+.proveedor-sellout-export-btn.is-busy {
+  cursor: not-allowed;
+  opacity: 1;
+  transform: none;
+  filter: none;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.22);
+}
+.proveedor-sellout-export-btn.is-busy .proveedor-sellout-export-btn__shine {
+  animation: none;
+  opacity: 0;
+}
+.proveedor-sellout-export-btn.is-busy .proveedor-sellout-export-btn__content {
+  opacity: 0;
+  transform: scale(0.96);
+}
+.proveedor-sellout-export-btn.is-busy .proveedor-sellout-export-btn__loader {
+  display: inline-flex;
+}
+.proveedor-sellout-export-btn.is-busy .proveedor-sellout-export-btn__progress {
+  display: block;
+}
+@keyframes proveedor-sellout-shine {
+  0%, 35% { transform: translateX(-120%); }
+  60%, 100% { transform: translateX(120%); }
+}
+@keyframes proveedor-sellout-progress {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(280%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .proveedor-sellout-export-btn,
+  .proveedor-sellout-export-btn__shine,
+  .proveedor-sellout-export-btn__spinner::before,
+  .proveedor-sellout-export-btn__spinner::after,
+  .proveedor-sellout-export-btn__dot,
+  .proveedor-sellout-export-btn__loader-text,
+  .proveedor-sellout-export-btn__progress::before {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Inventario físico — bodega + menú general */
+.bodega-inv-card {
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  border-radius: 14px !important;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+.bodega-inv-header__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.85rem 1rem;
+}
+.bodega-inv-header__title-block {
+  min-width: 0;
+  flex: 1 1 14rem;
+}
+.bodega-inv-header__actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.bodega-inv-sucursal {
+  max-width: 18rem;
+}
+.bodega-inv-export-btn {
+  border-radius: 999px !important;
+  font-weight: 700;
+  padding-left: 0.9rem;
+  padding-right: 0.9rem;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.22);
+}
+.bodega-inv-card .bodega-inv-table {
+  font-size: 0.78rem;
+}
+.bodega-inv-card .bodega-inv-table thead td {
+  font-size: 0.72rem;
+  white-space: nowrap;
+  padding: 0.35rem 0.4rem;
+}
+.bodega-inv-card .bodega-inv-table tbody td {
+  padding: 0.28rem 0.4rem;
+  vertical-align: middle;
+}
+.bodega-inv-table-wrap {
+  max-height: calc(100vh - 16rem);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 10px;
+  background: #fff;
+}
+.bodega-inv-filters--bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.65rem;
+  padding: 0.7rem 0.75rem;
+  border-radius: 12px;
+  background: rgba(248, 250, 252, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+.bodega-inv-filters__item {
+  flex: 0 1 9.5rem;
+  min-width: 7.5rem;
+}
+.bodega-inv-filters__item--grow {
+  flex: 1 1 14rem;
+  min-width: 12rem;
+}
+.bodega-inv-filters label,
+.bodega-inv-filters__label {
+  display: block;
+  font-size: 0.68rem;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem !important;
+  color: #64748b !important;
+}
+.bodega-inv-filters__control {
+  font-size: 0.75rem !important;
+  min-height: 2rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  border-radius: 9px !important;
+  border-color: rgba(148, 163, 184, 0.55) !important;
+  background: #fff !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.bodega-inv-filters__control:focus {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 0.15rem rgba(59, 130, 246, 0.18) !important;
+}
+.bodega-inv-search {
+  position: relative;
+}
+.bodega-inv-search__icon {
+  position: absolute;
+  left: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 0.78rem;
+  pointer-events: none;
+}
+.bodega-inv-search__input {
+  padding-left: 1.85rem !important;
+}
+.bodega-inv-existencia-toggle {
+  border-radius: 999px !important;
+  font-weight: 700;
+  min-width: 9.5rem;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.15s ease;
+}
+.bodega-inv-existencia-toggle.is-todos {
+  background: #e2e8f0 !important;
+  color: #334155 !important;
+  border: 1px solid #cbd5e1 !important;
+}
+.bodega-inv-existencia-toggle.is-sin-existencia {
+  background: #fff1f2 !important;
+  color: #be123c !important;
+  border: 1px solid #fda4af !important;
+}
+.bodega-inv-existencia-toggle:hover,
+.bodega-inv-export-btn:hover {
+  transform: translateY(-1px);
+}
+.bodega-inv-total {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.65rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.04);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+}
+.bodega-inv-total__label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+.bodega-inv-total__value {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #b91c1c;
+}
+@media (max-width: 767.98px) {
+  .bodega-inv-header__actions {
+    width: 100%;
+  }
+  .bodega-inv-header__actions .btn {
+    flex: 1 1 auto;
+  }
+  .bodega-inv-sucursal {
+    max-width: none;
+  }
+}
+
 #tblFFacturas tr.sygma-factura-descuadre td {
   border-top: 2px solid #dc3545 !important;
   border-bottom: 2px solid #dc3545 !important;
