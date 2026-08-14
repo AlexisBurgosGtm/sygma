@@ -53,6 +53,12 @@ function digitador_onHeaderFiltersChange() {
     if (digitador_currentPane === 'uno') {
         digitador_initDashboard();
     }
+    if (digitador_currentPane === 'cuatro') {
+        cargar_grid_embarques();
+    }
+    if (digitador_currentPane === 'tres') {
+        tbl_relleno_inventario('tblDataRelleno');
+    }
     if (typeof window.digitador_embedRefresh === 'function') {
         window.digitador_embedRefresh();
     }
@@ -1526,7 +1532,6 @@ function addListeners(){
 
     digitador_setupSucursalHeader();
 
-    digitador_initDashboard();
     digitador_setActiveCard('btnMenuDashboard');
     cmbSucursalHeader?.addEventListener('change', digitador_onHeaderFiltersChange);
     cmbMesHeader?.addEventListener('change', digitador_onHeaderFiltersChange);
@@ -1540,10 +1545,6 @@ function addListeners(){
     Object.keys(DIGITADOR_EMBED_SCRIPTS).forEach(digitador_bindEmbedMenu);
 
     F.slideAnimationTabs();
-
-    if (document.getElementById('tblDataRelleno')) {
-        tbl_relleno_inventario('tblDataRelleno');
-    }
 
     try { listeners_pedidos_pendientes(); } catch (e) {
         console.error('[inicio_digitador] listeners_pedidos_pendientes:', e);
@@ -1569,11 +1570,15 @@ function addListeners(){
     });
 
     btnMenuRelleno?.addEventListener('click', () => {
-        digitador_showPanel('tres', 'btnMenuRelleno');
+        digitador_showPanel('tres', 'btnMenuRelleno', () => {
+            tbl_relleno_inventario('tblDataRelleno');
+        });
     });
 
     btnMenuEmbarques?.addEventListener('click', () => {
-        digitador_showPanel('cuatro', 'btnMenuEmbarques');
+        digitador_showPanel('cuatro', 'btnMenuEmbarques', () => {
+            cargar_grid_embarques();
+        });
     });
 
     btnExportarSellOut?.addEventListener('click', () => {
@@ -1852,6 +1857,7 @@ function destroyView(){
     digitador_toggleSidebar(false);
     document.body.classList.remove('proveedor-sidebar-open');
     document.getElementById('js-page-content')?.classList.remove('proveedor-page');
+    digitador_repartidores_embarque_ready = false;
 }
 
 (function () {
@@ -1873,9 +1879,6 @@ var pendientesFiltroFechaActivo = false;
 function listeners_pedidos_pendientes(){
 
 
-    tbl_modal_embarques();
-
-    
     selected_ped_coddoc = '';
     selected_ped_correlativo = '';
     selected_ped_codembarque = '';
@@ -3265,28 +3268,33 @@ function tbl_relleno_inventario(idContainer){
 // EMBARQUES
 //------------------------
 
+var digitador_repartidores_embarque_ready = false;
+
+function digitador_cargar_repartidores_embarque() {
+    if (digitador_repartidores_embarque_ready) return Promise.resolve();
+    const cmb = document.getElementById('cmbEmbarqueEmpleado');
+    if (!cmb) return Promise.resolve();
+    return GF.get_data_empleados_tipo(4)
+        .then((data) => {
+            let str = '';
+            data.recordset.map((r) => {
+                str += `<option value="${r.CODEMPLEADO}">${r.NOMEMPLEADO}</option>`;
+            });
+            cmb.innerHTML = str;
+            digitador_repartidores_embarque_ready = true;
+        })
+        .catch(() => {
+            F.AvisoError('No se cargaron los Repartidores');
+            cmb.innerHTML = '<option value="1">SIN REPARTIDOR</option>';
+        });
+}
+
 function listeners_embarques(){
     const cmbMes = document.getElementById('cmbMes');
     const cmbAnio = document.getElementById('cmbAnio');
     const txtEmbarqueFecha = document.getElementById('txtEmbarqueFecha');
     const btnEmbarquesNuevo = document.getElementById('btnEmbarquesNuevo');
     if (!cmbMes || !cmbAnio || !txtEmbarqueFecha || !btnEmbarquesNuevo) return;
-
-    //carga la lista de empleados
-    GF.get_data_empleados_tipo(4)
-    .then((data)=>{
-        let str = '';
-        data.recordset.map((r)=>{
-            str += `<option value="${r.CODEMPLEADO}">${r.NOMEMPLEADO}</option>`
-        });
-        document.getElementById('cmbEmbarqueEmpleado').innerHTML = str;
-    })
-    .catch(()=>{
-        F.AvisoError('No se cargaron los Repartidores');
-        document.getElementById('cmbEmbarqueEmpleado').innerHTML ='<option value="1">SIN REPARTIDOR</option>';
-    })
-
-
 
     //listeners
     cmbMes.innerHTML = F.ComboMeses();
@@ -3296,14 +3304,11 @@ function listeners_embarques(){
     txtEmbarqueFecha.value = F.getFecha();
 
     btnEmbarquesNuevo.addEventListener('click',()=>{
-            
+        digitador_cargar_repartidores_embarque();
         clean_data_embarque();
         $("#modal_embarques_nuevo").modal('show');
 
     })
-
-
-    cargar_grid_embarques();
 
 
 
@@ -4019,17 +4024,19 @@ function clean_data_embarque(){
 }
 
 function get_data_embarque(fecha,codembarque,descripcion,ruteo,codempleado){
-    document.getElementById('txtEmbarqueCodigo').disabled = true;
-    document.getElementById('txtEmbarqueCodigo').value = codembarque;
-    document.getElementById('txtEmbarqueDescripcion').value =descripcion;
-    document.getElementById('txtEmbarqueRuteo').value =ruteo;
-    document.getElementById('cmbEmbarqueEmpleado').value = codempleado;
-    document.getElementById('txtEmbarqueFecha').value = fecha.replace("T00:00:00.000Z","");
-    const title = document.getElementById('lbEmbFormTitle');
-    const ref = document.getElementById('lbEmbFormRef');
-    if (title) title.textContent = 'Editar embarque';
-    if (ref) ref.textContent = `Embarque: ${codembarque}`;
-    $("#modal_embarques_nuevo").modal('show');
+    digitador_cargar_repartidores_embarque().finally(() => {
+        document.getElementById('txtEmbarqueCodigo').disabled = true;
+        document.getElementById('txtEmbarqueCodigo').value = codembarque;
+        document.getElementById('txtEmbarqueDescripcion').value =descripcion;
+        document.getElementById('txtEmbarqueRuteo').value =ruteo;
+        document.getElementById('cmbEmbarqueEmpleado').value = codempleado;
+        document.getElementById('txtEmbarqueFecha').value = fecha.replace("T00:00:00.000Z","");
+        const title = document.getElementById('lbEmbFormTitle');
+        const ref = document.getElementById('lbEmbFormRef');
+        if (title) title.textContent = 'Editar embarque';
+        if (ref) ref.textContent = `Embarque: ${codembarque}`;
+        $("#modal_embarques_nuevo").modal('show');
+    });
 };
 
 function eliminar_embarque(codembarque,idbtn){

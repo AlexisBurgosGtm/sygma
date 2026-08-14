@@ -26,61 +26,50 @@ function get_conf_token(token){
 
 const sql = require('mssql');
 
+const sqlPools = new Map();
+
+function poolKey(config) {
+	return `${config.server}|${config.database}|${config.user}`;
+}
+
+function getSharedPool(config) {
+	const key = poolKey(config);
+	const existing = sqlPools.get(key);
+	if (existing) return existing;
+
+	const pool = new sql.ConnectionPool(config);
+	const ready = pool.connect()
+		.then(() => pool)
+		.catch((err) => {
+			sqlPools.delete(key);
+			try { pool.close(); } catch (e) { /* ignore */ }
+			throw err;
+		});
+	pool.on('error', (err) => {
+		console.log('error sql pool = ' + err);
+		sqlPools.delete(key);
+		try { pool.close(); } catch (e) { /* ignore */ }
+	});
+	sqlPools.set(key, ready);
+	return ready;
+}
+
+function sendQuery(res, sqlqry, config) {
+	getSharedPool(config)
+		.then((pool) => pool.request().query(sqlqry))
+		.then((result) => res.send(result))
+		.catch((err) => {
+			console.log(err && err.message ? err.message : err);
+			res.send('error');
+		});
+}
+
 let execute = {
 	QueryLogin : (res,sqlqry)=>{	
-		
-		
-		try {
-		  const pool1 = new sql.ConnectionPool(configHost, err => {
-			new sql.Request(pool1)
-			.query(sqlqry, (err, result) => {
-				if(err){
-					console.log(err.message);
-					res.send('error')
-				}else{
-					res.send(result);
-				}					
-			})
-			sql.close();  
-		  })
-		  pool1.on('error', err => {
-			  console.log('error sql = ' + err);
-			  sql.close();
-			  res.send('error');
-		  })
-		} catch (error) {
-			console.log(error);
-		  res.send('error')   
-		  sql.close();
-		}
+		sendQuery(res, sqlqry, get_conf_token());
 	},
 	QueryToken : (res,sqlqry,token)=>{	
-		
-		let config = get_conf_token(token);
-
-		try {
-		  const pool1 = new sql.ConnectionPool(config, err => {
-			new sql.Request(pool1)
-			.query(sqlqry, (err, result) => {
-				if(err){
-					console.log(err.message);
-					res.send('error')
-				}else{
-					res.send(result);
-				}					
-			})
-			sql.close();  
-		  })
-		  pool1.on('error', err => {
-			  console.log('error sql = ' + err);
-			  sql.close();
-			  res.send('error');
-		  })
-		} catch (error) {
-			console.log(error);
-		  res.send('error')   
-		  sql.close();
-		}
+		sendQuery(res, sqlqry, get_conf_token(token));
 	},
 	/**
 	 * Ejecuta trabajo dentro de una transacción mssql con request parametrizable.
@@ -88,10 +77,8 @@ let execute = {
 	 */
 	TransactionToken : (token, workFn) => {
 		return new Promise(async (resolve, reject) => {
-			const config = get_conf_token(token);
-			const pool = new sql.ConnectionPool(config);
 			try {
-				await pool.connect();
+				const pool = await getSharedPool(get_conf_token(token));
 				const transaction = new sql.Transaction(pool);
 				await transaction.begin();
 				try {
@@ -104,8 +91,6 @@ let execute = {
 				}
 			} catch (err) {
 				reject(err);
-			} finally {
-				try { await pool.close(); } catch (e) { /* ignore */ }
 			}
 		});
 	},
@@ -125,32 +110,15 @@ let execute = {
 				`
 
 			
-				try {
-				const pool1 = new sql.ConnectionPool(config, err => {
-					new sql.Request(pool1)
-					.query(sqlqry, (err, result) => {
-						if(err){
-							console.log(err.message);
-							reject('error');
-						}else{
-							//console.log('pedido')
-							//console.log(result.recordset[0].JSONDOCPRODUCTOS);
-
-							resolve(result.recordset[0].JSONDOCPRODUCTOS);
-						}					
-					})
-					sql.close();  
+				getSharedPool(config)
+				.then((pool) => pool.request().query(sqlqry))
+				.then((result) => {
+					resolve(result.recordset[0].JSONDOCPRODUCTOS);
 				})
-				pool1.on('error', err => {
-					console.log('error sql = ' + err);
-					sql.close();
+				.catch((err) => {
+					console.log(err && err.message ? err.message : err);
 					reject('error');
-				})
-				} catch (error) {
-					console.log(error);
-					reject('error');   
-				sql.close();
-				}
+				});
 
 		})
 
@@ -160,29 +128,11 @@ let execute = {
 		
 		let config = get_conf_token(token);
 
-		try {
-		  const pool1 = new sql.ConnectionPool(config, err => {
-			new sql.Request(pool1)
-			.query(sqlqry, (err, result) => {
-				if(err){
-					console.log(err.message);
-					
-				}else{
-					//res.send(result);
-				}					
-			})
-			sql.close();  
-		  })
-		  pool1.on('error', err => {
-			  console.log('error sql = ' + err);
-			  sql.close();
-			  res.send('error');
-		  })
-		} catch (error) {
-			console.log(error);
-		  res.send('error')   
-		  sql.close();
-		}
+		getSharedPool(config)
+			.then((pool) => pool.request().query(sqlqry))
+			.catch((err) => {
+				console.log(err && err.message ? err.message : err);
+			});
 	},
 	get_data_qry : (sqlqry,token)=>{	
 				
@@ -191,29 +141,13 @@ let execute = {
 			let config = get_conf_token(token);
 
 			
-			try {
-				const pool1 = new sql.ConnectionPool(config, err => {
-				  new sql.Request(pool1)
-				  .query(sqlqry, (err, result) => {
-					  if(err){
-						  	console.log(err.message);
-						  	reject();
-					  }else{
-							resolve(result);
-					  }					
-				  })
-				  sql.close();  
-				})
-				pool1.on('error', err => {
-					console.log('error sql = ' + err);
+			getSharedPool(config)
+				.then((pool) => pool.request().query(sqlqry))
+				.then((result) => resolve(result))
+				.catch((err) => {
+					console.log(err && err.message ? err.message : err);
 					reject();
-					sql.close();
-				})
-			  } catch (error) {
-				  	console.log(error);
-					reject();   
-					sql.close();
-			  }
+				});
 
 		})
 

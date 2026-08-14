@@ -10,6 +10,7 @@ var mercaderista_act_fotos = {
     pop_antes: null, pop_despues: null,
 };
 var mercaderista_barcode_stream = null;
+var mercaderista_alcance = 'PROPIOS';
 
 function mercaderista_setActiveCard(cardId) {
     document.querySelectorAll('.proveedor-menu-card').forEach((el) => {
@@ -196,9 +197,37 @@ function getView() {
                     <div class="row align-items-end mb-2">
                         <div class="col-12">
                             <label class="negrita text-secondary small mb-1" for="txtMercaderistaBuscar">Buscar</label>
-                            <input type="search" class="form-control" id="txtMercaderistaBuscar"
-                                placeholder="Buscar por código, cliente, negocio o dirección..."
-                                oninput="mercaderista_filtrar_clientes()">
+                            <div class="d-flex align-items-stretch">
+                                <span id="btnMercaderistaAlcance" class="merc-alcance-badge merc-alcance-badge--propios hand"
+                                    title="Cambiar entre clientes propios y ajenos"
+                                    onclick="mercaderista_toggle_alcance()">PROPIOS</span>
+                                <input type="search" class="form-control merc-alcance-buscar" id="txtMercaderistaBuscar"
+                                    placeholder="Buscar por código, cliente, negocio o dirección..."
+                                    oninput="mercaderista_filtrar_clientes()"
+                                    onkeydown="mercaderista_on_buscar_keydown(event)">
+                            </div>
+                            <style>
+                                .merc-alcance-badge {
+                                    display: inline-flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    min-width: 92px;
+                                    padding: 0 12px;
+                                    font-size: 0.8rem;
+                                    font-weight: 700;
+                                    letter-spacing: 0.03em;
+                                    border-radius: 4px 0 0 4px;
+                                    white-space: nowrap;
+                                    user-select: none;
+                                    flex-shrink: 0;
+                                }
+                                .merc-alcance-badge--propios { background: #28a745; color: #fff; }
+                                .merc-alcance-badge--ajenos { background: #dc3545; color: #fff; }
+                                .merc-alcance-buscar {
+                                    border-top-left-radius: 0;
+                                    border-bottom-left-radius: 0;
+                                }
+                            </style>
                         </div>
                     </div>
 
@@ -1012,6 +1041,7 @@ function mercaderista_on_detalle_extra_click(e) {
 }
 
 function mercaderista_filtrar_clientes() {
+    if (mercaderista_alcance === 'AJENOS') return;
     const q = (document.getElementById('txtMercaderistaBuscar')?.value || '').toLowerCase().trim();
     document.querySelectorAll('#tblDataMercaderistaClientes tr').forEach((tr) => {
         tr.style.display = !q || tr.innerText.toLowerCase().includes(q) ? '' : 'none';
@@ -1019,6 +1049,123 @@ function mercaderista_filtrar_clientes() {
     document.querySelectorAll('#tblMercaderistaClientesCards .merc-cliente-card').forEach((card) => {
         card.style.display = !q || card.innerText.toLowerCase().includes(q) ? '' : 'none';
     });
+}
+
+function mercaderista_sync_alcance_ui() {
+    const badge = document.getElementById('btnMercaderistaAlcance');
+    const txt = document.getElementById('txtMercaderistaBuscar');
+    const esPropios = mercaderista_alcance !== 'AJENOS';
+    if (badge) {
+        badge.textContent = esPropios ? 'PROPIOS' : 'AJENOS';
+        badge.classList.toggle('merc-alcance-badge--propios', esPropios);
+        badge.classList.toggle('merc-alcance-badge--ajenos', !esPropios);
+    }
+    if (txt) {
+        txt.placeholder = esPropios
+            ? 'Buscar por código, cliente, negocio o dirección...'
+            : 'Escriba y presione Enter para buscar en toda la sucursal...';
+    }
+}
+
+function mercaderista_toggle_alcance() {
+    mercaderista_alcance = mercaderista_alcance === 'PROPIOS' ? 'AJENOS' : 'PROPIOS';
+    mercaderista_sync_alcance_ui();
+    const txt = document.getElementById('txtMercaderistaBuscar');
+    if (txt) txt.value = '';
+    if (mercaderista_alcance === 'PROPIOS') {
+        mercaderista_cargar_clientes();
+        return;
+    }
+    mercaderista_pintar_clientes([], 'Busque un cliente y presione Enter');
+}
+
+function mercaderista_on_buscar_keydown(e) {
+    if (e.key !== 'Enter' && e.keyCode !== 13) return;
+    e.preventDefault();
+    if (mercaderista_alcance === 'AJENOS') mercaderista_buscar_ajenos();
+}
+
+function mercaderista_pintar_clientes(rows, emptyMsg) {
+    const container = document.getElementById('tblDataMercaderistaClientes');
+    const cards = document.getElementById('tblMercaderistaClientesCards');
+    const lbTotal = document.getElementById('lbMercaderistaTotalClientes');
+    const estado = document.getElementById('cmbMercaderistaEstadoVisita')?.value || 'PENDIENTE';
+    const vacio = emptyMsg || 'No hay clientes para este día';
+    const list = rows || [];
+    let str = '';
+    let strCards = '';
+
+    list.forEach((r) => {
+        const acciones = mercaderista_acciones(r);
+        const horaInicio = (estado === 'ENCURSO' && r.HORA_INICIO)
+            ? `<div class="small text-info negrita mb-1"><i class="fal fa-clock mr-1"></i>Inicio ${r.HORA_INICIO}</div>`
+            : '';
+        const clienteHtml = mercaderista_cliente_celda_html(r);
+        const codCard = `<div class="small text-muted mb-1">Cód. ${r.CODCLIENTE || ''}</div>`;
+        str += `
+                <tr>
+                    <td>${r.TIPONEGOCIO || ''}</td>
+                    <td>${r.NEGOCIO || ''}</td>
+                    <td>${clienteHtml}</td>
+                    <td>${r.DIRECCION || ''}</td>
+                    <td>${r.DESMUN || ''}</td>
+                    <td class="text-center">${acciones}</td>
+                </tr>`;
+        strCards += `
+                <div class="card merc-cliente-card shadow-sm mb-2 border">
+                    <div class="card-body p-2">
+                        <div class="negrita text-base">${r.NOMBRE || ''}</div>
+                        ${codCard}
+                        <div class="small text-muted">${r.TIPONEGOCIO || ''} · ${r.NEGOCIO || ''}</div>
+                        <div class="small">${r.DIRECCION || ''}</div>
+                        <div class="small text-muted mb-2">${r.DESMUN || ''}</div>
+                        ${horaInicio}
+                        ${acciones}
+                    </div>
+                </div>`;
+    });
+
+    if (container) {
+        container.innerHTML = str || `<tr><td colspan="6" class="text-center text-muted py-3">${vacio}</td></tr>`;
+    }
+    if (cards) {
+        cards.innerHTML = strCards || `<div class="text-center text-muted py-3">${vacio}</div>`;
+    }
+    if (lbTotal) lbTotal.innerText = String(list.length);
+}
+
+function mercaderista_buscar_ajenos() {
+    const filtro = (document.getElementById('txtMercaderistaBuscar')?.value || '').trim();
+    if (!filtro) {
+        F.AvisoError('Escriba un código, nombre, negocio o dirección y presione Enter');
+        return;
+    }
+
+    const container = document.getElementById('tblDataMercaderistaClientes');
+    const cards = document.getElementById('tblMercaderistaClientesCards');
+    const { fecha } = mercaderista_fecha_partes();
+    if (container) container.innerHTML = `<tr><td colspan="6" class="text-center py-3">${GlobalLoader}</td></tr>`;
+    if (cards) cards.innerHTML = GlobalLoader;
+
+    axios.post('/clientes/buscar_cliente_mercaderista', {
+        token: TOKEN,
+        sucursal: GlobalEmpnit,
+        codemp: GlobalCodUsuario,
+        fecha,
+        alcance: 'AJENOS',
+        filtro,
+    })
+        .then((response) => {
+            if (response.data === 'error') {
+                mercaderista_pintar_clientes([], 'Error al buscar');
+                return;
+            }
+            const rows = response.data.recordset || [];
+            mercaderista_pintar_clientes(rows, 'No se encontraron clientes');
+        })
+        .catch(() => {
+            mercaderista_pintar_clientes([], 'No se encontraron clientes');
+        });
 }
 
 function mercaderista_detener_barcode() {
@@ -1820,10 +1967,14 @@ function mercaderista_cargar_clientes() {
     const dia = document.getElementById('cmbMercaderistaDia')?.value || '';
     const estado = document.getElementById('cmbMercaderistaEstadoVisita')?.value || 'PENDIENTE';
     const { fecha } = mercaderista_fecha_partes();
-    const lbTotal = document.getElementById('lbMercaderistaTotalClientes');
     const lbDia = document.getElementById('lbMercaderistaDiaLabel');
 
     if (lbDia) lbDia.innerText = `${dia || '--'} · ${estado}`;
+
+    if (mercaderista_alcance === 'AJENOS' && String(estado).toUpperCase() === 'PENDIENTE') {
+        mercaderista_pintar_clientes([], 'Busque un cliente y presione Enter');
+        return;
+    }
 
     if (container) container.innerHTML = `<tr><td colspan="6" class="text-center py-3">${GlobalLoader}</td></tr>`;
     if (cards) cards.innerHTML = GlobalLoader;
@@ -1839,60 +1990,14 @@ function mercaderista_cargar_clientes() {
     })
         .then((response) => {
             if (response.data === 'error') {
-                if (container) container.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">Error al cargar</td></tr>';
-                if (cards) cards.innerHTML = '<div class="text-center text-muted py-3">Error al cargar</div>';
-                if (lbTotal) lbTotal.innerText = '0';
+                mercaderista_pintar_clientes([], 'Error al cargar');
                 return;
             }
-
-            const rows = response.data.recordset || [];
-            let str = '';
-            let strCards = '';
-
-            rows.forEach((r) => {
-                const acciones = mercaderista_acciones(r);
-                const horaInicio = (estado === 'ENCURSO' && r.HORA_INICIO)
-                    ? `<div class="small text-info negrita mb-1"><i class="fal fa-clock mr-1"></i>Inicio ${r.HORA_INICIO}</div>`
-                    : '';
-                const clienteHtml = mercaderista_cliente_celda_html(r);
-                const codCard = `<div class="small text-muted mb-1">Cód. ${r.CODCLIENTE || ''}</div>`;
-                str += `
-                <tr>
-                    <td>${r.TIPONEGOCIO || ''}</td>
-                    <td>${r.NEGOCIO || ''}</td>
-                    <td>${clienteHtml}</td>
-                    <td>${r.DIRECCION || ''}</td>
-                    <td>${r.DESMUN || ''}</td>
-                    <td class="text-center">${acciones}</td>
-                </tr>`;
-
-                strCards += `
-                <div class="card merc-cliente-card shadow-sm mb-2 border">
-                    <div class="card-body p-2">
-                        <div class="negrita text-base">${r.NOMBRE || ''}</div>
-                        ${codCard}
-                        <div class="small text-muted">${r.TIPONEGOCIO || ''} · ${r.NEGOCIO || ''}</div>
-                        <div class="small">${r.DIRECCION || ''}</div>
-                        <div class="small text-muted mb-2">${r.DESMUN || ''}</div>
-                        ${horaInicio}
-                        ${acciones}
-                    </div>
-                </div>`;
-            });
-
-            if (container) {
-                container.innerHTML = str || '<tr><td colspan="6" class="text-center text-muted py-3">No hay clientes para este día</td></tr>';
-            }
-            if (cards) {
-                cards.innerHTML = strCards || '<div class="text-center text-muted py-3">No hay clientes para este día</div>';
-            }
-            if (lbTotal) lbTotal.innerText = String(rows.length);
+            mercaderista_pintar_clientes(response.data.recordset || [], 'No hay clientes para este día');
             mercaderista_filtrar_clientes();
         })
         .catch(() => {
-            if (container) container.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No se cargaron datos</td></tr>';
-            if (cards) cards.innerHTML = '<div class="text-center text-muted py-3">No se cargaron datos</div>';
-            if (lbTotal) lbTotal.innerText = '0';
+            mercaderista_pintar_clientes([], 'No se cargaron datos');
         });
 }
 
@@ -1940,18 +2045,15 @@ function addListeners() {
 
     mercaderista_toggle_qr_btn(true);
     mercaderista_setActiveCard('btnMenuMercHome');
+    mercaderista_alcance = 'PROPIOS';
+    mercaderista_sync_alcance_ui();
 }
 
 function initView() {
     document.getElementById('js-page-content')?.classList.add('proveedor-page');
     getView();
     addListeners();
-
-    const cargarRuta = (typeof cargar_ruta_mercaderista_sesion === 'function')
-        ? cargar_ruta_mercaderista_sesion()
-        : Promise.resolve(0);
-
-    cargarRuta.finally(() => mercaderista_cargar_clientes());
+    mercaderista_cargar_clientes();
 }
 
 function destroyView() {

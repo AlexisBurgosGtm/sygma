@@ -573,9 +573,13 @@ function addListeners(){
     anio.value = f.getFullYear();
 
     let cmbSucursal = document.getElementById('cmbSucursal');
+    cmbSucursal.innerHTML = '<option value="%">TODAS LAS SEDES</option>';
+    cmbSucursal.value = '%';
+    get_grid();
 
     GF.get_data_empresas()
     .then((data)=>{
+            const prev = cmbSucursal.value || '%';
             let str = '<option value="%">TODAS LAS SEDES</option>';
             data.recordset.map((r)=>{
                 str += `
@@ -583,14 +587,11 @@ function addListeners(){
                 `
             })
             cmbSucursal.innerHTML = str;
-
-              
-
-            get_grid();
-           
+            cmbSucursal.value = prev;
     })
     .catch(()=>{
-        cmbSucursal.innerHTML = "<option value=''>NO SE CARGARON LAS SEDES</option>"
+        cmbSucursal.innerHTML = '<option value="%">TODAS LAS SEDES</option>';
+        cmbSucursal.value = '%';
     })
 
 

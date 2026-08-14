@@ -2,6 +2,7 @@ var despacho_currentPane = 'uno';
 var despacho_backTarget = 'uno';
 var despacho_mapInstance = null;
 var despacho_facturas_docs = [];
+var despacho_devolucion_catalogos_promise = null;
 
 function despacho_showPanel(paneId, opts) {
     opts = opts || {};
@@ -729,76 +730,66 @@ function destroyView() {
     } catch (e) { /* sin modal activo */ }
 }
 
+function despacho_ensure_devolucion_catalogos() {
+    if (despacho_devolucion_catalogos_promise) return despacho_devolucion_catalogos_promise;
+
+    despacho_devolucion_catalogos_promise = Promise.all([
+        GF.get_data_tipodoc_coddoc_sucursal(GlobalEmpnit, 'DEV')
+            .then((data) => {
+                let strCoddoc = '';
+                data.recordset.map((r) => {
+                    strCoddoc += `<option value="${r.CODDOC}">${r.CODDOC}</option>`;
+                });
+                document.getElementById('cmbCoddoc').innerHTML = strCoddoc;
+                document.getElementById('cmbCoddoc').value = Selected_coddoc_env;
+                return GF.get_data_coddoc_correlativo_sucursal(GlobalEmpnit, document.getElementById('cmbCoddoc').value)
+                    .then((correlativo) => { document.getElementById('txtCorrelativo').value = correlativo; })
+                    .catch((correlativo) => { document.getElementById('txtCorrelativo').value = correlativo; });
+            })
+            .catch(() => {
+                document.getElementById('cmbCoddoc').innerHTML = `<option value=''></option>`;
+                document.getElementById('txtCorrelativo').value = '0';
+            }),
+        GF.get_data_cajas_sucursal(GlobalEmpnit)
+            .then((data) => {
+                let str = '';
+                data.recordset.map((r) => {
+                    str += `<option value="${r.CODCAJA}">${r.DESCAJA}</option>`;
+                });
+                document.getElementById('cmbCaja').innerHTML = str;
+            })
+            .catch(() => {
+                F.AvisoError('No se cargaron las cajas');
+                document.getElementById('cmbCaja').innerHTML = '<option value="1">SIN CAJA</option>';
+            }),
+        GF.get_data_empleados_tipo_emp(3, GlobalEmpnit)
+            .then((data) => {
+                let str = '';
+                data.recordset.map((r) => {
+                    str += `<option value="${r.CODEMPLEADO}">${r.NOMEMPLEADO}</option>`;
+                });
+                document.getElementById('cmbEmpleados').innerHTML = str;
+            })
+            .catch(() => {
+                F.AvisoError('No se cargaron los vendedores');
+                document.getElementById('cmbEmpleados').innerHTML = '<option value="1">SIN VENDEDOR</option>';
+            })
+    ]);
+
+    return despacho_devolucion_catalogos_promise;
+}
+
 function listeners_devolucion(){
 
-
-
-    GF.get_data_tipodoc_coddoc_sucursal(GlobalEmpnit,'DEV')
-    .then((data)=>{
-
-        let strCoddoc = ''
-        data.recordset.map((r)=>{
-            strCoddoc += `<option value="${r.CODDOC}">${r.CODDOC}</option>`
-        })        
-        document.getElementById('cmbCoddoc').innerHTML = strCoddoc;
-        document.getElementById('cmbCoddoc').value = Selected_coddoc_env;
-
-        GF.get_data_coddoc_correlativo_sucursal(GlobalEmpnit,document.getElementById('cmbCoddoc').value)
+    document.getElementById('cmbCoddoc')?.addEventListener('change', () => {
+        GF.get_data_coddoc_correlativo_sucursal(GlobalEmpnit, document.getElementById('cmbCoddoc').value)
         .then((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
         .catch((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
+    });
 
-
-    })
-    .catch(()=>{
-
-        document.getElementById('cmbCoddoc').innerHTML = `<option value=''></option>`;
-        document.getElementById('txtCorrelativo').value = '0'
-    
-    })
-
-
-    document.getElementById('cmbCoddoc').addEventListener('change',()=>{
-        GF.get_data_coddoc_correlativo_sucursal(sucursal,document.getElementById('cmbCoddoc').value)
-        .then((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
-        .catch((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
-    })
-
-    
-    //carga cajas
-     GF.get_data_cajas_sucursal(GlobalEmpnit)
-    .then((data)=>{
-        let str = '';
-        data.recordset.map((r)=>{
-            str += `<option value="${r.CODCAJA}">${r.DESCAJA}</option>`
-        });
-        document.getElementById('cmbCaja').innerHTML = str;
-    })
-    .catch(()=>{
-        F.AvisoError('No se cargaron las cajas');
-        document.getElementById('cmbCaja').innerHTML ='<option value="1">SIN CAJA</option>';
-    })
-
-    //carga empleados
-     GF.get_data_empleados_tipo_emp(3,GlobalEmpnit)
-    .then((data)=>{
-            let str = '';
-            data.recordset.map((r)=>{
-                str += `<option value="${r.CODEMPLEADO}">${r.NOMEMPLEADO}</option>`
-            });
-            document.getElementById('cmbEmpleados').innerHTML = str;
-            document.getElementById('cmbEmpleadosFac').innerHTML = `<option value='TODOS'>TODOS</OPTION>`;
-                
-                document.getElementById('cmbEmpleadosFac').addEventListener('change',()=>{
-                    get_tbl_documentos_embarque(selected_codembarque);
-                })
-        })
-    .catch(()=>{
-            F.AvisoError('No se cargaron los vendedores');
-            document.getElementById('cmbEmpleados').innerHTML ='<option value="1">SIN VENDEDOR</option>';
-    })
-
- 
-
+    document.getElementById('cmbEmpleadosFac')?.addEventListener('change', () => {
+        get_tbl_documentos_embarque(selected_codembarque);
+    });
 
     document.getElementById('txtFecha').value = F.getFecha();
 
@@ -1073,6 +1064,7 @@ function get_data_embarque(codembarque){
 };
 function get_data_embarque_devoluciones(codembarque){
 
+    despacho_ensure_devolucion_catalogos();
     despacho_showPanel('seis', { subtitle: 'Embarque: ' + codembarque, backTo: 'uno' });
 
     document.getElementById('lbEmbarqueDev').innerText = codembarque;

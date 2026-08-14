@@ -1145,13 +1145,53 @@ router.post("/ruta_mercaderista_por_empleado", async (req, res) => {
 });
 
 router.post("/buscar_cliente_mercaderista", async (req, res) => {
-    const { token, sucursal, codemp, codruta, dia, fecha, estado } = req.body;
+    const { token, sucursal, codemp, codruta, dia, fecha, estado, alcance, filtro } = req.body;
     const emp = esc(sucursal);
     const ven = Number(codemp) || 0;
     const rutaBody = Number(codruta) || 0;
     const diaVisita = esc(dia || '');
     const fechaVal = esc((fecha || '').trim());
     const estadoVal = String(estado || 'PENDIENTE').toUpperCase();
+    const alcanceVal = String(alcance || 'PROPIOS').toUpperCase();
+    const filtroVal = esc((filtro || '').trim());
+
+    if (alcanceVal === 'AJENOS') {
+        if (!filtroVal) {
+            return res.json({ recordset: [], rowsAffected: [0] });
+        }
+        const qryAjenos = `
+        SELECT TOP 100 CLIENTES.CODCLIENTE,
+               CLIENTES.TIPONEGOCIO,
+               CLIENTES.NEGOCIO,
+               CLIENTES.NOMBRE,
+               CLIENTES.DIRECCION,
+               MUNICIPIOS.DESMUN,
+               CLIENTES.LATITUD,
+               CLIENTES.LONGITUD,
+               ISNULL(CLIENTES.VISITAM, '') AS VISITAM,
+               ISNULL(CLIENTES.CODRUTAM, 0) AS CODRUTAM,
+               ISNULL((
+                   SELECT TOP 1 MV2.HORA_INICIO
+                     FROM MERCADERISTAS_VISITAS MV2
+                    WHERE MV2.EMPNIT = CLIENTES.EMPNIT
+                      AND MV2.CODCLIENTE = CLIENTES.CODCLIENTE
+                      AND MV2.CODEMP = ${ven}
+                      AND MV2.FECHA = '${fechaVal}'
+               ), '') AS HORA_INICIO
+          FROM CLIENTES
+          LEFT OUTER JOIN MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+         WHERE (CLIENTES.EMPNIT = '${emp}')
+           AND (CLIENTES.HABILITADO = 'SI')
+           AND (
+                CLIENTES.NOMBRE LIKE '%${filtroVal}%'
+             OR CLIENTES.NEGOCIO LIKE '%${filtroVal}%'
+             OR CLIENTES.DIRECCION LIKE '%${filtroVal}%'
+             OR ISNULL(CLIENTES.NIT, '') LIKE '%${filtroVal}%'
+             OR CAST(CLIENTES.CODCLIENTE AS VARCHAR(20)) LIKE '%${filtroVal}%'
+           )
+         ORDER BY CLIENTES.NOMBRE`;
+        return execute.QueryToken(res, qryAjenos, token);
+    }
 
     const filtroRuta = rutaBody > 0
         ? `(CLIENTES.CODRUTAM = ${rutaBody})`

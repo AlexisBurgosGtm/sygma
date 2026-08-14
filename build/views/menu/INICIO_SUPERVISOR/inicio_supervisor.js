@@ -1228,7 +1228,6 @@ function addListeners(){
         cmbAnioHeader.value = F.get_anio_curso();
     }
     supervisor_setupSucursalHeader();
-    supervisor_initDashboard();
     supervisor_setActiveCard('btnMenuDashboard');
 
     cmbMesHeader?.addEventListener('change', supervisor_onHeaderFiltersChange);

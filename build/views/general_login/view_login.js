@@ -448,7 +448,8 @@ function login_submit() {
                     const cargarSkus = (typeof cargar_objetivos_skus_sesion === 'function')
                         ? cargar_objetivos_skus_sesion()
                         : Promise.resolve();
-                    Promise.all([cargarRutaPerfil, cargarSkus]).finally(() => Navegar.inicio());
+                    cargarSkus.catch(() => {});
+                    Promise.resolve(cargarRutaPerfil).finally(() => Navegar.inicio());
                 })
                 .catch(() => {
                     F.AvisoError('No se pudieron cargar los datos de la empresa');

@@ -681,20 +681,19 @@ function initView(){
     if (typeof compras_cxc_listeners_ready !== 'undefined') compras_cxc_listeners_ready = false;
     if (typeof compras_cxc_vendedores_ready !== 'undefined') compras_cxc_vendedores_ready = false;
 
+    getView();
+    addListeners();
+    compras_showHome();
     compras_ensure_bodega_inv_script()
         .catch(() => null)
-        .finally(() => {
+        .then(() => {
             if (typeof bodega_inv_listeners_bound !== 'undefined') {
                 bodega_inv_listeners_bound = false;
             }
-            getView();
-            // Si el HTML quedó pendiente porque el script llegó tarde, montarlo ahora
             const pending = document.getElementById('bodegaInvPending');
             if (pending && typeof bodega_inv_html === 'function') {
                 pending.outerHTML = bodega_inv_html();
             }
-            addListeners();
-            compras_showHome();
         });
 }
 

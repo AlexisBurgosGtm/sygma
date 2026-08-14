@@ -1077,8 +1077,6 @@ function addListeners(){
     txtMarcaFechaFinal?.addEventListener('change', () => {
         rpt_tbl_marcas();
     });
-
-    ventas_loadDashboard();
 };
 
 function initView(){
@@ -1089,9 +1087,6 @@ function initView(){
         getView();
         addListeners();
         ventas_showHome();
-        if (typeof cargar_ruta_vendedor_sesion === 'function') {
-            cargar_ruta_vendedor_sesion();
-        }
     } catch (err) {
         console.error('[inicio_ventas] initView:', err);
         F.AvisoError('Error al inicializar ventas: ' + (err.message || err));

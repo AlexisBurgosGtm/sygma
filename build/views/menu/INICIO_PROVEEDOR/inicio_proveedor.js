@@ -17,7 +17,9 @@ var PROVEEDOR_EMBED_BASE = '../views/menu/INICIO_PROVEEDOR/';
 var MERC_VISITAS_CORE_URL = '../views/shared/view_mercaderistas_visitas_core.js';
 
 function proveedor_getSucursal() {
-    return document.getElementById('cmbSucursalHeader')?.value || '%';
+    const cmb = document.getElementById('cmbSucursalHeader')?.value;
+    if (cmb) return cmb;
+    return GlobalEmpnit || '%';
 }
 
 function proveedor_getMes() {
@@ -978,15 +980,18 @@ function addListeners(){
     selected_tab = ''; //VENTAS_VENDEDOR,VENTAS_MARCAS,SELLOUT,INVENTARIOS,OBJETIVOS
 
     let cmbSucursalHeader = document.getElementById('cmbSucursalHeader');
+    if (cmbSucursalHeader && !cmbSucursalHeader.value) {
+        cmbSucursalHeader.innerHTML = `<option value="${GlobalEmpnit || '%'}">${GlobalNomEmpresa || 'Sede'}</option>`;
+        cmbSucursalHeader.value = GlobalEmpnit || '%';
+    }
 
-    //bloqueo los controles para que no cargue nada
     document.getElementById('btnMenuVentasVendedor').disbled = true;
     document.getElementById('btnMenuVentasMarcas').disabled = true;
     document.getElementById('btnMenuVentasSellout').disabled = true;
 
-
     GF.get_data_empresas()
         .then((data)=>{
+            const prev = cmbSucursalHeader.value || GlobalEmpnit || '%';
             let str = '<option value="%">TODAS LAS SEDES</option>';
             data.recordset.map((r)=>{
                 str += `
@@ -994,15 +999,17 @@ function addListeners(){
                 `
             })
             cmbSucursalHeader.innerHTML = str;
+            cmbSucursalHeader.value = prev;
             document.getElementById('btnMenuVentasVendedor').disbled = false;
             document.getElementById('btnMenuVentasMarcas').disabled = false;
             document.getElementById('btnMenuVentasSellout').disabled = false;
-            
-            proveedor_loadDashboard();
-            proveedor_setActiveCard('btnMenuDashboard');
         })
         .catch(()=>{
-            cmbSucursalHeader.innerHTML = "<option value=''>NO SE CARGARON LAS SEDES</option>"
+            cmbSucursalHeader.innerHTML = `<option value="${GlobalEmpnit || '%'}">${GlobalNomEmpresa || 'Sede'}</option>`;
+            cmbSucursalHeader.value = GlobalEmpnit || '%';
+            document.getElementById('btnMenuVentasVendedor').disbled = false;
+            document.getElementById('btnMenuVentasMarcas').disabled = false;
+            document.getElementById('btnMenuVentasSellout').disabled = false;
         })
 
     const cmbMesHeader = document.getElementById('cmbMesHeader');
