@@ -3,6 +3,7 @@ var despacho_backTarget = 'uno';
 var despacho_mapInstance = null;
 var despacho_facturas_docs = [];
 var despacho_devolucion_catalogos_promise = null;
+var despacho_devolucion_codven_pendiente = '';
 
 function despacho_showPanel(paneId, opts) {
     opts = opts || {};
@@ -713,15 +714,20 @@ function despacho_hideGeneralMenu() {
 }
 
 function initView(){
+    despacho_devolucion_catalogos_promise = null;
+    despacho_devolucion_codven_pendiente = '';
     despacho_hideGeneralMenu();
     document.getElementById('js-page-content')?.classList.add('proveedor-page');
     getView();
     despacho_setupHeader();
     despacho_showPanel('uno');
     addListeners();
+    despacho_ensure_devolucion_catalogos();
 }
 
 function destroyView() {
+    despacho_devolucion_catalogos_promise = null;
+    despacho_devolucion_codven_pendiente = '';
     document.getElementById('js-page-content')?.classList.remove('proveedor-page');
     despacho_teardownMap();
     try {
@@ -730,19 +736,63 @@ function destroyView() {
     } catch (e) { /* sin modal activo */ }
 }
 
+function despacho_combo_tiene_valor(cmb, valor) {
+    const val = String(valor || '');
+    if (!cmb || !val) return false;
+    return Array.from(cmb.options).some((o) => String(o.value) === val);
+}
+
+function despacho_aplicar_coddoc_dev() {
+    const cmb = document.getElementById('cmbCoddoc');
+    if (!cmb || !cmb.options.length) return '';
+    const preferred = String(Selected_coddoc_env || '');
+    cmb.value = despacho_combo_tiene_valor(cmb, preferred) ? preferred : cmb.options[0].value;
+    if (!String(cmb.value || '').trim() && cmb.options[0]) {
+        cmb.value = cmb.options[0].value;
+    }
+    return String(cmb.value || '').trim();
+}
+
+function despacho_aplicar_vendedor_dev(codven) {
+    if (codven !== undefined && codven !== null && String(codven) !== '') {
+        despacho_devolucion_codven_pendiente = String(codven);
+    }
+    const cmb = document.getElementById('cmbEmpleados');
+    if (!cmb) return '';
+    const val = String(despacho_devolucion_codven_pendiente || '');
+    if (val && !despacho_combo_tiene_valor(cmb, val)) {
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = val;
+        cmb.insertBefore(opt, cmb.firstChild);
+    }
+    if (val) cmb.value = val;
+    return String(cmb.value || '').trim();
+}
+
 function despacho_ensure_devolucion_catalogos() {
+    const cmbCoddoc = document.getElementById('cmbCoddoc');
+    const cmbEmp = document.getElementById('cmbEmpleados');
+    const combosListos = cmbCoddoc && cmbCoddoc.options.length && String(cmbCoddoc.options[0].value || '').trim()
+        && cmbEmp && cmbEmp.options.length && String(cmbEmp.options[0].value || '').trim();
+    if (combosListos) return Promise.resolve();
     if (despacho_devolucion_catalogos_promise) return despacho_devolucion_catalogos_promise;
 
     despacho_devolucion_catalogos_promise = Promise.all([
         GF.get_data_tipodoc_coddoc_sucursal(GlobalEmpnit, 'DEV')
             .then((data) => {
                 let strCoddoc = '';
-                data.recordset.map((r) => {
-                    strCoddoc += `<option value="${r.CODDOC}">${r.CODDOC}</option>`;
+                (data.recordset || []).forEach((r) => {
+                    if (r.CODDOC) strCoddoc += `<option value="${r.CODDOC}">${r.CODDOC}</option>`;
                 });
-                document.getElementById('cmbCoddoc').innerHTML = strCoddoc;
-                document.getElementById('cmbCoddoc').value = Selected_coddoc_env;
-                return GF.get_data_coddoc_correlativo_sucursal(GlobalEmpnit, document.getElementById('cmbCoddoc').value)
+                const cmb = document.getElementById('cmbCoddoc');
+                if (cmb) cmb.innerHTML = strCoddoc || `<option value=""></option>`;
+                const coddoc = despacho_aplicar_coddoc_dev();
+                if (!coddoc) {
+                    document.getElementById('txtCorrelativo').value = '0';
+                    return;
+                }
+                return GF.get_data_coddoc_correlativo_sucursal(GlobalEmpnit, coddoc)
                     .then((correlativo) => { document.getElementById('txtCorrelativo').value = correlativo; })
                     .catch((correlativo) => { document.getElementById('txtCorrelativo').value = correlativo; });
             })
@@ -769,12 +819,18 @@ function despacho_ensure_devolucion_catalogos() {
                     str += `<option value="${r.CODEMPLEADO}">${r.NOMEMPLEADO}</option>`;
                 });
                 document.getElementById('cmbEmpleados').innerHTML = str;
+                despacho_aplicar_vendedor_dev();
             })
             .catch(() => {
                 F.AvisoError('No se cargaron los vendedores');
                 document.getElementById('cmbEmpleados').innerHTML = '<option value="1">SIN VENDEDOR</option>';
+                despacho_aplicar_vendedor_dev();
             })
-    ]);
+    ]).finally(() => {
+        const cmb = document.getElementById('cmbCoddoc');
+        const vacio = !cmb || !String(cmb.value || '').trim();
+        if (vacio) despacho_devolucion_catalogos_promise = null;
+    });
 
     return despacho_devolucion_catalogos_promise;
 }
@@ -884,14 +940,26 @@ function listeners_devolucion(){
                     if(codclie.toString()==''){F.AvisoError('No se selecciono una Factura');return;}
 
                     let sucursal = GlobalEmpnit;  //document.getElementById('cmbSucursal').value;
-                    let coddoc = document.getElementById('cmbCoddoc').value;
 
                     btnGuardar.disabled = true;
                     btnGuardar.innerHTML = `<i class="fal fa-save fa-spin"></i>`;
 
                     F.showToast('Obteniendo el correlativo del documento a generar');
 
-                    GF.get_data_coddoc_correlativo_sucursal(sucursal,coddoc)
+                    despacho_ensure_devolucion_catalogos()
+                    .then(()=>{
+                        despacho_aplicar_coddoc_dev();
+                        despacho_aplicar_vendedor_dev();
+                        const coddoc = document.getElementById('cmbCoddoc').value;
+                        const codemp = document.getElementById('cmbEmpleados').value;
+                        if (!String(coddoc || '').trim()) {
+                            throw new Error('sin_coddoc');
+                        }
+                        if (!String(codemp || '').trim()) {
+                            throw new Error('sin_vendedor');
+                        }
+                        return GF.get_data_coddoc_correlativo_sucursal(sucursal,coddoc);
+                    })
                     .then((correlativo)=>{
         
                                 document.getElementById('txtCorrelativo').value = correlativo;
@@ -935,10 +1003,16 @@ function listeners_devolucion(){
 
                                 })
                     })
-                    .catch((correlativo)=>{
+                    .catch((err)=>{
 
-                        document.getElementById('txtCorrelativo').value = correlativo;
-                        F.AvisoError('No se logro obtener el correlativo');
+                        document.getElementById('txtCorrelativo').value = (err && err.message) ? '0' : err;
+                        if (err && err.message === 'sin_coddoc') {
+                            F.AvisoError('No se cargó la serie DEV. Intente de nuevo');
+                        } else if (err && err.message === 'sin_vendedor') {
+                            F.AvisoError('No se cargó el vendedor. Intente de nuevo');
+                        } else {
+                            F.AvisoError('No se logro obtener el correlativo');
+                        }
 
                         btnGuardar.disabled = false;
                         btnGuardar.innerHTML = `<i class="fal fa-save"></i>`;
@@ -1044,6 +1118,7 @@ function get_tbl_embarques_pendientes(){
 
 function get_data_embarque(codembarque){
 
+    despacho_ensure_devolucion_catalogos();
     despacho_showPanel('dos', { subtitle: 'Embarque: ' + codembarque, backTo: 'uno' });
 
     document.getElementById('lbEmbarque').innerText = codembarque;
@@ -1828,15 +1903,27 @@ function get_devolucion_factura(codembarque,coddoc,correlativo,codven,codclie,ni
     document.getElementById('lbNomclie').innerText = cliente;
     document.getElementById('lbDirclie').innerText = dirclie;
     document.getElementById('lbNegocio').innerText = `${tiponegocio} ${negocio}`;
-       
-    document.getElementById('cmbEmpleados').value = codven;
-
     document.getElementById('txtFecha').value = fecha;
 
-
+    despacho_aplicar_vendedor_dev(codven);
+    despacho_ensure_devolucion_catalogos()
+        .then(() => {
+            despacho_aplicar_coddoc_dev();
+            despacho_aplicar_vendedor_dev(codven);
+            const serieDev = document.getElementById('cmbCoddoc')?.value;
+            if (!serieDev) {
+                F.AvisoError('No se cargó la serie DEV. Intente de nuevo');
+                return;
+            }
+            return GF.get_data_coddoc_correlativo_sucursal(GlobalEmpnit, serieDev)
+                .then((correlativoDev) => { document.getElementById('txtCorrelativo').value = correlativoDev; })
+                .catch((correlativoDev) => { document.getElementById('txtCorrelativo').value = correlativoDev; });
+        })
+        .catch(() => {
+            F.AvisoError('No se cargaron serie DEV o vendedor');
+        });
 
     load_grid_productos(GlobalEmpnit,coddoc,correlativo)
-
 
 };
 

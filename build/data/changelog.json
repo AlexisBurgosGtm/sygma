@@ -1,5 +1,5 @@
 {
-  "version": "M.14.08.26 15:32",
+  "version": "M.19.08.26 14:16",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -3535,6 +3535,16 @@
       "FECHA": "14-08-2026",
       "HORA": "15:32",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.14.08.26 15:32"
+    },
+    {
+      "FECHA": "19-08-2026",
+      "HORA": "14:16",
+      "DESCRIPCION": "REPARTIDOR: ESPERAR SERIE DEV Y VENDEDOR AL CREAR DEVOLUCION"
+    },
+    {
+      "FECHA": "19-08-2026",
+      "HORA": "14:16",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.19.08.26 14:16"
     }
   ]
 }
