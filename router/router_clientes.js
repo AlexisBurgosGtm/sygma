@@ -2110,6 +2110,140 @@ router.post("/delete", async(req,res)=>{
      
 });
 
+router.post("/solicitud_cambio_cliente", async (req, res) => {
+    const { token, empnit, usuario, fecha, detalles } = req.body;
+    const empVal = esc(empnit || '');
+    const usuarioVal = esc(usuario || '');
+    const fechaVal = esc((fecha || '').trim());
+    const detallesVal = esc(typeof detalles === 'string' ? detalles : JSON.stringify(detalles || {}));
+
+    if (!empVal || !usuarioVal || !fechaVal || !detallesVal) {
+        return res.status(400).send('error');
+    }
+
+    const qry = `
+        INSERT INTO SOLICITUDES (EMPNIT, TIPO, REALIZADA, USUARIO, FECHA, DETALLES)
+        VALUES (
+            '${empVal}',
+            'CAMBIO DATOS CLIENTE',
+            'NO',
+            '${usuarioVal}',
+            '${fechaVal}',
+            '${detallesVal}'
+        );
+    `;
+
+    execute.QueryToken(res, qry, token);
+});
+
+router.post("/solicitudes_cambio_cliente_list", async (req, res) => {
+    const { token, empnit, realizada } = req.body;
+    const empVal = esc(empnit || '');
+    const realizadaVal = esc(String(realizada || 'NO').toUpperCase() === 'SI' ? 'SI' : 'NO');
+
+    if (!empVal) {
+        return res.status(400).send('error');
+    }
+
+    const qry = `
+        SELECT ID,
+               EMPNIT,
+               TIPO,
+               REALIZADA,
+               USUARIO,
+               FECHA,
+               DETALLES
+          FROM SOLICITUDES
+         WHERE EMPNIT = '${empVal}'
+           AND TIPO = 'CAMBIO DATOS CLIENTE'
+           AND REALIZADA = '${realizadaVal}'
+         ORDER BY FECHA DESC, ID DESC;
+    `;
+
+    execute.QueryToken(res, qry, token);
+});
+
+router.post("/solicitudes_cambio_cliente_aceptar", async (req, res) => {
+    const { token, id, empnit } = req.body;
+    const idVal = Number(id) || 0;
+    const empFiltro = esc(empnit || '');
+
+    if (idVal <= 0) {
+        return res.status(400).send('error');
+    }
+
+    const filtroEmp = empFiltro ? `AND EMPNIT = '${empFiltro}'` : '';
+
+    try {
+        const sel = await execute.get_data_qry(`
+            SELECT TOP 1 ID, EMPNIT, TIPO, REALIZADA, DETALLES
+              FROM SOLICITUDES
+             WHERE ID = ${idVal}
+               AND TIPO = 'CAMBIO DATOS CLIENTE'
+               ${filtroEmp};
+        `, token);
+
+        const row = sel?.recordset?.[0];
+        if (!row) {
+            return res.send('error');
+        }
+        if (String(row.REALIZADA || '').toUpperCase() === 'SI') {
+            return res.send({ recordset: [{ RESULT: 'ok', MSG: 'ya_realizada' }], rowsAffected: [1] });
+        }
+
+        let det = {};
+        try {
+            det = typeof row.DETALLES === 'string' ? JSON.parse(row.DETALLES) : (row.DETALLES || {});
+        } catch (e) {
+            return res.send('error');
+        }
+
+        const empCliente = esc(det.empnit || row.EMPNIT || '');
+        const codclie = Number(det.codcliente) || 0;
+        if (!empCliente || codclie <= 0) {
+            return res.send('error');
+        }
+
+        const nit = esc(det.nit || '');
+        const nombre = esc(det.nombre || '');
+        const negocio = esc(det.negocio || '');
+        const direccion = esc(det.direccion || '');
+        const referencia = esc(det.referencia || '');
+        const tiponegocio = esc(det.tiponegocio || '');
+        const codmun = Number(det.codmun) || 0;
+        const coddepto = Number(det.coddepto) || 0;
+
+        const setTipo = tiponegocio ? `, TIPONEGOCIO='${tiponegocio}'` : '';
+
+        const qry = `
+            UPDATE SOLICITUDES
+               SET REALIZADA = 'SI'
+             WHERE ID = ${idVal}
+               AND TIPO = 'CAMBIO DATOS CLIENTE'
+               AND ISNULL(REALIZADA, 'NO') <> 'SI';
+
+            UPDATE CLIENTES
+               SET NIT = '${nit}',
+                   NOMBRE = '${nombre}',
+                   NEGOCIO = '${negocio}',
+                   DIRECCION = '${direccion}',
+                   REFERENCIA = '${referencia}',
+                   CODMUN = ${codmun},
+                   CODDEPTO = ${coddepto}
+                   ${setTipo}
+             WHERE CODCLIENTE = ${codclie}
+               AND EMPNIT = '${empCliente}';
+
+            SELECT 'ok' AS RESULT;
+        `;
+
+        execute.QueryToken(res, qry, token);
+    } catch (err) {
+        console.log(err && err.message ? err.message : err);
+        res.send('error');
+    }
+});
+
 
 
 

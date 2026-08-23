@@ -162,6 +162,128 @@
     background: rgb(255, 205, 205);
 }
 
+/* Nuevo Pedido — tarjeta cliente + panel Opciones */
+#tblDataClientes tr.ped-cliente-row > td {
+    border: 0;
+    padding: 0.55rem 0.35rem;
+    background: transparent;
+}
+.ped-cliente-card {
+    border-radius: 18px;
+    padding: 0.9rem 1rem;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.12);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+.ped-cliente-row.bg-visitado .ped-cliente-card {
+    background: rgba(224, 255, 245, 0.82);
+    border-color: rgba(46, 180, 130, 0.25);
+}
+.ped-cliente-row.bg-novisitado .ped-cliente-card {
+    background: rgba(255, 220, 220, 0.82);
+    border-color: rgba(220, 80, 80, 0.22);
+}
+.ped-cliente-card__meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 0.75rem;
+    margin-top: 0.7rem;
+    padding-top: 0.7rem;
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+.ped-cliente-card__ids {
+    min-width: 0;
+}
+.btn-ped-opciones {
+    border: 0;
+    border-radius: 999px;
+    padding: 0.45rem 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #fff;
+    background: linear-gradient(135deg, rgba(45, 90, 140, 0.95), rgba(70, 130, 180, 0.9));
+    box-shadow: 0 6px 16px rgba(45, 90, 140, 0.28);
+    white-space: nowrap;
+}
+.btn-ped-opciones.is-open {
+    background: linear-gradient(135deg, rgba(30, 60, 100, 0.98), rgba(50, 100, 150, 0.95));
+    box-shadow: 0 4px 12px rgba(30, 60, 100, 0.35);
+}
+.ped-opciones-panel {
+    display: none;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin-top: 0.75rem;
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0.55rem 0.35rem;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 10px 24px rgba(15, 23, 42, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+.ped-opciones-panel.is-open {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.25rem;
+}
+.ped-opciones-panel .btn {
+    box-shadow: 0 6px 14px rgba(15, 23, 42, 0.16);
+    flex: 0 0 auto;
+}
+.ped-opciones-side {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+}
+.ped-opciones-center {
+    flex: 1 1 auto;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+    gap: 0.2rem;
+    min-width: 0;
+}
+.ped-opciones-panel .btn.btn-circle {
+    width: 2.35rem;
+    height: 2.35rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+@media (max-width: 575.98px) {
+    .ped-cliente-card {
+        padding: 0.75rem 0.45rem;
+    }
+    .ped-opciones-panel {
+        padding: 0.45rem 0.15rem;
+    }
+    .ped-opciones-panel.is-open {
+        gap: 0.12rem;
+    }
+    .ped-opciones-center {
+        gap: 0.1rem;
+        justify-content: space-between;
+    }
+    .ped-opciones-panel .btn.btn-circle {
+        width: 2.05rem;
+        height: 2.05rem;
+        font-size: 0.85rem;
+    }
+}
+
 
 
 .bg-logrado{

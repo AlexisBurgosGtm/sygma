@@ -5,7 +5,7 @@ function getView(){
                 <div class="col-12 p-0">
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="dias-tab">
-                            ${view.lista_clientes() + view.modal_qr() + view.modal_camara() + view.modal_visita() + view.modal_goles()}
+                            ${view.lista_clientes() + view.modal_qr() + view.modal_camara() + view.modal_visita() + view.modal_goles() + view.modal_solicitud_cambio_cliente()}
                         </div> 
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="clientes-tab">
                             ${view.pedido() + view.modal_lista_precios() + view.modal_cantidad() + view.modal_editar_cantidad()}
@@ -530,12 +530,10 @@ function getView(){
                             </div>
                             
                             <div class="row">
-                                <table class="col-12 table table-bordered h-full">
-                                    <thead class="bg-base text-white">
+                                <table class="col-12 table table-borderless h-full mb-0">
+                                    <thead class="bg-base text-white" style="border-radius:14px;overflow:hidden">
                                         <tr>
-                                            <td>NIT / CÓDIGO</td>
-                                            <td>CLIENTE / TELÉFONO</td>
-                                            <td></td>
+                                            <td class="rounded" style="border-radius:14px">CLIENTE</td>
                                         </tr>
                                     </thead>
                                     <tbody id="tblDataClientes"></tbody>
@@ -1094,6 +1092,66 @@ function getView(){
             
             `
         },
+        modal_solicitud_cambio_cliente: () => `
+            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1"
+                role="dialog" aria-hidden="true" id="modal_solicitud_cambio_cliente">
+                <div class="modal-dialog modal-dialog-right modal-lg">
+                    <div class="modal-content">
+                        <div class="dropdown-header bg-info d-flex justify-content-center align-items-center w-100">
+                            <h4 class="m-0 text-center color-white">Solicitar cambios del cliente</h4>
+                        </div>
+                        <div class="modal-body p-4">
+                            <div class="card card-rounded shadow-sm border-0">
+                                <div class="card-body p-3">
+                                    <input type="hidden" id="txtSolCambioCodclie">
+                                    <input type="hidden" id="txtSolCambioTiponegocio">
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary small mb-1">NIT</label>
+                                        <input type="text" class="form-control negrita" id="txtSolCambioNit">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary small mb-1">Nombre</label>
+                                        <input type="text" class="form-control negrita" id="txtSolCambioNombre">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary small mb-1">Negocio</label>
+                                        <input type="text" class="form-control negrita" id="txtSolCambioNegocio">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary small mb-1">Dirección</label>
+                                        <input type="text" class="form-control negrita" id="txtSolCambioDireccion">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary small mb-1">Referencia</label>
+                                        <input type="text" class="form-control negrita" id="txtSolCambioReferencia">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary small mb-1">Departamento</label>
+                                        <select class="form-control negrita" id="cmbSolCambioDepartamento"></select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary small mb-1">Municipio</label>
+                                        <select class="form-control negrita" id="cmbSolCambioMunicipio"></select>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-6">
+                                            <button type="button" class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
+                                                <i class="fal fa-arrow-left"></i>
+                                            </button>
+                                        </div>
+                                        <div class="col-6 text-right">
+                                            <button type="button" class="btn btn-info hand shadow negrita" id="btnEnviarSolicitudCambioCliente">
+                                                <i class="fal fa-paper-plane mr-1"></i> Enviar Solicitud
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `,
     }
 
     root.innerHTML = view.body();
@@ -1397,6 +1455,11 @@ function addListeners(){
 
     document.getElementById('btnAtrasVentasClientes')?.addEventListener('click', volver_busqueda_clientes);
     document.getElementById('btnAtrasVentasClientesHdr')?.addEventListener('click', volver_busqueda_clientes);
+
+    document.getElementById('btnEnviarSolicitudCambioCliente')?.addEventListener('click', pedidos_enviar_solicitud_cambio_cliente);
+    document.getElementById('cmbSolCambioDepartamento')?.addEventListener('change', () => {
+        pedidos_cargar_municipios_solicitud(document.getElementById('cmbSolCambioDepartamento').value, '');
+    });
 
 };
 
@@ -2017,6 +2080,12 @@ function tbl_clientes(filtro,qr){
     let varTotalVisitados = 0;
     let varTotalNoVisitados = 0;
 
+    const escAttr = (v) => String(v ?? '')
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '&quot;')
+        .replace(/\r?\n/g, ' ');
+
     axios.post(url_clientes, {
         token:TOKEN,
         sucursal: GlobalEmpnit,
@@ -2043,67 +2112,83 @@ function tbl_clientes(filtro,qr){
                     varTotalNoVisitados+=1;
                 };
 
+                const cod = escAttr(r.CODCLIENTE);
+                const nit = escAttr(r.NIT);
+                const nom = escAttr(r.NOMBRE);
+                const dir = escAttr(typeof F.limpiarTexto === 'function' ? F.limpiarTexto(r.DIRECCION) : r.DIRECCION);
+                const tel = escAttr(r.TELEFONO);
+                const tipo = escAttr(r.TIPONEGOCIO);
+                const neg = escAttr(r.NEGOCIO);
+                const lat = escAttr(r.LATITUD);
+                const lng = escAttr(r.LONGITUD);
+                const codmun = escAttr(r.CODMUN);
+                const coddepto = escAttr(r.CODDEPTO);
+                const ref = escAttr(r.REFERENCIA);
+                const panelId = `pedOpc_${r.CODCLIENTE}`;
+
                 str += `
-                <tr class="hand border-secondary ${strClassVisitado}">    
+                <tr class="ped-cliente-row border-0 ${strClassVisitado}">
                     <td>
-                        ${r.NIT} / ${r.CODCLIENTE}
-                        <br>
-                        
-                        <small class="text-danger negrita">${r.VISITA}</small>
-                        <br>
-
-                        <button class="btn btn-md btn-circle btn-info hand shadow" onclick="F.gotoGoogleMaps('${r.LATITUD}','${r.LONGITUD}')">
-                            <i class="fal fa-globe"></i>
-                        </button>
-
-                        <br><br>
-
-                        <button class="btn btn-md btn-circle btn-warning hand shadow" onclick="create_qr_code('${r.CODCLIENTE}','${r.NOMBRE}')">
-                            <i class="fal fa-barcode"></i>
-                        </button>
-
-                        <br><br>
-
-                        <button class="btn btn-circle btn-md btn-primary hand shadow" 
-                        onclick="get_status_goles('${r.CODCLIENTE}','${r.NOMBRE}','${r.TIPONEGOCIO}','${r.NEGOCIO}')">
-                            <i class="fal fa-futbol"></i>
-                        </button>
-
-
-                    </td>
-                    <td>
-                        <small class="text-base negrita">${r.TIPONEGOCIO}-${r.NEGOCIO}</small>
-                        <br>
-                        ${r.NOMBRE}
-                        <br>
-                        <small>${r.DIRECCION}</small>
-                        <br>
-                        <small>Ref: ${r.REFERENCIA}</small>
-                        <br>
-                        <small>Tel: ${r.TELEFONO}</small>
-                    </td>
-                     
-                    <td>
-                        <button class="btn btn-circle btn-md btn-success hand shadow" 
-                        onclick="get_datos_cliente('${r.CODCLIENTE}','${r.NIT}','${r.NOMBRE}','${r.DIRECCION}','${r.TELEFONO}')">
-                            <i class="fal fa-shopping-cart"></i>
-                        </button>
-
-                        <br><br><br><br>
-
-                        <button class="btn btn-circle btn-md btn-outline-danger hand shadow" 
-                        onclick="get_visita('${r.CODCLIENTE}','${r.NOMBRE}','${r.TIPONEGOCIO}','${r.NEGOCIO}')">
-                            <i class="fal fa-history"></i>
-                        </button>
-
-                         <br><br>
-
-                        <button class="btn btn-circle btn-md btn-secondary hand shadow" 
-                        onclick="get_historial_cliente('${r.CODCLIENTE}','${r.NOMBRE}','${r.TIPONEGOCIO}','${r.NEGOCIO}')">
-                            <i class="fal fa-book"></i>
-                        </button>
-
-                        
+                        <div class="ped-cliente-card">
+                            <div>
+                                <small class="text-base negrita">${r.TIPONEGOCIO || ''}-${r.NEGOCIO || ''}</small>
+                                <br>
+                                <span class="negrita">${r.NOMBRE || ''}</span>
+                                <br>
+                                <small>${r.DIRECCION || ''}</small>
+                                <br>
+                                <small>Ref: ${r.REFERENCIA || ''}</small>
+                                <br>
+                                <small>Tel: ${r.TELEFONO || ''}</small>
+                            </div>
+                            <div class="ped-cliente-card__meta">
+                                <div class="ped-cliente-card__ids">
+                                    <small class="negrita d-block">NIT: ${r.NIT || ''}</small>
+                                    <small class="negrita d-block">Cód: ${r.CODCLIENTE || ''}</small>
+                                    <small class="text-danger negrita">${r.VISITA || ''}</small>
+                                </div>
+                                <button type="button" class="btn btn-ped-opciones hand"
+                                    onclick="pedidos_toggle_cliente_opciones(this,'${panelId}')">
+                                    <i class="fal fa-ellipsis-h mr-1"></i> Opciones
+                                </button>
+                            </div>
+                            <div class="ped-opciones-panel" id="${panelId}">
+                                <div class="ped-opciones-side ped-opciones-side--left">
+                                    <button type="button" class="btn btn-circle btn-md btn-dark hand" title="Solicitar cambios"
+                                        onclick="pedidos_abrir_solicitud_cambio('${cod}','${nit}','${nom}','${neg}','${dir}','${ref}','${codmun}','${coddepto}','${tipo}')">
+                                        <i class="fal fa-edit"></i>
+                                    </button>
+                                </div>
+                                <div class="ped-opciones-center">
+                                    <button type="button" class="btn btn-md btn-circle btn-info hand" title="Mapa"
+                                        onclick="F.gotoGoogleMaps('${lat}','${lng}')">
+                                        <i class="fal fa-globe"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-md btn-circle btn-warning hand" title="QR"
+                                        onclick="create_qr_code('${cod}','${nom}')">
+                                        <i class="fal fa-barcode"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-circle btn-md btn-primary hand" title="Goles"
+                                        onclick="get_status_goles('${cod}','${nom}','${tipo}','${neg}')">
+                                        <i class="fal fa-futbol"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-circle btn-md btn-outline-danger hand" title="Visita"
+                                        onclick="get_visita('${cod}','${nom}','${tipo}','${neg}')">
+                                        <i class="fal fa-history"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-circle btn-md btn-secondary hand" title="Historial"
+                                        onclick="get_historial_cliente('${cod}','${nom}','${tipo}','${neg}')">
+                                        <i class="fal fa-book"></i>
+                                    </button>
+                                </div>
+                                <div class="ped-opciones-side ped-opciones-side--right">
+                                    <button type="button" class="btn btn-circle btn-md btn-success hand" title="Pedido"
+                                        onclick="get_datos_cliente('${cod}','${nit}','${nom}','${dir}','${tel}')">
+                                        <i class="fal fa-shopping-cart"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </td>
                 </tr>
                 `
@@ -2122,6 +2207,147 @@ function tbl_clientes(filtro,qr){
 
 
 };
+
+function pedidos_toggle_cliente_opciones(btn, panelId) {
+    const panel = document.getElementById(panelId);
+    if (!panel) return;
+
+    const willOpen = !panel.classList.contains('is-open');
+
+    document.querySelectorAll('#tblDataClientes .ped-opciones-panel.is-open').forEach((el) => {
+        el.classList.remove('is-open');
+    });
+    document.querySelectorAll('#tblDataClientes .btn-ped-opciones.is-open').forEach((el) => {
+        el.classList.remove('is-open');
+        el.innerHTML = '<i class="fal fa-ellipsis-h mr-1"></i> Opciones';
+    });
+
+    if (willOpen) {
+        panel.classList.add('is-open');
+        btn.classList.add('is-open');
+        btn.innerHTML = '<i class="fal fa-times mr-1"></i> Cerrar';
+    }
+}
+
+function pedidos_cargar_municipios_solicitud(coddepto, codmunSelected) {
+    const cmbMun = document.getElementById('cmbSolCambioMunicipio');
+    if (!cmbMun) return Promise.resolve();
+    cmbMun.innerHTML = '<option value="">Cargando...</option>';
+    if (!coddepto) {
+        cmbMun.innerHTML = '<option value="">Seleccione departamento</option>';
+        return Promise.resolve();
+    }
+    return GF.data_municipios(coddepto)
+        .then((data) => {
+            let str = '';
+            (data.recordset || []).forEach((r) => {
+                str += `<option value="${r.CODIGO}">${r.DESCRIPCION}</option>`;
+            });
+            cmbMun.innerHTML = str || '<option value="">Sin municipios</option>';
+            if (codmunSelected && Array.from(cmbMun.options).some((o) => String(o.value) === String(codmunSelected))) {
+                cmbMun.value = String(codmunSelected);
+            }
+        })
+        .catch(() => {
+            cmbMun.innerHTML = '<option value="">No se cargaron municipios</option>';
+        });
+}
+
+function pedidos_cargar_departamentos_solicitud(coddeptoSelected, codmunSelected) {
+    const cmbDep = document.getElementById('cmbSolCambioDepartamento');
+    if (!cmbDep) return Promise.resolve();
+    cmbDep.innerHTML = '<option value="">Cargando...</option>';
+    return GF.data_departamentos()
+        .then((data) => {
+            let str = '';
+            (data.recordset || []).forEach((r) => {
+                str += `<option value="${r.CODIGO}">${r.DESCRIPCION}</option>`;
+            });
+            cmbDep.innerHTML = str || '<option value="">Sin departamentos</option>';
+            if (coddeptoSelected && Array.from(cmbDep.options).some((o) => String(o.value) === String(coddeptoSelected))) {
+                cmbDep.value = String(coddeptoSelected);
+            }
+            return pedidos_cargar_municipios_solicitud(cmbDep.value, codmunSelected);
+        })
+        .catch(() => {
+            cmbDep.innerHTML = '<option value="">No se cargaron departamentos</option>';
+            const cmbMun = document.getElementById('cmbSolCambioMunicipio');
+            if (cmbMun) cmbMun.innerHTML = '<option value="">Sin municipios</option>';
+        });
+}
+
+function pedidos_abrir_solicitud_cambio(codclie, nit, nombre, negocio, direccion, referencia, codmun, coddepto, tiponegocio) {
+    document.getElementById('txtSolCambioCodclie').value = codclie || '';
+    document.getElementById('txtSolCambioTiponegocio').value = tiponegocio || '';
+    document.getElementById('txtSolCambioNit').value = nit || '';
+    document.getElementById('txtSolCambioNombre').value = nombre || '';
+    document.getElementById('txtSolCambioNegocio').value = negocio || '';
+    document.getElementById('txtSolCambioDireccion').value = direccion || '';
+    document.getElementById('txtSolCambioReferencia').value = referencia || '';
+    pedidos_cargar_departamentos_solicitud(coddepto, codmun);
+    $('#modal_solicitud_cambio_cliente').modal('show');
+}
+
+function pedidos_enviar_solicitud_cambio_cliente() {
+    const btn = document.getElementById('btnEnviarSolicitudCambioCliente');
+    const cmbDep = document.getElementById('cmbSolCambioDepartamento');
+    const cmbMun = document.getElementById('cmbSolCambioMunicipio');
+    const detalles = {
+        empnit: GlobalEmpnit || '',
+        codcliente: document.getElementById('txtSolCambioCodclie')?.value || '',
+        tiponegocio: document.getElementById('txtSolCambioTiponegocio')?.value || '',
+        nit: document.getElementById('txtSolCambioNit')?.value || '',
+        nombre: document.getElementById('txtSolCambioNombre')?.value || '',
+        negocio: document.getElementById('txtSolCambioNegocio')?.value || '',
+        direccion: document.getElementById('txtSolCambioDireccion')?.value || '',
+        referencia: document.getElementById('txtSolCambioReferencia')?.value || '',
+        coddepto: cmbDep?.value || '',
+        departamento: cmbDep?.options?.[cmbDep.selectedIndex]?.text || '',
+        codmun: cmbMun?.value || '',
+        municipio: cmbMun?.options?.[cmbMun.selectedIndex]?.text || '',
+    };
+
+    if (!String(detalles.nombre || '').trim()) {
+        F.AvisoError('Indique el nombre del cliente');
+        return;
+    }
+    if (!detalles.coddepto) {
+        F.AvisoError('Seleccione el departamento');
+        return;
+    }
+    if (!detalles.codmun) {
+        F.AvisoError('Seleccione el municipio');
+        return;
+    }
+
+    const htmlOriginal = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fal fa-spinner fa-spin mr-1"></i> Enviando...';
+    }
+
+    axios.post('/clientes/solicitud_cambio_cliente', {
+        token: TOKEN,
+        empnit: GlobalEmpnit || '',
+        usuario: GlobalUsuario || '',
+        fecha: F.getFecha(),
+        detalles: JSON.stringify(detalles),
+    })
+        .then((response) => {
+            if (response.data === 'error') throw new Error('error');
+            F.Aviso('Solicitud enviada correctamente');
+            $('#modal_solicitud_cambio_cliente').modal('hide');
+        })
+        .catch(() => {
+            F.AvisoError('No se pudo enviar la solicitud');
+        })
+        .finally(() => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = htmlOriginal || '<i class="fal fa-paper-plane mr-1"></i> Enviar Solicitud';
+            }
+        });
+}
 function get_historial_cliente(codclie,nomclie,tiponegocio,negocio){
 
     $("#modal_historial_cliente").modal('show');

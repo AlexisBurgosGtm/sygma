@@ -51,6 +51,9 @@ function supervisor_onHeaderFiltersChange() {
     if (typeof window.supervisor_mercaderistas_refresh === 'function') {
         window.supervisor_mercaderistas_refresh();
     }
+    if (typeof window.supervisor_solicitudes_cambio_refresh === 'function') {
+        window.supervisor_solicitudes_cambio_refresh();
+    }
 }
 
 function supervisor_initDashboard() {
@@ -64,6 +67,7 @@ var SUPERVISOR_EMBED_SCRIPTS = {
     btnMenuObjetivos: SUPERVISOR_EMBED_BASE + 'view_avance_procter_vendedor.js',
     btnMenuCoberturaMunicipio: SUPERVISOR_EMBED_BASE + 'view_cobertura_municipios_mapa.js',
     btnMenuRptVisitasMapa: SUPERVISOR_EMBED_BASE + 'view_visitas_vendedores_gps.js',
+    btnMenuCambiosDatosClientes: SUPERVISOR_EMBED_BASE + 'view_solicitudes_cambio_cliente.js',
     btnMenuMercaderistas: SUPERVISOR_EMBED_BASE + 'view_mercaderistas.js',
 };
 
@@ -341,6 +345,7 @@ function getView(){
                 { id: 'btnMenuObjetivos', label: 'Logro objetivos P&G', icon: 'fa-chart-pie', color: 'danger' },
                 { id: 'btnMenuCoberturaMunicipio', label: 'Cobertura municipios', icon: 'fa-globe', color: 'primary' },
                 { id: 'btnMenuRptVisitasMapa', label: 'Visitas vendedor mapa', icon: 'fa-map-signs', color: 'secondary' },
+                { id: 'btnMenuCambiosDatosClientes', label: 'Cambios de datos Clientes', icon: 'fa-user-edit', color: 'warning' },
                 { id: 'btnMenuMercaderistas', label: 'Mercaderistas', icon: 'fa-clipboard-list', color: 'info' },
                 { id: 'btnMenuRptInventario', label: 'Inventario', icon: 'fa-warehouse', color: 'secondary' },
                 { id: 'btnMenuRptVendedores', label: 'Ventas vendedores', icon: 'fa-chart-bar', color: 'secondary' },
