@@ -314,6 +314,29 @@ function getView(){
                     </div>
                 </div>
                 <div class="row">
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-2">
+                        <div class="card card-rounded shadow ventas-dashboard-kpi">
+                            <div class="card-body py-2 px-3">
+                                <small class="text-muted d-block mb-1">Facturas válidas del mes</small>
+                                <div class="d-flex justify-content-between align-items-end">
+                                    <div>
+                                        <small class="text-muted d-block">Conteo</small>
+                                        <span class="negrita ventas-dashboard-kpi__conteo" id="lbVentasDashFacConteo">--</span>
+                                    </div>
+                                    <div class="text-right">
+                                        <small class="text-muted d-block">Importe</small>
+                                        <span class="negrita text-base ventas-dashboard-kpi__importe" id="lbVentasDashFacImporte">--</span>
+                                    </div>
+                                </div>
+                                <div class="ventas-dashboard-kpi__ticket-wrap">
+                                    <small class="text-muted d-block">Ticket promedio</small>
+                                    <span class="negrita text-danger ventas-dashboard-kpi__ticket" id="lbVentasDashFacTicket">--</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
                     <div class="col-12 col-lg-6 mb-2">
                         <div class="card card-rounded shadow h-100 ventas-dashboard-card">
                             <div class="card-body py-2 px-2">
@@ -1343,9 +1366,37 @@ function ventas_resizeDashboardCharts() {
     });
 }
 
+function ventas_resetFacKpi(texto) {
+    const val = texto || '--';
+    const lbConteo = document.getElementById('lbVentasDashFacConteo');
+    const lbImporte = document.getElementById('lbVentasDashFacImporte');
+    const lbTicket = document.getElementById('lbVentasDashFacTicket');
+    if (lbConteo) lbConteo.innerText = val;
+    if (lbImporte) lbImporte.innerText = val;
+    if (lbTicket) lbTicket.innerText = val;
+}
+
+function ventas_renderFacKpi(rowsDia) {
+    let conteo = 0;
+    let importe = 0;
+    (rowsDia || []).forEach((r) => {
+        conteo += Number(r.CONTEO) || 0;
+        importe += Number(r.TOTALPRECIO) || 0;
+    });
+    const ticket = conteo > 0 ? importe / conteo : 0;
+    const lbConteo = document.getElementById('lbVentasDashFacConteo');
+    const lbImporte = document.getElementById('lbVentasDashFacImporte');
+    const lbTicket = document.getElementById('lbVentasDashFacTicket');
+    if (lbConteo) lbConteo.innerText = String(conteo);
+    if (lbImporte) lbImporte.innerText = F.setMoneda(importe, 'Q');
+    if (lbTicket) lbTicket.innerText = F.setMoneda(ticket, 'Q');
+}
+
 function ventas_applyDashboardFromRows(rowsDia, rowsMarcas, rowsDev, mes, anio) {
     const lbDia = document.getElementById('lbVentasDashDiaTotal');
     const lbMarcas = document.getElementById('lbVentasDashMarcasTotal');
+
+    ventas_renderFacKpi(rowsDia || []);
 
     const seriesFac = ventas_buildDiasMesSeries(mes, anio, rowsDia || []);
     const seriesDev = ventas_buildDiasMesSeries(mes, anio, rowsDev || []);
@@ -1411,7 +1462,8 @@ function ventas_fetchDashboardRemote(sucursal, mes, anio, codemp, fecha) {
 function ventas_loadDashboard(forceRefresh) {
     const lbDia = document.getElementById('lbVentasDashDiaTotal');
     const lbMarcas = document.getElementById('lbVentasDashMarcasTotal');
-    if (!lbDia && !lbMarcas) return Promise.resolve();
+    const lbKpi = document.getElementById('lbVentasDashFacConteo');
+    if (!lbDia && !lbMarcas && !lbKpi) return Promise.resolve();
 
     const sucursal = ventas_getSucursal();
     const mes = ventas_getMes();
@@ -1430,6 +1482,7 @@ function ventas_loadDashboard(forceRefresh) {
         console.error('[inicio_ventas] dashboard:', err);
         if (lbDia) lbDia.innerText = 'Total mes: --';
         if (lbMarcas) lbMarcas.innerText = 'Total mes: --';
+        ventas_resetFacKpi('--');
         ventas_destroyDashboardChart('ventasDia');
         ventas_destroyDashboardChart('ventasMarcas');
         if (forceRefresh) F.AvisoError('No se pudieron actualizar los datos del dashboard');
@@ -1459,6 +1512,7 @@ function ventas_loadDashboard(forceRefresh) {
 
     if (lbDia) lbDia.innerText = 'Cargando...';
     if (lbMarcas) lbMarcas.innerText = 'Cargando...';
+    ventas_resetFacKpi('...');
 
     const dbReady = window._sygmaDbReady || Promise.resolve();
     return dbReady.then(runLoad);

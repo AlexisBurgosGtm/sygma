@@ -468,7 +468,7 @@ function getView(){
                 </div>
 
                 <div class="row">
-                    <div class="col-12 col-lg-5 mb-3 mb-lg-0">
+                    <div class="col-12 col-lg-6 mb-3 mb-lg-0">
                         <div class="proveedor-rpt-marcas__panel card shadow-sm h-100">
                             <div class="proveedor-rpt-marcas__panel-header">
                                 <span class="negrita text-secondary">Vendedores</span>
@@ -478,7 +478,7 @@ function getView(){
                                     placeholder="Buscar vendedor..."
                                     id="txtVendedoresBuscar"
                                     oninput="F.FiltrarTabla('tblVendedores','txtVendedoresBuscar')">
-                                <div class="table-responsive proveedor-rpt-marcas__scroll">
+                                <div class="table-responsive proveedor-rpt-marcas__scroll proveedor-rpt-vendedores__scroll">
                                     <table class="table table-hover h-full col-12 mb-0" id="tblVendedores">
                                         <thead class="bg-info text-white negrita">
                                             <tr>
@@ -486,6 +486,7 @@ function getView(){
                                                 <td>TEL</td>
                                                 <td class="text-right">PEDIDOS</td>
                                                 <td class="text-right">IMPORTE</td>
+                                                <td class="text-right">TICKET PROMEDIO</td>
                                             </tr>
                                         </thead>
                                         <tbody id="tblDataVendedores"></tbody>
@@ -494,6 +495,7 @@ function getView(){
                                                 <td colspan="2">TOTALES</td>
                                                 <td class="text-right" id="lbFootTotalPedidos"></td>
                                                 <td class="text-right" id="lbFootTotalPrecio"></td>
+                                                <td class="text-right" id="lbFootTicketPromedio"></td>
                                             </tr>
                                         </tfoot>
                                     </table>
@@ -502,7 +504,7 @@ function getView(){
                         </div>
                     </div>
 
-                    <div class="col-12 col-lg-7">
+                    <div class="col-12 col-lg-6">
                         <div class="proveedor-rpt-marcas__panel card shadow-sm h-100">
                             <div class="proveedor-rpt-marcas__panel-header d-flex align-items-center justify-content-between flex-wrap">
                                 <span class="negrita text-info" id="lbVendedorMarcas">Ventas por marca</span>
@@ -1601,8 +1603,10 @@ function tbl_rpt_vendedores() {
 
     const footPrecio = document.getElementById('lbFootTotalPrecio');
     const footPedidos = document.getElementById('lbFootTotalPedidos');
+    const footTicket = document.getElementById('lbFootTicketPromedio');
     if (footPrecio) footPrecio.innerText = '';
     if (footPedidos) footPedidos.innerText = '';
+    if (footTicket) footTicket.innerText = '';
 
     const sucursal = proveedor_getSucursal();
 
@@ -1618,6 +1622,9 @@ function tbl_rpt_vendedores() {
             items.forEach((r) => {
                 varTotal += Number(r.TOTALPRECIO);
                 varPedidos += Number(r.CONTEO);
+                const pedidos = Number(r.CONTEO) || 0;
+                const importe = Number(r.TOTALPRECIO) || 0;
+                const ticket = pedidos > 0 ? importe / pedidos : 0;
                 const nombreAttr = String(r.EMPLEADO || '').replace(/"/g, '&quot;');
                 str += `
                     <tr class="proveedor-rpt-marcas__row hand" data-codemp="${r.CODEMP}" data-nombre="${nombreAttr}">
@@ -1625,20 +1632,23 @@ function tbl_rpt_vendedores() {
                         <td><small class="text-muted">${r.TELEFONO || ''}</small></td>
                         <td class="text-right">${r.CONTEO}</td>
                         <td class="text-right">${F.setMoneda(r.TOTALPRECIO, 'Q')}</td>
+                        <td class="text-right">${F.setMoneda(ticket, 'Q')}</td>
                     </tr>
                 `;
             });
 
-            container.innerHTML = str || '<tr><td colspan="4" class="text-center text-muted">Sin datos</td></tr>';
+            container.innerHTML = str || '<tr><td colspan="5" class="text-center text-muted">Sin datos</td></tr>';
             document.getElementById('lbTotalVImporte').innerText = `Total: ${F.setMoneda(varTotal, 'Q')}`;
             if (footPrecio) footPrecio.innerText = F.setMoneda(varTotal, 'Q');
             if (footPedidos) footPedidos.innerText = String(varPedidos);
+            if (footTicket) footTicket.innerText = F.setMoneda(varPedidos > 0 ? varTotal / varPedidos : 0, 'Q');
         })
         .catch(() => {
-            container.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No se cargaron datos</td></tr>';
+            container.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No se cargaron datos</td></tr>';
             document.getElementById('lbTotalVImporte').innerText = '';
             if (footPrecio) footPrecio.innerText = '';
             if (footPedidos) footPedidos.innerText = '';
+            if (footTicket) footTicket.innerText = '';
         });
 }
 

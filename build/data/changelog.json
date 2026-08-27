@@ -1,5 +1,5 @@
 {
-  "version": "M.27.08.26 10:16",
+  "version": "M.27.08.26 11:31",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -3740,6 +3740,31 @@
       "FECHA": "27-08-2026",
       "HORA": "10:16",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.27.08.26 10:16"
+    },
+    {
+      "FECHA": "27-08-2026",
+      "HORA": "11:19",
+      "DESCRIPCION": "INICIO PROVEEDOR: TABLA VENDEDORES MAS ALTA Y MITAD CON LA GRAFICA"
+    },
+    {
+      "FECHA": "27-08-2026",
+      "HORA": "11:19",
+      "DESCRIPCION": "INICIO PROVEEDOR: COLUMNA TICKET PROMEDIO EN VENTAS POR VENDEDOR"
+    },
+    {
+      "FECHA": "27-08-2026",
+      "HORA": "11:19",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.27.08.26 11:19"
+    },
+    {
+      "FECHA": "27-08-2026",
+      "HORA": "11:31",
+      "DESCRIPCION": "INICIO VENDEDOR: CARD DE FACTURAS VALIDAS IMPORTE Y TICKET PROMEDIO"
+    },
+    {
+      "FECHA": "27-08-2026",
+      "HORA": "11:31",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.27.08.26 11:31"
     }
   ]
 }

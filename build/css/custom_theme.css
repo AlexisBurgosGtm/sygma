@@ -914,6 +914,9 @@ body.proveedor-sidebar-open {
   max-height: 320px;
   overflow-y: auto;
 }
+.proveedor-rpt-vendedores__scroll {
+  max-height: 560px;
+}
 .proveedor-rpt-marcas__chart {
   position: relative;
   height: 200px;
@@ -2116,6 +2119,31 @@ body.app-pos2-theme #root .btn.btn-circle {
 
 .ventas-dashboard-card__title {
   font-size: 0.88rem;
+}
+
+.ventas-dashboard-kpi {
+  border: 1px solid rgba(0, 68, 163, 0.12);
+}
+
+.ventas-dashboard-kpi__conteo {
+  font-size: 1.35rem;
+  line-height: 1.1;
+  color: #0044a3;
+}
+
+.ventas-dashboard-kpi__importe {
+  font-size: 1.05rem;
+}
+
+.ventas-dashboard-kpi__ticket-wrap {
+  margin-top: 0.45rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(0, 68, 163, 0.1);
+}
+
+.ventas-dashboard-kpi__ticket {
+  font-size: 1.15rem;
+  line-height: 1.2;
 }
 
 .ventas-dashboard-chart {
