@@ -1375,6 +1375,8 @@ router.post("/supervisor_mercaderistas_visitas", async (req, res) => {
         filtroTipo = `AND LTRIM(RTRIM(ISNULL(MV.FALTANTES, ''))) NOT IN ('', '[]', 'null', 'NULL')`;
     } else if (tipoVal === 'noatendidas') {
         filtroTipo = `AND LTRIM(RTRIM(ISNULL(MV.NOVISITADO, ''))) <> ''`;
+    } else if (tipoVal === 'visitas') {
+        filtroTipo = `AND LTRIM(RTRIM(ISNULL(MV.NOVISITADO, ''))) = ''`;
     } else if (tipoVal === 'horas') {
         filtroTipo = `AND LTRIM(RTRIM(ISNULL(MV.NOVISITADO, ''))) = ''
                       AND ISNULL(MV.HORA_INICIO, '') <> ''
@@ -2280,6 +2282,84 @@ router.post("/solicitudes_cambio_cliente_aceptar", async (req, res) => {
         console.log(err && err.message ? err.message : err);
         res.send('error');
     }
+});
+
+router.post("/vendedor_faltantes_mes", async (req, res) => {
+    const { token, sucursal, codven, mes, anio } = req.body;
+    const emp = esc(sucursal);
+    const ven = Number(codven) || 0;
+    const mesVal = Number(mes) || 0;
+    const anioVal = Number(anio) || 0;
+
+    if (!emp || ven <= 0 || mesVal <= 0 || anioVal <= 0) {
+        return res.status(400).send('error');
+    }
+
+    const filtroRuta = `(C.CODRUTA = ISNULL((SELECT TOP 1 CODRUTA FROM RUTAS_CLIENTES WHERE EMPNIT = '${emp}' AND CODEMP = ${ven}), -1))`;
+
+    const qry = `
+        SELECT C.CODCLIENTE,
+               ISNULL(C.NOMBRE, '') AS NOMBRE,
+               ISNULL(C.DIRECCION, '') AS DIRECCION,
+               ISNULL(C.NEGOCIO, '') AS NEGOCIO,
+               ISNULL(C.TIPONEGOCIO, '') AS TIPONEGOCIO,
+               CONVERT(varchar(10), MV.FECHA, 23) AS FECHA,
+               MV.EMPNIT,
+               ISNULL(E.NOMEMPLEADO, '') AS NOMMERCADERISTA
+          FROM MERCADERISTAS_VISITAS MV
+         INNER JOIN CLIENTES C
+            ON MV.EMPNIT = C.EMPNIT
+           AND MV.CODCLIENTE = C.CODCLIENTE
+          LEFT OUTER JOIN EMPLEADOS E
+            ON MV.EMPNIT = E.EMPNIT
+           AND MV.CODEMP = E.CODEMPLEADO
+         WHERE MV.EMPNIT = '${emp}'
+           AND ${filtroRuta}
+           AND (
+                (ISNULL(MV.MES, 0) = ${mesVal} AND ISNULL(MV.ANIO, 0) = ${anioVal})
+                OR (MONTH(MV.FECHA) = ${mesVal} AND YEAR(MV.FECHA) = ${anioVal})
+           )
+           AND LTRIM(RTRIM(ISNULL(MV.FALTANTES, ''))) NOT IN ('', '[]', 'null', 'NULL')
+         ORDER BY MV.FECHA DESC, C.NOMBRE
+    `;
+
+    execute.QueryToken(res, qry, token);
+});
+
+router.post("/vendedor_faltantes_visita", async (req, res) => {
+    const { token, sucursal, codclie, fecha } = req.body;
+    const emp = esc(sucursal);
+    const clie = Number(codclie) || 0;
+    const fechaVal = esc((fecha || '').trim()).substring(0, 10);
+
+    if (!emp || clie <= 0) {
+        return res.status(400).send('error');
+    }
+
+    const filtroFecha = fechaVal
+        ? `AND CONVERT(varchar(10), MV.FECHA, 23) = '${fechaVal}'`
+        : '';
+
+    const qry = `
+        SELECT TOP 1
+               MV.EMPNIT,
+               MV.CODCLIENTE,
+               CONVERT(varchar(10), MV.FECHA, 23) AS FECHA,
+               ISNULL(C.NOMBRE, '') AS NOMBRE,
+               ISNULL(C.DIRECCION, '') AS DIRECCION,
+               ISNULL(C.NEGOCIO, '') AS NEGOCIO,
+               ISNULL(MV.FALTANTES, '') AS FALTANTES
+          FROM MERCADERISTAS_VISITAS MV
+          LEFT OUTER JOIN CLIENTES C
+            ON MV.EMPNIT = C.EMPNIT
+           AND MV.CODCLIENTE = C.CODCLIENTE
+         WHERE MV.EMPNIT = '${emp}'
+           AND MV.CODCLIENTE = ${clie}
+           ${filtroFecha}
+         ORDER BY MV.FECHA DESC, ISNULL(MV.HORA_INICIO, '') DESC
+    `;
+
+    execute.QueryToken(res, qry, token);
 });
 
 

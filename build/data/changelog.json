@@ -1,5 +1,5 @@
 {
-  "version": "M.27.08.26 08:28",
+  "version": "M.27.08.26 10:16",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -3715,6 +3715,31 @@
       "FECHA": "27-08-2026",
       "HORA": "08:28",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.27.08.26 08:28"
+    },
+    {
+      "FECHA": "27-08-2026",
+      "HORA": "10:02",
+      "DESCRIPCION": "RESUMEN MERCADERISTAS: COLUMNA VISITAS A LA IZQUIERDA DE HORAS"
+    },
+    {
+      "FECHA": "27-08-2026",
+      "HORA": "10:02",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.27.08.26 10:02"
+    },
+    {
+      "FECHA": "27-08-2026",
+      "HORA": "10:16",
+      "DESCRIPCION": "INICIO VENDEDOR: SECCION FALTANTES MERCADERISTAS DEL MES"
+    },
+    {
+      "FECHA": "27-08-2026",
+      "HORA": "10:16",
+      "DESCRIPCION": "PEDIDOS VENDEDOR: BOTON F DE FALTANTES EN OPCIONES DEL CLIENTE"
+    },
+    {
+      "FECHA": "27-08-2026",
+      "HORA": "10:16",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.27.08.26 10:16"
     }
   ]
 }

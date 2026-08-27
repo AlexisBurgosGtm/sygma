@@ -62,6 +62,7 @@ window.MercVisitasCore = (function () {
         pop: 'Visitas con POP',
         faltante: 'Visitas con faltante',
         noatendidas: 'Visitas no atendidas',
+        visitas: 'Total de visitas',
         horas: 'Visitas con tiempo registrado',
     };
 
@@ -612,6 +613,7 @@ window.MercVisitasCore = (function () {
             <th class="text-center">POP</th>
             <th class="text-center">FALTANTE</th>
             <th class="text-center">NO ATENDIDAS</th>
+            <th class="text-center">VISITAS</th>
             <th class="text-center">HORAS</th>`;
         thead.innerHTML = todas
             ? `<tr><th>SUCURSAL</th>${cols}</tr>`
@@ -637,6 +639,7 @@ window.MercVisitasCore = (function () {
                         ${resumenMetricCard('POP', n0(r.TOTAL_POP), 'pop', '')}
                         ${resumenMetricCard('Faltante', n0(r.TOTAL_FALTANTE), 'faltante', 'text-danger')}
                         ${resumenMetricCard('No atend.', n0(r.TOTAL_NOVISITADO), 'noatendidas', 'text-warning')}
+                        ${resumenMetricCard('Visitas', n0(r.TOTAL_VISITAS), 'visitas', 'text-success')}
                         ${resumenMetricCard('Horas', fmtMinutos(r.MINUTOS_VISITAS), 'horas', 'text-info')}
                     </div>
                 </div>
@@ -648,7 +651,7 @@ window.MercVisitasCore = (function () {
         const cards = el('TblResumenCards');
         const lbTotal = el('LbTotalVisitas');
         const todas = esTodasSucursales();
-        const colspan = todas ? 9 : 8;
+        const colspan = todas ? 10 : 9;
 
         if (!rows.length) {
             const msg = `<tr><td colspan="${colspan}" class="text-center text-muted py-3">No hay datos en el rango seleccionado</td></tr>`;
@@ -674,6 +677,7 @@ window.MercVisitasCore = (function () {
                     ${resumenValCell(n0(r.TOTAL_POP), 'pop', '')}
                     ${resumenValCell(n0(r.TOTAL_FALTANTE), 'faltante', 'text-danger')}
                     ${resumenValCell(n0(r.TOTAL_NOVISITADO), 'noatendidas', 'text-warning')}
+                    ${resumenValCell(n0(r.TOTAL_VISITAS), 'visitas', 'text-success')}
                     ${resumenValCell(fmtMinutos(r.MINUTOS_VISITAS), 'horas', 'text-info')}
                 </tr>`;
             }).join('');
@@ -829,7 +833,7 @@ window.MercVisitasCore = (function () {
         const tbody = el('TblDataResumen');
         const cards = el('TblResumenCards');
         const todas = esTodasSucursales();
-        const colspan = todas ? 9 : 8;
+        const colspan = todas ? 10 : 9;
 
         actualizarCabeceraResumen();
         if (tbody) tbody.innerHTML = `<tr><td colspan="${colspan}" class="text-center py-3">${GlobalLoader}</td></tr>`;
@@ -944,7 +948,7 @@ window.MercVisitasCore = (function () {
                         <div id="${Pfx}PanelResumen">
                             <div id="${Pfx}TblResumenCards" class="d-md-none"></div>
                             <div class="table-responsive d-none d-md-block">
-                                <table class="table table-sm table-bordered table-hover mb-0" style="min-width:980px">
+                                <table class="table table-sm table-bordered table-hover mb-0" style="min-width:1040px">
                                     <thead class="bg-base text-white" id="${Pfx}TblResumenThead">
                                         <tr>
                                             <th>MERCADERISTA</th>
@@ -954,11 +958,12 @@ window.MercVisitasCore = (function () {
                                             <th class="text-center">POP</th>
                                             <th class="text-center">FALTANTE</th>
                                             <th class="text-center">NO ATENDIDAS</th>
+                                            <th class="text-center">VISITAS</th>
                                             <th class="text-center">HORAS</th>
                                         </tr>
                                     </thead>
                                     <tbody id="${Pfx}TblDataResumen">
-                                        <tr><td colspan="8" class="text-center text-muted py-3">Cargando resumen...</td></tr>
+                                        <tr><td colspan="9" class="text-center text-muted py-3">Cargando resumen...</td></tr>
                                     </tbody>
                                 </table>
                             </div>

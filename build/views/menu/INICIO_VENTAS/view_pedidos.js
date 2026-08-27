@@ -2164,9 +2164,9 @@ function tbl_clientes(filtro,qr){
                                         onclick="F.gotoGoogleMaps('${lat}','${lng}')">
                                         <i class="fal fa-globe"></i>
                                     </button>
-                                    <button type="button" class="btn btn-md btn-circle btn-warning hand" title="QR"
-                                        onclick="create_qr_code('${cod}','${nom}')">
-                                        <i class="fal fa-barcode"></i>
+                                    <button type="button" class="btn btn-md btn-circle btn-danger hand negrita" title="Faltantes mercaderista"
+                                        onclick="pedidos_ver_faltantes_ultima('${cod}','${nom}')">
+                                        F
                                     </button>
                                     <button type="button" class="btn btn-circle btn-md btn-primary hand" title="Goles"
                                         onclick="get_status_goles('${cod}','${nom}','${tipo}','${neg}')">
@@ -2595,6 +2595,14 @@ function tbl_status_goles(codclie){
 
 
 
+
+function pedidos_ver_faltantes_ultima(codclie, nom) {
+    if (typeof ventas_ver_faltantes_visita === 'function') {
+        ventas_ver_faltantes_visita(Number(codclie) || 0, '', nom || '');
+        return;
+    }
+    F.AvisoError('No se pudo abrir los faltantes del mercaderista');
+}
 
 function create_qr_code(codigo,nomclie){
 

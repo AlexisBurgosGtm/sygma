@@ -24,6 +24,7 @@ function ventas_onHeaderFiltersChange() {
         const alcance = document.getElementById('ventasCxcAlcance')?.value || 'MES';
         if (alcance !== 'TODAS') ventas_cxc_cargar_listado();
     }
+    if (ventas_currentPane === 'nueve') ventas_cargar_faltantes_merc();
 }
 
 function ventas_getSucursal() {
@@ -247,6 +248,9 @@ function getView(){
                         <div class="tab-pane fade" id="ocho" role="tabpanel" aria-labelledby="home-tab">
                             ${view.vista_creditos_pendientes()}
                         </div>
+                        <div class="tab-pane fade" id="nueve" role="tabpanel" aria-labelledby="home-tab">
+                            ${view.vista_faltantes_mercaderistas()}
+                        </div>
                     </div>
                     </div>
                 </div>
@@ -285,9 +289,14 @@ function getView(){
                             <a class="nav-link negrita text-danger" id="tab-ocho" data-toggle="tab" href="#ocho" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-nueve" data-toggle="tab" href="#nueve" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>
+                        </li>
                     </ul>
 
                 ${view.vista_creditos_modales()}
+                ${view.modal_faltantes_mercaderistas()}
                 ${view.modal_detalle_documento()}
             </div>
             `
@@ -361,6 +370,7 @@ function getView(){
                 { id: 'btnMenuRptGoles', label: 'Goles y cobertura', icon: 'fa-futbol', color: 'secondary' },
                 { id: 'btnMenuRptHistorial', label: 'Historial clientes', icon: 'fa-user', color: 'secondary' },
                 { id: 'btnMenuCreditosPendientes', label: 'Creditos pendientes', icon: 'fa-dollar-sign', color: 'warning' },
+                { id: 'btnMenuFaltantesMerc', label: 'Faltantes Mercaderistas', icon: 'fa-box-open', color: 'danger' },
             ];
             return items.map(item => `
                 <div class="card proveedor-menu-card hand" id="${item.id}">
@@ -458,6 +468,53 @@ function getView(){
                                     <tbody id="tblVentasCxcHistorialBody"></tbody>
                                 </table>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        },
+        vista_faltantes_mercaderistas:()=>{
+            return `
+            <div class="card card-rounded shadow border-0">
+                <div class="card-body p-2 p-md-3">
+                    <h5 class="negrita text-base mb-1">Faltantes Mercaderistas</h5>
+                    <small class="text-muted d-block mb-2">Clientes de su ruta visitados por mercaderista con faltantes en el mes seleccionado</small>
+                    <h6 class="negrita text-secondary mb-2" id="lbVentasFaltMercTotal">0 clientes</h6>
+                    <input type="search" class="form-control mb-2" id="txtVentasFaltMercBuscar"
+                        placeholder="Buscar cliente o dirección...">
+                    <div id="tblVentasFaltMercCards" class="d-md-none"></div>
+                    <div class="table-responsive d-none d-md-block">
+                        <table class="table table-sm table-bordered table-hover mb-0" id="tblVentasFaltMerc">
+                            <thead class="bg-base text-white">
+                                <tr>
+                                    <th>CLIENTE</th>
+                                    <th>DIRECCIÓN</th>
+                                    <th>FECHA VISITA</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataVentasFaltMerc">
+                                <tr><td colspan="3" class="text-center text-muted py-3">Cargando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>`;
+        },
+        modal_faltantes_mercaderistas:()=>{
+            return `
+            <div class="modal fade" id="modalVentasFaltantesMerc" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-danger py-2">
+                            <div>
+                                <h5 class="modal-title text-white negrita mb-0" id="lbVentasFaltMercTitulo">Faltantes</h5>
+                                <small class="text-white-50" id="lbVentasFaltMercSub"></small>
+                            </div>
+                            <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+                        </div>
+                        <div class="modal-body p-3" id="bodyVentasFaltantesMerc"></div>
+                        <div class="modal-footer py-2">
+                            <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</button>
                         </div>
                     </div>
                 </div>
@@ -1019,6 +1076,16 @@ function addListeners(){
             if (typeof ventas_init_creditos === 'function') ventas_init_creditos();
         });
     });
+
+    document.getElementById('btnMenuFaltantesMerc')?.addEventListener('click', () => {
+        ventas_showPanel('nueve', 'btnMenuFaltantesMerc', () => {
+            ventas_cargar_faltantes_merc();
+        });
+    });
+
+    document.getElementById('tblDataVentasFaltMerc')?.addEventListener('click', ventas_on_faltantes_list_click);
+    document.getElementById('tblVentasFaltMercCards')?.addEventListener('click', ventas_on_faltantes_list_click);
+    document.getElementById('txtVentasFaltMercBuscar')?.addEventListener('input', ventas_filtrar_faltantes_merc);
     
     //------------------------------
     // CHECK IN -----------------
@@ -1570,6 +1637,165 @@ function ventas_bindCheckInActions() {
                     });
             });
     });
+}
+
+function ventas_fmt_fecha_corta(fecha) {
+    if (!fecha) return '--';
+    if (typeof fecha === 'string' && fecha.includes('-')) {
+        const p = fecha.substring(0, 10).split('-');
+        if (p.length === 3) return `${p[2]}/${p[1]}/${p[0]}`;
+        return fecha.substring(0, 10);
+    }
+    try {
+        const d = new Date(fecha);
+        if (!isNaN(d.getTime())) {
+            return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+        }
+    } catch (e) { /* ignore */ }
+    return String(fecha);
+}
+
+function ventas_parse_faltantes(val) {
+    const s = String(val || '').trim();
+    if (!s) return [];
+    try {
+        const arr = JSON.parse(s);
+        return Array.isArray(arr) ? arr : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function ventas_html_lista_faltantes(items) {
+    if (!items.length) {
+        return '<div class="text-center text-muted py-3">No hay faltantes registrados en esta visita</div>';
+    }
+    return `
+        <div class="table-responsive" style="max-height:55vh;overflow-y:auto">
+            <table class="table table-sm table-bordered table-hover mb-0">
+                <thead class="bg-base text-white">
+                    <tr><th>CÓDIGO</th><th>PRODUCTO</th></tr>
+                </thead>
+                <tbody>
+                    ${items.map((p) => `<tr><td>${p.CODPROD || ''}</td><td>${p.DESPROD || ''}</td></tr>`).join('')}
+                </tbody>
+            </table>
+        </div>`;
+}
+
+function ventas_mostrar_modal_faltantes(titulo, sub, items) {
+    const lb = document.getElementById('lbVentasFaltMercTitulo');
+    const subEl = document.getElementById('lbVentasFaltMercSub');
+    const body = document.getElementById('bodyVentasFaltantesMerc');
+    if (lb) lb.innerText = titulo || 'Faltantes';
+    if (subEl) subEl.innerText = sub || '';
+    if (body) body.innerHTML = ventas_html_lista_faltantes(items);
+    $('#modalVentasFaltantesMerc').modal('show');
+}
+
+function ventas_cargar_faltantes_merc() {
+    const tbody = document.getElementById('tblDataVentasFaltMerc');
+    const cards = document.getElementById('tblVentasFaltMercCards');
+    const lb = document.getElementById('lbVentasFaltMercTotal');
+    if (tbody) tbody.innerHTML = `<tr><td colspan="3" class="text-center py-3">${GlobalLoader}</td></tr>`;
+    if (cards) cards.innerHTML = GlobalLoader;
+
+    axios.post('/clientes/vendedor_faltantes_mes', {
+        token: TOKEN,
+        sucursal: ventas_getSucursal(),
+        codven: Number(GlobalCodUsuario) || 0,
+        mes: Number(ventas_getMes()) || 0,
+        anio: Number(ventas_getAnio()) || 0,
+    })
+        .then((response) => {
+            if (response.data === 'error') throw new Error('error');
+            const rows = response.data.recordset || [];
+            if (lb) lb.innerText = `${rows.length} registro${rows.length === 1 ? '' : 's'}`;
+            if (!rows.length) {
+                if (tbody) tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted py-3">No hay faltantes en el mes seleccionado</td></tr>';
+                if (cards) cards.innerHTML = '<div class="text-center text-muted py-3">No hay faltantes en el mes seleccionado</div>';
+                return;
+            }
+            if (tbody) {
+                tbody.innerHTML = rows.map((r) => {
+                    const fechaVal = String(r.FECHA || '').substring(0, 10);
+                    const nom = String(r.NOMBRE || '').replace(/"/g, '&quot;');
+                    return `
+                    <tr class="hand ventas-falt-row" data-codclie="${r.CODCLIENTE}" data-fecha="${fechaVal}" data-nom="${nom}">
+                        <td>
+                            <div class="negrita">${r.NOMBRE || ''}</div>
+                            <small class="text-muted">${r.NEGOCIO || ''}</small>
+                        </td>
+                        <td>${r.DIRECCION || ''}</td>
+                        <td>${ventas_fmt_fecha_corta(r.FECHA)}</td>
+                    </tr>`;
+                }).join('');
+            }
+            if (cards) {
+                cards.innerHTML = rows.map((r) => {
+                    const fechaVal = String(r.FECHA || '').substring(0, 10);
+                    const nom = String(r.NOMBRE || '').replace(/"/g, '&quot;');
+                    return `
+                    <div class="card shadow-sm mb-2 border hand ventas-falt-row"
+                        data-codclie="${r.CODCLIENTE}" data-fecha="${fechaVal}" data-nom="${nom}">
+                        <div class="card-body p-2">
+                            <div class="negrita text-base">${r.NOMBRE || ''}</div>
+                            <small class="text-muted d-block">${r.NEGOCIO || ''}</small>
+                            <small class="d-block">${r.DIRECCION || ''}</small>
+                            <small class="text-info negrita">${ventas_fmt_fecha_corta(r.FECHA)}</small>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+            ventas_filtrar_faltantes_merc();
+        })
+        .catch(() => {
+            if (lb) lb.innerText = '0 registros';
+            if (tbody) tbody.innerHTML = '<tr><td colspan="3" class="text-center text-danger py-3">No se pudieron cargar los faltantes</td></tr>';
+            if (cards) cards.innerHTML = '<div class="text-center text-danger py-3">No se pudieron cargar los faltantes</div>';
+        });
+}
+
+function ventas_filtrar_faltantes_merc() {
+    const q = String(document.getElementById('txtVentasFaltMercBuscar')?.value || '').toLowerCase().trim();
+    document.querySelectorAll('#tblDataVentasFaltMerc tr.ventas-falt-row').forEach((tr) => {
+        tr.style.display = !q || tr.innerText.toLowerCase().includes(q) ? '' : 'none';
+    });
+    document.querySelectorAll('#tblVentasFaltMercCards .ventas-falt-row').forEach((card) => {
+        card.style.display = !q || card.innerText.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
+
+function ventas_on_faltantes_list_click(e) {
+    const row = e.target.closest('.ventas-falt-row');
+    if (!row) return;
+    ventas_ver_faltantes_visita(Number(row.dataset.codclie), row.dataset.fecha || '', row.dataset.nom || '');
+}
+
+function ventas_ver_faltantes_visita(codclie, fecha, nom) {
+    const body = document.getElementById('bodyVentasFaltantesMerc');
+    const lb = document.getElementById('lbVentasFaltMercTitulo');
+    const subEl = document.getElementById('lbVentasFaltMercSub');
+    if (lb) lb.innerText = nom || 'Faltantes';
+    if (subEl) subEl.innerText = fecha ? `Visita ${ventas_fmt_fecha_corta(fecha)}` : '';
+    if (body) body.innerHTML = `<div class="text-center py-3">${GlobalLoader}</div>`;
+    $('#modalVentasFaltantesMerc').modal('show');
+
+    axios.post('/clientes/vendedor_faltantes_visita', {
+        token: TOKEN,
+        sucursal: ventas_getSucursal(),
+        codclie,
+        fecha,
+    })
+        .then((response) => {
+            if (response.data === 'error' || !response.data?.recordset?.length) throw new Error('sin datos');
+            const r = response.data.recordset[0];
+            if (subEl) subEl.innerText = `Visita ${ventas_fmt_fecha_corta(r.FECHA)}`;
+            if (body) body.innerHTML = ventas_html_lista_faltantes(ventas_parse_faltantes(r.FALTANTES));
+        })
+        .catch(() => {
+            if (body) body.innerHTML = '<div class="text-center text-muted py-3">No hay visita de mercaderista para este cliente</div>';
+        });
 }
 
 window._ventasCore = { initView, destroyView, getView, addListeners };
