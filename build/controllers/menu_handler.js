@@ -542,6 +542,17 @@
             F.AvisoError('No tiene permitido entrar a esta secci├│n');
         }   
     },
+    objetivos_mercaderistas:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/bi_objetivos/view_mercaderistas_visitas.js','root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        }
+    },
     objetivos_cobertura_municipios:()=>{
         if(Menu.verify()==true){
             Menu.salidaMenu();

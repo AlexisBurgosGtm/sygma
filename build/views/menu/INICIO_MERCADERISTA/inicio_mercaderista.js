@@ -11,6 +11,7 @@ var mercaderista_act_fotos = {
 };
 var mercaderista_barcode_stream = null;
 var mercaderista_alcance = 'PROPIOS';
+var MERC_VISITAS_CORE_URL = '../views/shared/view_mercaderistas_visitas_core.js';
 
 function mercaderista_setActiveCard(cardId) {
     document.querySelectorAll('.proveedor-menu-card').forEach((el) => {
@@ -54,6 +55,7 @@ function mercaderista_showPanel(paneId, cardId, afterShow) {
 }
 
 function mercaderista_showHome() {
+    mercaderista_teardown_resumen();
     mercaderista_showPanel('uno', 'btnMenuMercHome', () => {
         mercaderista_toggle_qr_btn(true);
         mercaderista_cargar_clientes();
@@ -61,9 +63,56 @@ function mercaderista_showHome() {
 }
 
 function mercaderista_showPrecios() {
+    mercaderista_teardown_resumen();
     mercaderista_showPanel('dos', 'btnMenuMercPrecios', () => {
         mercaderista_toggle_qr_btn(false);
         mercaderista_cargar_precios();
+    });
+}
+
+function mercaderista_ensure_visitas_core() {
+    if (window.MercVisitasCore) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = MERC_VISITAS_CORE_URL + '?_se=' + Date.now();
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+    });
+}
+
+function mercaderista_teardown_resumen() {
+    if (window.MercVisitasCore) {
+        try { MercVisitasCore.destroy(); } catch (e) { /* ignore */ }
+    }
+    const host = document.getElementById('mercaderistaResumenHost');
+    if (host) host.innerHTML = '';
+}
+
+function mercaderista_showResumen() {
+    mercaderista_showPanel('tres', 'btnMenuMercResumen', () => {
+        mercaderista_toggle_qr_btn(false);
+        const host = document.getElementById('mercaderistaResumenHost');
+        if (host) host.innerHTML = `<div class="text-center py-4">${GlobalLoader}</div>`;
+        mercaderista_ensure_visitas_core()
+            .then(() => {
+                const hostEl = document.getElementById('mercaderistaResumenHost');
+                if (!hostEl || !window.MercVisitasCore) return;
+                const savedRoot = root;
+                root = hostEl;
+                MercVisitasCore.init({
+                    prefix: 'SelfMerc',
+                    titulo: 'Mi resumen de visitas',
+                    lockEmpleado: true,
+                    getSucursal: () => GlobalEmpnit || '%',
+                    getCodemp: () => Number(GlobalCodUsuario) || 0,
+                });
+                root = savedRoot;
+            })
+            .catch(() => {
+                const hostEl = document.getElementById('mercaderistaResumenHost');
+                if (hostEl) hostEl.innerHTML = '<div class="text-center text-danger py-4">No se pudo cargar el resumen de visitas</div>';
+            });
     });
 }
 
@@ -108,6 +157,9 @@ function getView() {
                             <div class="tab-pane fade" id="dos" role="tabpanel">
                                 ${view.vista_precios()}
                             </div>
+                            <div class="tab-pane fade" id="tres" role="tabpanel">
+                                <div id="mercaderistaResumenHost"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -115,6 +167,7 @@ function getView() {
                 <ul class="nav nav-tabs hidden" id="myTabHome" role="tablist">
                     <li class="nav-item"><a class="nav-link active" id="tab-uno" data-toggle="tab" href="#uno"></a></li>
                     <li class="nav-item"><a class="nav-link" id="tab-dos" data-toggle="tab" href="#dos"></a></li>
+                    <li class="nav-item"><a class="nav-link" id="tab-tres" data-toggle="tab" href="#tres"></a></li>
                 </ul>
 
                 ${view.modal_actividades()}
@@ -134,6 +187,7 @@ function getView() {
         menu: () => {
             const items = [
                 { id: 'btnMenuMercHome', label: 'Inicio', icon: 'fa-home', color: 'primary' },
+                { id: 'btnMenuMercResumen', label: 'Resumen visitas', icon: 'fa-clipboard-list', color: 'info' },
                 { id: 'btnMenuMercPrecios', label: 'Precios', icon: 'fa-tags', color: 'success' },
             ];
             return items.map((item) => `
@@ -2031,6 +2085,7 @@ function addListeners() {
     document.getElementById('cmbMercaderistaEstadoVisita')?.addEventListener('change', () => mercaderista_cargar_clientes());
 
     document.getElementById('btnMenuMercHome')?.addEventListener('click', () => mercaderista_showHome());
+    document.getElementById('btnMenuMercResumen')?.addEventListener('click', () => mercaderista_showResumen());
     document.getElementById('btnMenuMercPrecios')?.addEventListener('click', () => mercaderista_showPrecios());
 
     document.getElementById('btnMercaderistaGuardarNoVisita')?.addEventListener('click', mercaderista_registrar_no_visita);
@@ -2057,6 +2112,7 @@ function initView() {
 }
 
 function destroyView() {
+    mercaderista_teardown_resumen();
     mercaderista_toggleSidebar(false);
     document.body.classList.remove('proveedor-sidebar-open');
     document.getElementById('js-page-content')?.classList.remove('proveedor-page');

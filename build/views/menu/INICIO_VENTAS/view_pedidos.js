@@ -494,7 +494,7 @@ function getView(){
         lista_clientes:()=>{
             return `
                     <div class="card card-rounded col-12 shadow">            
-                        <div class="card-body p-4">
+                        <div class="card-body p-2">
                             <div class="row">
                                 <select class="form-control negrita text-danger border-danger" id="cmbDiaCliente">
                                             <option value="LUNES">LUNES</option>
@@ -529,11 +529,11 @@ function getView(){
                                     </div>
                             </div>
                             
-                            <div class="row">
-                                <table class="col-12 table table-borderless h-full mb-0">
-                                    <thead class="bg-base text-white" style="border-radius:14px;overflow:hidden">
+                            <div class="ped-clientes-table-wrap">
+                                <table class="table table-borderless w-100 mb-0" id="tblClientesPedido">
+                                    <thead class="bg-base text-white">
                                         <tr>
-                                            <td class="rounded" style="border-radius:14px">CLIENTE</td>
+                                            <td class="rounded">CLIENTE</td>
                                         </tr>
                                     </thead>
                                     <tbody id="tblDataClientes"></tbody>
@@ -2127,9 +2127,9 @@ function tbl_clientes(filtro,qr){
                 const panelId = `pedOpc_${r.CODCLIENTE}`;
 
                 str += `
-                <tr class="ped-cliente-row border-0 ${strClassVisitado}">
+                <tr class="ped-cliente-row border-0">
                     <td>
-                        <div class="ped-cliente-card">
+                        <div class="ped-cliente-card ${strClassVisitado}">
                             <div>
                                 <small class="text-base negrita">${r.TIPONEGOCIO || ''}-${r.NEGOCIO || ''}</small>
                                 <br>

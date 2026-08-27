@@ -163,12 +163,34 @@
 }
 
 /* Nuevo Pedido — tarjeta cliente + panel Opciones */
+.ped-clientes-table-wrap {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+}
+#tblClientesPedido {
+    width: 100% !important;
+    max-width: 100%;
+    table-layout: fixed;
+    margin: 0;
+}
+#tblClientesPedido thead td {
+    border-radius: 14px;
+}
+#tblDataClientes tr.ped-cliente-row,
 #tblDataClientes tr.ped-cliente-row > td {
-    border: 0;
-    padding: 0.55rem 0.35rem;
-    background: transparent;
+    border: 0 !important;
+    background: transparent !important;
+    background-color: transparent !important;
+}
+#tblDataClientes tr.ped-cliente-row > td {
+    padding: 0.45rem 0;
+    width: 100%;
 }
 .ped-cliente-card {
+    width: 100%;
+    box-sizing: border-box;
     border-radius: 18px;
     padding: 0.9rem 1rem;
     background: rgba(255, 255, 255, 0.72);
@@ -177,13 +199,13 @@
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
 }
-.ped-cliente-row.bg-visitado .ped-cliente-card {
-    background: rgba(224, 255, 245, 0.82);
-    border-color: rgba(46, 180, 130, 0.25);
+.ped-cliente-card.bg-visitado {
+    background: rgb(224, 255, 245) !important;
+    border-color: rgba(46, 180, 130, 0.35);
 }
-.ped-cliente-row.bg-novisitado .ped-cliente-card {
-    background: rgba(255, 220, 220, 0.82);
-    border-color: rgba(220, 80, 80, 0.22);
+.ped-cliente-card.bg-novisitado {
+    background: rgb(255, 205, 205) !important;
+    border-color: rgba(220, 80, 80, 0.3);
 }
 .ped-cliente-card__meta {
     display: flex;

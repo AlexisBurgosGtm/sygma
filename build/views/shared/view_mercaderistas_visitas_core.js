@@ -49,7 +49,60 @@ window.MercVisitasCore = (function () {
         return `${h} h ${r} min`;
     }
 
+    function n0(val) {
+        const n = Number(val);
+        return Number.isFinite(n) ? n : 0;
+    }
+
+    const FILTRO_TITULOS = {
+        todas: 'Todas las visitas',
+        ota: 'Visitas con OTA',
+        vitrinas: 'Visitas con Vitrinas',
+        detergentes: 'Visitas con Detergentes',
+        pop: 'Visitas con POP',
+        faltante: 'Visitas con faltante',
+        noatendidas: 'Visitas no atendidas',
+        horas: 'Visitas con tiempo registrado',
+    };
+
+    function actividadesHtml(r) {
+        const badges = [];
+        if (n0(r.OTA)) badges.push('<span class="badge badge-info mr-1 mb-1">OTA</span>');
+        if (n0(r.VITRINAS)) badges.push('<span class="badge badge-primary mr-1 mb-1">VITRINAS</span>');
+        if (n0(r.DETERGENTES)) badges.push('<span class="badge badge-success mr-1 mb-1">DETERGENTES</span>');
+        if (n0(r.POP)) badges.push('<span class="badge badge-secondary mr-1 mb-1">POP</span>');
+        if (tieneFaltantes(r.FALTANTES)) badges.push('<span class="badge badge-danger mr-1 mb-1">FALTANTE</span>');
+        const motivo = String(r.NOVISITADO || '').trim();
+        if (motivo) badges.push('<span class="badge badge-warning mr-1 mb-1">NO ATENDIDA</span>');
+        if (!badges.length) return '<span class="text-muted">—</span>';
+        return badges.join('');
+    }
+
+    function resumenValCell(valor, filtro, extraClass) {
+        return `<td class="text-center negrita hand merc-resumen-val ${extraClass || ''}" data-filtro="${filtro}" title="Ver visitas relacionadas">${valor}</td>`;
+    }
+
+    function resumenMetricCard(label, valor, filtro, extraClass) {
+        return `
+            <div class="col-4 mb-2">
+                <div class="hand merc-resumen-val py-1 rounded ${extraClass || ''}" data-filtro="${filtro}" title="Ver visitas relacionadas">
+                    <div class="text-muted">${label}</div>
+                    <div class="negrita">${valor}</div>
+                </div>
+            </div>`;
+    }
+
+    function isLockedEmpleado() {
+        return !!(cfg && (cfg.lockEmpleado === true || typeof cfg.getCodemp === 'function'));
+    }
+
     function getCodMercaderista() {
+        if (isLockedEmpleado()) {
+            if (typeof cfg.getCodemp === 'function') return Number(cfg.getCodemp()) || 0;
+            const locked = Number(cfg.lockCodemp);
+            if (locked > 0) return locked;
+            return Number(GlobalCodUsuario) || 0;
+        }
         return Number(el('CmbMercaderista')?.value) || 0;
     }
 
@@ -78,6 +131,7 @@ window.MercVisitasCore = (function () {
     }
 
     function cargarMercaderistas() {
+        if (isLockedEmpleado()) return Promise.resolve();
         const cmb = el('CmbMercaderista');
         if (!cmb) return Promise.resolve();
         const valorPrev = cmb.value || '0';
@@ -189,15 +243,15 @@ window.MercVisitasCore = (function () {
                     position: fixed;
                     inset: 0;
                     z-index: 20000;
-                    background: rgba(15, 23, 42, 0.88);
-                    backdrop-filter: blur(6px);
-                    -webkit-backdrop-filter: blur(6px);
+                    background: rgba(15, 23, 42, 0.82);
                     align-items: center;
                     justify-content: center;
                     padding: 1rem;
                 }
                 #mercVisitasFotoLightbox.is-open { display: flex; }
                 #mercVisitasFotoLightbox img {
+                    position: relative;
+                    z-index: 1;
                     max-width: 96vw;
                     max-height: 90vh;
                     object-fit: contain;
@@ -234,16 +288,100 @@ window.MercVisitasCore = (function () {
             <img id="mercVisitasFotoLightboxImg" alt="Foto ampliada" src="">
         `;
         document.body.appendChild(wrap);
-        wrap.addEventListener('click', (e) => {
-            if (e.target === wrap || e.target.classList.contains('merc-lb-close')) {
-                cerrarFotoCompleta();
-            }
+        wrap.addEventListener('mousedown', (e) => {
+            if (e.target !== wrap && !e.target.classList.contains('merc-lb-close')) return;
+            e.preventDefault();
+            e.stopPropagation();
+            cerrarFotoCompleta();
         });
-        document.addEventListener('keydown', onLightboxKeydown);
+        wrap.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+        document.addEventListener('keydown', onLightboxKeydown, true);
+    }
+
+    function lightboxAbierto() {
+        const box = document.getElementById('mercVisitasFotoLightbox');
+        return !!(box && box.classList.contains('is-open'));
     }
 
     function onLightboxKeydown(e) {
-        if (e.key === 'Escape') cerrarFotoCompleta();
+        if (e.key !== 'Escape' || !lightboxAbierto()) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+        cerrarFotoCompleta();
+    }
+
+    const MODAL_Z = {
+        ModalVisitasMerc: 2050,
+        ModalDetalleVisita: 2160,
+        ModalFotosActividad: 2260,
+        ModalFaltantesLista: 2260,
+    };
+
+    function syncModalBackdrops() {
+        const backs = Array.from(document.querySelectorAll('.modal-backdrop'));
+        backs.forEach((b, i) => {
+            const top = i === backs.length - 1;
+            b.style.setProperty('opacity', top ? '0.2' : '0', 'important');
+            b.style.setProperty('pointer-events', top ? 'auto' : 'none', 'important');
+        });
+    }
+
+    function apilarModal(modalEl, zModal) {
+        if (!modalEl) return;
+        modalEl.style.setProperty('z-index', String(zModal), 'important');
+        const fixBackdrop = () => {
+            const backs = document.querySelectorAll('.modal-backdrop');
+            const last = backs[backs.length - 1];
+            if (last) last.style.setProperty('z-index', String(zModal - 10), 'important');
+            syncModalBackdrops();
+        };
+        fixBackdrop();
+        setTimeout(fixBackdrop, 0);
+        setTimeout(fixBackdrop, 50);
+    }
+
+    function reapilarModalesVisibles() {
+        const orden = ['ModalFotosActividad', 'ModalFaltantesLista', 'ModalDetalleVisita', 'ModalVisitasMerc'];
+        const top = orden.map((id) => el(id)).find((m) => m && m.classList.contains('show'));
+        if (!top) return;
+        const key = Object.keys(MODAL_Z).find((k) => top.id && top.id.endsWith(k));
+        apilarModal(top, (key && MODAL_Z[key]) || 2160);
+        document.body.classList.add('modal-open');
+    }
+
+    function bindStackedModals() {
+        const stacks = [
+            { id: 'ModalDetalleVisita', z: MODAL_Z.ModalDetalleVisita },
+            { id: 'ModalFotosActividad', z: MODAL_Z.ModalFotosActividad },
+            { id: 'ModalFaltantesLista', z: MODAL_Z.ModalFaltantesLista },
+        ];
+        stacks.forEach(({ id, z }) => {
+            const modalEl = el(id);
+            if (!modalEl) return;
+            document.body.appendChild(modalEl);
+            $(modalEl).on('show.bs.modal shown.bs.modal', () => apilarModal(modalEl, z));
+            $(modalEl).on('hidden.bs.modal', () => {
+                reaplicarTrasCerrarAnidado();
+            });
+        });
+    }
+
+    function reaplicarTrasCerrarAnidado() {
+        if (lightboxAbierto()) cerrarFotoCompleta();
+        reapilarModalesVisibles();
+    }
+
+    function removeStackedModals(pfx) {
+        ['ModalDetalleVisita', 'ModalFotosActividad', 'ModalFaltantesLista'].forEach((id) => {
+            const m = document.getElementById(`${pfx}${id}`);
+            if (!m) return;
+            $(m).modal('hide');
+            if (m.parentElement === document.body) m.remove();
+        });
     }
 
     function verFotoCompleta(src, label) {
@@ -255,6 +393,7 @@ window.MercVisitasCore = (function () {
         if (img) img.src = src;
         if (cap) cap.textContent = label || 'Foto';
         if (box) box.classList.add('is-open');
+        document.body.classList.add('merc-lb-open');
     }
 
     function cerrarFotoCompleta() {
@@ -262,11 +401,15 @@ window.MercVisitasCore = (function () {
         const img = document.getElementById('mercVisitasFotoLightboxImg');
         if (box) box.classList.remove('is-open');
         if (img) img.removeAttribute('src');
+        document.body.classList.remove('merc-lb-open');
+        setTimeout(reapilarModalesVisibles, 0);
     }
 
     function onFotosDblClick(e) {
         const img = e.target.closest('img.merc-foto-preview');
         if (!img || !img.src) return;
+        e.preventDefault();
+        e.stopPropagation();
         verFotoCompleta(img.src, img.getAttribute('data-merc-foto-label') || img.alt || 'Foto');
     }
 
@@ -461,9 +604,18 @@ window.MercVisitasCore = (function () {
         const thead = el('TblResumenThead');
         if (!thead) return;
         const todas = esTodasSucursales();
+        const cols = `
+            <th>MERCADERISTA</th>
+            <th class="text-center">OTA</th>
+            <th class="text-center">VITRINAS</th>
+            <th class="text-center">DETERGENTES</th>
+            <th class="text-center">POP</th>
+            <th class="text-center">FALTANTE</th>
+            <th class="text-center">NO ATENDIDAS</th>
+            <th class="text-center">HORAS</th>`;
         thead.innerHTML = todas
-            ? `<tr><th>SUCURSAL</th><th>MERCADERISTA</th><th class="text-center">VISITAS</th><th class="text-center">NO VISITADO</th><th class="text-center">HORAS</th></tr>`
-            : `<tr><th>MERCADERISTA</th><th class="text-center">VISITAS</th><th class="text-center">NO VISITADO</th><th class="text-center">HORAS</th></tr>`;
+            ? `<tr><th>SUCURSAL</th>${cols}</tr>`
+            : `<tr>${cols}</tr>`;
     }
 
     function resumenCardHtml(r) {
@@ -471,16 +623,21 @@ window.MercVisitasCore = (function () {
         const sucursalHtml = todas
             ? `<div class="small text-secondary mb-1">${r.NOMEMPRESA || r.EMPNIT || ''}</div>`
             : '';
+        const nom = String(r.NOMMERCADERISTA || '').replace(/"/g, '&quot;');
         return `
-            <div class="card merc-resumen-card shadow-sm mb-2 border hand merc-resumen-row"
-                data-codemp="${r.CODEMP || 0}" data-empnit="${r.EMPNIT || ''}" data-nom="${String(r.NOMMERCADERISTA || '').replace(/"/g, '&quot;')}">
+            <div class="card merc-resumen-card shadow-sm mb-2 border merc-resumen-row"
+                data-codemp="${r.CODEMP || 0}" data-empnit="${r.EMPNIT || ''}" data-nom="${nom}">
                 <div class="card-body p-2">
                     ${sucursalHtml}
-                    <div class="negrita text-base mb-2">${r.NOMMERCADERISTA || ''}</div>
+                    <div class="negrita text-base mb-2 hand merc-resumen-val" data-filtro="todas" title="Ver todas las visitas">${r.NOMMERCADERISTA || ''}</div>
                     <div class="row small text-center">
-                        <div class="col-4"><div class="text-muted">Visitas</div><div class="negrita text-success">${r.TOTAL_VISITAS || 0}</div></div>
-                        <div class="col-4"><div class="text-muted">No visit.</div><div class="negrita text-warning">${r.TOTAL_NOVISITADO || 0}</div></div>
-                        <div class="col-4"><div class="text-muted">Horas</div><div class="negrita text-info">${fmtMinutos(r.MINUTOS_VISITAS)}</div></div>
+                        ${resumenMetricCard('OTA', n0(r.TOTAL_OTA), 'ota', 'text-primary')}
+                        ${resumenMetricCard('Vitrinas', n0(r.TOTAL_VITRINAS), 'vitrinas', 'text-info')}
+                        ${resumenMetricCard('Deterg.', n0(r.TOTAL_DETERGENTES), 'detergentes', 'text-success')}
+                        ${resumenMetricCard('POP', n0(r.TOTAL_POP), 'pop', '')}
+                        ${resumenMetricCard('Faltante', n0(r.TOTAL_FALTANTE), 'faltante', 'text-danger')}
+                        ${resumenMetricCard('No atend.', n0(r.TOTAL_NOVISITADO), 'noatendidas', 'text-warning')}
+                        ${resumenMetricCard('Horas', fmtMinutos(r.MINUTOS_VISITAS), 'horas', 'text-info')}
                     </div>
                 </div>
             </div>`;
@@ -491,7 +648,7 @@ window.MercVisitasCore = (function () {
         const cards = el('TblResumenCards');
         const lbTotal = el('LbTotalVisitas');
         const todas = esTodasSucursales();
-        const colspan = todas ? 5 : 4;
+        const colspan = todas ? 9 : 8;
 
         if (!rows.length) {
             const msg = `<tr><td colspan="${colspan}" class="text-center text-muted py-3">No hay datos en el rango seleccionado</td></tr>`;
@@ -505,14 +662,19 @@ window.MercVisitasCore = (function () {
         if (tbody) {
             tbody.innerHTML = rows.map((r) => {
                 const colSuc = todas ? `<td class="small">${r.NOMEMPRESA || r.EMPNIT || ''}</td>` : '';
+                const nom = String(r.NOMMERCADERISTA || '').replace(/"/g, '&quot;');
                 return `
-                <tr class="hand merc-resumen-row"
-                    data-codemp="${r.CODEMP || 0}" data-empnit="${r.EMPNIT || ''}" data-nom="${String(r.NOMMERCADERISTA || '').replace(/"/g, '&quot;')}">
+                <tr class="merc-resumen-row"
+                    data-codemp="${r.CODEMP || 0}" data-empnit="${r.EMPNIT || ''}" data-nom="${nom}">
                     ${colSuc}
-                    <td class="negrita">${r.NOMMERCADERISTA || ''}</td>
-                    <td class="text-center negrita text-success">${r.TOTAL_VISITAS || 0}</td>
-                    <td class="text-center negrita text-warning">${r.TOTAL_NOVISITADO || 0}</td>
-                    <td class="text-center negrita text-info">${fmtMinutos(r.MINUTOS_VISITAS)}</td>
+                    <td class="negrita hand merc-resumen-val" data-filtro="todas" title="Ver todas las visitas">${r.NOMMERCADERISTA || ''}</td>
+                    ${resumenValCell(n0(r.TOTAL_OTA), 'ota', 'text-primary')}
+                    ${resumenValCell(n0(r.TOTAL_VITRINAS), 'vitrinas', 'text-info')}
+                    ${resumenValCell(n0(r.TOTAL_DETERGENTES), 'detergentes', 'text-success')}
+                    ${resumenValCell(n0(r.TOTAL_POP), 'pop', '')}
+                    ${resumenValCell(n0(r.TOTAL_FALTANTE), 'faltante', 'text-danger')}
+                    ${resumenValCell(n0(r.TOTAL_NOVISITADO), 'noatendidas', 'text-warning')}
+                    ${resumenValCell(fmtMinutos(r.MINUTOS_VISITAS), 'horas', 'text-info')}
                 </tr>`;
             }).join('');
         }
@@ -526,7 +688,7 @@ window.MercVisitasCore = (function () {
         if (!body) return;
 
         if (!rows.length) {
-            body.innerHTML = '<div class="text-center text-muted py-3">No hay visitas en el rango seleccionado</div>';
+            body.innerHTML = '<div class="text-center text-muted py-3">No hay visitas relacionadas en el rango seleccionado</div>';
             if (lbTotal) lbTotal.innerText = '0 visitas';
             return;
         }
@@ -539,8 +701,8 @@ window.MercVisitasCore = (function () {
                         <tr>
                             ${todas ? '<th>SUCURSAL</th>' : ''}
                             <th>CLIENTE</th>
-                            <th>FECHA</th>
-                            <th>HORA</th>
+                            <th>ACTIVIDADES</th>
+                            <th class="text-center" style="width:90px">DETALLE</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -548,12 +710,22 @@ window.MercVisitasCore = (function () {
                             const fechaVal = String(r.FECHA || '').substring(0, 10);
                             const colSuc = todas ? `<td class="small">${r.NOMEMPRESA || r.EMPNIT || ''}</td>` : '';
                             return `
-                            <tr class="hand merc-visita-row"
-                                data-codemp="${r.CODEMP}" data-codclie="${r.CODCLIENTE}" data-fecha="${fechaVal}" data-empnit="${r.EMPNIT || ''}">
+                            <tr>
                                 ${colSuc}
-                                <td><div class="negrita">${r.NOMBRE_CLIENTE || ''}</div><small class="text-muted">${r.NEGOCIO || ''}</small></td>
-                                <td>${fmtFecha(r.FECHA)}</td>
-                                <td>${r.HORA_INICIO || '--'}</td>
+                                <td>
+                                    <div class="negrita">${r.NOMBRE_CLIENTE || ''}</div>
+                                    <small class="text-muted d-block">${r.NEGOCIO || ''}</small>
+                                    <small class="text-secondary">${fmtFecha(r.FECHA)} · ${r.HORA_INICIO || '--'}</small>
+                                </td>
+                                <td>${actividadesHtml(r)}</td>
+                                <td class="text-center align-middle">
+                                    <button type="button" class="btn btn-sm btn-outline-info merc-visita-detalle"
+                                        data-codemp="${r.CODEMP}" data-codclie="${r.CODCLIENTE}"
+                                        data-fecha="${fechaVal}" data-empnit="${r.EMPNIT || ''}"
+                                        title="Ver detalle de la visita">
+                                        <i class="fal fa-eye mr-1"></i>Ver
+                                    </button>
+                                </td>
                             </tr>`;
                         }).join('')}
                     </tbody>
@@ -562,7 +734,7 @@ window.MercVisitasCore = (function () {
         if (lbTotal) lbTotal.innerText = `${rows.length} visita${rows.length === 1 ? '' : 's'}`;
     }
 
-    function verVisitasMercaderista(codemp, empnit, nom) {
+    function verVisitasMercaderista(codemp, empnit, nom, tipo) {
         const fechas = validarFechas();
         if (!fechas) return;
         const { fi, ff } = fechas;
@@ -571,11 +743,13 @@ window.MercVisitasCore = (function () {
             F.AvisoError('Mercaderista no válido');
             return;
         }
+        const filtro = String(tipo || 'todas').toLowerCase();
+        const subtitulo = FILTRO_TITULOS[filtro] || FILTRO_TITULOS.todas;
 
         const titulo = el('LbTituloVisitasMerc');
         const body = el('BodyVisitasMerc');
         const lbTotal = el('LbTotalVisitasMerc');
-        if (titulo) titulo.innerText = nom || 'Visitas del mercaderista';
+        if (titulo) titulo.innerText = nom ? `${nom} — ${subtitulo}` : subtitulo;
         if (lbTotal) lbTotal.innerText = '';
         if (body) body.innerHTML = `<div class="text-center py-4">${GlobalLoader}</div>`;
         $(`#${P()}ModalVisitasMerc`).modal('show');
@@ -587,6 +761,7 @@ window.MercVisitasCore = (function () {
             fi,
             ff,
             codemp: merc,
+            tipo: filtro === 'todas' ? '' : filtro,
         })
             .then((response) => {
                 if (response.data === 'error') throw new Error('error');
@@ -599,12 +774,17 @@ window.MercVisitasCore = (function () {
     }
 
     function onResumenClick(e) {
-        const row = e.target.closest('.merc-resumen-row');
+        const cell = e.target.closest('.merc-resumen-val');
+        if (!cell) return;
+        const row = cell.closest('.merc-resumen-row');
         if (!row) return;
+        e.preventDefault();
+        e.stopPropagation();
         verVisitasMercaderista(
             Number(row.dataset.codemp),
             row.dataset.empnit || '',
-            row.dataset.nom || ''
+            row.dataset.nom || '',
+            cell.dataset.filtro || 'todas'
         );
     }
 
@@ -649,7 +829,7 @@ window.MercVisitasCore = (function () {
         const tbody = el('TblDataResumen');
         const cards = el('TblResumenCards');
         const todas = esTodasSucursales();
-        const colspan = todas ? 5 : 4;
+        const colspan = todas ? 9 : 8;
 
         actualizarCabeceraResumen();
         if (tbody) tbody.innerHTML = `<tr><td colspan="${colspan}" class="text-center py-3">${GlobalLoader}</td></tr>`;
@@ -675,6 +855,10 @@ window.MercVisitasCore = (function () {
     }
 
     function cargarDatos() {
+        if (isLockedEmpleado() && !getCodMercaderista()) {
+            F.AvisoError('No se identificó el mercaderista de la sesión');
+            return;
+        }
         togglePanelesReporte();
         if (getTipoReporte() === 'RESUMEN') cargarResumen();
         else cargarVisitas();
@@ -685,23 +869,42 @@ window.MercVisitasCore = (function () {
     }
 
     function onVisitaClick(e) {
-        const row = e.target.closest('.merc-visita-row');
-        if (!row) return;
+        const trigger = e.target.closest('.merc-visita-detalle') || e.target.closest('.merc-visita-row');
+        if (!trigger) return;
+        e.preventDefault();
+        e.stopPropagation();
         verDetalle(
-            Number(row.dataset.codemp),
-            Number(row.dataset.codclie),
-            row.dataset.fecha || '',
-            row.dataset.empnit || ''
+            Number(trigger.dataset.codemp),
+            Number(trigger.dataset.codclie),
+            trigger.dataset.fecha || '',
+            trigger.dataset.empnit || ''
         );
     }
 
     function getViewHtml() {
         const Pfx = P();
+        const locked = isLockedEmpleado();
+        const titulo = (cfg && cfg.titulo) || (locked ? 'Mi resumen de visitas' : 'Visitas de mercaderistas');
+        const filtroMercHtml = locked ? '' : `
+                            <div class="col-6 col-md-6 mb-2 mb-md-0">
+                                <label class="negrita text-secondary small mb-1" for="${Pfx}CmbMercaderista">Mercaderista</label>
+                                <select class="form-control negrita" id="${Pfx}CmbMercaderista">
+                                    <option value="0">TODOS</option>
+                                </select>
+                            </div>`;
+        const colTipo = locked ? 'col-12 col-md-6' : 'col-6 col-md-6';
         return `
+            <style>
+                .merc-resumen-val { cursor: pointer; }
+                .merc-resumen-val:hover { background-color: rgba(0, 68, 163, 0.08); }
+                #${Pfx}ModalDetalleVisita { z-index: 2160 !important; }
+                #${Pfx}ModalFotosActividad,
+                #${Pfx}ModalFaltantesLista { z-index: 2260 !important; }
+            </style>
             <div class="col-12 p-0 bg-white">
                 <div class="card card-rounded shadow border-0">
                     <div class="card-body p-2 p-md-3">
-                        <h5 class="negrita text-base mb-3">Visitas de mercaderistas</h5>
+                        <h5 class="negrita text-base mb-3">${titulo}</h5>
                         <div class="row align-items-end mb-2">
                             <div class="col-6 col-md-3 mb-2 mb-md-0">
                                 <label class="negrita text-secondary small mb-1" for="${Pfx}TxtFechaIni">Fecha inicial</label>
@@ -716,13 +919,8 @@ window.MercVisitasCore = (function () {
                             </div>
                         </div>
                         <div class="row align-items-end mb-3">
-                            <div class="col-6 col-md-6 mb-2 mb-md-0">
-                                <label class="negrita text-secondary small mb-1" for="${Pfx}CmbMercaderista">Mercaderista</label>
-                                <select class="form-control negrita" id="${Pfx}CmbMercaderista">
-                                    <option value="0">TODOS</option>
-                                </select>
-                            </div>
-                            <div class="col-6 col-md-6 mb-2 mb-md-0">
+                            ${filtroMercHtml}
+                            <div class="${colTipo} mb-2 mb-md-0">
                                 <label class="negrita text-secondary small mb-1" for="${Pfx}CmbTipoReporte">Reporte</label>
                                 <select class="form-control negrita" id="${Pfx}CmbTipoReporte">
                                     <option value="RESUMEN" selected>RESUMEN</option>
@@ -746,12 +944,21 @@ window.MercVisitasCore = (function () {
                         <div id="${Pfx}PanelResumen">
                             <div id="${Pfx}TblResumenCards" class="d-md-none"></div>
                             <div class="table-responsive d-none d-md-block">
-                                <table class="table table-sm table-bordered table-hover mb-0" style="min-width:640px">
+                                <table class="table table-sm table-bordered table-hover mb-0" style="min-width:980px">
                                     <thead class="bg-base text-white" id="${Pfx}TblResumenThead">
-                                        <tr><th>MERCADERISTA</th><th class="text-center">VISITAS</th><th class="text-center">NO VISITADO</th><th class="text-center">HORAS</th></tr>
+                                        <tr>
+                                            <th>MERCADERISTA</th>
+                                            <th class="text-center">OTA</th>
+                                            <th class="text-center">VITRINAS</th>
+                                            <th class="text-center">DETERGENTES</th>
+                                            <th class="text-center">POP</th>
+                                            <th class="text-center">FALTANTE</th>
+                                            <th class="text-center">NO ATENDIDAS</th>
+                                            <th class="text-center">HORAS</th>
+                                        </tr>
                                     </thead>
                                     <tbody id="${Pfx}TblDataResumen">
-                                        <tr><td colspan="4" class="text-center text-muted py-3">Cargando resumen...</td></tr>
+                                        <tr><td colspan="8" class="text-center text-muted py-3">Cargando resumen...</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -759,7 +966,7 @@ window.MercVisitasCore = (function () {
                     </div>
                 </div>
                 <div class="modal fade" id="${Pfx}ModalVisitasMerc" tabindex="-1" role="dialog" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
                         <div class="modal-content border-0 shadow">
                             <div class="modal-header bg-base py-2">
                                 <div>
@@ -837,10 +1044,19 @@ window.MercVisitasCore = (function () {
         el('BodyVisitasMerc')?.addEventListener('click', onVisitaClick);
         el('BodyDetalleVisita')?.addEventListener('click', onDetalleExtraClick);
         el('BodyFotosActividad')?.addEventListener('dblclick', onFotosDblClick);
+        bindStackedModals();
     }
 
     return {
         init(options) {
+            if (cfg && cfg.prefix) {
+                try {
+                    $(`#${cfg.prefix}ModalVisitasMerc`).modal('hide');
+                    removeStackedModals(cfg.prefix);
+                    cerrarFotoCompleta();
+                    document.body.classList.remove('merc-lb-open');
+                } catch (e) { /* ignore */ }
+            }
             cfg = options || {};
             visitasCache = [];
             detalleActual = null;
@@ -856,12 +1072,11 @@ window.MercVisitasCore = (function () {
             visitasCache = [];
             detalleActual = null;
             cerrarFotoCompleta();
-            document.removeEventListener('keydown', onLightboxKeydown);
+            document.removeEventListener('keydown', onLightboxKeydown, true);
+            document.body.classList.remove('merc-lb-open');
             if (pfx) {
                 $(`#${pfx}ModalVisitasMerc`).modal('hide');
-                $(`#${pfx}ModalDetalleVisita`).modal('hide');
-                $(`#${pfx}ModalFotosActividad`).modal('hide');
-                $(`#${pfx}ModalFaltantesLista`).modal('hide');
+                removeStackedModals(pfx);
             }
             cfg = null;
         },

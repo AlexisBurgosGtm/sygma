@@ -173,6 +173,11 @@
                                         </a>
                                     </li>
                                     <li>
+                                        <a title="How it works" data-filter-tags="theme settings how it works mercaderistas visitas" href="#" onclick="Menu.objetivos_mercaderistas()">
+                                            <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">VISITAS MERCADERISTAS</span>
+                                        </a>
+                                    </li>
+                                    <li>
                                         <a title="How it works" data-filter-tags="theme settings how it works" href="#" onclick="Menu.objetivos_cobertura_municipios()">
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">COBERTURA MUNICIPIOS</span>
                                         </a>

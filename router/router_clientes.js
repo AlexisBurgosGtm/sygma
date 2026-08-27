@@ -1346,11 +1346,12 @@ router.post("/mercaderista_lista_precios", async (req, res) => {
 });
 
 router.post("/supervisor_mercaderistas_visitas", async (req, res) => {
-    const { token, sucursal, fi, ff, codemp } = req.body;
+    const { token, sucursal, fi, ff, codemp, tipo } = req.body;
     const emp = esc(sucursal);
     const fiVal = esc((fi || '').trim());
     const ffVal = esc((ff || '').trim());
     const merc = Number(codemp) || 0;
+    const tipoVal = String(tipo || '').trim().toLowerCase();
 
     if (!fiVal || !ffVal) {
         return res.status(400).send('error');
@@ -1361,12 +1362,38 @@ router.post("/supervisor_mercaderistas_visitas", async (req, res) => {
         : `MV.EMPNIT = '${emp}'`;
     const filtroMerc = merc > 0 ? `AND MV.CODEMP = ${merc}` : '';
 
+    let filtroTipo = '';
+    if (tipoVal === 'ota') {
+        filtroTipo = 'AND ISNULL(MV.OTA, 0) = 1';
+    } else if (tipoVal === 'vitrinas') {
+        filtroTipo = 'AND ISNULL(MV.VITRINAS, 0) = 1';
+    } else if (tipoVal === 'detergentes') {
+        filtroTipo = 'AND ISNULL(MV.DETERGENTES, 0) = 1';
+    } else if (tipoVal === 'pop') {
+        filtroTipo = 'AND ISNULL(MV.POP, 0) = 1';
+    } else if (tipoVal === 'faltante') {
+        filtroTipo = `AND LTRIM(RTRIM(ISNULL(MV.FALTANTES, ''))) NOT IN ('', '[]', 'null', 'NULL')`;
+    } else if (tipoVal === 'noatendidas') {
+        filtroTipo = `AND LTRIM(RTRIM(ISNULL(MV.NOVISITADO, ''))) <> ''`;
+    } else if (tipoVal === 'horas') {
+        filtroTipo = `AND LTRIM(RTRIM(ISNULL(MV.NOVISITADO, ''))) = ''
+                      AND ISNULL(MV.HORA_INICIO, '') <> ''
+                      AND ISNULL(MV.HORA_FIN, '') <> ''`;
+    }
+
     const qry = `
         SELECT MV.EMPNIT,
                MV.CODEMP,
                MV.CODCLIENTE,
                MV.FECHA,
                ISNULL(MV.HORA_INICIO, '') AS HORA_INICIO,
+               ISNULL(MV.HORA_FIN, '') AS HORA_FIN,
+               ISNULL(MV.NOVISITADO, '') AS NOVISITADO,
+               ISNULL(MV.OTA, 0) AS OTA,
+               ISNULL(MV.VITRINAS, 0) AS VITRINAS,
+               ISNULL(MV.DETERGENTES, 0) AS DETERGENTES,
+               ISNULL(MV.POP, 0) AS POP,
+               ISNULL(MV.FALTANTES, '') AS FALTANTES,
                ISNULL(E.NOMEMPLEADO, '') AS NOMMERCADERISTA,
                ISNULL(C.NOMBRE, '') AS NOMBRE_CLIENTE,
                ISNULL(C.NEGOCIO, '') AS NEGOCIO,
@@ -1382,6 +1409,7 @@ router.post("/supervisor_mercaderistas_visitas", async (req, res) => {
             ON MV.EMPNIT = EMP.EMPNIT
          WHERE ${filtroEmp}
            ${filtroMerc}
+           ${filtroTipo}
            AND MV.FECHA >= '${fiVal}'
            AND MV.FECHA <= '${ffVal}'
          ORDER BY MV.FECHA DESC, MV.HORA_INICIO DESC, E.NOMEMPLEADO, C.NOMBRE
@@ -1412,6 +1440,11 @@ router.post("/supervisor_mercaderistas_resumen", async (req, res) => {
                ISNULL(E.NOMEMPLEADO, '') AS NOMMERCADERISTA,
                ISNULL(EMP.NOMBRE, E.EMPNIT) AS NOMEMPRESA,
                ISNULL(V.TOTAL_VISITAS, 0) AS TOTAL_VISITAS,
+               ISNULL(V.TOTAL_OTA, 0) AS TOTAL_OTA,
+               ISNULL(V.TOTAL_VITRINAS, 0) AS TOTAL_VITRINAS,
+               ISNULL(V.TOTAL_DETERGENTES, 0) AS TOTAL_DETERGENTES,
+               ISNULL(V.TOTAL_POP, 0) AS TOTAL_POP,
+               ISNULL(V.TOTAL_FALTANTE, 0) AS TOTAL_FALTANTE,
                ISNULL(V.TOTAL_NOVISITADO, 0) AS TOTAL_NOVISITADO,
                ISNULL(V.MINUTOS_VISITAS, 0) AS MINUTOS_VISITAS
           FROM EMPLEADOS E
@@ -1421,6 +1454,11 @@ router.post("/supervisor_mercaderistas_resumen", async (req, res) => {
                 SELECT MV.EMPNIT,
                        MV.CODEMP,
                        SUM(CASE WHEN LTRIM(RTRIM(ISNULL(MV.NOVISITADO, ''))) = '' THEN 1 ELSE 0 END) AS TOTAL_VISITAS,
+                       SUM(CASE WHEN ISNULL(MV.OTA, 0) = 1 THEN 1 ELSE 0 END) AS TOTAL_OTA,
+                       SUM(CASE WHEN ISNULL(MV.VITRINAS, 0) = 1 THEN 1 ELSE 0 END) AS TOTAL_VITRINAS,
+                       SUM(CASE WHEN ISNULL(MV.DETERGENTES, 0) = 1 THEN 1 ELSE 0 END) AS TOTAL_DETERGENTES,
+                       SUM(CASE WHEN ISNULL(MV.POP, 0) = 1 THEN 1 ELSE 0 END) AS TOTAL_POP,
+                       SUM(CASE WHEN LTRIM(RTRIM(ISNULL(MV.FALTANTES, ''))) NOT IN ('', '[]', 'null', 'NULL') THEN 1 ELSE 0 END) AS TOTAL_FALTANTE,
                        SUM(CASE WHEN LTRIM(RTRIM(ISNULL(MV.NOVISITADO, ''))) <> '' THEN 1 ELSE 0 END) AS TOTAL_NOVISITADO,
                        SUM(CASE
                              WHEN LTRIM(RTRIM(ISNULL(MV.NOVISITADO, ''))) = ''
