@@ -3,9 +3,7 @@ var supervisor_currentPane = 'uno';
 var supervisor_dashboardCharts = {};
 
 function supervisor_getSucursal() {
-    const cmb = document.getElementById('cmbSucursalHeader')?.value;
-    if (cmb) return cmb;
-    return GlobalEmpnit || '%';
+    return GlobalEmpnit || document.getElementById('cmbSucursalHeader')?.value || '%';
 }
 
 function supervisor_getMes() {
@@ -27,21 +25,11 @@ function supervisor_labelModoVentas() {
 function supervisor_setupSucursalHeader() {
     const cmb = document.getElementById('cmbSucursalHeader');
     if (!cmb) return;
-    GF.get_data_empresas()
-        .then((data) => {
-            let str = '<option value="%">TODAS LAS SEDES</option>';
-            (data.recordset || []).forEach((r) => {
-                str += `<option value="${r.EMPNIT}">${r.NOMBRE}</option>`;
-            });
-            cmb.innerHTML = str;
-            cmb.value = GlobalEmpnit || '%';
-            cmb.disabled = false;
-            cmb.addEventListener('change', supervisor_onHeaderFiltersChange);
-        })
-        .catch(() => {
-            cmb.innerHTML = `<option value="${GlobalEmpnit || '%'}">${GlobalNomEmpresa || 'Sede'}</option>`;
-            cmb.value = GlobalEmpnit || '%';
-        });
+    const emp = GlobalEmpnit || '%';
+    const nom = GlobalNomEmpresa || 'Sede';
+    cmb.innerHTML = `<option value="${emp}">${nom}</option>`;
+    cmb.value = emp;
+    cmb.disabled = true;
 }
 
 function supervisor_onHeaderFiltersChange() {
