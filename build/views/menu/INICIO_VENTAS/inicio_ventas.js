@@ -1923,6 +1923,8 @@ function rpt_tbl_documentos_embarque(){
                 const cuadra = Math.abs(importeDoc - sumaDetalle) < 0.05;
                 const rowClass = cuadra ? '' : 'sygma-factura-descuadre';
                 const idBtnFix = `idBtnFixFac${r.CODDOC}-${r.CORRELATIVO}`;
+                const idBtnDel = `idBtnDelFac${r.CODDOC}-${r.CORRELATIVO}`;
+                const tieneEmbarque = String(r.CODEMBARQUE || '').trim() ? '1' : '0';
                 const btnReparar = cuadra ? '' : `
                             <br>
                             <button class="btn btn-danger btn-sm hand shadow" id="${idBtnFix}"
@@ -1957,10 +1959,16 @@ function rpt_tbl_documentos_embarque(){
                             title="Ver detalle de productos">
                                 <i class="fal fa-list"></i>
                             </button>
-                            <button type="button" class="btn btn-info btn-sm btn-circle hand shadow"
+                            <button type="button" class="btn btn-info btn-sm btn-circle hand shadow mr-1"
                             onclick="fcn_editar_factura('${r.CODDOC}','${r.CORRELATIVO}','${r.NOMCLIE}','${r.DIRCLIE}','${r.STATUS}')"
                             title="Editar factura">
                                 <i class="fal fa-edit"></i>
+                            </button>
+                            <button type="button" class="btn btn-danger btn-sm btn-circle hand shadow"
+                            id="${idBtnDel}"
+                            onclick="fcn_eliminar_factura_vendedor('${r.CODDOC}','${r.CORRELATIVO}','${idBtnDel}','${tieneEmbarque}')"
+                            title="Eliminar factura">
+                                <i class="fal fa-trash"></i>
                             </button>
                         </td>
                     </tr>
@@ -2047,6 +2055,42 @@ function get_fix_pedido(coddoc, correlativo, idbtn) {
             F.AvisoError('No se pudo corregir el documento');
             btn.disabled = false;
             btn.innerHTML = `<i class="fal fa-wrench"></i>&nbsp Reparar`;
+        });
+}
+
+
+function fcn_eliminar_factura_vendedor(coddoc, correlativo, idbtn, tieneEmbarque) {
+    if (String(tieneEmbarque) === '1') {
+        F.AvisoError('Esta factura solo se puede eliminar en oficina');
+        return;
+    }
+
+    F.Confirmacion(`¿Está seguro que desea ELIMINAR la factura ${coddoc}-${correlativo}?`)
+        .then((value) => {
+            if (value !== true) return;
+
+            const btn = document.getElementById(idbtn);
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fal fa-trash fa-spin"></i>';
+            }
+
+            GF.get_data_eliminar_documento_vendedor(GlobalEmpnit, coddoc, correlativo)
+                .then(() => {
+                    F.Aviso('Documento eliminado exitosamente');
+                    rpt_tbl_documentos_embarque();
+                })
+                .catch((err) => {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fal fa-trash"></i>';
+                    }
+                    if (err === 'oficina') {
+                        F.AvisoError('Esta factura solo se puede eliminar en oficina');
+                    } else {
+                        F.AvisoError('No se pudo eliminar este documento');
+                    }
+                });
         });
 }
 

@@ -507,6 +507,64 @@ router.post("/eliminar_documento", async(req,res)=>{
     execute.QueryToken(res,qry,token);
      
 });
+
+router.post("/eliminar_documento_vendedor", async (req, res) => {
+    const { token, sucursal, coddoc, correlativo } = req.body;
+    const emp = String(sucursal || '').trim();
+    const doc = String(coddoc || '').trim();
+    const corr = Number(correlativo) || 0;
+
+    if (!emp || !doc || corr <= 0) {
+        return res.send('error');
+    }
+
+    try {
+        const result = await execute.TransactionToken(token, async (transaction, sql) => {
+            const reqCheck = new sql.Request(transaction);
+            reqCheck.input('empnit', sql.VarChar(50), emp);
+            reqCheck.input('coddoc', sql.VarChar(50), doc);
+            reqCheck.input('correlativo', sql.Int, corr);
+            const check = await reqCheck.query(`
+                SELECT LTRIM(RTRIM(ISNULL(CODEMBARQUE, ''))) AS CODEMBARQUE
+                FROM DOCUMENTOS
+                WHERE EMPNIT = @empnit AND CODDOC = @coddoc AND CORRELATIVO = @correlativo
+            `);
+
+            if (!check.recordset.length) {
+                return { RESULT: 'notfound' };
+            }
+            if (String(check.recordset[0].CODEMBARQUE || '').trim() !== '') {
+                return { RESULT: 'oficina' };
+            }
+
+            const reqDelDoc = new sql.Request(transaction);
+            reqDelDoc.input('empnit', sql.VarChar(50), emp);
+            reqDelDoc.input('coddoc', sql.VarChar(50), doc);
+            reqDelDoc.input('correlativo', sql.Int, corr);
+            await reqDelDoc.query(`
+                DELETE FROM DOCUMENTOS
+                WHERE EMPNIT = @empnit AND CODDOC = @coddoc AND CORRELATIVO = @correlativo
+            `);
+
+            const reqDelProd = new sql.Request(transaction);
+            reqDelProd.input('empnit', sql.VarChar(50), emp);
+            reqDelProd.input('coddoc', sql.VarChar(50), doc);
+            reqDelProd.input('correlativo', sql.Int, corr);
+            await reqDelProd.query(`
+                DELETE FROM DOCPRODUCTOS
+                WHERE EMPNIT = @empnit AND CODDOC = @coddoc AND CORRELATIVO = @correlativo
+            `);
+
+            return { RESULT: 'ok' };
+        });
+
+        res.send({ recordset: [result], rowsAffected: [1] });
+    } catch (err) {
+        console.log(err && err.message ? err.message : err);
+        res.send('error');
+    }
+});
+
 router.post("/anular_documento", async(req,res)=>{
    
     const { token, sucursal, coddoc,correlativo} = req.body;

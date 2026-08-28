@@ -1551,6 +1551,38 @@ let GF = {
     
         })
     },
+    get_data_eliminar_documento_vendedor: (empnit,coddoc,correlativo)=>{
+        return new Promise((resolve, reject)=>{
+            axios.post(`/documentos/eliminar_documento_vendedor`, {
+                sucursal: empnit,
+                token: TOKEN,
+                coddoc: coddoc,
+                correlativo: correlativo
+            })
+            .then((response) => {
+                if (response.status.toString() !== '200') {
+                    reject();
+                    return;
+                }
+                const data = response.data;
+                if (data.toString() === 'error') {
+                    reject();
+                    return;
+                }
+                const result = String(data.recordset?.[0]?.RESULT || '').toLowerCase();
+                if (result === 'ok') {
+                    resolve(data);
+                    return;
+                }
+                if (result === 'oficina') {
+                    reject('oficina');
+                    return;
+                }
+                reject();
+            })
+            .catch(() => reject());
+        });
+    },
     get_data_empresa_config(sucursal){
     
   

@@ -419,13 +419,21 @@ function getView(){
                                 </div>
                             </div>  
                             
+                            <div class="mt-2">
+                                <button type="button" class="btn btn-secondary btn-sm hand shadow" id="btnPosDocumentoAtrasLbl" title="Volver a productos para corregir">
+                                    <i class="fal fa-arrow-left"></i> Atrás para corregir
+                                </button>
+                            </div>
+
                         </div>
                     </div>
                 
                 </div>
             </div>
 
-            <button class="btn btn-secondary btn-xl btn-bottom-l btn-circle shadow hand" id="btnPosDocumentoAtras">
+            <button class="btn btn-secondary btn-xl btn-bottom-l btn-circle shadow hand" id="btnPosDocumentoAtras"
+                data-ventas-keep="true"
+                title="Atrás para corregir">
                 <i class="fal fa-arrow-left"></i>
             </button>
 
@@ -1792,9 +1800,11 @@ function listener_vista_cobro(){
         document.getElementById('tab-tres').click();
     });
 
-    document.getElementById('btnPosDocumentoAtras').addEventListener('click',()=>{
-        document.getElementById('tab-dos').click();
-    });
+    const volverProductosPedido = () => {
+        document.getElementById('tab-dos')?.click();
+    };
+    document.getElementById('btnPosDocumentoAtras')?.addEventListener('click', volverProductosPedido);
+    document.getElementById('btnPosDocumentoAtrasLbl')?.addEventListener('click', volverProductosPedido);
 
     document.getElementById('txtPosCobroNit').addEventListener('keyup',(e)=>{
        
