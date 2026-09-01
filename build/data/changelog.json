@@ -1,5 +1,5 @@
 {
-  "version": "M.28.08.26 11:36",
+  "version": "M.01.09.26 10:32",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -3790,6 +3790,16 @@
       "FECHA": "28-08-2026",
       "HORA": "11:36",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.28.08.26 11:36"
+    },
+    {
+      "FECHA": "01-09-2026",
+      "HORA": "10:32",
+      "DESCRIPCION": "MERCADERISTA: MOSTRAR EL ERROR REAL AL INICIAR VISITA"
+    },
+    {
+      "FECHA": "01-09-2026",
+      "HORA": "10:32",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.01.09.26 10:32"
     }
   ]
 }

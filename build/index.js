@@ -60,7 +60,7 @@ function sygma_updateHeaderUsuario() {
 
 
 
-let versionapp = "M.28.08.26 11:36"
+let versionapp = "M.01.09.26 10:32"
 const CHANGELOG_JSON = './data/changelog.json';
 
 function formatChangelogVersion(fecha, hora) {

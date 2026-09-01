@@ -863,6 +863,41 @@ function mercaderista_iniciar_visita_api(payload) {
     });
 }
 
+function mercaderista_mensaje_error_visita(errOrResponse, fallback) {
+    const data = errOrResponse && errOrResponse.data
+        ? errOrResponse.data
+        : errOrResponse && errOrResponse.response
+            ? errOrResponse.response.data
+            : errOrResponse;
+    if (data && typeof data === 'object') {
+        const rs = data.recordset && data.recordset[0];
+        if (rs && rs.MENSAJE) return String(rs.MENSAJE);
+        if (rs && rs.RESULT === 'existe') return 'Ya hay una visita para este cliente en la fecha seleccionada';
+        if (rs && rs.RESULT === 'sin_cliente') return 'El cliente no existe en esta sucursal';
+        if (rs && rs.RESULT === 'error') return 'No se pudo iniciar la visita';
+    }
+    if (data === 'error') return fallback || 'No se pudo iniciar la visita';
+    if (errOrResponse && errOrResponse.message && errOrResponse.message !== 'error') {
+        return String(errOrResponse.message);
+    }
+    return fallback || 'No se pudo iniciar la visita';
+}
+
+function mercaderista_aviso_error_detalle(titulo, detalle) {
+    const text = String(detalle || '').trim();
+    if (typeof Swal !== 'undefined' && Swal.fire) {
+        Swal.fire({
+            type: 'error',
+            title: titulo || 'Error',
+            text: text || titulo || 'Ocurrió un error',
+            showConfirmButton: true,
+            confirmButtonText: 'Entendido',
+        });
+        return;
+    }
+    F.AvisoError(text || titulo || 'Ocurrió un error');
+}
+
 function mercaderista_finalizar_visita_api(payload) {
     return axios.post('/clientes/mercaderista_visita_finalizar', {
         token: TOKEN,
@@ -1352,7 +1387,9 @@ function mercaderista_qr_iniciar_visita(codclie, nombre) {
                 hora_inicio: hora,
             }).then((response) => {
                 const rs = response.data?.recordset?.[0];
-                if (response.data === 'error' || (rs && rs.RESULT === 'error')) return 'encurso';
+                if (response.data === 'error' || (rs && rs.RESULT && rs.RESULT !== 'ok')) {
+                    throw Object.assign(new Error(mercaderista_mensaje_error_visita(response)), { data: response.data });
+                }
                 return 'iniciada';
             });
         })
@@ -1365,8 +1402,8 @@ function mercaderista_qr_iniciar_visita(codclie, nombre) {
             if (txtBuscar) txtBuscar.value = String(codclie);
             mercaderista_cargar_clientes();
         })
-        .catch(() => {
-            F.AvisoError('No se pudo iniciar la visita');
+        .catch((err) => {
+            mercaderista_aviso_error_detalle('No se pudo iniciar la visita', mercaderista_mensaje_error_visita(err));
         });
 }
 
@@ -1548,14 +1585,16 @@ function mercaderista_iniciar_visita(codclie, nombre, btnEl) {
             mercaderista_iniciar_visita_api({ codclie, fecha, mes, anio, hora_inicio: hora })
                 .then((response) => {
                     const rs = response.data?.recordset?.[0];
-                    if (response.data === 'error' || (rs && rs.RESULT === 'error')) throw new Error('error');
+                    if (response.data === 'error' || (rs && rs.RESULT && rs.RESULT !== 'ok')) {
+                        throw Object.assign(new Error(mercaderista_mensaje_error_visita(response)), { data: response.data });
+                    }
                     F.Aviso('Visita iniciada correctamente');
                     const cmbEstado = document.getElementById('cmbMercaderistaEstadoVisita');
                     if (cmbEstado) cmbEstado.value = 'ENCURSO';
                     mercaderista_cargar_clientes();
                 })
-                .catch(() => {
-                    F.AvisoError('No se pudo iniciar la visita');
+                .catch((err) => {
+                    mercaderista_aviso_error_detalle('No se pudo iniciar la visita', mercaderista_mensaje_error_visita(err));
                     if (btn) {
                         btn.disabled = false;
                         btn.innerHTML = btnHtmlOriginal || '<i class="fal fa-play mr-1"></i> Iniciar visita';

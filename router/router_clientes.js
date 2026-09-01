@@ -1490,43 +1490,106 @@ router.post("/supervisor_mercaderistas_resumen", async (req, res) => {
 
 router.post("/mercaderista_visita_iniciar", async (req, res) => {
     const { token, sucursal, codemp, codclie, fecha, mes, anio, hora_inicio } = req.body;
-    const emp = esc(sucursal);
+    const emp = String(sucursal || '').trim();
     const ven = Number(codemp) || 0;
     const clie = Number(codclie) || 0;
-    const fechaVal = esc((fecha || '').trim());
+    const fechaVal = String(fecha || '').trim().substring(0, 10);
     const mesVal = Number(mes) || 0;
     const anioVal = Number(anio) || 0;
-    const horaVal = esc((hora_inicio || '').trim());
+    const horaVal = String(hora_inicio || '').trim();
+
+    const sendResult = (RESULT, MENSAJE) => res.send({
+        recordset: [{ RESULT, MENSAJE: MENSAJE || '' }],
+        rowsAffected: [1],
+    });
 
     if (!fechaVal || !horaVal || ven <= 0 || clie <= 0) {
-        return res.status(400).send('error');
+        return sendResult('error', 'Faltan datos para iniciar la visita (fecha, hora, empleado o cliente)');
     }
 
-    const qry = `
-        IF EXISTS (
-            SELECT 1 FROM MERCADERISTAS_VISITAS
-             WHERE EMPNIT = '${emp}'
-               AND CODEMP = ${ven}
-               AND CODCLIENTE = ${clie}
-               AND FECHA = '${fechaVal}'
-        )
-        BEGIN
-            SELECT 'error' AS RESULT;
-        END
-        ELSE
-        BEGIN
-            INSERT INTO MERCADERISTAS_VISITAS
-                (EMPNIT, CODEMP, CODCLIENTE, FECHA, MES, ANIO, HORA_INICIO, HORA_FIN,
-                 NOVISITADO, OTA, VITRINAS, DETERGENTES, POP,
-                 OTA_F_ANTES, OTA_F_DESPUES, VITRINAS_F_ANTES, VITRINAS_F_DESPUES,
-                 DETERGENTES_F_ANTES, DETERGENTES_F_DESPUES, POP_F_ANTES, POP_F_DESPUES, FALTANTES)
-            VALUES
-                ('${emp}', ${ven}, ${clie}, '${fechaVal}', ${mesVal}, ${anioVal}, '${horaVal}', NULL,
-                 '', 0, 0, 0, 0, '', '', '', '', '', '', '', '', '');
-        END
-    `;
+    try {
+        const result = await execute.TransactionToken(token, async (transaction, sql) => {
+            const run = (text, inputs) => {
+                const request = new sql.Request(transaction);
+                (inputs || []).forEach(([name, type, value]) => request.input(name, type, value));
+                return request.query(text);
+            };
 
-    execute.QueryToken(res, qry, token);
+            const cli = await run(`
+                SELECT TOP 1 CODCLIENTE, ISNULL(HABILITADO, '') AS HABILITADO
+                  FROM CLIENTES
+                 WHERE EMPNIT = @empnit
+                   AND CODCLIENTE = @codclie
+            `, [
+                ['empnit', sql.VarChar(50), emp],
+                ['codclie', sql.Int, clie],
+            ]);
+
+            if (!cli.recordset.length) {
+                return {
+                    RESULT: 'sin_cliente',
+                    MENSAJE: `El cliente ${clie} no existe en la sucursal ${emp}`,
+                };
+            }
+            if (String(cli.recordset[0].HABILITADO || '').toUpperCase() !== 'SI') {
+                return {
+                    RESULT: 'error',
+                    MENSAJE: `El cliente ${clie} no está habilitado`,
+                };
+            }
+
+            const exists = await run(`
+                SELECT TOP 1 CODEMP, ISNULL(HORA_FIN, '') AS HORA_FIN
+                  FROM MERCADERISTAS_VISITAS
+                 WHERE EMPNIT = @empnit
+                   AND CODEMP = @codemp
+                   AND CODCLIENTE = @codclie
+                   AND CONVERT(date, FECHA) = CONVERT(date, @fecha)
+            `, [
+                ['empnit', sql.VarChar(50), emp],
+                ['codemp', sql.Int, ven],
+                ['codclie', sql.Int, clie],
+                ['fecha', sql.VarChar(10), fechaVal],
+            ]);
+
+            if (exists.recordset.length) {
+                const fin = String(exists.recordset[0].HORA_FIN || '').trim();
+                return {
+                    RESULT: 'existe',
+                    MENSAJE: fin
+                        ? 'Esta visita ya fue finalizada en la fecha seleccionada'
+                        : 'Ya hay una visita en curso para este cliente en la fecha seleccionada',
+                };
+            }
+
+            await run(`
+                INSERT INTO MERCADERISTAS_VISITAS
+                    (EMPNIT, CODEMP, CODCLIENTE, FECHA, MES, ANIO, HORA_INICIO, HORA_FIN,
+                     NOVISITADO, OTA, VITRINAS, DETERGENTES, POP,
+                     OTA_F_ANTES, OTA_F_DESPUES, VITRINAS_F_ANTES, VITRINAS_F_DESPUES,
+                     DETERGENTES_F_ANTES, DETERGENTES_F_DESPUES, POP_F_ANTES, POP_F_DESPUES, FALTANTES)
+                VALUES
+                    (@empnit, @codemp, @codclie, @fecha, @mes, @anio, @hora, '',
+                     '', 0, 0, 0, 0, '', '', '', '', '', '', '', '', '')
+            `, [
+                ['empnit', sql.VarChar(50), emp],
+                ['codemp', sql.Int, ven],
+                ['codclie', sql.Int, clie],
+                ['fecha', sql.VarChar(10), fechaVal],
+                ['mes', sql.Int, mesVal],
+                ['anio', sql.Int, anioVal],
+                ['hora', sql.VarChar(20), horaVal],
+            ]);
+
+            return { RESULT: 'ok', MENSAJE: '' };
+        });
+
+        res.send({ recordset: [result], rowsAffected: [1] });
+    } catch (err) {
+        const msg = err && err.message ? String(err.message) : 'Error de base de datos al iniciar la visita';
+        console.log('[mercaderista_visita_iniciar]', msg);
+        sendResult('error', msg);
+    }
 });
 
 router.post("/mercaderista_visita_finalizar", async (req, res) => {
