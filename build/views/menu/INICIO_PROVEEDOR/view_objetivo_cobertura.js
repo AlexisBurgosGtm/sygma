@@ -42,6 +42,7 @@ function getView(){
                             <span class="negrita text-base">Vendedores</span>
                         </div>
                         <div class="card-body p-3">
+                            <small class="proveedor-tabla-clic-hint"><i class="fal fa-hand-pointer mr-1"></i>Clic para ver detalles</small>
                             <div class="table-responsive proveedor-rpt-marcas__scroll">
                                 <table class="table table-sm table-bordered table-hover proveedor-rpt-marcas__table mb-0">
                                     <thead class="bg-base text-white">
@@ -74,6 +75,7 @@ function getView(){
                             <span class="negrita text-primary">Marcas</span>
                         </div>
                         <div class="card-body p-3">
+                            <small class="proveedor-tabla-clic-hint"><i class="fal fa-hand-pointer mr-1"></i>Clic para ver detalles</small>
                             <div class="table-responsive proveedor-rpt-marcas__scroll">
                                 <table class="table table-sm table-bordered table-hover proveedor-rpt-marcas__table mb-0">
                                     <thead class="bg-primary text-white">

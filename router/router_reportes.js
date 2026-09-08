@@ -17,6 +17,15 @@ function rptSumProductoNeta(campo) {
     return `SUM(CASE WHEN TD.TIPODOC IN ${RPT_TIPOS_VENTA} THEN ISNULL(DP.${campo},0) WHEN TD.TIPODOC = 'DEV' THEN -ISNULL(DP.${campo},0) ELSE 0 END)`;
 }
 
+function rptCountClientesUnicos(aliasDoc) {
+    const d = aliasDoc || 'D';
+    return `COUNT(DISTINCT CASE WHEN ${d}.CODCLIENTE IS NOT NULL AND ${d}.CODCLIENTE > 0 THEN ${d}.CODCLIENTE END)`;
+}
+
+function rptCountClientesUnicosNeta() {
+    return `COUNT(DISTINCT CASE WHEN TD.TIPODOC IN ${RPT_TIPOS_VENTA} AND D.CODCLIENTE IS NOT NULL AND D.CODCLIENTE > 0 THEN D.CODCLIENTE END)`;
+}
+
 
 
 
@@ -278,10 +287,10 @@ router.post("/rpt_ventas_vendedor", async(req,res)=>{
             SELECT
                 E.CODEMPLEADO AS CODEMP,
                 E.NOMEMPLEADO AS EMPLEADO,
-                E.TELEFONO,
                 E.USUARIO,
                 E.CLAVE,
                 SUM(CASE WHEN TD.TIPODOC IN ${RPT_TIPOS_VENTA} THEN 1 ELSE 0 END) AS CONTEO,
+                ${rptCountClientesUnicosNeta()} AS CLIENTES,
                 ${rptSumDocNeta('TOTALCOSTO')} AS TOTALCOSTO,
                 ${rptSumDocNeta('TOTALVENTA')} AS TOTALVENTA,
                 ${rptSumDocNeta('TOTALPRECIO')} AS TOTALPRECIO
@@ -295,17 +304,17 @@ router.post("/rpt_ventas_vendedor", async(req,res)=>{
                 AND D.ANIO = ${anio}
                 AND D.STATUS <> 'A'
                 AND TD.TIPODOC IN ${RPT_TIPOS_NETAS}
-            GROUP BY E.CODEMPLEADO, E.NOMEMPLEADO, E.TELEFONO, E.USUARIO, E.CLAVE
+            GROUP BY E.CODEMPLEADO, E.NOMEMPLEADO, E.USUARIO, E.CLAVE
             HAVING ${rptSumDocNeta('TOTALPRECIO')} <> 0
             ORDER BY TOTALPRECIO DESC;
         `;
     } else {
         qry = `
             SELECT EMPLEADOS.CODEMPLEADO AS CODEMP, EMPLEADOS.NOMEMPLEADO AS EMPLEADO, 
-                EMPLEADOS.TELEFONO, 
                 EMPLEADOS.USUARIO, 
                 EMPLEADOS.CLAVE, 
                 COUNT(DOCUMENTOS.CODDOC) AS CONTEO,
+                ${rptCountClientesUnicos('DOCUMENTOS')} AS CLIENTES,
                 SUM(DOCUMENTOS.TOTALCOSTO) AS TOTALCOSTO, 
                 SUM(DOCUMENTOS.TOTALVENTA) AS TOTALVENTA, 
                 SUM(DOCUMENTOS.TOTALPRECIO) AS TOTALPRECIO
@@ -319,7 +328,7 @@ router.post("/rpt_ventas_vendedor", async(req,res)=>{
                 AND (DOCUMENTOS.STATUS <> 'A') 
                 AND (TIPODOCUMENTOS.TIPODOC IN ${RPT_TIPOS_VENTA})
             GROUP BY EMPLEADOS.CODEMPLEADO, EMPLEADOS.NOMEMPLEADO, 
-                EMPLEADOS.TELEFONO, EMPLEADOS.USUARIO, EMPLEADOS.CLAVE, DOCUMENTOS.MES, DOCUMENTOS.ANIO
+                EMPLEADOS.USUARIO, EMPLEADOS.CLAVE
             ORDER BY SUM(DOCUMENTOS.TOTALPRECIO) DESC;
         `;
     }

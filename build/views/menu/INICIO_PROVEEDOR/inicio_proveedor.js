@@ -67,7 +67,7 @@ function proveedor_toggleSidebar(forceOpen) {
 }
 
 function proveedor_closeSidebarMobile() {
-    if (window.innerWidth < 768) proveedor_toggleSidebar(false);
+    proveedor_toggleSidebar(false);
 }
 
 function proveedor_setActiveCard(cardId) {
@@ -204,11 +204,11 @@ function getView(){
     let view = {
         body:()=>{
             return `
-            <div class="proveedor-layout">
-            <button type="button" class="btn proveedor-menu-toggle d-md-none" id="btnProveedorMenuToggle" title="Menú de opciones">
+            <div class="proveedor-layout proveedor-layout--drawer">
+            <button type="button" class="btn proveedor-menu-toggle" id="btnProveedorMenuToggle" title="Menú de opciones">
                 <i class="fal fa-bars"></i><span>Menú</span>
             </button>
-            <div class="proveedor-sidebar-backdrop d-md-none" id="proveedorSidebarBackdrop"></div>
+            <div class="proveedor-sidebar-backdrop" id="proveedorSidebarBackdrop"></div>
 
             <div class="proveedor-header-card card shadow-sm">
                 <div class="card-body py-2 px-3">
@@ -244,7 +244,7 @@ function getView(){
                         ${view.menu()}
                     </div>
                 </div>
-                <div class="col-12 col-md-10 proveedor-content-col">
+                <div class="col-12 proveedor-content-col">
                     <div class="proveedor-tab-area">
                     <div id="proveedorPanelContent">
                         <div id="proveedorPanelEmbed" class="d-none"></div>
@@ -478,12 +478,13 @@ function getView(){
                                     placeholder="Buscar vendedor..."
                                     id="txtVendedoresBuscar"
                                     oninput="F.FiltrarTabla('tblVendedores','txtVendedoresBuscar')">
+                                <small class="proveedor-tabla-clic-hint"><i class="fal fa-hand-pointer mr-1"></i>Clic para ver detalles</small>
                                 <div class="table-responsive proveedor-rpt-marcas__scroll proveedor-rpt-vendedores__scroll">
                                     <table class="table table-hover h-full col-12 mb-0" id="tblVendedores">
                                         <thead class="bg-info text-white negrita">
                                             <tr>
                                                 <td>VENDEDOR</td>
-                                                <td>TEL</td>
+                                                <td class="text-right">CLIENTES</td>
                                                 <td class="text-right">PEDIDOS</td>
                                                 <td class="text-right">IMPORTE</td>
                                                 <td class="text-right">TICKET PROMEDIO</td>
@@ -492,7 +493,8 @@ function getView(){
                                         <tbody id="tblDataVendedores"></tbody>
                                         <tfoot class="bg-info text-white negrita">
                                             <tr>
-                                                <td colspan="2">TOTALES</td>
+                                                <td>TOTALES</td>
+                                                <td class="text-right" id="lbFootTotalClientes"></td>
                                                 <td class="text-right" id="lbFootTotalPedidos"></td>
                                                 <td class="text-right" id="lbFootTotalPrecio"></td>
                                                 <td class="text-right" id="lbFootTicketPromedio"></td>
@@ -566,6 +568,7 @@ function getView(){
                                     placeholder="Buscar marca..."
                                     id="txtMarcasBuscar"
                                     oninput="F.FiltrarTabla('tblMarcas','txtMarcasBuscar')">
+                                <small class="proveedor-tabla-clic-hint"><i class="fal fa-hand-pointer mr-1"></i>Clic para ver detalles</small>
                                 <div class="table-responsive proveedor-rpt-marcas__scroll">
                                     <table class="table table-hover h-full col-12 mb-0" id="tblMarcas">
                                         <thead class="bg-secondary text-white negrita">
@@ -820,7 +823,8 @@ function getView(){
             return `
             <div class="card card-rounded shadow h-100 proveedor-rpt-marcas__panel">
                 <div class="card-body p-3">
-                    <h5 class="negrita text-base text-center mb-3">Logro de marcas</h5>
+                    <h5 class="negrita text-base text-center mb-1">Logro de marcas</h5>
+                    <small class="proveedor-tabla-clic-hint text-center"><i class="fal fa-hand-pointer mr-1"></i>Clic para ver detalles</small>
                     <div class="table-responsive proveedor-rpt-marcas__scroll">
                         <table class="table table-sm table-bordered proveedor-rpt-marcas__table mb-0" id="tblObjetivosMarcas">
                             <thead class="bg-base text-white">
@@ -852,7 +856,8 @@ function getView(){
             return `
             <div class="card card-rounded shadow h-100 proveedor-rpt-marcas__panel">
                 <div class="card-body p-3">
-                    <h5 class="negrita text-secondary text-center mb-3">Logro de vendedores</h5>
+                    <h5 class="negrita text-secondary text-center mb-1">Logro de vendedores</h5>
+                    <small class="proveedor-tabla-clic-hint text-center"><i class="fal fa-hand-pointer mr-1"></i>Clic para ver detalles</small>
                     <div class="table-responsive proveedor-rpt-marcas__scroll">
                         <table class="table table-sm table-bordered proveedor-rpt-marcas__table mb-0" id="tblObjetivosVendedores">
                             <thead class="bg-secondary text-white">
@@ -1047,6 +1052,9 @@ function addListeners(){
     document.getElementById('proveedorSidebarBackdrop')?.addEventListener('click', () => {
         proveedor_toggleSidebar(false);
     });
+    document.getElementById('proveedorSidebar')?.addEventListener('click', (e) => {
+        if (e.target.closest('.proveedor-menu-card')) proveedor_closeSidebarMobile();
+    });
 
     document.getElementById('btnMenuDashboard')?.addEventListener('click', () => {
         proveedor_showHome();
@@ -1227,7 +1235,7 @@ function get_grid_tab(){
 
             break;
         case 'OBJETIVOS':
-            get_reportes();
+            proveedor_rpt_objetivos();
 
             break;
 
@@ -1505,6 +1513,8 @@ function destroyView(){
     proveedor_destroyMarcasVendedorChart();
     proveedor_destroyVendedorMarcasChart();
     proveedor_teardownEmbed();
+    proveedor_toggleSidebar(false);
+    document.body.classList.remove('proveedor-sidebar-open');
     document.getElementById('js-page-content')?.classList.remove('proveedor-page');
 }
 
@@ -1603,9 +1613,11 @@ function tbl_rpt_vendedores() {
 
     const footPrecio = document.getElementById('lbFootTotalPrecio');
     const footPedidos = document.getElementById('lbFootTotalPedidos');
+    const footClientes = document.getElementById('lbFootTotalClientes');
     const footTicket = document.getElementById('lbFootTicketPromedio');
     if (footPrecio) footPrecio.innerText = '';
     if (footPedidos) footPedidos.innerText = '';
+    if (footClientes) footClientes.innerText = '';
     if (footTicket) footTicket.innerText = '';
 
     const sucursal = proveedor_getSucursal();
@@ -1617,11 +1629,13 @@ function tbl_rpt_vendedores() {
             const items = [...data.recordset].sort((a, b) => Number(b.TOTALPRECIO) - Number(a.TOTALPRECIO));
             let varTotal = 0;
             let varPedidos = 0;
+            let varClientes = 0;
             let str = '';
 
             items.forEach((r) => {
                 varTotal += Number(r.TOTALPRECIO);
                 varPedidos += Number(r.CONTEO);
+                varClientes += Number(r.CLIENTES) || 0;
                 const pedidos = Number(r.CONTEO) || 0;
                 const importe = Number(r.TOTALPRECIO) || 0;
                 const ticket = pedidos > 0 ? importe / pedidos : 0;
@@ -1629,7 +1643,7 @@ function tbl_rpt_vendedores() {
                 str += `
                     <tr class="proveedor-rpt-marcas__row hand" data-codemp="${r.CODEMP}" data-nombre="${nombreAttr}">
                         <td>${r.EMPLEADO}</td>
-                        <td><small class="text-muted">${r.TELEFONO || ''}</small></td>
+                        <td class="text-right">${Number(r.CLIENTES) || 0}</td>
                         <td class="text-right">${r.CONTEO}</td>
                         <td class="text-right">${F.setMoneda(r.TOTALPRECIO, 'Q')}</td>
                         <td class="text-right">${F.setMoneda(ticket, 'Q')}</td>
@@ -1641,6 +1655,7 @@ function tbl_rpt_vendedores() {
             document.getElementById('lbTotalVImporte').innerText = `Total: ${F.setMoneda(varTotal, 'Q')}`;
             if (footPrecio) footPrecio.innerText = F.setMoneda(varTotal, 'Q');
             if (footPedidos) footPedidos.innerText = String(varPedidos);
+            if (footClientes) footClientes.innerText = String(varClientes);
             if (footTicket) footTicket.innerText = F.setMoneda(varPedidos > 0 ? varTotal / varPedidos : 0, 'Q');
         })
         .catch(() => {
@@ -1648,6 +1663,7 @@ function tbl_rpt_vendedores() {
             document.getElementById('lbTotalVImporte').innerText = '';
             if (footPrecio) footPrecio.innerText = '';
             if (footPedidos) footPedidos.innerText = '';
+            if (footClientes) footClientes.innerText = '';
             if (footTicket) footTicket.innerText = '';
         });
 }
@@ -1987,7 +2003,7 @@ function listeners_objetivos(){
     document.getElementById('btnMenuObjetivos').addEventListener('click',()=>{
         proveedor_showPanel('seis', 'btnMenuObjetivos', ()=>{
             selected_tab = 'OBJETIVOS';
-            get_reportes();
+            proveedor_rpt_objetivos();
         });
     });
 
@@ -2004,7 +2020,7 @@ function listeners_objetivos(){
     });
 };
 
-function get_reportes(){
+function proveedor_rpt_objetivos(){
 
     let sucursal = proveedor_getSucursal();
     let mes = proveedor_getMes();
@@ -2279,4 +2295,4 @@ function tbl_detalle_vendedor(codemp){
 
 window.get_detalle_marca = get_detalle_marca;
 window.get_detalle_vendedor = get_detalle_vendedor;
-window.get_reportes = get_reportes;
+window.proveedor_rpt_objetivos = proveedor_rpt_objetivos;

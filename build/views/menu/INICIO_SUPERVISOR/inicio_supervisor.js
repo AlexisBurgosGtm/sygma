@@ -85,7 +85,7 @@ function supervisor_toggleSidebar(forceOpen) {
 }
 
 function supervisor_closeSidebarMobile() {
-    if (window.innerWidth < 768) supervisor_toggleSidebar(false);
+    supervisor_toggleSidebar(false);
 }
 
 function supervisor_showPanel(paneId, cardId, afterShow) {
@@ -206,7 +206,7 @@ function getView(){
     let view = {
         body:()=>{
             return `
-            <div class="proveedor-layout">
+            <div class="proveedor-layout proveedor-layout--drawer">
             <div class="proveedor-header-card card shadow-sm mb-3">
                 <div class="card-body py-2 px-3">
                     <div class="row align-items-center no-gutters">
@@ -236,10 +236,10 @@ function getView(){
                 </div>
             </div>
 
-            <button type="button" class="btn proveedor-menu-toggle d-md-none" id="btnSupervisorMenuToggle" title="Menú de opciones">
+            <button type="button" class="btn proveedor-menu-toggle" id="btnSupervisorMenuToggle" title="Menú de opciones">
                 <i class="fal fa-bars"></i><span>Menú</span>
             </button>
-            <div class="proveedor-sidebar-backdrop d-md-none" id="supervisorSidebarBackdrop"></div>
+            <div class="proveedor-sidebar-backdrop" id="supervisorSidebarBackdrop"></div>
 
             <div class="row proveedor-main-row">
                 <div class="col-12 col-md-2 proveedor-sidebar" id="supervisorSidebar">
@@ -247,7 +247,7 @@ function getView(){
                         ${view.menu()}
                     </div>
                 </div>
-                <div class="col-12 col-md-10 proveedor-tab-area">
+                <div class="col-12 proveedor-tab-area">
                     <div id="supervisorPanelContent">
                     <div id="supervisorPanelEmbed" class="d-none"></div>
                     <div class="tab-content" id="myTabHomeContent">

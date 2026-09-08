@@ -258,24 +258,24 @@ function addListeners(){
     document.getElementById('txtFecha').value = F.getFecha();
 
     get_empleados()
-        .then(() => { get_reportes(); })
+        .then(() => { visitas_gps_refresh(); })
         .catch(() => {});
 
     window.proveedor_embedRefresh = () => {
         get_empleados()
-            .then(() => { get_reportes(); })
+            .then(() => { visitas_gps_refresh(); })
             .catch(() => {});
     };
     document.getElementById('cmbEmpleado').addEventListener('change',()=>{
-        get_reportes();
+        visitas_gps_refresh();
     });
     document.getElementById('cmbDiaCliente').addEventListener('change',()=>{
-        get_reportes();
+        visitas_gps_refresh();
     });
 
     document.getElementById('txtFecha').addEventListener('change',()=>{
         document.getElementById('cmbDiaCliente').value = F.devuelve_dia_semana('txtFecha');
-        get_reportes();
+        visitas_gps_refresh();
     })
 
     
@@ -317,7 +317,7 @@ function get_empleados(){
 };
 
 
-function get_reportes(){
+function visitas_gps_refresh(){
 
     get_visitas_dia_vendedor();
 
@@ -325,9 +325,47 @@ function get_reportes(){
 };
 
 
+function visitas_mapa_coords_validas(lat, lng){
+    const la = Number(lat);
+    const lo = Number(lng);
+    if (!isFinite(la) || !isFinite(lo)) return false;
+    if (la === 0 && lo === 0) return false;
+    return true;
+};
+
+function visitas_mapa_centro_registros(registros){
+    const items = Array.isArray(registros) ? registros : [];
+    for (let i = 0; i < items.length; i++) {
+        const r = items[i];
+        if (visitas_mapa_coords_validas(r.LATITUD, r.LONGITUD)) {
+            return { lat: Number(r.LATITUD), lng: Number(r.LONGITUD) };
+        }
+    }
+    return null;
+};
+
+function visitas_mapa_obtener_gps(){
+    return new Promise((resolve) => {
+        if (!navigator.geolocation) {
+            resolve(null);
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            (location) => {
+                const lat = Number(location.coords.latitude);
+                const lng = Number(location.coords.longitude);
+                resolve(visitas_mapa_coords_validas(lat, lng) ? { lat, lng } : null);
+            },
+            () => resolve(null),
+            { enableHighAccuracy: false, timeout: 4000, maximumAge: 60000 }
+        );
+    });
+};
+
 function get_visitas_dia_vendedor(){
 
      let container = document.getElementById('container_mapa');
+    if (!container) return;
     container.innerHTML = '';
     container.innerHTML = `<div class="mapcontainer5" id="mapcontainer"></div>`;
 
@@ -335,8 +373,6 @@ function get_visitas_dia_vendedor(){
 
     let varTotalVisitados = 0;
     let varTotalNoVisitados = 0;
-    let contador = 0;
-    let latInicial =0, longInicial = 0;
 
     let codemp = document.getElementById('cmbEmpleado').value;
     let fecha = F.devuelveFecha('txtFecha');
@@ -367,88 +403,62 @@ function get_visitas_dia_vendedor(){
         //-----------------------------------------------
         //-----------------------------------------------
 
+    data_visitas_vendedor(codemp,fecha,dia)
+    .then((data)=>{
+        const registros = data.recordset || [];
+        const centroRegistros = visitas_mapa_centro_registros(registros);
 
-    try {
-        navigator.geolocation.getCurrentPosition(function (location) {
-            
-            lat = location.coords.latitude.toString();
-            long = location.coords.longitude.toString();
-
-            var map = L.map('mapcontainer').setView([Number(lat), Number(long)], 10);
+        const dibujarMapa = (centro) => {
+            const latCentro = Number(centro.lat);
+            const lngCentro = Number(centro.lng);
+            var map = L.map('mapcontainer').setView([latCentro, lngCentro], 10);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(map);
 
-            //agrego la ubicacion del usuario
-            //L.marker([Number(lat), Number(long)],{icon: userIcon})
-                //.addTo(map)
-                //.bindPopup(`${GlobalUsuario}`, {closeOnClick: false, autoClose: false})
-                //.openPopup();
+            registros.forEach((r)=>{
+                let icono;
 
+                if(F.convertir_fecha(r.LASTSALE,'-').toString()==F.devuelveFecha2('txtFecha')){
+                    varTotalVisitados+=1
+                    icono = greenIcon;
+                }else{
+                    varTotalNoVisitados +=1;
+                    icono = redIcon;
+                };
 
-            //agrega los marcadores al mapa
+                if (!visitas_mapa_coords_validas(r.LATITUD, r.LONGITUD)) return;
 
-            
+                L.marker([Number(r.LATITUD), Number(r.LONGITUD)],{icon: icono})
+                    .addTo(map)
+                    .bindPopup(`${r.TIPONEGOCIO}-${r.NEGOCIO}, ${r.NOMBRE}<br><small>${F.limpiarTexto(r.DIRECCION)}</small>`, {closeOnClick: false, autoClose: true})
+                    .on('click', function(e){
+                        get_datos_cliente(r.CODCLIENTE,r.NOMBRE)
+                    });
+            });
 
-            data_visitas_vendedor(codemp,fecha,dia)
-            .then((data)=>{
+            document.getElementById('lbTVisitadosMapa').innerText = `Vendido: ${varTotalVisitados}`;
+            document.getElementById('lbTNoVisitadosMapa').innerText = `No Vendido: ${varTotalNoVisitados}`;
 
-                data.recordset.map((r)=>{
-                    
-                    contador+=1;
-                    if(Number(contador)==1){latInicial = Number(r.LATITUD); longInicial=Number(r.LONGITUD)};
-                    if(latInicial==0){contador= contador-1};
+            setTimeout(function(){ map.invalidateSize(); map.setView([latCentro, lngCentro], 10); }, 400);
+        };
 
-                    let icono;
-                    
-                    if(F.convertir_fecha(r.LASTSALE,'-').toString()==F.devuelveFecha2('txtFecha')){
-                        varTotalVisitados+=1
-                         icono = greenIcon;
-                    }else{
-                        varTotalNoVisitados +=1;
-                        icono = redIcon;
-                    };
+        if (centroRegistros) {
+            dibujarMapa(centroRegistros);
+            return;
+        }
 
-                    
-                         L.marker([Number(r.LATITUD), Number(r.LONGITUD)],{icon: icono})
-                            .addTo(map)
-                            .bindPopup(`${r.TIPONEGOCIO}-${r.NEGOCIO}, ${r.NOMBRE}<br><small>${F.limpiarTexto(r.DIRECCION)}</small>`, {closeOnClick: false, autoClose: true})
-                            .on('click', function(e){
-                                get_datos_cliente(r.CODCLIENTE,r.NOMBRE)
-                            })
-                            //.openPopup();
-
-                  
-
-                })
-
-                document.getElementById('lbTVisitadosMapa').innerText = `Vendido: ${varTotalVisitados}`;
-                document.getElementById('lbTNoVisitadosMapa').innerText = `No Vendido: ${varTotalNoVisitados}`;
-
-
-                
-
-                //map.invalidateSize(true);
-                setTimeout(function(){ map.invalidateSize();map.flyTo([latInicial,longInicial],10);}, 400)
-
-            })
-            .catch(()=>{
-                container.innerHTML = 'No se cargaron datos...';
-                 document.getElementById('lbTVisitadosMapa').innerText = ``;
-                document.getElementById('lbTNoVisitadosMapa').innerText = ``;
-            })
-
-
-             
-
-                               
-        })
-    } catch (error) {
-            F.AvisoError(error.toString());
-    };
-
-
+        visitas_mapa_obtener_gps()
+            .then((gps) => {
+                dibujarMapa(gps || { lat: 14.634915, lng: -90.506882 });
+            });
+    })
+    .catch(()=>{
+        container.innerHTML = 'No se cargaron datos...';
+         document.getElementById('lbTVisitadosMapa').innerText = ``;
+        document.getElementById('lbTNoVisitadosMapa').innerText = ``;
+    });
 
 };
 

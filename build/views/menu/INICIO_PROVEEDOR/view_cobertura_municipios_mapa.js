@@ -58,6 +58,7 @@ function getView(){
                             id="txtBuscarMunicipio"
                             oninput="F.FiltrarTabla('tblMunicipiosDep','txtBuscarMunicipio')">
                         </div>
+                        <small class="proveedor-tabla-clic-hint"><i class="fal fa-hand-pointer mr-1"></i>Clic para ver detalles</small>
                         <table class="sortable table table-sm table-bordered proveedor-rpt-marcas__table mb-0" id="tblMunicipiosDep">
                             <thead class="bg-primary text-white">
                                 <tr>

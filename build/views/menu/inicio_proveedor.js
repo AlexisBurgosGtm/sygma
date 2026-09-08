@@ -383,7 +383,7 @@ function getView(){
                                     <thead class="bg-info text-white negrita">
                                         <tr>
                                             <td>VENDEDOR</td>
-                                            <td>TELEFONO</td>
+                                            <td>CLIENTES</td>
                                             <td>PEDIDOS</td>
                                             <td>IMPORTE</td>
                                             <td></td>
@@ -393,7 +393,7 @@ function getView(){
                                     <tfoot class="bg-info text-white negrita">
                                         <tr>
                                             <td>TOTALES</td>
-                                            <td></td>
+                                            <td id="lbFootTotalClientes"></td>
                                             <td id="lbFootTotalPedidos"></td>
                                             <td id="lbFootTotalPrecio"></td>
                                             <td></td>
@@ -1493,11 +1493,14 @@ function tbl_rpt_vendedores(){
 
     document.getElementById('lbFootTotalPrecio').innerText = ``;
     document.getElementById('lbFootTotalPedidos').innerText = ``;
+    const footClientes = document.getElementById('lbFootTotalClientes');
+    if (footClientes) footClientes.innerText = ``;
 
     let sucursal = document.getElementById('cmbSucursalHeader').value;
 
     let varTotal = 0;
     let varPedidos = 0;
+    let varClientes = 0;
 
     RPT.data_ventas_vendedor(sucursal,mes,anio)
     .then((data)=>{
@@ -1506,10 +1509,11 @@ function tbl_rpt_vendedores(){
         data.recordset.map((r)=>{
             varTotal += Number(r.TOTALPRECIO);
             varPedidos += Number(r.CONTEO);
+            varClientes += Number(r.CLIENTES) || 0;
             str += `
                 <tr>
                     <td>${r.EMPLEADO}</td>
-                    <td>${r.TELEFONO}</td>
+                    <td>${Number(r.CLIENTES) || 0}</td>
                     <td>${r.CONTEO}</td>
                     <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
                     <td>
@@ -1526,6 +1530,7 @@ function tbl_rpt_vendedores(){
         document.getElementById('lbTotalVImporte').innerText = `Total: ${F.setMoneda(varTotal,'Q')}`;
         document.getElementById('lbFootTotalPrecio').innerText = `${F.setMoneda(varTotal,'Q')}`;
         document.getElementById('lbFootTotalPedidos').innerText = `${varPedidos}`;
+        if (footClientes) footClientes.innerText = `${varClientes}`;
 
     })
     .catch(()=>{
@@ -1533,6 +1538,7 @@ function tbl_rpt_vendedores(){
         document.getElementById('lbTotalVImporte').innerText = '';
         document.getElementById('lbFootTotalPrecio').innerText = ``;
         document.getElementById('lbFootTotalPedidos').innerText = ``;
+        if (footClientes) footClientes.innerText = ``;
     });
 }
 

@@ -166,7 +166,7 @@ function digitador_toggleSidebar(forceOpen) {
 }
 
 function digitador_closeSidebarMobile() {
-    if (window.innerWidth < 768) digitador_toggleSidebar(false);
+    digitador_toggleSidebar(false);
 }
 
 function digitador_initDashboard() {
@@ -210,7 +210,7 @@ function getView(){
     let view = {
         body:()=>{
             return `
-            <div class="proveedor-layout">
+            <div class="proveedor-layout proveedor-layout--drawer">
             <div class="proveedor-header-card card shadow-sm mb-3">
                 <div class="card-body py-2 px-3">
                     <div class="row align-items-center no-gutters">
@@ -240,10 +240,10 @@ function getView(){
                 </div>
             </div>
 
-            <button type="button" class="btn proveedor-menu-toggle d-md-none" id="btnDigitadorMenuToggle" title="Menú de opciones">
+            <button type="button" class="btn proveedor-menu-toggle" id="btnDigitadorMenuToggle" title="Menú de opciones">
                 <i class="fal fa-bars"></i><span>Menú</span>
             </button>
-            <div class="proveedor-sidebar-backdrop d-md-none" id="digitadorSidebarBackdrop"></div>
+            <div class="proveedor-sidebar-backdrop" id="digitadorSidebarBackdrop"></div>
 
             <div class="row proveedor-main-row">
                 <div class="col-12 col-md-2 proveedor-sidebar" id="digitadorSidebar">
@@ -251,7 +251,7 @@ function getView(){
                         ${view.menu()}
                     </div>
                 </div>
-                <div class="col-12 col-md-10 proveedor-tab-area">
+                <div class="col-12 proveedor-tab-area">
                     <div id="proveedorPanelContent">
                         <div id="digitadorPanelEmbed" class="d-none"></div>
                         <div class="tab-content" id="myTabHomeContent">
@@ -1510,6 +1510,9 @@ function addListeners(){
     });
     document.getElementById('digitadorSidebarBackdrop')?.addEventListener('click', () => {
         digitador_toggleSidebar(false);
+    });
+    document.getElementById('digitadorSidebar')?.addEventListener('click', (e) => {
+        if (e.target.closest('.proveedor-menu-card')) digitador_closeSidebarMobile();
     });
 
     document.title = `Digitador - ${GlobalNomEmpresa}`;

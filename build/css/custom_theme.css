@@ -734,6 +734,42 @@ body.proveedor-sidebar-open {
 .proveedor-sidebar__scroll {
   max-height: none;
 }
+.proveedor-layout--drawer .proveedor-menu-toggle {
+  display: inline-flex !important;
+}
+.proveedor-layout--drawer .proveedor-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 1042;
+  width: min(85vw, 300px);
+  max-width: 300px;
+  margin: 0;
+  padding: 0.75rem 0.5rem 1rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #eef4ff 100%);
+  border-right: 1px solid rgba(0, 68, 163, 0.12);
+  box-shadow: 4px 0 24px rgba(0, 68, 163, 0.15);
+  transform: translateX(-105%);
+  transition: transform 0.28s ease;
+  overflow: hidden;
+  flex: 0 0 auto !important;
+}
+.proveedor-layout--drawer .proveedor-sidebar--open {
+  transform: translateX(0);
+}
+.proveedor-layout--drawer .proveedor-sidebar__scroll {
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-right: 0.25rem;
+}
+.proveedor-layout--drawer .proveedor-main-row > .proveedor-tab-area,
+.proveedor-layout--drawer .proveedor-main-row > .proveedor-content-col {
+  flex: 0 0 100% !important;
+  max-width: 100% !important;
+}
 @media (max-width: 767.98px) {
   .proveedor-sidebar {
     position: fixed;
@@ -941,6 +977,13 @@ body.proveedor-sidebar-open {
 .proveedor-rpt-marcas__row--active {
   background: rgba(59, 125, 221, 0.14) !important;
   box-shadow: inset 3px 0 0 #3b7ddd;
+}
+.proveedor-tabla-clic-hint {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  color: #6c757d;
 }
 
 /* Objetivos proveedor */
