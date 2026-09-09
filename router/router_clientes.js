@@ -2457,6 +2457,108 @@ router.post("/vendedor_faltantes_visita", async (req, res) => {
 });
 
 
+router.post("/update_obj_skus_compra", async (req, res) => {
+    const { token, sucursal, mi, mf, anio } = req.body;
+    const emp = esc(sucursal);
+    const miVal = Number(mi) || 0;
+    const mfVal = Number(mf) || 0;
+    const anioVal = Number(anio) || 0;
+    const esTodas = emp === '%' || emp.toUpperCase() === 'TODAS';
+
+    if (!emp || miVal < 1 || miVal > 12 || mfVal < 1 || mfVal > 12 || miVal > mfVal || anioVal < 2000) {
+        return res.status(400).send('error');
+    }
+
+    const promedio = (mfVal - miVal) + 1;
+    const filtroClientes = esTodas ? '1=1' : `EMPNIT = '${emp}'`;
+    const filtroDocs = esTodas ? '1=1' : `(DOCUMENTOS.EMPNIT = '${emp}')`;
+
+    const qry = `
+        UPDATE CLIENTES
+           SET OBJ_SKUS = 0,
+               OBJ_COMPRA = 0
+         WHERE ${filtroClientes};
+
+        UPDATE C
+           SET C.OBJ_SKUS = T.SKUS,
+               C.OBJ_COMPRA = T.COMPRA
+          FROM CLIENTES C
+         INNER JOIN (
+                SELECT DOCUMENTOS.EMPNIT,
+                       DOCUMENTOS.CODCLIENTE,
+                       COUNT(DISTINCT DOCPRODUCTOS.CODPROD) * 1.0 / ${promedio} AS SKUS,
+                       SUM(ISNULL(DOCPRODUCTOS.TOTALPRECIO, 0)) / ${promedio} AS COMPRA
+                  FROM DOCUMENTOS
+                  LEFT OUTER JOIN DOCPRODUCTOS
+                    ON DOCUMENTOS.CORRELATIVO = DOCPRODUCTOS.CORRELATIVO
+                   AND DOCUMENTOS.CODDOC = DOCPRODUCTOS.CODDOC
+                   AND DOCUMENTOS.EMPNIT = DOCPRODUCTOS.EMPNIT
+                  LEFT OUTER JOIN TIPODOCUMENTOS
+                    ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC
+                   AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+                 WHERE (${filtroDocs})
+                   AND (DOCUMENTOS.STATUS <> 'A')
+                   AND (DOCUMENTOS.ANIO = ${anioVal})
+                   AND (DOCUMENTOS.MES BETWEEN ${miVal} AND ${mfVal})
+                   AND (TIPODOCUMENTOS.TIPODOC IN ('FAC','FCP','FPC','FEC','FEF','FES'))
+                   AND (DOCPRODUCTOS.CODPROD IS NOT NULL)
+                   AND (DOCUMENTOS.CODCLIENTE IS NOT NULL)
+                 GROUP BY DOCUMENTOS.EMPNIT, DOCUMENTOS.CODCLIENTE
+         ) T ON C.EMPNIT = T.EMPNIT AND C.CODCLIENTE = T.CODCLIENTE;
+    `;
+
+    execute.QueryToken(res, qry, token);
+});
+
+
+router.post("/objetivo_cliente_mes", async (req, res) => {
+    const { token, sucursal, codclie, mes, anio } = req.body;
+    const emp = esc(sucursal);
+    const clie = Number(codclie) || 0;
+    const mesVal = Number(mes) || 0;
+    const anioVal = Number(anio) || 0;
+
+    if (!emp || clie <= 0 || mesVal < 1 || mesVal > 12 || anioVal < 2000) {
+        return res.status(400).send('error');
+    }
+
+    const qry = `
+        SELECT C.EMPNIT,
+               C.CODCLIENTE,
+               C.NOMBRE,
+               ISNULL(C.OBJ_SKUS, 0) AS OBJ_SKUS,
+               ISNULL(C.OBJ_COMPRA, 0) AS OBJ_COMPRA,
+               ISNULL(T.SKUS_MES, 0) AS SKUS_MES,
+               ISNULL(T.TOTALPRECIO_MES, 0) AS TOTALPRECIO_MES
+          FROM CLIENTES C
+          LEFT JOIN (
+                SELECT DOCUMENTOS.EMPNIT,
+                       DOCUMENTOS.CODCLIENTE,
+                       COUNT(DISTINCT DOCPRODUCTOS.CODPROD) AS SKUS_MES,
+                       SUM(ISNULL(DOCPRODUCTOS.TOTALPRECIO, 0)) AS TOTALPRECIO_MES
+                  FROM DOCUMENTOS
+                  LEFT OUTER JOIN DOCPRODUCTOS
+                    ON DOCUMENTOS.CORRELATIVO = DOCPRODUCTOS.CORRELATIVO
+                   AND DOCUMENTOS.CODDOC = DOCPRODUCTOS.CODDOC
+                   AND DOCUMENTOS.EMPNIT = DOCPRODUCTOS.EMPNIT
+                  LEFT OUTER JOIN TIPODOCUMENTOS
+                    ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC
+                   AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+                 WHERE (DOCUMENTOS.EMPNIT = '${emp}')
+                   AND (DOCUMENTOS.CODCLIENTE = ${clie})
+                   AND (DOCUMENTOS.STATUS <> 'A')
+                   AND (DOCUMENTOS.ANIO = ${anioVal})
+                   AND (DOCUMENTOS.MES = ${mesVal})
+                   AND (TIPODOCUMENTOS.TIPODOC IN ('FAC','FCP','FPC','FEC','FEF','FES'))
+                   AND (DOCPRODUCTOS.CODPROD IS NOT NULL)
+                 GROUP BY DOCUMENTOS.EMPNIT, DOCUMENTOS.CODCLIENTE
+          ) T ON C.EMPNIT = T.EMPNIT AND C.CODCLIENTE = T.CODCLIENTE
+         WHERE C.EMPNIT = '${emp}'
+           AND C.CODCLIENTE = ${clie};
+    `;
+
+    execute.QueryToken(res, qry, token);
+});
 
 
 module.exports = router;

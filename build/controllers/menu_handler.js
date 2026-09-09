@@ -590,6 +590,18 @@
         }
 
     },
+    calculos_cargas_mes:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            const url = '../views/bi_objetivos/view_calculos_cargas_mes.js?_=' + Date.now();
+            F.loadScript(url,'root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        }
+    },
     cuentas_por_cobrar:()=>{
         if(Menu.verify()==true){
             Menu.salidaMenu();

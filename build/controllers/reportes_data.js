@@ -1,14 +1,18 @@
 let RPT = {
-    data_ventas_vendedor:(empnit,mes,anio,modo)=>{
+    data_ventas_vendedor:(empnit,mes,anio,modo,filtro)=>{
 
         return new Promise((resolve,reject)=>{
 
+            const f = filtro || {};
             axios.post(GlobalUrlCalls + '/reportes/rpt_ventas_vendedor', {
                 token:TOKEN,
                 sucursal:empnit,
                 mes:mes,
                 anio:anio,
-                modo: modo || 'bruta'
+                modo: modo || 'bruta',
+                periodo: f.periodo || 'mensual',
+                fi: f.fi || '',
+                ff: f.ff || ''
             })
             .then((response) => {
                 if(response.status.toString()=='200'){
@@ -133,17 +137,21 @@ let RPT = {
             });
         });
     },
-    data_ventas_vendedor_marcas:(empnit,codemp,mes,anio,modo)=>{
+    data_ventas_vendedor_marcas:(empnit,codemp,mes,anio,modo,filtro)=>{
 
         return new Promise((resolve,reject)=>{
 
+            const f = filtro || {};
             axios.post(GlobalUrlCalls + '/reportes/rpt_ventas_vendedor_marcas', {
                 token:TOKEN,
                 sucursal:empnit,
                 codemp:codemp,
                 mes:mes,
                 anio:anio,
-                modo: modo || 'bruta'
+                modo: modo || 'bruta',
+                periodo: f.periodo || 'mensual',
+                fi: f.fi || '',
+                ff: f.ff || ''
             })
             .then((response) => {
                 if(response.status.toString()=='200'){

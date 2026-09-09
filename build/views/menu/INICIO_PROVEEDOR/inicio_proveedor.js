@@ -4,6 +4,58 @@ var proveedor_dashboardCharts = {};
 var proveedor_marcasVendedorChart = null;
 var proveedor_vendedorMarcasChart = null;
 var proveedor_vendedorSeleccionado = '';
+var proveedor_periodoVentasVendedor = 'mensual';
+
+function proveedor_hoyIso() {
+    return (typeof F.getFecha === 'function') ? F.getFecha() : new Date().toISOString().slice(0, 10);
+}
+
+function proveedor_fechaInput(id) {
+    const el = document.getElementById(id);
+    const v = String(el && el.value ? el.value : '').trim();
+    return /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : proveedor_hoyIso();
+}
+
+function proveedor_filtroVentasVendedor() {
+    const mes = proveedor_getMes();
+    const anio = proveedor_getAnio();
+    if (proveedor_periodoVentasVendedor === 'fechas') {
+        let fi = proveedor_fechaInput('txtVenFechaInicial');
+        let ff = proveedor_fechaInput('txtVenFechaFinal');
+        if (fi > ff) {
+            const tmp = fi;
+            fi = ff;
+            ff = tmp;
+        }
+        return { periodo: 'fechas', mes, anio, fi, ff };
+    }
+    return { periodo: 'mensual', mes, anio, fi: '', ff: '' };
+}
+
+function proveedor_syncPeriodoVentasVendedorUI(resetFechas) {
+    const isFechas = proveedor_periodoVentasVendedor === 'fechas';
+    const btn = document.getElementById('btnPeriodoVentasVendedor');
+    const wrap = document.getElementById('wrapFechasVentasVendedor');
+    if (btn) {
+        btn.textContent = isFechas ? 'FECHAS' : 'MENSUAL';
+        btn.classList.toggle('is-fechas', isFechas);
+        btn.title = isFechas ? 'Filtrar por rango de fechas (clic para mensual)' : 'Filtrar por mes y año (clic para fechas)';
+    }
+    if (wrap) wrap.classList.toggle('d-none', !isFechas);
+    if (isFechas) {
+        const hoy = proveedor_hoyIso();
+        const fi = document.getElementById('txtVenFechaInicial');
+        const ff = document.getElementById('txtVenFechaFinal');
+        if (fi && (resetFechas || !fi.value)) fi.value = hoy;
+        if (ff && (resetFechas || !ff.value)) ff.value = hoy;
+    }
+}
+
+function proveedor_togglePeriodoVentasVendedor() {
+    proveedor_periodoVentasVendedor = proveedor_periodoVentasVendedor === 'fechas' ? 'mensual' : 'fechas';
+    proveedor_syncPeriodoVentasVendedorUI(proveedor_periodoVentasVendedor === 'fechas');
+    tbl_rpt_vendedores();
+}
 
 function proveedor_getModoVentas() {
     return document.getElementById('cmbProveedorModoVentas')?.value || 'bruta';
@@ -463,7 +515,15 @@ function getView(){
                             <h5 class="negrita text-info mb-1">VENTAS POR VENDEDOR</h5>
                             <small class="text-muted">Seleccione un vendedor para ver ventas por marca</small>
                         </div>
-                        <div class="proveedor-rpt-marcas__total-badge negrita" id="lbTotalVImporte">--</div>
+                        <div class="proveedor-rpt-marcas__hero-actions">
+                            <button type="button" class="proveedor-periodo-badge" id="btnPeriodoVentasVendedor" title="Alternar mensual o rango de fechas">MENSUAL</button>
+                            <div class="proveedor-periodo-fechas d-none" id="wrapFechasVentasVendedor">
+                                <input type="date" class="form-control form-control-sm" id="txtVenFechaInicial" title="Fecha inicial">
+                                <span class="text-muted small">a</span>
+                                <input type="date" class="form-control form-control-sm" id="txtVenFechaFinal" title="Fecha final">
+                            </div>
+                            <div class="proveedor-rpt-marcas__total-badge negrita" id="lbTotalVImporte">--</div>
+                        </div>
                     </div>
                 </div>
 
@@ -1063,6 +1123,7 @@ function addListeners(){
     document.getElementById('btnMenuVentasVendedor').addEventListener('click',()=>{
         proveedor_showPanel('dos', 'btnMenuVentasVendedor', ()=>{
             selected_tab = 'VENTAS_VENDEDOR';
+            proveedor_syncPeriodoVentasVendedorUI(false);
             tbl_rpt_vendedores();
         });
     });
@@ -1088,12 +1149,21 @@ function addListeners(){
     document.getElementById('tblVendedores')?.addEventListener('click', (e) => {
         const row = e.target.closest('tr[data-codemp]');
         if (!row) return;
+        const filtro = proveedor_filtroVentasVendedor();
         tbl_rpt_vendedor_marcas(
             row.dataset.codemp,
             row.dataset.nombre || '',
-            proveedor_getMes(),
-            proveedor_getAnio()
+            filtro.mes,
+            filtro.anio
         );
+    });
+
+    document.getElementById('btnPeriodoVentasVendedor')?.addEventListener('click', proveedor_togglePeriodoVentasVendedor);
+    document.getElementById('txtVenFechaInicial')?.addEventListener('change', () => {
+        if (proveedor_periodoVentasVendedor === 'fechas') tbl_rpt_vendedores();
+    });
+    document.getElementById('txtVenFechaFinal')?.addEventListener('change', () => {
+        if (proveedor_periodoVentasVendedor === 'fechas') tbl_rpt_vendedores();
     });
 
 
@@ -1603,8 +1673,9 @@ function proveedor_renderVendedorMarcasChart(items, nombre) {
 }
 
 function tbl_rpt_vendedores() {
-    const mes = proveedor_getMes();
-    const anio = proveedor_getAnio();
+    const filtro = proveedor_filtroVentasVendedor();
+    const mes = filtro.mes;
+    const anio = filtro.anio;
     const container = document.getElementById('tblDataVendedores');
     if (!container) return;
 
@@ -1624,7 +1695,7 @@ function tbl_rpt_vendedores() {
 
     const modo = proveedor_getModoVentas();
 
-    RPT.data_ventas_vendedor(sucursal, mes, anio, modo)
+    RPT.data_ventas_vendedor(sucursal, mes, anio, modo, filtro)
         .then((data) => {
             const items = [...data.recordset].sort((a, b) => Number(b.TOTALPRECIO) - Number(a.TOTALPRECIO));
             let varTotal = 0;
@@ -1681,11 +1752,12 @@ function tbl_rpt_vendedor_marcas(codemp, nombre, mes, anio) {
     proveedor_destroyVendedorMarcasChart();
 
     const sucursal = proveedor_getSucursal();
-    const mesVal = mes || proveedor_getMes();
-    const anioVal = anio || proveedor_getAnio();
+    const filtro = proveedor_filtroVentasVendedor();
+    const mesVal = mes || filtro.mes;
+    const anioVal = anio || filtro.anio;
     const modo = proveedor_getModoVentas();
 
-    RPT.data_ventas_vendedor_marcas(sucursal, codemp, mesVal, anioVal, modo)
+    RPT.data_ventas_vendedor_marcas(sucursal, codemp, mesVal, anioVal, modo, filtro)
         .then((data) => {
             const items = [...data.recordset].sort((a, b) => Number(b.TOTALPRECIO) - Number(a.TOTALPRECIO));
             let varTotal = 0;

@@ -26,6 +26,26 @@ function rptCountClientesUnicosNeta() {
     return `COUNT(DISTINCT CASE WHEN TD.TIPODOC IN ${RPT_TIPOS_VENTA} AND D.CODCLIENTE IS NOT NULL AND D.CODCLIENTE > 0 THEN D.CODCLIENTE END)`;
 }
 
+function rptSanitizeDate(valor) {
+    const s = String(valor || '').trim();
+    return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : '';
+}
+
+function rptFiltroPeriodo(alias, body) {
+    const d = alias || 'D';
+    const periodo = String(body && body.periodo ? body.periodo : 'mensual').toLowerCase();
+    const fi = rptSanitizeDate(body && body.fi);
+    const ff = rptSanitizeDate(body && body.ff);
+    if (periodo === 'fechas' && fi && ff) {
+        const ini = fi <= ff ? fi : ff;
+        const fin = fi <= ff ? ff : fi;
+        return `CAST(${d}.FECHA AS DATE) BETWEEN '${ini}' AND '${fin}'`;
+    }
+    const mes = Number(body && body.mes) || 0;
+    const anio = Number(body && body.anio) || 0;
+    return `(${d}.MES = ${mes} AND ${d}.ANIO = ${anio})`;
+}
+
 
 
 
@@ -300,8 +320,7 @@ router.post("/rpt_ventas_vendedor", async(req,res)=>{
             INNER JOIN EMPLEADOS E
                 ON D.CODEMP = E.CODEMPLEADO AND D.EMPNIT = E.EMPNIT
             WHERE D.EMPNIT LIKE '${sucursal}'
-                AND D.MES = ${mes}
-                AND D.ANIO = ${anio}
+                AND ${rptFiltroPeriodo('D', req.body)}
                 AND D.STATUS <> 'A'
                 AND TD.TIPODOC IN ${RPT_TIPOS_NETAS}
             GROUP BY E.CODEMPLEADO, E.NOMEMPLEADO, E.USUARIO, E.CLAVE
@@ -323,8 +342,7 @@ router.post("/rpt_ventas_vendedor", async(req,res)=>{
                 TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
             WHERE 
                 (DOCUMENTOS.EMPNIT LIKE '${sucursal}') 
-                AND (DOCUMENTOS.MES = ${mes})
-                AND (DOCUMENTOS.ANIO = ${anio}) 
+                AND ${rptFiltroPeriodo('DOCUMENTOS', req.body)}
                 AND (DOCUMENTOS.STATUS <> 'A') 
                 AND (TIPODOCUMENTOS.TIPODOC IN ${RPT_TIPOS_VENTA})
             GROUP BY EMPLEADOS.CODEMPLEADO, EMPLEADOS.NOMEMPLEADO, 
@@ -495,8 +513,7 @@ router.post("/rpt_ventas_vendedor_marcas", async(req,res)=>{
             INNER JOIN PRODUCTOS P ON DP.CODPROD = P.CODPROD
             LEFT JOIN MARCAS M ON P.CODMARCA = M.CODMARCA
             WHERE D.EMPNIT LIKE '${sucursal}'
-                AND D.MES = ${mes}
-                AND D.ANIO = ${anio}
+                AND ${rptFiltroPeriodo('D', req.body)}
                 AND D.STATUS <> 'A'
                 AND TD.TIPODOC IN ${RPT_TIPOS_NETAS}
                 AND D.CODEMP = ${codemp}
@@ -515,8 +532,7 @@ router.post("/rpt_ventas_vendedor_marcas", async(req,res)=>{
                 PRODUCTOS LEFT OUTER JOIN
                 MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA ON DOCPRODUCTOS.CODPROD = PRODUCTOS.CODPROD
             WHERE (DOCUMENTOS.EMPNIT LIKE '${sucursal}') 
-                AND (DOCUMENTOS.MES = ${mes}) 
-                AND (DOCUMENTOS.ANIO = ${anio}) 
+                AND ${rptFiltroPeriodo('DOCUMENTOS', req.body)}
                 AND (DOCUMENTOS.STATUS <> 'A') 
                 AND (TIPODOCUMENTOS.TIPODOC IN ${RPT_TIPOS_VENTA}) 
                 AND (DOCUMENTOS.CODEMP = ${codemp}) 

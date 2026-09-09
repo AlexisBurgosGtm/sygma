@@ -102,6 +102,10 @@ router.post("/update_sell_out_productos", async(req,res)=>{
     const { token,sucursal,mi,mf,anio,obs} = req.body;
 
     let promedio = (Number(mf)-Number(mi)) + 1;
+    const emp = String(sucursal ?? '').replace(/'/g, "''");
+    const obsEsc = String(obs ?? '').replace(/'/g, "''");
+    const esTodas = emp === '%' || emp.toUpperCase() === 'TODAS';
+    const filtroEmp = esTodas ? '1=1' : `(DOCUMENTOS.EMPNIT='${emp}')`;
     
     let qry_sellout ='';  
 
@@ -118,7 +122,7 @@ router.post("/update_sell_out_productos", async(req,res)=>{
                 DOCUMENTOS.CODDOC = DOCPRODUCTOS.CODDOC AND DOCUMENTOS.EMPNIT = DOCPRODUCTOS.EMPNIT LEFT OUTER JOIN
                 TIPODOCUMENTOS ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
             WHERE
-                (DOCUMENTOS.EMPNIT='${sucursal}') AND  
+                ${filtroEmp} AND  
                 (DOCUMENTOS.STATUS <> 'A') AND 
                 (DOCUMENTOS.ANIO = ${anio}) AND 
                 (DOCUMENTOS.MES BETWEEN ${mi} AND ${mf}) AND 
@@ -130,7 +134,9 @@ router.post("/update_sell_out_productos", async(req,res)=>{
 
  
 
-    let qry_update_config = `UPDATE EMPRESAS SET OBS_SELLOUT='${obs}' WHERE EMPNIT='${sucursal}'; `//`UPDATE CONFIG SET OBS='${obs}' WHERE ID=3;`
+    let qry_update_config = esTodas
+        ? `UPDATE EMPRESAS SET OBS_SELLOUT='${obsEsc}'; `
+        : `UPDATE EMPRESAS SET OBS_SELLOUT='${obsEsc}' WHERE EMPNIT='${emp}'; `;
 
 
     let qry = qry_sellout + qry_update_config;

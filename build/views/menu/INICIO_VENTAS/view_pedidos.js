@@ -45,7 +45,7 @@ function getView(){
                     </ul>
                 </div>
 
-                ${view.modal_historial_cliente() + view.modal_marcas_cliente()}
+                ${view.modal_historial_cliente() + view.modal_marcas_cliente() + view.modal_objetivo_cliente()}
             `
         },
         pedido:()=>{
@@ -814,6 +814,52 @@ function getView(){
             </div>
             `
         },
+        modal_objetivo_cliente:()=>{
+            return `
+            <div class="modal fade ped-modal-detalle ped-modal-detalle--wide" tabindex="-1" role="dialog" aria-hidden="true" id="modal_objetivo_cliente">
+                <div class="modal-dialog modal-dialog-centered modal-xl">
+                    <div class="modal-content">
+                        <div class="ped-modal-detalle__header">
+                            <div>
+                                <h5 class="negrita mb-0">Objetivo cliente</h5>
+                                <small class="text-muted d-block" id="lbNomclieObjetivo"></small>
+                                <small class="text-muted" id="lbNegocioclieObjetivo"></small>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-circle ped-modal-detalle__close hand" data-dismiss="modal" aria-label="Cerrar">
+                                <i class="fal fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body ped-modal-detalle__body">
+                            <div class="form-row mb-3">
+                                <div class="col-6">
+                                    <label class="small text-muted mb-1">Mes</label>
+                                    <select class="form-control form-control-sm" id="cmbMesObjetivoCliente"></select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="small text-muted mb-1">Año</label>
+                                    <select class="form-control form-control-sm" id="cmbAnioObjetivoCliente"></select>
+                                </div>
+                            </div>
+                            <div class="table-responsive ped-modal-table-wrap">
+                                <table class="table table-sm table-hover ped-modal-table" id="tblObjetivoCliente">
+                                    <thead>
+                                        <tr>
+                                            <td>INDICADOR</td>
+                                            <td class="text-right">OBJETIVO</td>
+                                            <td class="text-right">AVANCE MES</td>
+                                            <td class="text-right">LOGRO</td>
+                                            <td>PROGRESO</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDataObjetivoCliente"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `
+        },
         modal_goles:()=>{
             return `
             <div class="modal fade ped-modal-detalle ped-modal-detalle--wide ped-modal-detalle--tall" tabindex="-1" role="dialog" aria-hidden="true" id="modal_goles">
@@ -947,6 +993,17 @@ function addListeners(){
     })
     document.getElementById('cmbAnioHistorial').addEventListener('change',()=>{
         tbl_historial_cliente();
+    })
+
+    document.getElementById('cmbMesObjetivoCliente').innerHTML = F.ComboMeses();
+    document.getElementById('cmbMesObjetivoCliente').value = F.get_mes_curso();
+    document.getElementById('cmbAnioObjetivoCliente').innerHTML = F.ComboAnio();
+    document.getElementById('cmbAnioObjetivoCliente').value = F.get_anio_curso();
+    document.getElementById('cmbMesObjetivoCliente').addEventListener('change',()=>{
+        tbl_objetivo_cliente();
+    })
+    document.getElementById('cmbAnioObjetivoCliente').addEventListener('change',()=>{
+        tbl_objetivo_cliente();
     })
 
 
@@ -1922,6 +1979,10 @@ function tbl_clientes(filtro,qr){
                                     onclick="get_status_goles('${cod}','${nom}','${tipo}','${neg}')">
                                     <i class="fal fa-futbol mr-1"></i>Goles
                                 </button>
+                                <button type="button" class="btn btn-sm ped-opcion-btn btn-warning hand" title="Objetivo cliente"
+                                    onclick="get_objetivo_cliente('${cod}','${nom}','${tipo}','${neg}')">
+                                    <i class="fal fa-bullseye mr-1"></i>Objetivo cliente
+                                </button>
                                 <button type="button" class="btn btn-sm ped-opcion-btn btn-outline-danger hand" title="Visita"
                                     onclick="get_visita('${cod}','${nom}','${tipo}','${neg}')">
                                     <i class="fal fa-history mr-1"></i>Visita
@@ -2336,6 +2397,91 @@ function insert_visita(codclie,motivo,latitud,longitud){
 
 
 
+function get_objetivo_cliente(codclie,nomclie,tiponegocio,negocio){
+
+    selected_cod_cliente = codclie;
+    $("#modal_objetivo_cliente").modal('show');
+
+    document.getElementById('lbNomclieObjetivo').innerText = nomclie || '';
+    document.getElementById('lbNegocioclieObjetivo').innerText = `${tiponegocio || ''}-${negocio || ''}`;
+
+    tbl_objetivo_cliente();
+
+};
+
+function pedidos_obj_pct(avance, objetivo){
+    const obj = Number(objetivo) || 0;
+    const av = Number(avance) || 0;
+    if(obj <= 0){
+        return av > 0 ? 100 : 0;
+    }
+    return (av / obj) * 100;
+};
+
+function pedidos_obj_bar_class(pct){
+    if(pct >= 100){ return 'bg-success'; }
+    if(pct >= 70){ return 'bg-info'; }
+    if(pct >= 40){ return 'bg-warning'; }
+    return 'bg-danger';
+};
+
+function pedidos_fmt_skus(n){
+    const v = Number(n) || 0;
+    if(Math.abs(v - Math.round(v)) < 0.005){
+        return String(Math.round(v));
+    }
+    return v.toFixed(2);
+};
+
+function pedidos_obj_row(label, objetivoTxt, avanceTxt, pct){
+    const barPct = Math.max(0, Math.min(100, pct));
+    const cls = pedidos_obj_bar_class(pct);
+    const pctTxt = `${pct.toFixed(1)}%`;
+    return `
+        <tr>
+            <td class="negrita">${label}</td>
+            <td class="text-right negrita">${objetivoTxt}</td>
+            <td class="text-right negrita">${avanceTxt}</td>
+            <td class="text-right negrita ${cls === 'bg-success' ? 'text-success' : ''}">${pctTxt}</td>
+            <td>
+                <div class="ped-obj-progress-wrap">
+                    <div class="progress ped-obj-progress">
+                        <div class="progress-bar ${cls}" role="progressbar" style="width:${barPct}%;" aria-valuenow="${barPct}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    `;
+};
+
+function tbl_objetivo_cliente(){
+
+    let container = document.getElementById('tblDataObjetivoCliente');
+    if(!container){ return; }
+    container.innerHTML = GlobalLoader;
+
+    let mes = document.getElementById('cmbMesObjetivoCliente').value;
+    let anio = document.getElementById('cmbAnioObjetivoCliente').value;
+
+    GF.get_data_objetivo_cliente_mes(GlobalEmpnit, selected_cod_cliente, mes, anio)
+    .then((data)=>{
+        const r = (data.recordset && data.recordset[0]) ? data.recordset[0] : {};
+        const objSkus = Number(r.OBJ_SKUS) || 0;
+        const skusMes = Number(r.SKUS_MES) || 0;
+        const objCompra = Number(r.OBJ_COMPRA) || 0;
+        const compraMes = Number(r.TOTALPRECIO_MES) || 0;
+        const pctSkus = pedidos_obj_pct(skusMes, objSkus);
+        const pctCompra = pedidos_obj_pct(compraMes, objCompra);
+
+        container.innerHTML =
+            pedidos_obj_row('Objetivo SKUs', pedidos_fmt_skus(objSkus), pedidos_fmt_skus(skusMes), pctSkus) +
+            pedidos_obj_row('Objetivo compra', F.setMoneda(objCompra,'Q'), F.setMoneda(compraMes,'Q'), pctCompra);
+    })
+    .catch(()=>{
+        container.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No se cargaron los objetivos del cliente</td></tr>`;
+    })
+
+};
 
 function get_status_goles(codclie,nomclie,tiponegocio,negocio){
 

@@ -195,6 +195,19 @@
                                 </ul>
                             </li>
                             <li>
+                                <a title="Theme Settings" data-filter-tags="theme settings calculos cargas">
+                                    <i class="fal fa-calculator"></i>
+                                    <span class="nav-link-text" data-i18n="nav.theme_settings">CÁLCULOS</span>
+                                </a>
+                                <ul>
+                                    <li>
+                                        <a title="Layout Options" data-filter-tags="theme settings layout options calculos cargas del mes" href="#" onclick="Menu.calculos_cargas_mes()">
+                                            <span class="nav-link-text" data-i18n="nav.theme_settings_layout_options">CARGAS DEL MES</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
                                 <a title="Theme Settings" data-filter-tags="theme settings">
                                     <i class="fal fa-folder-open"></i>
                                     <span class="nav-link-text" data-i18n="nav.theme_settings">ARCHIVO</span>
