@@ -95,7 +95,7 @@ sygma_syncDarkModeButton();
 
 
 
-let versionapp = "M.08.09.26 18:18"
+let versionapp = "M.08.09.26 18:58"
 const CHANGELOG_JSON = './data/changelog.json';
 
 function formatChangelogVersion(fecha, hora) {

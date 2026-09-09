@@ -1,5 +1,5 @@
 {
-  "version": "M.08.09.26 18:18",
+  "version": "M.08.09.26 18:58",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -3970,6 +3970,21 @@
       "FECHA": "08-09-2026",
       "HORA": "18:18",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.08.09.26 18:18"
+    },
+    {
+      "FECHA": "08-09-2026",
+      "HORA": "18:58",
+      "DESCRIPCION": "INICIO SUPERVISOR: VENTAS POR VENDEDOR COPIADA DE INICIO PROVEEDOR"
+    },
+    {
+      "FECHA": "08-09-2026",
+      "HORA": "18:58",
+      "DESCRIPCION": "INICIO SUPERVISOR: SELECT DE SUCURSAL BLOQUEADO EN VENTAS POR VENDEDOR"
+    },
+    {
+      "FECHA": "08-09-2026",
+      "HORA": "18:58",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.08.09.26 18:58"
     }
   ]
 }

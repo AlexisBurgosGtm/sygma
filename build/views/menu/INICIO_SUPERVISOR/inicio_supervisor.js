@@ -1,6 +1,8 @@
 var supervisor_embedDestroy = null;
 var supervisor_currentPane = 'uno';
 var supervisor_dashboardCharts = {};
+var supervisor_vendedorMarcasChart = null;
+var supervisor_vendedorSeleccionado = '';
 
 function supervisor_getSucursal() {
     return GlobalEmpnit || document.getElementById('cmbSucursalHeader')?.value || '%';
@@ -35,6 +37,9 @@ function supervisor_setupSucursalHeader() {
 function supervisor_onHeaderFiltersChange() {
     if (supervisor_currentPane === 'uno') {
         supervisor_initDashboard();
+    }
+    if (supervisor_currentPane === 'cinco') {
+        rpt_tbl_vendedores();
     }
     if (typeof window.supervisor_mercaderistas_refresh === 'function') {
         window.supervisor_mercaderistas_refresh();
@@ -336,7 +341,7 @@ function getView(){
                 { id: 'btnMenuCambiosDatosClientes', label: 'Cambios de datos Clientes', icon: 'fa-user-edit', color: 'warning' },
                 { id: 'btnMenuMercaderistas', label: 'Mercaderistas', icon: 'fa-clipboard-list', color: 'info' },
                 { id: 'btnMenuRptInventario', label: 'Inventario', icon: 'fa-warehouse', color: 'secondary' },
-                { id: 'btnMenuRptVendedores', label: 'Ventas vendedores', icon: 'fa-chart-bar', color: 'secondary' },
+                { id: 'btnMenuRptVendedores', label: 'Ventas por vendedor', icon: 'fa-users', color: 'info' },
                 { id: 'btnMenuRptMarcas', label: 'Reporte marcas', icon: 'fa-list', color: 'secondary' },
                 { id: 'btnMenuRptDocumentos', label: 'Reporte facturas', icon: 'fa-chart-pie', color: 'secondary' },
                 { id: 'btnMenuRptProductos', label: 'Reporte productos', icon: 'fa-box', color: 'secondary' },
@@ -721,65 +726,91 @@ function getView(){
         },
         rpt_vendedores:()=>{
             return `
-            <div class="card card-rounded shadow col-12">
-                <div class="card-body p-4">
-            
-                    <div class="row">
-                        <div class="col-6">
-                            <h4 class="negrita text-base">Ventas por Vendedor</h4>
-                            
-                            <br>
+            <div class="proveedor-rpt-marcas">
+                <div class="proveedor-rpt-marcas__hero card shadow-sm mb-3">
+                    <div class="card-body py-3 px-4 d-flex align-items-center justify-content-between flex-wrap">
+                        <div>
+                            <h5 class="negrita text-info mb-1">VENTAS POR VENDEDOR</h5>
+                            <small class="text-muted">Seleccione un vendedor para ver ventas por marca</small>
                         </div>
-                        <div class="col-6">
-                            <br>
-                            <label class="negrita text-info h5" id="lbVenTotalPedidos">Pedidos:</label>
-                            
-                            <br>
-                            <label class="negrita text-danger h4" id="lbVenTotalImporte">Importe:</label>
+                        <div class="proveedor-rpt-marcas__total-badge negrita" id="lbTotalVImporte">--</div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-lg-6 mb-3 mb-lg-0">
+                        <div class="proveedor-rpt-marcas__panel card shadow-sm h-100">
+                            <div class="proveedor-rpt-marcas__panel-header">
+                                <span class="negrita text-secondary">Vendedores</span>
+                            </div>
+                            <div class="card-body p-3">
+                                <input type="text" class="form-control form-control-sm mb-2"
+                                    placeholder="Buscar vendedor..."
+                                    id="txtVendedoresBuscar"
+                                    oninput="F.FiltrarTabla('tblVendedores','txtVendedoresBuscar')">
+                                <small class="proveedor-tabla-clic-hint"><i class="fal fa-hand-pointer mr-1"></i>Clic para ver detalles</small>
+                                <div class="table-responsive proveedor-rpt-marcas__scroll proveedor-rpt-vendedores__scroll">
+                                    <table class="table table-hover h-full col-12 mb-0" id="tblVendedores">
+                                        <thead class="bg-info text-white negrita">
+                                            <tr>
+                                                <td>VENDEDOR</td>
+                                                <td class="text-right">CLIENTES</td>
+                                                <td class="text-right">PEDIDOS</td>
+                                                <td class="text-right">IMPORTE</td>
+                                                <td class="text-right">TICKET PROMEDIO</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblDataVendedores"></tbody>
+                                        <tfoot class="bg-info text-white negrita">
+                                            <tr>
+                                                <td>TOTALES</td>
+                                                <td class="text-right" id="lbFootTotalClientes"></td>
+                                                <td class="text-right" id="lbFootTotalPedidos"></td>
+                                                <td class="text-right" id="lbFootTotalPrecio"></td>
+                                                <td class="text-right" id="lbFootTicketPromedio"></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <br>
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <label class="text-secondary">Fecha Inicial</label>
-                                    <input type="date" class="form-control negrita" id='txtRptVenFechaInicial'>
-                                </div>
+                    <div class="col-12 col-lg-6">
+                        <div class="proveedor-rpt-marcas__panel card shadow-sm h-100">
+                            <div class="proveedor-rpt-marcas__panel-header d-flex align-items-center justify-content-between flex-wrap">
+                                <span class="negrita text-info" id="lbVendedorMarcas">Ventas por marca</span>
                             </div>
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <label class="text-secondary">Fecha Final</label>
-                                    <input type="date" class="form-control negrita" id='txtRptVenFechaFinal'>
+                            <div class="card-body p-3">
+                                <div class="proveedor-rpt-marcas__chart mb-2">
+                                    <canvas id="chartVendedorMarcas"></canvas>
+                                </div>
+                                <input type="text" class="form-control form-control-sm mb-2"
+                                    placeholder="Buscar marca..."
+                                    id="txtBuscarMarca"
+                                    oninput="F.FiltrarTabla('tblVendedorMarcas','txtBuscarMarca')">
+                                <div class="table-responsive proveedor-rpt-marcas__scroll">
+                                    <table class="table table-hover h-full col-12 mb-0" id="tblVendedorMarcas">
+                                        <thead class="bg-secondary text-white negrita">
+                                            <tr>
+                                                <td>MARCA</td>
+                                                <td class="text-right">IMPORTE</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblDataVendedorMarcas"></tbody>
+                                        <tfoot class="bg-secondary text-white negrita">
+                                            <tr>
+                                                <td>TOTAL</td>
+                                                <td class="text-right" id="lbFootVendedorMarcasImporte">--</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
                                 </div>
                             </div>
                         </div>
-                        <br>
-
-                    <div class="table-responsive">
-
-                         <table class="table h-full table-bordered col-12" id="tblVendedores">
-                                <thead class="bg-base text-white negrita">
-                                    <tr>
-                                        <td>VENDEDOR</td>
-                                        <td>PEDIDOS</td>
-                                        <td>IMPORTE</td>
-                                        <td></td>
-                                    </tr>
-                                </thead>
-                                <tbody id="tblDataVendedores"></tbody>
-                                <t>
-
-                            </table>
-
                     </div>
-            
-
                 </div>
             </div>
-
-            
-            
             `
         },
         rpt_inventarios:()=>{
@@ -1321,16 +1352,15 @@ function addListeners(){
         });
     });
 
-    document.getElementById('txtRptVenFechaInicial').value = F.getFecha();
-
-    document.getElementById('txtRptVenFechaInicial').addEventListener('change',()=>{
-        rpt_tbl_vendedores();
-    });
-
-    document.getElementById('txtRptVenFechaFinal').value = F.getFecha();
-
-    document.getElementById('txtRptVenFechaFinal').addEventListener('change',()=>{
-        rpt_tbl_vendedores();
+    document.getElementById('tblVendedores')?.addEventListener('click', (e) => {
+        const row = e.target.closest('tr[data-codemp]');
+        if (!row) return;
+        supervisor_tbl_rpt_vendedor_marcas(
+            row.dataset.codemp,
+            row.dataset.nombre || '',
+            supervisor_getMes(),
+            supervisor_getAnio()
+        );
     });
 
 
@@ -1500,6 +1530,7 @@ function initView(){
 
 function destroyView(){
     Object.keys(supervisor_dashboardCharts).forEach(supervisor_destroyDashboardChart);
+    supervisor_destroyVendedorMarcasChart();
     supervisor_teardownEmbed();
     supervisor_toggleSidebar(false);
     document.body.classList.remove('proveedor-sidebar-open');
@@ -1824,57 +1855,190 @@ function rpt_tbl_productos(){
 
 
 
-function rpt_tbl_vendedores(){
+function supervisor_destroyVendedorMarcasChart() {
+    if (supervisor_vendedorMarcasChart) {
+        supervisor_vendedorMarcasChart.destroy();
+        supervisor_vendedorMarcasChart = null;
+    }
+}
 
+function supervisor_resetVendedorDetalle() {
+    supervisor_vendedorSeleccionado = '';
+    supervisor_destroyVendedorMarcasChart();
+    const lbMarcas = document.getElementById('lbVendedorMarcas');
+    const detalle = document.getElementById('tblDataVendedorMarcas');
+    const foot = document.getElementById('lbFootVendedorMarcasImporte');
+    if (lbMarcas) lbMarcas.innerText = 'Ventas por marca';
+    if (detalle) detalle.innerHTML = '<tr><td colspan="2" class="text-center text-muted py-4">Seleccione un vendedor</td></tr>';
+    if (foot) foot.innerText = '--';
+}
 
-    
-    let container = document.getElementById('tblDataVendedores');
+function supervisor_setVendedorActivo(codemp) {
+    supervisor_vendedorSeleccionado = String(codemp);
+    document.querySelectorAll('#tblDataVendedores tr[data-codemp]').forEach((row) => {
+        row.classList.toggle('proveedor-rpt-marcas__row--active', row.dataset.codemp === supervisor_vendedorSeleccionado);
+    });
+}
+
+function supervisor_renderVendedorMarcasChart(items, nombre) {
+    supervisor_destroyVendedorMarcasChart();
+
+    const canvas = document.getElementById('chartVendedorMarcas');
+    if (!canvas || !items.length || typeof Chart === 'undefined') return;
+
+    const labels = items.map((r) => r.DESMARCA);
+    const values = items.map((r) => Number(r.TOTALPRECIO));
+    const bgColor = labels.map(() => getRandomColor());
+
+    supervisor_vendedorMarcasChart = new Chart(canvas.getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Importe',
+                data: values,
+                backgroundColor: bgColor,
+                borderRadius: 6,
+                maxBarThickness: 42
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: `${supervisor_labelModoVentas()} por marca — ${nombre}`,
+                    font: { size: 12 }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { maxRotation: 45, minRotation: 0, font: { size: 10 } }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: (value) => F.setMoneda(value, 'Q')
+                    }
+                }
+            }
+        }
+    });
+}
+
+function rpt_tbl_vendedores() {
+    const mes = supervisor_getMes();
+    const anio = supervisor_getAnio();
+    const container = document.getElementById('tblDataVendedores');
+    if (!container) return;
 
     container.innerHTML = GlobalLoader;
-    let contador = 0;
-    let varTotal = 0;
-    let varTotalPedidos = 0;
+    supervisor_resetVendedorDetalle();
 
+    const footPrecio = document.getElementById('lbFootTotalPrecio');
+    const footPedidos = document.getElementById('lbFootTotalPedidos');
+    const footClientes = document.getElementById('lbFootTotalClientes');
+    const footTicket = document.getElementById('lbFootTicketPromedio');
+    if (footPrecio) footPrecio.innerText = '';
+    if (footPedidos) footPedidos.innerText = '';
+    if (footClientes) footClientes.innerText = '';
+    if (footTicket) footTicket.innerText = '';
 
-    let fi = F.devuelveFecha('txtRptVenFechaInicial');
-    let ff = F.devuelveFecha('txtRptVenFechaFinal');
+    const sucursal = supervisor_getSucursal();
+    const modo = supervisor_getModoVentas();
 
-    GF.get_data_ventas_vendedores_todos(GlobalEmpnit,fi,ff)
-    .then((data)=>{
+    RPT.data_ventas_vendedor(sucursal, mes, anio, modo)
+        .then((data) => {
+            const items = [...data.recordset].sort((a, b) => Number(b.TOTALPRECIO) - Number(a.TOTALPRECIO));
+            let varTotal = 0;
+            let varPedidos = 0;
+            let varClientes = 0;
+            let str = '';
 
-        let str = '';
+            items.forEach((r) => {
+                varTotal += Number(r.TOTALPRECIO);
+                varPedidos += Number(r.CONTEO);
+                varClientes += Number(r.CLIENTES) || 0;
+                const pedidos = Number(r.CONTEO) || 0;
+                const importe = Number(r.TOTALPRECIO) || 0;
+                const ticket = pedidos > 0 ? importe / pedidos : 0;
+                const nombreAttr = String(r.EMPLEADO || '').replace(/"/g, '&quot;');
+                str += `
+                    <tr class="proveedor-rpt-marcas__row hand" data-codemp="${r.CODEMP}" data-nombre="${nombreAttr}">
+                        <td>${r.EMPLEADO}</td>
+                        <td class="text-right">${Number(r.CLIENTES) || 0}</td>
+                        <td class="text-right">${r.CONTEO}</td>
+                        <td class="text-right">${F.setMoneda(r.TOTALPRECIO, 'Q')}</td>
+                        <td class="text-right">${F.setMoneda(ticket, 'Q')}</td>
+                    </tr>
+                `;
+            });
 
-        data.recordset.map((r)=>{
-         
-            contador +=1;
-            varTotal += Number(r.TOTALPRECIO);
-            varTotalPedidos += Number(r.PEDIDOS);
-            str += `
-                <tr>
-                    <td>${r.EMPLEADO}
-                        <br>
-                        <small class="negrita text-info">Usuario: ${r.USUARIO}</small>
-                        <br>
-                        <small class="negrita text-danger">Clave: ${r.CLAVE}</small>
-                    </td>
-                    <td>${r.PEDIDOS}</td>
-                    <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
-                    <td></td>
-                </tr>
-                `
+            container.innerHTML = str || '<tr><td colspan="5" class="text-center text-muted">Sin datos</td></tr>';
+            const lbTotal = document.getElementById('lbTotalVImporte');
+            if (lbTotal) lbTotal.innerText = `Total: ${F.setMoneda(varTotal, 'Q')}`;
+            if (footPrecio) footPrecio.innerText = F.setMoneda(varTotal, 'Q');
+            if (footPedidos) footPedidos.innerText = String(varPedidos);
+            if (footClientes) footClientes.innerText = String(varClientes);
+            if (footTicket) footTicket.innerText = F.setMoneda(varPedidos > 0 ? varTotal / varPedidos : 0, 'Q');
         })
-        container.innerHTML = str;
-        document.getElementById('lbVenTotalImporte').innerText =`Total: ${F.setMoneda(varTotal,'Q')}`;
-        document.getElementById('lbVenTotalPedidos').innerText = `Pedidos: ${varTotalPedidos}`;
-    })
-    .catch((error)=>{
-        container.innerHTML = 'No se cargaron datos....';
-        document.getElementById('lbVenTotalImporte').innerText = '';
-        document.getElementById('lbVenTotalPedidos').innerText = ``
-    })
+        .catch(() => {
+            container.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No se cargaron datos</td></tr>';
+            const lbTotal = document.getElementById('lbTotalVImporte');
+            if (lbTotal) lbTotal.innerText = '';
+            if (footPrecio) footPrecio.innerText = '';
+            if (footPedidos) footPedidos.innerText = '';
+            if (footClientes) footClientes.innerText = '';
+            if (footTicket) footTicket.innerText = '';
+        });
+}
 
+function supervisor_tbl_rpt_vendedor_marcas(codemp, nombre, mes, anio) {
+    const container = document.getElementById('tblDataVendedorMarcas');
+    const foot = document.getElementById('lbFootVendedorMarcasImporte');
+    if (!container || !foot) return;
 
-};
+    supervisor_setVendedorActivo(codemp);
+    const lb = document.getElementById('lbVendedorMarcas');
+    if (lb) lb.innerText = `Ventas por marca — ${nombre}`;
+
+    container.innerHTML = `<tr><td colspan="2" class="text-center">${GlobalLoader}</td></tr>`;
+    foot.innerText = '--';
+    supervisor_destroyVendedorMarcasChart();
+
+    const sucursal = supervisor_getSucursal();
+    const mesVal = mes || supervisor_getMes();
+    const anioVal = anio || supervisor_getAnio();
+    const modo = supervisor_getModoVentas();
+
+    RPT.data_ventas_vendedor_marcas(sucursal, codemp, mesVal, anioVal, modo)
+        .then((data) => {
+            const items = [...data.recordset].sort((a, b) => Number(b.TOTALPRECIO) - Number(a.TOTALPRECIO));
+            let varTotal = 0;
+            let str = '';
+
+            items.forEach((r) => {
+                varTotal += Number(r.TOTALPRECIO);
+                str += `
+                    <tr>
+                        <td>${r.DESMARCA}</td>
+                        <td class="text-right">${F.setMoneda(r.TOTALPRECIO, 'Q')}</td>
+                    </tr>
+                `;
+            });
+
+            container.innerHTML = str || '<tr><td colspan="2" class="text-center text-muted">Sin datos</td></tr>';
+            foot.innerText = F.setMoneda(varTotal, 'Q');
+            supervisor_renderVendedorMarcasChart(items, nombre);
+        })
+        .catch(() => {
+            container.innerHTML = '<tr><td colspan="2" class="text-center text-muted">No se cargaron datos</td></tr>';
+            foot.innerText = '--';
+            supervisor_destroyVendedorMarcasChart();
+        });
+}
 
 
 
