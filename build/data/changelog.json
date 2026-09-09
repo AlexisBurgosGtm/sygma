@@ -1,5 +1,5 @@
 {
-  "version": "M.09.09.26 00:24",
+  "version": "M.09.09.26 14:29",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -4060,6 +4060,26 @@
       "FECHA": "09-09-2026",
       "HORA": "00:24",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.09.09.26 00:24"
+    },
+    {
+      "FECHA": "09-09-2026",
+      "HORA": "14:23",
+      "DESCRIPCION": "NUEVO PEDIDO: MODAL DE LISTA DE PRODUCTOS PERMANECE ABIERTO AL AGREGAR"
+    },
+    {
+      "FECHA": "09-09-2026",
+      "HORA": "14:23",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.09.09.26 14:23"
+    },
+    {
+      "FECHA": "09-09-2026",
+      "HORA": "14:29",
+      "DESCRIPCION": "NUEVO PEDIDO: MODAL CANTIDAD ENCIMA Y LISTA DE PRODUCTOS SE REABRE SIN PERDER FILTRO"
+    },
+    {
+      "FECHA": "09-09-2026",
+      "HORA": "14:29",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.09.09.26 14:29"
     }
   ]
 }

@@ -1477,8 +1477,6 @@ function listener_vista_pedido(){
 
             F.showToast('Producto agregado ' + Selected_desprod);
             get_tbl_pedido();
-            
-            document.getElementById('txtPosCodprod').focus();
 
         })
         .catch(()=>{
@@ -2029,6 +2027,12 @@ function pedidos_bind_modales_detalle() {
             document.body.classList.remove('ped-modal-blur-open');
         }
     });
+
+    $('#modal_cantidad')
+        .off('hidden.bs.modal.pedRestoreLista')
+        .on('hidden.bs.modal.pedRestoreLista', function () {
+            pedidos_restaurar_lista_precios();
+        });
 }
 
 function pedidos_toggle_cliente_opciones(btn, panelId) {
@@ -3047,21 +3051,53 @@ function get_producto(codprod,desprod,codmedida,equivale,costo,precio,tipoprod,e
             document.getElementById('txtPosCodprod').value = '';
             document.getElementById('btnMCGuardar').disabled = false;
 
-            const abrirCantidad = () => {
-                $("#modal_cantidad").modal('show');
-                const inp = document.getElementById('txtMCCantidad');
-                if (inp) {
-                    inp.focus();
-                    inp.select();
-                }
-            };
-            const $lista = $("#modal_lista_precios");
-            if ($lista.hasClass('show')) {
-                $lista.one('hidden.bs.modal', abrirCantidad);
-                $lista.modal('hide');
-            } else {
-                abrirCantidad();
-            }
+            pedidos_abrir_cantidad_sobre_lista();
+};
+
+var pedido_reabrir_lista_precios = false;
+
+function pedidos_abrir_cantidad_sobre_lista(){
+    const $lista = $("#modal_lista_precios");
+    const listaVisible = $lista.hasClass('show');
+    pedido_reabrir_lista_precios = listaVisible;
+
+    const abrirCantidad = () => {
+        $("#modal_cantidad").modal('show');
+        const inp = document.getElementById('txtMCCantidad');
+        if (inp) {
+            inp.focus();
+            inp.select();
+        }
+    };
+
+    if (listaVisible) {
+        $lista.off('hidden.bs.modal.pedReopenQty');
+        $lista.one('hidden.bs.modal.pedReopenQty', abrirCantidad);
+        $lista.modal('hide');
+        return;
+    }
+
+    abrirCantidad();
+};
+
+function pedidos_restaurar_lista_precios(){
+    if (!pedido_reabrir_lista_precios) {
+        const txtProd = document.getElementById('txtPosCodprod');
+        if (txtProd) txtProd.focus();
+        return;
+    }
+
+    pedido_reabrir_lista_precios = false;
+    const $lista = $("#modal_lista_precios");
+    $lista.modal('show');
+
+    const filtroLista = document.getElementById('txtBuscarP');
+    if (filtroLista && filtroLista.value) {
+        F.FiltrarTabla('tblProductos', 'txtBuscarP');
+    }
+    setTimeout(() => {
+        if (filtroLista) filtroLista.focus();
+    }, 180);
 };
 
 function get_datos_precio(codprod,codmedida){
