@@ -2389,6 +2389,37 @@ router.post("/vendedor_faltantes_mes", async (req, res) => {
     execute.QueryToken(res, qry, token);
 });
 
+router.post("/vendedor_faltantes_clientes_mes", async (req, res) => {
+    const { token, sucursal, codven, mes, anio } = req.body;
+    const emp = esc(sucursal);
+    const ven = Number(codven) || 0;
+    const mesVal = Number(mes) || 0;
+    const anioVal = Number(anio) || 0;
+
+    if (!emp || ven <= 0 || mesVal <= 0 || anioVal <= 0) {
+        return res.status(400).send('error');
+    }
+
+    const filtroRuta = `(C.CODRUTA = ISNULL((SELECT TOP 1 CODRUTA FROM RUTAS_CLIENTES WHERE EMPNIT = '${emp}' AND CODEMP = ${ven}), -1))`;
+
+    const qry = `
+        SELECT DISTINCT MV.CODCLIENTE
+          FROM MERCADERISTAS_VISITAS MV
+         INNER JOIN CLIENTES C
+            ON MV.EMPNIT = C.EMPNIT
+           AND MV.CODCLIENTE = C.CODCLIENTE
+         WHERE MV.EMPNIT = '${emp}'
+           AND ${filtroRuta}
+           AND (
+                (ISNULL(MV.MES, 0) = ${mesVal} AND ISNULL(MV.ANIO, 0) = ${anioVal})
+                OR (MONTH(MV.FECHA) = ${mesVal} AND YEAR(MV.FECHA) = ${anioVal})
+           )
+           AND LTRIM(RTRIM(ISNULL(MV.FALTANTES, ''))) NOT IN ('', '[]', 'null', 'NULL')
+    `;
+
+    execute.QueryToken(res, qry, token);
+});
+
 router.post("/vendedor_faltantes_visita", async (req, res) => {
     const { token, sucursal, codclie, fecha } = req.body;
     const emp = esc(sucursal);

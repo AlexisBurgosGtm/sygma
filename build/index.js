@@ -58,9 +58,44 @@ function sygma_updateHeaderUsuario() {
     }
 }
 
+const SYGMA_DARK_KEY = 'sygmaDarkMode';
+
+function sygma_isDarkMode() {
+    return document.body.classList.contains('sygma-dark');
+}
+
+function sygma_syncDarkModeButton() {
+    const btn = document.getElementById('btnSygmaDarkMode');
+    if (!btn) return;
+    const dark = sygma_isDarkMode();
+    const icon = btn.querySelector('i');
+    if (icon) {
+        icon.className = dark ? 'fal fa-sun' : 'fal fa-moon';
+    }
+    btn.title = dark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro';
+    btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+    btn.classList.toggle('is-on', dark);
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeMeta) themeMeta.setAttribute('content', dark ? '#0b1220' : '#ffffff');
+}
+
+function sygma_applyDarkMode(on) {
+    document.body.classList.toggle('sygma-dark', !!on);
+    try {
+        localStorage.setItem(SYGMA_DARK_KEY, on ? '1' : '0');
+    } catch (e) {}
+    sygma_syncDarkModeButton();
+}
+
+function sygma_toggleDarkMode() {
+    sygma_applyDarkMode(!sygma_isDarkMode());
+}
+
+sygma_syncDarkModeButton();
 
 
-let versionapp = "M.08.09.26 11:56"
+
+let versionapp = "M.08.09.26 18:18"
 const CHANGELOG_JSON = './data/changelog.json';
 
 function formatChangelogVersion(fecha, hora) {

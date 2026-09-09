@@ -525,20 +525,19 @@ function getView(){
         },
         modal_faltantes_mercaderistas:()=>{
             return `
-            <div class="modal fade" id="modalVentasFaltantesMerc" tabindex="-1" role="dialog" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                    <div class="modal-content border-0 shadow">
-                        <div class="modal-header bg-danger py-2">
+            <div class="modal fade ped-modal-detalle ped-modal-detalle--wide ped-modal-detalle--tall" id="modalVentasFaltantesMerc" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+                    <div class="modal-content">
+                        <div class="ped-modal-detalle__header">
                             <div>
-                                <h5 class="modal-title text-white negrita mb-0" id="lbVentasFaltMercTitulo">Faltantes</h5>
-                                <small class="text-white-50" id="lbVentasFaltMercSub"></small>
+                                <h5 class="negrita mb-0" id="lbVentasFaltMercTitulo">Faltantes</h5>
+                                <small class="text-muted" id="lbVentasFaltMercSub"></small>
                             </div>
-                            <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+                            <button type="button" class="btn btn-sm btn-circle ped-modal-detalle__close hand" data-dismiss="modal" aria-label="Cerrar">
+                                <i class="fal fa-times"></i>
+                            </button>
                         </div>
-                        <div class="modal-body p-3" id="bodyVentasFaltantesMerc"></div>
-                        <div class="modal-footer py-2">
-                            <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</button>
-                        </div>
+                        <div class="modal-body ped-modal-detalle__body" id="bodyVentasFaltantesMerc"></div>
                     </div>
                 </div>
             </div>`;
@@ -599,55 +598,64 @@ function getView(){
         },
         modal_detalle_documento:()=>{
             return `
-            <div id="modal_detalle_pedido" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-right modal-xl">
-                    <div class="modal-content">
-                        <div class="dropdown-header bg-base d-flex justify-content-center align-items-center w-100">
-                            <h4 class="m-0 text-center color-white">Detalle del Documento</h4>
-                        </div>
-                        <div class="modal-body p-4">
-                            <div class="card card-rounded">
-                                <div class="card-body p-2">
-                                    <h4 class="negrita text-base" id="lbDetalleTomarDatosNombre"></h4>
-                                    <br>
-                                    <div class="table-responsive col-12">
-                                        <table class="table table-bordered table-hover table-sm">
-                                            <thead class="bg-verde text-white">
-                                                <tr>
-                                                    <td>CODIGO</td>
-                                                    <td>PRODUCTO</td>
-                                                    <td>TIPOP</td>
-                                                    <td>MEDIDA</td>
-                                                    <td>CANTIDAD</td>
-                                                    <td>PRECIO</td>
-                                                    <td>IMPORTE</td>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="tblDataDetallePedido"></tbody>
-                                            <tfoot class="bg-secondary negrita text-white">
-                                                <tr>
-                                                    <td></td>
-                                                    <td></td>
-                                                    <td></td>
-                                                    <td></td>
-                                                    <td id="lbFtotalCantidad"></td>
-                                                    <td></td>
-                                                    <td id="lbFtotalImporte"></td>
-                                                </tr>
-                                            </tfoot>
-                                        </table>
-                                        <div class="form-group mb-0">
-                                            <label class="negrita text-base">Observaciones</label>
-                                            <textarea class="form-control negrita" id="txtDetallePedidoObs" rows="3"></textarea>
-                                        </div>
-                                    </div>
+            <div id="modal_detalle_pedido" class="modal fade sygma-doc-detalle-modal ped-modal-detalle" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+                    <div class="modal-content sygma-doc-detalle-modal__content">
+                        <div class="sygma-doc-detalle-modal__header">
+                            <div class="sygma-doc-detalle-modal__header-top">
+                                <div>
+                                    <h4 class="sygma-doc-detalle-modal__title">Detalle del documento</h4>
+                                    <p class="sygma-doc-detalle-modal__doc-ref mb-0" id="lbDetalleDocRef"></p>
                                 </div>
-                            </div>
-                            <div class="row mt-3">
-                                <button type="button" class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
-                                    <i class="fal fa-arrow-left"></i>
+                                <button type="button" class="sygma-doc-detalle-modal__close" data-dismiss="modal" aria-label="Cerrar">
+                                    <i class="fal fa-times"></i>
                                 </button>
                             </div>
+                            <div class="sygma-doc-detalle-modal__meta">
+                                <div class="sygma-doc-detalle-modal__meta-row">
+                                    <span class="sygma-doc-detalle-modal__label-inline">Cliente:</span>
+                                    <span class="sygma-doc-detalle-modal__value" id="lbDetalleNomclie">—</span>
+                                </div>
+                                <div class="sygma-doc-detalle-modal__meta-row">
+                                    <span class="sygma-doc-detalle-modal__label-inline">Dirección:</span>
+                                    <span class="sygma-doc-detalle-modal__value" id="lbDetalleDirclie">—</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-body sygma-doc-detalle-modal__body">
+                            <div class="sygma-doc-detalle-modal__table-wrap">
+                                <table class="table sygma-doc-detalle-modal__table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Código</th>
+                                            <th>Producto</th>
+                                            <th>Tipo P.</th>
+                                            <th>Medida</th>
+                                            <th class="text-right">Cant.</th>
+                                            <th class="text-right">Precio</th>
+                                            <th class="text-right">Importe</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDataDetallePedido"></tbody>
+                                </table>
+                            </div>
+                            <div class="sygma-doc-detalle-modal__total-block">
+                                <div class="sygma-doc-detalle-modal__total-inner">
+                                    <span class="sygma-doc-detalle-modal__total-label">Total líneas</span>
+                                    <span class="sygma-doc-detalle-modal__total-qty" id="lbFtotalCantidad">0</span>
+                                    <span class="sygma-doc-detalle-modal__total-label">Importe total</span>
+                                    <span class="sygma-doc-detalle-modal__total-amount" id="lbFtotalImporte">Q 0.00</span>
+                                </div>
+                            </div>
+                            <div class="sygma-doc-detalle-modal__obs">
+                                <label class="sygma-doc-detalle-modal__label" for="txtDetallePedidoObs">Observaciones</label>
+                                <textarea class="form-control sygma-doc-detalle-modal__obs-input" id="txtDetallePedidoObs" rows="3" readonly></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer sygma-doc-detalle-modal__footer">
+                            <button type="button" class="btn btn-secondary sygma-doc-detalle-modal__btn-close" data-dismiss="modal">
+                                <i class="fal fa-times mr-1"></i>Cerrar
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -880,7 +888,7 @@ function getView(){
                     </div>
 
                     <div class="row no-gutters ventas-goles-tables">
-                        <div class="col-12 col-lg-6 pr-lg-1 mb-2 mb-lg-0">
+                        <div class="col-12">
                             <div class="table-responsive sygma-ventas-goles-table sygma-ventas-goles-table--marcas">
                                 <table class="table table-sm table-bordered mb-0 h-full col-12">
                                     <thead class="bg-primary text-white">
@@ -903,26 +911,6 @@ function getView(){
                                             <td></td>
                                         </tr>
                                     </tfoot>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="col-12 col-lg-6 pl-lg-1">
-                            <div class="form-group mb-1">
-                                <input type="text" class="form-control form-control-sm border-info text-info"
-                                id="txtBuscarGoles"
-                                placeholder="Buscar producto..."
-                                oninput="F.FiltrarTabla('tblGoles','txtBuscarGoles')">
-                            </div>
-                            <div class="table-responsive sygma-ventas-goles-table sygma-ventas-goles-table--productos">
-                                <table class="table table-sm table-hover table-bordered mb-0" id="tblGoles">
-                                    <thead class="bg-primary text-white">
-                                        <tr>
-                                            <td>PRODUCTO</td>
-                                            <td class="text-right">GOLES</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tblDataGoles">
-                                    </tbody>
                                 </table>
                             </div>
                         </div>
@@ -1012,6 +1000,16 @@ function getView(){
 };
 
 function addListeners(){
+
+    $('.ped-modal-detalle').off('show.bs.modal.pedBlur hidden.bs.modal.pedBlur')
+        .on('show.bs.modal.pedBlur', function () {
+            document.body.classList.add('ped-modal-blur-open');
+        })
+        .on('hidden.bs.modal.pedBlur', function () {
+            if (!$('.ped-modal-detalle.show').length) {
+                document.body.classList.remove('ped-modal-blur-open');
+            }
+        });
 
     document.getElementById('btnVentasMenuToggle')?.addEventListener('click', () => {
         ventas_toggleSidebar();
@@ -1725,13 +1723,13 @@ function ventas_html_lista_faltantes(items) {
         return '<div class="text-center text-muted py-3">No hay faltantes registrados en esta visita</div>';
     }
     return `
-        <div class="table-responsive" style="max-height:55vh;overflow-y:auto">
-            <table class="table table-sm table-bordered table-hover mb-0">
-                <thead class="bg-base text-white">
-                    <tr><th>CÓDIGO</th><th>PRODUCTO</th></tr>
+        <div class="table-responsive ped-modal-table-wrap">
+            <table class="table table-sm table-hover ped-modal-table">
+                <thead>
+                    <tr><td>CÓDIGO</td><td>PRODUCTO</td></tr>
                 </thead>
                 <tbody>
-                    ${items.map((p) => `<tr><td>${p.CODPROD || ''}</td><td>${p.DESPROD || ''}</td></tr>`).join('')}
+                    ${items.map((p) => `<tr><td class="negrita text-nowrap">${p.CODPROD || ''}</td><td>${p.DESPROD || ''}</td></tr>`).join('')}
                 </tbody>
             </table>
         </div>`;
@@ -1882,7 +1880,6 @@ function cargar_grid(){
             
             break;
         case 'GOLES-COBERTURA':
-            rpt_goles_resumen();
             rpt_cobertura_marcas_empleado(GlobalCodUsuario);
 
             break;
@@ -2000,39 +1997,61 @@ function get_detalle_pedido(coddoc, correlativo) {
 
     const container = document.getElementById('tblDataDetallePedido');
     if (!container) return;
-    container.innerHTML = GlobalLoader;
+    container.innerHTML = `<tr><td colspan="7" class="text-center py-4">${GlobalLoader}</td></tr>`;
+
+    const setTxt = (id, valor) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = valor;
+    };
+    setTxt('lbDetalleDocRef', `${coddoc}-${correlativo}`);
+    setTxt('lbDetalleNomclie', '—');
+    setTxt('lbDetalleDirclie', '—');
+    setTxt('lbFtotalCantidad', '0');
+    setTxt('lbFtotalImporte', F.setMoneda(0, 'Q'));
+    const txtObs = document.getElementById('txtDetallePedidoObs');
+    if (txtObs) txtObs.value = '';
 
     GF.get_data_detalle_documento(GlobalEmpnit, coddoc, correlativo)
         .then((data) => {
             let str = '';
             let contador = 0;
             let varImporte = 0;
+            let obs = '';
+            let nomclie = '—';
+            let dirclie = '—';
 
             data.recordset.map((r) => {
+                if (contador === 0) {
+                    nomclie = (r.NOMCLIE || '').trim() || '—';
+                    dirclie = (r.DIRCLIE || '').trim() || '—';
+                    obs = (r.DOCOBS || '').trim();
+                }
                 contador += 1;
                 varImporte += Number(r.TOTALPRECIO);
                 str += `
             <tr>
-                <td>${r.CODPROD}</td>
+                <td><span class="sygma-doc-detalle-modal__cod">${r.CODPROD}</span></td>
                 <td>${r.DESPROD}</td>
-                <td>${r.TIPOPRECIO}</td>
-                <td>${r.CODMEDIDA}</td>
-                <td>${r.CANTIDAD}</td>
-                <td>${F.setMoneda(r.PRECIO,'Q')}</td>
-                <td>${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
+                <td>${r.TIPOPRECIO || ''}</td>
+                <td>${r.CODMEDIDA || ''}</td>
+                <td class="text-right">${r.CANTIDAD}</td>
+                <td class="text-right">${F.setMoneda(r.PRECIO,'Q')}</td>
+                <td class="text-right sygma-doc-detalle-modal__importe">${F.setMoneda(r.TOTALPRECIO,'Q')}</td>
             </tr>
             `;
             });
-            container.innerHTML = str;
-            document.getElementById('lbFtotalCantidad').innerHTML = contador;
-            document.getElementById('lbFtotalImporte').innerHTML = F.setMoneda(varImporte, 'Q');
-            document.getElementById('txtDetallePedidoObs').value = '';
+            container.innerHTML = str || `<tr><td colspan="7" class="text-center text-muted py-4">Sin productos en este documento</td></tr>`;
+            setTxt('lbDetalleNomclie', nomclie);
+            setTxt('lbDetalleDirclie', dirclie);
+            setTxt('lbFtotalCantidad', String(contador));
+            setTxt('lbFtotalImporte', F.setMoneda(varImporte, 'Q'));
+            if (txtObs) txtObs.value = obs;
         })
         .catch(() => {
-            container.innerHTML = 'No hay datos...';
-            document.getElementById('lbFtotalCantidad').innerHTML = '';
-            document.getElementById('lbFtotalImporte').innerHTML = '';
-            document.getElementById('txtDetallePedidoObs').value = '';
+            container.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">No se pudo cargar el detalle</td></tr>`;
+            setTxt('lbFtotalCantidad', '0');
+            setTxt('lbFtotalImporte', F.setMoneda(0, 'Q'));
+            if (txtObs) txtObs.value = '';
         });
 }
 
@@ -2310,6 +2329,7 @@ function rpt_goles_resumen(){
     let anio = ventas_getAnio();
 
     let container = document.getElementById('tblDataGoles');
+    if (!container) return;
     container.innerHTML = GlobalLoader;
 
     let varTotal = 0;
@@ -2702,6 +2722,8 @@ function rpt_cobertura_marcas_empleado(codemp){
                 document.getElementById('lbTotalMarcaGolesEmpleado').innerText = varTotalGoles;
                 
                 document.getElementById('lbTotalMarcaImporteEmpleado').innerText = F.setMoneda(varTotalImporte,'Q');
+                const lbTotalGoles = document.getElementById('lbTotalGoles');
+                if (lbTotalGoles) lbTotalGoles.innerText = varTotalGoles;
                 
             })
             .catch((err)=>{
@@ -2710,6 +2732,8 @@ function rpt_cobertura_marcas_empleado(codemp){
                 document.getElementById('lbTotalMarcaVisitadosEmpleado').innerText = '';
                 document.getElementById('lbTotalMarcaGolesEmpleado').innerText = '';
                 document.getElementById('lbTotalMarcaImporteEmpleado').innerText = '';
+                const lbTotalGoles = document.getElementById('lbTotalGoles');
+                if (lbTotalGoles) lbTotalGoles.innerText = '';
             })
 
   

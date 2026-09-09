@@ -50,85 +50,160 @@ function getView(){
         },
         pedido:()=>{
             return `
-            <div class="ped-toma">
-                <div class="ped-toma__header">
-                    <div class="ped-toma__cliente">
-                        <button type="button" class="btn btn-light btn-sm btn-circle hand shadow-sm mr-2" id="btnAtrasVentasClientesHdr" title="Volver a clientes">
-                            <i class="fal fa-arrow-left"></i>
-                        </button>
-                        <div class="min-width-0">
-                            <small class="text-muted d-block">Tomando pedido</small>
-                            <div class="negrita text-truncate" id="lbPedidoClienteNombre">Cliente</div>
-                            <small class="text-muted" id="lbTotalItems">0 items</small>
+            <div class="row">
+         
+                    <div class="col-12">
+                        
+                        <div class="card border-base card-rounded shadow p-2 col-12">
+                            <div class="row">
+
+                                <div class="col-4 text-left d-flex align-items-start flex-wrap">
+                                    <button type="button"
+                                        class="btn btn-outline-secondary btn-circle hand shadow mr-2 mt-1 d-none d-md-inline-flex ventas-pedido-back-clientes--header"
+                                        id="btnAtrasVentasClientesHdr"
+                                        title="Volver a búsqueda de clientes">
+                                        <i class="fal fa-arrow-left"></i>
+                                    </button>
+                                    <div>
+                                        <label class="text-base negrita h5 mb-0" style="font-size:120%">Nuevo Pedido</label>
+                                        <br>
+                                        <label class="text-base negrita h5 mb-0" style="font-size:120%" id="lbTotalItems">0 items</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-8 text-right">
+                                    <h5 class="text-verde negrita" id="lbTotalVenta">Q 0.00</h5>
+                                    <h5 class="text-danger negrita" id="lbTotalDescuento">Q 0.00</h5>
+                                    <h1 class="text-base negrita" id="lbTotalVentaDescuento">Q 0.00</h1>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    
+            </div>
+           
+            <div class="row">
+
+                <div class="col-12">
+
+                                  
+                   <div class="row">
+                      
+                        <div class="col-12">
+                            <div class="card card-rounded shadow border-base col-12 p-2">
+                                <div class="card-body">
+                                    
+                                    <div class="form-group">
+                                        <div class="input-group">
+                                           
+                                            <input type="text" autocomplete="off" class="form-control col-12 border-base negrita col-12" placeholder='Escriba para buscar...' id="txtPosCodprod">
+                                            <select class="border-danger negrita text-danger" id="cmb_tipo_precio">
+                                                <option value="PRECIO">PUBLICO</option>
+                                                <option value="PRECIO_A">SEMI</option>
+                                                <option value="PRECIO_B">MAYORISTA</option>
+                                            </select>
+                                            <button class="btn btn-base hand col-1" id="btnBuscarProd">
+                                                <i class="fal fa-search"></i>
+                                            </button>
+                                                                                    
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <b class="text-base">Productos agregados a la Factura</b>
+                                        </div>
+                                    </div>
+                                    <table class="table  table-hover col-12 h-full">
+                                        <thead class="bg-verde text-white">
+                                            <tr>
+                                                <td>PRODUCTO</td>
+                                                
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblPosPedido"></tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="ped-toma__totales">
-                        <small class="text-muted d-none" id="lbTotalVenta">Q 0.00</small>
-                        <small class="text-danger d-none" id="lbTotalDescuento">Q 0.00</small>
-                        <div class="ped-toma__total" id="lbTotalVentaDescuento">Q 0.00</div>
-                    </div>
-                </div>
 
-                <div class="ped-toma__buscar">
-                    <div class="input-group">
-                        <input type="text" autocomplete="off" class="form-control negrita" placeholder="Buscar producto o código..." id="txtPosCodprod">
-                        <select class="custom-select ped-toma__precio" id="cmb_tipo_precio">
-                            <option value="PRECIO">PÚBLICO</option>
-                            <option value="PRECIO_A">SEMI</option>
-                            <option value="PRECIO_B">MAYORISTA</option>
-                        </select>
-                        <div class="input-group-append">
-                            <button class="btn btn-info hand" id="btnBuscarProd" type="button">
-                                <i class="fal fa-search"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="ped-toma__lista" id="tblPosPedido"></div>
-
-                <div class="ped-toma__bar">
-                    <button type="button" class="btn btn-light hand" id="btnAtrasVentasClientes" data-ventas-keep="true">
-                        <i class="fal fa-arrow-left mr-1"></i>Clientes
-                    </button>
-                    <button type="button" class="btn btn-success hand negrita flex-grow-1" id="btnPosCobro">
-                        Continuar <i class="fal fa-arrow-right ml-1"></i>
-                    </button>
                 </div>
             </div>
+            
+            <div class="row">
+
+
+            </div>
+
+            
+            <button type="button"
+                class="btn btn-secondary btn-xl btn-circle hand shadow ventas-pedido-back-clientes d-md-none"
+                id="btnAtrasVentasClientes"
+                data-ventas-keep="true"
+                title="Volver a búsqueda de clientes">
+                <i class="fal fa-arrow-left"></i>
+            </button>
+            
+            <button class="btn btn-verde btn-xl btn-bottom-r btn-circle shadow hand" id="btnPosCobro">
+                <i class="fal fa-arrow-right"></i>
+            </button>
             `
         },
         modal_lista_precios:()=>{
             return `
-            <div class="modal fade ped-modal-detalle ped-modal-detalle--wide ped-modal-detalle--tall" id="modal_lista_precios" tabindex="-1" role="dialog" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+            <div class="modal modal-with-scroll" id="modal_lista_precios" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl" role="document">
                     <div class="modal-content">
-                        <div class="ped-modal-detalle__header">
-                            <div>
-                                <h5 class="negrita mb-0">Buscar producto</h5>
-                                <small class="text-muted">Toque una fila para agregar</small>
+            
+                        <div class="modal-body p-4">
+                            <div class="row">
+                                <div class="col-8">
+                                    <label class="modal-title text-base h3" id="">Buscar producto</label>
+                                </div>
+                                <div class="col-4">
+                                    <button class="btn btn-secondary btn-md  hand shadow waves-effect waves-themed" data-dismiss="modal" id="">
+                                        <i class="fal fa-arrow-left"></i> Cerrar(x)
+                                    </button>
+                                </div>
                             </div>
-                            <button type="button" class="btn btn-sm btn-circle ped-modal-detalle__close hand" data-dismiss="modal">
-                                <i class="fal fa-times"></i>
-                            </button>
-                        </div>
-                        <div class="modal-body ped-modal-detalle__body">
-                            <input type="text" class="form-control form-control-sm mb-2"
+
+                            
+                            <div class="form-group">
+                                
+                                <input type="text" class="form-control border-danger negrita text-danger"
                                 id="txtBuscarP"
-                                placeholder="Filtrar en la lista..."
+                                placeholder="Escriba para filtrar"
                                 oninput="F.FiltrarTabla('tblProductos','txtBuscarP')">
-                            <div class="table-responsive ped-modal-table-wrap">
-                                <table class="table table-sm table-hover ped-modal-table" id="tblProductos">
-                                    <thead>
-                                        <tr>
-                                            <td>PRODUCTO</td>
-                                            <td>MEDIDA</td>
-                                            <td class="text-right">PRECIO</td>
-                                            <td class="text-right">EXIST.</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tblDataProductos"></tbody>
-                                </table>
+                            </div>
+
+                                    <table class="table table-responsive  table-hover table-bordered h-full" id="tblProductos">
+                                        <thead class="bg-base text-white">
+                                            <tr>
+                                                <td>PRODUCTO</td>
+                                                <td>MEDIDA</td>
+                                                <td>PRECIO</td>
+                                                <td>EXISTENCIA</td>
+                                                <td>MARCA</td>
+                                                <td>TIPO</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblDataProductos"></tbody>
+                                    </table>
+
+                            <br>
+
+                            <div class="row">
+                                    <div class="text-left">
+                                        <button class="btn btn-secondary btn-xl btn-circle hand shadow waves-effect waves-themed" data-dismiss="modal" id="">
+                                            <i class="fal fa-arrow-left"></i>
+                                        </button>                                
+                                    </div>
+        
+                                   
                             </div>
                         </div>
                     </div>
@@ -137,43 +212,68 @@ function getView(){
         },
         modal_cantidad:()=>{
             return `
-            <div class="modal fade ped-modal-detalle" id="modal_cantidad" tabindex="-1" role="dialog" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="modal" id="modal_cantidad" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
                     <div class="modal-content">
-                        <div class="ped-modal-detalle__header">
-                            <div>
-                                <h5 class="negrita mb-0">Cantidad</h5>
-                                <small class="text-muted" id="lbCantidadDesprod">Producto</small>
-                            </div>
-                            <button type="button" class="btn btn-sm btn-circle ped-modal-detalle__close hand" data-dismiss="modal">
-                                <i class="fal fa-times"></i>
-                            </button>
+
+                        <div class="modal-header">
+                            <label class="modal-title text-base h3" id="lbCantidadDesprod">Cantidad de producto</label>
                         </div>
-                        <div class="modal-body ped-modal-detalle__body">
-                            <div id="container_precio"></div>
-                            <div class="ped-qty">
-                                <button type="button" class="btn btn-light ped-qty__btn" onclick="pedido_step_cantidad('txtMCCantidad',-1)">−</button>
-                                <input type="number" inputmode="decimal" class="form-control ped-qty__input negrita" id="txtMCCantidad" placeholder="0">
-                                <button type="button" class="btn btn-light ped-qty__btn" onclick="pedido_step_cantidad('txtMCCantidad',1)">+</button>
+            
+                        <div class="modal-body p-4">
+                            <div class="" id="container_precio">
                             </div>
-                            <div class="d-flex justify-content-between mt-3">
-                                <small class="text-muted">Precio</small>
-                                <span class="negrita" id="lbMCPrecioVista">--</span>
+                            <div class="row">
+                                <div class="col-4 text-center">
+                                    <img src="./favicon.png" width="120px" height="100px">
+                                </div>
+                                <div class="col-8">
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary">Cantidad:</label>
+                                        <input type="number" style="font-size:140%" class="form-control negrita text-info border-base shadow col-10" id="txtMCCantidad">
+                                    </div>   
+                                    
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary">Precio ${GlobalSignoMoneda}:</label>
+                                        <input disabled="true" type="number" style="font-size:140%" class="form-control negrita text-info border-base shadow col-10" id="txtMCPrecio">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary">Subtotal ${GlobalSignoMoneda}:</label>
+                                        <input type="number" style="font-size:150%" class="form-control negrita text-danger border-base shadow col-10" id="txtMCTotalPrecio" disabled>
+                                    </div>
+
+                                    <div class="form-group hidden">
+                                        <label class="negrita text-secondary">Descuento ${GlobalSignoMoneda}:</label>
+                                        <input type="number" style="font-size:140%" class="form-control negrita text-info border-base shadow col-10" id="txtMCDescuento" oninput="calcular_descuento('txtMCDescuento','txtMCTotalPrecio','txtMCTotalPrecioDescuento')">
+                                    </div>
+                                    
+                                    <div class="form-group hidden">
+                                        <label class="negrita text-secondary">Importe ${GlobalSignoMoneda}:</label>
+                                        <input type="number" style="font-size:150%" class="form-control negrita text-danger border-base shadow col-10" id="txtMCTotalPrecioDescuento" disabled>
+                                    </div>
+
+
+                                </div>            
                             </div>
-                            <div class="d-flex justify-content-between">
-                                <small class="text-muted">Subtotal</small>
-                                <span class="negrita text-danger" id="lbMCTotalVista">--</span>
+                                
+                            <br>
+
+                            <div class="row">
+                                    <div class="col-5 text-right">
+                                        <button class="btn btn-secondary btn-xl btn-circle hand shadow waves-effect waves-themed" data-dismiss="modal" id="">
+                                            <i class="fal fa-arrow-left"></i>
+                                        </button>                                
+                                    </div>
+        
+                                    <div class="col-1"></div>
+        
+                                    <div class="col-5 text-right">
+                                        <button class="btn btn-base btn-xl btn-circle hand shadow waves-effect waves-themed" id="btnMCGuardar">
+                                            <i class="fal fa-check mr-1"></i>
+                                        </button>
+                                    </div>
                             </div>
-                            <input disabled type="number" class="d-none" id="txtMCPrecio">
-                            <input type="number" class="d-none" id="txtMCTotalPrecio" disabled>
-                            <input type="number" class="d-none" id="txtMCDescuento" oninput="calcular_descuento('txtMCDescuento','txtMCTotalPrecio','txtMCTotalPrecioDescuento')">
-                            <input type="number" class="d-none" id="txtMCTotalPrecioDescuento" disabled>
-                        </div>
-                        <div class="ped-modal-detalle__footer">
-                            <button type="button" class="btn btn-light hand" data-dismiss="modal">Cancelar</button>
-                            <button type="button" class="btn btn-success hand negrita" id="btnMCGuardar">
-                                <i class="fal fa-check mr-1"></i>Agregar
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -181,42 +281,67 @@ function getView(){
         },
         modal_editar_cantidad:()=>{
             return `
-            <div class="modal fade ped-modal-detalle" id="modal_editar_cantidad" tabindex="-1" role="dialog" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="modal" id="modal_editar_cantidad" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
                     <div class="modal-content">
-                        <div class="ped-modal-detalle__header">
-                            <div>
-                                <h5 class="negrita mb-0">Editar cantidad</h5>
-                                <small class="text-muted" id="lbCantidadDesprodE">Producto</small>
-                            </div>
-                            <button type="button" class="btn btn-sm btn-circle ped-modal-detalle__close hand" data-dismiss="modal">
-                                <i class="fal fa-times"></i>
-                            </button>
+
+                        <div class="modal-header bg-base">
+                            <label class="modal-title text-white h3" id="lbCantidadDesprodE">Cantidad de producto</label>
                         </div>
-                        <div class="modal-body ped-modal-detalle__body">
-                            <div class="ped-qty">
-                                <button type="button" class="btn btn-light ped-qty__btn" onclick="pedido_step_cantidad('txtMCCantidadE',-1)">−</button>
-                                <input type="number" inputmode="decimal" class="form-control ped-qty__input negrita" id="txtMCCantidadE">
-                                <button type="button" class="btn btn-light ped-qty__btn" onclick="pedido_step_cantidad('txtMCCantidadE',1)">+</button>
+            
+                        <div class="modal-body p-4">
+                            <div class="row">
+                                <div class="col-4 text-center">
+                                    <img src="./favicon.png" width="120px" height="100px">
+                                </div>
+                                <div class="col-8">
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary">Cantidad:</label>
+                                        <input type="number" style="font-size:140%" class="form-control negrita text-info border-base shadow col-10" id="txtMCCantidadE">
+                                    </div>   
+                                    
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary">Precio ${GlobalSignoMoneda}:</label>
+                                        <input disabled="true" type="number" style="font-size:140%" class="form-control negrita text-info border-base shadow col-10" id="txtMCPrecioE">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="negrita text-secondary">Subtotal ${GlobalSignoMoneda}:</label>
+                                        <input type="number" style="font-size:150%" class="form-control negrita text-danger border-base shadow col-10" id="txtMCTotalPrecioE" disabled>
+                                    </div>
+
+
+                                    <div class="form-group hidden">
+                                        <label class="negrita text-secondary">Descuento ${GlobalSignoMoneda}:</label>
+                                        <input type="number" style="font-size:140%" class="form-control negrita text-info border-base shadow col-10" id="txtMCDescuentoE" oninput="calcular_descuento('txtMCDescuentoE','txtMCTotalPrecioE','txtMCTotalPrecioDescuentoE')">
+                                    </div>
+                                    
+                                    <div class="form-group hidden">
+                                        <label class="negrita text-secondary">Importe ${GlobalSignoMoneda}:</label>
+                                        <input type="number" style="font-size:150%" class="form-control negrita text-danger border-base shadow col-10" id="txtMCTotalPrecioDescuentoE" disabled>
+                                    </div>
+
+
+                                </div>            
                             </div>
-                            <div class="d-flex justify-content-between mt-3">
-                                <small class="text-muted">Precio</small>
-                                <span class="negrita" id="lbMCPrecioVistaE">--</span>
+                                
+                            <br>
+        
+                            <div class="row">
+                                    <div class="col-5 text-right">
+                                        <button class="btn btn-secondary btn-xl btn-circle hand shadow waves-effect waves-themed" data-dismiss="modal" id="">
+                                            <i class="fal fa-arrow-left"></i>
+                                        </button>                                
+                                    </div>
+        
+                                    <div class="col-1"></div>
+        
+                                    <div class="col-5 text-right">
+                                        <button class="btn btn-base btn-xl btn-circle hand shadow waves-effect waves-themed" id="btnMCGuardarE">
+                                            <i class="fal fa-check mr-1"></i>
+                                        </button>
+                                    </div>
                             </div>
-                            <div class="d-flex justify-content-between">
-                                <small class="text-muted">Subtotal</small>
-                                <span class="negrita text-danger" id="lbMCTotalVistaE">--</span>
-                            </div>
-                            <input disabled type="number" class="d-none" id="txtMCPrecioE">
-                            <input type="number" class="d-none" id="txtMCTotalPrecioE" disabled>
-                            <input type="number" class="d-none" id="txtMCDescuentoE" oninput="calcular_descuento('txtMCDescuentoE','txtMCTotalPrecioE','txtMCTotalPrecioDescuentoE')">
-                            <input type="number" class="d-none" id="txtMCTotalPrecioDescuentoE" disabled>
-                        </div>
-                        <div class="ped-modal-detalle__footer">
-                            <button type="button" class="btn btn-light hand" data-dismiss="modal">Cancelar</button>
-                            <button type="button" class="btn btn-info hand negrita" id="btnMCGuardarE">
-                                <i class="fal fa-check mr-1"></i>Guardar
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -224,64 +349,97 @@ function getView(){
         },
         documento:()=>{
             return `
-            <div class="ped-cierre">
-                <div class="ped-cierre__header">
-                    <div>
-                        <small class="text-muted d-block">Confirmar y enviar</small>
-                        <div class="ped-cierre__total" id="lbPosCobroTotalPagar">Q 0.00</div>
-                    </div>
-                </div>
-                <div class="ped-cierre__cliente d-none">
+            <div class="row">
+                <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
                     ${view.documento_card_cliente()}
                 </div>
-                <div class="ped-cierre__resumen" id="lbCierreClienteResumen">Cliente</div>
-                <div class="ped-cierre__card">
-                    <div class="form-row">
-                        <div class="form-group col-6 mb-2">
-                            <label class="small text-muted mb-1">Tipo</label>
-                            <select class="form-control form-control-sm negrita" id="cmbTipoDocumento">
-                                <option value="FAC">FACTURA</option>
-                            </select>
+
+                <div class="col-sm-12 col-md-6 col-lg-8 col-xl-8">
+                    <div class="card card-rounded shadow col-12 border-base">
+                        <div class="card-body">
+
+                            <div class="row">
+                                <div class="form-group">
+                                    <label class="text-secondary">Tipo de Documento</label>
+                                    <select class="form-control col-12 negrita text-danger" id="cmbTipoDocumento">
+                                        <option value="FAC">FACTURAS NORMALES</option> 
+                                
+                                    </select>   
+                                </div>
+                                <div class="form-group text-left">
+                                    <label class="text-secondary">Serie Documento</label>
+                                    <div class="input-group">
+                                        <select class="form-control col-12" id="cmbCoddoc">
+                                        </select>
+                                        <input type="number" id="txtCorrelativo" class="form-control" disabled="true" value=0>
+                                    </div>    
+                                </div>
+                            </div>
+                            <br>
+
+                            <div class="row">
+                                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                                    <div class="form-group text-left">
+                                        <label class="text-secondary">Fecha</label>
+                                        <div class="input-group">
+                                            <input type="date" id="txtFecha" class="form-control text-base negrita border-base" disabled>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="text-secondary">Observaciones</label>
+                                        <textarea class="form-control negrita" rows="3" id="txtObs"></textarea>
+                                    </div>
+                                    
+                                 
+
+                                    <div class="hidden">
+                                        
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input hand" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="mostrador" checked>
+                                            <label class="form-check-label negrita text-base hand" for="inlineRadio1">Mostrador  </label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input hand" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="domicilio">
+                                            <label class="form-check-label negrita text-base hand" for="inlineRadio2">Domicilio  </label>
+                                        </div>
+                                         <div class="form-check form-check-inline">
+                                            <input class="form-check-input hand" type="radio" name="inlineRadioOptions" id="inlineRadio3" value="callcenter">
+                                            <label class="form-check-label negrita text-base hand" for="inlineRadio3">Call Center</label>
+                                        </div>
+
+                                    </div>
+
+                                </div>    
+                                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                                    <div class="form-group text-right">
+                                        <label class="negrita text-secondary h4">Total a Pagar</label>
+                                        <h2 class="negrita text-danger" style="font-size:280%" id="lbPosCobroTotalPagar">Q 0.00</h2>
+                                    </div>
+                                </div>
+                            </div>  
+                            
+                            <div class="mt-2">
+                                <button type="button" class="btn btn-secondary btn-sm hand shadow" id="btnPosDocumentoAtrasLbl" title="Volver a productos para corregir">
+                                    <i class="fal fa-arrow-left"></i> Atrás para corregir
+                                </button>
+                            </div>
+
                         </div>
-                        <div class="form-group col-6 mb-2">
-                            <label class="small text-muted mb-1">Fecha</label>
-                            <input type="date" id="txtFecha" class="form-control form-control-sm negrita" disabled>
-                        </div>
                     </div>
-                    <div class="form-group mb-2">
-                        <label class="small text-muted mb-1">Serie</label>
-                        <div class="input-group input-group-sm">
-                            <select class="form-control" id="cmbCoddoc"></select>
-                            <input type="number" id="txtCorrelativo" class="form-control" disabled value="0">
-                        </div>
-                    </div>
-                    <div class="form-group mb-0">
-                        <label class="small text-muted mb-1">Observaciones</label>
-                        <textarea class="form-control form-control-sm negrita" rows="2" id="txtObs" placeholder="Opcional"></textarea>
-                    </div>
-                    <div class="hidden">
-                        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="mostrador" checked>
-                        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="domicilio">
-                        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio3" value="callcenter">
-                    </div>
-                </div>
-                <div class="ped-toma__bar">
-                    <button type="button" class="btn btn-light hand" id="btnPosDocumentoAtrasLbl">
-                        <i class="fal fa-arrow-left mr-1"></i>Corregir
-                    </button>
-                    <button type="button" class="btn btn-info hand negrita flex-grow-1" id="btnGuardarFactura">
-                        <i class="fal fa-save mr-1"></i>Enviar pedido
-                    </button>
-                </div>
-                <button class="d-none" id="btnPosDocumentoAtras" data-ventas-keep="true"></button>
-                <div class="ped-cierre__loader d-none" id="pedCierreLoader" aria-live="polite">
-                    <div class="ped-cierre__loader-card">
-                        <i class="fal fa-sync fa-spin"></i>
-                        <div class="negrita" id="pedCierreLoaderTxt">Procesando...</div>
-                        <small class="text-muted">Espere un momento</small>
-                    </div>
+                
                 </div>
             </div>
+
+            <button class="btn btn-secondary btn-xl btn-bottom-l btn-circle shadow hand" id="btnPosDocumentoAtras"
+                data-ventas-keep="true"
+                title="Atrás para corregir">
+                <i class="fal fa-arrow-left"></i>
+            </button>
+
+            <button class="btn btn-info btn-xl btn-bottom-r btn-circle shadow" id="btnGuardarFactura">
+                <i class="fal fa-save"></i>
+            </button>
             `
         },
         documento_card_cliente:()=>{
@@ -989,23 +1147,33 @@ function addListeners(){
     let btnGuardarFactura = document.getElementById('btnGuardarFactura');
     btnGuardarFactura.addEventListener('click',()=>{
 
-        if (btnGuardarFactura.disabled) return;
+       
 
         F.Confirmacion("¿Está seguro que desea Guardar esta Venta?")
         .then((value)=>{
             if(value==true){
-                pedido_set_enviar_estado(true, 'Obteniendo ubicación...');
+
+                F.showToast('Obteniendo datos...');
+                
                 F.ObtenerUbicacion()
                 .then((location)=>{
+                    
                     let latitud = location.latitude.toString();
                     let longitud = location.longitude.toString();
+                    
                     finalizar_pedido(latitud,longitud);
                 })
                 .catch(()=>{
-                    finalizar_pedido(0,0)
+               
+                     finalizar_pedido(0,0)
                 })
+
+               
+               
             }
         })
+        
+
     });
 
 
@@ -1480,7 +1648,7 @@ function listener_vista_pedido(){
         .then(()=>{
             $("#modal_editar_cantidad").modal('hide');
 
-            F.showToast('Cantidad actualizada');
+            F.showToast('Producto agregado ' + Selected_desprod);
             get_tbl_pedido();
             document.getElementById('txtPosCodprod').focus();
         })
@@ -1538,7 +1706,6 @@ function listener_vista_cobro(){
     document.getElementById('txtPosCobroDireccion').value = "CIUDAD";
 
     document.getElementById('btnPosCobro').addEventListener('click',()=>{
-        pedido_pintar_cierre_resumen();
         document.getElementById('tab-tres').click();
     });
 
@@ -2550,115 +2717,50 @@ function fcn_buscar_cliente(nit){
 };
 
 //IR AL PEDIDO
-function pedido_esc_html(valor){
-    return String(valor ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-}
-
-function pedido_esc_js(valor){
-    return String(valor ?? '')
-        .replace(/\\/g, '\\\\')
-        .replace(/'/g, "\\'")
-        .replace(/\r?\n/g, ' ');
-}
-
-function pedido_pintar_cliente(nomclie, nitclie){
-    const nombre = nomclie || 'Cliente';
-    const lbNombre = document.getElementById('lbPedidoClienteNombre');
-    if (lbNombre) lbNombre.innerText = nombre;
-    pedido_pintar_cierre_resumen(nombre, nitclie);
-}
-
-function pedido_pintar_cierre_resumen(nombre, nitclie){
-    const lb = document.getElementById('lbCierreClienteResumen');
-    if (!lb) return;
-    const nom = nombre || document.getElementById('txtPosCobroNombre')?.value || 'Cliente';
-    const cod = nitclie || document.getElementById('txtPosCobroNitclie')?.value || '';
-    const nit = document.getElementById('txtPosCobroNit')?.value || '';
-    const extra = [cod, nit].filter(Boolean).join(' · ');
-    lb.innerText = extra ? `${nom} · ${extra}` : nom;
-}
-
 function get_datos_cliente(nitclie,nit,nomclie,dirclie,telefono){
 
+    //$("#modal_lista_clientes").modal('hide');
+
     document.getElementById('txtPosCobroNit').value = nit;
     document.getElementById('txtPosCobroNitclie').value = nitclie;
     document.getElementById('txtPosCobroNombre').value = nomclie;
     document.getElementById('txtPosCobroDireccion').value = dirclie;
     document.getElementById('txtPosCobroTelefono').value = telefono;
-    document.getElementById('txtBuscarClie').value='';
-    pedido_pintar_cliente(nomclie, nitclie);
-
+    
+    document.getElementById('txtBuscarClie').value=''; //limpio el filtro a la hora de vender
+    
+   
     selected_tab = 'tab_lista';
-    document.getElementById('tab-dos').click();
-    get_tbl_pedido();
-    document.getElementById('txtPosCodprod').focus();
-};
 
+    
+    document.getElementById('tab-dos').click();
+
+    document.getElementById('txtPosCodprod').focus();
+
+
+};
 function get_datos_cliente_mapa(nitclie,nit,nomclie,dirclie,telefono){
 
+    //$("#modal_lista_clientes").modal('hide');
+
     document.getElementById('txtPosCobroNit').value = nit;
     document.getElementById('txtPosCobroNitclie').value = nitclie;
     document.getElementById('txtPosCobroNombre').value = nomclie;
     document.getElementById('txtPosCobroDireccion').value = dirclie;
     document.getElementById('txtPosCobroTelefono').value = telefono;
-    document.getElementById('txtBuscarClie').value='';
-    pedido_pintar_cliente(nomclie, nitclie);
-
+    
+    document.getElementById('txtBuscarClie').value=''; //limpio el filtro a la hora de vender
+    
+   
     selected_tab = 'tab_mapa';
+
+    
     document.getElementById('tab-dos').click();
-    get_tbl_pedido();
+
     document.getElementById('txtPosCodprod').focus();
+
+
 };
-
-function pedido_sync_vista_cantidad(idCantidad, idPrecio, idLbPrecio, idLbTotal){
-    const cantidad = Number(document.getElementById(idCantidad)?.value || 0);
-    const precio = Number(document.getElementById(idPrecio)?.value || 0);
-    const total = cantidad * precio;
-    const lbP = document.getElementById(idLbPrecio);
-    const lbT = document.getElementById(idLbTotal);
-    if (lbP) lbP.innerText = F.setMoneda(precio, 'Q');
-    if (lbT) lbT.innerText = F.setMoneda(total, 'Q');
-}
-
-function pedido_step_cantidad(inputId, delta){
-    const el = document.getElementById(inputId);
-    if (!el) return;
-    let valor = Number(el.value || 0) + Number(delta);
-    if (valor < 1) valor = 1;
-    el.value = valor;
-    if (inputId === 'txtMCCantidadE') {
-        CalcularTotalPrecioEditar();
-    } else {
-        CalcularTotalPrecio();
-    }
-}
-
-function pedido_ajustar_cantidad(id, cantidadActual, precio, descuento, delta){
-    const nueva = Number(cantidadActual) + Number(delta);
-    if (nueva <= 0) {
-        deleteItemVentaPOS(id)
-        .then(()=>{
-            F.showToast('Producto quitado');
-            get_tbl_pedido();
-        })
-        .catch(()=>{
-            F.AvisoError('No se pudo quitar este producto');
-        });
-        return;
-    }
-
-    selectDataRowVentaPOS(Number(id), nueva, Number(precio), Number(descuento || 0))
-    .then(()=>{
-        get_tbl_pedido();
-    })
-    .catch(()=>{
-        F.AvisoError('No se pudo actualizar la cantidad');
-    });
-}
 
 function CalcularTotalPrecio(){
 
@@ -2666,7 +2768,7 @@ function CalcularTotalPrecio(){
     let precio = document.getElementById('txtMCPrecio').value;
     
     document.getElementById('txtMCTotalPrecio').value = (Number(cantidad)*Number(precio));
-    pedido_sync_vista_cantidad('txtMCCantidad','txtMCPrecio','lbMCPrecioVista','lbMCTotalVista');
+
 
 };
 
@@ -2676,7 +2778,6 @@ function CalcularTotalPrecioEditar(){
     let precio = document.getElementById('txtMCPrecioE').value;
     
     document.getElementById('txtMCTotalPrecioE').value = (Number(cantidad)*Number(precio));
-    pedido_sync_vista_cantidad('txtMCCantidadE','txtMCPrecioE','lbMCPrecioVistaE','lbMCTotalVistaE');
 
 };
 
@@ -2723,14 +2824,17 @@ function get_buscar_producto(filtro){
                     //si la medida es igual al precio, no aparece
                 }else{
                     str += `
-                    <tr class="hand" onclick="get_producto('${r.CODPROD}','${pedido_esc_js(r.DESPROD)}','${r.CODMEDIDA}','${r.EQUIVALE}','${r.COSTO}','${r.PRECIO}','${r.TIPOPROD}','${r.EXENTO}','${EXISTENCIA}','${r.BONO}')">
-                        <td><b style="color:${r.COLOR}">${pedido_esc_html(r.DESPROD)}</b>
+                    <tr class="hand" onclick="get_producto('${r.CODPROD}','${r.DESPROD}','${r.CODMEDIDA}','${r.EQUIVALE}','${r.COSTO}','${r.PRECIO}','${r.TIPOPROD}','${r.EXENTO}','${EXISTENCIA}','${r.BONO}')">
+                        
+                        <td><b style="color:${r.COLOR}">${r.DESPROD}</b>
                             <br>
                             <small class="negrita text-danger">Cód:${r.CODPROD}</small>
                         </td>
-                        <td>${r.CODMEDIDA} <small class="text-muted">Eq:${r.EQUIVALE}</small></td>
-                        <td class="text-right negrita">${F.setMoneda(r.PRECIO,'Q')}</td>
-                        <td class="text-right negrita ${strClassExistencia}">${F.setMoneda(EXISTENCIA,'')}</td>
+                        <td>${r.CODMEDIDA} (Eq:${r.EQUIVALE})</td>
+                        <td>${F.setMoneda(r.PRECIO,'Q')}</td>
+                        <td class="negrita ${strClassExistencia}">${F.setMoneda(EXISTENCIA,'')}</td>
+                        <td>${r.DESMARCA}</td>
+                        <td>${r.TIPOPROD}</td>
                     </tr>
                     `
                 }
@@ -2875,10 +2979,19 @@ function get_tbl_productos_clasificacion(codigo){
 
 function get_producto(codprod,desprod,codmedida,equivale,costo,precio,tipoprod,exento,existencia,bono){
 
+            //$("#modal_lista_precios").modal('hide');
+            
+            
+   
             let container = document.getElementById('container_precio');
-            if (container) container.innerHTML = '';
+            container.innerHTML = GlobalLoader;
 
+            document.getElementById('txtMCCantidad').value = '';
+            document.getElementById('txtMCPrecio').value = 0;
             document.getElementById('btnMCGuardar').disabled = true;
+
+
+            CalcularTotalPrecio();
 
             Selected_codprod = codprod;
             Selected_desprod = desprod;
@@ -2892,30 +3005,26 @@ function get_producto(codprod,desprod,codmedida,equivale,costo,precio,tipoprod,e
             Selected_bono = Number(bono);
 
             document.getElementById('lbCantidadDesprod').innerText = `${desprod} (${codmedida} - Eq: ${equivale})`;
-            document.getElementById('txtMCCantidad').value = 1;
+
+            document.getElementById('txtMCCantidad').value = '';
             document.getElementById('txtMCPrecio').value = precio;
-            document.getElementById('txtMCDescuento').value = 0;
+            //document.getElementById('txtMCBono').value = precio;
 
             CalcularTotalPrecio();
 
             document.getElementById('txtPosCodprod').value = '';
+
+            
+            container.innerHTML = '';
+
             document.getElementById('btnMCGuardar').disabled = false;
 
-            const abrirCantidad = () => {
-                $("#modal_cantidad").modal('show');
-                const inp = document.getElementById('txtMCCantidad');
-                if (inp) {
-                    inp.focus();
-                    inp.select();
-                }
-            };
-            const $lista = $("#modal_lista_precios");
-            if ($lista.hasClass('show')) {
-                $lista.one('hidden.bs.modal', abrirCantidad);
-                $lista.modal('hide');
-            } else {
-                abrirCantidad();
-            }
+            $("#modal_cantidad").modal('show');
+ 
+
+            document.getElementById('txtMCCantidad').focus();
+   
+
 };
 
 function get_datos_precio(codprod,codmedida){
@@ -3014,30 +3123,13 @@ function insert_producto_pedido(codprod,desprod,codmedida,equivale,costo,precio,
 function get_tbl_pedido(){
 
     let container = document.getElementById('tblPosPedido');
-    if (!container) return;
     container.innerHTML = GlobalLoader;
 
+    let str = '';
     let varTotalItems = 0;
     let varTotalVenta = 0;
     let varTotalCosto = 0;
     let varTotalDescuento = 0;
-
-    const pintarTotales = () => {
-        GlobalTotalCostoDocumento = varTotalCosto;
-        GlobalTotalDocumento = varTotalVenta;
-        GlobalTotalDescuento = varTotalDescuento;
-        const neto = varTotalVenta - varTotalDescuento;
-        const lbItems = document.getElementById('lbTotalItems');
-        if (lbItems) lbItems.innerText = `${varTotalItems} ${varTotalItems === 1 ? 'item' : 'items'}`;
-        const lbVenta = document.getElementById('lbTotalVenta');
-        if (lbVenta) lbVenta.innerText = F.setMoneda(varTotalVenta,'Q');
-        const lbDesc = document.getElementById('lbTotalDescuento');
-        if (lbDesc) lbDesc.innerText = `- ${F.setMoneda(varTotalDescuento,'Q')}`;
-        const lbNeto = document.getElementById('lbTotalVentaDescuento');
-        if (lbNeto) lbNeto.innerText = F.setMoneda(neto,'Q');
-        const lbPagar = document.getElementById('lbPosCobroTotalPagar');
-        if (lbPagar) lbPagar.innerText = F.setMoneda(neto,'Q');
-    };
 
     selectTempVentasPOS(GlobalEmpnit)
     .then((data)=>{
@@ -3046,47 +3138,68 @@ function get_tbl_pedido(){
             varTotalVenta = varTotalVenta + Number(rows.TOTALPRECIO);
             varTotalCosto = varTotalCosto + Number(rows.TOTALCOSTO);
             varTotalDescuento += Number(rows.DESCUENTO);
-            const desJs = pedido_esc_js(rows.DESPROD);
             return `
-            <div class="ped-item">
-                <div class="ped-item__top">
-                    <div class="ped-item__info">
-                        <div class="ped-item__nom">${pedido_esc_html(rows.DESPROD)}</div>
-                        <small class="text-muted">${rows.CODPROD} · ${rows.CODMEDIDA} · ${F.get_tipo_precio(rows.TIPOPRECIO)}</small>
+            <tr class="border-base border-left-0 border-right-0 border-top-0">
+                <td class="text-left">
+                    ${rows.DESPROD} (<small>${F.get_tipo_precio(rows.TIPOPRECIO)}</small>)
+                    <br>
+                    <small class="negrita"><b>${rows.CODPROD}</b></small>
+                    <br>
+                        ${rows.CODMEDIDA} (eq: ${rows.EQUIVALE})
+                    <br>
+
+                    <div class="row">
+                        <div class="col-3">
+                            <b class="text-info" style="font-size:140%">${rows.CANTIDAD}</b>
+                        </div>
+                        <div class="col-4">
+                            <small class="negrita">${F.setMoneda(rows.PRECIO,'Q')}</small>
+                        </div>
+                        <div class="col-5">
+                            <b class="negrita text-danger h5">${F.setMoneda(rows.TOTALPRECIO,'Q')}</b>
+                        </div>
+                       
                     </div>
-                    <button type="button" class="btn btn-sm btn-circle btn-light ped-item__del hand" title="Quitar" onclick="delete_item_pedido('${rows.ID}')">
+                </td>
+               
+                <td>
+                    <button class="hidden btn btn-md btn-circle btn-info shadow hand" onclick="edit_item_pedido('${rows.ID}','${rows.CODPROD}','${rows.DESPROD}','${rows.CODMEDIDA}','${rows.EQUIVALE}','${rows.CANTIDAD}','${rows.COSTO}','${rows.PRECIO}','${rows.TIPOPROD}','${rows.EXENTO}','${rows.EXISTENCIA}','${rows.BONO}','${rows.DESCUENTO}')">
+                        <i class="fal fa-edit"></i>
+                    </button>
+                </td> 
+                <td>
+                    <button class="btn btn-md btn-circle btn-danger shadow hand" onclick="delete_item_pedido('${rows.ID}')">
                         <i class="fal fa-trash"></i>
                     </button>
-                </div>
-                <div class="ped-item__bottom">
-                    <div class="ped-item__step">
-                        <button type="button" class="btn btn-light ped-item__btn hand" onclick="pedido_ajustar_cantidad('${rows.ID}',${rows.CANTIDAD},${rows.PRECIO},${rows.DESCUENTO || 0},-1)">−</button>
-                        <button type="button" class="btn btn-link ped-item__cant hand" title="Editar cantidad" onclick="edit_item_pedido('${rows.ID}','${rows.CODPROD}','${desJs}','${rows.CODMEDIDA}','${rows.EQUIVALE}','${rows.CANTIDAD}','${rows.COSTO}','${rows.PRECIO}','${rows.TIPOPROD}','${rows.EXENTO}','${rows.EXISTENCIA}','${rows.BONO}','${rows.DESCUENTO || 0}')">${rows.CANTIDAD}</button>
-                        <button type="button" class="btn btn-light ped-item__btn hand" onclick="pedido_ajustar_cantidad('${rows.ID}',${rows.CANTIDAD},${rows.PRECIO},${rows.DESCUENTO || 0},1)">+</button>
-                    </div>
-                    <div class="ped-item__montos">
-                        <small class="text-muted">${F.setMoneda(rows.PRECIO,'Q')} c/u</small>
-                        <div class="ped-item__total">${F.setMoneda(rows.TOTALPRECIO,'Q')}</div>
-                    </div>
-                </div>
-            </div>`;
+                </td>                            
+            </tr>`
        }).join('\n');
         container.innerHTML = datos;
-        pintarTotales();
+
+        GlobalTotalCostoDocumento = varTotalCosto;
+        GlobalTotalDocumento = varTotalVenta;
+        GlobalTotalDescuento = varTotalDescuento;
+
+        document.getElementById('lbTotalItems').innerText = varTotalItems.toString() + ' items';
+        document.getElementById('lbTotalVenta').innerText = F.setMoneda(varTotalVenta,'Q');
+        document.getElementById('lbTotalDescuento').innerText = `- ${F.setMoneda(varTotalDescuento,'Q')}` ;
+        document.getElementById('lbTotalVentaDescuento').innerText = F.setMoneda((varTotalVenta-varTotalDescuento),'Q');
+        
+        document.getElementById('lbPosCobroTotalPagar').innerText = F.setMoneda((varTotalVenta-varTotalDescuento),'Q');
     })
     .catch((error)=>{
+        
         console.log(error)
-        container.innerHTML = `
-            <div class="ped-toma__vacio">
-                <i class="fal fa-box-open mb-2"></i>
-                <div class="negrita">Sin productos</div>
-                <small>Busque y toque un producto para agregarlo</small>
-            </div>`;
-        varTotalItems = 0;
-        varTotalVenta = 0;
-        varTotalCosto = 0;
-        varTotalDescuento = 0;
-        pintarTotales();
+        container.innerHTML = 'No hay datos...';
+        GlobalTotalCostoDocumento = 0;
+        GlobalTotalDocumento = 0;
+        GlobalTotalDescuento = 0;
+
+        document.getElementById('lbTotalItems').innerText = '---';
+        document.getElementById('lbTotalVenta').innerText = 
+        document.getElementById('lbTotalDescuento').innerText = '---';
+        document.getElementById('lbTotalVentaDescuento').innerText = '---';
+        document.getElementById('lbPosCobroTotalPagar').innerText = '---';
     })
 
 
@@ -3118,9 +3231,7 @@ function edit_item_pedido(id,codprod,desprod,codmedida,equivale,cantidad,costo,p
 
     CalcularTotalPrecioEditar();
 
-    const inpE = document.getElementById('txtMCCantidadE');
-    inpE.focus();
-    inpE.select();
+    document.getElementById('txtMCCantidadE').focus();
 };
 
 function delete_item_pedido(id){
@@ -3186,31 +3297,27 @@ function get_correlativo_coddoc(coddoc){
 
 
 
-function pedido_set_enviar_estado(bloqueado, texto){
-    const btn = document.getElementById('btnGuardarFactura');
-    const btnAtras = document.getElementById('btnPosDocumentoAtrasLbl');
-    const loader = document.getElementById('pedCierreLoader');
-    const loaderTxt = document.getElementById('pedCierreLoaderTxt');
-    if (btn) {
-        btn.disabled = !!bloqueado;
-        btn.innerHTML = bloqueado
-            ? `<i class="fal fa-sync fa-spin mr-1"></i>${texto || 'Procesando...'}`
-            : `<i class="fal fa-save mr-1"></i>Enviar pedido`;
-    }
-    if (btnAtras) btnAtras.disabled = !!bloqueado;
-    if (loader) loader.classList.toggle('d-none', !bloqueado);
-    if (loaderTxt && texto) loaderTxt.textContent = texto;
-}
-
 function finalizar_pedido(latitud,longitud){
+
+
+    let btnGuardarFactura = document.getElementById('btnGuardarFactura');
+        
 
     let coddoc = document.getElementById('cmbCoddoc').value;
     let correlativoDoc = document.getElementById('txtCorrelativo').value;
 
-    pedido_set_enviar_estado(true, 'Obteniendo correlativo...');
+
+
+    F.showToast('Obteniendo correlativo');
+
+    btnGuardarFactura.disabled = true;
+    btnGuardarFactura.innerHTML = `<i class="fal fa-save fa-spin"></i>`;
 
     get_correlativo_coddoc(coddoc)
     .then((correlativo)=>{
+
+        btnGuardarFactura.disabled = false;
+        btnGuardarFactura.innerHTML = `<i class="fal fa-save"></i>`;
 
         document.getElementById('txtCorrelativo').value = correlativo;
         correlativoDoc = correlativo;
@@ -3219,7 +3326,6 @@ function finalizar_pedido(latitud,longitud){
         let codcliente = document.getElementById('txtPosCobroNitclie').value || ''; //GlobalSelectedCodCliente;
         if(codcliente==''){
             F.AvisoError('Seleccione un cliente');
-            pedido_set_enviar_estado(false);
             return;
         };
     
@@ -3264,13 +3370,10 @@ function finalizar_pedido(latitud,longitud){
         let entrega_lat = '0';
         let entrega_long = '0';
     
-        if(Number(GlobalTotalDocumento)==0){
-            F.AvisoError('No hay productos agregados');
-            pedido_set_enviar_estado(false);
-            return;
-        }
-
-        pedido_set_enviar_estado(true, 'Enviando pedido...');
+        if(Number(GlobalTotalDocumento)==0){F.AvisoError('No hay productos agregados');return;}
+        
+        btnGuardarFactura.disabled = true;
+        btnGuardarFactura.innerHTML = `<i class="fal fa-save fa-spin"></i>`;
     
             selectTempVentasPOS(GlobalEmpnit)
             .then((response)=>{
@@ -3294,7 +3397,8 @@ function finalizar_pedido(latitud,longitud){
                 }));
                 if (!productosLimpios.length) {
                     F.AvisoError('No hay productos agregados');
-                    pedido_set_enviar_estado(false);
+                    btnGuardarFactura.disabled = false;
+                    btnGuardarFactura.innerHTML = `<i class="fal fa-save"></i>`;
                     return;
                 }
                 axios.post('/pos/insertventa_factura', {
@@ -3337,23 +3441,29 @@ function finalizar_pedido(latitud,longitud){
                     const data = response.data;
                     if (data=='error'){
                         F.AvisoError('No se pudo guardar');
-                        pedido_set_enviar_estado(false);
+                        btnGuardarFactura.disabled = false;
+                        btnGuardarFactura.innerHTML = `<i class="fal fa-save"></i>`;
                     }else{
                         F.Aviso('Generado Exitosamente !!!')
-                        pedido_set_enviar_estado(false);
+                        btnGuardarFactura.disabled = false;
+                        btnGuardarFactura.innerHTML = `<i class="fal fa-save"></i>`;
+    
                         deleteTempVenta_pos(GlobalUsuario);
+    
                         fcnNuevoPedido();
                     }
                 }, (error) => {
                     console.log(error);
                     F.AvisoError('No se pudo guardar');
-                    pedido_set_enviar_estado(false);
+                    btnGuardarFactura.disabled = false;
+                    btnGuardarFactura.innerHTML = `<i class="fal fa-save"></i>`;
                 });        
             })
             .catch((error)=>{
                 console.log(error);
                 F.AvisoError('No se pudo guardar');
-                pedido_set_enviar_estado(false);
+                btnGuardarFactura.disabled = false;
+                btnGuardarFactura.innerHTML = `<i class="fal fa-save"></i>`;
             })
     
 
@@ -3361,7 +3471,8 @@ function finalizar_pedido(latitud,longitud){
     .catch(()=>{
         document.getElementById('txtCorrelativo').value = '0';
         F.AvisoError('No se pudo obtener el correlativo del documento... intentelo de nuevo');
-        pedido_set_enviar_estado(false);
+        btnGuardarFactura.disabled = false;
+        btnGuardarFactura.innerHTML = `<i class="fal fa-save"></i>`;
     })
 
 

@@ -108,6 +108,12 @@
                 localStorage.setItem("themeSettings", "");
             }
 
+            try {
+                if (localStorage.getItem('sygmaDarkMode') === '1') {
+                    classHolder.classList.add('sygma-dark');
+                }
+            } catch (e) {}
+
         </script>
         <!-- BEGIN Page Wrapper -->
 
@@ -169,6 +175,9 @@
                             </div>
 
                             <div class="d-flex align-items-center mr-2">
+                                <a href="javascript:void(0)" id="btnSygmaDarkMode" class="header-icon header-dark-toggle hand" title="Cambiar a modo oscuro" aria-pressed="false" onclick="sygma_toggleDarkMode(); return false;">
+                                    <i class="fal fa-moon" aria-hidden="true"></i>
+                                </a>
                                 <span class="header-user-badge d-none" id="lbHeaderUsuario" title="Usuario en sesión">
                                     <i class="fal fa-user-circle header-user-badge__icon" aria-hidden="true"></i>
                                     <span class="header-user-badge__text"></span>

@@ -536,6 +536,19 @@ border-color:  rgb(118, 188, 64)}
   background: rgba(255, 255, 255, 0.12) !important;
 }
 
+.page-header .header-dark-toggle {
+  width: 2rem;
+  height: 2rem;
+  margin-right: 0.4rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.page-header .header-dark-toggle i {
+  font-size: 0.95rem;
+}
+
 .page-header .header-user-badge {
   display: inline-flex;
   align-items: center;
@@ -3877,6 +3890,15 @@ body.fac2-en-ingreso #btnFac2Nuevo {
 /* Modal detalle documento (digitador / asignación pedidos) */
 .sygma-doc-detalle-modal .modal-dialog {
   max-width: min(960px, calc(100vw - 1.5rem));
+  width: calc(100% - 1.25rem);
+  margin: 1.15rem auto;
+}
+body:has(.sygma-doc-detalle-modal.show) .modal-backdrop,
+body.ped-modal-blur-open .modal-backdrop {
+  background-color: rgba(15, 23, 42, 0.48) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 1 !important;
 }
 
 .sygma-doc-detalle-modal__content {
@@ -4005,20 +4027,22 @@ body.fac2-en-ingreso #btnFac2Nuevo {
   position: sticky;
   top: 0;
   z-index: 1;
-  background: #0f172a;
+  background: #1e4d8c;
   color: #fff;
   border: none;
-  padding: 0.65rem 0.75rem;
+  padding: 0.7rem 0.8rem;
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   white-space: nowrap;
+  font-weight: 700;
 }
 
 .sygma-doc-detalle-modal__table tbody td {
-  padding: 0.55rem 0.75rem;
+  padding: 0.62rem 0.8rem;
   vertical-align: middle;
   border-top: 1px solid #eef2f7;
+  color: #1e293b;
 }
 
 .sygma-doc-detalle-modal__table tbody tr:nth-child(even) {
@@ -4087,16 +4111,33 @@ body.fac2-en-ingreso #btnFac2Nuevo {
 }
 
 .sygma-doc-detalle-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6rem;
   border-top: 1px solid #e2e8f0;
   background: #fff;
-  padding: 0.75rem 1.35rem;
-  justify-content: flex-end;
+  padding: 0.8rem 1.35rem;
+}
+
+.sygma-doc-detalle-modal__btn-close,
+.sygma-doc-detalle-modal__footer .btn {
+  min-height: 42px;
+  border-radius: 999px;
+  padding: 0.5rem 1.25rem;
+  font-weight: 700;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
 }
 
 .sygma-doc-detalle-modal__btn-close {
-  border-radius: 999px;
-  padding: 0.45rem 1.1rem;
-  font-weight: 600;
+  background: #e2e8f0;
+  color: #1e293b;
+  border: 0;
+}
+
+.sygma-doc-detalle-modal__btn-close:hover {
+  background: #cbd5e1;
+  color: #0f172a;
 }
 
 @media (max-width: 767.98px) {
@@ -5712,4 +5753,550 @@ body.spa-nav-hidden .page-content.proveedor-page #despachoPaneListado {
 .sygma-embarque-select-modal__table-wrap,
 #rpt_compras2_detalle .sygma-embarque-rpt__table-wrap {
   overflow-y: auto;
+}
+
+/* Pedido vendedor — modales de opciones del cliente */
+.ped-modal-detalle .modal-dialog {
+  max-width: 860px;
+  width: calc(100% - 1.25rem);
+  margin: 1.15rem auto;
+}
+.ped-modal-detalle--wide .modal-dialog {
+  max-width: 980px;
+}
+.ped-modal-detalle .modal-content {
+  border: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.28);
+}
+.ped-modal-detalle--tall .modal-content {
+  min-height: 72vh;
+}
+.ped-modal-detalle__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.85rem;
+  padding: 1rem 1.15rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #eef4ff 100%);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  flex-shrink: 0;
+}
+.ped-modal-detalle__header h5 {
+  color: #1e3a5f;
+}
+.ped-modal-detalle__close {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border: 1px solid rgba(15, 23, 42, 0.1) !important;
+  color: #475569 !important;
+  flex-shrink: 0;
+}
+.ped-modal-detalle__body {
+  padding: 1rem 1.15rem;
+  overflow-y: auto;
+  flex: 1 1 auto;
+}
+.ped-modal-detalle__cliente {
+  padding: 0.75rem 0.9rem;
+  margin-bottom: 0.9rem;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+.ped-modal-detalle__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.8rem 1.15rem;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  background: #f8fafc;
+  flex-shrink: 0;
+}
+.ped-modal-table-wrap {
+  max-height: calc(92vh - 13rem);
+  overflow: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+.ped-modal-table {
+  font-size: 0.86rem;
+  margin-bottom: 0;
+}
+.ped-modal-table thead td,
+.ped-modal-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #1e4d8c;
+  color: #fff;
+  border: 0;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 0.55rem 0.7rem;
+}
+.ped-modal-table tbody td {
+  vertical-align: middle;
+  border-color: rgba(15, 23, 42, 0.06);
+  padding: 0.55rem 0.7rem;
+}
+.ped-modal-table tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+.ped-modal-table tbody tr:hover {
+  background: rgba(59, 125, 221, 0.08);
+}
+body.ped-modal-blur-open .modal-backdrop {
+  background-color: rgba(15, 23, 42, 0.42) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 1 !important;
+}
+@media (max-width: 575.98px) {
+  .ped-modal-detalle .modal-dialog {
+    margin: 0.5rem auto;
+    width: calc(100% - 0.75rem);
+  }
+  .ped-modal-detalle--tall .modal-content {
+    min-height: 80vh;
+  }
+}
+
+/* Nuevo pedido — toma en tienda (después de elegir cliente) */
+.ped-toma,
+.ped-cierre {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 7.25rem);
+  background: #f4f6f9;
+  margin: -0.35rem -0.25rem 0;
+  padding-bottom: 0.25rem;
+}
+.ped-cierre__loader {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.ped-cierre__loader-card {
+  width: min(22rem, calc(100% - 2rem));
+  text-align: center;
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.35rem 1.2rem;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.22);
+}
+.ped-cierre__loader-card i {
+  display: block;
+  font-size: 1.7rem;
+  color: #1e4d8c;
+  margin-bottom: 0.55rem;
+}
+.ped-toma__header,
+.ped-cierre__header {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  background: #fff;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+.ped-toma__cliente {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.ped-toma__cliente .min-width-0 {
+  min-width: 0;
+}
+.ped-toma__totales {
+  text-align: right;
+  flex-shrink: 0;
+}
+.ped-toma__total,
+.ped-cierre__total {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #c81e1e;
+  line-height: 1.15;
+}
+.ped-toma__buscar {
+  position: sticky;
+  top: 4.15rem;
+  z-index: 3;
+  padding: 0.55rem 0.75rem;
+  background: #f4f6f9;
+}
+.ped-toma__precio {
+  max-width: 7.5rem;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+.ped-toma__lista {
+  flex: 1 1 auto;
+  padding: 0 0.75rem 0.5rem;
+}
+.ped-toma__vacio {
+  text-align: center;
+  color: #64748b;
+  padding: 2.4rem 1rem;
+  background: #fff;
+  border-radius: 14px;
+  border: 1px dashed rgba(15, 23, 42, 0.12);
+}
+.ped-toma__vacio i {
+  font-size: 1.8rem;
+  display: block;
+}
+.ped-toma__bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 0.75rem calc(0.7rem + env(safe-area-inset-bottom, 0px));
+  background: #fff;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 -10px 24px rgba(15, 23, 42, 0.06);
+}
+.ped-toma__bar .btn {
+  min-height: 46px;
+}
+.ped-item {
+  background: #fff;
+  border-radius: 14px;
+  padding: 0.7rem 0.8rem;
+  margin-bottom: 0.55rem;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.05);
+  border: 1px solid rgba(15, 23, 42, 0.05);
+}
+.ped-item__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.ped-item__nom {
+  font-weight: 700;
+  color: #1e3a5f;
+  line-height: 1.25;
+}
+.ped-item__del {
+  color: #c81e1e !important;
+  flex-shrink: 0;
+}
+.ped-item__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  margin-top: 0.65rem;
+}
+.ped-item__step,
+.ped-qty {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.ped-item__btn,
+.ped-qty__btn {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+  border: 1px solid rgba(15, 23, 42, 0.1) !important;
+  border-radius: 10px;
+}
+.ped-item__cant {
+  min-width: 2.6rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1e4d8c !important;
+  text-decoration: none !important;
+  padding: 0 0.15rem;
+}
+.ped-item__montos {
+  text-align: right;
+}
+.ped-item__total {
+  font-weight: 800;
+  color: #c81e1e;
+  font-size: 1.05rem;
+}
+.ped-qty {
+  justify-content: center;
+}
+.ped-qty__input {
+  max-width: 7rem;
+  text-align: center;
+  font-size: 1.45rem;
+  height: 48px;
+}
+.ped-cierre__resumen {
+  margin: 0.75rem 0.85rem 0;
+  padding: 0.7rem 0.85rem;
+  background: #fff;
+  border-radius: 12px;
+  font-weight: 700;
+  color: #1e3a5f;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+.ped-cierre__card {
+  margin: 0.7rem 0.85rem 0.85rem;
+  padding: 0.85rem;
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+@media (max-width: 575.98px) {
+  .ped-toma__precio {
+    max-width: 6.4rem;
+    padding-left: 0.4rem;
+    padding-right: 0.4rem;
+  }
+  .ped-toma__total,
+  .ped-cierre__total {
+    font-size: 1.15rem;
+  }
+}
+
+/* Modo oscuro — toggle en header */
+body.sygma-dark {
+  background: #0b1220 !important;
+  color: #e2e8f0 !important;
+}
+body.sygma-dark .page-wrapper,
+body.sygma-dark .page-inner,
+body.sygma-dark .page-content-wrapper,
+body.sygma-dark .page-content,
+body.sygma-dark #js-page-content,
+body.sygma-dark #root {
+  background: #0b1220 !important;
+  color: #e2e8f0 !important;
+}
+body.sygma-dark .card,
+body.sygma-dark .card-rounded,
+body.sygma-dark .panel,
+body.sygma-dark .well,
+body.sygma-dark .jumbotron {
+  background-color: #152033 !important;
+  color: #e2e8f0 !important;
+  border-color: rgba(148, 163, 184, 0.16) !important;
+}
+body.sygma-dark .card-header,
+body.sygma-dark .card-footer,
+body.sygma-dark .card-body {
+  background-color: transparent !important;
+  color: inherit;
+  border-color: rgba(148, 163, 184, 0.14) !important;
+}
+body.sygma-dark h1,
+body.sygma-dark h2,
+body.sygma-dark h3,
+body.sygma-dark h4,
+body.sygma-dark h5,
+body.sygma-dark h6,
+body.sygma-dark label,
+body.sygma-dark .negrita,
+body.sygma-dark .text-dark {
+  color: #f1f5f9 !important;
+}
+body.sygma-dark .text-secondary,
+body.sygma-dark .text-muted,
+body.sygma-dark small,
+body.sygma-dark .small {
+  color: #94a3b8 !important;
+}
+body.sygma-dark .text-base {
+  color: #7eb6ff !important;
+}
+body.sygma-dark a:not(.btn):not(.header-icon):not(.header-btn) {
+  color: #93c5fd;
+}
+body.sygma-dark .bg-white,
+body.sygma-dark .bg-light,
+body.sygma-dark .bg-gray,
+body.sygma-dark .bg-gris {
+  background-color: #152033 !important;
+  color: #e2e8f0 !important;
+}
+body.sygma-dark .table,
+body.sygma-dark table {
+  color: #e2e8f0 !important;
+}
+body.sygma-dark .table td,
+body.sygma-dark .table th,
+body.sygma-dark table td,
+body.sygma-dark table th {
+  border-color: rgba(148, 163, 184, 0.14) !important;
+}
+body.sygma-dark .table thead,
+body.sygma-dark table thead,
+body.sygma-dark .table thead td,
+body.sygma-dark .table thead th {
+  background-color: #1e3a5f !important;
+  color: #fff !important;
+}
+body.sygma-dark .table-hover tbody tr:hover,
+body.sygma-dark .table tbody tr:hover {
+  background-color: rgba(59, 130, 246, 0.12) !important;
+  color: #f8fafc !important;
+}
+body.sygma-dark .table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+body.sygma-dark .form-control,
+body.sygma-dark .custom-select,
+body.sygma-dark select.form-control,
+body.sygma-dark textarea.form-control,
+body.sygma-dark input.form-control,
+body.sygma-dark .input-group-text {
+  background-color: #0f172a !important;
+  color: #f1f5f9 !important;
+  border-color: rgba(148, 163, 184, 0.28) !important;
+}
+body.sygma-dark .form-control::placeholder,
+body.sygma-dark textarea::placeholder,
+body.sygma-dark input::placeholder {
+  color: #64748b !important;
+}
+body.sygma-dark .form-control:disabled,
+body.sygma-dark .form-control[readonly] {
+  background-color: #1a2740 !important;
+  color: #cbd5e1 !important;
+}
+body.sygma-dark .modal-content,
+body.sygma-dark .dropdown-menu,
+body.sygma-dark .popover,
+body.sygma-dark .list-group-item {
+  background-color: #152033 !important;
+  color: #e2e8f0 !important;
+  border-color: rgba(148, 163, 184, 0.16) !important;
+}
+body.sygma-dark .modal-header,
+body.sygma-dark .modal-footer,
+body.sygma-dark .ped-modal-detalle__header,
+body.sygma-dark .ped-modal-detalle__footer,
+body.sygma-dark .ped-modal-detalle__body {
+  background: #152033 !important;
+  color: #e2e8f0 !important;
+  border-color: rgba(148, 163, 184, 0.14) !important;
+}
+body.sygma-dark .ped-modal-detalle__header {
+  background: linear-gradient(135deg, #152033 0%, #1e3a5f 100%) !important;
+}
+body.sygma-dark .ped-modal-detalle__cliente,
+body.sygma-dark .ped-modal-table tbody tr:nth-child(even) {
+  background: #0f172a !important;
+}
+body.sygma-dark .nav-tabs {
+  border-color: rgba(148, 163, 184, 0.16);
+}
+body.sygma-dark .nav-tabs .nav-link {
+  color: #cbd5e1;
+}
+body.sygma-dark .dropdown-item {
+  color: #e2e8f0;
+}
+body.sygma-dark .dropdown-item:hover,
+body.sygma-dark .dropdown-item:focus {
+  background-color: rgba(59, 130, 246, 0.16);
+  color: #fff;
+}
+body.sygma-dark .page-header {
+  background: linear-gradient(90deg, rgba(6, 12, 24, 0.96) 0%, rgba(11, 22, 42, 0.94) 100%) !important;
+}
+body.sygma-dark .page-header .header-dark-toggle.is-on,
+body.sygma-dark .page-header .header-dark-toggle[aria-pressed="true"] {
+  background: rgba(251, 191, 36, 0.18) !important;
+}
+body.sygma-dark .ped-toma,
+body.sygma-dark .ped-cierre {
+  background: #0b1220 !important;
+}
+body.sygma-dark .ped-toma__header,
+body.sygma-dark .ped-cierre__header,
+body.sygma-dark .ped-toma__bar,
+body.sygma-dark .ped-item,
+body.sygma-dark .ped-cierre__resumen,
+body.sygma-dark .ped-cierre__card,
+body.sygma-dark .ped-toma__vacio {
+  background: #152033 !important;
+  color: #e2e8f0 !important;
+  border-color: rgba(148, 163, 184, 0.14) !important;
+}
+body.sygma-dark .ped-toma__buscar {
+  background: #0b1220 !important;
+}
+body.sygma-dark .ped-cierre__loader-card {
+  background: #152033 !important;
+  color: #e2e8f0 !important;
+}
+body.sygma-dark .sygma-doc-detalle-modal__content,
+body.sygma-dark .sygma-doc-detalle-modal__body,
+body.sygma-dark .sygma-doc-detalle-modal__footer,
+body.sygma-dark .sygma-doc-detalle-modal__table-wrap,
+body.sygma-dark .sygma-doc-detalle-modal__total-block {
+  background: #152033 !important;
+  color: #e2e8f0 !important;
+  border-color: rgba(148, 163, 184, 0.16) !important;
+}
+body.sygma-dark .sygma-doc-detalle-modal__table tbody td {
+  color: #e2e8f0 !important;
+  border-color: rgba(148, 163, 184, 0.12) !important;
+}
+body.sygma-dark .sygma-doc-detalle-modal__btn-close {
+  background: #1e293b !important;
+  color: #e2e8f0 !important;
+}
+body.sygma-dark .ped-item__nom,
+body.sygma-dark .ped-cierre__resumen {
+  color: #f8fafc !important;
+}
+body.sygma-dark .ped-item__btn,
+body.sygma-dark .ped-qty__btn,
+body.sygma-dark .btn-light {
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+  border-color: rgba(148, 163, 184, 0.22) !important;
+}
+body.sygma-dark .swal2-popup {
+  background: #152033 !important;
+  color: #e2e8f0 !important;
+}
+body.sygma-dark .swal2-title,
+body.sygma-dark .swal2-content,
+body.sygma-dark .swal2-html-container {
+  color: #e2e8f0 !important;
+}
+body.sygma-dark .dataTables_wrapper,
+body.sygma-dark .dataTables_info,
+body.sygma-dark .dataTables_length,
+body.sygma-dark .dataTables_filter,
+body.sygma-dark .dataTables_paginate {
+  color: #cbd5e1 !important;
+}
+body.sygma-dark .border,
+body.sygma-dark .border-base,
+body.sygma-dark .border-top,
+body.sygma-dark .border-bottom {
+  border-color: rgba(148, 163, 184, 0.2) !important;
 }

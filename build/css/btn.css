@@ -252,15 +252,35 @@
 }
 .ped-opciones-panel.is-open {
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
-    gap: 0.25rem;
+    justify-content: flex-start;
+    gap: 0.35rem;
 }
 .ped-opciones-panel .btn {
     box-shadow: 0 6px 14px rgba(15, 23, 42, 0.16);
     flex: 0 0 auto;
+}
+.ped-opcion-btn {
+    border-radius: 999px;
+    padding: 0.28rem 0.62rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1.15;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+}
+.ped-opcion-faltantes--off {
+    background: #8b939c !important;
+    border-color: #8b939c !important;
+    color: #fff !important;
+}
+.ped-opcion-faltantes--on {
+    background: #dc3545 !important;
+    border-color: #c82333 !important;
+    color: #fff !important;
 }
 .ped-opciones-side {
     flex: 0 0 auto;
@@ -270,11 +290,11 @@
 .ped-opciones-center {
     flex: 1 1 auto;
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     flex-direction: row;
     align-items: center;
-    justify-content: space-evenly;
-    gap: 0.2rem;
+    justify-content: flex-start;
+    gap: 0.35rem;
     min-width: 0;
 }
 .ped-opciones-panel .btn.btn-circle {
@@ -290,19 +310,14 @@
         padding: 0.75rem 0.45rem;
     }
     .ped-opciones-panel {
-        padding: 0.45rem 0.15rem;
+        padding: 0.45rem 0.2rem;
     }
     .ped-opciones-panel.is-open {
-        gap: 0.12rem;
+        gap: 0.28rem;
     }
-    .ped-opciones-center {
-        gap: 0.1rem;
-        justify-content: space-between;
-    }
-    .ped-opciones-panel .btn.btn-circle {
-        width: 2.05rem;
-        height: 2.05rem;
-        font-size: 0.85rem;
+    .ped-opcion-btn {
+        font-size: 0.68rem;
+        padding: 0.24rem 0.5rem;
     }
 }
 
