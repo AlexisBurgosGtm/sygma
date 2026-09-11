@@ -1479,6 +1479,38 @@ router.post("/detalle_pedido", async(req,res)=>{
 
 
 
+
+router.post("/pedidos_vendedor_totales", async(req,res)=>{
+
+    const { token, sucursal, codven, fi, ff } = req.body;
+    const emp = String(sucursal ?? '').replace(/'/g, "''");
+    const ven = Number(codven) || 0;
+    const fechaI = String(fi ?? '').replace(/'/g, "''");
+    const fechaF = String(ff ?? '').replace(/'/g, "''");
+
+    if (!emp || ven <= 0 || !fechaI || !fechaF) {
+        return res.status(400).send('error');
+    }
+
+    const qry = `
+        SELECT ISNULL(SUM(ISNULL(DOCUMENTOS.TOTALPRECIO, 0)), 0) AS TOTALVENTAS,
+               COUNT(*) AS TOTALPEDIDOS
+          FROM DOCUMENTOS
+         INNER JOIN TIPODOCUMENTOS
+            ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC
+           AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+         WHERE DOCUMENTOS.EMPNIT = '${emp}'
+           AND DOCUMENTOS.CODEMP = ${ven}
+           AND DOCUMENTOS.FECHA BETWEEN '${fechaI}' AND '${fechaF}'
+           AND DOCUMENTOS.STATUS <> 'A'
+           AND TIPODOCUMENTOS.TIPODOC IN ('FAC','FEF','FEC','FCP','FES','FPC');
+    `;
+
+    execute.QueryToken(res, qry, token);
+
+});
+
+
 module.exports = router;
 
 

@@ -251,7 +251,8 @@ body.app-pos2-theme #root {
 /* POS2 — reglas solo vista ventas_pos2 */
 #documento:not(.show) #btnPosDocumentoAtras { display: none !important; }
 #pedido:not(.show) #btnPosEscanearBarcode { display: none !important; }
-#root_pos2_barcode video {
+#root_pos2_barcode video,
+#root_movinv2_barcode video {
     max-width: 100%;
     width: 100%;
     border-radius: 8px;

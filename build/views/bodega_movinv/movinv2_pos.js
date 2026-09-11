@@ -1114,6 +1114,22 @@ function movinv2_setup_ingreso_listeners() {
         if (filtro) movinv2_get_buscar_producto(filtro);
     });
 
+    const btnEscanear = document.getElementById('btnMovinv2EscanearBarcode');
+    if (btnEscanear && btnEscanear.dataset.movinv2Bound !== '1') {
+        btnEscanear.dataset.movinv2Bound = '1';
+        btnEscanear.addEventListener('click', () => {
+            $('#modal_movinv2_barcode').modal('show');
+            if (typeof movinv2_iniciarBarcode === 'function') movinv2_iniciarBarcode();
+        });
+    }
+    const modalBarcode = document.getElementById('modal_movinv2_barcode');
+    if (modalBarcode && modalBarcode.dataset.movinv2BarcodeBound !== '1') {
+        modalBarcode.dataset.movinv2BarcodeBound = '1';
+        $(modalBarcode).on('hidden.bs.modal', () => {
+            if (typeof movinv2_detenerBarcode === 'function') movinv2_detenerBarcode();
+        });
+    }
+
     document.getElementById('btnMCGuardar')?.addEventListener('click', () => {
         const btn = document.getElementById('btnMCGuardar');
         if (btn?.disabled) return;

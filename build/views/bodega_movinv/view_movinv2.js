@@ -2,6 +2,98 @@
 
 var movinv2_listaCache = [];
 var movinv2_tipoDoc = 'ENT';
+var Movinv2BarcodeStream = null;
+var Movinv2BarcodeAnimId = null;
+
+function movinv2_detenerBarcode() {
+    if (Movinv2BarcodeAnimId != null) {
+        cancelAnimationFrame(Movinv2BarcodeAnimId);
+        Movinv2BarcodeAnimId = null;
+    }
+    if (Movinv2BarcodeStream) {
+        Movinv2BarcodeStream.getTracks().forEach((t) => t.stop());
+        Movinv2BarcodeStream = null;
+    }
+    const video = document.getElementById('movinv2_barcode_video');
+    if (video) {
+        video.srcObject = null;
+    }
+    const root = document.getElementById('root_movinv2_barcode');
+    if (root) {
+        root.innerHTML = '';
+    }
+}
+
+async function movinv2_iniciarBarcode() {
+    const root = document.getElementById('root_movinv2_barcode');
+    if (!root) return;
+
+    movinv2_detenerBarcode();
+    root.innerHTML = '';
+
+    if (!('BarcodeDetector' in window)) {
+        root.innerHTML = '<p class="text-danger mb-0">Este navegador no soporta lectura de códigos. Use Chrome o Edge actualizado.</p>';
+        return;
+    }
+
+    const barcodeDetector = new BarcodeDetector({
+        formats: ['code_39', 'codabar', 'ean_13', 'ean_8', 'code_128', 'qr_code', 'upc_a', 'upc_e']
+    });
+
+    let mediaStream;
+    try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment' }
+        });
+    } catch (err) {
+        try {
+            mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        } catch (err2) {
+            root.innerHTML = '<p class="text-danger mb-0">No se pudo acceder a la cámara. Verifique permisos del navegador.</p>';
+            return;
+        }
+    }
+
+    Movinv2BarcodeStream = mediaStream;
+
+    const video = document.createElement('video');
+    video.srcObject = mediaStream;
+    video.autoplay = true;
+    video.playsInline = true;
+    video.muted = true;
+    video.id = 'movinv2_barcode_video';
+    root.appendChild(video);
+
+    let leido = false;
+
+    function render() {
+        if (leido) return;
+        barcodeDetector
+            .detect(video)
+            .then((barcodes) => {
+                if (leido || !barcodes.length) return;
+                leido = true;
+                const codigo = (barcodes[0].rawValue || '').trim();
+                movinv2_detenerBarcode();
+                $('#modal_movinv2_barcode').modal('hide');
+                const txt = document.getElementById('txtPosCodprod');
+                const btn = document.getElementById('btnBuscarProd');
+                if (txt) {
+                    txt.value = codigo.toUpperCase();
+                }
+                if (btn) {
+                    btn.click();
+                }
+            })
+            .catch(() => { /* frame sin código */ });
+    }
+
+    function renderLoop() {
+        Movinv2BarcodeAnimId = requestAnimationFrame(renderLoop);
+        render();
+    }
+    renderLoop();
+}
 
 function movinv2_set_tipo(tipodoc) {
     movinv2_tipoDoc = (tipodoc === 'SAL') ? 'SAL' : 'ENT';
@@ -146,6 +238,20 @@ function movinv2_tpl_modals() {
                     <button type="button" class="btn btn-base btn-sm hand" id="btnMCGuardarE">
                         <i class="fal fa-check mr-1"></i> Guardar
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal pos2-modal" id="modal_movinv2_barcode" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-base text-white py-2">
+                    <h5 class="modal-title mb-0"><i class="fal fa-barcode-read mr-1"></i> Escanear código</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body p-3 text-center">
+                    <div id="root_movinv2_barcode"></div>
+                    <p class="small text-muted mt-2 mb-0">Apunte la cámara al código de barras o QR del producto</p>
                 </div>
             </div>
         </div>
@@ -298,6 +404,9 @@ function movinv2_tpl_ingreso() {
             style="position:fixed;left:18px;bottom:18px;z-index:1040;border-radius:24px" title="Dejar todo el inventario en cero">
             <i class="fal fa-eraser mr-1"></i> Dejar Inv Cero
         </button>
+        <button type="button" class="btn btn-base btn-xl btn-bottom-middle btn-circle shadow hand" id="btnMovinv2EscanearBarcode" title="Escanear código de barras">
+            <i class="fal fa-barcode-read"></i>
+        </button>
         ${movinv2_tpl_modals()}
     </div>`;
 }
@@ -414,6 +523,8 @@ window.movinv2_hide_ingreso_loader = movinv2_hide_ingreso_loader;
 window.movinv2_set_tipo = movinv2_set_tipo;
 
 function movinv2_show_listado() {
+    if (typeof movinv2_detenerBarcode === 'function') movinv2_detenerBarcode();
+    try { $('#modal_movinv2_barcode').modal('hide'); } catch (e) { /* sin modal */ }
     movinv2_hide_ingreso_loader();
     document.getElementById('movinv2Listado')?.classList.remove('d-none');
     document.getElementById('movinv2Ingreso')?.classList.add('d-none');
@@ -565,9 +676,10 @@ function addListeners(tipodoc) {
 
 function destroyView() {
     try {
-        $('#modal_lista_precios, #modal_cantidad, #modal_editar_cantidad').modal('hide');
+        if (typeof movinv2_detenerBarcode === 'function') movinv2_detenerBarcode();
+        $('#modal_lista_precios, #modal_cantidad, #modal_editar_cantidad, #modal_movinv2_barcode').modal('hide');
     } catch (e) { /* sin modal activo */ }
-    ['modal_lista_precios', 'modal_cantidad', 'modal_editar_cantidad'].forEach((id) => {
+    ['modal_lista_precios', 'modal_cantidad', 'modal_editar_cantidad', 'modal_movinv2_barcode'].forEach((id) => {
         document.querySelectorAll('#' + id).forEach((el) => {
             const $el = $(el);
             if ($el.data('bs.modal')) {

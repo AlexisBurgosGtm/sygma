@@ -684,6 +684,14 @@ function getView(){
                                     </div>
                                 </div>
                             </div>
+                            <div class="row no-gutters mt-1 ventas-marcas-toolbar__resumen">
+                                <div class="col-6 pr-1">
+                                    <div class="negrita text-danger ventas-marcas-toolbar__kpi" id="lbMarcaTotalVentas">Total ventas: Q 0.00</div>
+                                </div>
+                                <div class="col-6 pl-1">
+                                    <div class="negrita text-danger ventas-marcas-toolbar__kpi" id="lbMarcaTotalPedidos">Total pedidos: 0</div>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-12 col-md-3 col-lg-2 mt-1 mt-md-0 text-md-right ventas-marcas-toolbar__total">
                             <small class="negrita text-danger d-block" id="lbMarcaTotalImporte">Importe:</small>
@@ -2201,6 +2209,7 @@ function rpt_tbl_marcas(){
         container.innerHTML = str;
        
         document.getElementById('lbMarcaTotalImporte').innerText =`Total: ${F.setMoneda(varTotal,'Q')}`;
+        ventas_pintar_totales_marcas(fi, ff);
 
     })
     .catch((err)=>{
@@ -2210,6 +2219,7 @@ function rpt_tbl_marcas(){
         container.innerHTML = 'No se cargaron datos....';
        
         document.getElementById('lbMarcaTotalImporte').innerText = '';
+        ventas_pintar_totales_marcas(fi, ff);
     })
 
 
@@ -2228,6 +2238,27 @@ function rpt_tbl_marcas(){
 
 };
 
+
+
+function ventas_pintar_totales_marcas(fi, ff){
+    const lbVentas = document.getElementById('lbMarcaTotalVentas');
+    const lbPedidos = document.getElementById('lbMarcaTotalPedidos');
+    if (lbVentas) lbVentas.innerText = 'Total ventas: ...';
+    if (lbPedidos) lbPedidos.innerText = 'Total pedidos: ...';
+
+    GF.get_data_pedidos_vendedor_totales(GlobalEmpnit, fi, ff, GlobalCodUsuario)
+    .then((data)=>{
+        const r = (data.recordset && data.recordset[0]) ? data.recordset[0] : {};
+        const totalVentas = Number(r.TOTALVENTAS) || 0;
+        const totalPedidos = Number(r.TOTALPEDIDOS) || 0;
+        if (lbVentas) lbVentas.innerText = `Total ventas: ${F.setMoneda(totalVentas,'Q')}`;
+        if (lbPedidos) lbPedidos.innerText = `Total pedidos: ${totalPedidos}`;
+    })
+    .catch(()=>{
+        if (lbVentas) lbVentas.innerText = `Total ventas: ${F.setMoneda(0,'Q')}`;
+        if (lbPedidos) lbPedidos.innerText = 'Total pedidos: 0';
+    });
+};
 
 
 function get_data_vendedor(codemp,mes,anio){

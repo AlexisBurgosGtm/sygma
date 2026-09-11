@@ -1526,7 +1526,104 @@ let F = {
         let peso = (valor / total) * 100;
         return peso.toFixed(2) + '%'
       },
+      isoToDmy:(iso)=>{
+        if (!iso) return '';
+        const s = String(iso).trim().slice(0, 10);
+        const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+        if (!m) return '';
+        return `${m[3]}/${m[2]}/${m[1]}`;
+      },
+      initDateInputs:(root)=>{
+        const scope = root && root.querySelectorAll ? root : document;
+        const inputs = scope.querySelectorAll ? scope.querySelectorAll('input[type="date"]') : [];
+        inputs.forEach((input) => {
+          if (!input || input.dataset.sygmaDate === '1') return;
+          if (input.closest('.sygma-date-wrap')) {
+            input.dataset.sygmaDate = '1';
+            return;
+          }
+          F.wrapDateInput(input);
+        });
+      },
+      wrapDateInput:(input)=>{
+        if (!input || input.dataset.sygmaDate === '1') return;
+
+        const wrap = document.createElement('div');
+        wrap.className = 'sygma-date-wrap';
+        if (input.classList.contains('form-control-sm')) wrap.classList.add('sygma-date-wrap--sm');
+        if (input.disabled || input.readOnly) wrap.classList.add('is-disabled');
+        if (input.parentElement && input.parentElement.classList.contains('input-group')) {
+          wrap.classList.add('sygma-date-wrap--group');
+        }
+
+        const display = document.createElement('span');
+        display.className = 'sygma-date-display';
+        display.setAttribute('aria-hidden', 'true');
+
+        const parent = input.parentNode;
+        parent.insertBefore(wrap, input);
+        wrap.appendChild(input);
+        wrap.appendChild(display);
+
+        input.dataset.sygmaDate = '1';
+        input.setAttribute('lang', 'es-GT');
+        input.setAttribute('placeholder', 'dd/mm/yyyy');
+
+        const syncDisplay = () => {
+          const txt = F.isoToDmy(input.value);
+          display.textContent = txt || 'dd/mm/yyyy';
+          display.classList.toggle('is-empty', !txt);
+          wrap.classList.toggle('is-disabled', input.disabled || input.readOnly);
+        };
+
+        syncDisplay();
+        input.addEventListener('input', syncDisplay);
+        input.addEventListener('change', syncDisplay);
+
+        try {
+          const desc = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+          if (desc && desc.get && desc.set) {
+            Object.defineProperty(input, 'value', {
+              configurable: true,
+              enumerable: true,
+              get() {
+                return desc.get.call(this);
+              },
+              set(v) {
+                desc.set.call(this, v);
+                syncDisplay();
+              }
+            });
+          }
+        } catch (e) {}
+      },
 };
+
+(function sygmaDateInputsBoot() {
+  let timer = null;
+  const run = () => {
+    if (typeof F === 'undefined' || typeof F.initDateInputs !== 'function') return;
+    F.initDateInputs(document);
+  };
+  const schedule = () => {
+    if (timer) return;
+    timer = setTimeout(() => {
+      timer = null;
+      run();
+    }, 40);
+  };
+  const start = () => {
+    run();
+    if (!document.body || window.__sygmaDateObs) return;
+    window.__sygmaDateObs = new MutationObserver(schedule);
+    window.__sygmaDateObs.observe(document.body, { childList: true, subtree: true });
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
+})();
 
 function ClaveEmpresa() {
     return F.ClaveEmpresa();

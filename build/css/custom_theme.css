@@ -1968,6 +1968,11 @@ body.app-pos2-theme #root .btn.btn-circle {
   line-height: 1.15;
 }
 
+.ventas-marcas-toolbar__kpi {
+  font-size: 0.82rem;
+  line-height: 1.25;
+}
+
 @media (min-width: 768px) {
   .ventas-marcas-toolbar__fechas .form-control-sm {
     font-size: 0.88rem;
@@ -6462,4 +6467,70 @@ body.sygma-dark .calculos-skus-card {
 body.sygma-dark .calculos-skus-card__icon {
   background: rgba(59, 130, 246, 0.22);
   color: #93c5fd;
+}
+
+/* Selectores de fecha — visual dd/mm/yyyy en todos los dispositivos */
+.sygma-date-wrap {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+.sygma-date-wrap--group {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.sygma-date-wrap input[type="date"] {
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  caret-color: transparent;
+}
+.sygma-date-wrap input[type="date"]::-webkit-datetime-edit,
+.sygma-date-wrap input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+.sygma-date-wrap input[type="date"]::-webkit-datetime-edit-text,
+.sygma-date-wrap input[type="date"]::-webkit-datetime-edit-month-field,
+.sygma-date-wrap input[type="date"]::-webkit-datetime-edit-day-field,
+.sygma-date-wrap input[type="date"]::-webkit-datetime-edit-year-field,
+.sygma-date-wrap input[type="date"]::-webkit-datetime-edit-week-field {
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  background: transparent;
+}
+.sygma-date-wrap input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 1;
+  cursor: pointer;
+  position: relative;
+  z-index: 3;
+}
+.sygma-date-display {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 2.15rem;
+  display: flex;
+  align-items: center;
+  padding: 0.375rem 0.75rem;
+  font-weight: inherit;
+  color: inherit;
+  pointer-events: none;
+  z-index: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  letter-spacing: 0.02em;
+}
+.sygma-date-wrap--sm .sygma-date-display {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+.sygma-date-display.is-empty {
+  color: #94a3b8;
+}
+.sygma-date-wrap.is-disabled .sygma-date-display {
+  opacity: 0.7;
+}
+body.sygma-dark .sygma-date-display {
+  color: #f1f5f9;
+}
+body.sygma-dark .sygma-date-display.is-empty {
+  color: #94a3b8;
 }

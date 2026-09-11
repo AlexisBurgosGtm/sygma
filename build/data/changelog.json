@@ -1,5 +1,5 @@
 {
-  "version": "M.09.09.26 14:29",
+  "version": "M.11.09.26 12:27",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -4080,6 +4080,36 @@
       "FECHA": "09-09-2026",
       "HORA": "14:29",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.09.09.26 14:29"
+    },
+    {
+      "FECHA": "09-09-2026",
+      "HORA": "21:20",
+      "DESCRIPCION": "SELECTORES DE FECHA EN FORMATO DD/MM/YYYY EN TODA LA APP"
+    },
+    {
+      "FECHA": "09-09-2026",
+      "HORA": "21:20",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.09.09.26 21:20"
+    },
+    {
+      "FECHA": "09-09-2026",
+      "HORA": "21:28",
+      "DESCRIPCION": "INICIO VENDEDOR: TOTAL VENTAS Y TOTAL PEDIDOS EN REPORTE DE MARCAS"
+    },
+    {
+      "FECHA": "09-09-2026",
+      "HORA": "21:28",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.09.09.26 21:28"
+    },
+    {
+      "FECHA": "11-09-2026",
+      "HORA": "12:27",
+      "DESCRIPCION": "ENTRADAS Y SALIDAS DE INVENTARIO: LECTOR DE CODIGOS QR Y BARRAS COMO EN FACTURACION"
+    },
+    {
+      "FECHA": "11-09-2026",
+      "HORA": "12:27",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.11.09.26 12:27"
     }
   ]
 }

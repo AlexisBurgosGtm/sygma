@@ -2053,6 +2053,38 @@ let GF = {
     
         })
     },
+    get_data_pedidos_vendedor_totales: (empnit,fi,ff,codven)=>{
+
+        return new Promise((resolve, reject)=>{
+
+            let data = {
+                token:TOKEN,
+                sucursal:empnit,
+                codven:codven,
+                fi:fi,
+                ff:ff
+            };
+
+            axios.post(`/despacho/pedidos_vendedor_totales`, data)
+            .then(res => {
+
+                if(res.status.toString()=='200'){
+                    let data = res.data;
+                    if(data.toString()=="error"){
+                        reject();
+                    }else{
+                        resolve(data);
+                    }
+                }else{
+                    reject();
+                }
+            })
+            .catch(()=>{
+                reject();
+            })
+
+        })
+    },
     get_data_marcas_vendedor_todas: (empnit,fi,ff)=>{
         
         return new Promise((resolve, reject)=>{
