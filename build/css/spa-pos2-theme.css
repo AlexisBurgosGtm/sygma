@@ -450,3 +450,78 @@ body.app-pos2-theme .sygma-fab-nuevo.btn-verde,
 body.app-pos2-theme .sygma-embarques-fab.btn-success {
     box-shadow: 0 8px 22px rgba(2, 119, 64, 0.32);
 }
+
+/* Modo oscuro — el tema POS2 pinta tablas y cards en claro; forzar contraste */
+body.sygma-dark.app-pos2-theme {
+    --pos2-surface: #152033;
+    --pos2-bg: #0b1220;
+    --pos2-text: #e8eef7;
+    --pos2-muted: #cbd5e1;
+    --pos2-border: rgba(148, 163, 184, 0.24);
+}
+body.sygma-dark.app-pos2-theme #root {
+    color: var(--pos2-text) !important;
+}
+body.sygma-dark.app-pos2-theme:not(.login-active) #js-page-content,
+body.sygma-dark.app-pos2-theme:not(.login-active) main.page-content {
+    background: var(--pos2-bg) !important;
+    color: var(--pos2-text) !important;
+}
+body.sygma-dark.app-pos2-theme #root .card,
+body.sygma-dark.app-pos2-theme #root .card.card-rounded,
+body.sygma-dark.app-pos2-theme #root .card.shadow,
+body.sygma-dark.app-pos2-theme #root .proveedor-menu-card,
+body.sygma-dark.app-pos2-theme #root .proveedor-content-card,
+body.sygma-dark.app-pos2-theme #root .proveedor-tab-area .card {
+    background: var(--pos2-surface) !important;
+    color: var(--pos2-text) !important;
+    border-color: var(--pos2-border) !important;
+}
+body.sygma-dark.app-pos2-theme #root .table tbody td,
+body.sygma-dark.app-pos2-theme #root .table tbody th,
+body.sygma-dark.app-pos2-theme #root table tbody td,
+body.sygma-dark.app-pos2-theme #root table tbody th {
+    color: #e8eef7 !important;
+}
+body.sygma-dark.app-pos2-theme #root .table thead th,
+body.sygma-dark.app-pos2-theme #root .table thead td,
+body.sygma-dark.app-pos2-theme #root table thead th,
+body.sygma-dark.app-pos2-theme #root table thead td {
+    color: #fff !important;
+}
+body.sygma-dark.app-pos2-theme #root .table-hover tbody tr:hover {
+    background: rgba(59, 130, 246, 0.14) !important;
+    color: #f8fafc !important;
+}
+body.sygma-dark.app-pos2-theme #root .text-success,
+body.sygma-dark.app-pos2-theme #root .table .text-success,
+body.sygma-dark.app-pos2-theme #root table .text-success { color: #4ade80 !important; }
+body.sygma-dark.app-pos2-theme #root .text-danger,
+body.sygma-dark.app-pos2-theme #root .table .text-danger,
+body.sygma-dark.app-pos2-theme #root table .text-danger { color: #f87171 !important; }
+body.sygma-dark.app-pos2-theme #root .text-warning,
+body.sygma-dark.app-pos2-theme #root .table .text-warning,
+body.sygma-dark.app-pos2-theme #root table .text-warning { color: #fbbf24 !important; }
+body.sygma-dark.app-pos2-theme #root .text-info,
+body.sygma-dark.app-pos2-theme #root .table .text-info,
+body.sygma-dark.app-pos2-theme #root table .text-info { color: #38bdf8 !important; }
+body.sygma-dark.app-pos2-theme #root .text-primary,
+body.sygma-dark.app-pos2-theme #root .table .text-primary,
+body.sygma-dark.app-pos2-theme #root table .text-primary,
+body.sygma-dark.app-pos2-theme #root h3.negrita.text-base,
+body.sygma-dark.app-pos2-theme #root h5.negrita.text-base { color: #7eb6ff !important; }
+body.sygma-dark.app-pos2-theme #root label.negrita.text-secondary,
+body.sygma-dark.app-pos2-theme #root label.text-secondary,
+body.sygma-dark.app-pos2-theme #root .text-secondary,
+body.sygma-dark.app-pos2-theme #root .text-muted {
+    color: #cbd5e1 !important;
+}
+body.sygma-dark.app-pos2-theme .page-header {
+    background: linear-gradient(90deg, rgba(6, 12, 24, 0.96) 0%, rgba(11, 22, 42, 0.94) 100%) !important;
+    border-bottom-color: rgba(148, 163, 184, 0.16) !important;
+}
+body.sygma-dark.app-pos2-theme #root .form-control {
+    background-color: #0f172a !important;
+    color: #f1f5f9 !important;
+    border-color: var(--pos2-border) !important;
+}

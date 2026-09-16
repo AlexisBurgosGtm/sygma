@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const storage = require('../services/webdavStorage');
+const superUser = require('../services/superUser');
 
 const upload = multer({
     storage: multer.memoryStorage(),
@@ -173,6 +174,62 @@ router.post('/status', async (req, res) => {
     } catch (err) {
         console.error('[storage/status]', err.message);
         sendError(res, err, 'Almacenamiento no disponible');
+    }
+});
+
+router.post('/list-photos', async (req, res) => {
+    if (!superUser.requireSuper(req, res)) return;
+    try {
+        const photos = await storage.listPhotos({
+            folders: ['/XELASOL', storage.DEFAULT_FOLDER],
+        });
+        const months = storage.groupPhotosByMonth(photos).map((m) => ({
+            year: m.year,
+            month: m.month,
+            key: m.key,
+            count: m.count,
+            size: m.size,
+            size_mb: Number((m.size / (1024 * 1024)).toFixed(2)),
+        }));
+        res.send({
+            ok: true,
+            total: photos.length,
+            total_size: photos.reduce((acc, p) => acc + (Number(p.size) || 0), 0),
+            months,
+        });
+    } catch (err) {
+        console.error('[storage/list-photos]', err.message);
+        sendError(res, err, 'No se pudieron leer las fotos');
+    }
+});
+
+router.post('/delete-photos-month', async (req, res) => {
+    if (!superUser.requireSuper(req, res)) return;
+    try {
+        const year = Number(req.body && req.body.year);
+        const month = Number(req.body && req.body.month);
+        if (!year || month < 1 || month > 12) {
+            return res.status(400).send({ ok: false, error: 'Mes y año requeridos', code: 'INVALID_MONTH' });
+        }
+
+        const photos = await storage.listPhotos({
+            folders: ['/XELASOL', storage.DEFAULT_FOLDER],
+        });
+        const targets = photos
+            .filter((p) => Number(p.year) === year && Number(p.month) === month)
+            .map((p) => p.path);
+
+        const result = await storage.deleteMany(targets);
+        res.send({
+            ok: true,
+            year,
+            month,
+            found: targets.length,
+            ...result,
+        });
+    } catch (err) {
+        console.error('[storage/delete-photos-month]', err.message);
+        sendError(res, err, 'No se pudieron eliminar las fotos del mes');
     }
 });
 

@@ -46,6 +46,7 @@ var router_vehiculos = require('./router/router_vehiculos.js');
 
 var router_print = require('./router/router_print.js');
 var router_storage = require('./router/router_storage.js');
+var router_super = require('./router/router_super.js');
 
 
 
@@ -470,6 +471,7 @@ app.use('/vehiculos', router_vehiculos);
 
 app.use('/print', router_print);
 app.use('/storage', router_storage);
+app.use('/super', router_super);
 
 
 

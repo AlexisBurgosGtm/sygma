@@ -3,38 +3,14 @@ function getView(){
     let view = {
         body:()=>{
             return `
-                <div class="col-12 p-0 bg-white">
-                    <div class="tab-content" id="myTabHomeContent">
-                        <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
-                            ${view.vista_inicio()}
-
-                        </div>
-                        <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
-                            ${view.vista_datos_cliente()}
-                        </div>
-                        <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
-                            
-                        </div>    
+                <div class="col-12 p-0 visitas-mapa-root" id="visitasMapaRoot">
+                    <div id="visitasMapaPaneMapa">
+                        ${view.vista_inicio()}
                     </div>
-
-                    <ul class="nav nav-tabs hidden" id="myTabHome" role="tablist">
-                        <li class="nav-item">
-                            <a class="nav-link active negrita text-success" id="tab-uno" data-toggle="tab" href="#uno" role="tab" aria-controls="profile" aria-selected="false">
-                                <i class="fal fa-list"></i></a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link negrita text-danger" id="tab-dos" data-toggle="tab" href="#dos" role="tab" aria-controls="home" aria-selected="true">
-                                <i class="fal fa-comments"></i></a>
-                        </li>  
-                        <li class="nav-item">
-                            <a class="nav-link negrita text-danger" id="tab-tres" data-toggle="tab" href="#tres" role="tab" aria-controls="home" aria-selected="true">
-                                <i class="fal fa-comments"></i></a>
-                        </li>         
-                    </ul>
-                    
+                    <div id="visitasMapaPaneDetalle" class="d-none">
+                        ${view.vista_datos_cliente()}
+                    </div>
                 </div>
-
-               
             `
         },
         vista_inicio:()=>{
@@ -70,26 +46,31 @@ function getView(){
                 <div class="card-body p-4">
                     
                     <div class="row">
-                        <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
-                            
+                        <div class="col-sm-12 col-md-6 col-lg-3">
+                            <div class="form-group">
+                                <label class="text-secondary">Tipo de visita</label>
+                                <select class="form-control negrita" id="cmbTipoVisitaMapa">
+                                    <option value="actuales">Visitas actuales</option>
+                                    <option value="no_efectivas">Visitas no efectivas</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-md-6 col-lg-3">
                             <div class="form-group">
                                 <label class="text-secondary">Vendedor</label>
                                 <select class="form-control" id="cmbEmpleado">
                                 </select>
                             </div>
-
                         </div>
-                        <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
-
+                        <div class="col-sm-12 col-md-6 col-lg-3">
                             <div class="form-group">
                                 <label class="text-secondary">Fecha</label>
                                 <input type="date" class="form-control" id="txtFecha">
                             </div>
-
                         </div>
-                        <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                        <div class="col-sm-12 col-md-6 col-lg-3" id="wrapDiaClienteMapa">
                             <div class="form-group">
-                                <label class="text-secondary">Fecha</label>
+                                <label class="text-secondary">Día de ruta</label>
                                 <select class="form-control negrita text-danger border-danger" id="cmbDiaCliente">
                                             <option value="LUNES">LUNES</option>
                                             <option value="MARTES">MARTES</option>
@@ -117,6 +98,11 @@ function getView(){
             return `
             <div class="card card-rounded col-12">
                 <div class="card-body p-4">
+                    <div class="d-flex align-items-center flex-wrap mb-3">
+                        <button type="button" class="btn btn-secondary btn-sm negrita shadow-sm" id="btnVisitasMapaVolver" data-supervisor-keep="true" title="Regresar al mapa">
+                            <i class="fal fa-arrow-left mr-1"></i> Volver al mapa
+                        </button>
+                    </div>
 
                     <h5 class="negrita text-danger" id="lbNomclieMarca"></h5>
                     <small>CODIGO CLIENTE: </small>
@@ -124,6 +110,9 @@ function getView(){
 
                 </div>
             </div>
+            <button type="button" class="btn btn-secondary btn-bottom-l btn-xl btn-circle hand shadow" id="btnVisitasMapaVolverFab" data-supervisor-keep="true" title="Volver al mapa">
+                <i class="fal fa-arrow-left"></i>
+            </button>
             <br>
             <div class="row">
                 <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
@@ -326,9 +315,16 @@ function addListeners(){
     document.getElementById('txtFecha').addEventListener('change',()=>{
         document.getElementById('cmbDiaCliente').value = F.devuelve_dia_semana('txtFecha');
         get_reportes();
-    })
+    });
 
-    
+    document.getElementById('cmbTipoVisitaMapa')?.addEventListener('change', () => {
+        visitasMapa_syncTipoVisitaUI();
+        get_reportes();
+    });
+    document.getElementById('btnVisitasMapaVolver')?.addEventListener('click', visitasMapa_showMapa);
+    document.getElementById('btnVisitasMapaVolverFab')?.addEventListener('click', visitasMapa_showMapa);
+
+    visitasMapa_syncTipoVisitaUI();
 
 };
 
@@ -367,139 +363,189 @@ function get_empleados(){
 };
 
 
+function visitasMapa_tipo() {
+    return document.getElementById('cmbTipoVisitaMapa')?.value || 'actuales';
+}
+
+function visitasMapa_syncTipoVisitaUI() {
+    const noEfec = visitasMapa_tipo() === 'no_efectivas';
+    const wrapDia = document.getElementById('wrapDiaClienteMapa');
+    if (wrapDia) wrapDia.classList.toggle('d-none', noEfec);
+}
+
+function visitasMapa_showMapa() {
+    document.getElementById('visitasMapaPaneDetalle')?.classList.add('d-none');
+    document.getElementById('visitasMapaPaneMapa')?.classList.remove('d-none');
+    const map = window._visitasMapaLeaflet;
+    if (map && typeof map.invalidateSize === 'function') {
+        setTimeout(() => {
+            try { map.invalidateSize(); } catch (e) { /* mapa ya destruido */ }
+        }, 200);
+    }
+}
+
+function visitasMapa_showDetalle() {
+    document.getElementById('visitasMapaPaneMapa')?.classList.add('d-none');
+    document.getElementById('visitasMapaPaneDetalle')?.classList.remove('d-none');
+}
+
+function visitasMapa_coordsValidas(lat, lng) {
+    const nlat = Number(lat);
+    const nlng = Number(lng);
+    return Number.isFinite(nlat) && Number.isFinite(nlng) && nlat !== 0 && nlng !== 0;
+}
+
+function visitasMapa_escHtml(v) {
+    return String(v ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
 function get_reportes(){
-
+    visitasMapa_showMapa();
     get_visitas_dia_vendedor();
+};
 
-
+function destroyView(){
+    if (window._visitasMapaLeaflet) {
+        try { window._visitasMapaLeaflet.remove(); } catch (e) { /* ignore */ }
+        window._visitasMapaLeaflet = null;
+    }
 };
 
 
-function get_visitas_dia_vendedor(){
+function visitasMapa_crearMapa(onReady) {
+    if (window._visitasMapaLeaflet) {
+        try { window._visitasMapaLeaflet.remove(); } catch (e) { /* ignore */ }
+        window._visitasMapaLeaflet = null;
+    }
 
-     let container = document.getElementById('container_mapa');
-    container.innerHTML = '';
-    container.innerHTML = `<div class="mapcontainer5" id="mapcontainer"></div>`;
-
-    let dia = document.getElementById('cmbDiaCliente').value;
-
-    let varTotalVisitados = 0;
-    let varTotalNoVisitados = 0;
-    let contador = 0;
-    let latInicial =0, longInicial = 0;
-
-    let codemp = document.getElementById('cmbEmpleado').value;
-    let fecha = F.devuelveFecha('txtFecha');
-
-    //-----------------------------------------------
-    //personalizacion de marcadores
-           
-            //clase con opciones del icono
-            var LeafIcon = L.Icon.extend({
-                options: {
-                        shadowUrl: './libs/leaflet/images/marker-shadow.png',
-                        iconSize: [18, 35],
-                        shadowSize: [0, 0],
-                        iconAnchor: [20, 92],
-                        shadowAnchor: [4, 62],
-                        popupAnchor: [-3, -76]
-                }
-            });
-
-            //iconSize: [38, 95]
-            //iconAnchor: [22, 94]
-
-            var greenIcon = new LeafIcon({iconUrl: './libs/leaflet/images/marker-icon-green.png'}),
-                redIcon = new LeafIcon({iconUrl: './libs/leaflet/images/marker-icon-red.png'}),
-                blueIcon = new LeafIcon({iconUrl: './libs/leaflet/images/marker-icon.png'}),
-                userIcon = new LeafIcon({iconUrl: './libs/leaflet/images/marker-user.png'});
-        
-        //-----------------------------------------------
-        //-----------------------------------------------
-
-
-    try {
-        navigator.geolocation.getCurrentPosition(function (location) {
-            
-            lat = location.coords.latitude.toString();
-            long = location.coords.longitude.toString();
-
-            var map = L.map('mapcontainer').setView([Number(lat), Number(long)], 10);
-
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
-
-            //agrego la ubicacion del usuario
-            //L.marker([Number(lat), Number(long)],{icon: userIcon})
-                //.addTo(map)
-                //.bindPopup(`${GlobalUsuario}`, {closeOnClick: false, autoClose: false})
-                //.openPopup();
-
-
-            //agrega los marcadores al mapa
-
-            
-
-            data_visitas_vendedor(codemp,fecha,dia)
-            .then((data)=>{
-
-                data.recordset.map((r)=>{
-                    
-                    contador+=1;
-                    if(Number(contador)==1){latInicial = Number(r.LATITUD); longInicial=Number(r.LONGITUD)};
-                    if(latInicial==0){contador= contador-1};
-
-                    let icono;
-                    
-                    if(F.convertir_fecha(r.LASTSALE,'-').toString()==F.devuelveFecha2('txtFecha')){
-                        varTotalVisitados+=1
-                         icono = greenIcon;
-                    }else{
-                        varTotalNoVisitados +=1;
-                        icono = redIcon;
-                    };
-
-                    
-                         L.marker([Number(r.LATITUD), Number(r.LONGITUD)],{icon: icono})
-                            .addTo(map)
-                            .bindPopup(`${r.TIPONEGOCIO}-${r.NEGOCIO}, ${r.NOMBRE}<br><small>${F.limpiarTexto(r.DIRECCION)}</small>`, {closeOnClick: false, autoClose: true})
-                            .on('click', function(e){
-                                get_datos_cliente(r.CODCLIENTE,r.NOMBRE)
-                            })
-                            //.openPopup();
-
-                  
-
-                })
-
-                document.getElementById('lbTVisitadosMapa').innerText = `Vendido: ${varTotalVisitados}`;
-                document.getElementById('lbTNoVisitadosMapa').innerText = `No Vendido: ${varTotalNoVisitados}`;
-
-
-                
-
-                //map.invalidateSize(true);
-                setTimeout(function(){ map.invalidateSize();map.flyTo([latInicial,longInicial],10);}, 400)
-
-            })
-            .catch(()=>{
-                container.innerHTML = 'No se cargaron datos...';
-                 document.getElementById('lbTVisitadosMapa').innerText = ``;
-                document.getElementById('lbTNoVisitadosMapa').innerText = ``;
-            })
-
-
-             
-
-                               
-        })
-    } catch (error) {
-            F.AvisoError(error.toString());
+    const crear = (lat, lng) => {
+        const map = L.map('mapcontainer').setView([Number(lat), Number(lng)], 10);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        window._visitasMapaLeaflet = map;
+        onReady(map);
     };
 
+    try {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (location) => crear(location.coords.latitude, location.coords.longitude),
+                () => crear(14.6349, -90.5069),
+                { timeout: 6000 }
+            );
+        } else {
+            crear(14.6349, -90.5069);
+        }
+    } catch (error) {
+        crear(14.6349, -90.5069);
+    }
+}
 
+function get_visitas_dia_vendedor(){
 
+    const container = document.getElementById('container_mapa');
+    if (!container) return;
+    container.innerHTML = `<div class="mapcontainer5" id="mapcontainer"></div>`;
+
+    const tipo = visitasMapa_tipo();
+    const dia = document.getElementById('cmbDiaCliente')?.value;
+    const codemp = document.getElementById('cmbEmpleado')?.value;
+    const fecha = F.devuelveFecha('txtFecha');
+    const fechaIso = document.getElementById('txtFecha')?.value || fecha;
+
+    const LeafIcon = L.Icon.extend({
+        options: {
+            shadowUrl: './libs/leaflet/images/marker-shadow.png',
+            iconSize: [18, 35],
+            shadowSize: [0, 0],
+            iconAnchor: [20, 92],
+            shadowAnchor: [4, 62],
+            popupAnchor: [-3, -76]
+        }
+    });
+    const greenIcon = new LeafIcon({iconUrl: './libs/leaflet/images/marker-icon-green.png'});
+    const redIcon = new LeafIcon({iconUrl: './libs/leaflet/images/marker-icon-red.png'});
+    const blueIcon = new LeafIcon({iconUrl: './libs/leaflet/images/marker-icon.png'});
+
+    visitasMapa_crearMapa((map) => {
+        const loader = tipo === 'no_efectivas'
+            ? data_visitas_no_efectivas(codemp, fechaIso)
+            : data_visitas_vendedor(codemp, fecha, dia);
+
+        loader
+            .then((data) => {
+                let varTotalVisitados = 0;
+                let varTotalNoVisitados = 0;
+                let latInicial = 0;
+                let longInicial = 0;
+
+                (data.recordset || []).forEach((r) => {
+                    let latPin = r.LATITUD;
+                    let lngPin = r.LONGITUD;
+                    if (tipo === 'no_efectivas' && !visitasMapa_coordsValidas(latPin, lngPin)) {
+                        latPin = r.CLIENTE_LATITUD;
+                        lngPin = r.CLIENTE_LONGITUD;
+                    }
+                    if (!visitasMapa_coordsValidas(latPin, lngPin)) return;
+
+                    if (!latInicial) {
+                        latInicial = Number(latPin);
+                        longInicial = Number(lngPin);
+                    }
+
+                    let icono = redIcon;
+                    let popupExtra = '';
+                    if (tipo === 'no_efectivas') {
+                        varTotalNoVisitados += 1;
+                        icono = blueIcon;
+                        const motivo = visitasMapa_escHtml(r.MOTIVO || 'SIN MOTIVO');
+                        const hora = visitasMapa_escHtml(r.HORA || '');
+                        const emp = visitasMapa_escHtml(r.EMPLEADO || '');
+                        popupExtra = `<br><small class="negrita">No efectiva · ${motivo}${hora ? ' · ' + hora : ''}</small>${emp ? `<br><small>${emp}</small>` : ''}`;
+                    } else if (F.convertir_fecha(r.LASTSALE, '-').toString() == F.devuelveFecha2('txtFecha')) {
+                        varTotalVisitados += 1;
+                        icono = greenIcon;
+                    } else {
+                        varTotalNoVisitados += 1;
+                    }
+
+                    const nom = visitasMapa_escHtml(r.NOMBRE || '');
+                    const negocio = visitasMapa_escHtml(`${r.TIPONEGOCIO || ''}-${r.NEGOCIO || ''}`);
+                    const dir = visitasMapa_escHtml(typeof F.limpiarTexto === 'function' ? F.limpiarTexto(r.DIRECCION) : (r.DIRECCION || ''));
+
+                    L.marker([Number(latPin), Number(lngPin)], { icon: icono })
+                        .addTo(map)
+                        .bindPopup(`${negocio}, ${nom}<br><small>${dir}</small>${popupExtra}`, { closeOnClick: false, autoClose: true })
+                        .on('click', function () {
+                            get_datos_cliente(r.CODCLIENTE, r.NOMBRE);
+                        });
+                });
+
+                if (tipo === 'no_efectivas') {
+                    document.getElementById('lbTVisitadosMapa').innerText = '';
+                    document.getElementById('lbTNoVisitadosMapa').innerText = `No efectivas: ${varTotalNoVisitados}`;
+                } else {
+                    document.getElementById('lbTVisitadosMapa').innerText = `Vendido: ${varTotalVisitados}`;
+                    document.getElementById('lbTNoVisitadosMapa').innerText = `No Vendido: ${varTotalNoVisitados}`;
+                }
+
+                setTimeout(function () {
+                    map.invalidateSize();
+                    if (latInicial) map.flyTo([latInicial, longInicial], 10);
+                }, 400);
+            })
+            .catch(() => {
+                container.innerHTML = tipo === 'no_efectivas'
+                    ? 'No hay visitas no efectivas en esta fecha...'
+                    : 'No se cargaron datos...';
+                document.getElementById('lbTVisitadosMapa').innerText = '';
+                document.getElementById('lbTNoVisitadosMapa').innerText = '';
+            });
+    });
 };
 
 function data_visitas_vendedor(codven,fecha,dia){
@@ -544,9 +590,37 @@ function data_visitas_vendedor(codven,fecha,dia){
 
 };
 
+function data_visitas_no_efectivas(codven, fecha) {
+    const sucursal = document.getElementById('cmbSucursal').value;
+
+    return new Promise((resolve, reject) => {
+        axios.post('/clientes/visitas_no_efectivas_mapa', {
+            token: TOKEN,
+            sucursal: sucursal,
+            codemp: codven,
+            fecha: fecha
+        })
+        .then((res) => {
+            if (res.status.toString() == '200') {
+                const data = res.data;
+                if (data.toString() == 'error') {
+                    reject();
+                } else if (Number(data.rowsAffected[0]) > 0) {
+                    resolve(data);
+                } else {
+                    reject();
+                }
+            } else {
+                reject();
+            }
+        })
+        .catch(() => reject());
+    });
+}
+
 function get_datos_cliente(codclie,nomclie){
 
-    document.getElementById('tab-dos').click();
+    visitasMapa_showDetalle();
     get_marcas_cliente(codclie, nomclie);
     get_productos_clientes(codclie);
 

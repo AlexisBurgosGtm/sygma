@@ -25,6 +25,9 @@ let GlobalUsuario = '';
 let GlobalPass = '';
 let GlobalNivelUsuario = 0;
 let GlobalCodUsuario = 0;
+/** Super usuario anclado en código (no figura en listas). */
+let GlobalSuperUsuario = false;
+let GlobalSuperKey = '';
 /** CODRUTA del vendedor en RUTAS_CLIENTES (CODEMP = GlobalCodUsuario). */
 let GlobalCodRutaCliente = 0;
 /** CODRUTA del mercaderista en RUTAS_MERCADERISTAS (CODEMP = GlobalCodUsuario). */
@@ -140,6 +143,10 @@ function set_setting_local(opcion, valor) {
 
 function permite_inventario_negativo() {
     return String(get_setting('PERMITE INVENTARIO NEGATIVO', 'NO')).toUpperCase() === 'SI';
+}
+
+function permite_vista_pestanas() {
+    return String(get_setting('PERMITE VISTA PESTAÑAS', 'NO')).toUpperCase() === 'SI';
 }
 
 /**

@@ -88,16 +88,74 @@
             color: #b45309;
             background: #fffbeb;
         }
+        .config-sino-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 4.6rem;
+            padding: 0.42rem 1.15rem;
+            border: 0;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            line-height: 1.2;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
+            transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease;
+        }
+        .config-sino-badge:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.16);
+        }
+        .config-sino-badge:active { transform: translateY(0); }
+        .config-sino-badge:disabled { opacity: 0.7; cursor: wait; transform: none; }
+        .config-sino-badge--si {
+            background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+        }
+        .config-sino-badge--no {
+            background: linear-gradient(180deg, #f87171 0%, #dc2626 100%);
+        }
         `;
         document.head.appendChild(style);
     }
 
     function config_icon_for(opcion) {
         var o = String(opcion || '').toUpperCase();
+        if (o.indexOf('PESTAÑ') >= 0 || o.indexOf('PESTAN') >= 0) return 'fa-clone';
         if (o.indexOf('INVENTARIO') >= 0) return 'fa-boxes';
         if (o.indexOf('CLAVE') >= 0) return 'fa-key';
         if (o.indexOf('STOCK') >= 0) return 'fa-warehouse';
         return 'fa-sliders-h';
+    }
+
+    function config_is_si_no(opcion, valor) {
+        var v = String(valor || '').trim().toUpperCase();
+        var o = String(opcion || '').trim().toUpperCase();
+        if (v === 'SI' || v === 'NO') return true;
+        if (o.indexOf('PERMITE ') === 0) return true;
+        return false;
+    }
+
+    function config_hint_si_no(opcion) {
+        var up = String(opcion || '').toUpperCase();
+        if (up === 'PERMITE INVENTARIO NEGATIVO') {
+            return 'Permite movimientos/ventas que dejen existencia por debajo de cero.';
+        }
+        if (up === 'PERMITE VISTA PESTAÑAS') {
+            return 'Permite abrir vistas en pestañas internas (una pestaña por vista).';
+        }
+        return 'Pulse el distintivo para cambiar entre SI y NO. El cambio se guarda al instante.';
+    }
+
+    function config_apply_sino_badge(btn, valor) {
+        if (!btn) return;
+        var isSi = String(valor || '').toUpperCase() === 'SI';
+        btn.setAttribute('data-valor', isSi ? 'SI' : 'NO');
+        btn.textContent = isSi ? 'SI' : 'NO';
+        btn.classList.toggle('config-sino-badge--si', isSi);
+        btn.classList.toggle('config-sino-badge--no', !isSi);
     }
 
     function config_editor_html(row, idx) {
@@ -105,17 +163,20 @@
         var valor = String(row.VALOR == null ? '' : row.VALOR);
         var up = opcion.toUpperCase();
         var id = 'cfgSetting_' + idx;
+        var opcionAttr = opcion.replace(/"/g, '&quot;');
 
-        if (up === 'PERMITE INVENTARIO NEGATIVO') {
-            var selSi = valor.toUpperCase() === 'SI' ? 'selected' : '';
-            var selNo = valor.toUpperCase() !== 'SI' ? 'selected' : '';
+        if (config_is_si_no(opcion, valor)) {
+            var isSi = valor.toUpperCase() === 'SI';
             return `
-                <label for="${id}">Valor</label>
-                <select class="form-control negrita border-base" id="${id}" data-opcion="${opcion.replace(/"/g, '&quot;')}">
-                    <option value="SI" ${selSi}>SI</option>
-                    <option value="NO" ${selNo}>NO</option>
-                </select>
-                <small class="text-muted d-block mt-2">Permite movimientos/ventas que dejen existencia por debajo de cero.</small>
+                <label>Valor</label>
+                <div class="mt-1">
+                    <button type="button"
+                        class="config-sino-badge ${isSi ? 'config-sino-badge--si' : 'config-sino-badge--no'}"
+                        id="${id}"
+                        data-opcion="${opcionAttr}"
+                        data-valor="${isSi ? 'SI' : 'NO'}">${isSi ? 'SI' : 'NO'}</button>
+                </div>
+                <small class="text-muted d-block mt-2">${config_hint_si_no(opcion)}</small>
             `;
         }
 
@@ -213,6 +274,20 @@
         rootEl.innerHTML = view.body();
     }
 
+    function config_merge_defaults(rows) {
+        var list = Array.isArray(rows) ? rows.slice() : [];
+        var defaults = [
+            { OPCION: 'PERMITE VISTA PESTAÑAS', VALOR: 'NO' }
+        ];
+        defaults.forEach(function (def) {
+            var exists = list.some(function (r) {
+                return String(r.OPCION || '').trim().toUpperCase() === def.OPCION;
+            });
+            if (!exists) list.push({ OPCION: def.OPCION, VALOR: def.VALOR });
+        });
+        return list;
+    }
+
     function config_render_cards(rows) {
         var grid = document.getElementById('configSettingsGrid');
         if (!grid) return;
@@ -225,6 +300,7 @@
         grid.innerHTML = rows.map(function (row, idx) {
             var opcion = String(row.OPCION || 'Opción');
             var icon = config_icon_for(opcion);
+            var isSino = config_is_si_no(opcion, row.VALOR);
             return `
                 <div class="col-lg-4 col-md-6 col-12 mb-3">
                     <div class="config-panel-card">
@@ -233,12 +309,13 @@
                         </div>
                         <div class="card-body">
                             ${config_editor_html(row, idx)}
+                            ${isSino ? '' : `
                             <div class="text-right mt-3">
                                 <button type="button" class="btn btn-base text-white hand btn-config-save"
                                     data-idx="${idx}" data-opcion="${opcion.replace(/"/g, '&quot;')}">
                                     <i class="fal fa-save mr-1"></i> Guardar
                                 </button>
-                            </div>
+                            </div>`}
                         </div>
                     </div>
                 </div>
@@ -254,6 +331,26 @@
                 config_guardar_setting(opcion, input.value, btn);
             });
         });
+
+        grid.querySelectorAll('.config-sino-badge').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                if (btn.disabled) return;
+                var actual = String(btn.getAttribute('data-valor') || 'NO').toUpperCase() === 'SI';
+                var next = actual ? 'NO' : 'SI';
+                var opcion = btn.getAttribute('data-opcion');
+                var prev = actual ? 'SI' : 'NO';
+                config_apply_sino_badge(btn, next);
+                btn.disabled = true;
+                config_guardar_setting(opcion, next, null, true)
+                    .then(function () {})
+                    .catch(function () {
+                        config_apply_sino_badge(btn, prev);
+                    })
+                    .finally(function () {
+                        btn.disabled = false;
+                    });
+            });
+        });
     }
 
     function config_cargar_settings() {
@@ -266,7 +363,7 @@
 
         loader
             .then(function (data) {
-                data_settings = (data && data.recordset) ? data.recordset : [];
+                data_settings = config_merge_defaults((data && data.recordset) ? data.recordset : []);
                 if (typeof settings_aplicar_globales === 'function') settings_aplicar_globales();
                 config_render_cards(data_settings);
             })
@@ -277,10 +374,10 @@
             });
     }
 
-    function config_guardar_setting(opcion, valor, btn) {
+    function config_guardar_setting(opcion, valor, btn, silencioso) {
         if (!opcion) {
             F.AvisoError('Opción no válida');
-            return;
+            return Promise.reject(new Error('opcion'));
         }
         if (btn) {
             btn.disabled = true;
@@ -298,13 +395,14 @@
                 return r.data;
             });
 
-        saver
+        return saver
             .then(function () {
                 if (typeof set_setting_local === 'function') set_setting_local(opcion, valor);
-                F.Aviso('Configuración guardada');
+                if (!silencioso) F.Aviso('Configuración guardada');
             })
             .catch(function () {
                 F.AvisoError('No se pudo guardar');
+                throw new Error('save');
             })
             .finally(function () {
                 if (btn) {

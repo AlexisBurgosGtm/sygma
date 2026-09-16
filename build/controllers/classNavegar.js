@@ -16,6 +16,8 @@ let Navegar = {
                 if (value !== true) return;
 
                 GlobalNivelUsuario = 0;
+                GlobalSuperUsuario = false;
+                GlobalSuperKey = '';
                 GlobalCodRutaCliente = 0;
                 GlobalCodRutaMercaderista = 0;
                 if (typeof sygma_updateHeaderUsuario === 'function') {
@@ -30,6 +32,8 @@ let Navegar = {
 
     login: () => {
         GlobalNivelUsuario = 0;
+        GlobalSuperUsuario = false;
+        GlobalSuperKey = '';
         GlobalCodRutaCliente = 0;
         GlobalCodRutaMercaderista = 0;
         if (typeof sygma_updateHeaderUsuario === 'function') {
@@ -59,6 +63,7 @@ let Navegar = {
     },
 
     usaMenuSoloCards: () => {
+        if (GlobalSuperUsuario) return true;
         const nivel = Number(GlobalNivelUsuario);
         return nivel === 2 || nivel === 3 || nivel === 4 || nivel === 7 || nivel === 8 || nivel === 9;
     },
@@ -134,6 +139,11 @@ let Navegar = {
         if (Number(GlobalNivelUsuario) === 0) return;
         Navegar.mostrarMenu();
 
+        if (GlobalSuperUsuario) {
+            Navegar.inicio_superusuario();
+            return;
+        }
+
         switch (Number(GlobalNivelUsuario)) {
             case 1:
                 Navegar.inicio_gerencia();
@@ -165,6 +175,11 @@ let Navegar = {
             default:
                 F.AvisoError('No hay inicio configurado para su perfil.');
         }
+    },
+
+    inicio_superusuario: () => {
+        if (Number(GlobalNivelUsuario) === 0 || !GlobalSuperUsuario) return;
+        F.loadScript('../views/menu/INICIO_SUPER/inicio_superusuario.js', 'root').then(() => initView());
     },
 
     inicio_gerencia: () => {

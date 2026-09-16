@@ -25,7 +25,9 @@ function requestPermission() {
 }
 
 
-InicializarServiceWorkerNotif();
+if (!window.SYGMA_IS_TAB_FRAME) {
+  InicializarServiceWorkerNotif();
+}
 
 
 Mousetrap.bind(['command+e', 'ctrl+e'], function(e) {
@@ -81,6 +83,8 @@ function sygma_syncDarkModeButton() {
 
 function sygma_applyDarkMode(on) {
     document.body.classList.toggle('sygma-dark', !!on);
+    document.documentElement.classList.toggle('sygma-dark', !!on);
+    document.documentElement.classList.toggle('dark', !!on);
     try {
         localStorage.setItem(SYGMA_DARK_KEY, on ? '1' : '0');
     } catch (e) {}
@@ -95,7 +99,7 @@ sygma_syncDarkModeButton();
 
 
 
-let versionapp = "M.11.09.26 12:27"
+let versionapp = "M.16.09.26 13:25"
 const CHANGELOG_JSON = './data/changelog.json';
 
 function formatChangelogVersion(fecha, hora) {
@@ -183,7 +187,9 @@ function get_log() {
 }
 
 
-Navegar.login();
+if (!window.SYGMA_IS_TAB_FRAME) {
+    Navegar.login();
+}
 
 
 

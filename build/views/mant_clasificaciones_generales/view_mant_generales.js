@@ -1,18 +1,39 @@
+function clasif_titulo(tipo) {
+    switch (tipo) {
+        case 'MARCA':
+            return 'MARCA';
+        case 'BI':
+            return 'TIPO DE RENTABILIDAD';
+        case 'TIPO':
+            return 'TIPO DE PRODUCTO';
+        case 'LABORATORIO':
+            return 'OFERTA DEL PRODUCTO';
+        case 'IMPULSO':
+            return 'TIPO DE IMPULSO';
+        case 'PROGRAMA_SALUD':
+            return 'TIPO PROGRAMA DE SALUD';
+        case 'RM_MR':
+            return 'CLASIFICACIÓN DE MEDIA ROTACIÓN Y RENTABILIDAD';
+        case 'RELLENO':
+            return 'TIPO DE PRODUCTOS PARA RELLENO';
+        default:
+            return 'CLASIFICACIÓN';
+    }
+}
+
 function getView(){
+    if (typeof spa_inyectarEstilosPos2 === 'function') spa_inyectarEstilosPos2();
+
     let view = {
         body:()=>{
             return `
-                <div class="col-12 p-0 bg-white">
+                <div class="col-12 p-0">
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
                             ${view.vista_listado() + view.modal_nuevo() + view.modal_nuevo_marca()}
                         </div>
-                        <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
-                           
-                        </div>
-                        <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
-                            
-                        </div>    
+                        <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab"></div>
+                        <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab"></div>
                     </div>
 
                     <ul class="nav nav-tabs hidden" id="myTabHome" role="tablist">
@@ -23,123 +44,113 @@ function getView(){
                         <li class="nav-item">
                             <a class="nav-link negrita text-danger" id="tab-dos" data-toggle="tab" href="#dos" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
-                        </li>  
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link negrita text-danger" id="tab-tres" data-toggle="tab" href="#tres" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
-                        </li>         
+                        </li>
                     </ul>
-                    
                 </div>
-               
             `
         },
         vista_listado:()=>{
             return `
-            <div class="card card-rounded shadow border-base">
-                <div class="card-body p-4">
-                    <div class="row">
-                        <div class="col-6">
-                            <br>
-                            <h5 class="negrita text-base">Clasificaciones Generales</h5>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label class="negrita text-danger">Seleccione una Clasificación</label>
-                                <select class="form-control negrita text-verde" id="cmbTipo">
-                                    <option value="MARCA">MARCAS</option>
-                                    <option value="TIPO">TIPO PRODUCTO</option>
-                                    <option value="LABORATORIO">CLASIFICACION 2</option>
-                                    <option value="IMPULSO">CLASIFICACION 3</option>
-                                    <option value="PROGRAMA_SALUD">CLASIFICACION 4</option>
-                                    <option value="RM_MR">CLASIFICACION 5</option>
-                                    <option value="RELLENO">TIPO DE RELLENO</option>
-                                    <option class="hidden" value="BI">TIPO DE RENTABILIDAD</option>
-                                </select>
+            <div class="pos2-wrap">
+                <div class="pos2-totals-bar">
+                    <div class="row align-items-center no-gutters">
+                        <div class="col-12 col-lg-4 mb-2 mb-lg-0">
+                            <div class="d-flex align-items-center">
+                                <img src="./favicon.png" width="36" height="36" alt="" class="mr-2">
+                                <div>
+                                    <div class="negrita mb-0 pos2-bar-title" style="font-size:0.95rem">Clasificaciones Generales</div>
+                                    <div class="small" style="opacity:0.9" id="lbTotalClasif">0 registros</div>
+                                </div>
                             </div>
                         </div>
+                        <div class="col-12 col-md-6 col-lg-4 px-lg-2 mb-2 mb-md-0">
+                            <label class="small mb-1" style="opacity:0.9">Clasificación</label>
+                            <select class="form-control form-control-sm pos2-search-input negrita" id="cmbTipo">
+                                <option value="MARCA">MARCAS</option>
+                                <option value="TIPO">TIPO PRODUCTO</option>
+                                <option value="LABORATORIO">OFERTA DEL PRODUCTO</option>
+                                <option value="IMPULSO">CLASIFICACION 3</option>
+                                <option value="PROGRAMA_SALUD">CLASIFICACION 4</option>
+                                <option value="RM_MR">CLASIFICACION 5</option>
+                                <option value="RELLENO">TIPO DE RELLENO</option>
+                                <option class="hidden" value="BI">TIPO DE RENTABILIDAD</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <label class="small mb-1" style="opacity:0.9">Buscar</label>
+                            <input type="text" class="form-control form-control-sm pos2-search-input"
+                                id="txtBuscarClasif" placeholder="Código o descripción..."
+                                oninput="F.FiltrarTabla('tblListado','txtBuscarClasif')">
+                        </div>
                     </div>
-                    
+                </div>
+
+                <div class="pos2-panel-card">
+                    <div class="pos2-panel-head">
+                        <span class="negrita mb-0"><i class="fal fa-tags mr-1"></i> Catálogo</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="pos2-table-scroll table-responsive">
+                            <table class="table table-sm table-hover mb-0 pos2-table-compact" id="tblListado">
+                                <thead class="bg-base text-white">
+                                    <tr>
+                                        <th>CÓDIGO</th>
+                                        <th>DESCRIPCIÓN</th>
+                                        <th>MARCA ASOCIADA</th>
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tblDataListado"></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <br>
-            
-            <div class="card card-rounded shadow">
-                <div class="card-body p-2">
-                    <div class="table-responsive col-12">
-                        
-                        <table class="table table-responsive table-hover col-12" id="tblListado">
-                            <thead class="bg-base text-white">
-                                <tr>
-                                    <td>CÓDIGO</td>
-                                    <td>DESCRIPCIÓN</td>
-                                    <td>MARCA ASOCIADA</td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                            </thead>
-                            <tbody id="tblDataListado">
-                            </tbody>
-                        </table>
-
-                    </div>
-                </div>
-            </div>
-
-            <button class="btn btn-success btn-xl hand shadow btn-circle sygma-fab-nuevo" id="btnNuevo">
+            <button type="button" class="btn btn-success btn-xl hand shadow btn-circle sygma-fab-nuevo" id="btnNuevo" title="Nuevo">
                 <i class="fal fa-plus"></i>
             </button>
             `
         },
         modal_nuevo:()=>{
             return `
-            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" id="modal_nuevo" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg" role="document">
+            <div class="modal fade modal-backdrop-transparent modal-with-scroll" id="modal_nuevo" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                     <div class="modal-content">
-
-                        <div class="modal-header">
-                            <label class="modal-title text-base h3 negrita" id="lbTitulo"></label>
+                        <div class="modal-header bg-base text-white py-2">
+                            <h5 class="modal-title mb-0" id="lbTitulo">Clasificación</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"><span>&times;</span></button>
                         </div>
-            
-                        <div class="modal-body p-4">
-                            
+                        <div class="modal-body p-4 pos2-doc-compact">
                             <div class="form-group">
-                                <label class="text-secondary">Descripción</label>
-                                <input type="text" class="form-control negrita text-verde border-base" id="txtDescripcion">
+                                <label>Descripción</label>
+                                <input type="text" class="form-control negrita" id="txtDescripcion">
                             </div>
-                            
                             <div class="form-group">
-                                <label class="text-secondary">Marca Asociada</label>
-                                <select class="form-control negrita text-verde border-base" id="cmbCodMarca">
-                                </select>
+                                <label>Marca asociada</label>
+                                <select class="form-control negrita" id="cmbCodMarca"></select>
                             </div>
-
-                            <br>
-
-                            <div class="row">
-
-                                    <div class="col-5 text-right">
-                                        <button class="btn btn-secondary btn-xl btn-circle hand shadow waves-effect waves-themed" data-dismiss="modal" id="">
-                                            <i class="fal fa-arrow-left"></i>
-                                        </button>                                
-                                    </div>
-        
-                                    <div class="col-1"></div>
-        
-                                    <div class="col-5 text-right">
-                                        <button class="btn btn-info btn-xl btn-circle hand shadow waves-effect waves-themed" id="btnGuardar">
-                                            <i class="fal fa-save"></i>
-                                        </button>
-                                    </div>
-
-                            </div>
-                            
                             <div class="form-group hidden">
-                                <label class="text-secondary">Codigo</label>
-                                <input type="text" class="form-control negrita text-verde" id="txtCodigo">
+                                <label>Codigo</label>
+                                <input type="text" class="form-control negrita" id="txtCodigo">
                             </div>
-
+                            <div class="row mt-3">
+                                <div class="col-6">
+                                    <button type="button" class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
+                                        <i class="fal fa-arrow-left"></i>
+                                    </button>
+                                </div>
+                                <div class="col-6 text-right">
+                                    <button type="button" class="btn btn-base btn-circle btn-xl hand shadow" id="btnGuardar">
+                                        <i class="fal fa-save"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -147,57 +158,38 @@ function getView(){
         },
         modal_nuevo_marca:()=>{
             return `
-            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" 
-            id="modal_nuevo_marca" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg" role="document">
+            <div class="modal fade modal-backdrop-transparent modal-with-scroll" id="modal_nuevo_marca" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                     <div class="modal-content">
-
-                        <div class="modal-header">
-                            <label class="modal-title text-success h3 negrita" id="lbTituloMarca"></label>
+                        <div class="modal-header bg-base text-white py-2">
+                            <h5 class="modal-title mb-0" id="lbTituloMarca">Marca</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"><span>&times;</span></button>
                         </div>
-            
-                        <div class="modal-body p-4">
-                            
+                        <div class="modal-body p-4 pos2-doc-compact">
                             <div class="form-group">
-                                <label class="text-secondary">Marca</label>
-                                <input type="text" class="form-control negrita text-verde border-base" id="txtDescripcionMarca">
+                                <label>Marca</label>
+                                <input type="text" class="form-control negrita" id="txtDescripcionMarca">
                             </div>
-                            
-                         
-
-                           
-
                             <div class="form-group hidden">
-                                <label class="text-secondary">Objetivo</label>
-                                <input type="number" class="form-control negrita text-verde border-base" id="txtObjetivoMarca">
+                                <label>Objetivo</label>
+                                <input type="number" class="form-control negrita" id="txtObjetivoMarca">
                             </div>
-
-                            <br>
-
-                            <div class="row">
-
-                                    <div class="col-5 text-right">
-                                        <button class="btn btn-secondary btn-xl btn-circle hand shadow waves-effect waves-themed" 
-                                        data-dismiss="modal" id="">
-                                            <i class="fal fa-arrow-left"></i>
-                                        </button>                                
-                                    </div>
-        
-                                    <div class="col-1"></div>
-        
-                                    <div class="col-5 text-right">
-                                        <button class="btn btn-info btn-xl btn-circle hand shadow waves-effect waves-themed" id="btnGuardarMarca">
-                                            <i class="fal fa-save"></i>
-                                        </button>
-                                    </div>
-                                    
-                            </div>
-                            
                             <div class="form-group hidden">
-                                <label class="text-secondary">Codigo</label>
-                                <input type="text" class="form-control negrita text-verde" id="txtCodigoMarca">
+                                <label>Codigo</label>
+                                <input type="text" class="form-control negrita" id="txtCodigoMarca">
                             </div>
-
+                            <div class="row mt-3">
+                                <div class="col-6">
+                                    <button type="button" class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
+                                        <i class="fal fa-arrow-left"></i>
+                                    </button>
+                                </div>
+                                <div class="col-6 text-right">
+                                    <button type="button" class="btn btn-base btn-circle btn-xl hand shadow" id="btnGuardarMarca">
+                                        <i class="fal fa-save"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -220,39 +212,9 @@ function addListeners(){
     let btnNuevo = document.getElementById('btnNuevo');
     btnNuevo.addEventListener('click',()=>{
 
-        let strTitulo = '';
-        switch (tipo.value) {
-            case 'MARCA':
-
-
-                break;
-            case 'BI':
-                strTitulo = `TIPO DE RENTABILIDAD`
-                break;
-            case 'TIPO':
-                strTitulo = `TIPO DE PRODUCTO`
-                break;
-            case 'LABORATORIO':
-                strTitulo = `TIPO DE LABORATORIO`
-                break;       
-         
-            case 'IMPULSO':
-                strTitulo = `TIPO DE IMPULSO`
-                break;
-            case 'PROGRAMA_SALUD':
-                strTitulo = `TIPO PROGRAMA DE SALUD`
-                break;
-            case 'RM_MR':
-                strTitulo = `CLASIFICACIÓN DE MEDIA ROTACIÓN Y RENTABILIDAD`
-                break;
-            case 'RELLENO':
-                strTitulo = `TIPO DE PRODUCTOS PARA RELLENO`
-                break;
-            default:
-                break;
-        }
-
+        const strTitulo = clasif_titulo(tipo.value);
         document.getElementById('lbTitulo').innerText = strTitulo;
+        document.getElementById('lbTituloMarca').innerText = strTitulo;
 
         document.getElementById('txtCodigo').value = '';
         document.getElementById('txtDescripcion').value = '';
@@ -457,6 +419,7 @@ function initView(){
 
     getView();
     addListeners();
+    document.title = 'Clasificaciones Generales';
 
 };
 
@@ -464,37 +427,46 @@ function initView(){
 function get_listado(tipo){
     
     let container = document.getElementById('tblDataListado');
-    container.innerHTML = GlobalLoader;
+    container.innerHTML = `<tr><td colspan="5" class="text-center">${GlobalLoader}</td></tr>`;
+    const lbTotal = document.getElementById('lbTotalClasif');
+    if (lbTotal) lbTotal.innerText = 'Cargando...';
 
 
     GF.get_clasificaciones_listado(tipo)
     .then((data)=>{
         let str = '';
-        data.recordset.map((r)=>{
+        const rows = (data && data.recordset) ? data.recordset : [];
+        rows.forEach((r)=>{
             let btnE = 'btnE' + r.CODIGO.toString();
+            const desc = String(r.DESCRIPCION || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
             str += `
             <tr>
                 <td>${r.CODIGO}</td>
-                <td>${r.DESCRIPCION}</td>
-                <td>${r.DESMARCA}</td>
+                <td>${r.DESCRIPCION || ''}</td>
+                <td>${r.DESMARCA || ''}</td>
                 <td>
-                    <button class="btn btn-circle btn-info hand shadow" onclick="get_clasificacion('${r.CODIGO}','${r.DESCRIPCION}','${r.PORCENTAJE}','${r.CODMARCA}')">
+                    <button type="button" class="btn btn-md btn-circle btn-info hand shadow" title="Editar"
+                        onclick="get_clasificacion('${r.CODIGO}','${desc}','${r.PORCENTAJE}','${r.CODMARCA}')">
                         <i class="fal fa-edit"></i>
                     </button>
                 </td>
                 <td>
-                    <button class="btn btn-circle btn-danger hand shadow" id='${btnE}' onclick="eliminar_clasificacion('${r.CODIGO}','${btnE}')">
+                    <button type="button" class="btn btn-md btn-circle btn-danger hand shadow" title="Eliminar"
+                        id='${btnE}' onclick="eliminar_clasificacion('${r.CODIGO}','${btnE}')">
                         <i class="fal fa-trash"></i>
                     </button>
                 </td>
             </tr>
             `
         })
-        container.innerHTML = str;
+        container.innerHTML = str || '<tr><td colspan="5" class="text-center text-muted">No hay registros.</td></tr>';
+        if (lbTotal) lbTotal.innerText = `${rows.length} registro${rows.length === 1 ? '' : 's'}`;
+        const buscar = document.getElementById('txtBuscarClasif');
+        if (buscar) buscar.value = '';
     })
     .catch(()=>{
-        //F.AvisoError('No se pudo cargar la lista');
-        container.innerHTML = 'No se cargaron datos..'
+        container.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No se cargaron datos.</td></tr>';
+        if (lbTotal) lbTotal.innerText = '0 registros';
     })
 };
 
@@ -502,14 +474,15 @@ function get_clasificacion(codigo,descripcion,objetivo,codmarca){
 
 
     let tipo = document.getElementById('cmbTipo').value;
+    const strTitulo = clasif_titulo(tipo);
 
     switch (tipo) {
         case 'MARCA':
             
+            document.getElementById('lbTituloMarca').innerText = strTitulo;
             document.getElementById('txtCodigoMarca').value = codigo;
             document.getElementById('txtDescripcionMarca').value = descripcion;
             document.getElementById('txtObjetivoMarca').value = objetivo;
-            //document.getElementById('cmbCodMarca').value = codmarca;
         
             $("#modal_nuevo_marca").modal('show');
             
@@ -517,6 +490,7 @@ function get_clasificacion(codigo,descripcion,objetivo,codmarca){
     
         default:
 
+            document.getElementById('lbTitulo').innerText = strTitulo;
             document.getElementById('txtCodigo').value = codigo;
             document.getElementById('txtDescripcion').value = descripcion;
             document.getElementById('cmbCodMarca').value = codmarca;

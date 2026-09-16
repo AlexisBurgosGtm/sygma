@@ -665,7 +665,7 @@ function getView(){
                       
                     </div>
 
-                    <label class="negrita text-base">Clasificación 2</label>
+                    <label class="negrita text-base">Oferta del Producto</label>
                     <div class="input-group">
                         <select class="form-control" id="cmbTipoLaboratorio">
                         </select>

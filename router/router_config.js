@@ -31,6 +31,14 @@ router.post("/update_valor", async(req,res)=>{
 
 router.post("/settings_list", async (req, res) => {
     const { token } = req.body || {};
+    try {
+        await execute.get_data_qry(`
+            IF NOT EXISTS (SELECT 1 FROM SETTINGS WHERE OPCION = N'PERMITE VISTA PESTAÑAS')
+                INSERT INTO SETTINGS (OPCION, VALOR) VALUES (N'PERMITE VISTA PESTAÑAS', N'NO');
+        `, token);
+    } catch (e) {
+        console.error('[config/settings_list] ensure PERMITE VISTA PESTAÑAS', e && e.message ? e.message : e);
+    }
     const qry = `
         SELECT OPCION, VALOR
         FROM SETTINGS

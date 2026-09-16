@@ -111,8 +111,21 @@
             try {
                 if (localStorage.getItem('sygmaDarkMode') === '1') {
                     classHolder.classList.add('sygma-dark');
+                    document.documentElement.classList.add('sygma-dark', 'dark');
                 }
             } catch (e) {}
+
+            window.SYGMA_IS_TAB_FRAME = (function () {
+                try {
+                    return window.self !== window.top && /(?:\?|&)sygma_tab=1(?:&|$)/.test(String(location.search || ''));
+                } catch (err) {
+                    return true;
+                }
+            })();
+            if (window.SYGMA_IS_TAB_FRAME) {
+                document.documentElement.classList.add('sygma-tab-frame');
+                classHolder.classList.add('sygma-tab-frame', 'spa-nav-hidden');
+            }
 
         </script>
         <!-- BEGIN Page Wrapper -->
@@ -165,6 +178,8 @@
                             </a>
                         </div>
 
+                        <div id="sygmaViewTabs" class="sygma-view-tabs" hidden aria-label="Vistas abiertas"></div>
+
                         <div class="ml-auto d-flex">
                         
                             <!-- app settings -->
@@ -201,6 +216,7 @@
                         <div id="root">
 
                         </div>
+                        <div id="sygmaTabHost" class="sygma-tab-host" hidden></div>
 
                         
 
@@ -879,6 +895,7 @@
        
         <script src="./controllers/classNavegar.js"></script>
         <script src="./controllers/GlobalVars.js"></script>
+        <script src="./controllers/superUsuario.js"></script>
         <script src="./controllers/GlobalFunciones.js"></script>
         <script src="./libs/spa-pos2-theme.js"></script>
         <script src="./controllers/menu_handler.js"></script>
@@ -902,6 +919,7 @@
         <script src="./controllers/menu_buttons.js"></script>
 
         <script src="./index.js"></script>
+        <script src="./controllers/viewTabs.js"></script>
 
 
         <!--

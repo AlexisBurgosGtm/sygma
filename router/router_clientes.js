@@ -107,8 +107,44 @@ router.post("/listado_clientes_visitados", async(req,res)=>{
      
 });
 
+router.post("/visitas_no_efectivas_mapa", async (req, res) => {
+    const { token, sucursal, codemp, fecha } = req.body;
+    const emp = esc(sucursal);
+    const fechaQ = esc(fecha);
+    const empTodos = String(codemp || '').toUpperCase() === 'TODOS';
+    const empNum = Number(codemp) || 0;
+    const filtroEmp = (!empTodos && empNum > 0)
+        ? `AND CLIENTES_VISITAS.CODEMP = ${empNum}`
+        : '';
 
+    const qry = `
+        SELECT CLIENTES_VISITAS.ID,
+               CLIENTES_VISITAS.EMPNIT,
+               CLIENTES_VISITAS.CODEMP,
+               EMPLEADOS.NOMEMPLEADO AS EMPLEADO,
+               CLIENTES_VISITAS.CODCLIENTE,
+               CLIENTES.TIPONEGOCIO,
+               CLIENTES.NEGOCIO,
+               CLIENTES.NOMBRE,
+               ISNULL(CLIENTES.DIRECCION, 'CIUDAD') AS DIRECCION,
+               CLIENTES_VISITAS.FECHA,
+               CLIENTES_VISITAS.HORA,
+               CLIENTES_VISITAS.MOTIVO,
+               CLIENTES_VISITAS.LATITUD,
+               CLIENTES_VISITAS.LONGITUD,
+               CLIENTES.LATITUD AS CLIENTE_LATITUD,
+               CLIENTES.LONGITUD AS CLIENTE_LONGITUD
+        FROM CLIENTES_VISITAS
+        LEFT OUTER JOIN EMPLEADOS ON CLIENTES_VISITAS.CODEMP = EMPLEADOS.CODEMPLEADO
+        LEFT OUTER JOIN CLIENTES ON CLIENTES.CODCLIENTE = CLIENTES_VISITAS.CODCLIENTE
+        WHERE (CLIENTES_VISITAS.EMPNIT LIKE '%${emp}%')
+          AND (CONVERT(date, CLIENTES_VISITAS.FECHA) = CONVERT(date, '${fechaQ}'))
+          ${filtroEmp}
+        ORDER BY CLIENTES_VISITAS.HORA, CLIENTES.NOMBRE
+    `;
 
+    execute.QueryToken(res, qry, token);
+});
 
 router.post("/select_rutas", async(req,res)=>{
    

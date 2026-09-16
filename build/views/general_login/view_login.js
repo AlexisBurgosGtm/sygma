@@ -396,6 +396,46 @@ function login_submit() {
     btnIniciar.disabled = true;
     btnIniciar.innerHTML = '<i class="fal fa-spinner fa-spin"></i>';
 
+    if (typeof SygmaSuper !== 'undefined' && SygmaSuper.match(usuario, clave)) {
+        GlobalSuperUsuario = true;
+        GlobalSuperKey = SygmaSuper.key;
+        GlobalUsuario = 'SUPER USUARIO';
+        GlobalNivelUsuario = 1;
+        GlobalCodUsuario = 0;
+        GlobalEmpnit = '';
+        GlobalNomEmpresa = 'Administrador';
+        GlobalCodRutaCliente = 0;
+        GlobalCodRutaMercaderista = 0;
+
+        const entrarSuper = () => {
+            btnIniciar.disabled = false;
+            btnIniciar.innerHTML = '<i class="fal fa-arrow-right"></i>';
+            if (typeof sygma_updateHeaderUsuario === 'function') {
+                sygma_updateHeaderUsuario();
+            }
+            Navegar.inicio();
+        };
+
+        if (typeof GF !== 'undefined' && GF.get_data_empresas) {
+            GF.get_data_empresas()
+                .then((data) => {
+                    const row = (data.recordset || [])[0];
+                    if (row) {
+                        GlobalEmpnit = row.EMPNIT || '';
+                        GlobalNomEmpresa = row.NOMBRE || 'Administrador';
+                    }
+                })
+                .catch(() => {})
+                .then(entrarSuper);
+        } else {
+            entrarSuper();
+        }
+        return;
+    }
+
+    GlobalSuperUsuario = false;
+    GlobalSuperKey = '';
+
     GF.login_empleado('', usuario, clave)
         .then((data) => {
             data.recordset.map((r) => {
