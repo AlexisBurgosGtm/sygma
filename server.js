@@ -50,6 +50,7 @@ var router_super = require('./router/router_super.js');
 var router_boletin = require('./router/router_boletin.js');
 var router_ofertas = require('./router/router_ofertas.js');
 var router_medidas = require('./router/router_medidas.js');
+const presence = require('./services/presence.js');
 
 
 
@@ -492,9 +493,32 @@ app.use("*",function(req,res){
 
 
 
+function broadcastPresence() {
+    const snap = presence.snapshot();
+    presence.socketIdsSuper().forEach((id) => {
+        io.to(id).emit('usuarios_conectados', snap);
+    });
+}
+
 // SOCKET HANDLER
 io.on('connection', function(socket){
+      presence.markAnonymous(socket.id);
+      broadcastPresence();
 
+      socket.on('sesion_iniciar', (data) => {
+          presence.upsert(socket.id, data || {});
+          broadcastPresence();
+      });
+
+      socket.on('sesion_cerrar', () => {
+          presence.markAnonymous(socket.id);
+          broadcastPresence();
+      });
+
+      socket.on('disconnect', () => {
+          presence.remove(socket.id);
+          broadcastPresence();
+      });
 
       socket.on('nueva_devolucion_reparto', (codemp,cliente,importe)=>{
 

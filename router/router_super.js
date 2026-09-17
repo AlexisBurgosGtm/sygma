@@ -4,6 +4,7 @@ const express = require('express');
 const router = express.Router();
 const execute = require('../connection');
 const superUser = require('../services/superUser');
+const presence = require('../services/presence');
 
 function sqlNum(v) {
     if (v == null || v === '') return 0;
@@ -119,6 +120,11 @@ router.post('/db-size', async (req, res) => {
         used_mb: Number(used.toFixed(2)),
         available_mb: available,
     });
+});
+
+router.post('/conectados', (req, res) => {
+    if (!superUser.requireSuper(req, res)) return;
+    res.send({ ok: true, ...presence.snapshot() });
 });
 
 module.exports = router;

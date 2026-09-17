@@ -413,6 +413,7 @@ function login_submit() {
             if (typeof sygma_updateHeaderUsuario === 'function') {
                 sygma_updateHeaderUsuario();
             }
+            if (typeof sygma_sesion_socket === 'function') sygma_sesion_socket();
             Navegar.inicio();
             if (typeof sygma_push_subscribe === 'function') sygma_push_subscribe();
         };
@@ -491,6 +492,7 @@ function login_submit() {
                         : Promise.resolve();
                     cargarSkus.catch(() => {});
                     Promise.resolve(cargarRutaPerfil).finally(() => {
+                        if (typeof sygma_sesion_socket === 'function') sygma_sesion_socket();
                         Navegar.inicio();
                         if (typeof sygma_push_subscribe === 'function') sygma_push_subscribe();
                     });
@@ -522,6 +524,7 @@ function addListeners() {
     document.title = 'Login';
 
     GlobalNivelUsuario = 0;
+    if (typeof sygma_sesion_socket_cerrar === 'function') sygma_sesion_socket_cerrar();
 
     const btnIniciar = document.getElementById('btnIniciar');
     if (btnIniciar) {

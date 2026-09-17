@@ -6683,6 +6683,51 @@ body.sygma-dark #root {
   background: rgba(16, 185, 129, 0.14);
   color: #059669;
 }
+.super-card__icon--online {
+  background: rgba(34, 197, 94, 0.16);
+  color: #16a34a;
+}
+.super-online-kpis {
+  gap: 0.65rem;
+}
+.super-online-kpi {
+  min-width: 6.2rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.04);
+}
+.super-online-kpi__n {
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+.super-online-kpi__l {
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: 700;
+}
+.super-online-lista {
+  max-height: min(42vh, 360px);
+  overflow: auto;
+}
+.super-online-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 0.65rem;
+  margin-bottom: 0.35rem;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 10px;
+  background: #fff;
+}
+.super-online-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.18);
+  flex: 0 0 auto;
+}
 .super-fotos-lista {
   max-height: min(52vh, 420px);
   overflow: auto;
@@ -6744,6 +6789,21 @@ body.sygma-dark .super-db-available {
 body.sygma-dark .super-card__icon {
   background: rgba(14, 165, 233, 0.22);
   color: #7dd3fc;
+}
+body.sygma-dark .super-card__icon--online {
+  background: rgba(34, 197, 94, 0.22);
+  color: #86efac;
+}
+body.sygma-dark .super-online-kpi {
+  background: rgba(148, 163, 184, 0.12);
+}
+body.sygma-dark .super-online-kpi__l {
+  color: #94a3b8;
+}
+body.sygma-dark .super-online-row {
+  background: #152033 !important;
+  border-color: rgba(148, 163, 184, 0.2) !important;
+  color: #e8eef7 !important;
 }
 
 /* Vistas en pestañas (iframe aislado) */

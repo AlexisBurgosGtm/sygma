@@ -1,6 +1,8 @@
 'use strict';
 
 var super_fotoMonths = [];
+var super_conectadosTimer = null;
+var super_conectadosHandler = null;
 
 function super_mesNombre(mes) {
     const nombres = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -10,6 +12,103 @@ function super_mesNombre(mes) {
 function super_fmtMb(n) {
     const v = Number(n) || 0;
     return v.toLocaleString('es-GT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' MB';
+}
+
+function super_perfilTxt(r) {
+    if (r && r.super) return 'Super usuario';
+    switch (Number(r && r.nivel)) {
+        case 1: return 'Gerencia';
+        case 2: return 'Supervisor';
+        case 3: return 'Vendedor';
+        case 4: return 'Despacho';
+        case 5: return 'Digitador';
+        case 6: return 'Compras';
+        case 7: return 'Proveedor';
+        case 8: return 'Vendedor';
+        case 9: return 'Mercaderista';
+        default: return 'Usuario';
+    }
+}
+
+function super_fmtHace(ts) {
+    const s = Math.max(0, Math.floor((Date.now() - Number(ts || 0)) / 1000));
+    if (s < 45) return 'ahora';
+    if (s < 3600) return Math.floor(s / 60) + ' min';
+    const h = Math.floor(s / 3600);
+    return h + (h === 1 ? ' h' : ' h');
+}
+
+function super_esc(s) {
+    return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function super_renderConectados(data) {
+    const box = document.getElementById('superOnlineLista');
+    const lbU = document.getElementById('lbSuperOnlineUsers');
+    const lbS = document.getElementById('lbSuperOnlineSes');
+    const lbL = document.getElementById('lbSuperOnlineLogin');
+    const snap = data || {};
+    if (lbU) lbU.textContent = String(Number(snap.total_usuarios) || 0);
+    if (lbS) lbS.textContent = String(Number(snap.total_sesiones) || 0);
+    if (lbL) lbL.textContent = String(Number(snap.en_login) || 0);
+    if (!box) return;
+    const rows = snap.usuarios || [];
+    if (!rows.length) {
+        box.innerHTML = '<div class="text-muted small">Nadie con sesión iniciada. Si hay números en “En login”, están en la pantalla de acceso.</div>';
+        return;
+    }
+    box.innerHTML = rows.map((r) => `
+        <div class="super-online-row">
+            <span class="super-online-dot"></span>
+            <div class="flex-grow-1 min-width-0">
+                <div class="negrita">${super_esc(r.usuario)}</div>
+                <small class="text-muted">${super_esc(super_perfilTxt(r))} · ${super_esc(r.empresa || r.empnit || '—')}</small>
+            </div>
+            <div class="text-right small">
+                <div class="negrita">${Number(r.sesiones) || 1} ses.</div>
+                <span class="text-muted">${super_esc(super_fmtHace(r.desde))}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+function super_cargarConectados() {
+    if (!GlobalSuperUsuario) return;
+    axios.post('/super/conectados', { super_key: GlobalSuperKey, token: typeof TOKEN !== 'undefined' ? TOKEN : '' })
+        .then((res) => {
+            const data = res.data || {};
+            if (!data.ok) throw new Error(data.error || 'error');
+            super_renderConectados(data);
+        })
+        .catch(() => {
+            const box = document.getElementById('superOnlineLista');
+            if (box) box.innerHTML = '<div class="text-muted small">No se pudieron leer las conexiones.</div>';
+        });
+}
+
+function super_startConectados() {
+    super_stopConectados();
+    super_cargarConectados();
+    super_conectadosTimer = setInterval(super_cargarConectados, 8000);
+    if (typeof socket !== 'undefined' && socket && typeof socket.on === 'function') {
+        super_conectadosHandler = (snap) => super_renderConectados(snap);
+        socket.on('usuarios_conectados', super_conectadosHandler);
+    }
+}
+
+function super_stopConectados() {
+    if (super_conectadosTimer) {
+        clearInterval(super_conectadosTimer);
+        super_conectadosTimer = null;
+    }
+    if (super_conectadosHandler && typeof socket !== 'undefined' && socket && typeof socket.off === 'function') {
+        socket.off('usuarios_conectados', super_conectadosHandler);
+    }
+    super_conectadosHandler = null;
 }
 
 function super_busy(on, label) {
@@ -46,6 +145,11 @@ function getView() {
                     </div>
                     <div class="col-12 col-lg-5 mb-3">
                         ${view.card_db()}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        ${view.card_conectados()}
                     </div>
                 </div>
             </div>
@@ -117,6 +221,41 @@ function getView() {
                     </div>
                     <div class="super-db-available">
                         Disponible: <strong id="lbSuperDbFree">-- MB</strong>
+                    </div>
+                </div>
+            </div>
+        `,
+        card_conectados: () => `
+            <div class="card card-rounded shadow super-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between flex-wrap mb-3">
+                        <div class="d-flex align-items-start">
+                            <span class="super-card__icon super-card__icon--online"><i class="fal fa-wifi"></i></span>
+                            <div>
+                                <h5 class="negrita mb-0">Usuarios conectados</h5>
+                                <small class="text-muted">Sesiones en vivo en la aplicación</small>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-info negrita" id="btnSuperConectados">
+                            <i class="fal fa-sync mr-1"></i> Actualizar
+                        </button>
+                    </div>
+                    <div class="d-flex flex-wrap super-online-kpis mb-3">
+                        <div class="super-online-kpi">
+                            <div class="super-online-kpi__n" id="lbSuperOnlineUsers">0</div>
+                            <div class="super-online-kpi__l">Usuarios</div>
+                        </div>
+                        <div class="super-online-kpi">
+                            <div class="super-online-kpi__n" id="lbSuperOnlineSes">0</div>
+                            <div class="super-online-kpi__l">Sesiones</div>
+                        </div>
+                        <div class="super-online-kpi">
+                            <div class="super-online-kpi__n" id="lbSuperOnlineLogin">0</div>
+                            <div class="super-online-kpi__l">En login</div>
+                        </div>
+                    </div>
+                    <div id="superOnlineLista" class="super-online-lista">
+                        <div class="text-muted small">Cargando conexiones...</div>
                     </div>
                 </div>
             </div>
@@ -256,6 +395,7 @@ function addListeners() {
 
     document.getElementById('btnSuperSalir')?.addEventListener('click', () => Navegar.salir());
     document.getElementById('btnSuperLeerFotos')?.addEventListener('click', super_leerFotos);
+    document.getElementById('btnSuperConectados')?.addEventListener('click', super_cargarConectados);
     document.getElementById('superFotosLista')?.addEventListener('click', (e) => {
         const btn = e.target.closest('[data-super-del-mes]');
         if (!btn || btn.disabled) return;
@@ -269,6 +409,7 @@ function addListeners() {
     cmbAnio?.addEventListener('change', refreshSel);
 
     super_cargarDb();
+    super_startConectados();
 }
 
 function initView() {
@@ -279,4 +420,5 @@ function initView() {
 function destroyView() {
     super_fotoMonths = [];
     super_busy(false);
+    super_stopConectados();
 }

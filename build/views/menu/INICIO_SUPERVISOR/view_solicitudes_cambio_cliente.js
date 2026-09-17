@@ -95,6 +95,7 @@ function supervisor_sol_cambio_cargar() {
                                 <small class="d-block">Negocio: ${supervisor_sol_cambio_esc_html(det.negocio || '')}</small>
                                 <small class="d-block">${supervisor_sol_cambio_esc_html(det.direccion || '')}</small>
                                 <small class="d-block text-muted">Ref: ${supervisor_sol_cambio_esc_html(det.referencia || '')}</small>
+                                <small class="d-block text-muted">Tel: ${supervisor_sol_cambio_esc_html(det.telefono || '')}</small>
                                 <small class="d-block">${supervisor_sol_cambio_esc_html(det.municipio || '')}, ${supervisor_sol_cambio_esc_html(det.departamento || '')}</small>
                                 <small class="d-block text-info negrita mt-1">Solicitó: ${supervisor_sol_cambio_esc_html(r.USUARIO || '')} · ${fechaTxt}</small>
                                 <small class="d-block">Estado: <span class="negrita ${puedeAceptar ? 'text-danger' : 'text-success'}">${supervisor_sol_cambio_esc_html(r.REALIZADA || '')}</span></small>

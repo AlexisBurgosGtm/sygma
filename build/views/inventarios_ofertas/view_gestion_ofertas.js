@@ -5,6 +5,8 @@ let ofertasSelectedNom = '';
 let ofertasEditando = 0;
 let ofertasCache = [];
 let ofertasEmpresasCache = [];
+let ofertasProductosCache = [];
+let ofertasAddTipo = 'PROD';
 let ofertasBuscarTimer = null;
 
 function ofertas_esc(s) {
@@ -198,10 +200,12 @@ function getView() {
             cursor:pointer;
         }
         .ofertas-sede-item input { margin:0; }
+        .ofertas-pill.is-boni { background:#fef3c7; color:#92400e; }
         .ofertas-pill.is-sede {
             max-width: 14rem;
             overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
         }
+        body.sygma-dark .ofertas-pill.is-boni { background:#78350f; color:#fde68a; }
         body.sygma-dark .ofertas-sedes-box {
             background:#1e293b;
             border-color:#334155;
@@ -261,20 +265,20 @@ function getView() {
 
                     <div class="pos2-panel-card">
                         <div class="pos2-panel-head d-flex justify-content-between align-items-center flex-wrap">
-                            <span class="negrita mb-0 mr-2"><i class="fal fa-boxes mr-1"></i> Productos de esta oferta</span>
+                            <span class="negrita mb-0 mr-2"><i class="fal fa-boxes mr-1"></i> Productos de venta</span>
                             <div class="d-flex align-items-center">
                                 <input type="text" class="form-control form-control-sm pos2-search-input mr-2"
-                                    style="max-width:180px" id="txtBuscarOferta"
-                                    placeholder="Filtrar agregados..."
-                                    oninput="F.FiltrarTabla('tblOfertas','txtBuscarOferta')">
+                                    style="max-width:180px" id="txtBuscarOfertaProd"
+                                    placeholder="Filtrar venta..."
+                                    oninput="F.FiltrarTabla('tblOfertasProd','txtBuscarOfertaProd')">
                                 <button type="button" class="btn btn-sm btn-base negrita" id="btnOfertaAbrirBuscar">
-                                    <i class="fal fa-search mr-1"></i> Buscar producto
+                                    <i class="fal fa-search mr-1"></i> Agregar producto
                                 </button>
                             </div>
                         </div>
                         <div class="card-body p-0">
                             <div class="pos2-table-scroll table-responsive">
-                                <table class="table table-sm table-hover mb-0 pos2-table-compact" id="tblOfertas">
+                                <table class="table table-sm table-hover mb-0 pos2-table-compact" id="tblOfertasProd">
                                     <thead class="bg-base text-white">
                                         <tr>
                                             <th>CODPROD</th>
@@ -283,8 +287,40 @@ function getView() {
                                             <th></th>
                                         </tr>
                                     </thead>
-                                    <tbody id="tblDataOfertas">
-                                        <tr><td colspan="4" class="text-center text-muted">Sin productos.</td></tr>
+                                    <tbody id="tblDataOfertasProd">
+                                        <tr><td colspan="4" class="text-center text-muted">Sin productos de venta.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pos2-panel-card mt-2">
+                        <div class="pos2-panel-head d-flex justify-content-between align-items-center flex-wrap">
+                            <span class="negrita mb-0 mr-2"><i class="fal fa-gift mr-1"></i> Productos BONI</span>
+                            <div class="d-flex align-items-center">
+                                <input type="text" class="form-control form-control-sm pos2-search-input mr-2"
+                                    style="max-width:180px" id="txtBuscarOfertaBoni"
+                                    placeholder="Filtrar BONI..."
+                                    oninput="F.FiltrarTabla('tblOfertasBoni','txtBuscarOfertaBoni')">
+                                <button type="button" class="btn btn-sm btn-warning negrita" id="btnOfertaAbrirBuscarBoni">
+                                    <i class="fal fa-search mr-1"></i> Agregar BONI
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="pos2-table-scroll table-responsive">
+                                <table class="table table-sm table-hover mb-0 pos2-table-compact" id="tblOfertasBoni">
+                                    <thead class="bg-base text-white">
+                                        <tr>
+                                            <th>CODPROD</th>
+                                            <th>DESPROD</th>
+                                            <th>DESMARCA</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDataOfertasBoni">
+                                        <tr><td colspan="4" class="text-center text-muted">Sin productos BONI.</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -359,7 +395,7 @@ function getView() {
                 <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
                     <div class="modal-content">
                         <div class="modal-header bg-base text-white">
-                            <h5 class="modal-title negrita mb-0">Buscar producto</h5>
+                            <h5 class="modal-title negrita mb-0" id="lbOfertaBuscarTitulo">Buscar producto de venta</h5>
                         </div>
                         <div class="modal-body p-0">
                             <div class="p-3">
@@ -570,17 +606,18 @@ function ofertas_renderCards(rows) {
     }
     box.innerHTML = rows.map((r) => {
         const nprod = Number(r.NPROD) || 0;
+        const nboni = Number(r.NBONI) || 0;
         const vigente = String(r.TIPO_VIGENCIA || '').toUpperCase() !== 'VENCIMIENTO';
         return `
             <div class="ofertas-card" onclick="ofertas_abrirProductos(${r.CODOFERTA})">
                 <div class="ofertas-card__code">${r.CODOFERTA}</div>
                 <div class="ofertas-card__body">
                     <div class="ofertas-card__title">${ofertas_esc(r.DESOFERTA)}</div>
-                    <p class="ofertas-card__meta mb-0">${nprod} producto${nprod === 1 ? '' : 's'}</p>
+                    <p class="ofertas-card__meta mb-0">${nprod} venta · ${nboni} BONI</p>
                     <div class="ofertas-card__pills">
                         <span class="ofertas-pill ${vigente ? 'is-on' : 'is-off'}">${ofertas_esc(ofertas_vigenciaTxt(r))}</span>
                         <span class="ofertas-pill">Unid. ${ofertas_fmtNum(r.UNIDADES)}</span>
-                        <span class="ofertas-pill">Bonif. ${ofertas_fmtNum(r.CANTIDAD_BONIF)}</span>
+                        <span class="ofertas-pill is-boni">Bonif. ${ofertas_fmtNum(r.CANTIDAD_BONIF)}</span>
                         <span class="ofertas-pill is-sede" title="${ofertas_esc(ofertas_sedesTxt(r))}">${ofertas_esc(ofertas_sedesTxt(r))}</span>
                     </div>
                 </div>
@@ -640,18 +677,56 @@ function ofertas_abrirProductos(codoferta) {
     ofertas_mostrarProductos(r);
 }
 
+function ofertas_tipoProd(v) {
+    return String(v || '').toUpperCase() === 'BONI' ? 'BONI' : 'PROD';
+}
+
+function ofertas_abrirBuscar(tipo) {
+    ofertasAddTipo = ofertas_tipoProd(tipo);
+    const hits = document.getElementById('ofertasBuscarHits');
+    const txt = document.getElementById('txtOfertaBuscarProd');
+    const tit = document.getElementById('lbOfertaBuscarTitulo');
+    if (hits) hits.innerHTML = '';
+    if (txt) txt.value = '';
+    if (tit) tit.textContent = ofertasAddTipo === 'BONI' ? 'Buscar producto BONI' : 'Buscar producto de venta';
+    $('#modal_oferta_buscar').modal('show');
+}
+
+function ofertas_renderFilasProductos(rows, emptyMsg) {
+    if (!rows.length) {
+        return `<tr><td colspan="4" class="text-center text-muted">${emptyMsg}</td></tr>`;
+    }
+    return rows.map((r) => `
+        <tr>
+            <td>${ofertas_esc(r.CODPROD)}</td>
+            <td>${ofertas_esc(r.DESPROD)}</td>
+            <td>${ofertas_esc(r.DESMARCA)}</td>
+            <td class="text-right">
+                <button type="button" class="btn btn-sm btn-outline-danger" title="Quitar" onclick="ofertas_quitarProducto(${Number(r.ID) || 0})">
+                    <i class="fal fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
 function ofertas_cargarProductos(clasif) {
-    const container = document.getElementById('tblDataOfertas');
-    const buscar = document.getElementById('txtBuscarOferta');
-    if (buscar) buscar.value = '';
+    const contProd = document.getElementById('tblDataOfertasProd');
+    const contBoni = document.getElementById('tblDataOfertasBoni');
+    const buscarProd = document.getElementById('txtBuscarOfertaProd');
+    const buscarBoni = document.getElementById('txtBuscarOfertaBoni');
+    if (buscarProd) buscarProd.value = '';
+    if (buscarBoni) buscarBoni.value = '';
     const id = Number(clasif) || 0;
     if (!id) {
-        if (container) {
-            container.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Sin productos.</td></tr>';
-        }
+        ofertasProductosCache = [];
+        if (contProd) contProd.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Sin productos de venta.</td></tr>';
+        if (contBoni) contBoni.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Sin productos BONI.</td></tr>';
         return;
     }
-    container.innerHTML = `<tr><td colspan="4" class="text-center">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</td></tr>`;
+    const loader = `<tr><td colspan="4" class="text-center">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</td></tr>`;
+    if (contProd) contProd.innerHTML = loader;
+    if (contBoni) contBoni.innerHTML = loader;
     axios.post(GlobalUrlCalls + '/ofertas/productos', {
         token: TOKEN,
         sucursal: GlobalEmpnit,
@@ -660,25 +735,21 @@ function ofertas_cargarProductos(clasif) {
         .then((res) => {
             if (!res.data || res.data.ok === false) throw new Error('error');
             const rows = res.data.recordset || [];
-            if (!rows.length) {
-                container.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No hay productos en esta oferta.</td></tr>';
-                return;
+            ofertasProductosCache = rows;
+            const prod = rows.filter((r) => ofertas_tipoProd(r.TIPO) === 'PROD');
+            const boni = rows.filter((r) => ofertas_tipoProd(r.TIPO) === 'BONI');
+            if (contProd) contProd.innerHTML = ofertas_renderFilasProductos(prod, 'No hay productos de venta en esta oferta.');
+            if (contBoni) contBoni.innerHTML = ofertas_renderFilasProductos(boni, 'No hay productos BONI en esta oferta.');
+            const item = ofertasCache.find((x) => Number(x.CODOFERTA) === id);
+            if (item) {
+                item.NPROD = prod.length;
+                item.NBONI = boni.length;
             }
-            container.innerHTML = rows.map((r) => `
-                <tr>
-                    <td>${ofertas_esc(r.CODPROD)}</td>
-                    <td>${ofertas_esc(r.DESPROD)}</td>
-                    <td>${ofertas_esc(r.DESMARCA)}</td>
-                    <td class="text-right">
-                        <button type="button" class="btn btn-sm btn-outline-danger" title="Quitar" onclick="ofertas_quitarProducto(${Number(r.ID) || 0})">
-                            <i class="fal fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
         })
         .catch(() => {
-            container.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No se pudieron cargar los productos.</td></tr>';
+            ofertasProductosCache = [];
+            if (contProd) contProd.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No se pudieron cargar los productos.</td></tr>';
+            if (contBoni) contBoni.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No se pudieron cargar los productos BONI.</td></tr>';
         });
 }
 
@@ -705,8 +776,11 @@ function ofertas_buscarProducto() {
             }
             box.innerHTML = rows.map((r) => {
                 const payload = JSON.stringify(String(r.CODPROD || ''));
+                const ya = ofertasProductosCache.some((x) =>
+                    String(x.CODPROD) === String(r.CODPROD) && ofertas_tipoProd(x.TIPO) === ofertasAddTipo
+                );
                 return `
-                <div class="ofertas-search-hit" data-codprod="${ofertas_esc(r.CODPROD)}" onclick='ofertas_agregarProducto(${payload}, this)'>
+                <div class="ofertas-search-hit${ya ? ' is-added' : ''}" data-codprod="${ofertas_esc(r.CODPROD)}" onclick='ofertas_agregarProducto(${payload}, this)'>
                     <div class="ofertas-search-hit__cod">${ofertas_esc(r.CODPROD)}</div>
                     <div>
                         <div class="ofertas-search-hit__nom">${ofertas_esc(r.DESPROD)}</div>
@@ -736,7 +810,8 @@ function ofertas_agregarProducto(codprod, el) {
         token: TOKEN,
         sucursal: GlobalEmpnit,
         codoferta: id,
-        codprod: prod
+        codprod: prod,
+        tipo: ofertasAddTipo
     })
         .then((res) => {
             if (!res.data || res.data.ok === false) {
@@ -744,10 +819,8 @@ function ofertas_agregarProducto(codprod, el) {
                 F.AvisoError((res.data && res.data.error) || 'No se pudo agregar');
                 return;
             }
-            F.Aviso('Producto agregado');
+            F.Aviso(ofertasAddTipo === 'BONI' ? 'Producto BONI agregado' : 'Producto de venta agregado');
             ofertas_cargarProductos(id);
-            const item = ofertasCache.find((x) => Number(x.CODOFERTA) === id);
-            if (item) item.NPROD = (Number(item.NPROD) || 0) + 1;
             const txt = document.getElementById('txtOfertaBuscarProd');
             if (txt) txt.focus();
         })
@@ -770,8 +843,6 @@ function ofertas_quitarProducto(rowId) {
                         return;
                     }
                     ofertas_cargarProductos(ofertasSelectedCod);
-                    const item = ofertasCache.find((x) => Number(x.CODOFERTA) === Number(ofertasSelectedCod));
-                    if (item && Number(item.NPROD) > 0) item.NPROD = Number(item.NPROD) - 1;
                 })
                 .catch(() => F.AvisoError('No se pudo quitar el producto'));
         });
@@ -786,13 +857,8 @@ function addListeners() {
         ofertas_cargarListado();
     });
     document.getElementById('txtBuscarOfertaCab')?.addEventListener('input', ofertas_filtrarCards);
-    document.getElementById('btnOfertaAbrirBuscar')?.addEventListener('click', () => {
-        const hits = document.getElementById('ofertasBuscarHits');
-        const txt = document.getElementById('txtOfertaBuscarProd');
-        if (hits) hits.innerHTML = '';
-        if (txt) txt.value = '';
-        $('#modal_oferta_buscar').modal('show');
-    });
+    document.getElementById('btnOfertaAbrirBuscar')?.addEventListener('click', () => ofertas_abrirBuscar('PROD'));
+    document.getElementById('btnOfertaAbrirBuscarBoni')?.addEventListener('click', () => ofertas_abrirBuscar('BONI'));
     $('#modal_oferta_buscar').on('shown.bs.modal', function(){
         const txt = document.getElementById('txtOfertaBuscarProd');
         if (txt) txt.focus();

@@ -67,6 +67,13 @@ BEGIN
 END
 `;
 
+const DDL_PRODUCTOS_TIPO = `
+IF COL_LENGTH('dbo.OFERTAS_PRODUCTOS', 'TIPO') IS NULL
+BEGIN
+    EXEC('ALTER TABLE dbo.OFERTAS_PRODUCTOS ADD TIPO VARCHAR(10) NOT NULL CONSTRAINT DF_OFERTAS_PRODUCTOS_TIPO DEFAULT (''PROD'')');
+END
+`;
+
 const DDL_CREATE_SEDES = `
 IF OBJECT_ID('dbo.OFERTAS_SEDES', 'U') IS NULL
 BEGIN
@@ -104,12 +111,17 @@ async function replaceSedes(token, codoferta, sedes) {
     await execute.get_data_qry(`INSERT INTO OFERTAS_SEDES (CODOFERTA, EMPNIT) VALUES ${values}`, token);
 }
 
+function tipoProductoOferta(v) {
+    return String(v || '').toUpperCase() === 'BONI' ? 'BONI' : 'PROD';
+}
+
 async function ensureTables(token) {
     if (tablesReady) return;
     await execute.get_data_qry(DDL_CREATE, token);
     await execute.get_data_qry(DDL_CANTIDAD_BONIF, token);
     await execute.get_data_qry(DDL_DROP_BONIF, token);
     await execute.get_data_qry(DDL_CREATE_PRODUCTOS, token);
+    await execute.get_data_qry(DDL_PRODUCTOS_TIPO, token);
     await execute.get_data_qry(DDL_CREATE_SEDES, token);
     tablesReady = true;
 }
@@ -138,7 +150,8 @@ router.post('/listado', async (req, res) => {
                 O.TIPO_VIGENCIA,
                 CONVERT(varchar(10), O.FECHA_DEL, 23) AS FECHA_DEL,
                 CONVERT(varchar(10), O.FECHA_AL, 23) AS FECHA_AL,
-                (SELECT COUNT(*) FROM OFERTAS_PRODUCTOS P WHERE P.CODOFERTA = O.CODOFERTA) AS NPROD,
+                (SELECT COUNT(*) FROM OFERTAS_PRODUCTOS P WHERE P.CODOFERTA = O.CODOFERTA AND UPPER(ISNULL(NULLIF(LTRIM(RTRIM(P.TIPO)), ''), 'PROD')) = 'PROD') AS NPROD,
+                (SELECT COUNT(*) FROM OFERTAS_PRODUCTOS P WHERE P.CODOFERTA = O.CODOFERTA AND UPPER(ISNULL(P.TIPO, '')) = 'BONI') AS NBONI,
                 (SELECT COUNT(*) FROM OFERTAS_SEDES S WHERE S.CODOFERTA = O.CODOFERTA) AS NSEDES,
                 ISNULL((
                     SELECT STUFF((
@@ -388,13 +401,14 @@ router.post('/productos', async (req, res) => {
                 OP.ID,
                 OP.CODOFERTA,
                 OP.CODPROD,
+                UPPER(ISNULL(NULLIF(LTRIM(RTRIM(OP.TIPO)), ''), 'PROD')) AS TIPO,
                 ISNULL(P.DESPROD,'') AS DESPROD,
                 ISNULL(M.DESMARCA,'') AS DESMARCA
             FROM OFERTAS_PRODUCTOS OP
             LEFT JOIN PRODUCTOS P ON P.CODPROD = OP.CODPROD
             LEFT JOIN MARCAS M ON P.CODMARCA = M.CODMARCA
             WHERE OP.CODOFERTA=${id}
-            ORDER BY OP.ID
+            ORDER BY CASE WHEN UPPER(ISNULL(OP.TIPO,'')) = 'BONI' THEN 2 ELSE 1 END, P.DESPROD
         `, token);
         res.send({
             ok: true,
@@ -408,9 +422,10 @@ router.post('/productos', async (req, res) => {
 });
 
 router.post('/producto_insert', async (req, res) => {
-    const { token, codoferta, codprod } = req.body || {};
+    const { token, codoferta, codprod, tipo } = req.body || {};
     const id = Number(codoferta) || 0;
     const prod = String(codprod || '').trim();
+    const tipoProd = tipoProductoOferta(tipo);
     if (!id) {
         res.send({ ok: false, error: 'Seleccione una oferta' });
         return;
@@ -429,9 +444,20 @@ router.post('/producto_insert', async (req, res) => {
             return;
         }
         const realCod = String(exists.recordset[0].CODPROD);
+        const dup = await execute.get_data_qry(`
+            SELECT TOP 1 ID
+            FROM OFERTAS_PRODUCTOS
+            WHERE CODOFERTA=${id}
+              AND CODPROD='${sqlEsc(realCod)}'
+              AND UPPER(ISNULL(NULLIF(LTRIM(RTRIM(TIPO)), ''), 'PROD')) = '${tipoProd}'
+        `, token);
+        if (dup && dup.recordset && dup.recordset[0]) {
+            res.send({ ok: false, error: tipoProd === 'BONI' ? 'Este producto ya está en BONI' : 'Este producto ya está en venta' });
+            return;
+        }
         await execute.get_data_qry(`
-            INSERT INTO OFERTAS_PRODUCTOS (CODOFERTA, CODPROD)
-            VALUES (${id}, '${sqlEsc(realCod)}');
+            INSERT INTO OFERTAS_PRODUCTOS (CODOFERTA, CODPROD, TIPO)
+            VALUES (${id}, '${sqlEsc(realCod)}', '${tipoProd}');
         `, token);
         res.send({ ok: true, rowsAffected: [1] });
     } catch (e) {
@@ -472,6 +498,7 @@ router.post('/vendedor_disponibles', async (req, res) => {
                 CONVERT(varchar(10), O.FECHA_DEL, 23) AS FECHA_DEL,
                 CONVERT(varchar(10), O.FECHA_AL, 23) AS FECHA_AL,
                 OP.CODPROD,
+                UPPER(ISNULL(NULLIF(LTRIM(RTRIM(OP.TIPO)), ''), 'PROD')) AS TIPO,
                 ISNULL(P.DESPROD, '') AS DESPROD,
                 ISNULL(P.TIPOPROD, 'B') AS TIPOPROD,
                 ISNULL(P.EXENTO, 0) AS EXENTO,

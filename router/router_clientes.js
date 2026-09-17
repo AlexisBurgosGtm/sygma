@@ -2348,6 +2348,7 @@ router.post("/solicitudes_cambio_cliente_aceptar", async (req, res) => {
         const negocio = esc(det.negocio || '');
         const direccion = esc(det.direccion || '');
         const referencia = esc(det.referencia || '');
+        const telefono = esc(det.telefono || '');
         const tiponegocio = esc(det.tiponegocio || '');
         const codmun = Number(det.codmun) || 0;
         const coddepto = Number(det.coddepto) || 0;
@@ -2367,6 +2368,7 @@ router.post("/solicitudes_cambio_cliente_aceptar", async (req, res) => {
                    NEGOCIO = '${negocio}',
                    DIRECCION = '${direccion}',
                    REFERENCIA = '${referencia}',
+                   TELEFONO = '${telefono}',
                    CODMUN = ${codmun},
                    CODDEPTO = ${coddepto}
                    ${setTipo}

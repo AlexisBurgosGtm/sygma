@@ -1,5 +1,5 @@
 {
-  "version": "M.17.09.26 00:45",
+  "version": "M.17.09.26 11:50",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -4555,6 +4555,46 @@
       "FECHA": "17-09-2026",
       "HORA": "00:45",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.17.09.26 00:45"
+    },
+    {
+      "FECHA": "17-09-2026",
+      "HORA": "11:37",
+      "DESCRIPCION": "PRODUCTOS DE OFERTA SEPARADOS POR TIPO PROD Y BONI"
+    },
+    {
+      "FECHA": "17-09-2026",
+      "HORA": "11:37",
+      "DESCRIPCION": "PEDIDO VENDEDOR SOLO MUESTRA BONI TIPO BONI"
+    },
+    {
+      "FECHA": "17-09-2026",
+      "HORA": "11:37",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.17.09.26 11:37"
+    },
+    {
+      "FECHA": "17-09-2026",
+      "HORA": "11:43",
+      "DESCRIPCION": "CARD DE USUARIOS CONECTADOS EN INICIO SUPER USUARIO"
+    },
+    {
+      "FECHA": "17-09-2026",
+      "HORA": "11:43",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.17.09.26 11:43"
+    },
+    {
+      "FECHA": "17-09-2026",
+      "HORA": "11:50",
+      "DESCRIPCION": "TELEFONO EN SOLICITUD DE CAMBIOS DE CLIENTE VENDEDOR"
+    },
+    {
+      "FECHA": "17-09-2026",
+      "HORA": "11:50",
+      "DESCRIPCION": "SUPERVISOR ACTUALIZA TELEFONO AL ACEPTAR CAMBIO DE CLIENTE"
+    },
+    {
+      "FECHA": "17-09-2026",
+      "HORA": "11:50",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.17.09.26 11:50"
     }
   ]
 }

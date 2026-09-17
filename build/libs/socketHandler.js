@@ -111,8 +111,35 @@ socket.on('fin_despacho', (empnit,coddoc,correlativo)=>{
 
 });
 
-socket.io.on("error", (error) => {
-  // ...
+socket.on("connect", function(){
+  if (typeof GlobalUsuario !== 'undefined' && GlobalUsuario) {
+    sygma_sesion_socket();
+  }
 });
+
+function sygma_sesion_socket() {
+  try {
+    if (typeof socket === 'undefined' || !socket) return;
+    if (!GlobalUsuario) {
+      socket.emit('sesion_cerrar');
+      return;
+    }
+    socket.emit('sesion_iniciar', {
+      usuario: GlobalUsuario,
+      codigo: GlobalCodUsuario,
+      nivel: GlobalNivelUsuario,
+      empresa: GlobalNomEmpresa,
+      empnit: GlobalEmpnit,
+      super: !!GlobalSuperUsuario
+    });
+  } catch (e) {}
+}
+
+function sygma_sesion_socket_cerrar() {
+  try {
+    if (typeof socket === 'undefined' || !socket) return;
+    socket.emit('sesion_cerrar');
+  } catch (e) {}
+}
 
 

@@ -959,6 +959,10 @@ function getView(){
                                 <label class="small text-muted mb-1">Referencia</label>
                                 <input type="text" class="form-control form-control-sm negrita" id="txtSolCambioReferencia">
                             </div>
+                            <div class="form-group mb-2">
+                                <label class="small text-muted mb-1">Teléfono</label>
+                                <input type="text" class="form-control form-control-sm negrita" id="txtSolCambioTelefono">
+                            </div>
                             <div class="form-row">
                                 <div class="form-group col-6 mb-0">
                                     <label class="small text-muted mb-1">Departamento</label>
@@ -1998,7 +2002,7 @@ function tbl_clientes(filtro,qr){
                             </div>
                             <div class="ped-opciones-panel" id="${panelId}">
                                 <button type="button" class="btn btn-sm ped-opcion-btn btn-dark hand" title="Solicitar cambios"
-                                    onclick="pedidos_abrir_solicitud_cambio('${cod}','${nit}','${nom}','${neg}','${dir}','${ref}','${codmun}','${coddepto}','${tipo}')">
+                                    onclick="pedidos_abrir_solicitud_cambio('${cod}','${nit}','${nom}','${neg}','${dir}','${ref}','${tel}','${codmun}','${coddepto}','${tipo}')">
                                     <i class="fal fa-edit mr-1"></i>Cambios
                                 </button>
                                 <button type="button" class="btn btn-sm ped-opcion-btn btn-info hand" title="Mapa"
@@ -2168,7 +2172,7 @@ function pedidos_cargar_departamentos_solicitud(coddeptoSelected, codmunSelected
         });
 }
 
-function pedidos_abrir_solicitud_cambio(codclie, nit, nombre, negocio, direccion, referencia, codmun, coddepto, tiponegocio) {
+function pedidos_abrir_solicitud_cambio(codclie, nit, nombre, negocio, direccion, referencia, telefono, codmun, coddepto, tiponegocio) {
     document.getElementById('txtSolCambioCodclie').value = codclie || '';
     document.getElementById('txtSolCambioTiponegocio').value = tiponegocio || '';
     document.getElementById('txtSolCambioNit').value = nit || '';
@@ -2176,6 +2180,7 @@ function pedidos_abrir_solicitud_cambio(codclie, nit, nombre, negocio, direccion
     document.getElementById('txtSolCambioNegocio').value = negocio || '';
     document.getElementById('txtSolCambioDireccion').value = direccion || '';
     document.getElementById('txtSolCambioReferencia').value = referencia || '';
+    document.getElementById('txtSolCambioTelefono').value = telefono || '';
     pedidos_cargar_departamentos_solicitud(coddepto, codmun);
     $('#modal_solicitud_cambio_cliente').modal('show');
 }
@@ -2193,6 +2198,7 @@ function pedidos_enviar_solicitud_cambio_cliente() {
         negocio: document.getElementById('txtSolCambioNegocio')?.value || '',
         direccion: document.getElementById('txtSolCambioDireccion')?.value || '',
         referencia: document.getElementById('txtSolCambioReferencia')?.value || '',
+        telefono: document.getElementById('txtSolCambioTelefono')?.value || '',
         coddepto: cmbDep?.value || '',
         departamento: cmbDep?.options?.[cmbDep.selectedIndex]?.text || '',
         codmun: cmbMun?.value || '',
@@ -2785,15 +2791,21 @@ function pedido_group_ofertas(rows){
                 UNIDADES: Number(r.UNIDADES) || 0,
                 CANTIDAD_BONIF: Number(r.CANTIDAD_BONIF) || 0,
                 productos: {},
+                boniProds: {},
                 boni: []
             };
         }
         const cod = String(r.CODPROD || '').trim();
         if (!cod) return;
-        map[id].productos[cod] = true;
-        if (Number(r.TIENE_BONI) === 1 && !map[id].boni.some((b) => String(b.CODPROD) === cod)) {
-            map[id].boni.push(r);
+        const tipo = String(r.TIPO || 'PROD').toUpperCase() === 'BONI' ? 'BONI' : 'PROD';
+        if (tipo === 'BONI') {
+            map[id].boniProds[cod] = true;
+            if (!map[id].boni.some((b) => String(b.CODPROD) === cod)) {
+                map[id].boni.push(r);
+            }
+            return;
         }
+        map[id].productos[cod] = true;
     });
     return Object.keys(map).map((k) => map[k]);
 }
@@ -2815,7 +2827,7 @@ function pedido_eval_oferta(oferta, lines, excludeId){
         ? (lines || []).filter((r) => String(r.ID) !== String(excludeId))
         : (lines || []);
     const unidades = pedido_sum_unidades(filtered, oferta.productos, false);
-    const boniUsada = pedido_sum_unidades(filtered, oferta.productos, true);
+    const boniUsada = pedido_sum_unidades(filtered, oferta.boniProds, true);
     const req = Number(oferta.UNIDADES) || 0;
     const porBoni = Number(oferta.CANTIDAD_BONIF) || 0;
     const veces = req > 0 ? Math.floor((unidades + 0.0001) / req) : 0;
@@ -2835,11 +2847,11 @@ function pedido_cupo_boni_producto(lines, codprod, codmedida, cantidad, equivale
     let best = null;
     if (pedido_boni_ctx && Number(pedido_boni_ctx.codoferta)) {
         const ofe = ofertas.find((o) => Number(o.CODOFERTA) === Number(pedido_boni_ctx.codoferta));
-        if (ofe && ofe.productos[prod]) best = pedido_eval_oferta(ofe, lines, excludeId);
+        if (ofe && ofe.boniProds[prod]) best = pedido_eval_oferta(ofe, lines, excludeId);
     }
     if (!best) {
         ofertas.forEach((ofe) => {
-            if (!ofe.productos[prod]) return;
+            if (!ofe.boniProds[prod]) return;
             const ev = pedido_eval_oferta(ofe, lines, excludeId);
             if (!ev.aplica) return;
             if (!best || ev.restante < best.restante) best = ev;
@@ -2925,7 +2937,8 @@ function pedido_pintar_ofertas_disponibles(rows, lines){
     body.innerHTML = aplicables.map((o) => {
         const ev = pedido_eval_oferta(o, lines);
         const hits = (o.boni || []).map((r) => {
-            const off = ev.restante <= 0.0001;
+            const sinMedida = Number(r.TIENE_BONI) !== 1;
+            const off = ev.restante <= 0.0001 || sinMedida;
             const payload = JSON.stringify({
                 CODOFERTA: o.CODOFERTA,
                 CODPROD: r.CODPROD,
@@ -2945,9 +2958,9 @@ function pedido_pintar_ofertas_disponibles(rows, lines){
                         <div class="ped-oferta-hit__nom">${pedido_esc_html(r.DESPROD)}</div>
                         <div class="ped-oferta-hit__cod">${pedido_esc_html(r.CODPROD)} · BONI · Eq:${Number(r.EQUIVALE) || 1}</div>
                     </div>
-                    <span class="badge badge-${off ? 'secondary' : 'success'}">${off ? 'Cupo lleno' : 'Agregar'}</span>
+                    <span class="badge badge-${sinMedida ? 'warning' : (off ? 'secondary' : 'success')}">${sinMedida ? 'Sin medida BONI' : (off ? 'Cupo lleno' : 'Agregar')}</span>
                 </div>`;
-        }).join('') || '<div class="text-muted small">Esta oferta no tiene productos con medida BONI.</div>';
+        }).join('') || '<div class="text-muted small">Esta oferta no tiene productos tipo BONI.</div>';
         return `
             <div class="ped-oferta-card">
                 <div class="ped-oferta-card__title">${pedido_esc_html(o.DESOFERTA)}</div>
