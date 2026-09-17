@@ -67,12 +67,50 @@ BEGIN
 END
 `;
 
+const DDL_CREATE_SEDES = `
+IF OBJECT_ID('dbo.OFERTAS_SEDES', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.OFERTAS_SEDES (
+        CODOFERTA INT NOT NULL,
+        EMPNIT VARCHAR(50) NOT NULL,
+        CONSTRAINT PK_OFERTAS_SEDES PRIMARY KEY (CODOFERTA, EMPNIT)
+    );
+    CREATE NONCLUSTERED INDEX IX_OFERTAS_SEDES_EMP ON dbo.OFERTAS_SEDES (EMPNIT);
+END
+`;
+
+function parseSedes(sedes) {
+    const src = Array.isArray(sedes)
+        ? sedes
+        : String(sedes == null ? '' : sedes).split(',');
+    const seen = {};
+    const out = [];
+    src.forEach((v) => {
+        const emp = String(v == null ? '' : v).trim();
+        if (!emp || seen[emp]) return;
+        seen[emp] = true;
+        out.push(emp);
+    });
+    return out;
+}
+
+async function replaceSedes(token, codoferta, sedes) {
+    const id = Number(codoferta) || 0;
+    if (!id) return;
+    const list = parseSedes(sedes);
+    await execute.get_data_qry(`DELETE FROM OFERTAS_SEDES WHERE CODOFERTA=${id}`, token);
+    if (!list.length) return;
+    const values = list.map((emp) => `(${id}, '${sqlEsc(emp)}')`).join(',');
+    await execute.get_data_qry(`INSERT INTO OFERTAS_SEDES (CODOFERTA, EMPNIT) VALUES ${values}`, token);
+}
+
 async function ensureTables(token) {
     if (tablesReady) return;
     await execute.get_data_qry(DDL_CREATE, token);
     await execute.get_data_qry(DDL_CANTIDAD_BONIF, token);
     await execute.get_data_qry(DDL_DROP_BONIF, token);
     await execute.get_data_qry(DDL_CREATE_PRODUCTOS, token);
+    await execute.get_data_qry(DDL_CREATE_SEDES, token);
     tablesReady = true;
 }
 
@@ -100,7 +138,18 @@ router.post('/listado', async (req, res) => {
                 O.TIPO_VIGENCIA,
                 CONVERT(varchar(10), O.FECHA_DEL, 23) AS FECHA_DEL,
                 CONVERT(varchar(10), O.FECHA_AL, 23) AS FECHA_AL,
-                (SELECT COUNT(*) FROM OFERTAS_PRODUCTOS P WHERE P.CODOFERTA = O.CODOFERTA) AS NPROD
+                (SELECT COUNT(*) FROM OFERTAS_PRODUCTOS P WHERE P.CODOFERTA = O.CODOFERTA) AS NPROD,
+                (SELECT COUNT(*) FROM OFERTAS_SEDES S WHERE S.CODOFERTA = O.CODOFERTA) AS NSEDES,
+                ISNULL((
+                    SELECT STUFF((
+                        SELECT ', ' + ISNULL(E.NOMBRE, S.EMPNIT)
+                        FROM OFERTAS_SEDES S
+                        LEFT JOIN EMPRESAS E ON E.EMPNIT = S.EMPNIT
+                        WHERE S.CODOFERTA = O.CODOFERTA
+                        ORDER BY ISNULL(E.NOMBRE, S.EMPNIT)
+                        FOR XML PATH(''), TYPE
+                    ).value('.', 'nvarchar(max)'), 1, 2, '')
+                ), '') AS SEDES
             FROM OFERTAS O
             ORDER BY O.CODOFERTA DESC
         `;
@@ -165,6 +214,14 @@ router.post('/get', async (req, res) => {
             res.send({ ok: false, error: 'Oferta no encontrada' });
             return;
         }
+        const sedesData = await execute.get_data_qry(`
+            SELECT S.EMPNIT, ISNULL(E.NOMBRE, S.EMPNIT) AS NOMBRE
+            FROM OFERTAS_SEDES S
+            LEFT JOIN EMPRESAS E ON E.EMPNIT = S.EMPNIT
+            WHERE S.CODOFERTA=${id}
+            ORDER BY ISNULL(E.NOMBRE, S.EMPNIT)
+        `, token);
+        row.SEDES = (sedesData && sedesData.recordset) ? sedesData.recordset : [];
         res.send({
             ok: true,
             recordset: [row]
@@ -176,10 +233,15 @@ router.post('/get', async (req, res) => {
 });
 
 router.post('/insert', async (req, res) => {
-    const { token, desoferta, unidades, cantidad_bonif, tipo_vigencia, fecha_del, fecha_al } = req.body || {};
+    const { token, desoferta, unidades, cantidad_bonif, tipo_vigencia, fecha_del, fecha_al, sedes } = req.body || {};
     const nombre = String(desoferta || '').trim();
     if (!nombre) {
         res.send({ ok: false, error: 'Escriba el nombre de la oferta' });
+        return;
+    }
+    const listaSedes = parseSedes(sedes);
+    if (!listaSedes.length) {
+        res.send({ ok: false, error: 'Seleccione al menos una sede' });
         return;
     }
     const tipo = tipoVigencia(tipo_vigencia);
@@ -201,6 +263,7 @@ router.post('/insert', async (req, res) => {
             res.send({ ok: false, error: 'No se pudo crear la oferta' });
             return;
         }
+        await replaceSedes(token, id, listaSedes);
         res.send({ ok: true, recordset: [{ CODOFERTA: id }], rowsAffected: [1] });
     } catch (e) {
         console.error('[ofertas/insert]', e && e.message ? e.message : e);
@@ -209,7 +272,7 @@ router.post('/insert', async (req, res) => {
 });
 
 router.post('/update', async (req, res) => {
-    const { token, codoferta, desoferta, unidades, cantidad_bonif, tipo_vigencia, fecha_del, fecha_al } = req.body || {};
+    const { token, codoferta, desoferta, unidades, cantidad_bonif, tipo_vigencia, fecha_del, fecha_al, sedes } = req.body || {};
     const id = Number(codoferta) || 0;
     const nombre = String(desoferta || '').trim();
     if (!id) {
@@ -218,6 +281,11 @@ router.post('/update', async (req, res) => {
     }
     if (!nombre) {
         res.send({ ok: false, error: 'Escriba el nombre de la oferta' });
+        return;
+    }
+    const listaSedes = parseSedes(sedes);
+    if (!listaSedes.length) {
+        res.send({ ok: false, error: 'Seleccione al menos una sede' });
         return;
     }
     const tipo = tipoVigencia(tipo_vigencia);
@@ -240,6 +308,7 @@ router.post('/update', async (req, res) => {
                 LASTUPDATE=GETDATE()
             WHERE CODOFERTA=${id};
         `, token);
+        await replaceSedes(token, id, listaSedes);
         res.send({ ok: true, recordset: [{ CODOFERTA: id }], rowsAffected: [1] });
     } catch (e) {
         console.error('[ofertas/update]', e && e.message ? e.message : e);
@@ -259,6 +328,8 @@ router.post('/delete', async (req, res) => {
         await execute.get_data_qry(`
             IF OBJECT_ID('dbo.OFERTAS_PRODUCTOS', 'U') IS NOT NULL
                 DELETE FROM OFERTAS_PRODUCTOS WHERE CODOFERTA=${id};
+            IF OBJECT_ID('dbo.OFERTAS_SEDES', 'U') IS NOT NULL
+                DELETE FROM OFERTAS_SEDES WHERE CODOFERTA=${id};
             IF OBJECT_ID('dbo.OFERTAS_BONIF', 'U') IS NOT NULL
                 DELETE FROM OFERTAS_BONIF WHERE CODOFERTA=${id};
             DELETE FROM OFERTAS WHERE CODOFERTA=${id};
@@ -426,6 +497,14 @@ router.post('/vendedor_disponibles', async (req, res) => {
                         O.FECHA_DEL IS NOT NULL
                         AND O.FECHA_AL IS NOT NULL
                         AND CAST(GETDATE() AS DATE) BETWEEN O.FECHA_DEL AND O.FECHA_AL
+                    )
+                )
+                AND (
+                    NOT EXISTS (SELECT 1 FROM OFERTAS_SEDES S WHERE S.CODOFERTA = O.CODOFERTA)
+                    OR EXISTS (
+                        SELECT 1 FROM OFERTAS_SEDES S
+                        WHERE S.CODOFERTA = O.CODOFERTA
+                          AND S.EMPNIT = '${emp}'
                     )
                 )
             ORDER BY O.CODOFERTA, P.DESPROD

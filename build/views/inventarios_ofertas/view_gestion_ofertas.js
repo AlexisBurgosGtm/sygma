@@ -4,6 +4,7 @@ let ofertasSelectedCod = 0;
 let ofertasSelectedNom = '';
 let ofertasEditando = 0;
 let ofertasCache = [];
+let ofertasEmpresasCache = [];
 let ofertasBuscarTimer = null;
 
 function ofertas_esc(s) {
@@ -34,6 +35,67 @@ function ofertas_vigenciaTxt(r) {
         return (del && al) ? (del + ' al ' + al) : 'Con vencimiento';
     }
     return 'Vigente';
+}
+
+function ofertas_sedesTxt(r) {
+    const n = Number(r.NSEDES) || 0;
+    if (!n) return 'Todas las sedes';
+    const names = String(r.SEDES || '').trim();
+    if (names) return names;
+    return n + (n === 1 ? ' sede' : ' sedes');
+}
+
+function ofertas_cargarEmpresas() {
+    if (ofertasEmpresasCache.length) return Promise.resolve(ofertasEmpresasCache);
+    return axios.post(GlobalUrlCalls + '/general/empresas_listado', { TOKEN: TOKEN })
+        .then((res) => {
+            const data = res && res.data ? res.data : {};
+            ofertasEmpresasCache = data.recordset || [];
+            return ofertasEmpresasCache;
+        })
+        .catch(() => {
+            ofertasEmpresasCache = [];
+            return [];
+        });
+}
+
+function ofertas_pintarSedes(selected) {
+    const box = document.getElementById('ofertasSedesBox');
+    if (!box) return;
+    const rows = ofertasEmpresasCache || [];
+    if (!rows.length) {
+        box.innerHTML = '<div class="text-muted small py-1">No se cargaron las sedes.</div>';
+        return;
+    }
+    const set = {};
+    (selected || []).forEach((v) => {
+        const emp = String(v && v.EMPNIT != null ? v.EMPNIT : v || '').trim();
+        if (emp) set[emp] = true;
+    });
+    const checkAll = !selected || !selected.length;
+    box.innerHTML = rows.map((r) => {
+        const emp = String(r.EMPNIT || '').trim();
+        const on = checkAll || !!set[emp];
+        return `
+            <label class="ofertas-sede-item">
+                <input type="checkbox" class="oferta-sede-chk" value="${ofertas_esc(emp)}" ${on ? 'checked' : ''}>
+                <span>${ofertas_esc(r.NOMBRE || emp)}</span>
+                <span class="text-muted small">(${ofertas_esc(emp)})</span>
+            </label>`;
+    }).join('');
+}
+
+function ofertas_marcarSedes(todas) {
+    document.querySelectorAll('.oferta-sede-chk').forEach((el) => {
+        el.checked = !!todas;
+    });
+}
+
+function ofertas_sedesSeleccionadas() {
+    return Array.from(document.querySelectorAll('.oferta-sede-chk'))
+        .filter((el) => el.checked)
+        .map((el) => String(el.value || '').trim())
+        .filter(Boolean);
 }
 
 function getView() {
@@ -121,6 +183,32 @@ function getView() {
             border-color:#a78bfa;
             color:#f5f3ff !important;
         }
+        .ofertas-sedes-box {
+            max-height: 11rem;
+            overflow-y: auto;
+            border: 1px solid rgba(15,23,42,.1);
+            border-radius: 12px;
+            padding: 0.35rem 0.55rem;
+            background: #f8fafc;
+        }
+        .ofertas-sede-item {
+            display:flex; align-items:center; gap:0.45rem;
+            margin:0; padding:0.28rem 0.1rem;
+            font-size:0.82rem; font-weight:700; color:#334155;
+            cursor:pointer;
+        }
+        .ofertas-sede-item input { margin:0; }
+        .ofertas-pill.is-sede {
+            max-width: 14rem;
+            overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+        }
+        body.sygma-dark .ofertas-sedes-box {
+            background:#1e293b;
+            border-color:#334155;
+        }
+        body.sygma-dark label.ofertas-sede-item {
+            color:#e2e8f0 !important;
+        }
     `;
 
     const view = {
@@ -206,7 +294,7 @@ function getView() {
             </div>
 
             <div class="modal fade" tabindex="-1" role="dialog" id="modal_oferta">
-                <div class="modal-dialog modal-md modal-dialog-centered" role="document">
+                <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
                     <div class="modal-content">
                         <div class="modal-header bg-base text-white">
                             <h5 class="modal-title negrita mb-0" id="lbOfertaModalTitulo">Nueva oferta</h5>
@@ -245,6 +333,16 @@ function getView() {
                                     <label class="negrita small mb-1">Al</label>
                                     <input type="date" class="form-control" id="txtOfertaAl">
                                 </div>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between mt-3 mb-1">
+                                <label class="negrita small mb-0">Sedes donde aplica</label>
+                                <div>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btnOfertaSedesTodas">Todas</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary ml-1" id="btnOfertaSedesNinguna">Ninguna</button>
+                                </div>
+                            </div>
+                            <div id="ofertasSedesBox" class="ofertas-sedes-box">
+                                <div class="text-muted small py-1">Cargando sedes...</div>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -342,18 +440,26 @@ function ofertas_limpiarModal() {
     document.getElementById('txtOfertaAl').value = '';
     document.getElementById('lbOfertaModalTitulo').textContent = 'Nueva oferta';
     ofertas_setVigenciaUI('VIGENTE');
+    ofertas_pintarSedes([]);
 }
 
 function ofertas_abrirNueva() {
     ofertas_limpiarModal();
-    $('#modal_oferta').modal('show');
+    ofertas_cargarEmpresas().then(() => {
+        ofertas_pintarSedes([]);
+        $('#modal_oferta').modal('show');
+    });
 }
 
 function ofertas_abrirEditar(codoferta) {
     const id = Number(codoferta) || 0;
     if (!id) return;
-    axios.post(GlobalUrlCalls + '/ofertas/get', { token: TOKEN, codoferta: id })
-        .then((res) => {
+    Promise.all([
+        axios.post(GlobalUrlCalls + '/ofertas/get', { token: TOKEN, codoferta: id }),
+        ofertas_cargarEmpresas()
+    ])
+        .then((arr) => {
+            const res = arr[0];
             if (!res.data || res.data.ok === false) {
                 F.AvisoError((res.data && res.data.error) || 'No se pudo leer la oferta');
                 return;
@@ -368,6 +474,7 @@ function ofertas_abrirEditar(codoferta) {
             document.getElementById('txtOfertaAl').value = String(r.FECHA_AL || '').slice(0, 10);
             document.getElementById('lbOfertaModalTitulo').textContent = 'Editar oferta ' + ofertasEditando;
             ofertas_setVigenciaUI(r.TIPO_VIGENCIA);
+            ofertas_pintarSedes(r.SEDES || []);
             $('#modal_oferta').modal('show');
         })
         .catch(() => F.AvisoError('No se pudo leer la oferta'));
@@ -382,12 +489,17 @@ function ofertas_guardar() {
     const fecha_del = document.getElementById('txtOfertaDel').value;
     const fecha_al = document.getElementById('txtOfertaAl').value;
     const codoferta = Number(document.getElementById('txtOfertaCod').value) || 0;
+    const sedes = ofertas_sedesSeleccionadas();
     if (!desoferta) {
         F.AvisoError('Escriba el nombre de la oferta');
         return;
     }
     if (tipo === 'VENCIMIENTO' && (!fecha_del || !fecha_al)) {
         F.AvisoError('Indique las fechas Del y Al');
+        return;
+    }
+    if (!sedes.length) {
+        F.AvisoError('Seleccione al menos una sede');
         return;
     }
     const payload = {
@@ -398,7 +510,8 @@ function ofertas_guardar() {
         cantidad_bonif,
         tipo_vigencia: tipo,
         fecha_del,
-        fecha_al
+        fecha_al,
+        sedes
     };
     const url = codoferta ? '/ofertas/update' : '/ofertas/insert';
     if (codoferta) payload.codoferta = codoferta;
@@ -468,6 +581,7 @@ function ofertas_renderCards(rows) {
                         <span class="ofertas-pill ${vigente ? 'is-on' : 'is-off'}">${ofertas_esc(ofertas_vigenciaTxt(r))}</span>
                         <span class="ofertas-pill">Unid. ${ofertas_fmtNum(r.UNIDADES)}</span>
                         <span class="ofertas-pill">Bonif. ${ofertas_fmtNum(r.CANTIDAD_BONIF)}</span>
+                        <span class="ofertas-pill is-sede" title="${ofertas_esc(ofertas_sedesTxt(r))}">${ofertas_esc(ofertas_sedesTxt(r))}</span>
                     </div>
                 </div>
                 <div class="ofertas-actions" onclick="event.stopPropagation()">
@@ -492,7 +606,8 @@ function ofertas_filtrarCards() {
     const rows = ofertasCache.filter((r) => {
         const nom = String(r.DESOFERTA || '').toLowerCase();
         const cod = String(r.CODOFERTA || '');
-        return nom.indexOf(q) >= 0 || cod.indexOf(q) >= 0;
+        const sedes = String(r.SEDES || '').toLowerCase();
+        return nom.indexOf(q) >= 0 || cod.indexOf(q) >= 0 || sedes.indexOf(q) >= 0;
     });
     ofertas_renderCards(rows);
 }
@@ -689,7 +804,10 @@ function addListeners() {
     document.querySelectorAll('input[name="ofertasVigencia"]').forEach((el) => {
         el.addEventListener('change', () => ofertas_setVigenciaUI(el.value));
     });
+    document.getElementById('btnOfertaSedesTodas')?.addEventListener('click', () => ofertas_marcarSedes(true));
+    document.getElementById('btnOfertaSedesNinguna')?.addEventListener('click', () => ofertas_marcarSedes(false));
     ofertas_mostrarLista();
+    ofertas_cargarEmpresas();
     ofertas_cargarListado();
 }
 
