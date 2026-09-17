@@ -58,6 +58,7 @@ const presence = require('./services/presence.js');
 var http = require('http').Server(app);
 //var io = require('socket.io')(http);
 var io = require('socket.io')(http, { cors: { origin: '*' } });
+if (typeof router_boletin.setIO === 'function') router_boletin.setIO(io);
 
 
 const cors = require('cors');

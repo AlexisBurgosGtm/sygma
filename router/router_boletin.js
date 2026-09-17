@@ -4,8 +4,14 @@ const express = require('express');
 const router = express.Router();
 const execute = require('../connection');
 const webPush = require('../services/webPush');
+const presence = require('../services/presence');
 
 let tablesReady = false;
+let ioRef = null;
+
+function setIO(io) {
+    ioRef = io;
+}
 
 function sqlEsc(v) {
     return String(v == null ? '' : v).replace(/'/g, "''");
@@ -76,11 +82,14 @@ async function sendBoletinPush(token, empnit, codemp, payload) {
         rows = (data && data.recordset) ? data.recordset : [];
     } catch (e) {
         console.error('[boletin] leer suscripciones', e && e.message ? e.message : e);
-        return;
+        emitBoletinSocket(empnit, cod, payload);
+        return { total: 0, enviados: 0 };
     }
+    let enviados = 0;
     for (const row of rows) {
         try {
             await webPush.sendToSubscription(row, payload);
+            enviados += 1;
         } catch (err) {
             const status = err && (err.statusCode || err.status);
             if (status === 404 || status === 410) {
@@ -95,6 +104,40 @@ async function sendBoletinPush(token, empnit, codemp, payload) {
             }
         }
     }
+    emitBoletinSocket(empnit, cod, payload);
+    return { total: rows.length, enviados };
+}
+
+function emitBoletinSocket(empnit, codemp, payload) {
+    if (!ioRef) return;
+    const title = String((payload && payload.title) || 'Boletín').trim();
+    const body = String((payload && payload.body) || '').trim();
+    const msn = body ? (title + ': ' + body) : title;
+    const tipo = String((payload && payload.icono) || 'info');
+    const ids = presence.socketIdsFor(empnit, codemp);
+    ids.forEach((id) => {
+        ioRef.to(id).emit('notificacion', tipo, msn);
+    });
+}
+
+async function emitirBoletinId(token, sucursal, id) {
+    const emp = sqlEsc(sucursal);
+    const idNum = Number(id) || 0;
+    if (!emp || !idNum) return { ok: false, error: 'Aviso inválido' };
+    const data = await execute.get_data_qry(`
+        SELECT TOP 1 ID, EMPNIT, CODEMP, TITULO, MENSAJE, ICONO
+        FROM BOLETIN
+        WHERE ID=${idNum} AND EMPNIT='${emp}'
+    `, token);
+    const row = data && data.recordset && data.recordset[0];
+    if (!row) return { ok: false, error: 'No se encontró el aviso' };
+    const result = await sendBoletinPush(token, row.EMPNIT, row.CODEMP, {
+        title: String(row.TITULO || '').trim(),
+        body: String(row.MENSAJE || '').trim(),
+        icono: iconoOk(row.ICONO),
+        id: row.ID
+    });
+    return { ok: true, id: row.ID, enviados: (result && result.enviados) || 0, total: (result && result.total) || 0 };
 }
 
 router.post('/vapid', async (req, res) => {
@@ -165,13 +208,13 @@ router.post('/insert', async (req, res) => {
         `;
         const data = await execute.get_data_qry(qry, token);
         const id = data && data.recordset && data.recordset[0] && data.recordset[0].ID;
-        sendBoletinPush(token, sucursal, cod, {
+        const push = await sendBoletinPush(token, sucursal, cod, {
             title: String(titulo || '').trim(),
             body: String(mensaje || '').trim(),
             icono: ic,
             id: id || 0,
-        }).catch(() => {});
-        res.send({ ok: true, id: id || 0 });
+        }).catch(() => ({ enviados: 0, total: 0 }));
+        res.send({ ok: true, id: id || 0, enviados: push.enviados || 0, total: push.total || 0 });
     } catch (e) {
         console.error('[boletin/insert]', e && e.message ? e.message : e);
         res.send({ ok: false, error: 'No se pudo guardar el boletín' });
@@ -192,6 +235,18 @@ router.post('/delete', async (req, res) => {
         execute.QueryToken(res, qry, token);
     } catch (e) {
         res.send('error');
+    }
+});
+
+router.post('/emitir', async (req, res) => {
+    const { token, sucursal, id } = req.body || {};
+    try {
+        await ensureTables(token);
+        const result = await emitirBoletinId(token, sucursal, id);
+        res.send(result);
+    } catch (e) {
+        console.error('[boletin/emitir]', e && e.message ? e.message : e);
+        res.send({ ok: false, error: 'No se pudo emitir la noticia' });
     }
 });
 
@@ -238,3 +293,4 @@ router.post('/unsubscribe', async (req, res) => {
 });
 
 module.exports = router;
+module.exports.setIO = setIO;

@@ -41,6 +41,8 @@ function getView() {
         .boletin-card__title { font-weight: 800; margin: 0 0 0.2rem; font-size: 0.92rem; }
         .boletin-card__msg { margin: 0; color: #475569; font-size: 0.82rem; white-space: pre-wrap; }
         .boletin-card__meta { display: block; margin-top: 0.35rem; font-size: 0.7rem; color: #94a3b8; }
+        .boletin-card__actions { display:flex; flex-direction:column; gap:0.35rem; }
+        .boletin-card__actions .btn { white-space:nowrap; }
         .boletin-icon-pick { display: flex; flex-wrap: wrap; gap: 0.4rem; }
         .boletin-icon-pick .btn { min-width: 6.2rem; }
         .boletin-icon-pick .btn.is-on { box-shadow: 0 0 0 2px currentColor; font-weight: 800; }
@@ -192,8 +194,12 @@ function boletin_render(rows) {
                     <p class="boletin-card__msg">${boletin_esc(r.MENSAJE)}</p>
                     <small class="boletin-card__meta">${boletin_esc(when)}</small>
                 </div>
-                <button type="button" class="btn btn-sm btn-circle btn-danger hand shadow" title="Eliminar"
-                    data-boletin-del="${r.ID}"><i class="fal fa-trash"></i></button>
+                <div class="boletin-card__actions" onclick="event.stopPropagation()">
+                    <button type="button" class="btn btn-sm btn-info hand negrita" title="Emitir noticia"
+                        data-boletin-emit="${r.ID}"><i class="fal fa-bullhorn mr-1"></i>Emitir noticia</button>
+                    <button type="button" class="btn btn-sm btn-circle btn-danger hand shadow" title="Eliminar"
+                        data-boletin-del="${r.ID}"><i class="fal fa-trash"></i></button>
+                </div>
             </div>
         `;
     }).join('');
@@ -244,7 +250,8 @@ function boletin_guardar() {
         .then((res) => {
             if (!res.data || res.data.ok !== true) throw new Error(res.data && res.data.error ? res.data.error : 'error');
             $('#modal_boletin').modal('hide');
-            F.Aviso('Aviso publicado');
+            const n = Number(res.data.enviados) || 0;
+            F.Aviso(n > 0 ? ('Aviso publicado y notificación enviada (' + n + ')') : 'Aviso publicado');
             boletin_cargar();
         })
         .catch((err) => {
@@ -254,6 +261,35 @@ function boletin_guardar() {
             if (btn) {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fal fa-save"></i>';
+            }
+        });
+}
+
+function boletin_emitir(id, btn) {
+    const nid = Number(id) || 0;
+    if (!nid) return;
+    const htmlOriginal = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fal fa-spinner fa-spin mr-1"></i>Emitiendo';
+    }
+    axios.post(GlobalUrlCalls + '/boletin/emitir', {
+        token: TOKEN,
+        sucursal: GlobalEmpnit,
+        id: nid,
+    })
+        .then((res) => {
+            if (!res.data || res.data.ok !== true) throw new Error((res.data && res.data.error) || 'error');
+            const n = Number(res.data.enviados) || 0;
+            F.Aviso(n > 0 ? ('Notificación enviada (' + n + ')') : 'Noticia emitida. No hay dispositivos suscritos.');
+        })
+        .catch((err) => {
+            F.AvisoError((err && err.message && err.message !== 'error') ? err.message : 'No se pudo emitir la noticia');
+        })
+        .finally(() => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = htmlOriginal || '<i class="fal fa-bullhorn mr-1"></i>Emitir noticia';
             }
         });
 }
@@ -302,6 +338,11 @@ function addListeners() {
     });
     document.getElementById('txtBuscarBoletin')?.addEventListener('input', () => boletin_render(window._cacheBoletin || []));
     document.getElementById('boletinLista')?.addEventListener('click', (e) => {
+        const emitBtn = e.target.closest('[data-boletin-emit]');
+        if (emitBtn) {
+            boletin_emitir(Number(emitBtn.getAttribute('data-boletin-emit')), emitBtn);
+            return;
+        }
         const btn = e.target.closest('[data-boletin-del]');
         if (!btn) return;
         boletin_eliminar(Number(btn.getAttribute('data-boletin-del')), btn);

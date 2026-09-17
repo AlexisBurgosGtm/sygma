@@ -93,10 +93,24 @@ function socketIdsSuper() {
     return ids;
 }
 
+function socketIdsFor(empnit, codemp) {
+    const emp = String(empnit == null ? '' : empnit).trim();
+    const cod = Number(codemp) || 0;
+    const ids = [];
+    sessions.forEach((s, id) => {
+        if (!s || !s.identificado) return;
+        if (emp && String(s.empnit || '') !== emp) return;
+        if (cod > 0 && Number(s.codigo) !== cod) return;
+        ids.push(id);
+    });
+    return ids;
+}
+
 module.exports = {
     upsert,
     markAnonymous,
     remove,
     snapshot,
-    socketIdsSuper
+    socketIdsSuper,
+    socketIdsFor
 };
