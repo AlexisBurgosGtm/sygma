@@ -8,7 +8,7 @@ function getView(){
                             ${view.lista_clientes() + view.modal_qr() + view.modal_camara() + view.modal_visita() + view.modal_goles() + view.modal_solicitud_cambio_cliente()}
                         </div> 
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="clientes-tab">
-                            ${view.pedido() + view.modal_lista_precios() + view.modal_cantidad() + view.modal_editar_cantidad()}
+                            ${view.pedido() + view.modal_lista_precios() + view.modal_cantidad() + view.modal_editar_cantidad() + view.modal_ofertas_pedido()}
                         </div>
                         <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
                             ${view.documento()}
@@ -83,6 +83,9 @@ function getView(){
                             </button>
                         </div>
                     </div>
+                    <button type="button" class="btn btn-warning btn-sm hand negrita mt-2 d-none" id="btnOfertasDisponiblesPedido">
+                        <i class="fal fa-tags mr-1"></i> Ofertas Disponibles Pedido
+                    </button>
                 </div>
 
                 <div class="ped-toma__lista" id="tblPosPedido"></div>
@@ -130,6 +133,27 @@ function getView(){
                                     <tbody id="tblDataProductos"></tbody>
                                 </table>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`
+        },
+        modal_ofertas_pedido:()=>{
+            return `
+            <div class="modal fade ped-modal-detalle ped-modal-detalle--wide ped-modal-detalle--tall" id="modal_ofertas_pedido" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="ped-modal-detalle__header">
+                            <div>
+                                <h5 class="negrita mb-0">Ofertas Disponibles Pedido</h5>
+                                <small class="text-muted">Solo BONI autorizada según productos del pedido</small>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-circle ped-modal-detalle__close hand" data-dismiss="modal">
+                                <i class="fal fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body ped-modal-detalle__body" id="tblOfertasPedidoBody">
+                            <div class="text-center text-muted py-3">Cargando...</div>
                         </div>
                     </div>
                 </div>
@@ -1267,6 +1291,12 @@ function addListeners(){
         pedidos_cargar_municipios_solicitud(document.getElementById('cmbSolCambioDepartamento').value, '');
     });
 
+    const btnOfertas = document.getElementById('btnOfertasDisponiblesPedido');
+    if (btnOfertas) {
+        if (pedido_aplica_ofertas()) btnOfertas.classList.remove('d-none');
+        btnOfertas.addEventListener('click', pedido_abrir_ofertas_disponibles);
+    }
+
 };
 
 function volver_busqueda_clientes() {
@@ -1449,7 +1479,7 @@ function listener_vista_pedido(){
         let preciounitario = Number(document.getElementById('txtMCPrecio').value||0);
         let descuento = Number(document.getElementById('txtMCDescuento').value||0);
 
-        if(preciounitario==0){
+        if(preciounitario==0 && !(pedido_aplica_ofertas() && pedido_es_medida_boni(Selected_codmedida))){
             F.AvisoError('Precio inválido');
             return;
         };
@@ -1458,7 +1488,7 @@ function listener_vista_pedido(){
       
 
 
-        if(Number(preciounitario)<Number(Selected_costo)){
+        if(!(pedido_aplica_ofertas() && pedido_es_medida_boni(Selected_codmedida)) && Number(preciounitario)<Number(Selected_costo)){
 
             //PERMITE VENDER ABAJO DEL COSTO
             if(data_config_general[5].VALOR.toString()=="NO"){
@@ -1470,16 +1500,19 @@ function listener_vista_pedido(){
 
         let TipoP = document.getElementById('cmb_tipo_precio').value; //data_empresa_config.TIPO_PRECIO
 
-        insert_producto_pedido(Selected_codprod,Selected_desprod,Selected_codmedida,Selected_equivale,Selected_costo,preciounitario,cantidad, Selected_exento, Selected_tipoprod, TipoP, Selected_existencia,Selected_bono,descuento)
+        pedido_validar_agregar_boni(Selected_codprod, Selected_codmedida, cantidad, Selected_equivale)
+        .then(() => insert_producto_pedido(Selected_codprod,Selected_desprod,Selected_codmedida,Selected_equivale,Selected_costo,preciounitario,cantidad, Selected_exento, Selected_tipoprod, TipoP, Selected_existencia,Selected_bono,descuento))
         .then(()=>{
-            
+            pedido_boni_ctx = null;
             $("#modal_cantidad").modal('hide');
 
             F.showToast('Producto agregado ' + Selected_desprod);
             get_tbl_pedido();
 
         })
-        .catch(()=>{
+        .catch((err)=>{
+            const msg = String(err || '');
+            if (msg === 'sin_existencia' || msg.indexOf('BONI') >= 0 || msg.toLowerCase().indexOf('boni') >= 0 || msg.indexOf('oferta') >= 0) return;
             F.AvisoError('No se pudo agregar');
         })
 
@@ -1518,20 +1551,22 @@ function listener_vista_pedido(){
         let cantidad = Number(document.getElementById('txtMCCantidadE').value || 1);
         let preciounitario = Number(document.getElementById('txtMCPrecioE').value||0);
         let descuento =Number(document.getElementById('txtMCDescuentoE').value||0);
+        const esBoniOferta = pedido_aplica_ofertas() && pedido_es_medida_boni(Selected_codmedida);
 
-        if(preciounitario==0){
+        if(preciounitario==0 && !esBoniOferta){
             F.AvisoError('Precio inválido');
             return;
         };
 
-        if(Number(preciounitario)<Number(Selected_costo)){
+        if(!esBoniOferta && Number(preciounitario)<Number(Selected_costo)){
             F.AvisoError('Precio menor al costo');
             return;
         };
 
 
         let nuevacantidad = Number(cantidad);
-        selectDataRowVentaPOS(Number(Selected_id),nuevacantidad,preciounitario,descuento)
+        pedido_validar_agregar_boni(Selected_codprod, Selected_codmedida, nuevacantidad, Selected_equivale, Selected_id)
+        .then(() => selectDataRowVentaPOS(Number(Selected_id),nuevacantidad,preciounitario,descuento))
         .then(()=>{
             $("#modal_editar_cantidad").modal('hide');
 
@@ -1539,7 +1574,9 @@ function listener_vista_pedido(){
             get_tbl_pedido();
             document.getElementById('txtPosCodprod').focus();
         })
-        .catch(()=>{
+        .catch((err)=>{
+            const msg = String(err || '');
+            if (msg.indexOf('BONI') >= 0 || msg.toLowerCase().indexOf('boni') >= 0 || msg.indexOf('oferta') >= 0) return;
             F.AvisoError('No se pudo agregar');
         })
 
@@ -2031,7 +2068,9 @@ function pedidos_bind_modales_detalle() {
     $('#modal_cantidad')
         .off('hidden.bs.modal.pedRestoreLista')
         .on('hidden.bs.modal.pedRestoreLista', function () {
+            pedido_boni_ctx = null;
             pedidos_restaurar_lista_precios();
+            pedido_restaurar_ofertas();
         });
 }
 
@@ -2715,6 +2754,250 @@ function pedido_esc_js(valor){
         .replace(/\r?\n/g, ' ');
 }
 
+function pedido_aplica_ofertas(){
+    return typeof aplica_ofertas_vendedores === 'function' && aplica_ofertas_vendedores() === true;
+}
+
+function pedido_es_medida_boni(codmedida){
+    return String(codmedida || '').trim().toUpperCase() === 'BONI';
+}
+
+var pedido_boni_ctx = null;
+var pedido_reabrir_ofertas = false;
+var pedido_ofertas_rows = [];
+
+function pedido_precio_tipo(row){
+    const tipo = String(document.getElementById('cmb_tipo_precio')?.value || 'PRECIO').toUpperCase();
+    if (tipo === 'PRECIO_A') return Number(row.PRECIO_A) || 0;
+    if (tipo === 'PRECIO_B') return Number(row.PRECIO_B) || 0;
+    return Number(row.PRECIO) || 0;
+}
+
+function pedido_group_ofertas(rows){
+    const map = {};
+    (rows || []).forEach((r) => {
+        const id = Number(r.CODOFERTA) || 0;
+        if (!id) return;
+        if (!map[id]) {
+            map[id] = {
+                CODOFERTA: id,
+                DESOFERTA: r.DESOFERTA || ('Oferta ' + id),
+                UNIDADES: Number(r.UNIDADES) || 0,
+                CANTIDAD_BONIF: Number(r.CANTIDAD_BONIF) || 0,
+                productos: {},
+                boni: []
+            };
+        }
+        const cod = String(r.CODPROD || '').trim();
+        if (!cod) return;
+        map[id].productos[cod] = true;
+        if (Number(r.TIENE_BONI) === 1 && !map[id].boni.some((b) => String(b.CODPROD) === cod)) {
+            map[id].boni.push(r);
+        }
+    });
+    return Object.keys(map).map((k) => map[k]);
+}
+
+function pedido_sum_unidades(lines, productos, soloBoni){
+    const set = productos || {};
+    return (lines || []).reduce((acc, r) => {
+        const cod = String(r.CODPROD || '').trim();
+        if (!set[cod]) return acc;
+        const esBoni = pedido_es_medida_boni(r.CODMEDIDA);
+        if (soloBoni && !esBoni) return acc;
+        if (!soloBoni && esBoni) return acc;
+        return acc + (Number(r.TOTALUNIDADES) || (Number(r.CANTIDAD) * Number(r.EQUIVALE)) || 0);
+    }, 0);
+}
+
+function pedido_eval_oferta(oferta, lines, excludeId){
+    const filtered = excludeId
+        ? (lines || []).filter((r) => String(r.ID) !== String(excludeId))
+        : (lines || []);
+    const unidades = pedido_sum_unidades(filtered, oferta.productos, false);
+    const boniUsada = pedido_sum_unidades(filtered, oferta.productos, true);
+    const req = Number(oferta.UNIDADES) || 0;
+    const porBoni = Number(oferta.CANTIDAD_BONIF) || 0;
+    const veces = req > 0 ? Math.floor((unidades + 0.0001) / req) : 0;
+    const cupoBoni = veces * porBoni;
+    const aplica = veces > 0;
+    const restante = Math.max(0, cupoBoni - boniUsada);
+    return { unidades, boniUsada, aplica, restante, veces, cupoBoni };
+}
+
+function pedido_cupo_boni_producto(lines, codprod, codmedida, cantidad, equivale, excludeId){
+    if (!pedido_aplica_ofertas() || !pedido_es_medida_boni(codmedida)) {
+        return { ok: true, restante: 999999 };
+    }
+    const ofertas = pedido_group_ofertas(pedido_ofertas_rows);
+    const prod = String(codprod || '').trim();
+    const need = Number(cantidad) * Number(equivale || 1);
+    let best = null;
+    if (pedido_boni_ctx && Number(pedido_boni_ctx.codoferta)) {
+        const ofe = ofertas.find((o) => Number(o.CODOFERTA) === Number(pedido_boni_ctx.codoferta));
+        if (ofe && ofe.productos[prod]) best = pedido_eval_oferta(ofe, lines, excludeId);
+    }
+    if (!best) {
+        ofertas.forEach((ofe) => {
+            if (!ofe.productos[prod]) return;
+            const ev = pedido_eval_oferta(ofe, lines, excludeId);
+            if (!ev.aplica) return;
+            if (!best || ev.restante < best.restante) best = ev;
+        });
+    }
+    if (!best || !best.aplica) {
+        return { ok: false, restante: 0, error: 'Esta bonificación no aplica con los productos del pedido' };
+    }
+    if (need - best.restante > 0.0001) {
+        return { ok: false, restante: best.restante, error: 'Solo puede agregar ' + best.restante + ' unidad(es) de BONI en esta oferta' };
+    }
+    return { ok: true, restante: best.restante };
+}
+
+function pedido_validar_agregar_boni(codprod, codmedida, cantidad, equivale, excludeId){
+    return new Promise((resolve, reject) => {
+        if (!pedido_aplica_ofertas()) {
+            resolve(true);
+            return;
+        }
+        if (!pedido_es_medida_boni(codmedida)) {
+            resolve(true);
+            return;
+        }
+        const run = (lines) => {
+            const chk = pedido_cupo_boni_producto(lines, codprod, codmedida, cantidad, equivale, excludeId);
+            if (!chk.ok) {
+                F.AvisoError(chk.error);
+                reject(chk.error);
+                return;
+            }
+            resolve(true);
+        };
+        if (pedido_ofertas_rows && pedido_ofertas_rows.length) {
+            selectTempVentasPOS(GlobalEmpnit).then(run).catch(() => reject('sin_pedido'));
+            return;
+        }
+        pedido_cargar_ofertas_rows()
+            .then(() => selectTempVentasPOS(GlobalEmpnit))
+            .then(run)
+            .catch(() => reject('sin_ofertas'));
+    });
+}
+
+function pedido_cargar_ofertas_rows(){
+    return axios.post(GlobalUrlCalls + '/ofertas/vendedor_disponibles', {
+        token: TOKEN,
+        sucursal: GlobalEmpnit
+    }).then((res) => {
+        if (!res.data || res.data.ok === false) throw new Error('ofertas');
+        pedido_ofertas_rows = res.data.recordset || [];
+        return pedido_ofertas_rows;
+    });
+}
+
+function pedido_abrir_ofertas_disponibles(){
+    if (!pedido_aplica_ofertas()) {
+        F.AvisoError('Las ofertas de vendedor no están activas');
+        return;
+    }
+    const body = document.getElementById('tblOfertasPedidoBody');
+    if (body) body.innerHTML = `<div class="text-center text-muted py-3">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</div>`;
+    $('#modal_ofertas_pedido').modal('show');
+    Promise.all([
+        pedido_cargar_ofertas_rows(),
+        selectTempVentasPOS(GlobalEmpnit)
+    ])
+        .then((arr) => pedido_pintar_ofertas_disponibles(arr[0], arr[1] || []))
+        .catch(() => {
+            if (body) body.innerHTML = '<div class="text-center text-muted py-3">No se pudieron cargar las ofertas.</div>';
+        });
+}
+
+function pedido_pintar_ofertas_disponibles(rows, lines){
+    const body = document.getElementById('tblOfertasPedidoBody');
+    if (!body) return;
+    const ofertas = pedido_group_ofertas(rows);
+    const aplicables = ofertas.filter((o) => pedido_eval_oferta(o, lines).aplica);
+    if (!aplicables.length) {
+        body.innerHTML = '<div class="text-center text-muted py-3">Aún no aplica ninguna oferta. Agregue productos de la oferta hasta alcanzar las unidades requeridas.</div>';
+        return;
+    }
+    body.innerHTML = aplicables.map((o) => {
+        const ev = pedido_eval_oferta(o, lines);
+        const hits = (o.boni || []).map((r) => {
+            const off = ev.restante <= 0.0001;
+            const payload = JSON.stringify({
+                CODOFERTA: o.CODOFERTA,
+                CODPROD: r.CODPROD,
+                DESPROD: r.DESPROD,
+                EQUIVALE: Number(r.EQUIVALE) || 1,
+                COSTO: Number(r.COSTO) || 0,
+                PRECIO: pedido_precio_tipo(r),
+                TIPOPROD: r.TIPOPROD || 'B',
+                EXENTO: Number(r.EXENTO) || 0,
+                EXISTENCIA: F.get_existencia(Number(r.EXISTENCIA) || 0, Number(r.EQUIVALE) || 1),
+                BONO: Number(r.BONO) || 0,
+                RESTANTE: ev.restante
+            }).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+            return `
+                <div class="ped-oferta-hit${off ? ' is-off' : ''}" ${off ? '' : `data-ofe="${payload}" onclick="pedido_agregar_boni_oferta_el(this)"`}>
+                    <div>
+                        <div class="ped-oferta-hit__nom">${pedido_esc_html(r.DESPROD)}</div>
+                        <div class="ped-oferta-hit__cod">${pedido_esc_html(r.CODPROD)} · BONI · Eq:${Number(r.EQUIVALE) || 1}</div>
+                    </div>
+                    <span class="badge badge-${off ? 'secondary' : 'success'}">${off ? 'Cupo lleno' : 'Agregar'}</span>
+                </div>`;
+        }).join('') || '<div class="text-muted small">Esta oferta no tiene productos con medida BONI.</div>';
+        return `
+            <div class="ped-oferta-card">
+                <div class="ped-oferta-card__title">${pedido_esc_html(o.DESOFERTA)}</div>
+                <div class="ped-oferta-card__meta">
+                    Unidades venta ${ev.unidades} (cada ${o.UNIDADES} = ${o.CANTIDAD_BONIF} BONI)
+                    · Veces ${ev.veces}
+                    · Boni ${ev.boniUsada} / ${ev.cupoBoni}
+                    · Disponible ${ev.restante}
+                </div>
+                ${hits}
+            </div>`;
+    }).join('');
+}
+
+function pedido_agregar_boni_oferta_el(el){
+    if (!el) return;
+    try {
+        pedido_agregar_boni_oferta(JSON.parse(el.getAttribute('data-ofe') || '{}'));
+    } catch (e) {
+        F.AvisoError('No se pudo leer el producto de la oferta');
+    }
+}
+
+function pedido_agregar_boni_oferta(p){
+    if (!p) return;
+    if (Number(p.RESTANTE) <= 0) {
+        F.AvisoError('Ya se agregó la bonificación autorizada para esta oferta');
+        return;
+    }
+    pedido_boni_ctx = { codoferta: p.CODOFERTA, remaining: Number(p.RESTANTE) };
+    pedido_reabrir_ofertas = true;
+    const $ofe = $('#modal_ofertas_pedido');
+    const abrir = () => {
+        get_producto(p.CODPROD, p.DESPROD, 'BONI', p.EQUIVALE, p.COSTO, p.PRECIO, p.TIPOPROD, p.EXENTO, p.EXISTENCIA, p.BONO);
+    };
+    if ($ofe.hasClass('show')) {
+        $ofe.off('hidden.bs.modal.pedReopenOfe');
+        $ofe.one('hidden.bs.modal.pedReopenOfe', abrir);
+        $ofe.modal('hide');
+        return;
+    }
+    abrir();
+}
+
+function pedido_restaurar_ofertas(){
+    if (!pedido_reabrir_ofertas) return;
+    pedido_reabrir_ofertas = false;
+    pedido_abrir_ofertas_disponibles();
+}
+
 function pedido_pintar_cliente(nomclie, nitclie){
     const nombre = nomclie || 'Cliente';
     const lbNombre = document.getElementById('lbPedidoClienteNombre');
@@ -2801,13 +3084,34 @@ function pedido_ajustar_cantidad(id, cantidadActual, precio, descuento, delta){
         return;
     }
 
-    selectDataRowVentaPOS(Number(id), nueva, Number(precio), Number(descuento || 0))
-    .then(()=>{
-        get_tbl_pedido();
-    })
-    .catch(()=>{
-        F.AvisoError('No se pudo actualizar la cantidad');
-    });
+    const apply = () => {
+        selectDataRowVentaPOS(Number(id), nueva, Number(precio), Number(descuento || 0))
+        .then(()=>{
+            get_tbl_pedido();
+        })
+        .catch(()=>{
+            F.AvisoError('No se pudo actualizar la cantidad');
+        });
+    };
+
+    if (!pedido_aplica_ofertas()) {
+        apply();
+        return;
+    }
+
+    selectTempVentasPOS(GlobalEmpnit)
+        .then((lines) => {
+            const row = (lines || []).find((r) => String(r.ID) === String(id));
+            if (!row || !pedido_es_medida_boni(row.CODMEDIDA)) {
+                apply();
+                return;
+            }
+            return pedido_validar_agregar_boni(row.CODPROD, row.CODMEDIDA, nueva, row.EQUIVALE, row.ID)
+                .then(apply);
+        })
+        .catch(()=>{
+            F.AvisoError('No se pudo actualizar la cantidad');
+        });
 }
 
 function CalcularTotalPrecio(){
@@ -2871,6 +3175,8 @@ function get_buscar_producto(filtro){
 
                 if(r.CODMEDIDA.toString()==r.CODMEDIDA_DESHABILITADA.toString()){
                     //si la medida es igual al precio, no aparece
+                }else if(pedido_aplica_ofertas() && pedido_es_medida_boni(r.CODMEDIDA)){
+                    // BONI solo por Ofertas Disponibles Pedido
                 }else{
                     str += `
                     <tr class="hand" onclick="get_producto('${r.CODPROD}','${pedido_esc_js(r.DESPROD)}','${r.CODMEDIDA}','${r.EQUIVALE}','${r.COSTO}','${r.PRECIO}','${r.TIPOPROD}','${r.EXENTO}','${EXISTENCIA}','${r.BONO}')">
@@ -2994,6 +3300,7 @@ function get_tbl_productos_clasificacion(codigo){
         }else{
             const data = response.data.recordset;
             data.map((r)=>{
+                if (pedido_aplica_ofertas() && pedido_es_medida_boni(r.CODMEDIDA)) return;
                 str += `
                 <tr class="hand border-secondary border-top-0 border-left-0 border-right-0" onclick="get_data_producto_categoria('${r.CODPROD}','${r.DESPROD}','${r.CODMEDIDA}','${r.EQUIVALE}','${r.COSTO}','${r.PRECIO}')">
                     <td>
@@ -3025,6 +3332,11 @@ function get_tbl_productos_clasificacion(codigo){
 
 function get_producto(codprod,desprod,codmedida,equivale,costo,precio,tipoprod,exento,existencia,bono){
 
+            if (pedido_aplica_ofertas() && pedido_es_medida_boni(codmedida) && !pedido_boni_ctx) {
+                F.AvisoError('La medida BONI solo se agrega desde Ofertas Disponibles Pedido');
+                return;
+            }
+
             let container = document.getElementById('container_precio');
             if (container) container.innerHTML = '';
 
@@ -3041,8 +3353,22 @@ function get_producto(codprod,desprod,codmedida,equivale,costo,precio,tipoprod,e
             Selected_existencia = Number(existencia);
             Selected_bono = Number(bono);
 
+            let cantIni = 1;
+            if (pedido_boni_ctx) {
+                const eq = Number(equivale) || 1;
+                const maxUn = Number(pedido_boni_ctx.remaining) || 0;
+                if (eq > maxUn + 0.0001) {
+                    F.AvisoError('No hay cupo suficiente de BONI para esta medida');
+                    pedido_boni_ctx = null;
+                    document.getElementById('btnMCGuardar').disabled = false;
+                    pedido_restaurar_ofertas();
+                    return;
+                }
+                cantIni = 1;
+            }
+
             document.getElementById('lbCantidadDesprod').innerText = `${desprod} (${codmedida} - Eq: ${equivale})`;
-            document.getElementById('txtMCCantidad').value = 1;
+            document.getElementById('txtMCCantidad').value = cantIni;
             document.getElementById('txtMCPrecio').value = precio;
             document.getElementById('txtMCDescuento').value = 0;
 
@@ -3081,6 +3407,7 @@ function pedidos_abrir_cantidad_sobre_lista(){
 };
 
 function pedidos_restaurar_lista_precios(){
+    if (pedido_reabrir_ofertas) return;
     if (!pedido_reabrir_lista_precios) {
         const txtProd = document.getElementById('txtPosCodprod');
         if (txtProd) txtProd.focus();

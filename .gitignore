@@ -1,5 +1,5 @@
-node_modules
-.env
+data/vapid-keys.json
 .envx
 .env2
 garbage.md
+node_modules

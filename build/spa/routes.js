@@ -170,6 +170,10 @@ SpaRouter.registerMany({
         script: '../views/mant_marcas/view_marcas.js',
         title: 'Marcas y Medidas'
     },
+    'mant/medidas': {
+        script: '../views/mant_medidas/view_medidas.js',
+        title: 'Medidas'
+    },
     'mant/proveedores': {
         script: '../views/mant_proveedores/view_proveedores.js',
         title: 'Proveedores'

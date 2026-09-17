@@ -212,6 +212,137 @@ function getView(){
                     border: 1px solid rgba(15,23,42,0.06);
                     background: rgba(255,255,255,0.65);
                 }
+                #modal_menu_producto .modal-dialog {
+                    max-width: 1140px;
+                    width: 96%;
+                }
+                #modal_menu_producto .modal-body {
+                    padding: 0.7rem 1rem 0.45rem !important;
+                }
+                #modal_menu_producto .pp-prod-ops {
+                    display: grid;
+                    grid-template-columns: repeat(4, minmax(0, 1fr));
+                    gap: 0.5rem;
+                    margin: 0.55rem 0 0.85rem;
+                }
+                #modal_menu_producto .pp-prod-op {
+                    --pp-op-accent: #475569;
+                    --pp-op-icon-bg: #f1f5f9;
+                    --pp-op-hover: #f8fafc;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.55rem;
+                    margin: 0;
+                    padding: 0.55rem 0.65rem;
+                    min-height: 52px;
+                    border-radius: 12px;
+                    border: 1px solid rgba(15, 23, 42, 0.08);
+                    background: #fff;
+                    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+                    cursor: pointer;
+                    transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+                    user-select: none;
+                }
+                #modal_menu_producto .pp-prod-op:hover {
+                    transform: translateY(-1px);
+                    background: var(--pp-op-hover);
+                    border-color: var(--pp-op-accent);
+                    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+                }
+                #modal_menu_producto .pp-prod-op:active {
+                    transform: translateY(0);
+                    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+                }
+                #modal_menu_producto .pp-prod-op--info {
+                    --pp-op-accent: #0284c7;
+                    --pp-op-icon-bg: #e0f2fe;
+                    --pp-op-hover: #f0f9ff;
+                }
+                #modal_menu_producto .pp-prod-op--indigo {
+                    --pp-op-accent: #4f46e5;
+                    --pp-op-icon-bg: #eef2ff;
+                    --pp-op-hover: #f5f3ff;
+                }
+                #modal_menu_producto .pp-prod-op--teal {
+                    --pp-op-accent: #0f766e;
+                    --pp-op-icon-bg: #ccfbf1;
+                    --pp-op-hover: #f0fdfa;
+                }
+                #modal_menu_producto .pp-prod-op--success {
+                    --pp-op-accent: #059669;
+                    --pp-op-icon-bg: #d1fae5;
+                    --pp-op-hover: #ecfdf5;
+                }
+                #modal_menu_producto .pp-prod-op--oferta {
+                    --pp-op-accent: #7c3aed;
+                    --pp-op-icon-bg: #ede9fe;
+                    --pp-op-hover: #f5f3ff;
+                }
+                #modal_menu_producto .pp-prod-op--warning {
+                    --pp-op-accent: #d97706;
+                    --pp-op-icon-bg: #fef3c7;
+                    --pp-op-hover: #fffbeb;
+                }
+                #modal_menu_producto .pp-prod-op--danger {
+                    --pp-op-accent: #dc2626;
+                    --pp-op-icon-bg: #fee2e2;
+                    --pp-op-hover: #fef2f2;
+                }
+                #modal_menu_producto .pp-prod-op .btn,
+                #modal_menu_producto .pp-prod-op .btn-circle {
+                    width: 34px;
+                    height: 34px;
+                    min-width: 34px;
+                    padding: 0;
+                    flex: 0 0 34px;
+                    border: 0 !important;
+                    border-radius: 10px !important;
+                    background: var(--pp-op-icon-bg) !important;
+                    color: var(--pp-op-accent) !important;
+                    box-shadow: none !important;
+                    font-size: 0.85rem;
+                    line-height: 1;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                #modal_menu_producto .pp-prod-op b,
+                #modal_menu_producto .pp-prod-op .pp-prod-op__label {
+                    font-size: 0.74rem;
+                    margin: 0;
+                    line-height: 1.2;
+                    font-weight: 700;
+                    color: #334155;
+                    letter-spacing: 0.01em;
+                }
+                @media (max-width: 992px) {
+                    #modal_menu_producto .pp-prod-ops {
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                    }
+                }
+                #modal_menu_producto .pp-precios-wrap {
+                    overflow-x: auto;
+                    margin: 0;
+                }
+                #modal_menu_producto .pp-precios-wrap .card-body {
+                    padding: 0.4rem 0.35rem;
+                }
+                .pp-modal .pp-modal-cerrar {
+                    min-width: 7.6rem;
+                    border-radius: 10px;
+                    font-weight: 700;
+                    letter-spacing: 0.02em;
+                    padding: 0.42rem 1.05rem;
+                    background: #475569;
+                    border: 1px solid #475569;
+                    color: #fff;
+                }
+                .pp-modal .pp-modal-cerrar:hover,
+                .pp-modal .pp-modal-cerrar:focus {
+                    background: #334155;
+                    border-color: #334155;
+                    color: #fff;
+                }
                 .modal-backdrop.pp-backdrop-blur,
                 .modal-backdrop.pp-backdrop-blur.modal-backdrop-transparent {
                     background-color: rgba(15, 23, 42, 0.45) !important;
@@ -292,6 +423,76 @@ function getView(){
                     #ppView { padding: 0.5rem 0.5rem 5rem; }
                     #ppView .pp-hero { padding: 0.75rem; }
                 }
+                body.sygma-dark #ppView {
+                    --pp-ink: #e2e8f0;
+                    --pp-muted: #94a3b8;
+                    --pp-surface: #152033;
+                    --pp-soft: #1e293b;
+                    --pp-border: rgba(148, 163, 184, 0.18);
+                    background:
+                        radial-gradient(900px 280px at 0% -10%, rgba(14, 165, 233, 0.12), transparent 60%),
+                        radial-gradient(700px 240px at 100% 0%, rgba(34, 197, 94, 0.08), transparent 55%),
+                        linear-gradient(180deg, #0b1220 0%, #0f172a 100%);
+                    color: var(--pp-ink);
+                }
+                body.sygma-dark #ppView .pp-hero {
+                    background: rgba(21, 32, 51, 0.94);
+                    border-color: var(--pp-border);
+                    box-shadow: none;
+                }
+                body.sygma-dark #ppView .pp-card {
+                    background: #152033 !important;
+                    border-color: var(--pp-border) !important;
+                    box-shadow: none;
+                }
+                body.sygma-dark #ppView .pp-stat,
+                body.sygma-dark #ppView .pp-kardex-stat {
+                    background: var(--pp-soft);
+                }
+                body.sygma-dark #ppView .table-responsive {
+                    background: #152033;
+                    border-color: var(--pp-border);
+                }
+                body.sygma-dark #ppView table.table tbody td,
+                body.sygma-dark #ppView .table tbody td {
+                    border-color: rgba(148, 163, 184, 0.14) !important;
+                    color: #e8eef7;
+                }
+                body.sygma-dark #ppView table.table tbody tr:hover {
+                    background: rgba(59, 130, 246, 0.14);
+                }
+                body.sygma-dark #ppView .form-control,
+                body.sygma-dark #ppView select.form-control {
+                    background-color: #0f172a !important;
+                    color: #f1f5f9 !important;
+                    border-color: var(--pp-border) !important;
+                }
+                body.sygma-dark .pp-modal .modal-content {
+                    background: #152033 !important;
+                    border-color: rgba(148, 163, 184, 0.2);
+                    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+                }
+                body.sygma-dark .pp-modal .modal-footer {
+                    background: #101827;
+                    border-color: rgba(148, 163, 184, 0.14);
+                }
+                body.sygma-dark .pp-modal .card,
+                body.sygma-dark .pp-modal .card-rounded {
+                    background: #1e293b !important;
+                    border-color: rgba(148, 163, 184, 0.16);
+                }
+                body.sygma-dark #modal_menu_producto .pp-prod-op {
+                    background: #1e293b;
+                    border-color: rgba(148, 163, 184, 0.18);
+                    box-shadow: none;
+                }
+                body.sygma-dark #modal_menu_producto .pp-prod-op:hover {
+                    background: #243044;
+                }
+                body.sygma-dark #modal_menu_producto .pp-prod-op b,
+                body.sygma-dark #modal_menu_producto .pp-prod-op .pp-prod-op__label {
+                    color: #e2e8f0 !important;
+                }
             </style>
             `;
         },
@@ -304,7 +505,7 @@ function getView(){
                             ${view.vista_listado() + view.modal_opciones_producto() + view.modal_opciones_producto_deshabilitar_medidas()}
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
-                            ${view.vista_ficha_producto() + view.modal_nuevo_precio() + view.modal_medidas() + view.modal_sucursales_precio() + view.modal_marcas()}
+                            ${view.vista_ficha_producto() + view.modal_nuevo_precio() + view.modal_sucursales_precio() + view.modal_marcas()}
                         </div>
                         <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
                             ${view.vista_movimientos_kardex()}
@@ -417,7 +618,7 @@ function getView(){
         modal_opciones_producto:()=>{
             return `
             <div class="modal fade js-modal-settings modal-with-scroll pp-modal" tabindex="-1" role="dialog" aria-hidden="true" id="modal_menu_producto" data-backdrop="true">
-                <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-dialog modal-dialog-centered modal-xl">
                     <div class="modal-content">
                         <div class="dropdown-header bg-base d-flex justify-content-center align-items-center w-100">
                             <h4 class="m-0 text-center color-white">
@@ -428,53 +629,49 @@ function getView(){
                             <h3 id="lbDetDesprod">DESPROD</h3>
                             <small class="negrita text-danger" id="lbDetCodprod">0001</small>
                             
-                            <hr class="solid">
-                                <div class="row">
-
-                                    <div class="col-6">
-                                        
-                                            <button class="btn btn-circle btn-outline-info" id="btnProdMenEditar">
-                                                <i class="fal fa-edit"></i>
-                                            </button>  <b class="text-info hand">Editar Producto</b>
-                                        <hr class="solid">
-                                            <button class="btn btn-circle btn-base" id="btnProdMenKardex">
-                                                <i class="fal fa-list"></i>
-                                            </button>  <b class="text-base hand">Kardex Movimientos</b>
-                                        <hr class="solid">
-                                        
-                                            <button class="btn btn-circle btn-danger" id="btnProdMenEliminar">
-                                                <i class="fal fa-trash"></i>
-                                            </button>  <b class="text-danger hand">Eliminar</b>
-                                        
-                                    </div>
-
-                                    <div class="col-6">
-                                            <button class="btn btn-circle btn-base" id="btnProdMenVentas">
-                                                <i class="fal fa-chart-pie"></i>
-                                            </button>  <b class="text-base hand">Ventas por Fechas</b>
-                                        
-                                        <hr class="solid">
-                                            <button class="btn btn-circle btn-outline-success" onclick="habilitar_medida_precio()">
-                                                <i class="fal fa-dollar-sign"></i>
-                                            </button>  <b class="text-success hand">Deshabilitar medidas Sucursales</b>
-                                        
-                                        <hr class="solid">
-                                            <button class="btn btn-circle btn-warning" id="btnProdMenActivar">
-                                                <i class="fal fa-sync"></i>
-                                            </button>  <b class="text-warning hand">Activar/Desactivar</b>
-                                        
-                                    </div>
-
-                                    
-                                    
+                            <div class="pp-prod-ops">
+                                <div class="pp-prod-op pp-prod-op--info">
+                                    <button type="button" class="btn btn-circle" id="btnProdMenEditar">
+                                        <i class="fal fa-edit"></i>
+                                    </button>
+                                    <span class="pp-prod-op__label">Editar Producto</span>
                                 </div>
-                                    
-                            <br>
+                                <div class="pp-prod-op pp-prod-op--indigo">
+                                    <button type="button" class="btn btn-circle" id="btnProdMenVentas">
+                                        <i class="fal fa-chart-pie"></i>
+                                    </button>
+                                    <span class="pp-prod-op__label">Ventas por Fechas</span>
+                                </div>
+                                <div class="pp-prod-op pp-prod-op--teal">
+                                    <button type="button" class="btn btn-circle" id="btnProdMenKardex">
+                                        <i class="fal fa-list"></i>
+                                    </button>
+                                    <span class="pp-prod-op__label">Kardex Movimientos</span>
+                                </div>
+                                <div class="pp-prod-op pp-prod-op--success">
+                                    <button type="button" class="btn btn-circle" onclick="habilitar_medida_precio()">
+                                        <i class="fal fa-dollar-sign"></i>
+                                    </button>
+                                    <span class="pp-prod-op__label">Deshabilitar medidas Sucursales</span>
+                                </div>
+                                <div class="pp-prod-op pp-prod-op--warning">
+                                    <button type="button" class="btn btn-circle" id="btnProdMenActivar">
+                                        <i class="fal fa-sync"></i>
+                                    </button>
+                                    <span class="pp-prod-op__label">Activar/Desactivar</span>
+                                </div>
+                                <div class="pp-prod-op pp-prod-op--danger">
+                                    <button type="button" class="btn btn-circle" id="btnProdMenEliminar">
+                                        <i class="fal fa-trash"></i>
+                                    </button>
+                                    <span class="pp-prod-op__label">Eliminar</span>
+                                </div>
+                            </div>
 
-                            <div class="card card-rounded p-2">
+                            <div class="card card-rounded p-2 pp-precios-wrap">
                                 <div class="card-body">
 
-                                    <table class="table table-responsive h-full">
+                                    <table class="table h-full">
                                         <thead class="bg-base text-white">
                                             <tr>
                                                 <td>MEDIDA</td>
@@ -499,12 +696,10 @@ function getView(){
                            
                            
                         </div>
-                        <div class="modal-footer text-left">
-
-                            <button class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
-                                <i class="fal fa-arrow-left"></i>
+                        <div class="modal-footer justify-content-end">
+                            <button type="button" class="btn pp-modal-cerrar hand shadow" data-dismiss="modal">
+                                <i class="fal fa-times mr-1"></i> Cerrar
                             </button>
-
                         </div>
                        
                     </div>
@@ -665,7 +860,7 @@ function getView(){
                       
                     </div>
 
-                    <label class="negrita text-base">Oferta del Producto</label>
+                    <label class="negrita text-base">Clasificación 2</label>
                     <div class="input-group">
                         <select class="form-control" id="cmbTipoLaboratorio">
                         </select>
@@ -805,14 +1000,8 @@ function getView(){
                                         <tbody>
                                             <tr>
                                                 <td>
-                                                    <div class="input-group">
-                                                        <select class="form-control bg-amarillo" id="cmbPreMedida">
-                                                        </select>
-                                                        <button class="btn btn-base hand" id="btnBuscarMedidas">
-                                                            <i class="fal fa-search"></i>
-                                                        </button>
-                                                    </div>
-                                                    
+                                                    <select class="form-control bg-amarillo" id="cmbPreMedida">
+                                                    </select>
                                                 </td>
                                                 <td>
                                                     <input type="number" class="negrita form-control bg-amarillo" id="txtPreEquivale">
@@ -1038,71 +1227,6 @@ function getView(){
                                 </div>
                             </div>
 
-                                
-                            <div class="row">
-                                <button class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
-                                    <i class="fal fa-arrow-left"></i>
-                                </button>
-                            </div>
-
-                        </div>
-                       
-                    </div>
-                </div>
-            </div>
-
-            
-            `
-        },
-        modal_medidas:()=>{
-            return `
-            <div class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll pp-modal" tabindex="-1" role="dialog" aria-hidden="true" id="modal_medidas">
-                <div class="modal-dialog modal-dialog-right modal-xl">
-                    <div class="modal-content">
-                        <div class="dropdown-header bg-secondary d-flex justify-content-center align-items-center w-100">
-                            <h4 class="m-0 text-center color-white" id="">
-                                Gestión de Medidas de Precio
-                            </h4>
-                        </div>
-                        <div class="modal-body p-4">
-                            
-                            <div class="card card-rounded">
-                                <div class="card-body p-2">
-                                    <table class="table table-responsive">
-                                        <thead class="negrita text-base">
-                                            <tr>
-                                                <td>MEDIDA</td>
-                                                <td></td>    
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>
-                                                    <input type="text" maxlength="30" class="border-base form-control negrita text-base" id="txtProdCodmedida"></td>
-                                                <td>
-                                                    <button class="btn btn-base hand shadow" id="btnProdAgregarMedida">
-                                                        <i class="fal fa-plus"></i> Agregar
-                                                    </button>
-                                                </td>    
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            
-
-                            <table class="table table-responsive h-full f-med" id="">
-                                <thead class="negrita bg-base text-white">
-                                    <tr>
-                                        <td>MEDIDA</td>
-                                        <td></td>
-                                    </tr>
-                                </thead>
-                                <tbody id="tblDataProdMedidas">
-                                            
-                                </tbody>
-                            </table>
                                 
                             <div class="row">
                                 <button class="btn btn-secondary btn-circle btn-xl hand shadow" data-dismiss="modal">
@@ -1840,6 +1964,14 @@ function listeners_menu_productos(){
 
         })
 
+        document.querySelectorAll('#modal_menu_producto .pp-prod-op').forEach((row)=>{
+            row.addEventListener('click',(e)=>{
+                if(e.target.closest('button')){return;}
+                const btn = row.querySelector('button');
+                if(btn){btn.click();}
+            });
+        });
+
         document.getElementById('btnKardexAtras')?.addEventListener('click', () => {
             document.getElementById('tab-uno').click();
         });
@@ -1990,6 +2122,7 @@ function listeners_precios(){
             document.getElementById('txtPreCosto').value = document.getElementById('txtCosto').value
             document.getElementById('txtPreEquivale').value = 1;
 
+            get_combo_medidas();
             calcular_costo_medida();
 
 
@@ -2123,58 +2256,6 @@ function listeners_precios(){
 
     });
 
-   
-
-    // MEDIDAS -----------------------------
-    let btnBuscarMedidas = document.getElementById('btnBuscarMedidas');
-    btnBuscarMedidas.addEventListener('click',()=>{
-
-        $("#modal_medidas").modal('show');
-        get_lista_medidas();
-
-    });
-
-    let btnProdAgregarMedida = document.getElementById('btnProdAgregarMedida');
-    btnProdAgregarMedida.addEventListener('click',()=>{
-
-     
-        let descripcion = document.getElementById('txtProdCodmedida').value || 'SN';
-        if(descripcion=='SN'){F.AvisoError('Indique una descripción de medida válida');return;};
-        
-
-        F.Confirmacion('¿Está seguro que desea agregar esta Medida?')
-        .then((value)=>{
-            if(value==true){
-
-                btnProdAgregarMedida.innerHTML = `<i class="fal fa-plus fa-spin"></i>`;
-                btnProdAgregarMedida.disabled = true;
-
-                insert_medida(descripcion,descripcion)
-                .then(()=>{
-
-                    F.Aviso('Medida creada exitosamente!!');
-                    get_lista_medidas();
-                    get_combo_medidas();
-
-                    document.getElementById('txtProdCodmedida').value ='';
-                    
-                    btnProdAgregarMedida.innerHTML = `<i class="fal fa-plus"></i> Agregar`;
-                    btnProdAgregarMedida.disabled = false;
-
-                })
-                .catch(()=>{
-                    F.AvisoError('No se pudo guardar esta Medida');
-                    
-                    btnProdAgregarMedida.innerHTML = `<i class="fal fa-plus"></i> Agregar`;
-                    btnProdAgregarMedida.disabled = false;
-                })
-            }
-        })
-
-        
-
-    });
-    // MEDIDAS -----------------------------
 
 
 };
@@ -2673,172 +2754,47 @@ function get_combo_clasedos(){
 
 
 function get_combo_medidas(){
-    let container = document.getElementById('cmbPreMedida');
-        
-    axios.post(GlobalUrlCalls + '/productos/listado_medidas',
-        {
-            sucursal:GlobalEmpnit,
-            token:TOKEN
-        })
-    .then((response) => {
-        if(response.status.toString()=='200'){
-            let data = response.data;
-            if(Number(data.rowsAffected[0])>0){
-                let str = '';
-                data.recordset.map((r)=>{
-                    str += `<option value='${r.CODMEDIDA}'>${r.CODMEDIDA}</option>`
-                })
-                container.innerHTML = str;     
-            }else{
-                container.innerHTML = `<option value='SN'>No se cargó las Medidas de precio</option>`;
-            }            
-        }else{
-            container.innerHTML = `<option value='SN'>No se cargó las Medidas de precio</option>`;
-        }             
-    }, (error) => {
-        container.innerHTML = `<option value='SN'>No se cargó las Medidas de precio</option>`;
-    });
+    const container = document.getElementById('cmbPreMedida');
+    if (!container) return;
+    container.innerHTML = `<option value="">Cargando...</option>`;
 
-};
-
-function get_lista_medidas(){
-
-    let container = document.getElementById('tblDataProdMedidas');
-    container.innerHTML = GlobalLoader;
-
-    axios.post(GlobalUrlCalls + '/productos/listado_medidas',
-        {
-            sucursal:GlobalEmpnit,
-            token:TOKEN
-        })
-    .then((response) => {
-        if(response.status.toString()=='200'){
-            let data = response.data;
-            if(Number(data.rowsAffected[0])>0){
-                let str = '';
-                data.recordset.map((r)=>{
-                    let btnE = `btnE${r.CODMEDIDA}`;
-
-                    str += `<tr>
-                                <td>${r.CODMEDIDA}</td>
-                                <td>
-                                    <button class="btn btn-circle btn-md btn-danger hand shadow"
-                                    onclick="delete_medida('${r.CODMEDIDA}','${btnE}')" id="${btnE}"
-                                    >
-                                        <i class="fal fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>`
-                })
-                container.innerHTML = str;     
-            }else{
-                container.innerHTML = `No se cargó las medidas`;
-            }            
-        }else{
-            container.innerHTML = `No se cargó las medidas`;
-        }             
-    }, (error) => {
-        container.innerHTML = `No se cargó las medidas`;
-    });
-
-};
-
-function insert_medida(codigo,descripcion){
-  
-    return new Promise((resolve,reject)=>{
-
-        axios.post(GlobalUrlCalls + '/productos/insert_medida',
-            {
-                sucursal:GlobalEmpnit,
-                token:TOKEN,
-                codigo:codigo,
-                descripcion:descripcion
-            })
-        .then((response) => {
-            console.log(response);
-            if(response.status.toString()=='200'){
-                if(response.data.toString()=='error'){
-                    reject();
-                }else{
-                    let data = response.data;
-                    if(Number(data.rowsAffected[0])>0){
-                        resolve(data);             
-                    }else{
-                        reject();
-                    }
-                }       
-            }else{
-                reject();
-            }             
-        }, (error) => {
-            reject();
-        });
-    })   
-};
-
-function delete_medida(codmedida, idbtn){
-
-    let btn = document.getElementById(idbtn);
-
-    F.Confirmacion('¿Está seguro que desea ELIMINAR esta medida?')
-    .then((value)=>{
-        if(value==true){
-
-            btn.disabled = true;
-            btn.innerHTML = `<i class="fal fa-trash fa-spin"></i>`;
-
-            data_delete_medida(codmedida)
-            .then(()=>{
-
-                get_lista_medidas();
-                get_combo_medidas();
-
-            })
-            .catch(()=>{
-                btn.disabled = false;
-                btn.innerHTML = `<i class="fal fa-trash"></i>`;
-            })
-
-
+    const fill = (rows) => {
+        const list = Array.isArray(rows) ? rows : [];
+        if (!list.length) {
+            container.innerHTML = `<option value="">Sin medidas</option>`;
+            return;
         }
-    })
+        container.innerHTML = list.map((r) => {
+            const cod = String(r.CODMEDIDA || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/"/g, '&quot;');
+            return `<option value="${cod}">${cod}</option>`;
+        }).join('');
+    };
 
-
-
-};
-
-
-function data_delete_medida(codmedida){
-  
-    return new Promise((resolve,reject)=>{
-
-        axios.post(GlobalUrlCalls + '/productos/delete_medida',
-            {
-                sucursal:GlobalEmpnit,
-                token:TOKEN,
-                codmedida:codmedida
-            })
+    axios.post(GlobalUrlCalls + '/medidas/listado', { token: TOKEN })
         .then((response) => {
-            console.log(response);
-            if(response.status.toString()=='200'){
-                if(response.data.toString()=='error'){
-                    reject();
-                }else{
-                    let data = response.data;
-                    if(Number(data.rowsAffected[0])>0){
-                        resolve(data);             
-                    }else{
-                        reject();
-                    }
-                }       
-            }else{
-                reject();
-            }             
-        }, (error) => {
-            reject();
+            if (response.data && response.data.ok !== false && Array.isArray(response.data.recordset)) {
+                fill(response.data.recordset);
+                return;
+            }
+            return axios.post(GlobalUrlCalls + '/productos/listado_medidas', {
+                sucursal: GlobalEmpnit,
+                token: TOKEN
+            }).then((r2) => fill((r2.data && r2.data.recordset) || []));
+        })
+        .catch(() => {
+            axios.post(GlobalUrlCalls + '/productos/listado_medidas', {
+                sucursal: GlobalEmpnit,
+                token: TOKEN
+            })
+                .then((r2) => fill((r2.data && r2.data.recordset) || []))
+                .catch(() => {
+                    container.innerHTML = `<option value="">No se cargó las Medidas de precio</option>`;
+                });
         });
-    })   
-};
+}
 
 
 var ppKardexRows = [];

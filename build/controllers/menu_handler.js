@@ -130,6 +130,17 @@
             F.AvisoError('No tiene permitido entrar a esta secci├│n');
         }
     },
+    gestion_ofertas:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/inventarios_ofertas/view_gestion_ofertas.js','root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        }
+    },
     compras_requisiciones:()=>{
         if(Menu.verify()==true){
             Menu.salidaMenu();
@@ -284,6 +295,17 @@
             F.AvisoError('No tiene permitido entrar a esta secci├│n');
         }
     },
+    boletin:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/archivo_boletin/view_boletin.js','root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        }
+    },
     reporte_bonificaciones:()=>{
         if(Menu.verify()==true){
             Menu.salidaMenu();
@@ -391,7 +413,7 @@
     medidas:()=>{
         if(Menu.verify()==true){
             Menu.salidaMenu();
-            F.loadScript('../views/mant_marcas/view_marcas.js','root')
+            F.loadScript('../views/mant_medidas/view_medidas.js','root')
             .then(async()=>{
                 initView();
             })

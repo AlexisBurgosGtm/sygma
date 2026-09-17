@@ -414,6 +414,7 @@ function login_submit() {
                 sygma_updateHeaderUsuario();
             }
             Navegar.inicio();
+            if (typeof sygma_push_subscribe === 'function') sygma_push_subscribe();
         };
 
         if (typeof GF !== 'undefined' && GF.get_data_empresas) {
@@ -489,7 +490,10 @@ function login_submit() {
                         ? cargar_objetivos_skus_sesion()
                         : Promise.resolve();
                     cargarSkus.catch(() => {});
-                    Promise.resolve(cargarRutaPerfil).finally(() => Navegar.inicio());
+                    Promise.resolve(cargarRutaPerfil).finally(() => {
+                        Navegar.inicio();
+                        if (typeof sygma_push_subscribe === 'function') sygma_push_subscribe();
+                    });
                 })
                 .catch(() => {
                     F.AvisoError('No se pudieron cargar los datos de la empresa');

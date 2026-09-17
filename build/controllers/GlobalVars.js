@@ -149,6 +149,10 @@ function permite_vista_pestanas() {
     return String(get_setting('PERMITE VISTA PESTAÑAS', 'NO')).toUpperCase() === 'SI';
 }
 
+function aplica_ofertas_vendedores() {
+    return String(get_setting('APLICA OFERTAS EN VENDEDORES', 'NO')).toUpperCase() === 'SI';
+}
+
 /**
  * Valida cantidad vs stock al agregar líneas a facturas/pedidos.
  * @param {number|string} cantidad - cantidad en la medida seleccionada

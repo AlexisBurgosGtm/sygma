@@ -22,6 +22,7 @@
     ];
     var TITLE_FALLBACK = {
         productos: 'PRODUCTOS Y PRECIOS',
+        gestion_ofertas: 'GESTION DE OFERTAS',
         pos: 'FACTURACION',
         compras: 'COMPRAS',
         compras2: 'COMPRAS',
@@ -53,6 +54,7 @@
         report_ventas_marcas: 'VENTAS POR MARCAS',
         calculos_cargas_mes: 'CARGAS DEL MES',
         documentos: 'DOCUMENTOS',
+        boletin: 'BOLETIN INFORMATIVO',
         ventas_visitas: 'CLIENTES NO VISITADOS',
         reporte_bonificaciones: 'BONIFICACIONES ENTREGADAS',
         mantenimiento_generales: 'CLASIFICACIONES GENERALES',

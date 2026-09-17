@@ -47,6 +47,9 @@ var router_vehiculos = require('./router/router_vehiculos.js');
 var router_print = require('./router/router_print.js');
 var router_storage = require('./router/router_storage.js');
 var router_super = require('./router/router_super.js');
+var router_boletin = require('./router/router_boletin.js');
+var router_ofertas = require('./router/router_ofertas.js');
+var router_medidas = require('./router/router_medidas.js');
 
 
 
@@ -472,6 +475,9 @@ app.use('/vehiculos', router_vehiculos);
 app.use('/print', router_print);
 app.use('/storage', router_storage);
 app.use('/super', router_super);
+app.use('/boletin', router_boletin);
+app.use('/ofertas', router_ofertas);
+app.use('/medidas', router_medidas);
 
 
 

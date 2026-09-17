@@ -4,9 +4,12 @@
     var ROUTE_ID = 'config/general';
 
     function config_inyectarEstilos() {
-        if (document.getElementById('config-styles')) return;
-        var style = document.createElement('style');
-        style.id = 'config-styles';
+        var style = document.getElementById('config-styles');
+        if (!style) {
+            style = document.createElement('style');
+            style.id = 'config-styles';
+            document.head.appendChild(style);
+        }
         style.textContent = `
         .config-wrap {
             max-width: 100%;
@@ -117,8 +120,52 @@
         .config-sino-badge--no {
             background: linear-gradient(180deg, #f87171 0%, #dc2626 100%);
         }
+        body.sygma-dark .config-wrap {
+            background:
+                radial-gradient(800px 240px at 0% -10%, rgba(14,165,233,.12), transparent 60%),
+                radial-gradient(700px 220px at 100% 0%, rgba(34,197,94,.08), transparent 55%),
+                linear-gradient(180deg, #0b1220 0%, #0f172a 100%);
+            color: #e2e8f0;
+        }
+        body.sygma-dark .config-hero {
+            background: rgba(21, 32, 51, 0.94);
+            border-color: rgba(148, 163, 184, 0.18);
+            box-shadow: none;
+        }
+        body.sygma-dark .config-hero h4 { color: #e2e8f0 !important; }
+        body.sygma-dark .config-hero p { color: #94a3b8 !important; }
+        body.sygma-dark .config-panel-card {
+            background: #152033 !important;
+            border-color: rgba(148, 163, 184, 0.18);
+            box-shadow: none;
+            color: #e2e8f0;
+        }
+        body.sygma-dark .config-panel-head {
+            background: linear-gradient(135deg, #1e293b 0%, #152033 100%);
+            border-color: rgba(148, 163, 184, 0.14);
+            color: #e2e8f0 !important;
+        }
+        body.sygma-dark .config-panel-card label {
+            color: #94a3b8 !important;
+        }
+        body.sygma-dark .config-panel-card .form-control {
+            background-color: #0f172a !important;
+            color: #f1f5f9 !important;
+            border-color: rgba(148, 163, 184, 0.24) !important;
+        }
+        body.sygma-dark .config-clave-input {
+            background: #1e293b !important;
+            color: #fbbf24 !important;
+        }
+        body.sygma-dark .config-stock2-box {
+            border-top-color: rgba(148, 163, 184, 0.22);
+        }
+        body.sygma-dark .config-wrap .text-muted,
+        body.sygma-dark .config-panel-card .text-muted,
+        body.sygma-dark .config-wrap small {
+            color: #94a3b8 !important;
+        }
         `;
-        document.head.appendChild(style);
     }
 
     function config_icon_for(opcion) {
@@ -127,6 +174,8 @@
         if (o.indexOf('INVENTARIO') >= 0) return 'fa-boxes';
         if (o.indexOf('CLAVE') >= 0) return 'fa-key';
         if (o.indexOf('STOCK') >= 0) return 'fa-warehouse';
+        if (o.indexOf('OFERTA') >= 0) return 'fa-tags';
+        if (o.indexOf('VENDEDOR') >= 0) return 'fa-user-tie';
         return 'fa-sliders-h';
     }
 
@@ -135,6 +184,7 @@
         var o = String(opcion || '').trim().toUpperCase();
         if (v === 'SI' || v === 'NO') return true;
         if (o.indexOf('PERMITE ') === 0) return true;
+        if (o.indexOf('APLICA ') === 0) return true;
         return false;
     }
 
@@ -145,6 +195,9 @@
         }
         if (up === 'PERMITE VISTA PESTAÑAS') {
             return 'Permite abrir vistas en pestañas internas (una pestaña por vista).';
+        }
+        if (up === 'APLICA OFERTAS EN VENDEDORES') {
+            return 'Si está en SI, las ofertas se aplican en pedidos de vendedores.';
         }
         return 'Pulse el distintivo para cambiar entre SI y NO. El cambio se guarda al instante.';
     }
@@ -277,7 +330,8 @@
     function config_merge_defaults(rows) {
         var list = Array.isArray(rows) ? rows.slice() : [];
         var defaults = [
-            { OPCION: 'PERMITE VISTA PESTAÑAS', VALOR: 'NO' }
+            { OPCION: 'PERMITE VISTA PESTAÑAS', VALOR: 'NO' },
+            { OPCION: 'APLICA OFERTAS EN VENDEDORES', VALOR: 'NO' }
         ];
         defaults.forEach(function (def) {
             var exists = list.some(function (r) {

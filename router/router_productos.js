@@ -514,6 +514,31 @@ router.post("/listado_export", async(req,res)=>{
 });
 
 
+router.post("/listado_oferta", async(req,res)=>{
+
+    const { token, clasif } = req.body || {};
+    const cod = Number(clasif) || 0;
+    if (!cod) {
+        res.send('error');
+        return;
+    }
+
+    const qry = `
+        SELECT
+            PRODUCTOS.CODPROD,
+            PRODUCTOS.DESPROD,
+            ISNULL(MARCAS.DESMARCA,'') AS DESMARCA
+        FROM PRODUCTOS
+        LEFT OUTER JOIN MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA
+        WHERE PRODUCTOS.CLASIF_LABORATORIO = ${cod}
+        ORDER BY PRODUCTOS.DESPROD
+    `;
+
+    execute.QueryToken(res, qry, token);
+
+});
+
+
 router.post("/get_cantidad_productos", async(req,res)=>{
    
     const { token, sucursal,  habilitado } = req.body;
@@ -630,7 +655,16 @@ router.post("/listado_medidas", async(req,res)=>{
     const { token, sucursal } = req.body;
 
     let qry = `
-        SELECT CODMEDIDA, DESMEDIDA FROM MEDIDAS  
+        SET NOCOUNT ON;
+        IF NOT EXISTS (
+            SELECT 1 FROM MEDIDAS
+            WHERE UPPER(LTRIM(RTRIM(CODMEDIDA))) = 'BONI'
+        )
+        BEGIN
+            INSERT INTO MEDIDAS (CODMEDIDA, DESMEDIDA) VALUES ('BONI', 'BONIFICACION');
+        END
+        SELECT CODMEDIDA, DESMEDIDA FROM MEDIDAS
+        ORDER BY CASE WHEN UPPER(LTRIM(RTRIM(CODMEDIDA))) = 'BONI' THEN 0 ELSE 1 END, CODMEDIDA
     `
     
   
@@ -641,6 +675,10 @@ router.post("/listado_medidas", async(req,res)=>{
 router.post("/insert_medida", async(req,res)=>{
    
     const {token,sucursal,codigo,descripcion} = req.body;
+    const cod = String(codigo == null ? '' : codigo).trim().toUpperCase();
+    if (cod === 'BONI') {
+        return res.send({ error: 'La medida BONI es fija y no se puede crear ni modificar', rowsAffected: [0], recordset: [] });
+    }
 
    
     let qry = `
@@ -656,11 +694,15 @@ router.post("/insert_medida", async(req,res)=>{
 router.post("/delete_medida", async(req,res)=>{
    
     const {token,sucursal,codmedida} = req.body;
+    if (String(codmedida == null ? '' : codmedida).trim().toUpperCase() === 'BONI') {
+        return res.send({ error: 'La medida BONI es fija y no se puede eliminar', rowsAffected: [0], recordset: [] });
+    }
 
    
     let qry = `
     DELETE FROM MEDIDAS 
-    WHERE CODMEDIDA='${codmedida}';
+    WHERE CODMEDIDA='${codmedida}'
+      AND UPPER(LTRIM(RTRIM(CODMEDIDA))) <> 'BONI';
     `
 
     execute.QueryToken(res,qry,token);

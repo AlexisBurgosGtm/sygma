@@ -83,7 +83,7 @@ const precacheAssets = [
 
 // INSTALL Event
 self.addEventListener('install', function (event) {
-    
+    self.skipWaiting();
     return;
 
     event.waitUntil(
@@ -96,7 +96,7 @@ self.addEventListener('install', function (event) {
 
 // ACTIVATE Event
 self.addEventListener('activate', function (event) {
-    
+    event.waitUntil(self.clients.claim());
     return;
 
     event.waitUntil(
@@ -126,5 +126,48 @@ self.addEventListener('fetch', function (event) {
             // Fallback Page, When No Internet Connection
             return caches.match('offline.html');
           })
+    );
+});
+
+self.addEventListener('push', function (event) {
+    var data = { title: 'SYGMA', body: 'Nuevo aviso del boletín', icono: 'info', id: 0 };
+    try {
+        if (event.data) {
+            var parsed = event.data.json();
+            if (parsed && typeof parsed === 'object') {
+                data.title = parsed.title || parsed.TITULO || data.title;
+                data.body = parsed.body || parsed.mensaje || parsed.MENSAJE || data.body;
+                data.icono = parsed.icono || parsed.ICONO || data.icono;
+                data.id = parsed.id || parsed.ID || 0;
+            }
+        }
+    } catch (e) {
+        try {
+            if (event.data) data.body = event.data.text() || data.body;
+        } catch (e2) {}
+    }
+    event.waitUntil(
+        self.registration.showNotification(data.title, {
+            body: data.body,
+            icon: './favicon.png',
+            badge: './favicon.png',
+            tag: 'boletin-' + String(data.id || Date.now()),
+            renotify: true,
+            data: { url: './index.html', id: data.id, icono: data.icono }
+        })
+    );
+});
+
+self.addEventListener('notificationclick', function (event) {
+    event.notification.close();
+    var target = (event.notification && event.notification.data && event.notification.data.url) || './index.html';
+    event.waitUntil(
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (clientList) {
+            for (var i = 0; i < clientList.length; i++) {
+                var client = clientList[i];
+                if (client.url && 'focus' in client) return client.focus();
+            }
+            if (self.clients.openWindow) return self.clients.openWindow(target);
+        })
     );
 });

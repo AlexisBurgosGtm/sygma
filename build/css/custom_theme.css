@@ -6872,3 +6872,67 @@ body.sygma-dark .sygma-view-tab.is-active {
 body.sygma-dark .sygma-tab-host iframe.sygma-tab-frame {
   background: #0b1220;
 }
+body.sygma-dark .ped-cliente-card {
+  background: #152033 !important;
+  border-color: rgba(148, 163, 184, 0.22) !important;
+  color: #e2e8f0 !important;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
+}
+body.sygma-dark .ped-cliente-card.bg-visitado {
+  background: #14532d !important;
+  border-color: rgba(74, 222, 128, 0.4) !important;
+  color: #ecfdf5 !important;
+}
+body.sygma-dark .ped-cliente-card.bg-novisitado {
+  background: #7f1d1d !important;
+  border-color: rgba(248, 113, 113, 0.45) !important;
+  color: #fef2f2 !important;
+}
+body.sygma-dark .ped-cliente-card .negrita,
+body.sygma-dark .ped-cliente-card span,
+body.sygma-dark .ped-cliente-card small,
+body.sygma-dark .ped-cliente-card .text-muted {
+  color: inherit !important;
+}
+body.sygma-dark .ped-cliente-card .text-base {
+  color: #93c5fd !important;
+}
+body.sygma-dark .ped-cliente-card .text-danger {
+  color: #fecaca !important;
+}
+body.sygma-dark .ped-cliente-card.bg-visitado .text-base {
+  color: #bbf7d0 !important;
+}
+body.sygma-dark .ped-cliente-card.bg-novisitado .text-base {
+  color: #fecaca !important;
+}
+body.sygma-dark .ped-cliente-card__meta {
+  border-top-color: rgba(255, 255, 255, 0.16) !important;
+}
+body.sygma-dark .ped-opciones-panel {
+  background: #1e293b !important;
+  border-color: rgba(148, 163, 184, 0.22) !important;
+  box-shadow: none;
+}
+body.sygma-dark .ped-clientes-table-wrap,
+body.sygma-dark #tblClientesPedido,
+body.sygma-dark #tblDataClientes,
+body.sygma-dark #tblDataClientes tr.ped-cliente-row,
+body.sygma-dark #tblDataClientes tr.ped-cliente-row > td {
+  background: transparent !important;
+  color: #e2e8f0 !important;
+}
+body.sygma-dark .ped-toma__buscar,
+body.sygma-dark .ped-toma__lista {
+  background: transparent;
+}
+body.sygma-dark .ped-oferta-card {
+  background: #152033 !important;
+  border-color: rgba(148, 163, 184, 0.2) !important;
+  color: #e2e8f0 !important;
+}
+body.sygma-dark .ped-oferta-hit {
+  background: #1e293b !important;
+  border-color: rgba(148, 163, 184, 0.16) !important;
+  color: #e2e8f0 !important;
+}

@@ -102,6 +102,11 @@
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">PRODUCTOS Y PRECIOS</span>
                                         </a>
                                     </li>
+                                    <li>
+                                        <a title="Gestión de ofertas" data-filter-tags="inventarios gestion ofertas clasificacion" href="#" onclick="Menu.gestion_ofertas()">
+                                            <span class="nav-link-text">GESTION DE OFERTAS</span>
+                                        </a>
+                                    </li>
                                  
                                     <li>
                                         <a title="Introduction" data-filter-tags="application intel introduction" href="#" onclick="Menu.compras_gestion_minmax()">
@@ -216,6 +221,11 @@
                                     <li>
                                         <a title="How it works" data-filter-tags="theme settings how it works" href="#" onclick="Menu.documentos()">
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">DOCUMENTOS</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a title="Boletín informativo" data-filter-tags="archivo boletin avisos notificaciones" href="#" onclick="Menu.boletin()">
+                                            <span class="nav-link-text">BOLETIN INFORMATIVO</span>
                                         </a>
                                     </li>
                                      <li>

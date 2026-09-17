@@ -31,7 +31,7 @@ const SpaNav = {
         empleados_gps: 'mant/empleados-gps',
         proveedores: 'mant/proveedores',
         empresas: 'mant/empresas',
-        medidas: 'mant/marcas',
+        medidas: 'mant/medidas',
         bi_notificaciones: 'admin/notificaciones',
         ventas_censo: 'ventas/censo',
         ventas_pedidos: 'ventas/pedidos',

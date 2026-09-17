@@ -40,7 +40,7 @@ const MENU_ROUTES = {
     municipios_departamentos: 'mant/municipios',
     empleados: 'mant/empleados',
     proveedores: null,
-    medidas: 'mant/marcas',
+    medidas: 'mant/medidas',
     config_tipodocumentos: 'config/tipodocumentos',
     ventas_pedidos: 'ventas/pedidos',
     ventas_censo: 'ventas/censo',
