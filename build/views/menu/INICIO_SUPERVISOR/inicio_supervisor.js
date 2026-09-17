@@ -114,6 +114,7 @@ var SUPERVISOR_EMBED_SCRIPTS = {
     btnMenuRptVisitasMapa: SUPERVISOR_EMBED_BASE + 'view_visitas_vendedores_gps.js',
     btnMenuCambiosDatosClientes: SUPERVISOR_EMBED_BASE + 'view_solicitudes_cambio_cliente.js',
     btnMenuMercaderistas: SUPERVISOR_EMBED_BASE + 'view_mercaderistas.js',
+    btnMenuOfertas: '../views/inventarios_ofertas/view_ofertas_catalogo.js',
 };
 
 function supervisor_bindEmbedMenu(cardId) {
@@ -391,6 +392,7 @@ function getView(){
                 { id: 'btnMenuCoberturaMunicipio', label: 'Cobertura municipios', icon: 'fa-globe', color: 'primary' },
                 { id: 'btnMenuRptVisitasMapa', label: 'Visitas vendedor mapa', icon: 'fa-map-signs', color: 'secondary' },
                 { id: 'btnMenuCambiosDatosClientes', label: 'Cambios de datos Clientes', icon: 'fa-edit', color: 'warning' },
+                { id: 'btnMenuOfertas', label: 'Ofertas', icon: 'fa-tags', color: 'success' },
                 { id: 'btnMenuMercaderistas', label: 'Mercaderistas', icon: 'fa-clipboard-list', color: 'info' },
                 { id: 'btnMenuRptInventario', label: 'Inventario', icon: 'fa-warehouse', color: 'secondary' },
                 { id: 'btnMenuRptVendedores', label: 'Ventas por vendedor', icon: 'fa-users', color: 'info' },

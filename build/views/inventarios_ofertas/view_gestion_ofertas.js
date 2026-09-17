@@ -136,10 +136,18 @@ function getView() {
             border-color: rgba(124,58,237,.35);
         }
         .ofertas-card__code {
-            flex:0 0 2.6rem; min-width:2.6rem; height:2.6rem; border-radius:12px;
-            display:flex; align-items:center; justify-content:center;
+            flex:0 0 3.2rem; min-width:3.2rem; height:3.2rem; border-radius:12px;
+            display:flex; align-items:center; justify-content:center; overflow:hidden;
             background:#ede9fe; color:#6d28d9; font-weight:800; font-size:0.82rem;
         }
+        .ofertas-card__code img {
+            width:100%; height:100%; object-fit:cover;
+        }
+        .ofertas-img-preview {
+            width: 88px; height: 88px; border-radius: 12px; object-fit: cover;
+            border: 1px solid rgba(15,23,42,.12); background:#f8fafc;
+        }
+        body.sygma-dark .ofertas-img-preview { background:#1e293b; border-color:#334155; }
         .ofertas-card__body { flex:1; min-width:0; }
         .ofertas-card__title { font-weight:800; margin:0 0 0.2rem; font-size:0.95rem; color:#0f172a; }
         .ofertas-card__meta { margin:0; color:#64748b; font-size:0.78rem; }
@@ -380,6 +388,15 @@ function getView() {
                             <div id="ofertasSedesBox" class="ofertas-sedes-box">
                                 <div class="text-muted small py-1">Cargando sedes...</div>
                             </div>
+                            <label class="negrita small mb-1 mt-3">Foto de la oferta</label>
+                            <div class="d-flex align-items-center">
+                                <img id="imgOfertaPreview" class="ofertas-img-preview mr-2" alt="" style="display:none">
+                                <div class="flex-grow-1">
+                                    <input type="hidden" id="txtOfertaImagenActual" value="">
+                                    <input type="file" class="form-control-file" id="txtOfertaImagen" accept="image/*">
+                                    <small class="text-muted d-block mt-1" id="lbOfertaImagenNom">Sin imagen</small>
+                                </div>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
@@ -466,6 +483,51 @@ function ofertas_setVigenciaUI(tipo) {
     if (wrap) wrap.style.display = vigente ? 'none' : '';
 }
 
+function ofertas_img_url(nombre) {
+    const n = String(nombre || '').trim();
+    if (!n) return '';
+    const path = n.indexOf('/') === 0 ? n : ('/OFERTAS/' + n);
+    return '/storage/file?path=' + encodeURIComponent(path);
+}
+
+function ofertas_set_preview(nombre, file) {
+    const img = document.getElementById('imgOfertaPreview');
+    const lb = document.getElementById('lbOfertaImagenNom');
+    if (!img) return;
+    if (file) {
+        img.src = URL.createObjectURL(file);
+        img.style.display = '';
+        if (lb) lb.textContent = file.name;
+        return;
+    }
+    const url = ofertas_img_url(nombre);
+    if (url) {
+        img.src = url;
+        img.style.display = '';
+        if (lb) lb.textContent = nombre;
+        return;
+    }
+    img.removeAttribute('src');
+    img.style.display = 'none';
+    if (lb) lb.textContent = 'Sin imagen';
+}
+
+function ofertas_subirImagen(codoferta) {
+    const inp = document.getElementById('txtOfertaImagen');
+    const file = inp && inp.files && inp.files[0];
+    if (!file || !codoferta) return Promise.resolve();
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('token', TOKEN);
+    fd.append('codoferta', String(codoferta));
+    return axios.post(GlobalUrlCalls + '/ofertas/upload_imagen', fd, { timeout: 120000 })
+        .then((res) => {
+            if (!res.data || res.data.ok === false) {
+                throw new Error((res.data && res.data.error) || 'No se pudo subir la imagen');
+            }
+        });
+}
+
 function ofertas_limpiarModal() {
     ofertasEditando = 0;
     document.getElementById('txtOfertaCod').value = '0';
@@ -475,6 +537,10 @@ function ofertas_limpiarModal() {
     document.getElementById('txtOfertaDel').value = '';
     document.getElementById('txtOfertaAl').value = '';
     document.getElementById('lbOfertaModalTitulo').textContent = 'Nueva oferta';
+    const inp = document.getElementById('txtOfertaImagen');
+    if (inp) inp.value = '';
+    document.getElementById('txtOfertaImagenActual').value = '';
+    ofertas_set_preview('');
     ofertas_setVigenciaUI('VIGENTE');
     ofertas_pintarSedes([]);
 }
@@ -511,6 +577,10 @@ function ofertas_abrirEditar(codoferta) {
             document.getElementById('lbOfertaModalTitulo').textContent = 'Editar oferta ' + ofertasEditando;
             ofertas_setVigenciaUI(r.TIPO_VIGENCIA);
             ofertas_pintarSedes(r.SEDES || []);
+            document.getElementById('txtOfertaImagenActual').value = r.IMAGEN || '';
+            const inp = document.getElementById('txtOfertaImagen');
+            if (inp) inp.value = '';
+            ofertas_set_preview(r.IMAGEN || '');
             $('#modal_oferta').modal('show');
         })
         .catch(() => F.AvisoError('No se pudo leer la oferta'));
@@ -557,18 +627,32 @@ function ofertas_guardar() {
     }
     axios.post(GlobalUrlCalls + url, payload)
         .then((res) => {
+            if (!res.data || res.data.ok === false) {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fal fa-save mr-1"></i> Guardar';
+                }
+                F.AvisoError((res.data && res.data.error) || 'No se pudo guardar');
+                return;
+            }
+            const id = Number((res.data.recordset && res.data.recordset[0] && res.data.recordset[0].CODOFERTA) || codoferta) || 0;
+            return ofertas_subirImagen(id).then(() => {
+                F.Aviso('Oferta guardada');
+                $('#modal_oferta').modal('hide');
+                ofertas_mostrarLista();
+                ofertas_cargarListado();
+            }).catch((err) => {
+                F.AvisoError((err && err.message) || 'La oferta se guardó, pero no se pudo subir la imagen');
+                $('#modal_oferta').modal('hide');
+                ofertas_mostrarLista();
+                ofertas_cargarListado();
+            });
+        })
+        .then(() => {
             if (btn) {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fal fa-save mr-1"></i> Guardar';
             }
-            if (!res.data || res.data.ok === false) {
-                F.AvisoError((res.data && res.data.error) || 'No se pudo guardar');
-                return;
-            }
-            F.Aviso('Oferta guardada');
-            $('#modal_oferta').modal('hide');
-            ofertas_mostrarLista();
-            ofertas_cargarListado();
         })
         .catch(() => {
             if (btn) {
@@ -608,9 +692,10 @@ function ofertas_renderCards(rows) {
         const nprod = Number(r.NPROD) || 0;
         const nboni = Number(r.NBONI) || 0;
         const vigente = String(r.TIPO_VIGENCIA || '').toUpperCase() !== 'VENCIMIENTO';
+        const img = ofertas_img_url(r.IMAGEN);
         return `
             <div class="ofertas-card" onclick="ofertas_abrirProductos(${r.CODOFERTA})">
-                <div class="ofertas-card__code">${r.CODOFERTA}</div>
+                <div class="ofertas-card__code">${img ? `<img src="${ofertas_esc(img)}" alt="">` : r.CODOFERTA}</div>
                 <div class="ofertas-card__body">
                     <div class="ofertas-card__title">${ofertas_esc(r.DESOFERTA)}</div>
                     <p class="ofertas-card__meta mb-0">${nprod} venta · ${nboni} BONI</p>
@@ -872,6 +957,10 @@ function addListeners() {
     });
     document.getElementById('btnOfertaSedesTodas')?.addEventListener('click', () => ofertas_marcarSedes(true));
     document.getElementById('btnOfertaSedesNinguna')?.addEventListener('click', () => ofertas_marcarSedes(false));
+    document.getElementById('txtOfertaImagen')?.addEventListener('change', function(){
+        const file = this.files && this.files[0];
+        ofertas_set_preview(document.getElementById('txtOfertaImagenActual')?.value || '', file);
+    });
     ofertas_mostrarLista();
     ofertas_cargarEmpresas();
     ofertas_cargarListado();

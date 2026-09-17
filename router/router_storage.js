@@ -116,7 +116,9 @@ router.get('/file', async (req, res) => {
         res.setHeader('Content-Type', mime_type);
         res.setHeader('Content-Length', buffer.length);
         res.setHeader('Cache-Control', 'private, max-age=300');
-        res.setHeader('Content-Disposition', `inline; filename="${remote_path.split('/').pop()}"`);
+        const fname = remote_path.split('/').pop() || 'archivo';
+        const asDownload = String(req.query.download || '') === '1';
+        res.setHeader('Content-Disposition', `${asDownload ? 'attachment' : 'inline'}; filename="${fname}"`);
         res.send(buffer);
     } catch (err) {
         console.error('[storage/file GET]', err.message);

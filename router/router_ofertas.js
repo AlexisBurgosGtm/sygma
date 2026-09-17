@@ -2,9 +2,17 @@
 
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const execute = require('../connection');
+const storage = require('../services/webdavStorage');
 
 let tablesReady = false;
+const OFERTAS_FOLDER = '/OFERTAS';
+
+const uploadOfertaImg = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 12 * 1024 * 1024 }
+});
 
 function sqlEsc(v) {
     return String(v == null ? '' : v).replace(/'/g, "''");
@@ -74,6 +82,13 @@ BEGIN
 END
 `;
 
+const DDL_IMAGEN = `
+IF COL_LENGTH('dbo.OFERTAS', 'IMAGEN') IS NULL
+BEGIN
+    EXEC('ALTER TABLE dbo.OFERTAS ADD IMAGEN VARCHAR(200) NULL');
+END
+`;
+
 const DDL_CREATE_SEDES = `
 IF OBJECT_ID('dbo.OFERTAS_SEDES', 'U') IS NULL
 BEGIN
@@ -115,6 +130,29 @@ function tipoProductoOferta(v) {
     return String(v || '').toUpperCase() === 'BONI' ? 'BONI' : 'PROD';
 }
 
+function safeImagenName(v) {
+    return String(v == null ? '' : v)
+        .replace(/[/\\]/g, '_')
+        .replace(/\s+/g, '_')
+        .trim()
+        .slice(0, 180);
+}
+
+function ofertasImagenPath(nombre) {
+    const n = safeImagenName(nombre);
+    if (!n) return '';
+    if (n.startsWith('/')) return n;
+    return `${OFERTAS_FOLDER}/${n}`;
+}
+
+async function deleteOfertaImagen(nombre) {
+    const remote = ofertasImagenPath(nombre);
+    if (!remote) return;
+    try {
+        await storage.deleteFile({ remote_path: remote });
+    } catch (e) {}
+}
+
 async function ensureTables(token) {
     if (tablesReady) return;
     await execute.get_data_qry(DDL_CREATE, token);
@@ -122,6 +160,7 @@ async function ensureTables(token) {
     await execute.get_data_qry(DDL_DROP_BONIF, token);
     await execute.get_data_qry(DDL_CREATE_PRODUCTOS, token);
     await execute.get_data_qry(DDL_PRODUCTOS_TIPO, token);
+    await execute.get_data_qry(DDL_IMAGEN, token);
     await execute.get_data_qry(DDL_CREATE_SEDES, token);
     tablesReady = true;
 }
@@ -150,6 +189,7 @@ router.post('/listado', async (req, res) => {
                 O.TIPO_VIGENCIA,
                 CONVERT(varchar(10), O.FECHA_DEL, 23) AS FECHA_DEL,
                 CONVERT(varchar(10), O.FECHA_AL, 23) AS FECHA_AL,
+                ISNULL(O.IMAGEN, '') AS IMAGEN,
                 (SELECT COUNT(*) FROM OFERTAS_PRODUCTOS P WHERE P.CODOFERTA = O.CODOFERTA AND UPPER(ISNULL(NULLIF(LTRIM(RTRIM(P.TIPO)), ''), 'PROD')) = 'PROD') AS NPROD,
                 (SELECT COUNT(*) FROM OFERTAS_PRODUCTOS P WHERE P.CODOFERTA = O.CODOFERTA AND UPPER(ISNULL(P.TIPO, '')) = 'BONI') AS NBONI,
                 (SELECT COUNT(*) FROM OFERTAS_SEDES S WHERE S.CODOFERTA = O.CODOFERTA) AS NSEDES,
@@ -218,7 +258,8 @@ router.post('/get', async (req, res) => {
             SELECT
                 CODOFERTA, DESOFERTA, UNIDADES, CANTIDAD_BONIF, TIPO_VIGENCIA,
                 CONVERT(varchar(10), FECHA_DEL, 23) AS FECHA_DEL,
-                CONVERT(varchar(10), FECHA_AL, 23) AS FECHA_AL
+                CONVERT(varchar(10), FECHA_AL, 23) AS FECHA_AL,
+                ISNULL(IMAGEN, '') AS IMAGEN
             FROM OFERTAS
             WHERE CODOFERTA=${id}
         `, token);
@@ -267,9 +308,9 @@ router.post('/insert', async (req, res) => {
     try {
         await ensureTables(token);
         const ins = await execute.get_data_qry(`
-            INSERT INTO OFERTAS (DESOFERTA, UNIDADES, CANTIDAD_BONIF, TIPO_VIGENCIA, FECHA_DEL, FECHA_AL, LASTUPDATE)
+            INSERT INTO OFERTAS (DESOFERTA, UNIDADES, CANTIDAD_BONIF, TIPO_VIGENCIA, FECHA_DEL, FECHA_AL, IMAGEN, LASTUPDATE)
             OUTPUT INSERTED.CODOFERTA
-            VALUES ('${sqlEsc(nombre)}', ${sqlDec(unidades)}, ${sqlDec(cantidad_bonif)}, '${tipo}', ${del}, ${al}, GETDATE());
+            VALUES ('${sqlEsc(nombre)}', ${sqlDec(unidades)}, ${sqlDec(cantidad_bonif)}, '${tipo}', ${del}, ${al}, '', GETDATE());
         `, token);
         const id = Number(ins && ins.recordset && ins.recordset[0] && ins.recordset[0].CODOFERTA) || 0;
         if (!id) {
@@ -338,6 +379,8 @@ router.post('/delete', async (req, res) => {
     }
     try {
         await ensureTables(token);
+        const prev = await execute.get_data_qry(`SELECT ISNULL(IMAGEN,'') AS IMAGEN FROM OFERTAS WHERE CODOFERTA=${id}`, token);
+        const img = prev && prev.recordset && prev.recordset[0] ? prev.recordset[0].IMAGEN : '';
         await execute.get_data_qry(`
             IF OBJECT_ID('dbo.OFERTAS_PRODUCTOS', 'U') IS NOT NULL
                 DELETE FROM OFERTAS_PRODUCTOS WHERE CODOFERTA=${id};
@@ -347,6 +390,7 @@ router.post('/delete', async (req, res) => {
                 DELETE FROM OFERTAS_BONIF WHERE CODOFERTA=${id};
             DELETE FROM OFERTAS WHERE CODOFERTA=${id};
         `, token);
+        await deleteOfertaImagen(img);
         res.send({ ok: true, rowsAffected: [1] });
     } catch (e) {
         console.error('[ofertas/delete]', e && e.message ? e.message : e);
@@ -544,6 +588,119 @@ router.post('/vendedor_disponibles', async (req, res) => {
     } catch (e) {
         console.error('[ofertas/vendedor_disponibles]', e && e.message ? e.message : e);
         res.send({ ok: false, error: 'No se pudieron cargar las ofertas disponibles' });
+    }
+});
+
+router.post('/catalogo', async (req, res) => {
+    const { token, sucursal } = req.body || {};
+    const emp = sqlEsc(String(sucursal || '').trim());
+    try {
+        await ensureTables(token);
+        const filtroSede = (!emp || emp === '%')
+            ? '1=1'
+            : `(
+                NOT EXISTS (SELECT 1 FROM OFERTAS_SEDES S WHERE S.CODOFERTA = O.CODOFERTA)
+                OR EXISTS (
+                    SELECT 1 FROM OFERTAS_SEDES S
+                    WHERE S.CODOFERTA = O.CODOFERTA
+                      AND S.EMPNIT = '${emp}'
+                )
+            )`;
+        const data = await execute.get_data_qry(`
+            SELECT
+                O.CODOFERTA,
+                O.DESOFERTA,
+                O.UNIDADES,
+                O.CANTIDAD_BONIF,
+                O.TIPO_VIGENCIA,
+                CONVERT(varchar(10), O.FECHA_DEL, 23) AS FECHA_DEL,
+                CONVERT(varchar(10), O.FECHA_AL, 23) AS FECHA_AL,
+                ISNULL(O.IMAGEN, '') AS IMAGEN,
+                (SELECT COUNT(*) FROM OFERTAS_PRODUCTOS P WHERE P.CODOFERTA = O.CODOFERTA AND UPPER(ISNULL(NULLIF(LTRIM(RTRIM(P.TIPO)), ''), 'PROD')) = 'PROD') AS NPROD,
+                (SELECT COUNT(*) FROM OFERTAS_PRODUCTOS P WHERE P.CODOFERTA = O.CODOFERTA AND UPPER(ISNULL(P.TIPO, '')) = 'BONI') AS NBONI
+            FROM OFERTAS O
+            WHERE
+                (
+                    UPPER(ISNULL(O.TIPO_VIGENCIA, 'VIGENTE')) <> 'VENCIMIENTO'
+                    OR (
+                        O.FECHA_DEL IS NOT NULL
+                        AND O.FECHA_AL IS NOT NULL
+                        AND CAST(GETDATE() AS DATE) BETWEEN O.FECHA_DEL AND O.FECHA_AL
+                    )
+                )
+                AND ${filtroSede}
+            ORDER BY O.DESOFERTA
+        `, token);
+        const rows = ((data && data.recordset) ? data.recordset : []).map((r) => {
+            const img = String(r.IMAGEN || '').trim();
+            return {
+                ...r,
+                IMAGEN_URL: img ? `/storage/file?path=${encodeURIComponent(ofertasImagenPath(img))}` : ''
+            };
+        });
+        res.send({ ok: true, recordset: rows, rowsAffected: [rows.length] });
+    } catch (e) {
+        console.error('[ofertas/catalogo]', e && e.message ? e.message : e);
+        res.send({ ok: false, error: 'No se pudieron cargar las ofertas vigentes' });
+    }
+});
+
+router.post('/upload_imagen', (req, res, next) => {
+    uploadOfertaImg.single('file')(req, res, (err) => {
+        if (!err) return next();
+        console.error('[ofertas/upload_imagen] multer', err.message || err);
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            return res.send({ ok: false, error: 'La imagen es demasiado grande (máx. 12MB)' });
+        }
+        return res.send({ ok: false, error: 'No se pudo leer la imagen' });
+    });
+}, async (req, res) => {
+    const token = (req.body && req.body.token) || '';
+    const id = Number(req.body && req.body.codoferta) || 0;
+    if (!id) {
+        res.send({ ok: false, error: 'Código de oferta inválido' });
+        return;
+    }
+    if (!req.file || !req.file.buffer) {
+        res.send({ ok: false, error: 'Seleccione una imagen' });
+        return;
+    }
+    try {
+        await ensureTables(token);
+        const prev = await execute.get_data_qry(`SELECT ISNULL(IMAGEN,'') AS IMAGEN FROM OFERTAS WHERE CODOFERTA=${id}`, token);
+        if (!(prev && prev.recordset && prev.recordset[0])) {
+            res.send({ ok: false, error: 'Oferta no encontrada' });
+            return;
+        }
+        const oldName = String(prev.recordset[0].IMAGEN || '').trim();
+        const orig = String(req.file.originalname || 'oferta.jpg');
+        let ext = orig.includes('.') ? orig.slice(orig.lastIndexOf('.')).toLowerCase() : '.jpg';
+        if (!['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext)) ext = '.jpg';
+        const filename = `oferta_${id}${ext}`;
+        await storage.uploadFromBuffer({
+            buffer: req.file.buffer,
+            filename,
+            folder: OFERTAS_FOLDER,
+            overwrite: true
+        });
+        if (oldName && oldName !== filename) {
+            await deleteOfertaImagen(oldName);
+        }
+        await execute.get_data_qry(`
+            UPDATE OFERTAS SET IMAGEN='${sqlEsc(filename)}', LASTUPDATE=GETDATE()
+            WHERE CODOFERTA=${id};
+        `, token);
+        res.send({
+            ok: true,
+            recordset: [{
+                CODOFERTA: id,
+                IMAGEN: filename,
+                IMAGEN_URL: `/storage/file?path=${encodeURIComponent(ofertasImagenPath(filename))}`
+            }]
+        });
+    } catch (e) {
+        console.error('[ofertas/upload_imagen]', e && e.message ? e.message : e);
+        res.send({ ok: false, error: 'No se pudo guardar la imagen de la oferta' });
     }
 });
 

@@ -6,6 +6,7 @@ var VENTAS_EMBED_SCRIPTS = {
     btnMenuAvancePG: VENTAS_EMBED_BASE + 'view_avance_procter_vendedor.js',
     btnMenuNuevoPedido: VENTAS_EMBED_BASE + 'view_pedidos.js',
     btnMenuCenso: VENTAS_EMBED_BASE + 'view_censo.js',
+    btnMenuOfertas: '../views/inventarios_ofertas/view_ofertas_catalogo.js',
 };
 
 function ventas_getMes() {
@@ -386,6 +387,7 @@ function getView(){
                 { id: 'btnMenuAvancePG', label: 'Avance P&G', icon: 'fa-folder-open', color: 'danger' },
                 { id: 'btnMenuNuevoPedido', label: 'Nuevo pedido', icon: 'fa-shopping-cart', color: 'info' },
                 { id: 'btnMenuCenso', label: 'Crear clientes (censo)', icon: 'fa-users', color: 'info' },
+                { id: 'btnMenuOfertas', label: 'Ofertas', icon: 'fa-tags', color: 'success' },
                 { id: 'btnMenuRptMarcas', label: 'Reporte marcas', icon: 'fa-list', color: 'secondary' },
                 { id: 'btnMenuRptCategorias', label: 'Objetivos categorías', icon: 'fa-chart-bar', color: 'secondary' },
                 { id: 'btnMenuRptDocumentos', label: 'Reporte facturas', icon: 'fa-chart-pie', color: 'secondary' },
