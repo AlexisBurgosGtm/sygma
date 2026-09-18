@@ -1,5 +1,5 @@
 {
-  "version": "M.17.09.26 12:47",
+  "version": "M.18.09.26 11:42",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -4630,6 +4630,21 @@
       "FECHA": "17-09-2026",
       "HORA": "13:19",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.17.09.26 13:19"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "11:42",
+      "DESCRIPCION": "QUITAR PRECIO C D E F EN LISTA DE PRECIOS DEL PRODUCTO"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "11:42",
+      "DESCRIPCION": "PRECIOS PUBLICO A Y B EDITABLES CON GUARDAR POR FILA"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "11:42",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.18.09.26 11:42"
     }
   ]
 }

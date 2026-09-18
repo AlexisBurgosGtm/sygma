@@ -327,6 +327,20 @@ function getView(){
                 #modal_menu_producto .pp-precios-wrap .card-body {
                     padding: 0.4rem 0.35rem;
                 }
+                #modal_menu_producto .pp-precio-input {
+                    min-width: 5.6rem;
+                    max-width: 8rem;
+                    height: 2rem;
+                    font-weight: 700;
+                    text-align: right;
+                    padding: 0.2rem 0.45rem;
+                }
+                #modal_menu_producto .pp-precio-row-actions {
+                    display: flex;
+                    gap: 0.35rem;
+                    align-items: center;
+                    white-space: nowrap;
+                }
                 .pp-modal .pp-modal-cerrar {
                     min-width: 7.6rem;
                     border-radius: 10px;
@@ -492,6 +506,11 @@ function getView(){
                 body.sygma-dark #modal_menu_producto .pp-prod-op b,
                 body.sygma-dark #modal_menu_producto .pp-prod-op .pp-prod-op__label {
                     color: #e2e8f0 !important;
+                }
+                body.sygma-dark #modal_menu_producto .pp-precio-input {
+                    background-color: #0f172a !important;
+                    color: #f1f5f9 !important;
+                    border-color: rgba(148, 163, 184, 0.22) !important;
                 }
             </style>
             `;
@@ -680,10 +699,6 @@ function getView(){
                                                 <td>PÚBLICO</td>
                                                 <td>PRECIO_A</td>
                                                 <td>PRECIO_B</td>
-                                                <td>PRECIO_C</td>
-                                                <td>PRECIO_D</td>
-                                                <td>PRECIO_E</td>
-                                                <td>PRECIO_F</td>
                                                 <td></td>
                                             </tr>
                                         </thead>
@@ -3398,10 +3413,18 @@ function get_detalle_producto(codprod,desprod,desprod2,costo,lastupdate,st){
 
 };
 
+function pp_num_precio(v){
+    const n = Number(v);
+    if (!isFinite(n)) return '0';
+    return String(Math.round(n * 10000) / 10000);
+}
+
 function get_tbl_precios_producto(codprod,idcontainer){
 
     let container = document.getElementById(idcontainer);
+    if (!container) return;
     container.innerHTML = GlobalLoader;
+    const editable = idcontainer === 'tblDataPreciosProd';
 
     axios.post(GlobalUrlCalls + '/productos/lista_precios',
         {
@@ -3417,14 +3440,49 @@ function get_tbl_precios_producto(codprod,idcontainer){
                 
                 data.recordset.map((r)=>{
                     let idbtnE = `btnE${r.ID}`;
+                    let idbtnG = `btnG${r.ID}`;
                     let idbtnA = `btnA${r.ID}`;
                     let strClassHab = '';
                 
                     if(r.HABILITADO=='SI'){strClassHab='btn-success';}else{strClassHab='btn-danger';};
-                    
-                    str += `
-                        <tr>
 
+                    if (editable) {
+                        str += `
+                        <tr>
+                            <td>${r.CODMEDIDA}</td>
+                            <td>${r.EQUIVALE}</td>
+                            <td>${F.setMoneda(r.COSTO,'Q')}</td>
+                            <td>
+                                <input type="number" min="0" step="0.01" class="form-control form-control-sm pp-precio-input"
+                                    id="txtPrecioP${r.ID}" value="${pp_num_precio(r.PRECIO)}">
+                            </td>
+                            <td>
+                                <input type="number" min="0" step="0.01" class="form-control form-control-sm pp-precio-input"
+                                    id="txtPrecioA${r.ID}" value="${pp_num_precio(r.PRECIO_A)}">
+                            </td>
+                            <td>
+                                <input type="number" min="0" step="0.01" class="form-control form-control-sm pp-precio-input"
+                                    id="txtPrecioB${r.ID}" value="${pp_num_precio(r.PRECIO_B)}">
+                            </td>
+                            <td>
+                                <div class="pp-precio-row-actions">
+                                    <button class="btn-md btn-circle btn-success hand shadow" title="Guardar precios"
+                                        id="${idbtnG}"
+                                        onclick="guardar_precios_fila('${idbtnG}','${r.ID}','${codprod}')">
+                                        <i class="fal fa-save"></i>
+                                    </button>
+                                    <button class="btn-md btn-circle btn-danger hand shadow" title="Eliminar"
+                                        id="${idbtnE}"
+                                        onclick="delete_precio('${idbtnE}','${r.ID}','${codprod}')">
+                                        <i class="fal fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        `;
+                    } else {
+                        str += `
+                        <tr>
                             <td>${r.CODMEDIDA}</td>
                             <td>${r.EQUIVALE}</td>
                             <td>${F.setMoneda(r.COSTO,'Q')}</td>
@@ -3443,7 +3501,8 @@ function get_tbl_precios_producto(codprod,idcontainer){
                                 </button>
                             </td>
                         </tr>
-                    `
+                        `;
+                    }
                 })
                 container.innerHTML = str;             
             }else{
@@ -3459,6 +3518,47 @@ function get_tbl_precios_producto(codprod,idcontainer){
     });
  
 };
+
+function guardar_precios_fila(idbtn, id, codprod){
+    const btn = document.getElementById(idbtn);
+    const precio = Number(document.getElementById('txtPrecioP' + id)?.value);
+    const precioA = Number(document.getElementById('txtPrecioA' + id)?.value);
+    const precioB = Number(document.getElementById('txtPrecioB' + id)?.value);
+    if (!isFinite(precio) || !isFinite(precioA) || !isFinite(precioB) || precio < 0 || precioA < 0 || precioB < 0) {
+        F.AvisoError('Revise los precios de la fila');
+        return;
+    }
+    const htmlOriginal = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fal fa-save fa-spin"></i>';
+    }
+    axios.post(GlobalUrlCalls + '/productos/update_precios_fila', {
+        token: TOKEN,
+        sucursal: GlobalEmpnit,
+        id,
+        codprod,
+        precio,
+        precio_a: precioA,
+        precio_b: precioB
+    })
+    .then((response) => {
+        if (response.status.toString() !== '200') throw new Error('error');
+        const data = response.data;
+        if (data && data.toString() === 'error') throw new Error('error');
+        if (!(Number(data && data.rowsAffected && data.rowsAffected[0]) > 0)) throw new Error('error');
+        F.Aviso('Precios actualizados');
+    })
+    .catch(() => {
+        F.AvisoError('No se pudieron guardar los precios');
+    })
+    .finally(() => {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = htmlOriginal || '<i class="fal fa-save"></i>';
+        }
+    });
+}
 function habilitar_medida_precio(){
 
     

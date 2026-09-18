@@ -146,6 +146,33 @@ router.post("/insert_producto", async(req,res)=>{
      
 });
 
+router.post("/update_precios_fila", async(req,res)=>{
+
+    const {token, sucursal, id, codprod, precio, precio_a, precio_b} = req.body || {};
+    const idNum = Number(id) || 0;
+    const prod = String(codprod == null ? '' : codprod).replace(/'/g, "''").trim();
+    const p = Number(precio);
+    const pa = Number(precio_a);
+    const pb = Number(precio_b);
+
+    if (!idNum || !prod || !isFinite(p) || !isFinite(pa) || !isFinite(pb) || p < 0 || pa < 0 || pb < 0) {
+        res.send({ error: 'Precios inválidos', rowsAffected: [0], recordset: [] });
+        return;
+    }
+
+    const qry = `
+        UPDATE PRECIOS SET
+            PRECIO=${p},
+            PRECIO_A=${pa},
+            PRECIO_B=${pb},
+            LASTUPDATE=GETDATE()
+        WHERE ID=${idNum} AND CODPROD='${prod}';
+    `;
+
+    execute.QueryToken(res, qry, token);
+
+});
+
 router.post("/update_precio_medida", async(req,res)=>{
    
     const {token,sucursal,codprod,tipo,codmedida,equivale,precio,bono,margen} = req.body;
