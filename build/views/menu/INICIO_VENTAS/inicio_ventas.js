@@ -6,7 +6,6 @@ var VENTAS_EMBED_SCRIPTS = {
     btnMenuAvancePG: VENTAS_EMBED_BASE + 'view_avance_procter_vendedor.js',
     btnMenuNuevoPedido: VENTAS_EMBED_BASE + 'view_pedidos.js',
     btnMenuCenso: VENTAS_EMBED_BASE + 'view_censo.js',
-    btnMenuOfertas: '../views/inventarios_ofertas/view_ofertas_catalogo.js',
 };
 
 function ventas_getMes() {
@@ -26,6 +25,7 @@ function ventas_onHeaderFiltersChange() {
         if (alcance !== 'TODAS') ventas_cxc_cargar_listado();
     }
     if (ventas_currentPane === 'nueve') ventas_cargar_faltantes_merc();
+    if (ventas_currentPane === 'diez') ventas_ofertas_cargar();
 }
 
 function ventas_getSucursal() {
@@ -252,6 +252,9 @@ function getView(){
                         <div class="tab-pane fade" id="nueve" role="tabpanel" aria-labelledby="home-tab">
                             ${view.vista_faltantes_mercaderistas()}
                         </div>
+                        <div class="tab-pane fade" id="diez" role="tabpanel" aria-labelledby="home-tab">
+                            ${view.vista_ofertas()}
+                        </div>
                     </div>
                     </div>
                 </div>
@@ -294,11 +297,16 @@ function getView(){
                             <a class="nav-link negrita text-danger" id="tab-nueve" data-toggle="tab" href="#nueve" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-diez" data-toggle="tab" href="#diez" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>
+                        </li>
                     </ul>
 
                 ${view.vista_creditos_modales()}
                 ${view.modal_faltantes_mercaderistas()}
                 ${view.modal_detalle_documento()}
+                ${view.modal_ofertas()}
             </div>
             `
         },
@@ -521,6 +529,90 @@ function getView(){
                                 <tr><td colspan="3" class="text-center text-muted py-3">Cargando...</td></tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>`;
+        },
+        vista_ofertas:()=>{
+            return `
+            <div class="card card-rounded shadow border-0 ventas-ofertas-sec">
+                <div class="card-body p-2 p-md-3">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between mb-2">
+                        <div>
+                            <h5 class="negrita text-base mb-0"><i class="fal fa-tags mr-1"></i> Ofertas vigentes</h5>
+                            <small class="text-muted" id="lbVentasOfertasTotal">0 ofertas</small>
+                        </div>
+                    </div>
+                    <input type="search" class="form-control mb-2" id="txtVentasOfertasBuscar"
+                        placeholder="Buscar oferta...">
+                    <div id="ventasOfertasLista">
+                        <div class="text-center text-muted py-3">Cargando ofertas...</div>
+                    </div>
+                </div>
+            </div>`;
+        },
+        modal_ofertas:()=>{
+            return `
+            <div class="modal fade ped-modal-detalle ped-modal-detalle--wide ped-modal-detalle--tall" id="modalVentasOferta" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+                    <div class="modal-content">
+                        <div class="ped-modal-detalle__header">
+                            <div>
+                                <h5 class="negrita mb-0" id="lbVentasOfertaTitulo">Oferta</h5>
+                                <small class="text-muted" id="lbVentasOfertaMeta"></small>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-circle ped-modal-detalle__close hand" data-dismiss="modal" aria-label="Cerrar">
+                                <i class="fal fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body ped-modal-detalle__body">
+                            <div class="mb-3" id="ventasOfertaFotoBox"></div>
+                            <div class="row">
+                                <div class="col-12 col-md-6 mb-3 mb-md-0">
+                                    <div class="negrita mb-2"><i class="fal fa-boxes mr-1"></i> Productos de venta</div>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover mb-0">
+                                            <thead class="bg-base text-white">
+                                                <tr><th>CODPROD</th><th>DESPROD</th><th>MARCA</th></tr>
+                                            </thead>
+                                            <tbody id="tblVentasOfertaProd"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="negrita mb-2"><i class="fal fa-gift mr-1"></i> Productos BONI</div>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover mb-0">
+                                            <thead class="bg-base text-white">
+                                                <tr><th>CODPROD</th><th>DESPROD</th><th>MARCA</th></tr>
+                                            </thead>
+                                            <tbody id="tblVentasOfertaBoni"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade ped-modal-detalle" id="modalVentasOfertaFoto" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="ped-modal-detalle__header">
+                            <h5 class="negrita mb-0">Foto de la oferta</h5>
+                            <button type="button" class="btn btn-sm btn-circle ped-modal-detalle__close hand" data-dismiss="modal" aria-label="Cerrar">
+                                <i class="fal fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <img id="imgVentasOfertaFull" alt="Foto oferta" style="max-width:100%;max-height:70vh">
+                        </div>
+                        <div class="modal-footer">
+                            <a class="btn btn-info negrita" id="btnVentasOfertaDescargar" href="#" download>
+                                <i class="fal fa-download mr-1"></i> Descargar
+                            </a>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                        </div>
                     </div>
                 </div>
             </div>`;
@@ -1114,6 +1206,28 @@ function addListeners(){
         });
     });
 
+    document.getElementById('btnMenuOfertas')?.addEventListener('click', () => {
+        ventas_showPanel('diez', 'btnMenuOfertas', () => {
+            ventas_ofertas_cargar();
+        });
+    });
+    document.getElementById('txtVentasOfertasBuscar')?.addEventListener('input', ventas_ofertas_filtrar);
+    if (!document.getElementById('ventas-ofertas-styles')) {
+        const st = document.createElement('style');
+        st.id = 'ventas-ofertas-styles';
+        st.textContent = `
+            .ventas-oferta-thumb {
+                flex: 0 0 3.4rem; width: 3.4rem; height: 3.4rem; border-radius: 10px;
+                overflow: hidden; background: #ede9fe; color: #6d28d9;
+                display: flex; align-items: center; justify-content: center; font-weight: 800;
+            }
+            .ventas-oferta-thumb img { width: 100%; height: 100%; object-fit: cover; }
+            .ventas-oferta-card:hover { box-shadow: 0 8px 18px rgba(15,23,42,.08); }
+            body.sygma-dark .ventas-oferta-thumb { background: #312e81; color: #e9d5ff; }
+        `;
+        document.head.appendChild(st);
+    }
+
     document.getElementById('tblDataVentasFaltMerc')?.addEventListener('click', ventas_on_faltantes_list_click);
     document.getElementById('tblVentasFaltMercCards')?.addEventListener('click', ventas_on_faltantes_list_click);
     document.getElementById('txtVentasFaltMercBuscar')?.addEventListener('input', ventas_filtrar_faltantes_merc);
@@ -1193,6 +1307,9 @@ function initView(){
 
 function destroyView(){
     ventas_teardownEmbed();
+    ventas_ofertas_cache = [];
+    try { $('#modalVentasOferta').modal('hide'); } catch (e) {}
+    try { $('#modalVentasOfertaFoto').modal('hide'); } catch (e) {}
     if (typeof ventas_cxc_listeners_ready !== 'undefined') ventas_cxc_listeners_ready = false;
     ventas_currentPane = 'uno';
     ventas_toggleSidebar(false);
@@ -1858,6 +1975,168 @@ function ventas_ver_faltantes_visita(codclie, fecha, nom) {
         .catch(() => {
             if (body) body.innerHTML = '<div class="text-center text-muted py-3">No hay visita de mercaderista para este cliente</div>';
         });
+}
+
+var ventas_ofertas_cache = [];
+
+function ventas_ofertas_esc(s) {
+    return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function ventas_ofertas_num(n) {
+    const v = Number(n);
+    return Number.isFinite(v) ? String(v) : '0';
+}
+
+function ventas_ofertas_fecha(s) {
+    const x = String(s || '').slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(x)) return '';
+    const p = x.split('-');
+    return p[2] + '/' + p[1] + '/' + p[0];
+}
+
+function ventas_ofertas_vigencia(r) {
+    if (String(r.TIPO_VIGENCIA || '').toUpperCase() === 'VENCIMIENTO') {
+        const del = ventas_ofertas_fecha(r.FECHA_DEL);
+        const al = ventas_ofertas_fecha(r.FECHA_AL);
+        return (del && al) ? (del + ' al ' + al) : 'Con vencimiento';
+    }
+    return 'Vigente';
+}
+
+function ventas_ofertas_img(r) {
+    if (r && r.IMAGEN_URL) return r.IMAGEN_URL;
+    const n = String(r && r.IMAGEN ? r.IMAGEN : '').trim();
+    if (!n) return '';
+    const path = n.indexOf('/') === 0 ? n : ('/OFERTAS/' + n);
+    return '/storage/file?path=' + encodeURIComponent(path);
+}
+
+function ventas_ofertas_render(rows) {
+    const box = document.getElementById('ventasOfertasLista');
+    const lb = document.getElementById('lbVentasOfertasTotal');
+    if (lb) lb.textContent = (rows.length) + (rows.length === 1 ? ' oferta' : ' ofertas');
+    if (!box) return;
+    if (!rows.length) {
+        box.innerHTML = '<div class="text-center text-muted py-3">No hay ofertas vigentes para esta sede.</div>';
+        return;
+    }
+    box.innerHTML = rows.map((r) => {
+        const img = ventas_ofertas_img(r);
+        const id = Number(r.CODOFERTA) || 0;
+        return `
+            <div class="card card-rounded shadow-sm border-0 mb-2 hand ventas-oferta-card" onclick="ventas_ofertas_abrir(${id})">
+                <div class="card-body py-2 px-3 d-flex align-items-center">
+                    <div class="ventas-oferta-thumb mr-3">${img ? `<img src="${ventas_ofertas_esc(img)}" alt="">` : id}</div>
+                    <div class="min-width-0 flex-grow-1">
+                        <div class="negrita">${ventas_ofertas_esc(r.DESOFERTA)}</div>
+                        <small class="text-muted">${ventas_ofertas_esc(ventas_ofertas_vigencia(r))}
+                            · Unid. ${ventas_ofertas_num(r.UNIDADES)}
+                            · Bonif. ${ventas_ofertas_num(r.CANTIDAD_BONIF)}
+                            · ${Number(r.NPROD) || 0} venta · ${Number(r.NBONI) || 0} BONI</small>
+                    </div>
+                </div>
+            </div>`;
+    }).join('');
+}
+
+function ventas_ofertas_filtrar() {
+    const q = String(document.getElementById('txtVentasOfertasBuscar')?.value || '').toLowerCase().trim();
+    if (!q) {
+        ventas_ofertas_render(ventas_ofertas_cache);
+        return;
+    }
+    ventas_ofertas_render(ventas_ofertas_cache.filter((r) => {
+        return String(r.DESOFERTA || '').toLowerCase().indexOf(q) >= 0
+            || String(r.CODOFERTA || '').indexOf(q) >= 0;
+    }));
+}
+
+function ventas_ofertas_cargar() {
+    const box = document.getElementById('ventasOfertasLista');
+    if (box) box.innerHTML = `<div class="text-center py-3">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</div>`;
+    axios.post(GlobalUrlCalls + '/ofertas/catalogo', {
+        token: TOKEN,
+        sucursal: ventas_getSucursal()
+    })
+        .then((res) => {
+            if (!res.data || res.data.ok === false) throw new Error('error');
+            ventas_ofertas_cache = res.data.recordset || [];
+            ventas_ofertas_filtrar();
+        })
+        .catch(() => {
+            ventas_ofertas_cache = [];
+            if (box) box.innerHTML = '<div class="text-center text-muted py-3">No se pudieron cargar las ofertas.</div>';
+        });
+}
+
+function ventas_ofertas_filas(rows, empty) {
+    if (!rows.length) return `<tr><td colspan="3" class="text-center text-muted">${empty}</td></tr>`;
+    return rows.map((r) => `
+        <tr>
+            <td>${ventas_ofertas_esc(r.CODPROD)}</td>
+            <td>${ventas_ofertas_esc(r.DESPROD)}</td>
+            <td>${ventas_ofertas_esc(r.DESMARCA)}</td>
+        </tr>
+    `).join('');
+}
+
+function ventas_ofertas_abrir(codoferta) {
+    const id = Number(codoferta) || 0;
+    const r = ventas_ofertas_cache.find((x) => Number(x.CODOFERTA) === id);
+    if (!r) {
+        F.AvisoError('No se encontró la oferta');
+        return;
+    }
+    const titulo = document.getElementById('lbVentasOfertaTitulo');
+    const meta = document.getElementById('lbVentasOfertaMeta');
+    if (titulo) titulo.textContent = r.DESOFERTA || ('Oferta ' + id);
+    if (meta) meta.textContent = `Código ${id} · Unidades ${ventas_ofertas_num(r.UNIDADES)} · Bonif. ${ventas_ofertas_num(r.CANTIDAD_BONIF)} · ${ventas_ofertas_vigencia(r)}`;
+    const img = ventas_ofertas_img(r);
+    const foto = document.getElementById('ventasOfertaFotoBox');
+    if (foto) {
+        foto.innerHTML = img ? `
+            <div class="text-center mb-2">
+                <button type="button" class="btn btn-sm btn-info negrita mr-1" onclick="ventas_ofertas_ver_foto('${ventas_ofertas_esc(img)}','${ventas_ofertas_esc(r.IMAGEN || ('oferta_' + id + '.jpg'))}')">
+                    <i class="fal fa-image mr-1"></i> Ver foto
+                </button>
+                <a class="btn btn-sm btn-outline-info negrita" href="${ventas_ofertas_esc(img)}&download=1" download="${ventas_ofertas_esc(r.IMAGEN || 'oferta.jpg')}">
+                    <i class="fal fa-download mr-1"></i> Descargar
+                </a>
+            </div>` : '<div class="text-muted small">Esta oferta no tiene foto.</div>';
+    }
+    const tProd = document.getElementById('tblVentasOfertaProd');
+    const tBoni = document.getElementById('tblVentasOfertaBoni');
+    if (tProd) tProd.innerHTML = `<tr><td colspan="3" class="text-center">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</td></tr>`;
+    if (tBoni) tBoni.innerHTML = `<tr><td colspan="3" class="text-center">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</td></tr>`;
+    $('#modalVentasOferta').modal('show');
+    axios.post(GlobalUrlCalls + '/ofertas/productos', { token: TOKEN, sucursal: ventas_getSucursal(), codoferta: id })
+        .then((res) => {
+            const rows = (res.data && res.data.recordset) ? res.data.recordset : [];
+            const prod = rows.filter((x) => String(x.TIPO || 'PROD').toUpperCase() !== 'BONI');
+            const boni = rows.filter((x) => String(x.TIPO || '').toUpperCase() === 'BONI');
+            if (tProd) tProd.innerHTML = ventas_ofertas_filas(prod, 'Sin productos de venta.');
+            if (tBoni) tBoni.innerHTML = ventas_ofertas_filas(boni, 'Sin productos BONI.');
+        })
+        .catch(() => {
+            if (tProd) tProd.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No se pudieron cargar.</td></tr>';
+            if (tBoni) tBoni.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No se pudieron cargar.</td></tr>';
+        });
+}
+
+function ventas_ofertas_ver_foto(url, nombre) {
+    const img = document.getElementById('imgVentasOfertaFull');
+    const a = document.getElementById('btnVentasOfertaDescargar');
+    if (img) img.src = url;
+    if (a) {
+        a.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'download=1';
+        a.setAttribute('download', nombre || 'oferta.jpg');
+    }
+    $('#modalVentasOfertaFoto').modal('show');
 }
 
 window._ventasCore = { initView, destroyView, getView, addListeners };

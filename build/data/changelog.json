@@ -1,5 +1,5 @@
 {
-  "version": "M.18.09.26 11:42",
+  "version": "M.18.09.26 16:26",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -4645,6 +4645,36 @@
       "FECHA": "18-09-2026",
       "HORA": "11:42",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.18.09.26 11:42"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "16:18",
+      "DESCRIPCION": "QUITAR OFERTAS DEL INICIO PROVEEDOR"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "16:18",
+      "DESCRIPCION": "OFERTAS DEL MENU VENDEDOR NO ROMPE LA NAVEGACION AL CAMBIAR DE SECCION"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "16:18",
+      "DESCRIPCION": "QUITAR PRECIO C D E F AL CREAR O EDITAR PRODUCTO"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "16:18",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.18.09.26 16:18"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "16:26",
+      "DESCRIPCION": "OFERTAS COMO SECCION NATIVA EN INICIO VENDEDOR"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "16:26",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.18.09.26 16:26"
     }
   ]
 }

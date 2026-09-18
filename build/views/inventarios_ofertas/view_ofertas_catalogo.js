@@ -177,8 +177,10 @@ function getView() {
         `
     };
 
-    root = document.getElementById('root');
-    root.innerHTML = view.body();
+    const host = (typeof root !== 'undefined' && root && root.nodeType === 1)
+        ? root
+        : document.getElementById('root');
+    if (host) host.innerHTML = view.body();
 }
 
 function ofertas_cat_render(rows) {
@@ -322,4 +324,7 @@ function destroyView() {
     ofertasCatCache = [];
     try { $('#modal_oferta_cat').modal('hide'); } catch (e) {}
     try { $('#modal_oferta_cat_foto').modal('hide'); } catch (e) {}
+    document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove());
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('padding-right');
 }

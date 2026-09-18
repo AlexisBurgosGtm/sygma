@@ -113,8 +113,7 @@ router.post("/insert_producto", async(req,res)=>{
         PRECIO_D, PRECIO_E, PRECIO_F, PESO, LASTUPDATE,HABILITADO)
     SELECT '${codprod}' AS CODPROD, CODMEDIDA, 
         EQUIVALE, COSTO, 
-        PRECIO, PRECIO_A, PRECIO_B, PRECIO_C, 
-        PRECIO_D, PRECIO_E, PRECIO_F,
+        PRECIO, PRECIO_A, PRECIO_B, 0, 0, 0, 0,
         PESO, '${lastupdate}' AS LASTUPDATE,'SI' AS HABILITADO
     FROM TEMP_PRECIOS;
     INSERT INTO INVSALDO (EMPNIT, CODPROD,
@@ -271,8 +270,7 @@ router.post("/lista_precios_temp", async(req,res)=>{
     let qry = `
     SELECT ID,
     CODMEDIDA, EQUIVALE, COSTO,
-    PRECIO, PRECIO_A, PRECIO_B, 
-    PRECIO_C, PRECIO_D, PRECIO_E, PRECIO_F, PESO
+    PRECIO, PRECIO_A, PRECIO_B, PESO
         FROM 
     TEMP_PRECIOS 
     ;
@@ -286,17 +284,24 @@ router.post("/lista_precios_temp", async(req,res)=>{
 
 router.post("/insert_temp_precio", async(req,res)=>{
    
-    const {token,sucursal,codprod,usuario,codmedida,equivale,peso,costo,preciop,precioa,preciob,precioc,preciod,precioe,preciof} = req.body;
-
- 
+    const {token,sucursal,codprod,usuario,codmedida,equivale,peso,costo,preciop,precioa,preciob} = req.body;
+    const p = Number(preciop) || 0;
+    const pa = Number(precioa) || 0;
+    const pb = Number(preciob) || 0;
+    const eq = Number(equivale) || 0;
+    const cst = Number(costo) || 0;
+    const pe = Number(peso) || 0;
+    const med = String(codmedida == null ? '' : codmedida).replace(/'/g, "''");
+    const prod = String(codprod == null ? '' : codprod).replace(/'/g, "''");
+    const usr = String(usuario == null ? '' : usuario).replace(/'/g, "''");
 
     let qry = `
     INSERT INTO TEMP_PRECIOS 
     (CODPROD,CODMEDIDA,EQUIVALE,COSTO,
     PRECIO,PRECIO_A,PRECIO_B,PRECIO_C,PRECIO_D,PRECIO_E,PRECIO_F,PESO,USUARIO) 
     VALUES 
-    ('${codprod}','${codmedida}',${equivale},${costo},
-    ${preciop},${precioa},${preciob},${precioc},${preciod},${precioe},${preciof},${peso},'${usuario}');
+    ('${prod}','${med}',${eq},${cst},
+    ${p},${pa},${pb},0,0,0,0,${pe},'${usr}');
     `
     
     execute.QueryToken(res,qry,token);
@@ -426,14 +431,23 @@ router.post("/delete_producto", async(req,res)=>{
 
 router.post("/insert_precio", async(req,res)=>{
    
-    const {token,sucursal,codprod,codmedida,equivale,peso,costo,preciop,precioa,preciob,precioc,preciod,precioe,preciof,lastupdate} = req.body;
+    const {token,sucursal,codprod,codmedida,equivale,peso,costo,preciop,precioa,preciob,lastupdate} = req.body;
+    const p = Number(preciop) || 0;
+    const pa = Number(precioa) || 0;
+    const pb = Number(preciob) || 0;
+    const eq = Number(equivale) || 0;
+    const cst = Number(costo) || 0;
+    const pe = Number(peso) || 0;
+    const med = String(codmedida == null ? '' : codmedida).replace(/'/g, "''");
+    const prod = String(codprod == null ? '' : codprod).replace(/'/g, "''");
+    const lu = String(lastupdate == null ? '' : lastupdate).replace(/'/g, "''");
 
     let qry = `
     INSERT INTO PRECIOS 
     (CODPROD,CODMEDIDA,EQUIVALE,COSTO,PRECIO,PRECIO_A,PRECIO_B,PRECIO_C,PRECIO_D,PRECIO_E,PRECIO_F,PESO,LASTUPDATE,HABILITADO) 
     VALUES 
-    ('${codprod}','${codmedida}',${equivale},${costo},${preciop},${precioa},${preciob},
-    ${precioc},${preciod},${precioe},${preciof},${peso},'${lastupdate}','SI');
+    ('${prod}','${med}',${eq},${cst},${p},${pa},${pb},
+    0,0,0,0,${pe},'${lu}','SI');
     `
    
     execute.QueryToken(res,qry,token);

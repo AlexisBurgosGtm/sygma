@@ -976,10 +976,6 @@ function getView(){
                                             <td>PRECIO</td>
                                             <td>PRECIO_A</td>
                                             <td>PRECIO_B</td>
-                                            <td>PRECIO_C</td>
-                                            <td>PRECIO_D</td>
-                                            <td>PRECIO_E</td>
-                                            <td>PRECIO_F</td>
                                             <td></td>
                                         </tr>
                                     </thead>
@@ -1112,74 +1108,6 @@ function getView(){
                                             </td>
                                             <td>
                                                 <button class="btn btn-circle btn-md btn-base hand shadow" onclick="get_lista_sucursales_precio('PRECIO_B')">
-                                                    <i class="fal fa-list"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="negrita">Precio C</td>
-                                            <td>
-                                                <input type="number" class="bg-amarillo form-control negrita text-danger" id="txtPreMayoreoC">
-                                            </td>
-                                            <td>
-                                                <input type="number" class="form-control negrita text-info" id="txtPreUtilidadMayoreoC" disabled=true>
-                                            </td>
-                                            <td>
-                                                <input type="number" class="form-control negrita text-info" id="txtPreMargenMayoreoC" disabled=true>
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-circle btn-md btn-base hand shadow" onclick="get_lista_sucursales_precio('PRECIO_C')">
-                                                    <i class="fal fa-list"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="negrita">Precio D</td>
-                                            <td>
-                                                <input type="number" class="bg-amarillo form-control negrita text-danger" id="txtPreMayoreoD">
-                                            </td>
-                                            <td>
-                                                <input type="number" class="form-control negrita text-info" id="txtPreUtilidadMayoreoD" disabled=true>
-                                            </td>
-                                            <td>
-                                                <input type="number" class="form-control negrita text-info" id="txtPreMargenMayoreoD" disabled=true>
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-circle btn-md btn-base hand shadow" onclick="get_lista_sucursales_precio('PRECIO_D')">
-                                                    <i class="fal fa-list"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="negrita">Precio E</td>
-                                            <td>
-                                                <input type="number" class="bg-amarillo form-control negrita text-danger" id="txtPreMayoreoE">
-                                            </td>
-                                            <td>
-                                                <input type="number" class="form-control negrita text-info" id="txtPreUtilidadMayoreoE" disabled=true>
-                                            </td>
-                                            <td>
-                                                <input type="number" class="form-control negrita text-info" id="txtPreMargenMayoreoE" disabled=true>
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-circle btn-md btn-base hand shadow" onclick="get_lista_sucursales_precio('PRECIO_E')">
-                                                    <i class="fal fa-list"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="negrita">Precio F</td>
-                                            <td>
-                                                <input type="number" class="bg-amarillo form-control negrita text-danger" id="txtPreMayoreoF">
-                                            </td>
-                                            <td>
-                                                <input type="number" class="form-control negrita text-info" id="txtPreUtilidadMayoreoF" disabled=true>
-                                            </td>
-                                            <td>
-                                                <input type="number" class="form-control negrita text-info" id="txtPreMargenMayoreoF" disabled=true>
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-circle btn-md btn-base hand shadow" onclick="get_lista_sucursales_precio('PRECIO_F')">
                                                     <i class="fal fa-list"></i>
                                                 </button>
                                             </td>
@@ -2127,10 +2055,6 @@ function listeners_precios(){
             document.getElementById('txtPrePublico').value = '';
             document.getElementById('txtPreMayoreoA').value = '';
             document.getElementById('txtPreMayoreoB').value = '';
-            document.getElementById('txtPreMayoreoC').value = '';
-            document.getElementById('txtPreMayoreoD').value = '';
-            document.getElementById('txtPreMayoreoE').value = '';
-            document.getElementById('txtPreMayoreoF').value = '';
 
             $("#modal_nuevo_precio").modal('show');
 
@@ -2154,18 +2078,6 @@ function listeners_precios(){
     });
     document.getElementById('txtPreMayoreoB').addEventListener('input',()=>{
         calcular_utilidad_precios('B');  
-    });
-    document.getElementById('txtPreMayoreoC').addEventListener('input',()=>{
-        calcular_utilidad_precios('C');  
-    });
-    document.getElementById('txtPreMayoreoD').addEventListener('input',()=>{
-        calcular_utilidad_precios('D');  
-    });
-    document.getElementById('txtPreMayoreoE').addEventListener('input',()=>{
-        calcular_utilidad_precios('E');  
-    });
-    document.getElementById('txtPreMayoreoF').addEventListener('input',()=>{
-        calcular_utilidad_precios('F');  
     });
 
     document.getElementById('txtPrePublico').addEventListener('input',()=>{
@@ -2204,10 +2116,6 @@ function listeners_precios(){
         };
 
         let txtPreMayoreoB = document.getElementById('txtPreMayoreoB').value || '0';
-        let txtPreMayoreoC = document.getElementById('txtPreMayoreoC').value || '0';
-        let txtPreMayoreoD = document.getElementById('txtPreMayoreoD').value || '0';
-        let txtPreMayoreoE = document.getElementById('txtPreMayoreoE').value || '0';
-        let txtPreMayoreoF = document.getElementById('txtPreMayoreoF').value || '0';
 
         if(txtPreEquivale.toString()=='0'){
             document.getElementById('txtPreEquivale').value='1';
@@ -2221,7 +2129,7 @@ function listeners_precios(){
 
         if(GlobalBolEditando==false){
             //se está creando un nuevo producto
-            insert_temp_precio(codprod,cmbPreMedida.value,txtPreEquivale,'0',txtPreTotalCosto,txtPrePublico,txtPreMayoreoA,txtPreMayoreoB,txtPreMayoreoC,txtPreMayoreoD,txtPreMayoreoE,txtPreMayoreoF)
+            insert_temp_precio(codprod,cmbPreMedida.value,txtPreEquivale,'0',txtPreTotalCosto,txtPrePublico,txtPreMayoreoA,txtPreMayoreoB)
             .then(()=>{
     
                 btnPreGuardar.innerHTML = `<i class="fal fa-save"></i>`;
@@ -2242,7 +2150,7 @@ function listeners_precios(){
 
         }else{
             //se está editando el producto
-            insert_precio(codprod,cmbPreMedida.value,txtPreEquivale,'0',txtPreTotalCosto,txtPrePublico,txtPreMayoreoA,txtPreMayoreoB,txtPreMayoreoC,txtPreMayoreoD,txtPreMayoreoE,txtPreMayoreoF)
+            insert_precio(codprod,cmbPreMedida.value,txtPreEquivale,'0',txtPreTotalCosto,txtPrePublico,txtPreMayoreoA,txtPreMayoreoB)
             .then(()=>{
     
                 btnPreGuardar.innerHTML = `<i class="fal fa-save"></i>`;
@@ -2303,7 +2211,7 @@ function get_lista_sucursales_precio(precio){
 
 };
 
-function insert_temp_precio(codprod,codmedida,equivale,peso,costo,preciop,precioa,preciob,precioc,preciod,precioe,preciof){
+function insert_temp_precio(codprod,codmedida,equivale,peso,costo,preciop,precioa,preciob){
 
 
     return new Promise((resolve,reject)=>{
@@ -2320,11 +2228,7 @@ function insert_temp_precio(codprod,codmedida,equivale,peso,costo,preciop,precio
                 costo:costo,
                 preciop:preciop,
                 precioa:precioa,
-                preciob:preciob,
-                precioc:precioc,
-                preciod:preciod,
-                precioe:precioe,
-                preciof:preciof
+                preciob:preciob
             })
         .then((response) => {
             if(response.status.toString()=='200'){
@@ -2365,10 +2269,6 @@ function calcular_utilidad_precios(tipoprecio){
     let pre_publico = document.getElementById('txtPrePublico').value || 0;
     let pre_mayoreoa = document.getElementById('txtPreMayoreoA').value || 0;
     let pre_mayoreob = document.getElementById('txtPreMayoreoB').value || 0;
-    let pre_mayoreoc = document.getElementById('txtPreMayoreoC').value || 0;
-    let pre_mayoreod = document.getElementById('txtPreMayoreoD').value || 0;
-    let pre_mayoreoe = document.getElementById('txtPreMayoreoE').value || 0;
-    let pre_mayoreof = document.getElementById('txtPreMayoreoF').value || 0;
     
     try {
         switch (tipoprecio) {
@@ -2384,31 +2284,10 @@ function calcular_utilidad_precios(tipoprecio){
                 document.getElementById('txtPreUtilidadMayoreoB').value = Number(pre_mayoreob) - Number(costomedida);
                 document.getElementById('txtPreMargenMayoreoB').value =   (((Number(pre_mayoreob) - Number(costomedida)) / Number(pre_mayoreob)) * 100).toFixed(2);
                 break;
-            case 'C':
-                document.getElementById('txtPreUtilidadMayoreoC').value = Number(pre_mayoreoc) - Number(costomedida);
-                document.getElementById('txtPreMargenMayoreoC').value =   (((Number(pre_mayoreoc) - Number(costomedida)) / Number(pre_mayoreoc)) * 100).toFixed(2);
-                break;
-            case 'D':
-                document.getElementById('txtPreUtilidadMayoreoD').value = Number(pre_mayoreod) - Number(costomedida);
-                document.getElementById('txtPreMargenMayoreoD').value =   (((Number(pre_mayoreod) - Number(costomedida)) / Number(pre_mayoreod)) * 100).toFixed(2);                   
-                break;
-            case 'E':
-                document.getElementById('txtPreUtilidadMayoreoE').value = Number(pre_mayoreoe) - Number(costomedida);
-                document.getElementById('txtPreMargenMayoreoE').value =   (((Number(pre_mayoreoe) - Number(costomedida)) / Number(pre_mayoreoe)) * 100).toFixed(2);    
-                break;
-            case 'F':
-                document.getElementById('txtPreUtilidadMayoreoF').value = Number(pre_mayoreof) - Number(costomedida);
-                document.getElementById('txtPreMargenMayoreoF').value =   (((Number(pre_mayoreof) - Number(costomedida)) / Number(pre_mayoreof)) * 100).toFixed(2);                    
-                break;
             case 'T':
                 calcular_utilidad_precios('P');
                 calcular_utilidad_precios('A');
                 calcular_utilidad_precios('B');
-                calcular_utilidad_precios('C');
-                calcular_utilidad_precios('D');
-                calcular_utilidad_precios('E');
-                calcular_utilidad_precios('F');
-                
                 break;
         }
     } catch (error) {
@@ -3002,10 +2881,6 @@ function get_tbl_precios(){
                                 <td>${F.setMoneda(r.PRECIO,'Q')}</td>
                                 <td>${F.setMoneda(r.PRECIO_A,'Q')}</td>
                                 <td>${F.setMoneda(r.PRECIO_B,'Q')}</td>
-                                <td>${F.setMoneda(r.PRECIO_C,'Q')}</td>
-                                <td>${F.setMoneda(r.PRECIO_D,'Q')}</td>
-                                <td>${F.setMoneda(r.PRECIO_E,'Q')}</td>
-                                <td>${F.setMoneda(r.PRECIO_F,'Q')}</td>
                                 <td>
                                     <button class="btn-md btn-circle btn-danger hand shadow" id="${idbtnE}" onclick="delete_temp_precio('${idbtnE}','${r.ID}')">
                                         <i class="fal fa-trash"></i>
@@ -3489,10 +3364,6 @@ function get_tbl_precios_producto(codprod,idcontainer){
                             <td>${F.setMoneda(r.PRECIO,'Q')}</td>
                             <td>${F.setMoneda(r.PRECIO_A,'Q')}</td>
                             <td>${F.setMoneda(r.PRECIO_B,'Q')}</td>
-                            <td>${F.setMoneda(r.PRECIO_C,'Q')}</td>
-                            <td>${F.setMoneda(r.PRECIO_D,'Q')}</td>
-                            <td>${F.setMoneda(r.PRECIO_E,'Q')}</td>
-                            <td>${F.setMoneda(r.PRECIO_F,'Q')}</td>
                             <td>
                                 <button class="btn-md btn-circle btn-danger hand shadow" 
                                     id="${idbtnE}" 
@@ -3620,7 +3491,7 @@ function get_lista_medidas_deshabilitadas_empresas(codprod){
     });
 }
 
-function insert_precio(codprod,codmedida,equivale,peso,costo,preciop,precioa,preciob,precioc,preciod,precioe,preciof){
+function insert_precio(codprod,codmedida,equivale,peso,costo,preciop,precioa,preciob){
 
 
     return new Promise((resolve,reject)=>{
@@ -3638,10 +3509,6 @@ function insert_precio(codprod,codmedida,equivale,peso,costo,preciop,precioa,pre
                 preciop:preciop,
                 precioa:precioa,
                 preciob:preciob,
-                precioc:precioc,
-                preciod:preciod,
-                precioe:precioe,
-                preciof:preciof,
                 lastupdate:F.getFecha()
             })
         .then((response) => {

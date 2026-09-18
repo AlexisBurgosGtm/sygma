@@ -97,7 +97,6 @@ var PROVEEDOR_EMBED_SCRIPTS = {
     btnMenuCoberturaClientes: PROVEEDOR_EMBED_BASE + 'view_objetivo_cobertura.js',
     btnMenuCoberturaMarcas: PROVEEDOR_EMBED_BASE + 'view_cobertura_marcas.js',
     btnMenuMercaderistas: PROVEEDOR_EMBED_BASE + 'view_mercaderistas.js',
-    btnMenuOfertas: '../views/inventarios_ofertas/view_ofertas_catalogo.js',
 };
 
 var PROVEEDOR_MODERN_EMBEDS = new Set([
@@ -107,7 +106,6 @@ var PROVEEDOR_MODERN_EMBEDS = new Set([
     'btnMenuCoberturaClientes',
     'btnMenuCoberturaMarcas',
     'btnMenuMercaderistas',
-    'btnMenuOfertas',
 ]);
 
 function proveedor_toggleSidebar(forceOpen) {
@@ -371,7 +369,6 @@ function getView(){
                 { id: 'btnMenuCoberturaMarcas',   label: 'Cobertura marcas',         icon: 'fa-tags',       color: 'info' },
                 { id: 'btnMenuRptVisitasMapa',   label: 'Visitas vendedor mapa',     icon: 'fa-map-signs',  color: 'secondary' },
                 { id: 'btnMenuMercaderistas',    label: 'Mercaderistas',             icon: 'fa-clipboard-list', color: 'info' },
-                { id: 'btnMenuOfertas',          label: 'Ofertas',                   icon: 'fa-tags',       color: 'success' },
                 { id: 'btnMenuObjetivos',        label: 'Objetivos',                 icon: 'fa-list',       color: 'base' },
                 { id: 'btnMenuInventarioRetroactivo', label: 'Inventario retroactivo', icon: 'fa-box',     color: 'secondary' },
             ];
