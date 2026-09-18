@@ -87,8 +87,6 @@ router.post("/update_costos_compra", async(req,res)=>{
     
     qry = qry_productos + qry_precios;
 
-    console.log(qry);
-
     res.send('error');
     
     //execute.QueryToken(res,qry,token);
@@ -489,8 +487,6 @@ router.post("/insertcompra", async(req,res)=>{
     let qryStatusDocCot = `UPDATE DOCUMENTOS SET STATUS='D' WHERE EMPNIT='${sucursal}' AND CODDOC='${coddoc_origen}' AND CORRELATIVO=${correlativo_origen};`
 
     let qry = qryDocumentos + qryDocproductos + qryStatusDocCot + qryTipodocumentos;
-
- console.log(qry)
  
     
     execute.QueryToken(res,qry,token);

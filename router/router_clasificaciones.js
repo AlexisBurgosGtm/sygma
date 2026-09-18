@@ -41,8 +41,7 @@ router.post("/listado", async(req,res)=>{
             break;
     }
     
-    console.log(qry);
-    
+     
     execute.QueryToken(res,qry,token);
      
 });

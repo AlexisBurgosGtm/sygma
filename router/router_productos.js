@@ -23,8 +23,6 @@ router.post("/lista_precios_general", async(req,res)=>{
                 view_lista_productos_precios 
             `
 
-            console.log(qry)
-
     execute.QueryToken(res,qry,token);
      
 });
@@ -147,17 +145,22 @@ router.post("/insert_producto", async(req,res)=>{
 
 router.post("/update_precios_fila", async(req,res)=>{
 
-    const {token, sucursal, id, codprod, precio, precio_a, precio_b} = req.body || {};
+    const {token, sucursal, id, codprod, codmedida, precio, precio_a, precio_b} = req.body || {};
     const idNum = Number(id) || 0;
     const prod = String(codprod == null ? '' : codprod).replace(/'/g, "''").trim();
+    const med = String(codmedida == null ? '' : codmedida).replace(/'/g, "''").trim();
     const p = Number(precio);
     const pa = Number(precio_a);
     const pb = Number(precio_b);
 
-    if (!idNum || !prod || !isFinite(p) || !isFinite(pa) || !isFinite(pb) || p < 0 || pa < 0 || pb < 0) {
+    if (!prod || (!idNum && !med) || !isFinite(p) || !isFinite(pa) || !isFinite(pb) || p < 0 || pa < 0 || pb < 0) {
         res.send({ error: 'Precios inválidos', rowsAffected: [0], recordset: [] });
         return;
     }
+
+    const where = idNum
+        ? `ID=${idNum} AND CODPROD='${prod}'`
+        : `CODPROD='${prod}' AND CODMEDIDA='${med}'`;
 
     const qry = `
         UPDATE PRECIOS SET
@@ -165,7 +168,7 @@ router.post("/update_precios_fila", async(req,res)=>{
             PRECIO_A=${pa},
             PRECIO_B=${pb},
             LASTUPDATE=GETDATE()
-        WHERE ID=${idNum} AND CODPROD='${prod}';
+        WHERE ${where};
     `;
 
     execute.QueryToken(res, qry, token);

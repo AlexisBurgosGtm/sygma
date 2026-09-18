@@ -552,8 +552,6 @@ HAVING (CODEMP = ${codven})
             GROUP BY MARCAS.DESMARCA
     `;
 
-    console.log(qry)
-
     execute.QueryToken(res,qry,token);
      
 });
@@ -774,8 +772,6 @@ router.post("/pedidos_pendientes_embarque_productos_bonif", async(req,res)=>{
             ORDER BY MARCAS.DESMARCA, PRODUCTOS.DESPROD;
             `;
     
-        console.log(qry);
-
 
     execute.QueryToken(res,qry,token);
      

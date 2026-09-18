@@ -1,5 +1,5 @@
 {
-  "version": "M.18.09.26 16:26",
+  "version": "M.18.09.26 17:29",
   "entries": [
     {
       "FECHA": "20-08-2025",
@@ -4675,6 +4675,86 @@
       "FECHA": "18-09-2026",
       "HORA": "16:26",
       "DESCRIPCION": "ACTUALIZACION DE VERSION A M.18.09.26 16:26"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "16:29",
+      "DESCRIPCION": "ELIMINAR CONSOLE LOG DE QUERIES EN BACKEND"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "16:29",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.18.09.26 16:29"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "16:35",
+      "DESCRIPCION": "TABLA COMPACTA EN INVENTARIOS LISTA DE PRECIOS"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "16:35",
+      "DESCRIPCION": "COLUMNA DESPROD PRIORITARIA Y HAB EN VERDE O ROJO"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "16:35",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.18.09.26 16:35"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "16:42",
+      "DESCRIPCION": "QUITAR COD3 Y TIPO EN LISTA DE PRECIOS"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "16:42",
+      "DESCRIPCION": "DESPROD COMPLETO Y TABLA MAS ALTA EN LISTA DE PRECIOS"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "16:42",
+      "DESCRIPCION": "MODAL PARA EDITAR PRECIOS DESDE LISTA DE PRECIOS"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "16:42",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.18.09.26 16:42"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "17:21",
+      "DESCRIPCION": "FILTRO TODOS HABILITADOS Y DESHABILITADOS EN LISTA DE PRECIOS"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "17:21",
+      "DESCRIPCION": "EXPORTAR EXCEL CON EL FILTRO DE HABILITADO"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "17:21",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.18.09.26 17:21"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "17:29",
+      "DESCRIPCION": "BADGE CONTROLADO SI/NO EN CREAR Y EDITAR OFERTAS"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "17:29",
+      "DESCRIPCION": "COLUMNA CONTROLADO EN LISTA DE OFERTAS"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "17:29",
+      "DESCRIPCION": "SECCION OFERTAS EN INICIO PROVEEDOR SOLO CONTROLADAS"
+    },
+    {
+      "FECHA": "18-09-2026",
+      "HORA": "17:29",
+      "DESCRIPCION": "ACTUALIZACION DE VERSION A M.18.09.26 17:29"
     }
   ]
 }

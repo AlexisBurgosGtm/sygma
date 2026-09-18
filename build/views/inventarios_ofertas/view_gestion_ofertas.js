@@ -158,6 +158,16 @@ function getView() {
         }
         .ofertas-pill.is-on { background:#dcfce7; color:#166534; }
         .ofertas-pill.is-off { background:#fee2e2; color:#b91c1c; }
+        .ofertas-badge-ctrl {
+            border-radius:999px; font-weight:800; padding:0.28rem 0.9rem;
+            border:1px solid transparent; cursor:pointer; min-width:3.4rem;
+        }
+        .ofertas-badge-ctrl.is-si { background:#dcfce7; color:#166534; }
+        .ofertas-badge-ctrl.is-no { background:#fee2e2; color:#b91c1c; }
+        .ofertas-badge-ctrl:not(.is-on) { opacity:0.38; }
+        .ofertas-badge-ctrl.is-on { box-shadow:0 0 0 2px currentColor; }
+        body.sygma-dark .ofertas-badge-ctrl.is-si { background:#14532d; color:#86efac; }
+        body.sygma-dark .ofertas-badge-ctrl.is-no { background:#7f1d1d; color:#fecaca; }
         .ofertas-search-hits {
             max-height: 22rem;
             overflow-y: auto;
@@ -347,6 +357,12 @@ function getView() {
                             <input type="hidden" id="txtOfertaCod" value="0">
                             <label class="negrita small mb-1">Nombre de la oferta</label>
                             <input type="text" class="form-control" id="txtOfertaNombre" maxlength="200" placeholder="Ej. Combo verano">
+                            <label class="negrita small mb-1 mt-3">Controlado</label>
+                            <input type="hidden" id="txtOfertaControlado" value="SI">
+                            <div class="ofertas-chip-row mb-1">
+                                <button type="button" class="ofertas-badge-ctrl is-si is-on" id="btnOfertaCtrlSI">SI</button>
+                                <button type="button" class="ofertas-badge-ctrl is-no" id="btnOfertaCtrlNO">NO</button>
+                            </div>
                             <div class="row mt-2">
                                 <div class="col-12 col-md-6">
                                     <label class="negrita small mb-1">Unidades de producto</label>
@@ -471,6 +487,18 @@ function ofertas_mostrarProductos(r) {
     ofertas_cargarProductos(ofertasSelectedCod);
 }
 
+function ofertas_getControlado() {
+    return String(document.getElementById('txtOfertaControlado')?.value || 'SI').toUpperCase() === 'NO' ? 'NO' : 'SI';
+}
+
+function ofertas_setControladoUI(v) {
+    const ctrl = String(v || 'SI').toUpperCase() === 'NO' ? 'NO' : 'SI';
+    const hid = document.getElementById('txtOfertaControlado');
+    if (hid) hid.value = ctrl;
+    document.getElementById('btnOfertaCtrlSI')?.classList.toggle('is-on', ctrl === 'SI');
+    document.getElementById('btnOfertaCtrlNO')?.classList.toggle('is-on', ctrl === 'NO');
+}
+
 function ofertas_setVigenciaUI(tipo) {
     const vigente = String(tipo || 'VIGENTE').toUpperCase() !== 'VENCIMIENTO';
     const rV = document.querySelector('input[name="ofertasVigencia"][value="VIGENTE"]');
@@ -542,6 +570,7 @@ function ofertas_limpiarModal() {
     document.getElementById('txtOfertaImagenActual').value = '';
     ofertas_set_preview('');
     ofertas_setVigenciaUI('VIGENTE');
+    ofertas_setControladoUI('SI');
     ofertas_pintarSedes([]);
 }
 
@@ -576,6 +605,7 @@ function ofertas_abrirEditar(codoferta) {
             document.getElementById('txtOfertaAl').value = String(r.FECHA_AL || '').slice(0, 10);
             document.getElementById('lbOfertaModalTitulo').textContent = 'Editar oferta ' + ofertasEditando;
             ofertas_setVigenciaUI(r.TIPO_VIGENCIA);
+            ofertas_setControladoUI(r.CONTROLADO);
             ofertas_pintarSedes(r.SEDES || []);
             document.getElementById('txtOfertaImagenActual').value = r.IMAGEN || '';
             const inp = document.getElementById('txtOfertaImagen');
@@ -617,7 +647,8 @@ function ofertas_guardar() {
         tipo_vigencia: tipo,
         fecha_del,
         fecha_al,
-        sedes
+        sedes,
+        controlado: ofertas_getControlado()
     };
     const url = codoferta ? '/ofertas/update' : '/ofertas/insert';
     if (codoferta) payload.codoferta = codoferta;
@@ -700,6 +731,7 @@ function ofertas_renderCards(rows) {
                     <div class="ofertas-card__title">${ofertas_esc(r.DESOFERTA)}</div>
                     <p class="ofertas-card__meta mb-0">${nprod} venta · ${nboni} BONI</p>
                     <div class="ofertas-card__pills">
+                        <span class="ofertas-pill ${String(r.CONTROLADO || 'SI').toUpperCase() === 'SI' ? 'is-on' : 'is-off'}">Controlado ${String(r.CONTROLADO || 'SI').toUpperCase() === 'NO' ? 'NO' : 'SI'}</span>
                         <span class="ofertas-pill ${vigente ? 'is-on' : 'is-off'}">${ofertas_esc(ofertas_vigenciaTxt(r))}</span>
                         <span class="ofertas-pill">Unid. ${ofertas_fmtNum(r.UNIDADES)}</span>
                         <span class="ofertas-pill is-boni">Bonif. ${ofertas_fmtNum(r.CANTIDAD_BONIF)}</span>
@@ -955,6 +987,8 @@ function addListeners() {
     document.querySelectorAll('input[name="ofertasVigencia"]').forEach((el) => {
         el.addEventListener('change', () => ofertas_setVigenciaUI(el.value));
     });
+    document.getElementById('btnOfertaCtrlSI')?.addEventListener('click', () => ofertas_setControladoUI('SI'));
+    document.getElementById('btnOfertaCtrlNO')?.addEventListener('click', () => ofertas_setControladoUI('NO'));
     document.getElementById('btnOfertaSedesTodas')?.addEventListener('click', () => ofertas_marcarSedes(true));
     document.getElementById('btnOfertaSedesNinguna')?.addEventListener('click', () => ofertas_marcarSedes(false));
     document.getElementById('txtOfertaImagen')?.addEventListener('change', function(){
