@@ -483,6 +483,157 @@ router.post('/productos', async (req, res) => {
     }
 });
 
+function filtroOfertasVigentesSede(emp) {
+    const filtroSede = (!emp || emp === '%')
+        ? '1=1'
+        : `(
+            NOT EXISTS (SELECT 1 FROM OFERTAS_SEDES S WHERE S.CODOFERTA = O.CODOFERTA)
+            OR EXISTS (
+                SELECT 1 FROM OFERTAS_SEDES S
+                WHERE S.CODOFERTA = O.CODOFERTA
+                  AND S.EMPNIT = '${emp}'
+            )
+        )`;
+    return `
+        (
+            UPPER(ISNULL(O.TIPO_VIGENCIA, 'VIGENTE')) <> 'VENCIMIENTO'
+            OR (
+                O.FECHA_DEL IS NOT NULL
+                AND O.FECHA_AL IS NOT NULL
+                AND CAST(GETDATE() AS DATE) BETWEEN O.FECHA_DEL AND O.FECHA_AL
+            )
+        )
+        AND ${filtroSede}
+    `;
+}
+
+router.post('/pedido_venta', async (req, res) => {
+    const { token, sucursal, codoferta } = req.body || {};
+    const id = Number(codoferta) || 0;
+    const emp = sqlEsc(String(sucursal || '').trim());
+    try {
+        await ensureTables(token);
+        const whereOferta = id
+            ? `OP.CODOFERTA = ${id}`
+            : `OP.CODOFERTA IN (SELECT O.CODOFERTA FROM OFERTAS O WHERE ${filtroOfertasVigentesSede(emp)})`;
+        const data = await execute.get_data_qry(`
+            SELECT
+                OP.CODOFERTA,
+                OP.CODPROD,
+                'PROD' AS TIPO,
+                ISNULL(P.DESPROD, '') AS DESPROD,
+                ISNULL(M.DESMARCA, '') AS DESMARCA,
+                ISNULL(P.TIPOPROD, 'B') AS TIPOPROD,
+                ISNULL(P.EXENTO, 0) AS EXENTO,
+                ISNULL(PR.CODMEDIDA, '') AS CODMEDIDA,
+                ISNULL(PR.EQUIVALE, 1) AS EQUIVALE,
+                ISNULL(PR.COSTO, 0) AS COSTO,
+                ISNULL(PR.PRECIO, 0) AS PRECIO,
+                ISNULL(PR.PRECIO_A, 0) AS PRECIO_A,
+                ISNULL(PR.PRECIO_B, 0) AS PRECIO_B,
+                ISNULL(PR.BONO_PRECIO, 0) AS BONO
+            FROM OFERTAS_PRODUCTOS OP
+            LEFT JOIN PRODUCTOS P ON P.CODPROD = OP.CODPROD
+            LEFT JOIN MARCAS M ON P.CODMARCA = M.CODMARCA
+            OUTER APPLY (
+                SELECT TOP 1
+                    PX.CODMEDIDA, PX.EQUIVALE, PX.COSTO,
+                    PX.PRECIO, PX.PRECIO_A, PX.PRECIO_B,
+                    PX.BONO_PRECIO
+                FROM PRECIOS PX
+                WHERE PX.CODPROD = OP.CODPROD
+                  AND UPPER(LTRIM(RTRIM(PX.CODMEDIDA))) <> 'BONI'
+                ORDER BY PX.EQUIVALE
+            ) PR
+            WHERE ${whereOferta}
+              AND UPPER(ISNULL(NULLIF(LTRIM(RTRIM(OP.TIPO)), ''), 'PROD')) <> 'BONI'
+            ORDER BY P.DESPROD
+        `, token);
+        res.send({
+            ok: true,
+            recordset: (data && data.recordset) ? data.recordset : [],
+            rowsAffected: (data && data.rowsAffected) ? data.rowsAffected : [0]
+        });
+    } catch (e) {
+        console.error('[ofertas/pedido_venta]', e && e.message ? e.message : e);
+        res.send({ ok: false, error: 'No se pudieron cargar los productos de la oferta' });
+    }
+});
+
+router.post('/pedido_existencias', async (req, res) => {
+    const { token, sucursal, codoferta } = req.body || {};
+    const id = Number(codoferta) || 0;
+    const emp = sqlEsc(String(sucursal || '').trim());
+    if (!id) {
+        res.send({ ok: false, error: 'Seleccione una oferta' });
+        return;
+    }
+    try {
+        await ensureTables(token);
+        const data = await execute.get_data_qry(`
+            SELECT
+                OP.CODPROD,
+                ISNULL(INV.TOTALUNIDADES, 0) AS EXISTENCIA
+            FROM OFERTAS_PRODUCTOS OP
+            LEFT JOIN view_invsaldo INV ON INV.CODPROD = OP.CODPROD AND INV.EMPNIT = '${emp}'
+            WHERE OP.CODOFERTA = ${id}
+              AND UPPER(ISNULL(NULLIF(LTRIM(RTRIM(OP.TIPO)), ''), 'PROD')) <> 'BONI'
+        `, token);
+        res.send({
+            ok: true,
+            recordset: (data && data.recordset) ? data.recordset : [],
+            rowsAffected: (data && data.rowsAffected) ? data.rowsAffected : [0]
+        });
+    } catch (e) {
+        console.error('[ofertas/pedido_existencias]', e && e.message ? e.message : e);
+        res.send({ ok: false, error: 'No se pudo leer la existencia' });
+    }
+});
+
+router.post('/pedido_boni', async (req, res) => {
+    const { token, sucursal, codoferta } = req.body || {};
+    const id = Number(codoferta) || 0;
+    const emp = sqlEsc(String(sucursal || '').trim());
+    if (!id) {
+        res.send({ ok: false, error: 'Seleccione una oferta' });
+        return;
+    }
+    try {
+        await ensureTables(token);
+        const data = await execute.get_data_qry(`
+            SELECT
+                OP.CODPROD,
+                ISNULL(P.DESPROD, '') AS DESPROD,
+                ISNULL(P.TIPOPROD, 'B') AS TIPOPROD,
+                ISNULL(P.EXENTO, 0) AS EXENTO,
+                ISNULL(INV.TOTALUNIDADES, 0) AS EXISTENCIA,
+                CASE WHEN PRB.CODMEDIDA IS NULL THEN 0 ELSE 1 END AS TIENE_BONI,
+                ISNULL(PRB.EQUIVALE, 1) AS EQUIVALE,
+                ISNULL(PRB.COSTO, 0) AS COSTO,
+                ISNULL(PRB.PRECIO, 0) AS PRECIO,
+                ISNULL(PRB.PRECIO_A, 0) AS PRECIO_A,
+                ISNULL(PRB.PRECIO_B, 0) AS PRECIO_B,
+                ISNULL(PRB.BONO_PRECIO, 0) AS BONO
+            FROM OFERTAS_PRODUCTOS OP
+            LEFT JOIN PRODUCTOS P ON P.CODPROD = OP.CODPROD
+            LEFT JOIN PRECIOS PRB ON PRB.CODPROD = OP.CODPROD
+                AND UPPER(LTRIM(RTRIM(PRB.CODMEDIDA))) = 'BONI'
+            LEFT JOIN view_invsaldo INV ON INV.CODPROD = OP.CODPROD AND INV.EMPNIT = '${emp}'
+            WHERE OP.CODOFERTA = ${id}
+              AND UPPER(ISNULL(OP.TIPO, '')) = 'BONI'
+            ORDER BY P.DESPROD
+        `, token);
+        res.send({
+            ok: true,
+            recordset: (data && data.recordset) ? data.recordset : [],
+            rowsAffected: (data && data.rowsAffected) ? data.rowsAffected : [0]
+        });
+    } catch (e) {
+        console.error('[ofertas/pedido_boni]', e && e.message ? e.message : e);
+        res.send({ ok: false, error: 'No se pudieron cargar las bonificaciones' });
+    }
+});
+
 router.post('/producto_insert', async (req, res) => {
     const { token, codoferta, codprod, tipo } = req.body || {};
     const id = Number(codoferta) || 0;

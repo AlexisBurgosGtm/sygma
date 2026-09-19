@@ -150,6 +150,12 @@ function permite_vista_pestanas() {
 }
 
 function aplica_ofertas_vendedores() {
+    // TEMP DEV: forzar ofertas en pedido vendedor sin tocar SETTINGS de producción.
+    // Quitar este bloque cuando se habilite de forma permanente en configuración.
+    try {
+        const h = String(location && location.hostname ? location.hostname : '').toLowerCase();
+        if (h === 'localhost' || h === '127.0.0.1' || h === '::1') return true;
+    } catch (e) {}
     return String(get_setting('APLICA OFERTAS EN VENDEDORES', 'NO')).toUpperCase() === 'SI';
 }
 
