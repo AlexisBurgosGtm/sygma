@@ -509,6 +509,17 @@
             F.AvisoError('No tiene permitido entrar a esta secci├│n');
         } 
     },
+    objetivos_concursos:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/bi_objetivos/view_concursos.js','root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        }
+    },
     objetivos_bi:()=>{
         if(Menu.verify()==true){
             Menu.salidaMenu();

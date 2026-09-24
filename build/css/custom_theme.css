@@ -603,13 +603,6 @@ body.login-active.nav-function-fixed:not(.nav-function-top) .page-content-wrappe
   margin-left: 0 !important;
 }
 
-/* Login: registro de cambios (changelog) */
-#modal_log #tblLog,
-#modal_log #tblLog td,
-#modal_log #tblLog thead td {
-  font-size: 0.8em;
-}
-
 body.spa-nav-hidden .page-header .dropdown-icon-menu,
 body.spa-nav-hidden .page-header .hidden-lg-up {
   visibility: hidden;

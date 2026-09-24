@@ -223,6 +223,10 @@ SpaRouter.registerMany({
         script: '../views/bi_objetivos/view_objetivos.js',
         title: 'Objetivos'
     },
+    'bi/concursos': {
+        script: '../views/bi_objetivos/view_concursos.js',
+        title: 'Concursos'
+    },
     'bi/objetivos-dashboard': {
         script: '../views/bi_objetivos/view_bi_objetivos.js',
         title: 'Objetivos BI'

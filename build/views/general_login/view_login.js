@@ -245,12 +245,8 @@ function login_inyectarEstilos() {
             font-size: 0.7rem;
             border-radius: 999px;
             padding: 0.35rem 0.75rem;
-            transition: background 0.2s, color 0.2s;
-        }
-
-        .login-version-btn:hover {
-            background: rgba(255, 255, 255, 0.14);
-            color: var(--login-text);
+            cursor: default;
+            pointer-events: none;
         }
 
         #btnIniciar {
@@ -364,9 +360,7 @@ function getView() {
                         </div>
 
                         <div class="login-footer" id="scene2">
-                            <button type="button" class="btn login-version-btn" id="btnChangelog" title="Registro de cambios del sistema" onclick="get_log(); $('#modal_log').modal('show')">
-                                <i class="fal fa-clipboard-list mr-1"></i>${versionapp}
-                            </button>
+                            <span class="login-version-btn" id="lbVersionApp">${versionapp}</span>
                             <button type="button" class="btn btn-circle shadow hand" id="btnIniciar" title="Iniciar sesión">
                                 <i class="fal fa-arrow-right"></i>
                             </button>
@@ -548,7 +542,6 @@ function addListeners() {
         setTimeout(() => txtUser.focus(), 400);
     }
 
-    get_log();
 }
 
 function efecto_confeti() {

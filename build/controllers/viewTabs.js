@@ -42,6 +42,7 @@
         cuentas_por_cobrar: 'CUENTAS POR COBRAR',
         cuentas_por_pagar: 'CUENTAS POR PAGAR',
         objetivos: 'GESTION DE OBJETIVOS',
+        objetivos_concursos: 'CONCURSOS',
         objetivos_bi: 'LOGRO DE OBJETIVOS',
         objetivos_goles: 'GOLES P&G',
         objetivos_cobertura: 'COBERTURA CLIENTES',

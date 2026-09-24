@@ -148,6 +148,11 @@
                                         </a>
                                     </li>
                                     <li>
+                                        <a title="Concursos" data-filter-tags="theme settings concursos objetivos" href="#" onclick="Menu.objetivos_concursos()">
+                                            <span class="nav-link-text">CONCURSOS</span>
+                                        </a>
+                                    </li>
+                                    <li>
                                         <a title="How it works" data-filter-tags="theme settings how it works" href="#" onclick="Menu.objetivos_bi()">
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_how_it_works">LOGRO DE OBJETIVOS</span>
                                         </a>

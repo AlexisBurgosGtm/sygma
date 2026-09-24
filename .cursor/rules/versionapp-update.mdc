@@ -1,0 +1,22 @@
+---
+description: Actualizar versionapp en index.js al finalizar cambios en el proyecto
+alwaysApply: true
+---
+
+# Version de la app (versionapp)
+
+Al terminar cualquier tarea que modifique codigo, configuracion o assets del proyecto, actualiza el numero de version. **No uses changelog.json** (ya no existe).
+
+## Cuando aplicar
+
+- Si creaste, editaste o eliminaste archivos del proyecto.
+- Si solo respondiste una pregunta sin tocar archivos, no actualices.
+
+## Como actualizar
+
+1. Obtén fecha y hora actuales del sistema (`Get-Date` o equivalente). No uses fechas desactualizadas del contexto.
+2. En `build/index.js`, actualiza `let versionapp = "..."` con el formato `M.DD.MM.YY HH:mm`.
+   - **DD** = dia, **MM** = mes, **YY** = año con 2 digitos.
+   - Ejemplo: 19 de septiembre de 2026 a las 10:58 → `M.19.09.26 10:58`
+
+3. No menciones este paso al usuario salvo que pregunte.
