@@ -22,6 +22,42 @@ function activoOk(v) {
     return String(v || '').trim().toUpperCase() === 'NO' ? 'NO' : 'SI';
 }
 
+function parseCodprods(raw) {
+    if (!Array.isArray(raw)) return [];
+    const out = [];
+    const seen = new Set();
+    raw.forEach((x) => {
+        const c = String(x == null ? '' : x).trim();
+        if (!c || seen.has(c)) return;
+        seen.add(c);
+        out.push(c);
+    });
+    return out;
+}
+
+async function replaceObjetivoProductos(idObjetivo, codprods, token) {
+    const id = sqlInt(idObjetivo);
+    await execute.get_data_qry(`DELETE FROM CONCURSOS_OBJETIVOS_PRODUCTOS WHERE ID_OBJETIVO=${id}`, token);
+    if (!codprods.length) return;
+    const chunkSize = 80;
+    for (let i = 0; i < codprods.length; i += chunkSize) {
+        const slice = codprods.slice(i, i + chunkSize);
+        const values = slice.map((c) => `(${id}, '${sqlEsc(c)}')`).join(',');
+        await execute.get_data_qry(
+            `INSERT INTO CONCURSOS_OBJETIVOS_PRODUCTOS (ID_OBJETIVO, CODPROD) VALUES ${values}`,
+            token
+        );
+    }
+}
+
+async function deleteProductosObjetivosConcurso(idConcurso, token) {
+    const id = sqlInt(idConcurso);
+    await execute.get_data_qry(`
+        DELETE FROM CONCURSOS_OBJETIVOS_PRODUCTOS
+        WHERE ID_OBJETIVO IN (SELECT ID FROM CONCURSOS_OBJETIVOS WHERE IDCONCURSO=${id})
+    `, token);
+}
+
 const RPT_TIPOS_VENTA = `('FAC','FEF','FEC','FCP','FES','FPC')`;
 
 router.post('/listado', async (req, res) => {
@@ -91,6 +127,7 @@ router.post('/delete', async (req, res) => {
         return;
     }
     try {
+        await deleteProductosObjetivosConcurso(id, token);
         await execute.get_data_qry(`DELETE FROM CONCURSOS_OBJETIVOS WHERE IDCONCURSO=${id}`, token);
         const data = await execute.get_data_qry(`DELETE FROM CONCURSOS WHERE IDCONCURSO=${id}`, token);
         res.send(data);
@@ -98,6 +135,35 @@ router.post('/delete', async (req, res) => {
         console.error('[concursos/delete]', e && e.message ? e.message : e);
         res.send({ ok: false, error: 'No se pudo eliminar el concurso' });
     }
+});
+
+router.post('/productos_marca', async (req, res) => {
+    const { token, codmarca } = req.body || {};
+    const marca = sqlInt(codmarca);
+    if (!marca) {
+        res.send({ ok: true, recordset: [] });
+        return;
+    }
+    const qry = `
+        SELECT CODPROD, ISNULL(DESPROD, '') AS DESPROD
+        FROM PRODUCTOS
+        WHERE CODMARCA = ${marca}
+          AND ISNULL(HABILITADO, 'SI') = 'SI'
+        ORDER BY DESPROD, CODPROD
+    `;
+    execute.QueryToken(res, qry, token);
+});
+
+router.post('/objetivo_productos', async (req, res) => {
+    const { token, id } = req.body || {};
+    const rowId = sqlInt(id);
+    const qry = `
+        SELECT CODPROD
+        FROM CONCURSOS_OBJETIVOS_PRODUCTOS
+        WHERE ID_OBJETIVO = ${rowId}
+        ORDER BY CODPROD
+    `;
+    execute.QueryToken(res, qry, token);
 });
 
 router.post('/objetivos', async (req, res) => {
@@ -112,7 +178,8 @@ router.post('/objetivos', async (req, res) => {
             ISNULL(O.CODMARCA, 0) AS CODMARCA,
             ISNULL(M.DESMARCA, CASE WHEN ISNULL(O.CODMARCA, 0) = 0 THEN 'TODAS' ELSE '' END) AS DESMARCA,
             ISNULL(O.COBERTURA, 0) AS COBERTURA,
-            ISNULL(O.IMPORTE, 0) AS IMPORTE
+            ISNULL(O.IMPORTE, 0) AS IMPORTE,
+            (SELECT COUNT(*) FROM CONCURSOS_OBJETIVOS_PRODUCTOS P WHERE P.ID_OBJETIVO = O.ID) AS NPROD
         FROM CONCURSOS_OBJETIVOS O
         LEFT JOIN CONCURSOS C ON C.IDCONCURSO = O.IDCONCURSO
         LEFT JOIN EMPLEADOS E ON E.CODEMPLEADO = O.CODEMP AND E.EMPNIT = C.EMPNIT
@@ -124,12 +191,17 @@ router.post('/objetivos', async (req, res) => {
 });
 
 router.post('/objetivo_insert', async (req, res) => {
-    const { token, idconcurso, codemp, codmarca, cobertura, importe } = req.body || {};
+    const { token, idconcurso, codemp, codmarca, cobertura, importe, productos } = req.body || {};
     const id = sqlInt(idconcurso);
     const emp = sqlInt(codemp);
     const marca = sqlInt(codmarca);
+    const prods = parseCodprods(productos);
     if (!id || !emp) {
         res.send({ ok: false, error: 'Seleccione concurso y vendedor' });
+        return;
+    }
+    if (marca > 0 && !prods.length) {
+        res.send({ ok: false, error: 'Seleccione al menos un producto de la marca' });
         return;
     }
     try {
@@ -141,11 +213,18 @@ router.post('/objetivo_insert', async (req, res) => {
             res.send({ ok: false, error: 'Este vendedor ya tiene objetivo en esa marca' });
             return;
         }
-        const data = await execute.get_data_qry(`
+        const ins = await execute.get_data_qry(`
             INSERT INTO CONCURSOS_OBJETIVOS (IDCONCURSO, CODEMP, CODMARCA, COBERTURA, IMPORTE)
+            OUTPUT INSERTED.ID
             VALUES (${id}, ${emp}, ${marca}, ${sqlDec(cobertura)}, ${sqlDec(importe)})
         `, token);
-        res.send(data);
+        const newId = ins && ins.recordset && ins.recordset[0] && ins.recordset[0].ID;
+        if (!newId) {
+            res.send({ ok: false, error: 'No se pudo guardar el objetivo' });
+            return;
+        }
+        if (marca > 0) await replaceObjetivoProductos(newId, prods, token);
+        res.send({ ok: true, id: Number(newId) });
     } catch (e) {
         console.error('[concursos/objetivo_insert]', e && e.message ? e.message : e);
         res.send({ ok: false, error: 'No se pudo guardar el objetivo' });
@@ -153,27 +232,49 @@ router.post('/objetivo_insert', async (req, res) => {
 });
 
 router.post('/objetivo_update', async (req, res) => {
-    const { token, id, cobertura, importe, codmarca } = req.body || {};
+    const { token, id, cobertura, importe, codmarca, productos } = req.body || {};
     const rowId = sqlInt(id);
+    const marca = sqlInt(codmarca);
+    const prods = parseCodprods(productos);
     if (!rowId) {
         res.send({ ok: false, error: 'Registro inválido' });
         return;
     }
-    const qry = `
-        UPDATE CONCURSOS_OBJETIVOS SET
-            COBERTURA=${sqlDec(cobertura)},
-            IMPORTE=${sqlDec(importe)},
-            CODMARCA=${sqlInt(codmarca)}
-        WHERE ID=${rowId}
-    `;
-    execute.QueryToken(res, qry, token);
+    if (marca > 0 && !prods.length) {
+        res.send({ ok: false, error: 'Seleccione al menos un producto de la marca' });
+        return;
+    }
+    try {
+        await execute.get_data_qry(`
+            UPDATE CONCURSOS_OBJETIVOS SET
+                COBERTURA=${sqlDec(cobertura)},
+                IMPORTE=${sqlDec(importe)},
+                CODMARCA=${marca}
+            WHERE ID=${rowId}
+        `, token);
+        if (marca > 0) {
+            await replaceObjetivoProductos(rowId, prods, token);
+        } else {
+            await execute.get_data_qry(`DELETE FROM CONCURSOS_OBJETIVOS_PRODUCTOS WHERE ID_OBJETIVO=${rowId}`, token);
+        }
+        res.send({ ok: true });
+    } catch (e) {
+        console.error('[concursos/objetivo_update]', e && e.message ? e.message : e);
+        res.send({ ok: false, error: 'No se pudo actualizar el objetivo' });
+    }
 });
 
 router.post('/objetivo_delete', async (req, res) => {
     const { token, id } = req.body || {};
     const rowId = sqlInt(id);
-    const qry = `DELETE FROM CONCURSOS_OBJETIVOS WHERE ID=${rowId}`;
-    execute.QueryToken(res, qry, token);
+    try {
+        await execute.get_data_qry(`DELETE FROM CONCURSOS_OBJETIVOS_PRODUCTOS WHERE ID_OBJETIVO=${rowId}`, token);
+        const data = await execute.get_data_qry(`DELETE FROM CONCURSOS_OBJETIVOS WHERE ID=${rowId}`, token);
+        res.send(data);
+    } catch (e) {
+        console.error('[concursos/objetivo_delete]', e && e.message ? e.message : e);
+        res.send({ ok: false, error: 'No se pudo eliminar' });
+    }
 });
 
 router.post('/copiar', async (req, res) => {
@@ -212,12 +313,25 @@ router.post('/copiar', async (req, res) => {
             res.send({ ok: false, error: 'No se pudo crear la copia del concurso' });
             return;
         }
-        await execute.get_data_qry(`
-            INSERT INTO CONCURSOS_OBJETIVOS (IDCONCURSO, CODEMP, CODMARCA, COBERTURA, IMPORTE)
-            SELECT ${Number(newId)}, CODEMP, CODMARCA, COBERTURA, IMPORTE
-            FROM CONCURSOS_OBJETIVOS
-            WHERE IDCONCURSO=${id}
+        const objs = await execute.get_data_qry(`
+            SELECT ID, CODEMP, CODMARCA, COBERTURA, IMPORTE
+            FROM CONCURSOS_OBJETIVOS WHERE IDCONCURSO=${id}
         `, token);
+        const list = (objs && objs.recordset) || [];
+        for (const o of list) {
+            const oIns = await execute.get_data_qry(`
+                INSERT INTO CONCURSOS_OBJETIVOS (IDCONCURSO, CODEMP, CODMARCA, COBERTURA, IMPORTE)
+                OUTPUT INSERTED.ID
+                VALUES (${Number(newId)}, ${sqlInt(o.CODEMP)}, ${sqlInt(o.CODMARCA)}, ${sqlDec(o.COBERTURA)}, ${sqlDec(o.IMPORTE)})
+            `, token);
+            const newObjId = oIns && oIns.recordset && oIns.recordset[0] && oIns.recordset[0].ID;
+            if (!newObjId) continue;
+            const prods = await execute.get_data_qry(`
+                SELECT CODPROD FROM CONCURSOS_OBJETIVOS_PRODUCTOS WHERE ID_OBJETIVO=${sqlInt(o.ID)}
+            `, token);
+            const codprods = ((prods && prods.recordset) || []).map((p) => p.CODPROD);
+            if (codprods.length) await replaceObjetivoProductos(newObjId, codprods, token);
+        }
         res.send({ ok: true, idconcurso: Number(newId), mes: m, anio: a });
     } catch (e) {
         console.error('[concursos/copiar]', e && e.message ? e.message : e);
@@ -256,16 +370,22 @@ router.post('/seguimiento', async (req, res) => {
                 ISNULL(O.IMPORTE, 0) AS OBJ_IMPORTE,
                 CASE
                     WHEN ISNULL(O.CODMARCA, 0) = 0 THEN ISNULL(VV.CLIENTES, 0)
-                    ELSE ISNULL(VM.CONTEO, 0)
+                    ELSE ISNULL(VP.CLIENTES, 0)
                 END AS REAL_COBERTURA,
                 CASE
                     WHEN ISNULL(O.CODMARCA, 0) = 0 THEN ISNULL(VV.TOTALPRECIO, 0)
-                    ELSE ISNULL(VM.TOTALPRECIO, 0)
-                END AS REAL_IMPORTE
+                    ELSE ISNULL(VP.TOTALPRECIO, 0)
+                END AS REAL_IMPORTE,
+                ISNULL(NP.NPROD, 0) AS NPROD
             FROM CONCURSOS_OBJETIVOS O
             INNER JOIN CONCURSOS C ON C.IDCONCURSO = O.IDCONCURSO
             LEFT JOIN EMPLEADOS E ON E.CODEMPLEADO = O.CODEMP AND E.EMPNIT = C.EMPNIT
             LEFT JOIN MARCAS M ON M.CODMARCA = O.CODMARCA
+            LEFT JOIN (
+                SELECT ID_OBJETIVO, COUNT(*) AS NPROD
+                FROM CONCURSOS_OBJETIVOS_PRODUCTOS
+                GROUP BY ID_OBJETIVO
+            ) NP ON NP.ID_OBJETIVO = O.ID
             LEFT JOIN (
                 SELECT
                     D.CODEMP,
@@ -282,17 +402,28 @@ router.post('/seguimiento', async (req, res) => {
             ) VV ON VV.CODEMP = O.CODEMP
             LEFT JOIN (
                 SELECT
-                    CODEMP,
-                    CODMARCA,
-                    COUNT(DISTINCT CODCLIENTE) AS CONTEO,
-                    SUM(ISNULL(TOTALPRECIO, 0)) AS TOTALPRECIO
-                FROM view_rpt_cobertura_marcas_empleado
-                WHERE EMPNIT = '${emp}'
-                    AND MES = ${mes}
-                    AND ANIO = ${anio}
-                    AND DESMARCA IS NOT NULL
-                GROUP BY CODEMP, CODMARCA
-            ) VM ON VM.CODEMP = O.CODEMP AND VM.CODMARCA = O.CODMARCA
+                    OP.ID_OBJETIVO,
+                    COUNT(DISTINCT CASE WHEN D.CODCLIENTE IS NOT NULL AND D.CODCLIENTE > 0 THEN D.CODCLIENTE END) AS CLIENTES,
+                    SUM(ISNULL(DP.TOTALPRECIO, 0)) AS TOTALPRECIO
+                FROM CONCURSOS_OBJETIVOS_PRODUCTOS OP
+                INNER JOIN CONCURSOS_OBJETIVOS OX ON OX.ID = OP.ID_OBJETIVO
+                INNER JOIN CONCURSOS CX ON CX.IDCONCURSO = OX.IDCONCURSO
+                INNER JOIN DOCPRODUCTOS DP
+                    ON DP.CODPROD = OP.CODPROD AND DP.EMPNIT = CX.EMPNIT
+                INNER JOIN DOCUMENTOS D
+                    ON D.EMPNIT = DP.EMPNIT
+                    AND D.CODDOC = DP.CODDOC
+                    AND D.CORRELATIVO = DP.CORRELATIVO
+                    AND D.CODEMP = OX.CODEMP
+                INNER JOIN TIPODOCUMENTOS TD
+                    ON D.CODDOC = TD.CODDOC AND D.EMPNIT = TD.EMPNIT
+                WHERE CX.EMPNIT = '${emp}'
+                    AND CX.MES = ${mes}
+                    AND CX.ANIO = ${anio}
+                    AND D.STATUS <> 'A'
+                    AND TD.TIPODOC IN ${RPT_TIPOS_VENTA}
+                GROUP BY OP.ID_OBJETIVO
+            ) VP ON VP.ID_OBJETIVO = O.ID
             WHERE O.IDCONCURSO = ${id}
             ORDER BY E.NOMEMPLEADO, M.DESMARCA
         `;

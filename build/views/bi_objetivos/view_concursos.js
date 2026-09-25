@@ -70,14 +70,15 @@ function getView() {
                                         <tr>
                                             <th>VENDEDOR</th>
                                             <th>MARCA</th>
+                                            <th class="text-center">PRODS</th>
                                             <th class="text-right">COBERTURA</th>
                                             <th class="text-right">IMPORTE</th>
                                             <th></th>
                                         </tr>
                                     </thead>
-                                    <tbody id="tblDataConcursoObj">
-                                        <tr><td colspan="5" class="text-center text-muted">Cargando...</td></tr>
-                                    </tbody>
+                                        <tbody id="tblDataConcursoObj">
+                                            <tr><td colspan="6" class="text-center text-muted">Cargando...</td></tr>
+                                        </tbody>
                                 </table>
                             </div>
                         </div>
@@ -181,7 +182,7 @@ function getView() {
                 </div>
 
                 <div class="modal fade" tabindex="-1" role="dialog" id="modal_concurso_obj">
-                    <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                         <div class="modal-content">
                             <div class="modal-header bg-info text-white py-2">
                                 <h5 class="modal-title negrita mb-0">Objetivo del vendedor</h5>
@@ -192,6 +193,20 @@ function getView() {
                                 <select class="form-control form-control-sm" id="cmbObjVendedor"></select>
                                 <label class="negrita small mb-1 mt-2">Marca</label>
                                 <select class="form-control form-control-sm" id="cmbObjMarca"></select>
+                                <div id="concObjProdBox" class="d-none mt-2">
+                                    <div class="d-flex flex-wrap align-items-center justify-content-between mb-1">
+                                        <label class="negrita small mb-0">Productos de la marca</label>
+                                        <span class="small text-muted" id="lbObjProdCount">0 seleccionados</span>
+                                    </div>
+                                    <div class="d-flex flex-wrap mb-1">
+                                        <button type="button" class="btn btn-xs btn-outline-success hand mr-1" id="btnObjProdAll">Todos</button>
+                                        <button type="button" class="btn btn-xs btn-outline-secondary hand mr-2" id="btnObjProdNone">Ninguno</button>
+                                        <input type="search" class="form-control form-control-sm flex-grow-1" id="txtObjProdBuscar" placeholder="Buscar producto...">
+                                    </div>
+                                    <div class="conc-obj-prod-list border rounded p-2" id="concObjProdList">
+                                        <span class="text-muted small">Seleccione una marca</span>
+                                    </div>
+                                </div>
                                 <div class="row mt-2">
                                     <div class="col-6">
                                         <label class="negrita small mb-1">Cobertura</label>
@@ -223,6 +238,8 @@ var concursos_cache = [];
 var concursos_sel = 0;
 var concursos_sel_nom = '';
 var conc_view = 'listado';
+var conc_obj_prod_cache = [];
+var conc_obj_prod_selected = null;
 
 function conc_esc(s) {
     return String(s == null ? '' : s)
@@ -405,14 +422,14 @@ function conc_cargar_obj() {
         conc_pintar_obj([]);
         return;
     }
-    if (box) box.innerHTML = `<tr><td colspan="5" class="text-center">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</td></tr>`;
+    if (box) box.innerHTML = `<tr><td colspan="6" class="text-center">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</td></tr>`;
     axios.post(GlobalUrlCalls + '/concursos/objetivos', { token: TOKEN, idconcurso: concursos_sel })
         .then((res) => {
             if (!res.data || res.data === 'error') throw new Error('error');
             conc_pintar_obj(res.data.recordset || []);
         })
         .catch(() => {
-            if (box) box.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No se pudieron cargar los objetivos.</td></tr>';
+            if (box) box.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No se pudieron cargar los objetivos.</td></tr>';
         });
 }
 
@@ -420,13 +437,14 @@ function conc_pintar_obj(rows) {
     const box = document.getElementById('tblDataConcursoObj');
     if (!box) return;
     if (!rows.length) {
-        box.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Sin objetivos. Agregue vendedores.</td></tr>';
+        box.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Sin objetivos. Agregue vendedores.</td></tr>';
         return;
     }
     box.innerHTML = rows.map((r) => `
         <tr>
             <td>${conc_esc(r.NOMEMPLEADO || r.CODEMP)}</td>
             <td>${conc_esc(r.DESMARCA || 'TODAS')}</td>
+            <td class="text-center">${Number(r.CODMARCA) > 0 ? (Number(r.NPROD) || 0) : '—'}</td>
             <td class="text-right">${Number(r.COBERTURA) || 0}</td>
             <td class="text-right">${conc_mon(r.IMPORTE)}</td>
             <td class="text-right">
@@ -467,9 +485,10 @@ function conc_pintar_seg(rows) {
     box.innerHTML = rows.map((r) => {
         const pctCob = conc_pct(r.REAL_COBERTURA, r.OBJ_COBERTURA);
         const pctImp = conc_pct(r.REAL_IMPORTE, r.OBJ_IMPORTE);
+        const sinProd = Number(r.CODMARCA) > 0 && !(Number(r.NPROD) > 0);
         return `
-        <tr>
-            <td>${conc_esc(r.NOMEMPLEADO || r.CODEMP)}</td>
+        <tr${sinProd ? ' class="table-warning"' : ''}>
+            <td>${conc_esc(r.NOMEMPLEADO || r.CODEMP)}${sinProd ? ' <span class="small text-muted">(sin productos — edite objetivo)</span>' : ''}</td>
             <td>${conc_esc(r.DESMARCA || 'TODAS')}</td>
             <td class="text-right">${Number(r.OBJ_COBERTURA) || 0}</td>
             <td class="text-right negrita">${Number(r.REAL_COBERTURA) || 0}</td>
@@ -565,6 +584,111 @@ function conc_eliminar(id) {
         });
 }
 
+function conc_obj_prod_sync_from_dom() {
+    if (!conc_obj_prod_selected) conc_obj_prod_selected = new Set();
+    document.querySelectorAll('#concObjProdList input.conc-obj-prod-chk').forEach((el) => {
+        if (el.checked) conc_obj_prod_selected.add(el.value);
+        else conc_obj_prod_selected.delete(el.value);
+    });
+}
+
+function conc_obj_prod_sel_count() {
+    return conc_obj_prod_selected ? conc_obj_prod_selected.size : 0;
+}
+
+function conc_obj_prod_update_count() {
+    const lb = document.getElementById('lbObjProdCount');
+    if (lb) lb.textContent = `${conc_obj_prod_sel_count()} seleccionados`;
+}
+
+function conc_obj_prod_get_checked() {
+    conc_obj_prod_sync_from_dom();
+    return Array.from(conc_obj_prod_selected || []);
+}
+
+function conc_obj_prod_pintar(selectedSet) {
+    const box = document.getElementById('concObjProdList');
+    if (!box) return;
+    if (selectedSet) conc_obj_prod_selected = new Set(selectedSet);
+    else conc_obj_prod_sync_from_dom();
+    const q = String(document.getElementById('txtObjProdBuscar')?.value || '').toLowerCase().trim();
+    const rows = conc_obj_prod_cache.filter((r) => {
+        if (!q) return true;
+        const t = `${r.CODPROD} ${r.DESPROD}`.toLowerCase();
+        return t.indexOf(q) >= 0;
+    });
+    if (!conc_obj_prod_cache.length) {
+        box.innerHTML = '<span class="text-muted small">No hay productos habilitados en esta marca.</span>';
+        conc_obj_prod_update_count();
+        return;
+    }
+    if (!rows.length) {
+        box.innerHTML = '<span class="text-muted small">Sin coincidencias.</span>';
+        conc_obj_prod_update_count();
+        return;
+    }
+    const sel = conc_obj_prod_selected || new Set();
+    box.innerHTML = rows.map((r) => {
+        const cod = String(r.CODPROD);
+        const on = sel.has(cod);
+        return `
+            <label class="conc-obj-prod-item d-flex align-items-start hand mb-1">
+                <input type="checkbox" class="conc-obj-prod-chk mr-2 mt-1" value="${conc_esc(cod)}" ${on ? 'checked' : ''}>
+                <span><span class="negrita">${conc_esc(cod)}</span> — ${conc_esc(r.DESPROD)}</span>
+            </label>`;
+    }).join('');
+    box.querySelectorAll('.conc-obj-prod-chk').forEach((el) => {
+        el.addEventListener('change', () => {
+            if (!conc_obj_prod_selected) conc_obj_prod_selected = new Set();
+            if (el.checked) conc_obj_prod_selected.add(el.value);
+            else conc_obj_prod_selected.delete(el.value);
+            conc_obj_prod_update_count();
+        });
+    });
+    conc_obj_prod_update_count();
+}
+
+function conc_obj_prod_toggle_box(marca) {
+    const box = document.getElementById('concObjProdBox');
+    if (box) box.classList.toggle('d-none', !(Number(marca) > 0));
+}
+
+function conc_obj_cargar_productos(marca, idObjetivo) {
+    conc_obj_prod_cache = [];
+    conc_obj_prod_selected = null;
+    conc_obj_prod_toggle_box(marca);
+    const list = document.getElementById('concObjProdList');
+    if (!(Number(marca) > 0)) {
+        if (list) list.innerHTML = '';
+        conc_obj_prod_update_count();
+        return Promise.resolve();
+    }
+    if (list) list.innerHTML = `<span class="text-muted small">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando productos...'}</span>`;
+    const loadProds = axios.post(GlobalUrlCalls + '/concursos/productos_marca', { token: TOKEN, codmarca: marca })
+        .then((res) => {
+            if (!res.data || res.data === 'error') throw new Error('error');
+            conc_obj_prod_cache = res.data.recordset || [];
+        });
+    const loadSel = (Number(idObjetivo) > 0)
+        ? axios.post(GlobalUrlCalls + '/concursos/objetivo_productos', { token: TOKEN, id: idObjetivo })
+            .then((res) => {
+                if (!res.data || res.data === 'error') throw new Error('error');
+                return new Set((res.data.recordset || []).map((r) => String(r.CODPROD)));
+            })
+        : Promise.resolve(null);
+    return Promise.all([loadProds, loadSel])
+        .then(([, selSet]) => {
+            const all = new Set(conc_obj_prod_cache.map((r) => String(r.CODPROD)));
+            const selected = selSet && selSet.size ? selSet : all;
+            conc_obj_prod_pintar(selected);
+        })
+        .catch(() => {
+            conc_obj_prod_cache = [];
+            if (list) list.innerHTML = '<span class="text-danger small">No se pudieron cargar los productos.</span>';
+            conc_obj_prod_update_count();
+        });
+}
+
 function conc_obj_nuevo() {
     if (!concursos_sel) {
         F.AvisoError('Seleccione un concurso');
@@ -573,11 +697,13 @@ function conc_obj_nuevo() {
     document.getElementById('txtObjId').value = '0';
     document.getElementById('txtObjCobertura').value = '0';
     document.getElementById('txtObjImporte').value = '0';
+    document.getElementById('txtObjProdBuscar').value = '';
     const cmbVen = document.getElementById('cmbObjVendedor');
     const cmbMarca = document.getElementById('cmbObjMarca');
     if (cmbVen) cmbVen.disabled = false;
+    if (cmbMarca) cmbMarca.disabled = false;
     if (cmbMarca) cmbMarca.value = '0';
-    $('#modal_concurso_obj').modal('show');
+    conc_obj_cargar_productos(0).then(() => $('#modal_concurso_obj').modal('show'));
 }
 
 function conc_obj_editar(row) {
@@ -586,9 +712,11 @@ function conc_obj_editar(row) {
     document.getElementById('cmbObjVendedor').value = String(row.CODEMP);
     document.getElementById('cmbObjVendedor').disabled = true;
     document.getElementById('cmbObjMarca').value = String(row.CODMARCA || 0);
+    document.getElementById('cmbObjMarca').disabled = true;
     document.getElementById('txtObjCobertura').value = String(row.COBERTURA || 0);
     document.getElementById('txtObjImporte').value = String(row.IMPORTE || 0);
-    $('#modal_concurso_obj').modal('show');
+    document.getElementById('txtObjProdBuscar').value = '';
+    conc_obj_cargar_productos(row.CODMARCA || 0, row.ID).then(() => $('#modal_concurso_obj').modal('show'));
 }
 
 function conc_obj_guardar() {
@@ -603,21 +731,29 @@ function conc_obj_guardar() {
         btn.disabled = true;
         btn.innerHTML = '<i class="fal fa-save fa-spin mr-1"></i> Guardando';
     }
+    const codmarca = Number(document.getElementById('cmbObjMarca').value) || 0;
+    const productos = codmarca > 0 ? conc_obj_prod_get_checked() : [];
+    if (codmarca > 0 && !productos.length) {
+        F.AvisoError('Seleccione al menos un producto de la marca');
+        return;
+    }
     const payload = id
         ? {
             token: TOKEN,
             id,
             cobertura: document.getElementById('txtObjCobertura').value || 0,
             importe: document.getElementById('txtObjImporte').value || 0,
-            codmarca: document.getElementById('cmbObjMarca').value || 0
+            codmarca,
+            productos
         }
         : {
             token: TOKEN,
             idconcurso: concursos_sel,
             codemp,
-            codmarca: document.getElementById('cmbObjMarca').value || 0,
+            codmarca,
             cobertura: document.getElementById('txtObjCobertura').value || 0,
-            importe: document.getElementById('txtObjImporte').value || 0
+            importe: document.getElementById('txtObjImporte').value || 0,
+            productos
         };
     axios.post(GlobalUrlCalls + (id ? '/concursos/objetivo_update' : '/concursos/objetivo_insert'), payload)
         .then((res) => {
@@ -724,6 +860,9 @@ function addListeners() {
             body.sygma-dark .conc-badge.is-si, body.sygma-dark .conc-pill.is-on, body.sygma-dark .conc-pct.conc-ok { background:#14532d; color:#86efac; }
             body.sygma-dark .conc-badge.is-no, body.sygma-dark .conc-pill.is-off, body.sygma-dark .conc-pct.conc-bad { background:#7f1d1d; color:#fecaca; }
             body.sygma-dark .conc-pct.conc-warn { background:#713f12; color:#fde047; }
+            .conc-obj-prod-list { max-height: 220px; overflow-y: auto; background: rgba(0,0,0,0.02); }
+            body.sygma-dark .conc-obj-prod-list { background: rgba(255,255,255,0.04); }
+            .conc-obj-prod-item { font-size: 0.82rem; line-height: 1.25; }
         `;
         document.head.appendChild(st);
     }
@@ -756,9 +895,25 @@ function addListeners() {
     document.getElementById('btnConcVolverObj')?.addEventListener('click', conc_volver_listado);
     document.getElementById('btnConcVolverSeg')?.addEventListener('click', conc_volver_listado);
     document.getElementById('btnCopiarGuardar')?.addEventListener('click', conc_copiar_guardar);
+    document.getElementById('cmbObjMarca')?.addEventListener('change', (e) => {
+        document.getElementById('txtObjProdBuscar').value = '';
+        const idObj = Number(document.getElementById('txtObjId').value) || 0;
+        conc_obj_cargar_productos(e.target.value, idObj);
+    });
+    document.getElementById('txtObjProdBuscar')?.addEventListener('input', () => {
+        conc_obj_prod_pintar();
+    });
+    document.getElementById('btnObjProdAll')?.addEventListener('click', () => {
+        conc_obj_prod_pintar(new Set(conc_obj_prod_cache.map((r) => String(r.CODPROD))));
+    });
+    document.getElementById('btnObjProdNone')?.addEventListener('click', () => {
+        conc_obj_prod_pintar(new Set());
+    });
     $('#modal_concurso_obj').on('hidden.bs.modal', () => {
         const cmbVen = document.getElementById('cmbObjVendedor');
+        const cmbMarca = document.getElementById('cmbObjMarca');
         if (cmbVen) cmbVen.disabled = false;
+        if (cmbMarca) cmbMarca.disabled = false;
     });
 }
 
