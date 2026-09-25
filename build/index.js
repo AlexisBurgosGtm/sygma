@@ -99,7 +99,7 @@ sygma_syncDarkModeButton();
 
 
 
-let versionapp = "M.25.09.26 13:11"
+let versionapp = "M.25.09.26 14:30"
 
 
 if (!window.SYGMA_IS_TAB_FRAME) {

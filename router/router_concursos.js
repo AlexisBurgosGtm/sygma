@@ -439,4 +439,108 @@ router.post('/seguimiento', async (req, res) => {
     }
 });
 
+router.post('/seguimiento_detalle', async (req, res) => {
+    const { token, id_objetivo } = req.body || {};
+    const objId = sqlInt(id_objetivo);
+    if (!objId) {
+        res.send({ ok: false, error: 'Objetivo inválido' });
+        return;
+    }
+    try {
+        const hdr = await execute.get_data_qry(`
+            SELECT TOP 1
+                O.ID,
+                O.CODEMP,
+                ISNULL(O.CODMARCA, 0) AS CODMARCA,
+                ISNULL(E.NOMEMPLEADO, '') AS NOMEMPLEADO,
+                C.EMPNIT,
+                C.MES,
+                C.ANIO
+            FROM CONCURSOS_OBJETIVOS O
+            INNER JOIN CONCURSOS C ON C.IDCONCURSO = O.IDCONCURSO
+            LEFT JOIN EMPLEADOS E ON E.CODEMPLEADO = O.CODEMP AND E.EMPNIT = C.EMPNIT
+            WHERE O.ID = ${objId}
+        `, token);
+        const o = hdr && hdr.recordset && hdr.recordset[0];
+        if (!o) {
+            res.send({ ok: false, error: 'Objetivo no encontrado' });
+            return;
+        }
+        const emp = sqlEsc(String(o.EMPNIT || '').trim());
+        const mes = sqlInt(o.MES);
+        const anio = sqlInt(o.ANIO);
+        const codemp = sqlInt(o.CODEMP);
+        const marca = sqlInt(o.CODMARCA);
+        let qry = '';
+        if (marca > 0) {
+            qry = `
+                SELECT
+                    P.CODPROD,
+                    ISNULL(P.DESPROD, '') AS DESPROD,
+                    ISNULL(V.COBERTURA, 0) AS COBERTURA,
+                    ISNULL(V.IMPORTE, 0) AS IMPORTE
+                FROM CONCURSOS_OBJETIVOS_PRODUCTOS OP
+                INNER JOIN PRODUCTOS P ON P.CODPROD = OP.CODPROD
+                LEFT JOIN (
+                    SELECT
+                        DP.CODPROD,
+                        COUNT(DISTINCT CASE WHEN D.CODCLIENTE IS NOT NULL AND D.CODCLIENTE > 0 THEN D.CODCLIENTE END) AS COBERTURA,
+                        SUM(ISNULL(DP.TOTALPRECIO, 0)) AS IMPORTE
+                    FROM DOCPRODUCTOS DP
+                    INNER JOIN DOCUMENTOS D
+                        ON D.EMPNIT = DP.EMPNIT
+                        AND D.CODDOC = DP.CODDOC
+                        AND D.CORRELATIVO = DP.CORRELATIVO
+                    INNER JOIN TIPODOCUMENTOS TD
+                        ON D.CODDOC = TD.CODDOC AND D.EMPNIT = TD.EMPNIT
+                    WHERE D.EMPNIT = '${emp}'
+                        AND D.MES = ${mes}
+                        AND D.ANIO = ${anio}
+                        AND D.CODEMP = ${codemp}
+                        AND D.STATUS <> 'A'
+                        AND TD.TIPODOC IN ${RPT_TIPOS_VENTA}
+                    GROUP BY DP.CODPROD
+                ) V ON V.CODPROD = OP.CODPROD
+                WHERE OP.ID_OBJETIVO = ${objId}
+                ORDER BY P.DESPROD, P.CODPROD
+            `;
+        } else {
+            qry = `
+                SELECT
+                    P.CODPROD,
+                    ISNULL(P.DESPROD, '') AS DESPROD,
+                    COUNT(DISTINCT CASE WHEN D.CODCLIENTE IS NOT NULL AND D.CODCLIENTE > 0 THEN D.CODCLIENTE END) AS COBERTURA,
+                    SUM(ISNULL(DP.TOTALPRECIO, 0)) AS IMPORTE
+                FROM DOCPRODUCTOS DP
+                INNER JOIN DOCUMENTOS D
+                    ON D.EMPNIT = DP.EMPNIT
+                    AND D.CODDOC = DP.CODDOC
+                    AND D.CORRELATIVO = DP.CORRELATIVO
+                INNER JOIN TIPODOCUMENTOS TD
+                    ON D.CODDOC = TD.CODDOC AND D.EMPNIT = TD.EMPNIT
+                INNER JOIN PRODUCTOS P ON P.CODPROD = DP.CODPROD
+                WHERE D.EMPNIT = '${emp}'
+                    AND D.MES = ${mes}
+                    AND D.ANIO = ${anio}
+                    AND D.CODEMP = ${codemp}
+                    AND D.STATUS <> 'A'
+                    AND TD.TIPODOC IN ${RPT_TIPOS_VENTA}
+                GROUP BY P.CODPROD, P.DESPROD
+                HAVING SUM(ISNULL(DP.TOTALPRECIO, 0)) <> 0
+                    OR COUNT(DISTINCT CASE WHEN D.CODCLIENTE IS NOT NULL AND D.CODCLIENTE > 0 THEN D.CODCLIENTE END) > 0
+                ORDER BY P.DESPROD, P.CODPROD
+            `;
+        }
+        const data = await execute.get_data_qry(qry, token);
+        res.send({
+            ok: true,
+            objetivo: o,
+            recordset: (data && data.recordset) || []
+        });
+    } catch (e) {
+        console.error('[concursos/seguimiento_detalle]', e && e.message ? e.message : e);
+        res.send({ ok: false, error: 'No se pudo cargar el detalle' });
+    }
+});
+
 module.exports = router;

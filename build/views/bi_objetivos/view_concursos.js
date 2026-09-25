@@ -88,14 +88,19 @@ function getView() {
                 <div id="concPanelSeguimiento" class="d-none">
                     <div class="card card-rounded shadow border-0">
                         <div class="card-body p-3">
-                            <div class="d-flex flex-wrap align-items-center mb-2">
-                                <button type="button" class="btn btn-outline-secondary btn-sm hand negrita mr-2 mb-1" id="btnConcVolverSeg">
-                                    <i class="fal fa-arrow-left mr-1"></i> Atrás
-                                </button>
-                                <div>
-                                    <h5 class="negrita text-base mb-0">Seguimiento vs ventas</h5>
-                                    <small class="text-muted" id="lbConcursoSelSeg">—</small>
+                            <div class="d-flex flex-wrap align-items-center justify-content-between mb-2">
+                                <div class="d-flex flex-wrap align-items-center">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm hand negrita mr-2 mb-1" id="btnConcVolverSeg">
+                                        <i class="fal fa-arrow-left mr-1"></i> Atrás
+                                    </button>
+                                    <div class="mb-1">
+                                        <h5 class="negrita text-base mb-0">Seguimiento vs ventas</h5>
+                                        <small class="text-muted" id="lbConcursoSelSeg">—</small>
+                                    </div>
                                 </div>
+                                <button type="button" class="btn btn-success btn-sm hand negrita mb-1" id="btnConcSegExcel">
+                                    <i class="fal fa-file-excel mr-1"></i> Exportar Excel
+                                </button>
                             </div>
                             <div class="table-responsive">
                                 <table class="table table-sm table-hover mb-0">
@@ -181,6 +186,37 @@ function getView() {
                     </div>
                 </div>
 
+                <div class="modal fade" tabindex="-1" role="dialog" id="modal_concurso_seg_det">
+                    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header bg-base text-white py-2">
+                                <h5 class="modal-title negrita mb-0" id="lbSegDetTitulo">Ventas por producto</h5>
+                            </div>
+                            <div class="modal-body p-3">
+                                <p class="small text-muted mb-2" id="lbSegDetSub">—</p>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover mb-0">
+                                        <thead class="bg-secondary text-white">
+                                            <tr>
+                                                <th>CODPROD</th>
+                                                <th>PRODUCTO</th>
+                                                <th class="text-right">COBERTURA</th>
+                                                <th class="text-right">IMPORTE</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblDataSegDet">
+                                            <tr><td colspan="4" class="text-center text-muted">—</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="modal-footer py-2">
+                                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="modal fade" tabindex="-1" role="dialog" id="modal_concurso_obj">
                     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                         <div class="modal-content">
@@ -240,6 +276,7 @@ var concursos_sel_nom = '';
 var conc_view = 'listado';
 var conc_obj_prod_cache = [];
 var conc_obj_prod_selected = null;
+var conc_seg_cache = [];
 
 function conc_esc(s) {
     return String(s == null ? '' : s)
@@ -468,11 +505,88 @@ function conc_cargar_seg() {
     axios.post(GlobalUrlCalls + '/concursos/seguimiento', { token: TOKEN, idconcurso: concursos_sel })
         .then((res) => {
             if (!res.data || res.data.ok === false) throw new Error((res.data && res.data.error) || 'error');
-            conc_pintar_seg(res.data.recordset || []);
+            conc_seg_cache = res.data.recordset || [];
+            conc_pintar_seg(conc_seg_cache);
         })
         .catch((e) => {
+            conc_seg_cache = [];
             if (box) box.innerHTML = `<tr><td colspan="8" class="text-center text-muted">${conc_esc((e && e.message && e.message !== 'error') ? e.message : 'No se pudo cargar el seguimiento.')}</td></tr>`;
         });
+}
+
+function conc_seg_export_excel() {
+    if (!conc_seg_cache.length) {
+        F.AvisoError('No hay datos de seguimiento para exportar');
+        return;
+    }
+    const datos = conc_seg_cache.map((r) => {
+        const pctCob = conc_pct(r.REAL_COBERTURA, r.OBJ_COBERTURA);
+        const pctImp = conc_pct(r.REAL_IMPORTE, r.OBJ_IMPORTE);
+        return {
+            VENDEDOR: r.NOMEMPLEADO || r.CODEMP,
+            MARCA: r.DESMARCA || 'TODAS',
+            'OBJ. COBERTURA': Number(r.OBJ_COBERTURA) || 0,
+            'REAL COBERTURA': Number(r.REAL_COBERTURA) || 0,
+            '% COBERTURA': pctCob,
+            'OBJ. IMPORTE': Number(r.OBJ_IMPORTE) || 0,
+            'REAL IMPORTE': Number(r.REAL_IMPORTE) || 0,
+            '% IMPORTE': pctImp
+        };
+    });
+    const nom = String(concursos_sel_nom || 'Concurso').replace(/[\\/:*?"<>|]/g, '_').slice(0, 80);
+    F.export_json_to_xlsx(datos, `Seguimiento ${nom}`);
+}
+
+function conc_seg_det_abrir(idObjetivo) {
+    const row = conc_seg_cache.find((x) => Number(x.ID) === Number(idObjetivo));
+    if (!row) return;
+    const box = document.getElementById('tblDataSegDet');
+    document.getElementById('lbSegDetTitulo').textContent = `Ventas — ${row.NOMEMPLEADO || row.CODEMP}`;
+    document.getElementById('lbSegDetSub').textContent = `Marca: ${row.DESMARCA || 'TODAS'} · Solo ventas del período (sin comparar objetivo)`;
+    if (box) box.innerHTML = `<tr><td colspan="4" class="text-center">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</td></tr>`;
+    $('#modal_concurso_seg_det').modal('show');
+    axios.post(GlobalUrlCalls + '/concursos/seguimiento_detalle', { token: TOKEN, id_objetivo: idObjetivo })
+        .then((res) => {
+            if (!res.data || res.data.ok === false) throw new Error((res.data && res.data.error) || 'error');
+            conc_seg_det_pintar(res.data.recordset || [], row);
+        })
+        .catch((e) => {
+            if (box) {
+                box.innerHTML = `<tr><td colspan="4" class="text-center text-muted">${conc_esc((e && e.message && e.message !== 'error') ? e.message : 'No se pudo cargar el detalle.')}</td></tr>`;
+            }
+        });
+}
+
+function conc_seg_det_pintar(rows, hdr) {
+    const box = document.getElementById('tblDataSegDet');
+    if (!box) return;
+    if (Number(hdr.CODMARCA) > 0 && !(Number(hdr.NPROD) > 0)) {
+        box.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Este objetivo no tiene productos configurados. Edítelo en Objetivos.</td></tr>';
+        return;
+    }
+    if (!rows.length) {
+        box.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Sin ventas registradas en el período.</td></tr>';
+        return;
+    }
+    let totImp = 0;
+    const body = rows.map((r) => {
+        const cob = Number(r.COBERTURA) || 0;
+        const imp = Number(r.IMPORTE) || 0;
+        totImp += imp;
+        return `
+            <tr>
+                <td class="negrita">${conc_esc(r.CODPROD)}</td>
+                <td>${conc_esc(r.DESPROD)}</td>
+                <td class="text-right">${cob}</td>
+                <td class="text-right">${conc_mon(imp)}</td>
+            </tr>`;
+    }).join('');
+    box.innerHTML = body + `
+        <tr class="bg-light negrita">
+            <td colspan="2" class="text-right">TOTALES</td>
+            <td class="text-right">—</td>
+            <td class="text-right">${conc_mon(totImp)}</td>
+        </tr>`;
 }
 
 function conc_pintar_seg(rows) {
@@ -486,9 +600,12 @@ function conc_pintar_seg(rows) {
         const pctCob = conc_pct(r.REAL_COBERTURA, r.OBJ_COBERTURA);
         const pctImp = conc_pct(r.REAL_IMPORTE, r.OBJ_IMPORTE);
         const sinProd = Number(r.CODMARCA) > 0 && !(Number(r.NPROD) > 0);
+        const idObj = Number(r.ID) || 0;
         return `
         <tr${sinProd ? ' class="table-warning"' : ''}>
-            <td>${conc_esc(r.NOMEMPLEADO || r.CODEMP)}${sinProd ? ' <span class="small text-muted">(sin productos — edite objetivo)</span>' : ''}</td>
+            <td>
+                <span class="text-primary hand negrita conc-vend-link" onclick="conc_seg_det_abrir(${idObj})" title="Ver productos vendidos">${conc_esc(r.NOMEMPLEADO || r.CODEMP)}</span>${sinProd ? ' <span class="small text-muted">(sin productos — edite objetivo)</span>' : ''}
+            </td>
             <td>${conc_esc(r.DESMARCA || 'TODAS')}</td>
             <td class="text-right">${Number(r.OBJ_COBERTURA) || 0}</td>
             <td class="text-right negrita">${Number(r.REAL_COBERTURA) || 0}</td>
@@ -863,6 +980,8 @@ function addListeners() {
             .conc-obj-prod-list { max-height: 220px; overflow-y: auto; background: rgba(0,0,0,0.02); }
             body.sygma-dark .conc-obj-prod-list { background: rgba(255,255,255,0.04); }
             .conc-obj-prod-item { font-size: 0.82rem; line-height: 1.25; }
+            .conc-vend-link { text-decoration: underline; text-underline-offset: 2px; }
+            .conc-vend-link:hover { opacity: 0.85; }
         `;
         document.head.appendChild(st);
     }
@@ -894,6 +1013,7 @@ function addListeners() {
     document.getElementById('btnObjGuardar')?.addEventListener('click', conc_obj_guardar);
     document.getElementById('btnConcVolverObj')?.addEventListener('click', conc_volver_listado);
     document.getElementById('btnConcVolverSeg')?.addEventListener('click', conc_volver_listado);
+    document.getElementById('btnConcSegExcel')?.addEventListener('click', conc_seg_export_excel);
     document.getElementById('btnCopiarGuardar')?.addEventListener('click', conc_copiar_guardar);
     document.getElementById('cmbObjMarca')?.addEventListener('change', (e) => {
         document.getElementById('txtObjProdBuscar').value = '';
@@ -929,4 +1049,6 @@ function destroyView() {
     try { $('#modal_concurso').modal('hide'); } catch (e) {}
     try { $('#modal_concurso_obj').modal('hide'); } catch (e) {}
     try { $('#modal_concurso_copiar').modal('hide'); } catch (e) {}
+    try { $('#modal_concurso_seg_det').modal('hide'); } catch (e) {}
+    conc_seg_cache = [];
 }
