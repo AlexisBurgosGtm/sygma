@@ -33,13 +33,15 @@ function getView() {
                                     <thead class="bg-base text-white">
                                         <tr>
                                             <th>CONCURSO</th>
+                                            <th>MARCA</th>
+                                            <th class="text-center">PRODS</th>
                                             <th class="text-center">ACTIVO</th>
                                             <th class="text-center">OBJ.</th>
                                             <th class="text-right">ACCIONES</th>
                                         </tr>
                                     </thead>
                                     <tbody id="tblDataConcursos">
-                                        <tr><td colspan="4" class="text-center text-muted">Cargando...</td></tr>
+                                        <tr><td colspan="6" class="text-center text-muted">Cargando...</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -69,15 +71,13 @@ function getView() {
                                     <thead class="bg-secondary text-white">
                                         <tr>
                                             <th>VENDEDOR</th>
-                                            <th>MARCA</th>
-                                            <th class="text-center">PRODS</th>
                                             <th class="text-right">COBERTURA</th>
                                             <th class="text-right">IMPORTE</th>
                                             <th></th>
                                         </tr>
                                     </thead>
                                         <tbody id="tblDataConcursoObj">
-                                            <tr><td colspan="6" class="text-center text-muted">Cargando...</td></tr>
+                                            <tr><td colspan="4" class="text-center text-muted">Cargando...</td></tr>
                                         </tbody>
                                 </table>
                             </div>
@@ -126,7 +126,7 @@ function getView() {
                 </div>
 
                 <div class="modal fade" tabindex="-1" role="dialog" id="modal_concurso">
-                    <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                         <div class="modal-content">
                             <div class="modal-header bg-base text-white py-2">
                                 <h5 class="modal-title negrita mb-0" id="lbConcursoTitulo">Nuevo concurso</h5>
@@ -143,6 +143,22 @@ function getView() {
                                     <div class="col-6">
                                         <label class="negrita small mb-1">Año</label>
                                         <select class="form-control form-control-sm" id="cmbConcursoAnioModal"></select>
+                                    </div>
+                                </div>
+                                <label class="negrita small mb-1 mt-2">Marca a medir</label>
+                                <select class="form-control form-control-sm" id="cmbConcMarca"></select>
+                                <div id="concConcProdBox" class="mt-2">
+                                    <div class="d-flex flex-wrap align-items-center justify-content-between mb-1">
+                                        <label class="negrita small mb-0">Productos</label>
+                                        <span class="small text-muted" id="lbConcProdCount">0 seleccionados</span>
+                                    </div>
+                                    <div class="d-flex flex-wrap mb-1">
+                                        <button type="button" class="btn btn-xs btn-outline-success hand mr-1" id="btnConcProdAll">Todos</button>
+                                        <button type="button" class="btn btn-xs btn-outline-secondary hand mr-2" id="btnConcProdNone">Ninguno</button>
+                                        <input type="search" class="form-control form-control-sm flex-grow-1" id="txtConcProdBuscar" placeholder="Buscar producto...">
+                                    </div>
+                                    <div class="conc-obj-prod-list border rounded p-2" id="concConcProdList">
+                                        <span class="text-muted small">Seleccione una marca</span>
                                     </div>
                                 </div>
                                 <label class="negrita small mb-1 mt-3">Activo</label>
@@ -217,7 +233,7 @@ function getView() {
                 </div>
 
                 <div class="modal fade" tabindex="-1" role="dialog" id="modal_concurso_obj">
-                    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
                         <div class="modal-content">
                             <div class="modal-header bg-info text-white py-2">
                                 <h5 class="modal-title negrita mb-0">Objetivo del vendedor</h5>
@@ -226,22 +242,6 @@ function getView() {
                                 <input type="hidden" id="txtObjId" value="0">
                                 <label class="negrita small mb-1">Vendedor</label>
                                 <select class="form-control form-control-sm" id="cmbObjVendedor"></select>
-                                <label class="negrita small mb-1 mt-2">Marca</label>
-                                <select class="form-control form-control-sm" id="cmbObjMarca"></select>
-                                <div id="concObjProdBox" class="d-none mt-2">
-                                    <div class="d-flex flex-wrap align-items-center justify-content-between mb-1">
-                                        <label class="negrita small mb-0">Productos de la marca</label>
-                                        <span class="small text-muted" id="lbObjProdCount">0 seleccionados</span>
-                                    </div>
-                                    <div class="d-flex flex-wrap mb-1">
-                                        <button type="button" class="btn btn-xs btn-outline-success hand mr-1" id="btnObjProdAll">Todos</button>
-                                        <button type="button" class="btn btn-xs btn-outline-secondary hand mr-2" id="btnObjProdNone">Ninguno</button>
-                                        <input type="search" class="form-control form-control-sm flex-grow-1" id="txtObjProdBuscar" placeholder="Buscar producto...">
-                                    </div>
-                                    <div class="conc-obj-prod-list border rounded p-2" id="concObjProdList">
-                                        <span class="text-muted small">Seleccione una marca</span>
-                                    </div>
-                                </div>
                                 <div class="row mt-2">
                                     <div class="col-6">
                                         <label class="negrita small mb-1">Cobertura</label>
@@ -273,8 +273,8 @@ var concursos_cache = [];
 var concursos_sel = 0;
 var concursos_sel_nom = '';
 var conc_view = 'listado';
-var conc_obj_prod_cache = [];
-var conc_obj_prod_selected = null;
+var conc_con_prod_cache = [];
+var conc_con_prod_selected = null;
 var conc_seg_cache = [];
 
 function conc_esc(s) {
@@ -344,7 +344,7 @@ function conc_limpiar_sel() {
 
 function conc_cargar() {
     const box = document.getElementById('tblDataConcursos');
-    if (box) box.innerHTML = `<tr><td colspan="4" class="text-center">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</td></tr>`;
+    if (box) box.innerHTML = `<tr><td colspan="6" class="text-center">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</td></tr>`;
     const f = conc_filtros();
     axios.post(GlobalUrlCalls + '/concursos/listado', { token: TOKEN, ...f })
         .then((res) => {
@@ -355,7 +355,7 @@ function conc_cargar() {
         })
         .catch(() => {
             concursos_cache = [];
-            if (box) box.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No se pudieron cargar los concursos.</td></tr>';
+            if (box) box.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No se pudieron cargar los concursos.</td></tr>';
         });
 }
 
@@ -365,7 +365,7 @@ function conc_pintar() {
     const q = String(document.getElementById('txtConcursoBuscar')?.value || '').toLowerCase().trim();
     const rows = concursos_cache.filter((r) => !q || String(r.NOMBRE || '').toLowerCase().indexOf(q) >= 0);
     if (!rows.length) {
-        box.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No hay concursos en este período.</td></tr>';
+        box.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No hay concursos en este período.</td></tr>';
         return;
     }
     box.innerHTML = rows.map((r) => {
@@ -374,6 +374,8 @@ function conc_pintar() {
         return `
             <tr>
                 <td class="negrita">${conc_esc(r.NOMBRE)}</td>
+                <td>${conc_esc(r.DESMARCA || '—')}</td>
+                <td class="text-center">${Number(r.NPROD) || 0}</td>
                 <td class="text-center"><span class="conc-pill ${on ? 'is-on' : 'is-off'}">${on ? 'SI' : 'NO'}</span></td>
                 <td class="text-center">${Number(r.NOBJ) || 0}</td>
                 <td class="text-right conc-actions">
@@ -395,16 +397,25 @@ function conc_sel(id) {
     return r;
 }
 
+function conc_subtitulo_concurso(r) {
+    if (!r) return concursos_sel_nom || '—';
+    const marca = r.DESMARCA || 'Sin marca';
+    const prods = Number(r.NPROD) || 0;
+    return `${r.NOMBRE || concursos_sel_nom} · ${marca} · ${prods} producto${prods === 1 ? '' : 's'}`;
+}
+
 function conc_ir_objetivos(id) {
-    if (!conc_sel(id)) return;
-    document.getElementById('lbConcursoSelObj').textContent = concursos_sel_nom;
+    const r = conc_sel(id);
+    if (!r) return;
+    document.getElementById('lbConcursoSelObj').textContent = conc_subtitulo_concurso(r);
     conc_setView('objetivos');
     conc_cargar_obj();
 }
 
 function conc_ir_seguimiento(id) {
-    if (!conc_sel(id)) return;
-    document.getElementById('lbConcursoSelSeg').textContent = concursos_sel_nom;
+    const r = conc_sel(id);
+    if (!r) return;
+    document.getElementById('lbConcursoSelSeg').textContent = conc_subtitulo_concurso(r);
     conc_setView('seguimiento');
     conc_cargar_seg();
 }
@@ -458,14 +469,14 @@ function conc_cargar_obj() {
         conc_pintar_obj([]);
         return;
     }
-    if (box) box.innerHTML = `<tr><td colspan="6" class="text-center">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</td></tr>`;
+    if (box) box.innerHTML = `<tr><td colspan="4" class="text-center">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</td></tr>`;
     axios.post(GlobalUrlCalls + '/concursos/objetivos', { token: TOKEN, idconcurso: concursos_sel })
         .then((res) => {
             if (!res.data || res.data === 'error') throw new Error('error');
             conc_pintar_obj(res.data.recordset || []);
         })
         .catch(() => {
-            if (box) box.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No se pudieron cargar los objetivos.</td></tr>';
+            if (box) box.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No se pudieron cargar los objetivos.</td></tr>';
         });
 }
 
@@ -473,21 +484,18 @@ function conc_pintar_obj(rows) {
     const box = document.getElementById('tblDataConcursoObj');
     if (!box) return;
     if (!rows.length) {
-        box.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Sin objetivos. Agregue vendedores.</td></tr>';
+        box.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Sin objetivos. Agregue vendedores.</td></tr>';
         return;
     }
     box.innerHTML = rows.map((r) => `
         <tr>
             <td>${conc_esc(r.NOMEMPLEADO || r.CODEMP)}</td>
-            <td>${conc_esc(r.DESMARCA || 'TODAS')}</td>
-            <td class="text-center">${Number(r.CODMARCA) > 0 ? (Number(r.NPROD) || 0) : '—'}</td>
             <td class="text-right">${Number(r.COBERTURA) || 0}</td>
             <td class="text-right">${conc_mon(r.IMPORTE)}</td>
             <td class="text-right">
                 <button type="button" class="btn btn-xs btn-info hand" title="Editar" onclick='conc_obj_editar(${JSON.stringify({
                     ID: Number(r.ID) || 0,
                     CODEMP: Number(r.CODEMP) || 0,
-                    CODMARCA: Number(r.CODMARCA) || 0,
                     COBERTURA: Number(r.COBERTURA) || 0,
                     IMPORTE: Number(r.IMPORTE) || 0
                 })})'><i class="fal fa-edit"></i></button>
@@ -562,8 +570,9 @@ function conc_seg_det_abrir(idObjetivo) {
 function conc_seg_det_pintar(rows, hdr, coberturaMarca) {
     const box = document.getElementById('tblDataSegDet');
     if (!box) return;
-    if (Number(hdr.CODMARCA) > 0 && !(Number(hdr.NPROD) > 0)) {
-        box.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Este objetivo no tiene productos configurados. Edítelo en Objetivos.</td></tr>';
+    const concRow = conc_getRow(concursos_sel);
+    if (concRow && !(Number(concRow.NPROD) > 0)) {
+        box.innerHTML = '<tr><td colspan="3" class="text-center text-muted">El concurso no tiene productos configurados. Edítelo en el listado.</td></tr>';
         return;
     }
     if (!rows.length) {
@@ -602,14 +611,14 @@ function conc_pintar_seg(rows) {
     box.innerHTML = rows.map((r) => {
         const pctCob = conc_pct(r.REAL_COBERTURA, r.OBJ_COBERTURA);
         const pctImp = conc_pct(r.REAL_IMPORTE, r.OBJ_IMPORTE);
-        const sinProd = Number(r.CODMARCA) > 0 && !(Number(r.NPROD) > 0);
+        const sinProd = !(Number(r.NPROD) > 0);
         const idObj = Number(r.ID) || 0;
         return `
         <tr${sinProd ? ' class="table-warning"' : ''}>
             <td>
-                <span class="text-primary hand negrita conc-vend-link" onclick="conc_seg_det_abrir(${idObj})" title="Ver productos vendidos">${conc_esc(r.NOMEMPLEADO || r.CODEMP)}</span>${sinProd ? ' <span class="small text-muted">(sin productos — edite objetivo)</span>' : ''}
+                <span class="text-primary hand negrita conc-vend-link" onclick="conc_seg_det_abrir(${idObj})" title="Ver productos vendidos">${conc_esc(r.NOMEMPLEADO || r.CODEMP)}</span>${sinProd ? ' <span class="small text-muted">(sin productos — edite concurso)</span>' : ''}
             </td>
-            <td>${conc_esc(r.DESMARCA || 'TODAS')}</td>
+            <td>${conc_esc(r.DESMARCA || '—')}</td>
             <td class="text-right">${Number(r.OBJ_COBERTURA) || 0}</td>
             <td class="text-right negrita">${Number(r.REAL_COBERTURA) || 0}</td>
             <td class="text-right"><span class="conc-pct ${conc_pctClass(pctCob)}">${pctCob}%</span></td>
@@ -625,9 +634,11 @@ function conc_nuevo() {
     document.getElementById('txtConcursoNombre').value = '';
     document.getElementById('cmbConcursoMesModal').value = document.getElementById('cmbConcursoMes').value;
     document.getElementById('cmbConcursoAnioModal').value = document.getElementById('cmbConcursoAnio').value;
+    document.getElementById('txtConcProdBuscar').value = '';
+    document.getElementById('cmbConcMarca').value = '0';
     document.getElementById('lbConcursoTitulo').textContent = 'Nuevo concurso';
     conc_setActivoUI('SI');
-    $('#modal_concurso').modal('show');
+    conc_con_cargar_productos(0, 0).then(() => $('#modal_concurso').modal('show'));
 }
 
 function conc_editar(id) {
@@ -637,9 +648,11 @@ function conc_editar(id) {
     document.getElementById('txtConcursoNombre').value = r.NOMBRE || '';
     document.getElementById('cmbConcursoMesModal').value = String(r.MES);
     document.getElementById('cmbConcursoAnioModal').value = String(r.ANIO);
+    document.getElementById('cmbConcMarca').value = String(r.CODMARCA || 0);
+    document.getElementById('txtConcProdBuscar').value = '';
     document.getElementById('lbConcursoTitulo').textContent = 'Editar concurso';
     conc_setActivoUI(r.ACTIVO);
-    $('#modal_concurso').modal('show');
+    conc_con_cargar_productos(r.CODMARCA || 0, id).then(() => $('#modal_concurso').modal('show'));
 }
 
 function conc_guardar() {
@@ -650,13 +663,25 @@ function conc_guardar() {
     }
     const id = Number(document.getElementById('txtConcursoId').value) || 0;
     const btn = document.getElementById('btnConcursoGuardar');
+    const codmarca = Number(document.getElementById('cmbConcMarca').value) || 0;
+    const productos = conc_con_prod_get_checked();
+    if (!codmarca) {
+        F.AvisoError('Seleccione la marca del concurso');
+        return;
+    }
+    if (!productos.length) {
+        F.AvisoError('Seleccione al menos un producto');
+        return;
+    }
     const payload = {
         token: TOKEN,
         sucursal: document.getElementById('cmbConcursoSucursal').value,
         nombre,
         mes: document.getElementById('cmbConcursoMesModal').value,
         anio: document.getElementById('cmbConcursoAnioModal').value,
-        activo: conc_getActivo()
+        activo: conc_getActivo(),
+        codmarca,
+        productos
     };
     if (id) payload.idconcurso = id;
     if (btn) {
@@ -704,93 +729,92 @@ function conc_eliminar(id) {
         });
 }
 
-function conc_obj_prod_sync_from_dom() {
-    if (!conc_obj_prod_selected) conc_obj_prod_selected = new Set();
-    document.querySelectorAll('#concObjProdList input.conc-obj-prod-chk').forEach((el) => {
-        if (el.checked) conc_obj_prod_selected.add(el.value);
-        else conc_obj_prod_selected.delete(el.value);
+function conc_con_prod_sync_from_dom() {
+    if (!conc_con_prod_selected) conc_con_prod_selected = new Set();
+    document.querySelectorAll('#concConcProdList input.conc-con-prod-chk').forEach((el) => {
+        if (el.checked) conc_con_prod_selected.add(el.value);
+        else conc_con_prod_selected.delete(el.value);
     });
 }
 
-function conc_obj_prod_sel_count() {
-    return conc_obj_prod_selected ? conc_obj_prod_selected.size : 0;
+function conc_con_prod_sel_count() {
+    return conc_con_prod_selected ? conc_con_prod_selected.size : 0;
 }
 
-function conc_obj_prod_update_count() {
-    const lb = document.getElementById('lbObjProdCount');
-    if (lb) lb.textContent = `${conc_obj_prod_sel_count()} seleccionados`;
+function conc_con_prod_update_count() {
+    const lb = document.getElementById('lbConcProdCount');
+    if (lb) lb.textContent = `${conc_con_prod_sel_count()} seleccionados`;
 }
 
-function conc_obj_prod_get_checked() {
-    conc_obj_prod_sync_from_dom();
-    return Array.from(conc_obj_prod_selected || []);
+function conc_con_prod_get_checked() {
+    conc_con_prod_sync_from_dom();
+    return Array.from(conc_con_prod_selected || []);
 }
 
-function conc_obj_prod_pintar(selectedSet) {
-    const box = document.getElementById('concObjProdList');
+function conc_con_prod_pintar(selectedSet) {
+    const box = document.getElementById('concConcProdList');
     if (!box) return;
-    if (selectedSet) conc_obj_prod_selected = new Set(selectedSet);
-    else conc_obj_prod_sync_from_dom();
-    const q = String(document.getElementById('txtObjProdBuscar')?.value || '').toLowerCase().trim();
-    const rows = conc_obj_prod_cache.filter((r) => {
+    if (selectedSet) conc_con_prod_selected = new Set(selectedSet);
+    else conc_con_prod_sync_from_dom();
+    const q = String(document.getElementById('txtConcProdBuscar')?.value || '').toLowerCase().trim();
+    const rows = conc_con_prod_cache.filter((r) => {
         if (!q) return true;
         const t = `${r.CODPROD} ${r.DESPROD}`.toLowerCase();
         return t.indexOf(q) >= 0;
     });
-    if (!conc_obj_prod_cache.length) {
+    if (!(Number(document.getElementById('cmbConcMarca')?.value) > 0)) {
+        box.innerHTML = '<span class="text-muted small">Seleccione una marca</span>';
+        conc_con_prod_update_count();
+        return;
+    }
+    if (!conc_con_prod_cache.length) {
         box.innerHTML = '<span class="text-muted small">No hay productos habilitados en esta marca.</span>';
-        conc_obj_prod_update_count();
+        conc_con_prod_update_count();
         return;
     }
     if (!rows.length) {
         box.innerHTML = '<span class="text-muted small">Sin coincidencias.</span>';
-        conc_obj_prod_update_count();
+        conc_con_prod_update_count();
         return;
     }
-    const sel = conc_obj_prod_selected || new Set();
+    const sel = conc_con_prod_selected || new Set();
     box.innerHTML = rows.map((r) => {
         const cod = String(r.CODPROD);
         const on = sel.has(cod);
         return `
             <label class="conc-obj-prod-item d-flex align-items-start hand mb-1">
-                <input type="checkbox" class="conc-obj-prod-chk mr-2 mt-1" value="${conc_esc(cod)}" ${on ? 'checked' : ''}>
+                <input type="checkbox" class="conc-con-prod-chk mr-2 mt-1" value="${conc_esc(cod)}" ${on ? 'checked' : ''}>
                 <span><span class="negrita">${conc_esc(cod)}</span> — ${conc_esc(r.DESPROD)}</span>
             </label>`;
     }).join('');
-    box.querySelectorAll('.conc-obj-prod-chk').forEach((el) => {
+    box.querySelectorAll('.conc-con-prod-chk').forEach((el) => {
         el.addEventListener('change', () => {
-            if (!conc_obj_prod_selected) conc_obj_prod_selected = new Set();
-            if (el.checked) conc_obj_prod_selected.add(el.value);
-            else conc_obj_prod_selected.delete(el.value);
-            conc_obj_prod_update_count();
+            if (!conc_con_prod_selected) conc_con_prod_selected = new Set();
+            if (el.checked) conc_con_prod_selected.add(el.value);
+            else conc_con_prod_selected.delete(el.value);
+            conc_con_prod_update_count();
         });
     });
-    conc_obj_prod_update_count();
+    conc_con_prod_update_count();
 }
 
-function conc_obj_prod_toggle_box(marca) {
-    const box = document.getElementById('concObjProdBox');
-    if (box) box.classList.toggle('d-none', !(Number(marca) > 0));
-}
-
-function conc_obj_cargar_productos(marca, idObjetivo) {
-    conc_obj_prod_cache = [];
-    conc_obj_prod_selected = null;
-    conc_obj_prod_toggle_box(marca);
-    const list = document.getElementById('concObjProdList');
+function conc_con_cargar_productos(marca, idConcurso) {
+    conc_con_prod_cache = [];
+    conc_con_prod_selected = null;
+    const list = document.getElementById('concConcProdList');
     if (!(Number(marca) > 0)) {
-        if (list) list.innerHTML = '';
-        conc_obj_prod_update_count();
+        if (list) list.innerHTML = '<span class="text-muted small">Seleccione una marca</span>';
+        conc_con_prod_update_count();
         return Promise.resolve();
     }
     if (list) list.innerHTML = `<span class="text-muted small">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando productos...'}</span>`;
     const loadProds = axios.post(GlobalUrlCalls + '/concursos/productos_marca', { token: TOKEN, codmarca: marca })
         .then((res) => {
             if (!res.data || res.data === 'error') throw new Error('error');
-            conc_obj_prod_cache = res.data.recordset || [];
+            conc_con_prod_cache = res.data.recordset || [];
         });
-    const loadSel = (Number(idObjetivo) > 0)
-        ? axios.post(GlobalUrlCalls + '/concursos/objetivo_productos', { token: TOKEN, id: idObjetivo })
+    const loadSel = (Number(idConcurso) > 0)
+        ? axios.post(GlobalUrlCalls + '/concursos/concurso_productos', { token: TOKEN, idconcurso: idConcurso })
             .then((res) => {
                 if (!res.data || res.data === 'error') throw new Error('error');
                 return new Set((res.data.recordset || []).map((r) => String(r.CODPROD)));
@@ -798,14 +822,14 @@ function conc_obj_cargar_productos(marca, idObjetivo) {
         : Promise.resolve(null);
     return Promise.all([loadProds, loadSel])
         .then(([, selSet]) => {
-            const all = new Set(conc_obj_prod_cache.map((r) => String(r.CODPROD)));
+            const all = new Set(conc_con_prod_cache.map((r) => String(r.CODPROD)));
             const selected = selSet && selSet.size ? selSet : all;
-            conc_obj_prod_pintar(selected);
+            conc_con_prod_pintar(selected);
         })
         .catch(() => {
-            conc_obj_prod_cache = [];
+            conc_con_prod_cache = [];
             if (list) list.innerHTML = '<span class="text-danger small">No se pudieron cargar los productos.</span>';
-            conc_obj_prod_update_count();
+            conc_con_prod_update_count();
         });
 }
 
@@ -814,16 +838,17 @@ function conc_obj_nuevo() {
         F.AvisoError('Seleccione un concurso');
         return;
     }
+    const c = conc_getRow(concursos_sel);
+    if (c && !(Number(c.NPROD) > 0)) {
+        F.AvisoError('Configure marca y productos en el concurso antes de agregar objetivos');
+        return;
+    }
     document.getElementById('txtObjId').value = '0';
     document.getElementById('txtObjCobertura').value = '0';
     document.getElementById('txtObjImporte').value = '0';
-    document.getElementById('txtObjProdBuscar').value = '';
     const cmbVen = document.getElementById('cmbObjVendedor');
-    const cmbMarca = document.getElementById('cmbObjMarca');
     if (cmbVen) cmbVen.disabled = false;
-    if (cmbMarca) cmbMarca.disabled = false;
-    if (cmbMarca) cmbMarca.value = '0';
-    conc_obj_cargar_productos(0).then(() => $('#modal_concurso_obj').modal('show'));
+    $('#modal_concurso_obj').modal('show');
 }
 
 function conc_obj_editar(row) {
@@ -831,12 +856,9 @@ function conc_obj_editar(row) {
     document.getElementById('txtObjId').value = String(row.ID);
     document.getElementById('cmbObjVendedor').value = String(row.CODEMP);
     document.getElementById('cmbObjVendedor').disabled = true;
-    document.getElementById('cmbObjMarca').value = String(row.CODMARCA || 0);
-    document.getElementById('cmbObjMarca').disabled = true;
     document.getElementById('txtObjCobertura').value = String(row.COBERTURA || 0);
     document.getElementById('txtObjImporte').value = String(row.IMPORTE || 0);
-    document.getElementById('txtObjProdBuscar').value = '';
-    conc_obj_cargar_productos(row.CODMARCA || 0, row.ID).then(() => $('#modal_concurso_obj').modal('show'));
+    $('#modal_concurso_obj').modal('show');
 }
 
 function conc_obj_guardar() {
@@ -851,29 +873,19 @@ function conc_obj_guardar() {
         btn.disabled = true;
         btn.innerHTML = '<i class="fal fa-save fa-spin mr-1"></i> Guardando';
     }
-    const codmarca = Number(document.getElementById('cmbObjMarca').value) || 0;
-    const productos = codmarca > 0 ? conc_obj_prod_get_checked() : [];
-    if (codmarca > 0 && !productos.length) {
-        F.AvisoError('Seleccione al menos un producto de la marca');
-        return;
-    }
     const payload = id
         ? {
             token: TOKEN,
             id,
             cobertura: document.getElementById('txtObjCobertura').value || 0,
-            importe: document.getElementById('txtObjImporte').value || 0,
-            codmarca,
-            productos
+            importe: document.getElementById('txtObjImporte').value || 0
         }
         : {
             token: TOKEN,
             idconcurso: concursos_sel,
             codemp,
-            codmarca,
             cobertura: document.getElementById('txtObjCobertura').value || 0,
-            importe: document.getElementById('txtObjImporte').value || 0,
-            productos
+            importe: document.getElementById('txtObjImporte').value || 0
         };
     axios.post(GlobalUrlCalls + (id ? '/concursos/objetivo_update' : '/concursos/objetivo_insert'), payload)
         .then((res) => {
@@ -933,13 +945,13 @@ function conc_cargar_combos() {
 
     GF.get_data_marcas()
         .then((data) => {
-            const cmb = document.getElementById('cmbObjMarca');
-            cmb.innerHTML = ['<option value="0">TODAS</option>']
-                .concat((data.recordset || []).map((r) => `<option value="${r.CODMARCA}">${conc_esc(r.DESMARCA)}</option>`))
-                .join('');
+            const opts = (data.recordset || []).map((r) => `<option value="${r.CODMARCA}">${conc_esc(r.DESMARCA)}</option>`);
+            const cmb = document.getElementById('cmbConcMarca');
+            if (cmb) cmb.innerHTML = ['<option value="0">Seleccione marca...</option>'].concat(opts).join('');
         })
         .catch(() => {
-            document.getElementById('cmbObjMarca').innerHTML = '<option value="0">TODAS</option>';
+            const cmb = document.getElementById('cmbConcMarca');
+            if (cmb) cmb.innerHTML = '<option value="0">Seleccione marca...</option>';
         });
 }
 
@@ -1018,25 +1030,23 @@ function addListeners() {
     document.getElementById('btnConcVolverSeg')?.addEventListener('click', conc_volver_listado);
     document.getElementById('btnConcSegExcel')?.addEventListener('click', conc_seg_export_excel);
     document.getElementById('btnCopiarGuardar')?.addEventListener('click', conc_copiar_guardar);
-    document.getElementById('cmbObjMarca')?.addEventListener('change', (e) => {
-        document.getElementById('txtObjProdBuscar').value = '';
-        const idObj = Number(document.getElementById('txtObjId').value) || 0;
-        conc_obj_cargar_productos(e.target.value, idObj);
+    document.getElementById('cmbConcMarca')?.addEventListener('change', (e) => {
+        document.getElementById('txtConcProdBuscar').value = '';
+        const idConc = Number(document.getElementById('txtConcursoId').value) || 0;
+        conc_con_cargar_productos(e.target.value, idConc);
     });
-    document.getElementById('txtObjProdBuscar')?.addEventListener('input', () => {
-        conc_obj_prod_pintar();
+    document.getElementById('txtConcProdBuscar')?.addEventListener('input', () => {
+        conc_con_prod_pintar();
     });
-    document.getElementById('btnObjProdAll')?.addEventListener('click', () => {
-        conc_obj_prod_pintar(new Set(conc_obj_prod_cache.map((r) => String(r.CODPROD))));
+    document.getElementById('btnConcProdAll')?.addEventListener('click', () => {
+        conc_con_prod_pintar(new Set(conc_con_prod_cache.map((r) => String(r.CODPROD))));
     });
-    document.getElementById('btnObjProdNone')?.addEventListener('click', () => {
-        conc_obj_prod_pintar(new Set());
+    document.getElementById('btnConcProdNone')?.addEventListener('click', () => {
+        conc_con_prod_pintar(new Set());
     });
     $('#modal_concurso_obj').on('hidden.bs.modal', () => {
         const cmbVen = document.getElementById('cmbObjVendedor');
-        const cmbMarca = document.getElementById('cmbObjMarca');
         if (cmbVen) cmbVen.disabled = false;
-        if (cmbMarca) cmbMarca.disabled = false;
     });
 }
 
