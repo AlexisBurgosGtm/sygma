@@ -60,6 +60,39 @@ async function deleteProductosObjetivosConcurso(idConcurso, token) {
 
 const RPT_TIPOS_VENTA = `('FAC','FEF','FEC','FCP','FES','FPC')`;
 
+function sqlVentasLineasObjetivo(emp, mes, anio, idObjetivo) {
+    const empSql = sqlEsc(String(emp || '').trim());
+    const m = sqlInt(mes);
+    const a = sqlInt(anio);
+    const objFilter = idObjetivo ? `AND OP.ID_OBJETIVO = ${sqlInt(idObjetivo)}` : '';
+    return `
+        SELECT
+            OP.ID_OBJETIVO,
+            D.CODCLIENTE,
+            DP.TOTALPRECIO
+        FROM CONCURSOS_OBJETIVOS_PRODUCTOS OP
+        INNER JOIN CONCURSOS_OBJETIVOS OX ON OX.ID = OP.ID_OBJETIVO
+        INNER JOIN CONCURSOS CX ON CX.IDCONCURSO = OX.IDCONCURSO
+        INNER JOIN DOCPRODUCTOS DP ON DP.CODPROD = OP.CODPROD AND DP.EMPNIT = CX.EMPNIT
+        INNER JOIN DOCUMENTOS D
+            ON D.EMPNIT = DP.EMPNIT
+            AND D.CODDOC = DP.CODDOC
+            AND D.CORRELATIVO = DP.CORRELATIVO
+            AND D.CODEMP = OX.CODEMP
+        INNER JOIN TIPODOCUMENTOS TD ON D.CODDOC = TD.CODDOC AND D.EMPNIT = TD.EMPNIT
+        WHERE CX.EMPNIT = '${empSql}'
+            AND CX.MES = ${m}
+            AND CX.ANIO = ${a}
+            AND D.MES = ${m}
+            AND D.ANIO = ${a}
+            AND D.STATUS <> 'A'
+            AND TD.TIPODOC IN ${RPT_TIPOS_VENTA}
+            AND D.CODCLIENTE IS NOT NULL
+            AND D.CODCLIENTE > 0
+            ${objFilter}
+    `;
+}
+
 router.post('/listado', async (req, res) => {
     const { token, sucursal, mes, anio } = req.body || {};
     const emp = sqlEsc(String(sucursal || '').trim());
@@ -389,7 +422,7 @@ router.post('/seguimiento', async (req, res) => {
             LEFT JOIN (
                 SELECT
                     D.CODEMP,
-                    COUNT(DISTINCT CASE WHEN D.CODCLIENTE IS NOT NULL AND D.CODCLIENTE > 0 THEN D.CODCLIENTE END) AS CLIENTES,
+                    COUNT(DISTINCT D.CODCLIENTE) AS CLIENTES,
                     SUM(ISNULL(D.TOTALPRECIO, 0)) AS TOTALPRECIO
                 FROM DOCUMENTOS D
                 INNER JOIN TIPODOCUMENTOS TD ON D.CODDOC = TD.CODDOC AND D.EMPNIT = TD.EMPNIT
@@ -398,31 +431,25 @@ router.post('/seguimiento', async (req, res) => {
                     AND D.ANIO = ${anio}
                     AND D.STATUS <> 'A'
                     AND TD.TIPODOC IN ${RPT_TIPOS_VENTA}
+                    AND D.CODCLIENTE IS NOT NULL
+                    AND D.CODCLIENTE > 0
                 GROUP BY D.CODEMP
             ) VV ON VV.CODEMP = O.CODEMP
             LEFT JOIN (
                 SELECT
-                    OP.ID_OBJETIVO,
-                    COUNT(DISTINCT CASE WHEN D.CODCLIENTE IS NOT NULL AND D.CODCLIENTE > 0 THEN D.CODCLIENTE END) AS CLIENTES,
-                    SUM(ISNULL(DP.TOTALPRECIO, 0)) AS TOTALPRECIO
-                FROM CONCURSOS_OBJETIVOS_PRODUCTOS OP
-                INNER JOIN CONCURSOS_OBJETIVOS OX ON OX.ID = OP.ID_OBJETIVO
-                INNER JOIN CONCURSOS CX ON CX.IDCONCURSO = OX.IDCONCURSO
-                INNER JOIN DOCPRODUCTOS DP
-                    ON DP.CODPROD = OP.CODPROD AND DP.EMPNIT = CX.EMPNIT
-                INNER JOIN DOCUMENTOS D
-                    ON D.EMPNIT = DP.EMPNIT
-                    AND D.CODDOC = DP.CODDOC
-                    AND D.CORRELATIVO = DP.CORRELATIVO
-                    AND D.CODEMP = OX.CODEMP
-                INNER JOIN TIPODOCUMENTOS TD
-                    ON D.CODDOC = TD.CODDOC AND D.EMPNIT = TD.EMPNIT
-                WHERE CX.EMPNIT = '${emp}'
-                    AND CX.MES = ${mes}
-                    AND CX.ANIO = ${anio}
-                    AND D.STATUS <> 'A'
-                    AND TD.TIPODOC IN ${RPT_TIPOS_VENTA}
-                GROUP BY OP.ID_OBJETIVO
+                    U.ID_OBJETIVO,
+                    COUNT(*) AS CLIENTES,
+                    ISNULL(I.TOTALPRECIO, 0) AS TOTALPRECIO
+                FROM (
+                    SELECT DISTINCT VO.ID_OBJETIVO, VO.CODCLIENTE
+                    FROM (${sqlVentasLineasObjetivo(emp, mes, anio, 0)}) VO
+                ) U
+                LEFT JOIN (
+                    SELECT VO2.ID_OBJETIVO, SUM(ISNULL(VO2.TOTALPRECIO, 0)) AS TOTALPRECIO
+                    FROM (${sqlVentasLineasObjetivo(emp, mes, anio, 0)}) VO2
+                    GROUP BY VO2.ID_OBJETIVO
+                ) I ON I.ID_OBJETIVO = U.ID_OBJETIVO
+                GROUP BY U.ID_OBJETIVO, I.TOTALPRECIO
             ) VP ON VP.ID_OBJETIVO = O.ID
             WHERE O.IDCONCURSO = ${id}
             ORDER BY E.NOMEMPLEADO, M.DESMARCA
@@ -472,28 +499,29 @@ router.post('/seguimiento_detalle', async (req, res) => {
         const codemp = sqlInt(o.CODEMP);
         const marca = sqlInt(o.CODMARCA);
         let qry = '';
+        let coberturaMarca = 0;
         if (marca > 0) {
             qry = `
                 SELECT
                     P.CODPROD,
                     ISNULL(P.DESPROD, '') AS DESPROD,
-                    ISNULL(V.COBERTURA, 0) AS COBERTURA,
                     ISNULL(V.IMPORTE, 0) AS IMPORTE
                 FROM CONCURSOS_OBJETIVOS_PRODUCTOS OP
                 INNER JOIN PRODUCTOS P ON P.CODPROD = OP.CODPROD
                 LEFT JOIN (
                     SELECT
                         DP.CODPROD,
-                        COUNT(DISTINCT CASE WHEN D.CODCLIENTE IS NOT NULL AND D.CODCLIENTE > 0 THEN D.CODCLIENTE END) AS COBERTURA,
                         SUM(ISNULL(DP.TOTALPRECIO, 0)) AS IMPORTE
-                    FROM DOCPRODUCTOS DP
+                    FROM CONCURSOS_OBJETIVOS_PRODUCTOS OPF
+                    INNER JOIN DOCPRODUCTOS DP ON DP.CODPROD = OPF.CODPROD AND DP.EMPNIT = '${emp}'
                     INNER JOIN DOCUMENTOS D
                         ON D.EMPNIT = DP.EMPNIT
                         AND D.CODDOC = DP.CODDOC
                         AND D.CORRELATIVO = DP.CORRELATIVO
                     INNER JOIN TIPODOCUMENTOS TD
                         ON D.CODDOC = TD.CODDOC AND D.EMPNIT = TD.EMPNIT
-                    WHERE D.EMPNIT = '${emp}'
+                    WHERE OPF.ID_OBJETIVO = ${objId}
+                        AND D.EMPNIT = '${emp}'
                         AND D.MES = ${mes}
                         AND D.ANIO = ${anio}
                         AND D.CODEMP = ${codemp}
@@ -504,6 +532,16 @@ router.post('/seguimiento_detalle', async (req, res) => {
                 WHERE OP.ID_OBJETIVO = ${objId}
                 ORDER BY P.DESPROD, P.CODPROD
             `;
+            const cobRes = await execute.get_data_qry(`
+                SELECT COUNT(*) AS N
+                FROM (
+                    SELECT DISTINCT VO.CODCLIENTE
+                    FROM (${sqlVentasLineasObjetivo(emp, mes, anio, objId)}) VO
+                ) X
+            `, token);
+            coberturaMarca = cobRes && cobRes.recordset && cobRes.recordset[0]
+                ? Number(cobRes.recordset[0].N) || 0
+                : 0;
         } else {
             qry = `
                 SELECT
@@ -530,11 +568,28 @@ router.post('/seguimiento_detalle', async (req, res) => {
                     OR COUNT(DISTINCT CASE WHEN D.CODCLIENTE IS NOT NULL AND D.CODCLIENTE > 0 THEN D.CODCLIENTE END) > 0
                 ORDER BY P.DESPROD, P.CODPROD
             `;
+            const cobRes = await execute.get_data_qry(`
+                SELECT COUNT(DISTINCT D.CODCLIENTE) AS N
+                FROM DOCUMENTOS D
+                INNER JOIN TIPODOCUMENTOS TD ON D.CODDOC = TD.CODDOC AND D.EMPNIT = TD.EMPNIT
+                WHERE D.EMPNIT = '${emp}'
+                    AND D.MES = ${mes}
+                    AND D.ANIO = ${anio}
+                    AND D.CODEMP = ${codemp}
+                    AND D.STATUS <> 'A'
+                    AND TD.TIPODOC IN ${RPT_TIPOS_VENTA}
+                    AND D.CODCLIENTE IS NOT NULL
+                    AND D.CODCLIENTE > 0
+            `, token);
+            coberturaMarca = cobRes && cobRes.recordset && cobRes.recordset[0]
+                ? Number(cobRes.recordset[0].N) || 0
+                : 0;
         }
         const data = await execute.get_data_qry(qry, token);
         res.send({
             ok: true,
             objetivo: o,
+            cobertura_marca: coberturaMarca,
             recordset: (data && data.recordset) || []
         });
     } catch (e) {

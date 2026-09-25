@@ -200,12 +200,11 @@ function getView() {
                                             <tr>
                                                 <th>CODPROD</th>
                                                 <th>PRODUCTO</th>
-                                                <th class="text-right">COBERTURA</th>
                                                 <th class="text-right">IMPORTE</th>
                                             </tr>
                                         </thead>
                                         <tbody id="tblDataSegDet">
-                                            <tr><td colspan="4" class="text-center text-muted">—</td></tr>
+                                            <tr><td colspan="3" class="text-center text-muted">—</td></tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -543,49 +542,53 @@ function conc_seg_det_abrir(idObjetivo) {
     const box = document.getElementById('tblDataSegDet');
     document.getElementById('lbSegDetTitulo').textContent = `Ventas — ${row.NOMEMPLEADO || row.CODEMP}`;
     document.getElementById('lbSegDetSub').textContent = `Marca: ${row.DESMARCA || 'TODAS'} · Solo ventas del período (sin comparar objetivo)`;
-    if (box) box.innerHTML = `<tr><td colspan="4" class="text-center">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</td></tr>`;
+    if (box) box.innerHTML = `<tr><td colspan="3" class="text-center">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</td></tr>`;
     $('#modal_concurso_seg_det').modal('show');
     axios.post(GlobalUrlCalls + '/concursos/seguimiento_detalle', { token: TOKEN, id_objetivo: idObjetivo })
         .then((res) => {
             if (!res.data || res.data.ok === false) throw new Error((res.data && res.data.error) || 'error');
-            conc_seg_det_pintar(res.data.recordset || [], row);
+            const cob = Number(res.data.cobertura_marca) || 0;
+            document.getElementById('lbSegDetSub').textContent =
+                `Marca: ${row.DESMARCA || 'TODAS'} · Cobertura (clientes únicos): ${cob} · Importe por producto del listado`;
+            conc_seg_det_pintar(res.data.recordset || [], row, cob);
         })
         .catch((e) => {
             if (box) {
-                box.innerHTML = `<tr><td colspan="4" class="text-center text-muted">${conc_esc((e && e.message && e.message !== 'error') ? e.message : 'No se pudo cargar el detalle.')}</td></tr>`;
+                box.innerHTML = `<tr><td colspan="3" class="text-center text-muted">${conc_esc((e && e.message && e.message !== 'error') ? e.message : 'No se pudo cargar el detalle.')}</td></tr>`;
             }
         });
 }
 
-function conc_seg_det_pintar(rows, hdr) {
+function conc_seg_det_pintar(rows, hdr, coberturaMarca) {
     const box = document.getElementById('tblDataSegDet');
     if (!box) return;
     if (Number(hdr.CODMARCA) > 0 && !(Number(hdr.NPROD) > 0)) {
-        box.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Este objetivo no tiene productos configurados. Edítelo en Objetivos.</td></tr>';
+        box.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Este objetivo no tiene productos configurados. Edítelo en Objetivos.</td></tr>';
         return;
     }
     if (!rows.length) {
-        box.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Sin ventas registradas en el período.</td></tr>';
+        box.innerHTML = `<tr><td colspan="3" class="text-center text-muted">Sin ventas de productos del listado. Cobertura: ${Number(coberturaMarca) || 0}</td></tr>`;
         return;
     }
     let totImp = 0;
     const body = rows.map((r) => {
-        const cob = Number(r.COBERTURA) || 0;
         const imp = Number(r.IMPORTE) || 0;
         totImp += imp;
         return `
             <tr>
                 <td class="negrita">${conc_esc(r.CODPROD)}</td>
                 <td>${conc_esc(r.DESPROD)}</td>
-                <td class="text-right">${cob}</td>
                 <td class="text-right">${conc_mon(imp)}</td>
             </tr>`;
     }).join('');
     box.innerHTML = body + `
         <tr class="bg-light negrita">
-            <td colspan="2" class="text-right">TOTALES</td>
-            <td class="text-right">—</td>
+            <td colspan="2" class="text-right">TOTAL IMPORTE</td>
             <td class="text-right">${conc_mon(totImp)}</td>
+        </tr>
+        <tr class="bg-light negrita">
+            <td colspan="2" class="text-right">COBERTURA (clientes únicos)</td>
+            <td class="text-right">${Number(coberturaMarca) || 0}</td>
         </tr>`;
 }
 
