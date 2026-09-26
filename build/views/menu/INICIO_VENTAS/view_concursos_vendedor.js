@@ -14,6 +14,26 @@ function ven_conc_mon(v) {
     return typeof F.setMoneda === 'function' ? F.setMoneda(v, 'Q') : v;
 }
 
+function ven_conc_pct(real, obj) {
+    const o = Number(obj) || 0;
+    const r = Number(real) || 0;
+    if (o <= 0) return r > 0 ? 100 : 0;
+    return Math.round((r / o) * 1000) / 10;
+}
+
+function ven_conc_pctClass(pct) {
+    if (pct >= 100) return 'conc-ok';
+    if (pct >= 80) return 'conc-warn';
+    return 'conc-bad';
+}
+
+function ven_conc_faltanCob(real, obj) {
+    const o = Number(obj) || 0;
+    const r = Number(real) || 0;
+    if (o <= 0) return 0;
+    return Math.max(0, Math.ceil(o - r));
+}
+
 function ven_conc_codemp() {
     return Number(GlobalCodUsuario) || 0;
 }
@@ -31,11 +51,11 @@ function ven_conc_cargar() {
     const box = document.getElementById('tblDataVenConcursos');
     const cod = ven_conc_codemp();
     if (!cod) {
-        if (box) box.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No se identificó al vendedor en sesión.</td></tr>';
+        if (box) box.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No se identificó al vendedor en sesión.</td></tr>';
         return;
     }
     if (box) {
-        box.innerHTML = `<tr><td colspan="4" class="text-center">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</td></tr>`;
+        box.innerHTML = `<tr><td colspan="9" class="text-center">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</td></tr>`;
     }
     axios.post(GlobalUrlCalls + '/concursos/vendedor_resumen', { token: TOKEN, ...ven_conc_filtros() })
         .then((res) => {
@@ -46,7 +66,7 @@ function ven_conc_cargar() {
         .catch((e) => {
             ven_conc_cache = [];
             if (box) {
-                box.innerHTML = `<tr><td colspan="4" class="text-center text-muted">${ven_conc_esc((e && e.message && e.message !== 'error') ? e.message : 'No se pudieron cargar los concursos.')}</td></tr>`;
+                box.innerHTML = `<tr><td colspan="9" class="text-center text-muted">${ven_conc_esc((e && e.message && e.message !== 'error') ? e.message : 'No se pudieron cargar los concursos.')}</td></tr>`;
             }
         });
 }
@@ -63,22 +83,33 @@ function ven_conc_pintar() {
         return t.indexOf(q) >= 0;
     });
     if (!rows.length) {
-        box.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No tiene concursos asignados en este mes.</td></tr>';
+        box.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No tiene concursos asignados en este mes.</td></tr>';
         return;
     }
     box.innerHTML = rows.map((r) => {
         const idObj = Number(r.ID_OBJETIVO) || 0;
-        const cob = Number(r.REAL_COBERTURA) || 0;
-        const imp = Number(r.REAL_IMPORTE) || 0;
+        const objCob = Number(r.OBJ_COBERTURA) || 0;
+        const objImp = Number(r.OBJ_IMPORTE) || 0;
+        const realCob = Number(r.REAL_COBERTURA) || 0;
+        const realImp = Number(r.REAL_IMPORTE) || 0;
+        const pctCob = ven_conc_pct(realCob, objCob);
+        const pctImp = ven_conc_pct(realImp, objImp);
+        const faltan = ven_conc_faltanCob(realCob, objCob);
         const on = String(r.ACTIVO || 'NO').toUpperCase() === 'SI';
+        const faltanCls = faltan > 0 ? 'text-danger negrita' : 'text-success';
         return `
             <tr class="hand" onclick="ven_conc_detalle(${idObj})" title="Ver productos del concurso">
                 <td>
                     <div class="negrita text-primary">${ven_conc_esc(r.NOMBRE)}</div>
                     <small class="text-muted">${ven_conc_esc(r.DESMARCA || '—')}${on ? '' : ' · Inactivo'}</small>
                 </td>
-                <td class="text-right negrita">${cob}</td>
-                <td class="text-right negrita">${ven_conc_mon(imp)}</td>
+                <td class="text-right">${objCob}</td>
+                <td class="text-right negrita">${realCob}</td>
+                <td class="text-right ${faltanCls}">${faltan}</td>
+                <td class="text-right"><span class="ven-conc-pct ${ven_conc_pctClass(pctCob)}">${pctCob}%</span></td>
+                <td class="text-right">${ven_conc_mon(objImp)}</td>
+                <td class="text-right negrita">${ven_conc_mon(realImp)}</td>
+                <td class="text-right"><span class="ven-conc-pct ${ven_conc_pctClass(pctImp)}">${pctImp}%</span></td>
                 <td class="text-center"><i class="fal fa-chevron-right text-muted"></i></td>
             </tr>`;
     }).join('');
@@ -144,6 +175,20 @@ function ven_conc_det_pintar(rows, coberturaMarca, hdr) {
         </tr>`;
 }
 
+function ven_conc_injectStyles() {
+    if (document.getElementById('ven-conc-styles')) return;
+    const st = document.createElement('style');
+    st.id = 'ven-conc-styles';
+    st.textContent = `
+        .ven-conc-root .ven-conc-pct { font-size:0.72rem; font-weight:800; padding:0.1rem 0.35rem; border-radius:999px; white-space:nowrap; }
+        .ven-conc-root .ven-conc-pct.conc-ok { background:#dcfce7; color:#166534; }
+        .ven-conc-root .ven-conc-pct.conc-warn { background:#fef9c3; color:#854d0e; }
+        .ven-conc-root .ven-conc-pct.conc-bad { background:#fee2e2; color:#b91c1c; }
+        .ven-conc-root .table-sm th, .ven-conc-root .table-sm td { font-size:0.78rem; }
+    `;
+    document.head.appendChild(st);
+}
+
 function getView() {
     const html = `
         <div class="col-12 p-0 ven-conc-root">
@@ -161,14 +206,23 @@ function getView() {
                         <table class="table table-sm table-hover mb-0">
                             <thead class="bg-base text-white">
                                 <tr>
-                                    <th>CONCURSO</th>
-                                    <th class="text-right">CLIENTES</th>
-                                    <th class="text-right">IMPORTE</th>
-                                    <th style="width:2rem;"></th>
+                                    <th rowspan="2">CONCURSO</th>
+                                    <th colspan="4" class="text-center border-left">COBERTURA (clientes)</th>
+                                    <th colspan="3" class="text-center border-left">IMPORTE</th>
+                                    <th rowspan="2" style="width:1.5rem;"></th>
+                                </tr>
+                                <tr>
+                                    <th class="text-right border-left">OBJ.</th>
+                                    <th class="text-right">REAL</th>
+                                    <th class="text-right">FALTAN</th>
+                                    <th class="text-right">%</th>
+                                    <th class="text-right border-left">OBJ.</th>
+                                    <th class="text-right">REAL</th>
+                                    <th class="text-right">%</th>
                                 </tr>
                             </thead>
                             <tbody id="tblDataVenConcursos">
-                                <tr><td colspan="4" class="text-center text-muted">Cargando...</td></tr>
+                                <tr><td colspan="9" class="text-center text-muted">Cargando...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -210,6 +264,7 @@ function getView() {
 }
 
 function initView() {
+    ven_conc_injectStyles();
     getView();
     document.getElementById('txtVenConcursoBuscar')?.addEventListener('input', ven_conc_pintar);
     window.proveedor_embedRefresh = ven_conc_cargar;
