@@ -99,6 +99,9 @@ function supervisor_onHeaderFiltersChange() {
     if (typeof window.supervisor_solicitudes_cambio_refresh === 'function') {
         window.supervisor_solicitudes_cambio_refresh();
     }
+    if (typeof window.supervisor_concursos_refresh === 'function') {
+        window.supervisor_concursos_refresh();
+    }
 }
 
 function supervisor_initDashboard() {
@@ -115,6 +118,7 @@ var SUPERVISOR_EMBED_SCRIPTS = {
     btnMenuCambiosDatosClientes: SUPERVISOR_EMBED_BASE + 'view_solicitudes_cambio_cliente.js',
     btnMenuMercaderistas: SUPERVISOR_EMBED_BASE + 'view_mercaderistas.js',
     btnMenuOfertas: '../views/inventarios_ofertas/view_ofertas_catalogo.js',
+    btnMenuConcursos: SUPERVISOR_EMBED_BASE + 'view_concursos_consulta.js',
 };
 
 function supervisor_bindEmbedMenu(cardId) {
@@ -181,6 +185,7 @@ function supervisor_teardownEmbed() {
     }
     document.querySelectorAll('script[data-supervisor-embed]').forEach((s) => s.remove());
     window.supervisor_mercaderistas_refresh = null;
+    window.supervisor_concursos_refresh = null;
     const embed = document.getElementById('supervisorPanelEmbed');
     if (embed) {
         embed.classList.add('d-none');
@@ -389,6 +394,7 @@ function getView(){
                 { id: 'btnMenuDashboard', label: 'Dashboard', icon: 'fa-chart-line', color: 'primary' },
                 { id: 'btnMenuClientes', label: 'Gestión Clientes', icon: 'fa-user', color: 'info' },
                 { id: 'btnMenuObjetivos', label: 'Logro objetivos P&G', icon: 'fa-chart-pie', color: 'danger' },
+                { id: 'btnMenuConcursos', label: 'Concursos', icon: 'fa-trophy', color: 'danger' },
                 { id: 'btnMenuCoberturaMunicipio', label: 'Cobertura municipios', icon: 'fa-globe', color: 'primary' },
                 { id: 'btnMenuRptVisitasMapa', label: 'Visitas vendedor mapa', icon: 'fa-map-signs', color: 'secondary' },
                 { id: 'btnMenuCambiosDatosClientes', label: 'Cambios de datos Clientes', icon: 'fa-edit', color: 'warning' },
