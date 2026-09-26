@@ -91,6 +91,43 @@ function sqlVentasLineasConcurso(emp, mes, anio, idConcurso, idObjetivo) {
     `;
 }
 
+function sqlVentasLineasConcursoVendedor(emp, mes, anio, codemp, idConcurso, idObjetivo) {
+    const empSql = sqlEsc(String(emp || '').trim());
+    const m = sqlInt(mes);
+    const a = sqlInt(anio);
+    const ven = sqlInt(codemp);
+    const concFilter = idConcurso ? `AND CX.IDCONCURSO = ${sqlInt(idConcurso)}` : '';
+    const objFilter = idObjetivo ? `AND O.ID = ${sqlInt(idObjetivo)}` : '';
+    return `
+        SELECT
+            O.ID AS ID_OBJETIVO,
+            D.CODCLIENTE,
+            DP.TOTALPRECIO
+        FROM CONCURSOS_OBJETIVOS O
+        INNER JOIN CONCURSOS CX ON CX.IDCONCURSO = O.IDCONCURSO
+        INNER JOIN CONCURSOS_PRODUCTOS CP ON CP.IDCONCURSO = CX.IDCONCURSO
+        INNER JOIN DOCPRODUCTOS DP ON DP.CODPROD = CP.CODPROD AND DP.EMPNIT = CX.EMPNIT
+        INNER JOIN DOCUMENTOS D
+            ON D.EMPNIT = DP.EMPNIT
+            AND D.CODDOC = DP.CODDOC
+            AND D.CORRELATIVO = DP.CORRELATIVO
+            AND D.CODEMP = O.CODEMP
+        INNER JOIN TIPODOCUMENTOS TD ON D.CODDOC = TD.CODDOC AND D.EMPNIT = TD.EMPNIT
+        WHERE CX.EMPNIT = '${empSql}'
+            AND CX.MES = ${m}
+            AND CX.ANIO = ${a}
+            AND O.CODEMP = ${ven}
+            AND D.MES = ${m}
+            AND D.ANIO = ${a}
+            AND D.STATUS <> 'A'
+            AND TD.TIPODOC IN ${RPT_TIPOS_VENTA}
+            AND D.CODCLIENTE IS NOT NULL
+            AND D.CODCLIENTE > 0
+            ${concFilter}
+            ${objFilter}
+    `;
+}
+
 router.post('/listado', async (req, res) => {
     const { token, sucursal, mes, anio } = req.body || {};
     const emp = sqlEsc(String(sucursal || '').trim());
@@ -371,6 +408,67 @@ router.post('/copiar', async (req, res) => {
     }
 });
 
+router.post('/vendedor_resumen', async (req, res) => {
+    const { token, sucursal, mes, anio, codemp } = req.body || {};
+    const emp = sqlEsc(String(sucursal || '').trim());
+    const m = sqlInt(mes);
+    const a = sqlInt(anio);
+    const ven = sqlInt(codemp);
+    if (!emp || !ven) {
+        res.send({ ok: false, error: 'Datos incompletos' });
+        return;
+    }
+    try {
+        const qry = `
+            SELECT
+                C.IDCONCURSO,
+                C.NOMBRE,
+                ISNULL(C.ACTIVO, 'NO') AS ACTIVO,
+                ISNULL(C.CODMARCA, 0) AS CODMARCA,
+                ISNULL(M.DESMARCA, '') AS DESMARCA,
+                O.ID AS ID_OBJETIVO,
+                ISNULL(O.COBERTURA, 0) AS OBJ_COBERTURA,
+                ISNULL(O.IMPORTE, 0) AS OBJ_IMPORTE,
+                ISNULL(VP.CLIENTES, 0) AS REAL_COBERTURA,
+                ISNULL(VP.TOTALPRECIO, 0) AS REAL_IMPORTE,
+                ISNULL(NP.NPROD, 0) AS NPROD
+            FROM CONCURSOS C
+            INNER JOIN CONCURSOS_OBJETIVOS O ON O.IDCONCURSO = C.IDCONCURSO AND O.CODEMP = ${ven}
+            LEFT JOIN MARCAS M ON M.CODMARCA = C.CODMARCA
+            LEFT JOIN (
+                SELECT IDCONCURSO, COUNT(*) AS NPROD
+                FROM CONCURSOS_PRODUCTOS
+                GROUP BY IDCONCURSO
+            ) NP ON NP.IDCONCURSO = C.IDCONCURSO
+            LEFT JOIN (
+                SELECT
+                    U.ID_OBJETIVO,
+                    COUNT(*) AS CLIENTES,
+                    ISNULL(I.TOTALPRECIO, 0) AS TOTALPRECIO
+                FROM (
+                    SELECT DISTINCT VO.ID_OBJETIVO, VO.CODCLIENTE
+                    FROM (${sqlVentasLineasConcursoVendedor(emp, m, a, ven, 0, 0)}) VO
+                ) U
+                LEFT JOIN (
+                    SELECT VO2.ID_OBJETIVO, SUM(ISNULL(VO2.TOTALPRECIO, 0)) AS TOTALPRECIO
+                    FROM (${sqlVentasLineasConcursoVendedor(emp, m, a, ven, 0, 0)}) VO2
+                    GROUP BY VO2.ID_OBJETIVO
+                ) I ON I.ID_OBJETIVO = U.ID_OBJETIVO
+                GROUP BY U.ID_OBJETIVO, I.TOTALPRECIO
+            ) VP ON VP.ID_OBJETIVO = O.ID
+            WHERE C.EMPNIT = '${emp}'
+              AND C.MES = ${m}
+              AND C.ANIO = ${a}
+            ORDER BY C.NOMBRE
+        `;
+        const data = await execute.get_data_qry(qry, token);
+        res.send({ ok: true, recordset: (data && data.recordset) || [] });
+    } catch (e) {
+        console.error('[concursos/vendedor_resumen]', e && e.message ? e.message : e);
+        res.send({ ok: false, error: 'No se pudo cargar sus concursos' });
+    }
+});
+
 router.post('/seguimiento', async (req, res) => {
     const { token, idconcurso } = req.body || {};
     const id = sqlInt(idconcurso);
@@ -448,7 +546,7 @@ router.post('/seguimiento', async (req, res) => {
 });
 
 router.post('/seguimiento_detalle', async (req, res) => {
-    const { token, id_objetivo } = req.body || {};
+    const { token, id_objetivo, codemp } = req.body || {};
     const objId = sqlInt(id_objetivo);
     if (!objId) {
         res.send({ ok: false, error: 'Objetivo inválido' });
@@ -475,6 +573,11 @@ router.post('/seguimiento_detalle', async (req, res) => {
         const o = hdr && hdr.recordset && hdr.recordset[0];
         if (!o) {
             res.send({ ok: false, error: 'Objetivo no encontrado' });
+            return;
+        }
+        const venReq = sqlInt(codemp);
+        if (venReq && sqlInt(o.CODEMP) !== venReq) {
+            res.send({ ok: false, error: 'No autorizado' });
             return;
         }
         const emp = sqlEsc(String(o.EMPNIT || '').trim());

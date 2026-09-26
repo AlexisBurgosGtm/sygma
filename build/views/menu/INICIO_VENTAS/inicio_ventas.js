@@ -6,6 +6,7 @@ var VENTAS_EMBED_SCRIPTS = {
     btnMenuAvancePG: VENTAS_EMBED_BASE + 'view_avance_procter_vendedor.js',
     btnMenuNuevoPedido: VENTAS_EMBED_BASE + 'view_pedidos.js',
     btnMenuCenso: VENTAS_EMBED_BASE + 'view_censo.js',
+    btnMenuConcursos: VENTAS_EMBED_BASE + 'view_concursos_vendedor.js',
 };
 
 function ventas_getMes() {
@@ -110,7 +111,7 @@ function ventas_teardownEmbed() {
         try { ventas_embedDestroy(); } catch (e) { /* vista embebida sin teardown */ }
         ventas_embedDestroy = null;
     }
-    document.querySelector('script[data-ventas-embed]')?.remove();
+    document.querySelectorAll('script[data-ventas-embed]').forEach((s) => s.remove());
     const embed = document.getElementById('ventasPanelEmbed');
     if (embed) {
         embed.classList.add('d-none');
@@ -396,6 +397,7 @@ function getView(){
                 { id: 'btnMenuNuevoPedido', label: 'Nuevo pedido', icon: 'fa-shopping-cart', color: 'info' },
                 { id: 'btnMenuCenso', label: 'Crear clientes (censo)', icon: 'fa-users', color: 'info' },
                 { id: 'btnMenuOfertas', label: 'Ofertas', icon: 'fa-tags', color: 'success' },
+                { id: 'btnMenuConcursos', label: 'Concursos', icon: 'fa-trophy', color: 'danger' },
                 { id: 'btnMenuRptMarcas', label: 'Reporte marcas', icon: 'fa-list', color: 'secondary' },
                 { id: 'btnMenuRptCategorias', label: 'Objetivos categorías', icon: 'fa-chart-bar', color: 'secondary' },
                 { id: 'btnMenuRptDocumentos', label: 'Reporte facturas', icon: 'fa-chart-pie', color: 'secondary' },
