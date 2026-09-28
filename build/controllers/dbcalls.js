@@ -586,6 +586,24 @@ function deleteItemVentaPOS(id){
     })            
 };
 
+function deleteItemsVentaPOSByOferta(codoferta, sucursal){
+    const idO = Number(codoferta) || 0;
+    if (!idO) {
+        return Promise.reject(new Error('oferta'));
+    }
+    return new Promise(async (resolve, reject) => {
+        const rowsDeleted = await connection.remove({
+            from: 'temp_pos',
+            where: {
+                EMPNIT: String(sucursal || ''),
+                CODOFERTA: idO
+            }
+        });
+        if (rowsDeleted > 0) resolve(rowsDeleted);
+        else reject();
+    });
+}
+
 function selectDataRowVentaPOS(id,nuevacantidad,nuevoprecio,descuento) {
 
     let costo = 0; let precio = 0; let equivale =0; let exento=0; let cantidad= nuevacantidad;

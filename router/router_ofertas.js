@@ -535,19 +535,11 @@ router.post('/pedido_venta', async (req, res) => {
             FROM OFERTAS_PRODUCTOS OP
             LEFT JOIN PRODUCTOS P ON P.CODPROD = OP.CODPROD
             LEFT JOIN MARCAS M ON P.CODMARCA = M.CODMARCA
-            OUTER APPLY (
-                SELECT TOP 1
-                    PX.CODMEDIDA, PX.EQUIVALE, PX.COSTO,
-                    PX.PRECIO, PX.PRECIO_A, PX.PRECIO_B,
-                    PX.BONO_PRECIO
-                FROM PRECIOS PX
-                WHERE PX.CODPROD = OP.CODPROD
-                  AND UPPER(LTRIM(RTRIM(PX.CODMEDIDA))) <> 'BONI'
-                ORDER BY PX.EQUIVALE
-            ) PR
+            INNER JOIN PRECIOS PR ON PR.CODPROD = OP.CODPROD
+                AND UPPER(LTRIM(RTRIM(ISNULL(PR.CODMEDIDA, '')))) <> 'BONI'
             WHERE ${whereOferta}
               AND UPPER(ISNULL(NULLIF(LTRIM(RTRIM(OP.TIPO)), ''), 'PROD')) <> 'BONI'
-            ORDER BY P.DESPROD
+            ORDER BY P.DESPROD, PR.EQUIVALE, PR.CODMEDIDA
         `, token);
         res.send({
             ok: true,

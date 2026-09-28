@@ -1,4 +1,4 @@
-const DbName = "posdb_r13";
+const DbName = "posdb_r14";
 
 var tblDocumentos = {
     name: 'documentos',
@@ -92,6 +92,7 @@ var tblTempventasPos = {
         NOLOTE:{dataType: "string"},
         TIPOPROD:{dataType: "string"},
         BONO:{dataType: "number"},
+        CODOFERTA:{dataType: "number"},
     }
 };
 
