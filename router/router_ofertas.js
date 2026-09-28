@@ -96,9 +96,22 @@ BEGIN
 END
 `;
 
+const DDL_VENTAS = `
+IF COL_LENGTH('dbo.OFERTAS', 'VENTAS') IS NULL
+BEGIN
+    EXEC('ALTER TABLE dbo.OFERTAS ADD VENTAS VARCHAR(2) NOT NULL CONSTRAINT DF_OFERTAS_VENTAS DEFAULT (''SI'')');
+END
+`;
+
 function controladoOk(v) {
     return String(v || '').trim().toUpperCase() === 'NO' ? 'NO' : 'SI';
 }
+
+function ventasOk(v) {
+    return String(v || '').trim().toUpperCase() === 'NO' ? 'NO' : 'SI';
+}
+
+const SQL_FILTRO_VENTAS_VENDEDOR = "UPPER(ISNULL(O.VENTAS, 'SI')) = 'SI'";
 
 const DDL_CREATE_SEDES = `
 IF OBJECT_ID('dbo.OFERTAS_SEDES', 'U') IS NULL
@@ -176,6 +189,7 @@ async function ensureTables(token) {
         tablesReady = true;
     }
     await execute.get_data_qry(DDL_CONTROLADO, token);
+    await execute.get_data_qry(DDL_VENTAS, token);
 }
 
 router.post('/ensure', async (req, res) => {
@@ -204,6 +218,7 @@ router.post('/listado', async (req, res) => {
                 CONVERT(varchar(10), O.FECHA_AL, 23) AS FECHA_AL,
                 ISNULL(O.IMAGEN, '') AS IMAGEN,
                 ISNULL(O.CONTROLADO, 'SI') AS CONTROLADO,
+                ISNULL(O.VENTAS, 'SI') AS VENTAS,
                 (SELECT COUNT(*) FROM OFERTAS_PRODUCTOS P WHERE P.CODOFERTA = O.CODOFERTA AND UPPER(ISNULL(NULLIF(LTRIM(RTRIM(P.TIPO)), ''), 'PROD')) = 'PROD') AS NPROD,
                 (SELECT COUNT(*) FROM OFERTAS_PRODUCTOS P WHERE P.CODOFERTA = O.CODOFERTA AND UPPER(ISNULL(P.TIPO, '')) = 'BONI') AS NBONI,
                 (SELECT COUNT(*) FROM OFERTAS_SEDES S WHERE S.CODOFERTA = O.CODOFERTA) AS NSEDES,
@@ -274,7 +289,8 @@ router.post('/get', async (req, res) => {
                 CONVERT(varchar(10), FECHA_DEL, 23) AS FECHA_DEL,
                 CONVERT(varchar(10), FECHA_AL, 23) AS FECHA_AL,
                 ISNULL(IMAGEN, '') AS IMAGEN,
-                ISNULL(CONTROLADO, 'SI') AS CONTROLADO
+                ISNULL(CONTROLADO, 'SI') AS CONTROLADO,
+                ISNULL(VENTAS, 'SI') AS VENTAS
             FROM OFERTAS
             WHERE CODOFERTA=${id}
         `, token);
@@ -302,8 +318,9 @@ router.post('/get', async (req, res) => {
 });
 
 router.post('/insert', async (req, res) => {
-    const { token, desoferta, unidades, cantidad_bonif, tipo_vigencia, fecha_del, fecha_al, sedes, controlado } = req.body || {};
+    const { token, desoferta, unidades, cantidad_bonif, tipo_vigencia, fecha_del, fecha_al, sedes, controlado, ventas } = req.body || {};
     const ctrl = controladoOk(controlado);
+    const vent = ventasOk(ventas);
     const nombre = String(desoferta || '').trim();
     if (!nombre) {
         res.send({ ok: false, error: 'Escriba el nombre de la oferta' });
@@ -324,9 +341,9 @@ router.post('/insert', async (req, res) => {
     try {
         await ensureTables(token);
         const ins = await execute.get_data_qry(`
-            INSERT INTO OFERTAS (DESOFERTA, UNIDADES, CANTIDAD_BONIF, TIPO_VIGENCIA, FECHA_DEL, FECHA_AL, IMAGEN, CONTROLADO, LASTUPDATE)
+            INSERT INTO OFERTAS (DESOFERTA, UNIDADES, CANTIDAD_BONIF, TIPO_VIGENCIA, FECHA_DEL, FECHA_AL, IMAGEN, CONTROLADO, VENTAS, LASTUPDATE)
             OUTPUT INSERTED.CODOFERTA
-            VALUES ('${sqlEsc(nombre)}', ${sqlDec(unidades)}, ${sqlDec(cantidad_bonif)}, '${tipo}', ${del}, ${al}, '', '${ctrl}', GETDATE());
+            VALUES ('${sqlEsc(nombre)}', ${sqlDec(unidades)}, ${sqlDec(cantidad_bonif)}, '${tipo}', ${del}, ${al}, '', '${ctrl}', '${vent}', GETDATE());
         `, token);
         const id = Number(ins && ins.recordset && ins.recordset[0] && ins.recordset[0].CODOFERTA) || 0;
         if (!id) {
@@ -342,8 +359,9 @@ router.post('/insert', async (req, res) => {
 });
 
 router.post('/update', async (req, res) => {
-    const { token, codoferta, desoferta, unidades, cantidad_bonif, tipo_vigencia, fecha_del, fecha_al, sedes, controlado } = req.body || {};
+    const { token, codoferta, desoferta, unidades, cantidad_bonif, tipo_vigencia, fecha_del, fecha_al, sedes, controlado, ventas } = req.body || {};
     const ctrl = controladoOk(controlado);
+    const vent = ventasOk(ventas);
     const id = Number(codoferta) || 0;
     const nombre = String(desoferta || '').trim();
     if (!id) {
@@ -377,6 +395,7 @@ router.post('/update', async (req, res) => {
                 FECHA_DEL=${del},
                 FECHA_AL=${al},
                 CONTROLADO='${ctrl}',
+                VENTAS='${vent}',
                 LASTUPDATE=GETDATE()
             WHERE CODOFERTA=${id};
         `, token);
@@ -504,6 +523,7 @@ function filtroOfertasVigentesSede(emp) {
             )
         )
         AND ${filtroSede}
+        AND ${SQL_FILTRO_VENTAS_VENDEDOR}
     `;
 }
 
@@ -533,6 +553,7 @@ router.post('/pedido_venta', async (req, res) => {
                 ISNULL(PR.PRECIO_B, 0) AS PRECIO_B,
                 ISNULL(PR.BONO_PRECIO, 0) AS BONO
             FROM OFERTAS_PRODUCTOS OP
+            INNER JOIN OFERTAS OV ON OV.CODOFERTA = OP.CODOFERTA AND ${SQL_FILTRO_VENTAS_VENDEDOR.replace(/O\./g, 'OV.')}
             LEFT JOIN PRODUCTOS P ON P.CODPROD = OP.CODPROD
             LEFT JOIN MARCAS M ON P.CODMARCA = M.CODMARCA
             INNER JOIN PRECIOS PR ON PR.CODPROD = OP.CODPROD
@@ -567,6 +588,7 @@ router.post('/pedido_existencias', async (req, res) => {
                 OP.CODPROD,
                 ISNULL(INV.TOTALUNIDADES, 0) AS EXISTENCIA
             FROM OFERTAS_PRODUCTOS OP
+            INNER JOIN OFERTAS OV ON OV.CODOFERTA = OP.CODOFERTA AND ${SQL_FILTRO_VENTAS_VENDEDOR.replace(/O\./g, 'OV.')}
             LEFT JOIN view_invsaldo INV ON INV.CODPROD = OP.CODPROD AND INV.EMPNIT = '${emp}'
             WHERE OP.CODOFERTA = ${id}
               AND UPPER(ISNULL(NULLIF(LTRIM(RTRIM(OP.TIPO)), ''), 'PROD')) <> 'BONI'
@@ -611,6 +633,7 @@ router.post('/pedido_boni', async (req, res) => {
             LEFT JOIN PRECIOS PRB ON PRB.CODPROD = OP.CODPROD
                 AND UPPER(LTRIM(RTRIM(PRB.CODMEDIDA))) = 'BONI'
             LEFT JOIN view_invsaldo INV ON INV.CODPROD = OP.CODPROD AND INV.EMPNIT = '${emp}'
+            INNER JOIN OFERTAS O ON O.CODOFERTA = OP.CODOFERTA AND ${SQL_FILTRO_VENTAS_VENDEDOR}
             WHERE OP.CODOFERTA = ${id}
               AND UPPER(ISNULL(OP.TIPO, '')) = 'BONI'
             ORDER BY P.DESPROD
@@ -739,6 +762,7 @@ router.post('/vendedor_disponibles', async (req, res) => {
                           AND S.EMPNIT = '${emp}'
                     )
                 )
+                AND ${SQL_FILTRO_VENTAS_VENDEDOR}
             ORDER BY O.CODOFERTA, P.DESPROD
         `, token);
         res.send({
@@ -792,6 +816,7 @@ router.post('/catalogo', async (req, res) => {
                     )
                 )
                 AND ${filtroSede}
+                AND ${SQL_FILTRO_VENTAS_VENDEDOR}
                 ${soloControlado ? "AND UPPER(ISNULL(O.CONTROLADO, 'SI')) = 'SI'" : ''}
             ORDER BY O.DESOFERTA
         `, token);
