@@ -165,6 +165,30 @@
         body.sygma-dark .config-wrap small {
             color: #94a3b8 !important;
         }
+        .config-empresa-table-wrap {
+            max-height: 420px;
+            overflow: auto;
+            border: 1px solid rgba(15,23,42,.08);
+            border-radius: 12px;
+        }
+        .config-empresa-table {
+            margin-bottom: 0;
+            font-size: 0.82rem;
+        }
+        .config-empresa-table thead td {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: #f1f5f9;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(15,23,42,.08);
+        }
+        body.sygma-dark .config-empresa-table thead td {
+            background: #1e293b;
+        }
+        .config-empresa-table tbody tr:hover {
+            background: rgba(59, 125, 221, 0.06);
+        }
         `;
     }
 
@@ -295,6 +319,25 @@
                     <div class="col-12 text-center text-muted py-4">Cargando configuración...</div>
                 </div>
 
+                <div class="row mt-1">
+                    <div class="col-12 mb-3">
+                        <div class="config-panel-card">
+                            <div class="config-panel-head">
+                                <i class="fal fa-search mr-1"></i> Vendedor — buscar y reasignar cliente (por empresa)
+                            </div>
+                            <div class="card-body">
+                                <small class="text-muted d-block mb-2">
+                                    Define en qué sucursales aparece el botón verde (lupa) en Nuevo pedido para buscar clientes y asignarlos a la ruta del vendedor.
+                                    Por defecto todas están en <strong>SI</strong>.
+                                </small>
+                                <div class="config-empresa-table-wrap" id="configReasignEmpresasWrap">
+                                    <div class="text-center text-muted py-4">Cargando empresas...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="row mt-2">
                     <div class="col-lg-6 col-12 mb-3">
                         <div class="config-panel-card">
@@ -407,6 +450,99 @@
         });
     }
 
+    function config_cargar_reasign_empresas() {
+        var wrap = document.getElementById('configReasignEmpresasWrap');
+        if (wrap) wrap.innerHTML = '<div class="text-center text-muted py-4">Cargando empresas...</div>';
+
+        var loader = (typeof GF !== 'undefined' && typeof GF.get_settings_empresa_reasign === 'function')
+            ? GF.get_settings_empresa_reasign()
+            : axios.post(GlobalUrlCalls + '/config/settings_empresa_reasign_list', { token: TOKEN }).then(function (r) { return r.data; });
+
+        loader
+            .then(function (data) {
+                var rows = (data && data.recordset) ? data.recordset : [];
+                if (typeof settings_empresa_reasign_aplicar === 'function') settings_empresa_reasign_aplicar(rows);
+                config_render_reasign_empresas(rows);
+            })
+            .catch(function () {
+                if (wrap) wrap.innerHTML = '<div class="alert alert-danger mb-0">No se pudo cargar empresas.</div>';
+            });
+    }
+
+    function config_render_reasign_empresas(rows) {
+        var wrap = document.getElementById('configReasignEmpresasWrap');
+        if (!wrap) return;
+        if (!rows || !rows.length) {
+            wrap.innerHTML = '<div class="text-muted py-3 text-center">No hay empresas registradas.</div>';
+            return;
+        }
+        var esc = function (v) {
+            return String(v == null ? '' : v)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/"/g, '&quot;');
+        };
+        var body = rows.map(function (r, idx) {
+            var emp = esc(r.EMPNIT);
+            var nom = esc(r.NOMBRE);
+            var isSi = String(r.VALOR || 'SI').toUpperCase() !== 'NO';
+            var id = 'cfgReasignEmp_' + idx;
+            return `
+                <tr>
+                    <td class="negrita">${emp}</td>
+                    <td>${nom}</td>
+                    <td class="text-center">
+                        <button type="button"
+                            class="config-sino-badge ${isSi ? 'config-sino-badge--si' : 'config-sino-badge--no'}"
+                            id="${id}"
+                            data-empnit="${emp}"
+                            data-valor="${isSi ? 'SI' : 'NO'}">${isSi ? 'SI' : 'NO'}</button>
+                    </td>
+                </tr>`;
+        }).join('');
+        wrap.innerHTML = `
+            <table class="table table-sm config-empresa-table">
+                <thead>
+                    <tr>
+                        <td style="width:28%">EMPNIT</td>
+                        <td>Empresa</td>
+                        <td class="text-center" style="width:120px">¿Activo?</td>
+                    </tr>
+                </thead>
+                <tbody>${body}</tbody>
+            </table>`;
+
+        wrap.querySelectorAll('.config-sino-badge[data-empnit]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                if (btn.disabled) return;
+                var empnit = btn.getAttribute('data-empnit');
+                var actual = String(btn.getAttribute('data-valor') || 'NO').toUpperCase() === 'SI';
+                var next = actual ? 'NO' : 'SI';
+                var prev = actual ? 'SI' : 'NO';
+                config_apply_sino_badge(btn, next);
+                btn.disabled = true;
+                axios.post(GlobalUrlCalls + '/config/settings_empresa_reasign_update', {
+                    token: TOKEN,
+                    empnit: empnit,
+                    valor: next
+                })
+                    .then(function (r) {
+                        if (r.data === 'error') throw new Error('error');
+                        if (typeof set_setting_empresa_reasign_local === 'function') {
+                            set_setting_empresa_reasign_local(empnit, next);
+                        }
+                    })
+                    .catch(function () {
+                        config_apply_sino_badge(btn, prev);
+                        F.AvisoError('No se pudo guardar');
+                    })
+                    .finally(function () {
+                        btn.disabled = false;
+                    });
+            });
+        });
+    }
+
     function config_cargar_settings() {
         var grid = document.getElementById('configSettingsGrid');
         if (grid) grid.innerHTML = '<div class="col-12 text-center text-muted py-4">Cargando configuración...</div>';
@@ -426,6 +562,8 @@
                     grid.innerHTML = '<div class="col-12"><div class="alert alert-danger mb-0">No se pudo cargar SETTINGS.</div></div>';
                 }
             });
+
+        config_cargar_reasign_empresas();
     }
 
     function config_guardar_setting(opcion, valor, btn, silencioso) {

@@ -2,6 +2,29 @@ const execute = require('./../connection');
 const express = require('express');
 const router = express.Router();
 
+const OPCION_REASIGN_CLIENTE_PEDIDO = 'VENDEDOR REASIGNAR CLIENTE PEDIDO';
+
+const DDL_SETTINGS_EMPRESA = `
+IF OBJECT_ID('dbo.SETTINGS_EMPRESA', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.SETTINGS_EMPRESA (
+        EMPNIT VARCHAR(50) NOT NULL,
+        OPCION NVARCHAR(120) NOT NULL,
+        VALOR NVARCHAR(20) NOT NULL CONSTRAINT DF_SETTINGS_EMPRESA_VALOR DEFAULT ('SI'),
+        CONSTRAINT PK_SETTINGS_EMPRESA PRIMARY KEY (EMPNIT, OPCION)
+    );
+END
+`;
+
+function escConfig(val) {
+    if (val === null || val === undefined) return '';
+    return String(val).replace(/'/g, "''");
+}
+
+async function ensureSettingsEmpresa(token) {
+    await execute.get_data_qry(DDL_SETTINGS_EMPRESA, token);
+}
+
 
 router.post("/config_generales", async(req,res)=>{
 
@@ -71,8 +94,57 @@ router.post("/settings_update", async (req, res) => {
     execute.QueryToken(res, qry, token);
 });
 
+/** Por empresa: botón buscar/reasignar cliente en pedido vendedor (default SI). */
+router.post('/settings_empresa_reasign_list', async (req, res) => {
+    const { token } = req.body || {};
+    const opc = escConfig(OPCION_REASIGN_CLIENTE_PEDIDO);
+    try {
+        await ensureSettingsEmpresa(token);
+        const qry = `
+            SELECT
+                E.EMPNIT,
+                E.NOMBRE,
+                ISNULL(S.VALOR, 'SI') AS VALOR
+            FROM EMPRESAS E
+            LEFT JOIN SETTINGS_EMPRESA S
+                ON S.EMPNIT = E.EMPNIT
+               AND S.OPCION = N'${opc}'
+            ORDER BY E.NOMBRE
+        `;
+        execute.QueryToken(res, qry, token);
+    } catch (e) {
+        console.error('[config/settings_empresa_reasign_list]', e && e.message ? e.message : e);
+        res.send('error');
+    }
+});
 
-
-
+router.post('/settings_empresa_reasign_update', async (req, res) => {
+    const { token, empnit, valor } = req.body || {};
+    const emp = escConfig(String(empnit || '').trim());
+    const v = String(valor || '').trim().toUpperCase() === 'NO' ? 'NO' : 'SI';
+    const opc = escConfig(OPCION_REASIGN_CLIENTE_PEDIDO);
+    if (!emp) {
+        res.send('error');
+        return;
+    }
+    try {
+        await ensureSettingsEmpresa(token);
+        const qry = `
+            IF EXISTS (
+                SELECT 1 FROM SETTINGS_EMPRESA
+                WHERE EMPNIT = '${emp}' AND OPCION = N'${opc}'
+            )
+                UPDATE SETTINGS_EMPRESA SET VALOR = '${v}'
+                WHERE EMPNIT = '${emp}' AND OPCION = N'${opc}'
+            ELSE
+                INSERT INTO SETTINGS_EMPRESA (EMPNIT, OPCION, VALOR)
+                VALUES ('${emp}', N'${opc}', '${v}');
+        `;
+        execute.QueryToken(res, qry, token);
+    } catch (e) {
+        console.error('[config/settings_empresa_reasign_update]', e && e.message ? e.message : e);
+        res.send('error');
+    }
+});
 
 module.exports = router;

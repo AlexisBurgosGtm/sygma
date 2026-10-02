@@ -16,7 +16,7 @@
         'GlobalSignoMoneda', 'GlobalStockProceso', 'GlobalBolEditando',
         'Global_latitud_empresa', 'Global_longitud_empresa',
         'selected_latitud', 'selected_longitud', 'selected_codigo',
-        'data_settings', 'data_settings_map', 'data_empresa_config',
+        'data_settings', 'data_settings_map', 'GlobalSettingsEmpresaReasign', 'data_empresa_config',
         'data_usuario_config', 'data_config_general', 'GlobalObjetivoSkus',
         'versionapp'
     ];

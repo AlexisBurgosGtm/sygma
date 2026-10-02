@@ -480,6 +480,18 @@ function login_submit() {
                         if (typeof settings_aplicar_globales === 'function') settings_aplicar_globales();
                     });
 
+                    if (typeof GF.get_settings_empresa_reasign === 'function') {
+                        GF.get_settings_empresa_reasign()
+                            .then((data) => {
+                                if (typeof settings_empresa_reasign_aplicar === 'function') {
+                                    settings_empresa_reasign_aplicar((data && data.recordset) ? data.recordset : []);
+                                }
+                            })
+                            .catch(() => {
+                                if (typeof settings_empresa_reasign_aplicar === 'function') settings_empresa_reasign_aplicar([]);
+                            });
+                    }
+
                     data_empresa_config = data.recordset[0];
                     const cargarSkus = (typeof cargar_objetivos_skus_sesion === 'function')
                         ? cargar_objetivos_skus_sesion()

@@ -124,6 +124,18 @@ let GF = {
             }, () => reject());
         });
     },
+    get_settings_empresa_reasign:()=>{
+        return new Promise((resolve, reject)=>{
+            axios.post(GlobalUrlCalls + '/config/settings_empresa_reasign_list', { token: TOKEN })
+            .then((response) => {
+                if (response.status.toString() === '200') {
+                    const data = response.data;
+                    if (data && data.toString && data.toString() === 'error') reject();
+                    else resolve(data);
+                } else reject();
+            }, () => reject());
+        });
+    },
     update_setting:(opcion, valor)=>{
         return new Promise((resolve, reject)=>{
             axios.post(GlobalUrlCalls + '/config/settings_update', {

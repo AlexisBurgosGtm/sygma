@@ -1097,6 +1097,7 @@ function addListeners(){
 
     F.slideAnimationTabs();
     pedidos_bind_modales_detalle();
+    pedidos_aplicar_visibilidad_reasignar_cliente();
 
 
     let f = new Date();
@@ -2290,6 +2291,15 @@ function pedidos_cargar_departamentos_solicitud(coddeptoSelected, codmunSelected
 }
 
 let pedidos_reasign_cliente_sel = null;
+
+function pedidos_aplicar_visibilidad_reasignar_cliente() {
+    const btn = document.getElementById('btnBuscarClienteReasignar');
+    if (!btn) return;
+    const ok = (typeof vendedor_permite_reasignar_cliente === 'function')
+        ? vendedor_permite_reasignar_cliente()
+        : true;
+    btn.classList.toggle('d-none', !ok);
+}
 
 function pedidos_modal_reasign_apilar() {
     document.body.classList.add('ped-modal-reasign-stack');

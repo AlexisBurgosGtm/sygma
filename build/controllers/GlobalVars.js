@@ -97,6 +97,8 @@ let data_empresa_config = [];
 let data_usuario_config = [];
 /** Mapa EMPNIT -> OBJETIVO_SKUS (cargado al iniciar sesión). */
 let GlobalObjetivoSkus = {};
+/** Mapa EMPNIT -> SI/NO: botón reasignar cliente en pedido vendedor (default SI si no existe). */
+let GlobalSettingsEmpresaReasign = {};
 
 /**
  * Proceso de inventario activo en lecturas de UI.
@@ -147,6 +149,30 @@ function permite_inventario_negativo() {
 
 function permite_vista_pestanas() {
     return String(get_setting('PERMITE VISTA PESTAÑAS', 'NO')).toUpperCase() === 'SI';
+}
+
+function settings_empresa_reasign_aplicar(rows) {
+    GlobalSettingsEmpresaReasign = {};
+    (rows || []).forEach((r) => {
+        const key = String(r.EMPNIT || '').trim();
+        if (!key) return;
+        GlobalSettingsEmpresaReasign[key] = String(r.VALOR || 'SI').trim().toUpperCase() === 'NO' ? 'NO' : 'SI';
+    });
+}
+
+function set_setting_empresa_reasign_local(empnit, valor) {
+    const key = String(empnit || '').trim();
+    if (!key) return;
+    GlobalSettingsEmpresaReasign[key] = String(valor || 'SI').trim().toUpperCase() === 'NO' ? 'NO' : 'SI';
+}
+
+function vendedor_permite_reasignar_cliente(empnit) {
+    const key = String(empnit != null ? empnit : (typeof GlobalEmpnit !== 'undefined' ? GlobalEmpnit : '')).trim();
+    if (!key) return true;
+    if (GlobalSettingsEmpresaReasign && Object.prototype.hasOwnProperty.call(GlobalSettingsEmpresaReasign, key)) {
+        return GlobalSettingsEmpresaReasign[key] === 'SI';
+    }
+    return true;
 }
 
 function aplica_ofertas_vendedores() {
