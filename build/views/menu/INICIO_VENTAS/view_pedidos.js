@@ -5,7 +5,7 @@ function getView(){
                 <div class="col-12 p-0">
                     <div class="tab-content" id="myTabHomeContent">
                         <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="dias-tab">
-                            ${view.lista_clientes() + view.modal_qr() + view.modal_camara() + view.modal_visita() + view.modal_goles() + view.modal_solicitud_cambio_cliente()}
+                            ${view.lista_clientes() + view.modal_qr() + view.modal_camara() + view.modal_visita() + view.modal_goles() + view.modal_solicitud_cambio_cliente() + view.modal_buscar_reasignar_cliente() + view.modal_reasignar_dia_visita()}
                         </div> 
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="clientes-tab">
                             ${view.pedido() + view.modal_lista_precios() + view.modal_cantidad() + view.modal_editar_cantidad() + view.modal_ofertas_pedido()}
@@ -435,6 +435,11 @@ function getView(){
                 
                 <button type="button" class="btn btn-circle btn-xl btn-secondary btn-bottom-l hand shadow" data-spa-action="inicio">
                         <i class="fal fa-home"></i>
+                </button>
+
+                <button type="button" class="btn btn-circle btn-xl btn-success btn-bottom-ml hand shadow"
+                    id="btnBuscarClienteReasignar" title="Buscar cliente en sucursal">
+                        <i class="fal fa-search"></i>
                 </button>
 
                 <button class="btn btn-circle btn-xl btn-info btn-bottom-middle hand shadow"
@@ -995,6 +1000,84 @@ function getView(){
                 </div>
             </div>
         `,
+        modal_buscar_reasignar_cliente: () => `
+            <div class="modal fade ped-modal-detalle ped-modal-detalle--tall" tabindex="-1" role="dialog" aria-hidden="true" id="modal_buscar_reasignar_cliente" data-backdrop="static">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <div class="ped-modal-detalle__header">
+                            <div>
+                                <h5 class="negrita mb-0">Buscar cliente</h5>
+                                <small class="text-muted">Sucursal: todos los clientes habilitados</small>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-circle ped-modal-detalle__close hand" data-dismiss="modal" aria-label="Cerrar">
+                                <i class="fal fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body ped-modal-detalle__body">
+                            <div class="input-group mb-3">
+                                <input type="search" autocomplete="off" class="form-control negrita" id="txtBuscarClienteReasignar"
+                                    placeholder="Nombre, código cliente o NIT">
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-success hand" id="btnEjecutarBuscarClienteReasignar">
+                                        <i class="fal fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="table-responsive ped-modal-table-wrap" style="max-height:55vh;">
+                                <table class="table table-sm table-hover ped-modal-table mb-0" id="tblBuscarClienteReasignar">
+                                    <thead>
+                                        <tr>
+                                            <td>Cód.</td>
+                                            <td>Negocio / Nombre</td>
+                                            <td>Dirección</td>
+                                            <td>Municipio</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDataBuscarClienteReasignar"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `,
+        modal_reasignar_dia_visita: () => `
+            <div class="modal fade ped-modal-detalle ped-modal-reasign-confirm" tabindex="-1" role="dialog" aria-hidden="true" id="modal_reasignar_dia_visita" data-backdrop="static" data-keyboard="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="ped-modal-detalle__header">
+                            <div>
+                                <h5 class="negrita mb-0">Asignar a mi ruta</h5>
+                                <small class="text-muted d-block" id="lbReasignarClienteResumen"></small>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-circle ped-modal-detalle__close hand" data-dismiss="modal" aria-label="Cerrar">
+                                <i class="fal fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body ped-modal-detalle__body">
+                            <label class="small text-muted mb-1">Día de visita</label>
+                            <select class="form-control negrita text-danger border-danger mb-3" id="cmbReasignarDiaVisita">
+                                <option value="LUNES">LUNES</option>
+                                <option value="MARTES">MARTES</option>
+                                <option value="MIERCOLES">MIERCOLES</option>
+                                <option value="JUEVES">JUEVES</option>
+                                <option value="VIERNES">VIERNES</option>
+                                <option value="SABADO">SABADO</option>
+                                <option value="DOMINGO">DOMINGO</option>
+                                <option value="OTROS">OTROS</option>
+                            </select>
+                            <p class="small text-muted mb-0">El cliente quedará en su lista con su ruta y vendedor actuales.</p>
+                        </div>
+                        <div class="ped-modal-detalle__footer">
+                            <button type="button" class="btn btn-light hand" data-dismiss="modal">Cancelar</button>
+                            <button type="button" class="btn btn-success hand negrita" id="btnConfirmarReasignarCliente">
+                                <i class="fal fa-check mr-1"></i>Confirmar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `,
     }
 
     root.innerHTML = view.body();
@@ -1114,6 +1197,19 @@ function addListeners(){
 
     });
 
+
+    document.getElementById('btnBuscarClienteReasignar')?.addEventListener('click', pedidos_abrir_buscar_reasignar_cliente);
+    document.getElementById('btnEjecutarBuscarClienteReasignar')?.addEventListener('click', pedidos_buscar_clientes_reasignar);
+    document.getElementById('txtBuscarClienteReasignar')?.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter') {
+            ev.preventDefault();
+            pedidos_buscar_clientes_reasignar();
+        }
+    });
+    document.getElementById('btnConfirmarReasignarCliente')?.addEventListener('click', pedidos_confirmar_reasignar_cliente);
+    $('#modal_reasignar_dia_visita')
+        .on('shown.bs.modal.pedReasignStack', pedidos_modal_reasign_apilar)
+        .on('hidden.bs.modal.pedReasignStack', pedidos_modal_reasign_quitar_stack);
 
     let btnMapaClientes = document.getElementById('btnMapaClientes');
     btnMapaClientes.addEventListener('click',()=>{
@@ -2190,6 +2286,166 @@ function pedidos_cargar_departamentos_solicitud(coddeptoSelected, codmunSelected
             cmbDep.innerHTML = '<option value="">No se cargaron departamentos</option>';
             const cmbMun = document.getElementById('cmbSolCambioMunicipio');
             if (cmbMun) cmbMun.innerHTML = '<option value="">Sin municipios</option>';
+        });
+}
+
+let pedidos_reasign_cliente_sel = null;
+
+function pedidos_modal_reasign_apilar() {
+    document.body.classList.add('ped-modal-reasign-stack');
+    const $buscar = $('#modal_buscar_reasignar_cliente');
+    const $confirm = $('#modal_reasignar_dia_visita');
+    $buscar.css('z-index', 2050);
+    $confirm.css('z-index', 2070);
+    const backs = $('.modal-backdrop');
+    if (backs.length >= 1) backs.eq(0).css('z-index', 2040);
+    if (backs.length >= 2) backs.eq(1).css('z-index', 2060);
+}
+
+function pedidos_modal_reasign_quitar_stack() {
+    document.body.classList.remove('ped-modal-reasign-stack');
+    $('#modal_buscar_reasignar_cliente').css('z-index', '');
+    $('#modal_reasignar_dia_visita').css('z-index', '');
+}
+
+function pedidos_ensure_reasign_modals_en_body() {
+    ['modal_buscar_reasignar_cliente', 'modal_reasignar_dia_visita'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el && el.parentElement !== document.body) {
+            document.body.appendChild(el);
+        }
+    });
+}
+
+function pedidos_abrir_buscar_reasignar_cliente() {
+    pedidos_ensure_reasign_modals_en_body();
+    const tbody = document.getElementById('tblDataBuscarClienteReasignar');
+    const txt = document.getElementById('txtBuscarClienteReasignar');
+    if (tbody) tbody.innerHTML = '';
+    if (txt) {
+        txt.value = '';
+        setTimeout(() => txt.focus(), 400);
+    }
+    pedidos_reasign_cliente_sel = null;
+    $('#modal_buscar_reasignar_cliente').modal('show');
+}
+
+function pedidos_buscar_clientes_reasignar() {
+    const filtro = String(document.getElementById('txtBuscarClienteReasignar')?.value || '').trim();
+    const tbody = document.getElementById('tblDataBuscarClienteReasignar');
+    if (!filtro) {
+        F.AvisoError('Escriba nombre, código o NIT');
+        return;
+    }
+    if (tbody) tbody.innerHTML = `<tr><td colspan="4">${GlobalLoader}</td></tr>`;
+
+    axios.post('/clientes/buscar_cliente_sucursal_vendedor', {
+        token: TOKEN,
+        sucursal: GlobalEmpnit,
+        filtro,
+    })
+        .then((response) => {
+            if (response.data === 'error') throw new Error('error');
+            const rows = response.data.recordset || [];
+            if (!rows.length) {
+                if (tbody) tbody.innerHTML = '<tr><td colspan="4" class="text-muted text-center py-3">Sin resultados</td></tr>';
+                return;
+            }
+            const esc = (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+            let html = '';
+            rows.forEach((r) => {
+                const neg = esc(`${r.TIPONEGOCIO || ''}-${r.NEGOCIO || ''}`.replace(/^-/, ''));
+                const nom = esc(r.NOMBRE || '');
+                const dir = esc(r.DIRECCION || '');
+                const mun = esc(r.DESMUN || '');
+                html += `
+                    <tr class="hand ped-reasign-row" data-codclie="${esc(r.CODCLIENTE)}"
+                        data-nombre="${nom}" data-negocio="${neg}" data-direccion="${dir}" data-municipio="${mun}">
+                        <td class="negrita">${esc(r.CODCLIENTE)}</td>
+                        <td><small class="d-block text-muted">${neg}</small><span class="negrita">${nom}</span></td>
+                        <td><small>${dir}</small></td>
+                        <td><small>${mun}</small></td>
+                    </tr>`;
+            });
+            if (tbody) {
+                tbody.innerHTML = html;
+                tbody.querySelectorAll('.ped-reasign-row').forEach((tr) => {
+                    tr.addEventListener('click', () => pedidos_abrir_modal_dia_reasignar(tr));
+                });
+            }
+        })
+        .catch(() => {
+            if (tbody) tbody.innerHTML = '';
+            F.AvisoError('No se pudo buscar');
+        });
+}
+
+function pedidos_abrir_modal_dia_reasignar(tr) {
+    if (!tr) return;
+    pedidos_reasign_cliente_sel = {
+        codclie: tr.getAttribute('data-codclie'),
+        nombre: tr.getAttribute('data-nombre') || '',
+        negocio: tr.getAttribute('data-negocio') || '',
+        direccion: tr.getAttribute('data-direccion') || '',
+        municipio: tr.getAttribute('data-municipio') || '',
+    };
+    const lb = document.getElementById('lbReasignarClienteResumen');
+    if (lb) {
+        lb.textContent = `${pedidos_reasign_cliente_sel.negocio ? pedidos_reasign_cliente_sel.negocio + ' · ' : ''}${pedidos_reasign_cliente_sel.nombre} (Cód. ${pedidos_reasign_cliente_sel.codclie})`;
+    }
+    const cmb = document.getElementById('cmbReasignarDiaVisita');
+    if (cmb) {
+        const f = new Date();
+        cmb.value = F.getDiaSemana(f.getDay());
+    }
+    $('#modal_reasignar_dia_visita').modal('show');
+}
+
+function pedidos_confirmar_reasignar_cliente() {
+    const sel = pedidos_reasign_cliente_sel;
+    if (!sel || !sel.codclie) {
+        F.AvisoError('Seleccione un cliente');
+        return;
+    }
+    const dia = document.getElementById('cmbReasignarDiaVisita')?.value || '';
+    const btn = document.getElementById('btnConfirmarReasignarCliente');
+    const htmlOrig = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fal fa-spinner fa-spin mr-1"></i> Guardando...';
+    }
+
+    axios.post('/clientes/vendedor_reasignar_cliente', {
+        token: TOKEN,
+        sucursal: GlobalEmpnit,
+        codclie: sel.codclie,
+        codven: GlobalCodUsuario,
+        codruta: (typeof GlobalCodRutaCliente !== 'undefined' ? GlobalCodRutaCliente : 0),
+        dia,
+    })
+        .then((response) => {
+            const data = response.data || {};
+            if (!data.ok) throw new Error(data.error || 'error');
+            F.Aviso('Cliente asignado a su ruta');
+            $('#modal_reasignar_dia_visita').modal('hide');
+            $('#modal_buscar_reasignar_cliente').modal('hide');
+            const diaLista = document.getElementById('cmbDiaCliente')?.value || '';
+            if (diaLista === (data.dia || dia)) {
+                tbl_clientes(document.getElementById('txtBuscarClie')?.value || '');
+            } else if (document.getElementById('cmbDiaCliente')) {
+                document.getElementById('cmbDiaCliente').value = data.dia || dia;
+                tbl_clientes('');
+            }
+        })
+        .catch((err) => {
+            const msg = err && err.message && err.message !== 'error' ? err.message : 'No se pudo reasignar el cliente';
+            F.AvisoError(msg);
+        })
+        .finally(() => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = htmlOrig || '<i class="fal fa-check mr-1"></i>Confirmar';
+            }
         });
 }
 

@@ -874,6 +874,91 @@ router.post("/delete_sector", async(req,res)=>{
 
 
 
+const DIAS_VISITA_CLIENTE = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO', 'DOMINGO', 'OTROS'];
+
+function diaVisitaClienteOk(val) {
+    const u = String(val || '').toUpperCase().trim();
+    return DIAS_VISITA_CLIENTE.includes(u) ? u : '';
+}
+
+/** Búsqueda de clientes en toda la sucursal (vendedor — reasignación manual). */
+router.post('/buscar_cliente_sucursal_vendedor', async (req, res) => {
+    const { token, sucursal, filtro } = req.body || {};
+    const emp = esc(String(sucursal || '').trim());
+    const f = esc(String(filtro || '').trim());
+    if (!emp || !f) {
+        execute.QueryToken(res, `SELECT TOP 0 CLIENTES.CODCLIENTE AS CODCLIENTE WHERE 1=0`, token);
+        return;
+    }
+    const fNum = Number(f);
+    const esNum = f !== '' && !Number.isNaN(fNum) && String(fNum) === String(f).trim();
+    let whereExtra = `(CLIENTES.NOMBRE LIKE '%${f}%') OR (CLIENTES.NEGOCIO LIKE '%${f}%') OR (CLIENTES.NIT = '${f}')`;
+    if (esNum) {
+        whereExtra += ` OR (CLIENTES.CODCLIENTE = ${fNum})`;
+    }
+    const qry = `
+        SELECT TOP 80
+            CLIENTES.CODCLIENTE,
+            CLIENTES.NIT,
+            CLIENTES.TIPONEGOCIO,
+            CLIENTES.NEGOCIO,
+            CLIENTES.NOMBRE,
+            CLIENTES.DIRECCION,
+            CLIENTES.CODMUN,
+            ISNULL(MUNICIPIOS.DESMUN, '') AS DESMUN,
+            CLIENTES.CODEMPLEADO,
+            ISNULL(EMPLEADOS.NOMEMPLEADO, '') AS NOMEMPLEADO,
+            ISNULL(CLIENTES.CODRUTA, 0) AS CODRUTA,
+            CLIENTES.DIAVISITA AS VISITA
+        FROM CLIENTES
+        LEFT OUTER JOIN MUNICIPIOS ON CLIENTES.CODMUN = MUNICIPIOS.CODMUN
+        LEFT OUTER JOIN EMPLEADOS ON CLIENTES.CODEMPLEADO = EMPLEADOS.CODEMPLEADO
+        WHERE (CLIENTES.EMPNIT = '${emp}')
+          AND (CLIENTES.HABILITADO = 'SI')
+          AND (${whereExtra})
+        ORDER BY CLIENTES.NOMBRE
+    `;
+    execute.QueryToken(res, qry, token);
+});
+
+/** Reasigna cliente al vendedor en sesión: día de visita, CODEMPLEADO y CODRUTA. */
+router.post('/vendedor_reasignar_cliente', async (req, res) => {
+    const { token, sucursal, codclie, codven, codruta, dia } = req.body || {};
+    const emp = esc(String(sucursal || '').trim());
+    const clie = Number(codclie) || 0;
+    const ven = Number(codven) || 0;
+    const rutaBody = Number(codruta) || 0;
+    const diaVal = diaVisitaClienteOk(dia);
+    if (!emp || !clie || !ven || !diaVal) {
+        res.send({ ok: false, error: 'Datos incompletos' });
+        return;
+    }
+    const rutaSql = rutaBody > 0
+        ? String(rutaBody)
+        : `(SELECT TOP 1 CODRUTA FROM RUTAS_CLIENTES WHERE EMPNIT = '${emp}' AND CODEMP = ${ven})`;
+    const qry = `
+        UPDATE CLIENTES SET
+            CODEMPLEADO = ${ven},
+            DIAVISITA = '${diaVal}',
+            CODRUTA = ISNULL(${rutaSql}, CODRUTA)
+        WHERE CODCLIENTE = ${clie}
+          AND EMPNIT = '${emp}'
+          AND HABILITADO = 'SI'
+    `;
+    try {
+        const data = await execute.get_data_qry(qry, token);
+        const affected = data && data.rowsAffected && data.rowsAffected[0] ? data.rowsAffected[0] : 0;
+        if (!affected) {
+            res.send({ ok: false, error: 'No se encontró el cliente o no se pudo actualizar' });
+            return;
+        }
+        res.send({ ok: true, dia: diaVal });
+    } catch (e) {
+        console.error('[vendedor_reasignar_cliente]', e && e.message ? e.message : e);
+        res.send({ ok: false, error: 'Error al reasignar el cliente' });
+    }
+});
+
 router.post("/buscar_cliente", async(req,res)=>{
    
     const { token, sucursal, filtro} = req.body;
