@@ -3191,7 +3191,8 @@ function pedido_cargar_ofertas_rows(){
 function pedido_cargar_ofertas_catalogo(){
     return axios.post(GlobalUrlCalls + '/ofertas/catalogo', {
         token: TOKEN,
-        sucursal: GlobalEmpnit
+        sucursal: GlobalEmpnit,
+        perfil: 'vendedor'
     }).then((res) => {
         if (!res.data || res.data.ok === false) throw new Error('ofertas');
         pedido_ofertas_catalogo = res.data.recordset || [];

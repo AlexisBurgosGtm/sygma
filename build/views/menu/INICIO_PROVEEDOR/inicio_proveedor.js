@@ -1798,6 +1798,7 @@ function proveedor_ofertas_cargar() {
     axios.post(GlobalUrlCalls + '/ofertas/catalogo', {
         token: TOKEN,
         sucursal: proveedor_getSucursal(),
+        perfil: 'proveedor',
         controlado: 'SI'
     })
         .then((res) => {

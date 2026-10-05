@@ -2063,7 +2063,8 @@ function ventas_ofertas_cargar() {
     if (box) box.innerHTML = `<div class="text-center py-3">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</div>`;
     axios.post(GlobalUrlCalls + '/ofertas/catalogo', {
         token: TOKEN,
-        sucursal: ventas_getSucursal()
+        sucursal: ventas_getSucursal(),
+        perfil: 'vendedor'
     })
         .then((res) => {
             if (!res.data || res.data.ok === false) throw new Error('error');

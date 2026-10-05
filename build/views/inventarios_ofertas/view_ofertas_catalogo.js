@@ -223,10 +223,16 @@ function ofertas_cat_filtrar() {
 function ofertas_cat_cargar() {
     const box = document.getElementById('ofertasCatLista');
     if (box) box.innerHTML = `<div class="text-center py-3">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</div>`;
-    axios.post(GlobalUrlCalls + '/ofertas/catalogo', {
+    const perfilCat = (typeof supervisor_getSucursal === 'function' && supervisor_getSucursal())
+        ? 'supervisor'
+        : ((typeof proveedor_getSucursal === 'function' && proveedor_getSucursal()) ? 'proveedor' : 'vendedor');
+    const payload = {
         token: TOKEN,
-        sucursal: ofertas_cat_sucursal()
-    })
+        sucursal: ofertas_cat_sucursal(),
+        perfil: perfilCat
+    };
+    if (perfilCat === 'proveedor') payload.controlado = 'SI';
+    axios.post(GlobalUrlCalls + '/ofertas/catalogo', payload)
         .then((res) => {
             if (!res.data || res.data.ok === false) throw new Error('error');
             ofertasCatCache = res.data.recordset || [];

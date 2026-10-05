@@ -111,7 +111,18 @@ function ventasOk(v) {
     return String(v || '').trim().toUpperCase() === 'NO' ? 'NO' : 'SI';
 }
 
-const SQL_FILTRO_VENTAS_VENDEDOR = "UPPER(ISNULL(O.VENTAS, 'SI')) = 'SI'";
+const SQL_FILTRO_VENTAS_SI = "UPPER(ISNULL(O.VENTAS, 'SI')) = 'SI'";
+const SQL_FILTRO_CONTROLADO_SI = "UPPER(ISNULL(O.CONTROLADO, 'SI')) = 'SI'";
+/** @deprecated alias */
+const SQL_FILTRO_VENTAS_VENDEDOR = SQL_FILTRO_VENTAS_SI;
+
+/** Catálogo por perfil: vendedor/supervisor → VENTAS=SI; proveedor → CONTROLADO=SI (sin filtrar VENTAS). */
+function sqlFiltroOfertasCatalogoPerfil(soloControladoProveedor) {
+    if (soloControladoProveedor) {
+        return `AND ${SQL_FILTRO_CONTROLADO_SI}`;
+    }
+    return `AND ${SQL_FILTRO_VENTAS_SI}`;
+}
 
 const DDL_CREATE_SEDES = `
 IF OBJECT_ID('dbo.OFERTAS_SEDES', 'U') IS NULL
@@ -777,9 +788,12 @@ router.post('/vendedor_disponibles', async (req, res) => {
 });
 
 router.post('/catalogo', async (req, res) => {
-    const { token, sucursal, controlado } = req.body || {};
+    const { token, sucursal, controlado, perfil } = req.body || {};
     const emp = sqlEsc(String(sucursal || '').trim());
-    const soloControlado = String(controlado || '').trim().toUpperCase() === 'SI';
+    const perf = String(perfil || '').trim().toLowerCase();
+    const modoProveedor = perf === 'proveedor'
+        || String(controlado || '').trim().toUpperCase() === 'SI';
+    const filtroVisibilidad = sqlFiltroOfertasCatalogoPerfil(modoProveedor);
     try {
         await ensureTables(token);
         const filtroSede = (!emp || emp === '%')
@@ -803,6 +817,7 @@ router.post('/catalogo', async (req, res) => {
                 CONVERT(varchar(10), O.FECHA_AL, 23) AS FECHA_AL,
                 ISNULL(O.IMAGEN, '') AS IMAGEN,
                 ISNULL(O.CONTROLADO, 'SI') AS CONTROLADO,
+                ISNULL(O.VENTAS, 'SI') AS VENTAS,
                 (SELECT COUNT(*) FROM OFERTAS_PRODUCTOS P WHERE P.CODOFERTA = O.CODOFERTA AND UPPER(ISNULL(NULLIF(LTRIM(RTRIM(P.TIPO)), ''), 'PROD')) = 'PROD') AS NPROD,
                 (SELECT COUNT(*) FROM OFERTAS_PRODUCTOS P WHERE P.CODOFERTA = O.CODOFERTA AND UPPER(ISNULL(P.TIPO, '')) = 'BONI') AS NBONI
             FROM OFERTAS O
@@ -816,8 +831,7 @@ router.post('/catalogo', async (req, res) => {
                     )
                 )
                 AND ${filtroSede}
-                AND ${SQL_FILTRO_VENTAS_VENDEDOR}
-                ${soloControlado ? "AND UPPER(ISNULL(O.CONTROLADO, 'SI')) = 'SI'" : ''}
+                ${filtroVisibilidad}
             ORDER BY O.DESOFERTA
         `, token);
         const rows = ((data && data.recordset) ? data.recordset : []).map((r) => {
