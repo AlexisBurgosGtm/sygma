@@ -1,6 +1,7 @@
 const execute = require('./../connection');
 const express = require('express');
 const router = express.Router();
+const bitacora = require('../services/bitacoraEliminaciones');
 
 const OPCION_REASIGN_CLIENTE_PEDIDO = 'VENDEDOR REASIGNAR CLIENTE PEDIDO';
 
@@ -144,6 +145,32 @@ router.post('/settings_empresa_reasign_update', async (req, res) => {
     } catch (e) {
         console.error('[config/settings_empresa_reasign_update]', e && e.message ? e.message : e);
         res.send('error');
+    }
+});
+
+router.post('/bitacora_list', async (req, res) => {
+    const { token, mes, anio, buscar } = req.body || {};
+    try {
+        const data = await bitacora.listarBitacora(token, mes, anio, buscar);
+        res.send({ ok: true, mes: data.mes, anio: data.anio, recordset: data.recordset });
+    } catch (e) {
+        console.error('[config/bitacora_list]', e && e.message ? e.message : e);
+        res.send({ ok: false, error: 'No se pudo cargar la bitácora', recordset: [] });
+    }
+});
+
+router.post('/bitacora_delete', async (req, res) => {
+    const { token, id } = req.body || {};
+    try {
+        const result = await bitacora.eliminarRegistroBitacora(token, id);
+        if (!result.ok) {
+            res.send({ ok: false, error: result.error || 'No se pudo eliminar' });
+            return;
+        }
+        res.send({ ok: true });
+    } catch (e) {
+        console.error('[config/bitacora_delete]', e && e.message ? e.message : e);
+        res.send({ ok: false, error: 'No se pudo eliminar el registro' });
     }
 });
 

@@ -2,6 +2,7 @@ const execute = require('../connection');
 const express = require('express');
 const router = express.Router();
 const storage = require('../services/webdavStorage');
+const bitacora = require('../services/bitacoraEliminaciones');
 
 function esc(val) {
     if (val === null || val === undefined) return '';
@@ -1995,6 +1996,14 @@ router.post("/mercaderista_visita_eliminar", async (req, res) => {
                AND FECHA = '${fechaVal}'
         `;
         await execute.get_data_qry(qryDelete, token);
+
+        bitacora.logEliminacionAsync({
+            token,
+            empnit: emp,
+            usuario: bitacora.pickUsuario(req.body),
+            modulo: 'VISITA_MERCADERISTA',
+            detalle: `Eliminó visita mercaderista CODEMP=${ven} CODCLIENTE=${clie} FECHA=${fechaVal} (fotos: ${fotos.length})`,
+        });
 
         res.send({
             ok: true,

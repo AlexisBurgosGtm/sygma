@@ -82,6 +82,17 @@
             F.AvisoError('No tiene permitido entrar a esta sección');
         }
     },
+    config_bitacora:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/config/view_bitacora.js','root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        }
+    },
     productos:()=>{
         
         if(Menu.verify()==true){

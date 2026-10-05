@@ -1537,7 +1537,8 @@ let GF = {
                 sucursal:empnit,
                 token:TOKEN,
                 coddoc:coddoc,
-                correlativo:correlativo
+                correlativo:correlativo,
+                usuario: (typeof GlobalUsuario !== 'undefined' ? GlobalUsuario : '')
             };
     
             axios.post(`/documentos/eliminar_documento`, data)
@@ -1569,7 +1570,8 @@ let GF = {
                 sucursal: empnit,
                 token: TOKEN,
                 coddoc: coddoc,
-                correlativo: correlativo
+                correlativo: correlativo,
+                usuario: (typeof GlobalUsuario !== 'undefined' ? GlobalUsuario : '')
             })
             .then((response) => {
                 if (response.status.toString() !== '200') {

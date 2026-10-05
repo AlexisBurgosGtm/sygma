@@ -1836,6 +1836,7 @@ function mercaderista_eliminar_visita(codclie, nombre, btnEl) {
                 codemp: GlobalCodUsuario,
                 codclie,
                 fecha,
+                usuario: (typeof GlobalUsuario !== 'undefined' ? GlobalUsuario : ''),
             })
                 .then((response) => {
                     if (!response.data || response.data.ok !== true) throw new Error('error');

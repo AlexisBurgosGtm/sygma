@@ -67,6 +67,7 @@
         medidas: 'MEDIDAS',
         empresas: 'EMPRESAS',
         config_general: 'CONFIGURACIONES GENERALES',
+        config_bitacora: 'BITÁCORA',
         config_tipodocumentos: 'TIPO DE DOCUMENTOS',
         ventas_pedidos: 'PEDIDOS',
         ventas_pedidos_comodin: 'PEDIDOS 2',

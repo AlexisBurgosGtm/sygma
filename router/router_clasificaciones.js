@@ -1,6 +1,7 @@
 const execute = require('../connection');
 const express = require('express');
 const router = express.Router();
+const bitacora = require('../services/bitacoraEliminaciones');
 
 
 
@@ -121,16 +122,34 @@ router.post("/edit_marca", async(req,res)=>{
      
 });
 
-router.post("/delete_marca", async(req,res)=>{
-   
-    const { token, sucursal, codigo} = req.body;
-
-    let qry = `
-        DELETE FROM MARCAS WHERE CODMARCA=${codigo};
-        ` 
-
-    execute.QueryToken(res,qry,token);
-     
+router.post("/delete_marca", async (req, res) => {
+    const { token, sucursal, codigo } = req.body || {};
+    const cod = Number(codigo) || 0;
+    if (!cod) {
+        res.send('error');
+        return;
+    }
+    try {
+        const snap = await execute.get_data_qry(
+            `SELECT TOP 1 DESMARCA FROM MARCAS WHERE CODMARCA=${cod}`,
+            token
+        );
+        const des = snap && snap.recordset && snap.recordset[0]
+            ? snap.recordset[0].DESMARCA
+            : '';
+        const result = await execute.get_data_qry(`DELETE FROM MARCAS WHERE CODMARCA=${cod};`, token);
+        bitacora.logEliminacionAsync({
+            token,
+            empnit: bitacora.pickEmpnit(req.body),
+            usuario: bitacora.pickUsuario(req.body),
+            modulo: 'MARCA',
+            detalle: `Eliminó marca CODMARCA=${cod}${des ? ` (${des})` : ''}`,
+        });
+        res.send(result);
+    } catch (e) {
+        console.error('[clasificaciones/delete_marca]', e && e.message ? e.message : e);
+        res.send('error');
+    }
 });
 
 

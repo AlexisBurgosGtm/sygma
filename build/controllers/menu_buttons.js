@@ -312,6 +312,11 @@
                                         </a>
                                     </li>
                                     <li>
+                                        <a title="Bitácora de eliminaciones" data-filter-tags="bitacora eliminaciones auditoria" href="#" onclick="Menu.config_bitacora()">
+                                            <span class="nav-link-text">BITÁCORA</span>
+                                        </a>
+                                    </li>
+                                    <li>
                                         <a title="Skin Options" data-filter-tags="theme settings skin options" href="#" onclick="Menu.config_tipodocumentos()">
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_skin_options">TIPO DE DOCUMENTOS</span>
                                         </a>

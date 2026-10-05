@@ -60,6 +60,10 @@ SpaRouter.registerMany({
         script: '../views/config/view_config.js',
         title: 'Configuraciones Generales'
     },
+    'config/bitacora': {
+        script: '../views/config/view_bitacora.js',
+        title: 'Bitácora de eliminaciones'
+    },
 
     'compras/productos': {
         script: '../views/compras_productos/view_productos.js',

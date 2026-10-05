@@ -708,7 +708,12 @@ function delete_marca(codigo){
 
     return new Promise((resolve,reject)=>{
 
-        axios.post(GlobalUrlCalls + '/clasificaciones/delete_marca', {token:TOKEN,codigo:codigo})
+        axios.post(GlobalUrlCalls + '/clasificaciones/delete_marca', {
+            token: TOKEN,
+            codigo: codigo,
+            sucursal: (typeof GlobalEmpnit !== 'undefined' ? GlobalEmpnit : ''),
+            usuario: (typeof GlobalUsuario !== 'undefined' ? GlobalUsuario : '')
+        })
         .then((response) => {
            
             if(response.data.toString()=='error'){

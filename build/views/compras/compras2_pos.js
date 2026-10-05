@@ -997,7 +997,8 @@ function compras2_abandonar_documento() {
             token: TOKEN,
             sucursal: GlobalEmpnit,
             coddoc: doc.coddoc,
-            correlativo: doc.correlativo
+            correlativo: doc.correlativo,
+            usuario: (typeof GlobalUsuario !== 'undefined' ? GlobalUsuario : '')
         }).catch(() => {}).finally(() => compras2_reset_sesion());
     }
 
@@ -1269,7 +1270,8 @@ function compras2_eliminar_documento_listado(coddoc, correlativo, st, idbtn) {
                 token: TOKEN,
                 sucursal: GlobalEmpnit,
                 coddoc: coddoc,
-                correlativo: correlativo
+                correlativo: correlativo,
+                usuario: (typeof GlobalUsuario !== 'undefined' ? GlobalUsuario : '')
             }).then((response) => {
                 if (response.data === 'error' || Number(response.data?.rowsAffected?.[0] || 0) === 0) {
                     F.AvisoError('No se pudo eliminar el documento');

@@ -3547,7 +3547,8 @@ function delete_precio(idbtn,id,codprod){
                     {
                         sucursal:GlobalEmpnit,
                         token:TOKEN,
-                        id:id
+                        id:id,
+                        usuario: (typeof GlobalUsuario !== 'undefined' ? GlobalUsuario : '')
                     })
                 .then((response) => {
                     if(response.status.toString()=='200'){
@@ -3660,7 +3661,8 @@ function delete_producto(codprod){
             {
                 sucursal:GlobalEmpnit,
                 token:TOKEN,
-                codprod:codprod
+                codprod:codprod,
+                usuario: (typeof GlobalUsuario !== 'undefined' ? GlobalUsuario : '')
             })
         .then((response) => {
                 if(response.status.toString()=='200'){

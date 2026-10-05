@@ -1,6 +1,7 @@
 const execute = require('./../connection');
 const express = require('express');
 const router = express.Router();
+const bitacora = require('../services/bitacoraEliminaciones');
 
 
 
@@ -416,20 +417,41 @@ router.post("/desactivar_producto", async(req,res)=>{
 });
 
 
-router.post("/delete_producto", async(req,res)=>{
-   
-    const {token,sucursal,codprod} = req.body;
-
-    let qry = `
-    DELETE FROM PRODUCTOS WHERE CODPROD='${codprod}';
-    DELETE FROM PRECIOS WHERE CODPROD='${codprod}';
-    DELETE FROM INVSALDO WHERE CODPROD='${codprod}';
-    IF OBJECT_ID('dbo.INV_STOCK', 'U') IS NOT NULL
-        DELETE FROM INV_STOCK WHERE CODPROD='${codprod}';
-    `
-
-    execute.QueryToken(res,qry,token);
-     
+router.post("/delete_producto", async (req, res) => {
+    const { token, sucursal, codprod } = req.body || {};
+    const prod = bitacora.escSql(String(codprod || '').trim());
+    if (!prod) {
+        res.send('error');
+        return;
+    }
+    try {
+        const snap = await execute.get_data_qry(
+            `SELECT TOP 1 DESPROD FROM PRODUCTOS WHERE CODPROD='${prod}'`,
+            token
+        );
+        const des = snap && snap.recordset && snap.recordset[0]
+            ? snap.recordset[0].DESPROD
+            : '';
+        const qry = `
+            DELETE FROM PRODUCTOS WHERE CODPROD='${prod}';
+            DELETE FROM PRECIOS WHERE CODPROD='${prod}';
+            DELETE FROM INVSALDO WHERE CODPROD='${prod}';
+            IF OBJECT_ID('dbo.INV_STOCK', 'U') IS NOT NULL
+                DELETE FROM INV_STOCK WHERE CODPROD='${prod}';
+        `;
+        const result = await execute.get_data_qry(qry, token);
+        bitacora.logEliminacionAsync({
+            token,
+            empnit: bitacora.pickEmpnit(req.body),
+            usuario: bitacora.pickUsuario(req.body),
+            modulo: 'PRODUCTO',
+            detalle: `Eliminó producto CODPROD=${prod}${des ? ` (${des})` : ''} y precios/saldos asociados`,
+        });
+        res.send(result);
+    } catch (e) {
+        console.error('[productos/delete_producto]', e && e.message ? e.message : e);
+        res.send('error');
+    }
 });
 
 router.post("/insert_precio", async(req,res)=>{
@@ -626,17 +648,35 @@ router.post("/lista_precios", async(req,res)=>{
      
 });
 
-router.post("/delete_precio", async(req,res)=>{
-   
-    const {token,sucursal,id} = req.body;
-
-   
-    let qry = `
-    DELETE FROM PRECIOS WHERE ID=${id};
-    `
-
-    execute.QueryToken(res,qry,token);
-     
+router.post("/delete_precio", async (req, res) => {
+    const { token, sucursal, id } = req.body || {};
+    const idNum = Number(id) || 0;
+    if (!idNum) {
+        res.send('error');
+        return;
+    }
+    try {
+        const snap = await execute.get_data_qry(
+            `SELECT TOP 1 CODPROD, CODMEDIDA, PRECIO FROM PRECIOS WHERE ID=${idNum}`,
+            token
+        );
+        const row = snap && snap.recordset && snap.recordset[0] ? snap.recordset[0] : null;
+        const result = await execute.get_data_qry(`DELETE FROM PRECIOS WHERE ID=${idNum};`, token);
+        const det = row
+            ? `Eliminó precio ID=${idNum} CODPROD=${row.CODPROD} medida=${row.CODMEDIDA} precio=${row.PRECIO}`
+            : `Eliminó precio ID=${idNum}`;
+        bitacora.logEliminacionAsync({
+            token,
+            empnit: bitacora.pickEmpnit(req.body),
+            usuario: bitacora.pickUsuario(req.body),
+            modulo: 'PRECIO',
+            detalle: det,
+        });
+        res.send(result);
+    } catch (e) {
+        console.error('[productos/delete_precio]', e && e.message ? e.message : e);
+        res.send('error');
+    }
 });
 router.post("/habilitar_precio", async(req,res)=>{
    

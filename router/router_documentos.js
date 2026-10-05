@@ -1,6 +1,7 @@
 const execute = require('./../connection');
 const express = require('express');
 const router = express.Router();
+const bitacora = require('../services/bitacoraEliminaciones');
 
 
 
@@ -493,18 +494,48 @@ router.post("/BACKUP_detalle_documento_json", async(req,res)=>{
 });
 
 
-router.post("/eliminar_documento", async(req,res)=>{
-   
-    const { token, sucursal, coddoc,correlativo} = req.body;
-
-    let qry = `DELETE FROM DOCUMENTOS 
-                    WHERE EMPNIT='${sucursal}' AND CODDOC='${coddoc}' AND CORRELATIVO=${correlativo};
-                DELETE FROM DOCPRODUCTOS 
-                    WHERE EMPNIT='${sucursal}' AND CODDOC='${coddoc}' AND CORRELATIVO=${correlativo};    
-                `
-    
-    execute.QueryToken(res,qry,token);
-     
+router.post("/eliminar_documento", async (req, res) => {
+    const { token, sucursal, coddoc, correlativo } = req.body || {};
+    const emp = bitacora.escSql(String(sucursal || '').trim());
+    const doc = bitacora.escSql(String(coddoc || '').trim());
+    const corr = Number(correlativo) || 0;
+    if (!emp || !doc || corr <= 0) {
+        res.send('error');
+        return;
+    }
+    try {
+        const snap = await execute.get_data_qry(`
+            SELECT TOP 1 D.CODDOC, D.CORRELATIVO, D.FECHA, D.STATUS,
+                   ISNULL(D.DOC_NOMCLIE, '') AS CLIENTE,
+                   ISNULL(T.TIPODOC, '') AS TIPODOC,
+                   ISNULL(T.DESCRIPCION, '') AS DESCTIPODOC
+            FROM DOCUMENTOS D
+            LEFT JOIN TIPODOCUMENTOS T ON T.EMPNIT = D.EMPNIT AND T.CODDOC = D.CODDOC
+            WHERE D.EMPNIT='${emp}' AND D.CODDOC='${doc}' AND D.CORRELATIVO=${corr}
+        `, token);
+        const row = snap && snap.recordset && snap.recordset[0] ? snap.recordset[0] : null;
+        const qry = `
+            DELETE FROM DOCUMENTOS
+                WHERE EMPNIT='${emp}' AND CODDOC='${doc}' AND CORRELATIVO=${corr};
+            DELETE FROM DOCPRODUCTOS
+                WHERE EMPNIT='${emp}' AND CODDOC='${doc}' AND CORRELATIVO=${corr};
+        `;
+        const result = await execute.get_data_qry(qry, token);
+        const det = row
+            ? `Eliminó documento ${doc}-${corr} tipo=${row.TIPODOC || row.DESCTIPODOC || ''} cliente=${row.CLIENTE || ''} fecha=${row.FECHA || ''} status=${row.STATUS || ''}`
+            : `Eliminó documento ${doc}-${corr} (EMPNIT ${emp})`;
+        bitacora.logEliminacionAsync({
+            token,
+            empnit: emp,
+            usuario: bitacora.pickUsuario(req.body),
+            modulo: 'DOCUMENTO',
+            detalle: det,
+        });
+        res.send(result);
+    } catch (e) {
+        console.error('[documentos/eliminar_documento]', e && e.message ? e.message : e);
+        res.send('error');
+    }
 });
 
 router.post("/eliminar_documento_vendedor", async (req, res) => {
@@ -524,7 +555,9 @@ router.post("/eliminar_documento_vendedor", async (req, res) => {
             reqCheck.input('coddoc', sql.VarChar(50), doc);
             reqCheck.input('correlativo', sql.Int, corr);
             const check = await reqCheck.query(`
-                SELECT LTRIM(RTRIM(ISNULL(CODEMBARQUE, ''))) AS CODEMBARQUE
+                SELECT LTRIM(RTRIM(ISNULL(CODEMBARQUE, ''))) AS CODEMBARQUE,
+                       ISNULL(DOC_NOMCLIE, '') AS CLIENTE,
+                       ISNULL(FECHA, '') AS FECHA
                 FROM DOCUMENTOS
                 WHERE EMPNIT = @empnit AND CODDOC = @coddoc AND CORRELATIVO = @correlativo
             `);
@@ -535,6 +568,8 @@ router.post("/eliminar_documento_vendedor", async (req, res) => {
             if (String(check.recordset[0].CODEMBARQUE || '').trim() !== '') {
                 return { RESULT: 'oficina' };
             }
+
+            const metaRow = check.recordset[0];
 
             const reqDelDoc = new sql.Request(transaction);
             reqDelDoc.input('empnit', sql.VarChar(50), emp);
@@ -554,8 +589,22 @@ router.post("/eliminar_documento_vendedor", async (req, res) => {
                 WHERE EMPNIT = @empnit AND CODDOC = @coddoc AND CORRELATIVO = @correlativo
             `);
 
-            return { RESULT: 'ok' };
+            return {
+                RESULT: 'ok',
+                CLIENTE: metaRow.CLIENTE || '',
+                FECHA: metaRow.FECHA || '',
+            };
         });
+
+        if (result && result.RESULT === 'ok') {
+            bitacora.logEliminacionAsync({
+                token,
+                empnit: emp,
+                usuario: bitacora.pickUsuario(req.body),
+                modulo: 'PEDIDO_VENDEDOR',
+                detalle: `Eliminó pedido vendedor ${doc}-${corr} cliente=${result.CLIENTE || ''} fecha=${result.FECHA || ''} (EMPNIT ${emp})`,
+            });
+        }
 
         res.send({ recordset: [result], rowsAffected: [1] });
     } catch (err) {
