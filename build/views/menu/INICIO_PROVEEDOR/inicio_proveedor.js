@@ -5,6 +5,8 @@ var proveedor_marcasVendedorChart = null;
 var proveedor_vendedorMarcasChart = null;
 var proveedor_vendedorSeleccionado = '';
 var proveedor_periodoVentasVendedor = 'mensual';
+var proveedor_inventario_cache = { key: '', rows: [] };
+var proveedor_marcas_inventario_loaded = false;
 
 function proveedor_hoyIso() {
     return (typeof F.getFecha === 'function') ? F.getFecha() : new Date().toISOString().slice(0, 10);
@@ -837,22 +839,21 @@ function getView(){
                     
                     <h5 class="negrita text-danger mb-3">INVENTARIO ACTUAL</h5>
 
-                    <div class="row">
-                        <div class="col-sm-6 col-md-8 col-lg-8 col-xl-8">
-                            <div class="input-group">
-                                <select class="form-control negrita text-base" id="cmbSt">
-                                    <option value="SI">PRODUCTOS HABILITADOS</option>
-                                    <option value="NO">PRODUCTOS NO HABILITADOS</option>
+                    <div class="row align-items-end">
+                        <div class="col-12 col-lg-9 mb-2 mb-lg-0">
+                            <div class="input-group proveedor-inv-filters flex-nowrap">
+                                <select class="form-control negrita proveedor-inv-filter-item" id="cmbSt" title="Habilitados">
+                                    <option value="SI">HABILITADOS</option>
+                                    <option value="NO">NO HABILITADOS</option>
                                 </select>
-                                <input type="text" class="form-control" placeholder="Escriba para buscar..." id="txtBuscarProductoInventario" oninput="F.FiltrarTabla('tblInventario','txtBuscarProductoInventario')">
-
+                                <select class="form-control negrita proveedor-inv-filter-item proveedor-inv-filter-marca" id="cmbMarcaInventario" title="Marca">
+                                    <option value="0">TODAS LAS MARCAS</option>
+                                </select>
+                                <input type="search" class="form-control proveedor-inv-filter-item" placeholder="Buscar..." id="txtBuscarProductoInventario" autocomplete="off">
                             </div>
-
-                            
                         </div>
-                        
-                        <div class="col-sm-6 col-md-4 col-lg-4 col-xl-4">
-                            <button class="btn btn-success btn-md hand shadow" id="btnExportarInventario">
+                        <div class="col-12 col-lg-3 text-lg-right">
+                            <button class="btn btn-success btn-sm hand shadow" id="btnExportarInventario">
                                 <i class="fal fa-share"></i> Exportar Excel
                             </button>
                         </div>
@@ -860,8 +861,8 @@ function getView(){
 
                     <br>
 
-                    <div class="table-responsive col-12">
-                        <table class="table h-full table-hover col-12" id="tblInventario">
+                    <div class="table-responsive col-12 proveedor-inv-table-wrap">
+                        <table class="table table-sm table-hover col-12 proveedor-inv-table" id="tblInventario">
                             <thead class="bg-base text-white">
                                 <tr>
                                     <td>CODIGO</td>
@@ -1310,13 +1311,23 @@ function addListeners(){
     document.getElementById('btnMenuRptInventario').addEventListener('click',()=>{
         proveedor_showPanel('cinco', 'btnMenuRptInventario', ()=>{
             selected_tab = 'INVENTARIOS';
-            tbl_inventario();
+            proveedor_cargar_marcas_inventario();
+            tbl_inventario(true);
         });
     });
 
 
     document.getElementById('cmbSt').addEventListener('change',()=>{
-        tbl_inventario();
+        proveedor_inventario_cache.key = '';
+        tbl_inventario(true);
+    });
+
+    document.getElementById('cmbMarcaInventario')?.addEventListener('change', () => {
+        proveedor_render_inventario_desde_cache();
+    });
+
+    document.getElementById('txtBuscarProductoInventario')?.addEventListener('input', () => {
+        proveedor_filtrar_inventario_tabla();
     });
 
 
@@ -1364,7 +1375,8 @@ function addListeners(){
                         
                         F.Aviso('SellOut establecido exitosamente!!');
                         
-                        tbl_inventario();
+                        proveedor_inventario_cache.key = '';
+                        tbl_inventario(true);
 
                         btnConfigSellout.disabled = false;
                         btnConfigSellout.innerHTML = `<i class="fal fa-save"></i>`;
@@ -2289,54 +2301,104 @@ function proveedor_exportar_sellout() {
 
 
 
-function tbl_inventario(){
-
-    let container = document.getElementById('tblDataInventario');
-    container.innerHTML = GlobalLoader;
-
-    let st = document.getElementById('cmbSt').value;
-
-    let sucursal = proveedor_getSucursal();
-
-
-    GF.get_data_inventarios_general(sucursal,st)
-    .then((data)=>{
-
-        let str = '';
-        data.recordset.map((r)=>{
-
-            let SELLOUT = F.get_existencia(Number(r.SELLOUT),Number(r.UXC)).toFixed(2);
-            let CAJAS = F.get_existencia(Number(r.TOTALUNIDADES),Number(r.UXC)).toFixed(2);
-
-            str += `
-            <tr>
-                <td>${r.CODPROD}</td>
-                <td>${r.CODPROD2}</td>
-                <td>${r.DESPROD3}</td>
-                <td>${r.DESPROD}</td>
-                <td>${r.DESMARCA}</td>
-                <td>${F.setMoneda((Number(r.TOTALUNIDADES)*Number(r.COSTO)),'Q')}</td>
-                <td>${CAJAS}</td>
-
-                <td>${SELLOUT}</td>
-                <td>${F.get_existencia(Number(CAJAS),Number(SELLOUT)).toFixed(2)}</td>
-            </tr>
-            `
+function proveedor_cargar_marcas_inventario() {
+    if (proveedor_marcas_inventario_loaded) return Promise.resolve();
+    const cmb = document.getElementById('cmbMarcaInventario');
+    if (!cmb) return Promise.resolve();
+    return GF.get_data_marcas()
+        .then((data) => {
+            const rows = data.recordset || [];
+            const prev = cmb.value || '0';
+            let opts = '<option value="0">TODAS LAS MARCAS</option>';
+            rows.forEach((m) => {
+                const cod = Number(m.CODMARCA) || 0;
+                const des = String(m.DESMARCA || '').replace(/</g, '&lt;');
+                if (!cod) return;
+                opts += `<option value="${cod}">${des}</option>`;
+            });
+            cmb.innerHTML = opts;
+            cmb.value = prev;
+            proveedor_marcas_inventario_loaded = true;
         })
-        container.innerHTML = str;
+        .catch(() => {
+            cmb.innerHTML = '<option value="0">TODAS LAS MARCAS</option>';
+        });
+}
 
-        //F.initit_datatable('tblInventario', true);
+function proveedor_inventario_cache_key() {
+    const st = document.getElementById('cmbSt')?.value || 'SI';
+    return `${proveedor_getSucursal()}|${st}`;
+}
 
-    })
-    .catch(()=>{
+function proveedor_filtrar_inventario_rows(rows) {
+    const codMarca = Number(document.getElementById('cmbMarcaInventario')?.value) || 0;
+    if (!codMarca) return rows;
+    return rows.filter((r) => Number(r.CODMARCA) === codMarca);
+}
 
-        container.innerHTML = 'No se cargaron datos...';
-    })
+function proveedor_build_inventario_html(rows) {
+    if (!rows.length) {
+        return '<tr><td colspan="9" class="text-center text-muted py-3">Sin productos para el filtro</td></tr>';
+    }
+    return rows.map((r) => {
+        const uxc = Number(r.UXC) || 1;
+        const sellout = F.get_existencia(Number(r.SELLOUT), uxc).toFixed(2);
+        const cajas = F.get_existencia(Number(r.TOTALUNIDADES), uxc).toFixed(2);
+        const meses = F.get_existencia(Number(cajas), Number(sellout)).toFixed(2);
+        const totalCosto = F.setMoneda(Number(r.TOTALUNIDADES) * Number(r.COSTO), 'Q');
+        return `<tr>
+            <td>${r.CODPROD || ''}</td>
+            <td>${r.CODPROD2 || ''}</td>
+            <td>${r.DESPROD3 || ''}</td>
+            <td>${r.DESPROD || ''}</td>
+            <td>${r.DESMARCA || ''}</td>
+            <td class="text-right">${totalCosto}</td>
+            <td class="text-right">${cajas}</td>
+            <td class="text-right">${sellout}</td>
+            <td class="text-right">${meses}</td>
+        </tr>`;
+    }).join('');
+}
 
+function proveedor_render_inventario_desde_cache() {
+    const container = document.getElementById('tblDataInventario');
+    if (!container) return;
+    const filtradas = proveedor_filtrar_inventario_rows(proveedor_inventario_cache.rows || []);
+    container.innerHTML = proveedor_build_inventario_html(filtradas);
+    proveedor_filtrar_inventario_tabla();
+}
 
-    
+function proveedor_filtrar_inventario_tabla() {
+    const txt = document.getElementById('txtBuscarProductoInventario');
+    if (!txt || typeof F.FiltrarTabla !== 'function') return;
+    F.FiltrarTabla('tblInventario', 'txtBuscarProductoInventario');
+}
 
-};
+function tbl_inventario(forceReload) {
+    const container = document.getElementById('tblDataInventario');
+    if (!container) return;
+
+    const cacheKey = proveedor_inventario_cache_key();
+    if (!forceReload && proveedor_inventario_cache.key === cacheKey && proveedor_inventario_cache.rows.length) {
+        proveedor_render_inventario_desde_cache();
+        return;
+    }
+
+    container.innerHTML = GlobalLoader;
+    const st = document.getElementById('cmbSt').value;
+    const sucursal = proveedor_getSucursal();
+
+    GF.get_data_inventarios_general(sucursal, st)
+        .then((data) => {
+            const rows = data.recordset || [];
+            proveedor_inventario_cache = { key: cacheKey, rows };
+            proveedor_render_inventario_desde_cache();
+        })
+        .catch(() => {
+            proveedor_inventario_cache = { key: '', rows: [] };
+            container.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-3">No se cargaron datos</td></tr>';
+        });
+}
 
 
 

@@ -1017,6 +1017,36 @@ body.proveedor-sidebar-open {
   background: rgba(59, 125, 221, 0.14) !important;
   box-shadow: inset 3px 0 0 #3b7ddd;
 }
+
+/* Proveedor — inventario actual */
+.proveedor-inv-filters .proveedor-inv-filter-item {
+  font-size: 0.8rem;
+  min-height: 34px;
+}
+.proveedor-inv-filters .proveedor-inv-filter-marca {
+  max-width: 11rem;
+  flex: 0 1 11rem;
+}
+.proveedor-inv-table-wrap {
+  max-height: calc(100vh - 280px);
+  overflow: auto;
+}
+.proveedor-inv-table {
+  font-size: 0.72rem;
+  line-height: 1.25;
+}
+.proveedor-inv-table thead td {
+  font-size: 0.68rem;
+  padding: 0.35rem 0.4rem;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.proveedor-inv-table tbody td {
+  padding: 0.28rem 0.4rem;
+  vertical-align: middle;
+}
 .proveedor-tabla-clic-hint {
   display: block;
   margin-bottom: 0.5rem;

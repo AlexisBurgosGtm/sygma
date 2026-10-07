@@ -192,9 +192,10 @@ router.post("/BACKUP_update_sell_out_productos", async(req,res)=>{
 
 router.post("/select_inventario_general", async(req,res)=>{
    
-    const {token,sucursal,st} = req.body;
+    const { token, sucursal, st, codmarca } = req.body;
+    const marcaNum = Number(codmarca) || 0;
+    const filtroMarca = marcaNum > 0 ? ` AND (PRODUCTOS.CODMARCA = ${marcaNum})` : '';
 
-    
     let qry = '';
 
     if(sucursal=='%'){
@@ -223,7 +224,7 @@ router.post("/select_inventario_general", async(req,res)=>{
         GROUP BY view_invsaldo.CODPROD, view_invsaldo.CODPROD2, view_invsaldo.DESPROD3, view_invsaldo.DESPROD, view_invsaldo.HABILITADO, view_invsaldo.COSTO_ULTIMO, view_invsaldo.COSTO_ANTERIOR, 
                   view_invsaldo.COSTO_PROMEDIO, PRODUCTOS.CODMARCA, 
                   MARCAS.DESMARCA, PRODUCTOS.UXC,PRODUCTOS.SELLOUT,PRODUCTOS.COSTO_ULTIMO
-        HAVING (view_invsaldo.HABILITADO = '${st}')
+        HAVING (view_invsaldo.HABILITADO = '${st}')${filtroMarca}
         ORDER BY view_invsaldo.CODPROD
         `
     }else{
@@ -236,10 +237,10 @@ router.post("/select_inventario_general", async(req,res)=>{
                 PRODUCTOS.CODMARCA, MARCAS.DESMARCA,
                 PRODUCTOS.UXC,
                 ISNULL(view_invsaldo.SELLOUT,0) AS SELLOUT
-        FROM  PRODUCTOS RIGHT OUTER JOIN
-                view_invsaldo ON PRODUCTOS.CODPROD = view_invsaldo.CODPROD LEFT OUTER JOIN
-                MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA
-        WHERE (view_invsaldo.EMPNIT = '${sucursal}') AND (view_invsaldo.HABILITADO='${st}')
+        FROM  view_invsaldo
+                INNER JOIN PRODUCTOS ON PRODUCTOS.CODPROD = view_invsaldo.CODPROD
+                LEFT OUTER JOIN MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA
+        WHERE (view_invsaldo.EMPNIT = '${sucursal}') AND (view_invsaldo.HABILITADO='${st}')${filtroMarca}
         ORDER BY view_invsaldo.CODPROD;
         `
 
