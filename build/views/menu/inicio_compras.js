@@ -1,5 +1,7 @@
 var embarque_print_codembarque = '';
 var embarque_print_fecha = '';
+var embarque_picking_ctx_codembarque = '';
+var embarque_picking_ctx_fecha = '';
 var compras_currentPane = 'uno';
 
 function compras_getMes() {
@@ -180,6 +182,66 @@ function getView(){
 
             ${view.vista_creditos_modales()}
 
+            <div class="modal fade" id="modal_bodega_picking_opciones" tabindex="-1" role="dialog" aria-labelledby="modal_bodega_picking_opciones_titulo" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header py-2">
+                            <div>
+                                <h5 class="modal-title negrita mb-0" id="modal_bodega_picking_opciones_titulo">Picking</h5>
+                                <small class="text-muted d-block" id="modal_bodega_picking_opciones_sub"></small>
+                            </div>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+                        </div>
+                        <div class="modal-body pt-2 pb-3">
+                            <button type="button" class="btn btn-outline-secondary btn-block hand mb-2 text-left" onclick="embarque_picking_opcion_lista()">
+                                <i class="fal fa-list mr-2"></i> Ver listado de productos
+                            </button>
+                            <button type="button" class="btn btn-outline-success btn-block hand mb-2 text-left" onclick="embarque_picking_opcion_excel()">
+                                <i class="fal fa-file-excel mr-2"></i> Exportar Excel
+                            </button>
+                            <button type="button" class="btn btn-outline-info btn-block hand text-left" onclick="embarque_picking_opcion_imprimir()">
+                                <i class="fal fa-print mr-2"></i> Imprimir picking
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="modal_bodega_picking_lista" tabindex="-1" role="dialog" aria-labelledby="modal_bodega_picking_titulo" aria-hidden="true">
+                <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header py-2">
+                            <div>
+                                <h5 class="modal-title negrita mb-0" id="modal_bodega_picking_titulo">Picking</h5>
+                                <small class="text-muted" id="modal_bodega_picking_subtitulo"></small>
+                            </div>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+                        </div>
+                        <div class="modal-body pt-2">
+                            <input type="search" class="form-control sygma-embarque-rpt__search mb-2" id="txtBuscarBodegaPickingLista"
+                                placeholder="Buscar código o producto..."
+                                oninput="F.FiltrarTabla('tblBodegaPickingLista','txtBuscarBodegaPickingLista')">
+                            <div class="table-responsive sygma-embarque-rpt__table-wrap">
+                                <table class="table sygma-embarque-rpt__table mb-0" id="tblBodegaPickingLista">
+                                    <thead>
+                                        <tr>
+                                            <th>CODIGO</th>
+                                            <th>PRODUCTO</th>
+                                            <th class="text-center">UXC</th>
+                                            <th class="text-center">CAJAS</th>
+                                            <th class="text-center">UNIDADES</th>
+                                            <th class="text-center">BONI</th>
+                                            <th class="text-right">IMPORTE</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDataBodegaPickingLista"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div id="sygma_embarque_print_host" class="sygma-embarque-print-host" aria-hidden="true"></div>
             `
         },
@@ -226,7 +288,7 @@ function getView(){
                                     <th>REPARTIDOR</th>
                                     <th class="text-right">IMPORTE</th>
                                     <th class="text-right">DEVOL.</th>
-                                    <th class="sygma-embarque-rpt__col-action oculto-impresion text-center" title="Imprimir"></th>
+                                    <th class="sygma-embarque-rpt__col-action oculto-impresion text-center" title="Acciones"></th>
                                 </tr>
                             </thead>
                             <tbody id="tblDatalEmbarques"></tbody>
@@ -655,6 +717,8 @@ function addListeners(){
 
     document.title = 'Inicio Bodega';
 
+    compras_hideGeneralMenu();
+
     compras_setupSucursalHeader();
 
     const cmbMesHeader = document.getElementById('cmbMesHeader');
@@ -761,8 +825,8 @@ function tbl_embarques(idContainer,status,mes,anio){
                  
                     <td class="sygma-embarque-rpt__col-action oculto-impresion text-center">
                         <button type="button" class="btn btn-outline-info btn-md btn-circle hand shadow sygma-embarques-btn-action"
-                            onclick="embarque_imprimir_productos('${r.CODEMBARQUE}','${F.convertDateNormal(r.FECHA)}')" title="Imprimir ${GlobalRptPicking}">
-                            <i class="fal fa-print"></i>
+                            onclick="embarque_picking_abrir_opciones('${r.CODEMBARQUE}','${F.convertDateNormal(r.FECHA)}')" title="Opciones ${GlobalRptPicking}">
+                            <i class="fal fa-ellipsis-h"></i>
                         </button>
                     </td>
                 
@@ -809,6 +873,148 @@ function tbl_embarques(idContainer,status,mes,anio){
 
 };
 
+function embarque_fetch_picking_bundle(codembarque) {
+    return Promise.all([
+        GF.get_data_embarque_productos(GlobalEmpnit, codembarque),
+        embarque_fetch_resumen_vendedor(codembarque)
+    ]).then(([prodData, resumenRows]) => ({
+        products: prodData.recordset || [],
+        resumenRows: resumenRows || []
+    }));
+}
+
+function embarque_picking_build_product_row_html(r) {
+    return `
+        <tr>
+            <td><span class="sygma-embarque-rpt__cod-main">${r.CODPROD}</span></td>
+            <td><span class="sygma-embarque-rpt__prod-main">${r.DESPROD}</span></td>
+            <td class="text-center">${r.UXC}</td>
+            <td class="text-center">${r.CAJAS}</td>
+            <td class="text-center">${r.UNIDADES}</td>
+            <td class="text-center">${Number(r.BONI || 0)}</td>
+            <td class="text-right sygma-embarque-rpt__importe">${F.setMoneda(r.IMPORTE, 'Q')}</td>
+        </tr>`;
+}
+
+function embarque_picking_totals_from_products(products) {
+    let contador = 0;
+    let varTotal = 0;
+    (products || []).forEach((r) => {
+        contador += 1;
+        varTotal += Number(r.IMPORTE) || 0;
+    });
+    return { contador, varTotal };
+}
+
+function embarque_picking_build_excel_rows(codembarque, fechaLabel, products, resumenRows) {
+    const { contador, varTotal } = embarque_picking_totals_from_products(products);
+    const sheet = [];
+    (products || []).forEach((r) => {
+        sheet.push({
+            CODIGO: r.CODPROD,
+            PRODUCTO: r.DESPROD,
+            UXC: r.UXC,
+            CAJAS: r.CAJAS,
+            UNIDADES: r.UNIDADES,
+            BONI: Number(r.BONI || 0),
+            IMPORTE: Number(r.IMPORTE) || 0
+        });
+    });
+    sheet.push({});
+    sheet.push({ PRODUCTO: 'ITEMS', IMPORTE: contador });
+    sheet.push({ PRODUCTO: 'TOTAL IMPORTE', IMPORTE: varTotal });
+    sheet.push({});
+    sheet.push({ CODIGO: 'VENDEDOR', PRODUCTO: 'PEDIDOS', UXC: 'IMPORTE' });
+    let totalPedidos = 0;
+    let totalResumen = 0;
+    (resumenRows || []).forEach((r) => {
+        totalPedidos += Number(r.CONTEO) || 0;
+        totalResumen += Number(r.IMPORTE) || 0;
+        sheet.push({
+            CODIGO: r.EMPLEADO || '',
+            PRODUCTO: Number(r.CONTEO) || 0,
+            UXC: Number(r.IMPORTE) || 0
+        });
+    });
+    if (!(resumenRows || []).length) {
+        sheet.push({ CODIGO: 'Sin datos de vendedores' });
+    } else {
+        sheet.push({});
+        sheet.push({ CODIGO: 'TOTAL PEDIDOS', PRODUCTO: totalPedidos, UXC: totalResumen });
+    }
+    return sheet;
+}
+
+function embarque_picking_abrir_opciones(embarque, fechaLabel) {
+    const codembarque = embarque;
+    if (!codembarque) return;
+    embarque_picking_ctx_codembarque = codembarque;
+    embarque_picking_ctx_fecha = fechaLabel || '';
+    const titulo = document.getElementById('modal_bodega_picking_opciones_titulo');
+    const subtitulo = document.getElementById('modal_bodega_picking_opciones_sub');
+    const rpt = GlobalRptPicking || 'Picking';
+    if (titulo) titulo.textContent = `${rpt} — ${codembarque}`;
+    if (subtitulo) {
+        subtitulo.textContent = fechaLabel ? `Fecha: ${fechaLabel}` : '';
+    }
+    $('#modal_bodega_picking_opciones').modal('show');
+}
+
+function embarque_picking_opcion_lista() {
+    $('#modal_bodega_picking_opciones').modal('hide');
+    embarque_picking_ver_lista(embarque_picking_ctx_codembarque, embarque_picking_ctx_fecha);
+}
+
+function embarque_picking_opcion_excel() {
+    $('#modal_bodega_picking_opciones').modal('hide');
+    embarque_picking_export_excel(embarque_picking_ctx_codembarque, embarque_picking_ctx_fecha);
+}
+
+function embarque_picking_opcion_imprimir() {
+    $('#modal_bodega_picking_opciones').modal('hide');
+    embarque_imprimir_productos(embarque_picking_ctx_codembarque, embarque_picking_ctx_fecha);
+}
+
+function embarque_picking_ver_lista(embarque, fechaLabel) {
+    const codembarque = embarque;
+    if (!codembarque) return;
+    const tbody = document.getElementById('tblDataBodegaPickingLista');
+    const titulo = document.getElementById('modal_bodega_picking_titulo');
+    const subtitulo = document.getElementById('modal_bodega_picking_subtitulo');
+    const buscar = document.getElementById('txtBuscarBodegaPickingLista');
+    if (!tbody) return;
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-3">${GlobalLoader}</td></tr>`;
+    if (titulo) titulo.textContent = `${GlobalRptPicking || 'Picking'} — ${codembarque}`;
+    if (subtitulo) subtitulo.textContent = fechaLabel ? `Fecha: ${fechaLabel}` : '';
+    if (buscar) buscar.value = '';
+    $('#modal_bodega_picking_lista').modal('show');
+    embarque_fetch_picking_bundle(codembarque)
+        .then(({ products }) => {
+            let strRows = '';
+            products.forEach((r) => { strRows += embarque_picking_build_product_row_html(r); });
+            if (!strRows) strRows = `<tr><td colspan="7" class="text-center text-muted py-2">Sin productos</td></tr>`;
+            tbody.innerHTML = strRows;
+        })
+        .catch(() => {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger py-2">No se pudieron cargar los productos</td></tr>`;
+            F.AvisoError(`No se pudo cargar el listado de ${GlobalRptPicking || 'picking'}`);
+        });
+}
+
+function embarque_picking_export_excel(embarque, fechaLabel) {
+    const codembarque = embarque;
+    if (!codembarque) return;
+    embarque_fetch_picking_bundle(codembarque)
+        .then(({ products, resumenRows }) => {
+            const sheet = embarque_picking_build_excel_rows(codembarque, fechaLabel, products, resumenRows);
+            const safeName = `Picking_${String(codembarque).replace(/[^\w\-]+/g, '_')}`;
+            F.export_json_to_xlsx(sheet, safeName);
+        })
+        .catch(() => {
+            F.AvisoError(`No se pudo exportar ${GlobalRptPicking || 'picking'} a Excel`);
+        });
+}
+
 function embarque_imprimir_productos(embarque, fechaLabel){
     const codembarque = embarque;
     if (!codembarque) return;
@@ -817,28 +1023,11 @@ function embarque_imprimir_productos(embarque, fechaLabel){
     embarque_print_codembarque = codembarque;
     embarque_print_fecha = fechaLabel || '';
     embarque_print_show_loader(`Generando ${GlobalRptPicking}...`);
-    Promise.all([
-        GF.get_data_embarque_productos(GlobalEmpnit, codembarque),
-        embarque_fetch_resumen_vendedor(codembarque)
-    ])
-    .then(([prodData, resumenRows]) => {
-        let contador = 0;
-        let varTotal = 0;
+    embarque_fetch_picking_bundle(codembarque)
+    .then(({ products, resumenRows }) => {
+        const { contador, varTotal } = embarque_picking_totals_from_products(products);
         let strRows = '';
-        (prodData.recordset || []).forEach((r) => {
-            contador += 1;
-            varTotal += Number(r.IMPORTE) || 0;
-            strRows += `
-                <tr>
-                    <td><span class="sygma-embarque-rpt__cod-main">${r.CODPROD}</span></td>
-                    <td><span class="sygma-embarque-rpt__prod-main">${r.DESPROD}</span></td>
-                    <td class="text-center">${r.UXC}</td>
-                    <td class="text-center">${r.CAJAS}</td>
-                    <td class="text-center">${r.UNIDADES}</td>
-                    <td class="text-center">${Number(r.BONI || 0)}</td>
-                    <td class="text-right sygma-embarque-rpt__importe">${F.setMoneda(r.IMPORTE, 'Q')}</td>
-                </tr>`;
-        });
+        products.forEach((r) => { strRows += embarque_picking_build_product_row_html(r); });
         if (!strRows) strRows = `<tr><td colspan="7" class="text-center text-muted py-2">Sin productos</td></tr>`;
         host.innerHTML = embarque_print_sheet_open(GlobalRptPicking) + `
             <div class="table-responsive sygma-embarque-rpt__table-wrap">
