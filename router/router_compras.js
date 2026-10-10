@@ -1,8 +1,7 @@
 const execute = require('./../connection');
 const express = require('express');
 const router = express.Router();
-
-
+const { ensureDocproductosDesc123 } = require('../services/ensureDocproductosDesc123');
 
 router.post("/update_costos_documento", async(req,res)=>{
    
@@ -579,8 +578,18 @@ router.post("/insert_item_compra", async(req,res)=>{
         codprod, desprod, codmedida, cantidad, equivale,
         totalunidades, costo, precio, totalcosto, totalprecio,
         descuento, tipoprod, tipoprecio, lastupdate, por_iva, existencia,
-        bono, exento
+        bono, exento, desc1, desc2, desc3
     } = req.body;
+
+    const vDesc1 = Number(desc1) || 0;
+    const vDesc2 = Number(desc2) || 0;
+    const vDesc3 = Number(desc3) || 0;
+
+    try {
+        await ensureDocproductosDesc123(token);
+    } catch (e) {
+        return execute.QueryToken(res, 'SELECT 0 AS rowsAffected WHERE 1=0', token);
+    }
 
     let qry = `
        INSERT INTO DOCPRODUCTOS (
@@ -590,7 +599,7 @@ router.post("/insert_item_compra", async(req,res)=>{
             TOTALCOSTO, DESCUENTO, TOTALPRECIO, ENTREGADOS_TOTALUNIDADES,
             COSTOANTERIOR, COSTOPROMEDIO, CODBODEGA, NOSERIE, EXENTO,
             OBS, TIPOPROD, TIPOPRECIO, LASTUPDATE, TOTALUNIDADES_DEVUELTAS,
-            POR_IVA, EXISTENCIA, BONO, TOTALBONO
+            POR_IVA, EXISTENCIA, BONO, TOTALBONO, DESC1, DESC2, DESC3
             )
         SELECT
             EMPNIT, ANIO, MES, CODDOC, CORRELATIVO,
@@ -621,7 +630,10 @@ router.post("/insert_item_compra", async(req,res)=>{
             ${por_iva} AS POR_IVA,
             ${existencia} AS EXISTENCIA,
             ${bono} AS BONO,
-            ${Number(bono) * Number(cantidad)} AS TOTALBONO
+            ${Number(bono) * Number(cantidad)} AS TOTALBONO,
+            ${vDesc1} AS DESC1,
+            ${vDesc2} AS DESC2,
+            ${vDesc3} AS DESC3
         FROM DOCUMENTOS
         WHERE EMPNIT='${sucursal}'
             AND CODDOC='${coddoc}'
@@ -630,6 +642,58 @@ router.post("/insert_item_compra", async(req,res)=>{
 
     execute.QueryToken(res,qry,token);
 
+});
+
+router.post("/reporte_compras_detalle", async (req, res) => {
+    const { token, sucursal, mes, anio } = req.body;
+    const vMes = Number(mes);
+    const vAnio = Number(anio);
+    if (!sucursal || !vMes || !vAnio) {
+        return execute.QueryToken(res, 'SELECT 0 AS rowsAffected WHERE 1=0', token);
+    }
+    try {
+        await ensureDocproductosDesc123(token);
+    } catch (e) {
+        return execute.QueryToken(res, 'SELECT 0 AS rowsAffected WHERE 1=0', token);
+    }
+    const qry = `
+        SELECT
+            EMPRESAS.NOMBRE AS SUCURSAL,
+            DOCUMENTOS.FECHA,
+            DOCUMENTOS.CODDOC,
+            DOCUMENTOS.CORRELATIVO,
+            DOCUMENTOS.DOC_NOMCLIE AS PROVEEDOR,
+            ISNULL(DOCUMENTOS.SERIEFAC, '') AS SERIEFAC,
+            ISNULL(DOCUMENTOS.NOFAC, '') AS NOFAC,
+            DOCPRODUCTOS.CODPROD,
+            DOCPRODUCTOS.DESPROD,
+            ISNULL(MARCAS.DESMARCA, '') AS MARCA,
+            DOCPRODUCTOS.CODMEDIDA,
+            DOCPRODUCTOS.CANTIDAD,
+            DOCPRODUCTOS.COSTO,
+            DOCPRODUCTOS.TOTALCOSTO,
+            ISNULL(DOCPRODUCTOS.DESC1, 0) AS DESC1,
+            ISNULL(DOCPRODUCTOS.DESC2, 0) AS DESC2,
+            ISNULL(DOCPRODUCTOS.DESC3, 0) AS DESC3
+        FROM DOCPRODUCTOS
+        INNER JOIN DOCUMENTOS
+            ON DOCPRODUCTOS.EMPNIT = DOCUMENTOS.EMPNIT
+            AND DOCPRODUCTOS.CODDOC = DOCUMENTOS.CODDOC
+            AND DOCPRODUCTOS.CORRELATIVO = DOCUMENTOS.CORRELATIVO
+        INNER JOIN TIPODOCUMENTOS
+            ON DOCUMENTOS.CODDOC = TIPODOCUMENTOS.CODDOC
+            AND DOCUMENTOS.EMPNIT = TIPODOCUMENTOS.EMPNIT
+        LEFT JOIN EMPRESAS ON DOCUMENTOS.EMPNIT = EMPRESAS.EMPNIT
+        LEFT JOIN PRODUCTOS ON DOCPRODUCTOS.CODPROD = PRODUCTOS.CODPROD
+        LEFT JOIN MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA
+        WHERE DOCUMENTOS.EMPNIT = '${sucursal}'
+            AND DOCUMENTOS.MES = ${vMes}
+            AND DOCUMENTOS.ANIO = ${vAnio}
+            AND TIPODOCUMENTOS.TIPODOC = 'COM'
+            AND DOCUMENTOS.STATUS <> 'A'
+        ORDER BY DOCUMENTOS.FECHA, DOCUMENTOS.CODDOC, DOCUMENTOS.CORRELATIVO, DOCPRODUCTOS.ID
+    `;
+    execute.QueryToken(res, qry, token);
 });
 
 router.post("/encabezado_documento", async(req,res)=>{
@@ -934,7 +998,10 @@ function str_qry_docproductos(sucursal,coddoc,correlativo,anio,mes,iva,codbodega
             TOTALUNIDADES_DEVUELTAS,
             POR_IVA,
             EXISTENCIA,
-            BONO
+            BONO,
+            DESC1,
+            DESC2,
+            DESC3
             )
         SELECT 
             '${sucursal}' AS EMPNIT,
@@ -968,7 +1035,10 @@ function str_qry_docproductos(sucursal,coddoc,correlativo,anio,mes,iva,codbodega
             0 AS TOTALUNIDADES_DEVUELTAS,
             ${iva} AS POR_IVA,
             ${r.EXISTENCIA} AS EXISTENCIA,
-            ${r.BONO} AS BONO;
+            ${r.BONO} AS BONO,
+            ${Number(r.DESC1) || 0} AS DESC1,
+            ${Number(r.DESC2) || 0} AS DESC2,
+            ${Number(r.DESC3) || 0} AS DESC3;
         `
 
     })

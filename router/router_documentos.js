@@ -2,6 +2,7 @@ const execute = require('./../connection');
 const express = require('express');
 const router = express.Router();
 const bitacora = require('../services/bitacoraEliminaciones');
+const { ensureDocproductosDesc123 } = require('../services/ensureDocproductosDesc123');
 
 
 
@@ -384,6 +385,12 @@ router.post("/detalle_documento", async(req,res)=>{
    
     const { token, sucursal, coddoc,correlativo} = req.body;
 
+    try {
+        await ensureDocproductosDesc123(token);
+    } catch (e) {
+        return execute.QueryToken(res, 'SELECT 0 AS rowsAffected WHERE 1=0', token);
+    }
+
     let qry = `
         SELECT 
             DOCPRODUCTOS.ID, 
@@ -406,6 +413,9 @@ router.post("/detalle_documento", async(req,res)=>{
             DOCPRODUCTOS.TIPOPROD, 
             DOCPRODUCTOS.TIPOPRECIO, 
             DOCPRODUCTOS.EXISTENCIA,
+            ISNULL(DOCPRODUCTOS.DESC1, 0) AS DESC1,
+            ISNULL(DOCPRODUCTOS.DESC2, 0) AS DESC2,
+            ISNULL(DOCPRODUCTOS.DESC3, 0) AS DESC3,
             DOCUMENTOS.DOC_NOMCLIE AS NOMCLIE,
             DOCUMENTOS.DOC_DIRCLIE AS DIRCLIE,
             ISNULL(DOCUMENTOS.CODEMBARQUE, '') AS CODEMBARQUE,

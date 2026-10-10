@@ -3096,6 +3096,11 @@ body.app-pos2-theme #root .btn.btn-circle {
   box-shadow: 0 4px 10px rgba(15, 23, 42, 0.15);
 }
 
+.compras2-desc-grupo {
+  background: #f8fafc;
+  border-color: #cbd5e1 !important;
+}
+
 .sygma-embarques-fab {
   position: fixed;
   right: 0.65rem;

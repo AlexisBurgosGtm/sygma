@@ -1,45 +1,58 @@
+function pedidos_resetTabPaneStyles(host) {
+    if (!host) return;
+    host.querySelectorAll('.tab-pane').forEach((p) => {
+        p.classList.remove('show', 'active');
+        p.removeAttribute('style');
+    });
+}
+
+function pedidos_bindTabAnimations(host) {
+    if (!host || typeof $ === 'undefined') return;
+    $(host).find('a[data-toggle="tab"]').off('hide.bs.tab show.bs.tab shown.bs.tab');
+}
+
 function getView(){
     let view = {
         body:()=>{
             return `
                 <div class="col-12 p-0">
-                    <div class="tab-content" id="myTabHomeContent">
-                        <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="dias-tab">
+                    <div class="tab-content" id="pedTabHomeContent">
+                        <div class="tab-pane fade show active" id="ped-uno" role="tabpanel" aria-labelledby="dias-tab">
                             ${view.lista_clientes() + view.modal_qr() + view.modal_camara() + view.modal_visita() + view.modal_goles() + view.modal_solicitud_cambio_cliente() + view.modal_buscar_reasignar_cliente() + view.modal_reasignar_dia_visita()}
                         </div> 
-                        <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="clientes-tab">
+                        <div class="tab-pane fade" id="ped-dos" role="tabpanel" aria-labelledby="clientes-tab">
                             ${view.pedido() + view.modal_lista_precios() + view.modal_cantidad() + view.modal_editar_cantidad() + view.modal_ofertas_pedido()}
                         </div>
-                        <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
+                        <div class="tab-pane fade" id="ped-tres" role="tabpanel" aria-labelledby="home-tab">
                             ${view.documento()}
                         </div>
-                        <div class="tab-pane fade" id="cuatro" role="tabpanel" aria-labelledby="clientes-tab">
+                        <div class="tab-pane fade" id="ped-cuatro" role="tabpanel" aria-labelledby="clientes-tab">
                             ${view.modal_lista_documentos()}
                         </div>
-                        <div class="tab-pane fade" id="cinco" role="tabpanel" aria-labelledby="clientes-tab">
+                        <div class="tab-pane fade" id="ped-cinco" role="tabpanel" aria-labelledby="clientes-tab">
                             ${view.lista_clientes_mapa() + view.modal_visita_mapa()}
                         </div>
                     </div>
 
-                    <ul class="nav nav-tabs hidden" id="myTabHome" role="tablist">
+                    <ul class="nav nav-tabs hidden" id="pedTabHome" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active negrita text-success" id="tab-uno" data-toggle="tab" href="#uno" role="tab" aria-controls="profile" aria-selected="false">
+                            <a class="nav-link active negrita text-success" id="ped-tab-uno" data-toggle="tab" href="#ped-uno" role="tab" aria-controls="profile" aria-selected="false">
                                 <i class="fal fa-list"></i></a>Pedido
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link negrita text-danger" id="tab-dos" data-toggle="tab" href="#dos" role="tab" aria-controls="home" aria-selected="true">
+                            <a class="nav-link negrita text-danger" id="ped-tab-dos" data-toggle="tab" href="#ped-dos" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>Precios
                         </li> 
                         <li class="nav-item">
-                            <a class="nav-link negrita text-info" id="tab-tres" data-toggle="tab" href="#tres" role="tab" aria-controls="home" aria-selected="true">
+                            <a class="nav-link negrita text-info" id="ped-tab-tres" data-toggle="tab" href="#ped-tres" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-edit"></i></a>Finalizar
                         </li> 
                         <li class="nav-item">
-                            <a class="nav-link negrita text-info" id="tab-cuatro" data-toggle="tab" href="#cuatro" role="tab" aria-controls="home" aria-selected="true">
+                            <a class="nav-link negrita text-info" id="ped-tab-cuatro" data-toggle="tab" href="#ped-cuatro" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-edit"></i></a>Finalizar
                         </li>    
                         <li class="nav-item">
-                            <a class="nav-link negrita text-info" id="tab-cinco" data-toggle="tab" href="#cinco" role="tab" aria-controls="home" aria-selected="true">
+                            <a class="nav-link negrita text-info" id="ped-tab-cinco" data-toggle="tab" href="#ped-cinco" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-edit"></i></a>Finalizar
                         </li>                           
                     </ul>
@@ -494,7 +507,7 @@ function getView(){
          
                 
                 <button class="btn btn-circle btn-xl btn-secondary btn-bottom-l hand shadow"
-                    onclick="document.getElementById('tab-uno').click()">
+                    onclick="document.getElementById('ped-tab-uno').click()">
                         <i class="fal fa-arrow-left"></i>
                 </button>
 
@@ -646,7 +659,7 @@ function getView(){
 
                                 
                             </div>
-                            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('tab-uno').click()">
+                            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('ped-tab-uno').click()">
                                 <i class="fal fa-arrow-left"></i>
                             </button>
                         </div>
@@ -1092,10 +1105,10 @@ function addListeners(){
     
 
 
-    document.getElementById('tab-uno').click();
-    selected_tab = 'tab_lista';
+    const pedHost = document.getElementById('ventasPanelEmbed') || document.getElementById('root');
+    pedidos_resetTabPaneStyles(pedHost);
+    pedidos_bindTabAnimations(pedHost);
 
-    F.slideAnimationTabs();
     pedidos_bind_modales_detalle();
     pedidos_aplicar_visibilidad_reasignar_cliente();
 
@@ -1167,6 +1180,10 @@ function addListeners(){
    
 
     let btnGuardarFactura = document.getElementById('btnGuardarFactura');
+    if (!btnGuardarFactura) {
+        console.error('[view_pedidos] btnGuardarFactura no encontrado');
+        return;
+    }
     btnGuardarFactura.addEventListener('click',()=>{
 
         if (btnGuardarFactura.disabled) return;
@@ -1213,9 +1230,9 @@ function addListeners(){
         .on('hidden.bs.modal.pedReasignStack', pedidos_modal_reasign_quitar_stack);
 
     let btnMapaClientes = document.getElementById('btnMapaClientes');
-    btnMapaClientes.addEventListener('click',()=>{
+    btnMapaClientes?.addEventListener('click',()=>{
 
-        document.getElementById('tab-cinco').click();
+        document.getElementById('ped-tab-cinco').click();
         selected_tab = 'tab_mapa';
         
         tbl_clientes_mapa('');
@@ -1223,6 +1240,9 @@ function addListeners(){
     });
     document.getElementById('cmbDiaClienteMapa').addEventListener('change',()=>{
         tbl_clientes_mapa('');
+    });
+    document.getElementById('cmbDiaCliente')?.addEventListener('change', () => {
+        tbl_clientes(document.getElementById('txtBuscarClie')?.value || '');
     });
     document.getElementById('btnVenderMapa').addEventListener('click',()=>{
 
@@ -1417,11 +1437,11 @@ function addListeners(){
 function volver_busqueda_clientes() {
     switch (selected_tab) {
         case 'tab_mapa':
-            document.getElementById('tab-cinco').click();
+            document.getElementById('ped-tab-cinco').click();
             break;
         case 'tab_lista':
         default:
-            document.getElementById('tab-uno').click();
+            document.getElementById('ped-tab-uno').click();
             break;
     }
 }
@@ -1500,6 +1520,8 @@ function get_correlativo(coddoc){
 
 
 function listener_teclado(){
+    if (window.__pedidosMousetrapBound) return;
+    window.__pedidosMousetrapBound = true;
     //evitando errores
     Mousetrap.bind('f5', function(e) { e.preventDefault(); });
     Mousetrap.bind('f7', function(e) { e.preventDefault(); });
@@ -1753,11 +1775,11 @@ function listener_vista_cobro(){
 
     document.getElementById('btnPosCobro').addEventListener('click',()=>{
         pedido_pintar_cierre_resumen();
-        document.getElementById('tab-tres').click();
+        document.getElementById('ped-tab-tres').click();
     });
 
     const volverProductosPedido = () => {
-        document.getElementById('tab-dos')?.click();
+        document.getElementById('ped-tab-dos')?.click();
     };
     document.getElementById('btnPosDocumentoAtras')?.addEventListener('click', volverProductosPedido);
     document.getElementById('btnPosDocumentoAtrasLbl')?.addEventListener('click', volverProductosPedido);
@@ -1881,7 +1903,7 @@ function listener_listado_documentos(){
     btnListadoDocumentos.addEventListener('click',()=>{
         //$("#modal_lista_documentos").modal('show');
         
-        document.getElementById('tab-cuatro').click();
+        document.getElementById('ped-tab-cuatro').click();
 
         tbl_lista_documentos('ENV');
 
@@ -1896,12 +1918,66 @@ function listener_listado_documentos(){
 
 };
 
-function initView(){                                                                                                                                             
-   
+function pedidos_show_tab_lista() {
+    const pane = document.getElementById('ped-uno');
+    const link = document.getElementById('ped-tab-uno');
+    document.querySelectorAll('#pedTabHomeContent .tab-pane').forEach((p) => {
+        p.classList.remove('show', 'active');
+    });
+    document.querySelectorAll('#pedTabHome .nav-link').forEach((l) => {
+        l.classList.remove('active');
+        l.setAttribute('aria-selected', 'false');
+    });
+    if (pane) {
+        pane.classList.add('show', 'active');
+    }
+    if (link) {
+        link.classList.add('active');
+        link.setAttribute('aria-selected', 'true');
+    }
+    selected_tab = 'tab_lista';
+}
+
+function pedidos_embed_enter() {
     getView();
     addListeners();
+    pedidos_show_tab_lista();
+    try {
+        tbl_clientes('');
+    } catch (e) {
+        console.error('[view_pedidos] tbl_clientes inicial', e);
+    }
+}
 
-};
+function pedidos_embed_leave() {
+    const host = document.getElementById('ventasPanelEmbed');
+    if (!host) return;
+    try {
+        $(host).find('a[data-toggle="tab"]').off('hide.bs.tab show.bs.tab shown.bs.tab');
+        $(host).find('.modal').modal('hide');
+    } catch (e) { /* bootstrap */ }
+    pedidos_resetTabPaneStyles(host);
+    try {
+        $('.modal-backdrop').remove();
+        $('body').removeClass('modal-open');
+    } catch (e) { /* bootstrap */ }
+    if (typeof Mousetrap !== 'undefined' && typeof Mousetrap.reset === 'function') {
+        Mousetrap.reset();
+    }
+    window.__pedidosMousetrapBound = false;
+    window.__pedidosListenersGen = 0;
+}
+
+window.pedidos_embed_enter = pedidos_embed_enter;
+window.pedidos_embed_leave = pedidos_embed_leave;
+
+function initView(){
+    pedidos_embed_enter();
+}
+
+function destroyView() {
+    pedidos_embed_leave();
+}
 
 
 
@@ -3718,7 +3794,7 @@ function get_datos_cliente(nitclie,nit,nomclie,dirclie,telefono){
     pedido_pintar_cliente(nomclie, nitclie);
 
     selected_tab = 'tab_lista';
-    document.getElementById('tab-dos').click();
+    document.getElementById('ped-tab-dos').click();
     get_tbl_pedido();
     document.getElementById('txtPosCodprod').focus();
 };
@@ -3734,7 +3810,7 @@ function get_datos_cliente_mapa(nitclie,nit,nomclie,dirclie,telefono){
     pedido_pintar_cliente(nomclie, nitclie);
 
     selected_tab = 'tab_mapa';
-    document.getElementById('tab-dos').click();
+    document.getElementById('ped-tab-dos').click();
     get_tbl_pedido();
     document.getElementById('txtPosCodprod').focus();
 };
@@ -4633,7 +4709,7 @@ function fcnNuevoPedido(){
         .then((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
         .catch((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
     
-        document.getElementById('tab-uno').click();
+        document.getElementById('ped-tab-uno').click();
 
 };
 

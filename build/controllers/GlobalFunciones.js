@@ -1481,11 +1481,13 @@ let GF = {
                     if(data.toString()=="error"){
                         reject();
                     }else{
-                        if(Number(data.rowsAffected[0])>0){
-                            resolve(data);             
-                        }else{
+                        const rs = data.recordset || [];
+                        const affected = Number(data.rowsAffected?.[0]) || 0;
+                        if (rs.length > 0 || affected > 0) {
+                            resolve(data);
+                        } else {
                             reject();
-                        } 
+                        }
                     }       
                 }else{
                     reject();

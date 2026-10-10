@@ -53,6 +53,7 @@
         objetivos_cobertura_municipios: 'COBERTURA MUNICIPIOS',
         report_ventas_vendedor: 'VENTAS VENDEDOR',
         report_ventas_marcas: 'VENTAS POR MARCAS',
+        reporte_compras: 'REPORTE DE COMPRAS',
         calculos_cargas_mes: 'CARGAS DEL MES',
         documentos: 'DOCUMENTOS',
         boletin: 'BOLETIN INFORMATIVO',

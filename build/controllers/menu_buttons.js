@@ -202,6 +202,11 @@
                                             <span class="nav-link-text" data-i18n="nav.theme_settings_layout_options">VENTAS POR MARCAS</span>
                                         </a>
                                     </li>
+                                    <li>
+                                        <a title="Reporte de compras" data-filter-tags="reportes compras docproductos" href="#" onclick="Menu.reporte_compras()">
+                                            <span class="nav-link-text">REPORTE DE COMPRAS</span>
+                                        </a>
+                                    </li>
                                 </ul>
                             </li>
                             <li>

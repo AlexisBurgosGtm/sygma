@@ -8,6 +8,7 @@ var compras2_syncTimer = null;
 var compras2_modoEdicion = false;
 var compras2_proveedoresCache = [];
 var compras2_costosPreviewCache = [];
+var compras2_detalle_by_id = {};
 
 function compras2_reset_sesion() {
     compras2_docActivo = null;
@@ -400,7 +401,46 @@ function compras2_iniciar_documento_nuevo() {
         });
 }
 
-function compras2_insert_item_api(coddoc, correlativo, codprod, desprod, codmedida, cantidad, equivale, costo, precio, descuento, tipoprod, tipoprecio, existencia, bono, exento) {
+function compras2_norm_line_desc(r) {
+    if (!r || typeof r !== 'object') return r;
+    r.DESC1 = Number(r.DESC1) || 0;
+    r.DESC2 = Number(r.DESC2) || 0;
+    r.DESC3 = Number(r.DESC3) || 0;
+    return r;
+}
+
+function compras2_set_desc_inputs(suffix, r) {
+    const s = suffix || '';
+    const row = compras2_norm_line_desc(r || {});
+    ['1', '2', '3'].forEach((n) => {
+        const el = document.getElementById('txtMCDesc' + n + s);
+        if (el) el.value = row['DESC' + n];
+    });
+}
+
+function compras2_read_desc_inputs(suffix) {
+    const s = suffix || '';
+    return {
+        desc1: Number(document.getElementById('txtMCDesc1' + s)?.value || 0),
+        desc2: Number(document.getElementById('txtMCDesc2' + s)?.value || 0),
+        desc3: Number(document.getElementById('txtMCDesc3' + s)?.value || 0)
+    };
+}
+
+function compras2_reset_desc_inputs(suffix) {
+    const s = suffix || '';
+    ['1', '2', '3'].forEach((n) => {
+        const el = document.getElementById('txtMCDesc' + n + s);
+        if (el) el.value = '0';
+    });
+}
+
+function compras2_set_precio_actual_display(inputId, precio) {
+    const el = document.getElementById(inputId);
+    if (el) el.value = F.setMoneda(Number(precio) || 0, GlobalSignoMoneda || 'Q');
+}
+
+function compras2_insert_item_api(coddoc, correlativo, codprod, desprod, codmedida, cantidad, equivale, costo, precio, descuento, tipoprod, tipoprecio, existencia, bono, exento, desc1, desc2, desc3) {
     const totalunidades = Number(cantidad) * Number(equivale);
     const totalcosto = Number(costo) * Number(cantidad);
     const totalprecio = Number(precio) * Number(cantidad);
@@ -427,7 +467,10 @@ function compras2_insert_item_api(coddoc, correlativo, codprod, desprod, codmedi
         por_iva: GlobalConfigIVA,
         existencia: existencia,
         bono: bono,
-        exento: exento
+        exento: exento,
+        desc1: Number(desc1) || 0,
+        desc2: Number(desc2) || 0,
+        desc3: Number(desc3) || 0
     }).then((response) => {
         if (response.data === 'error' || Number(response.data?.rowsAffected?.[0] || 0) === 0) {
             throw new Error('item');
@@ -455,7 +498,10 @@ function compras2_get_tbl_pedido() {
     GF.get_data_detalle_documento(GlobalEmpnit, doc.coddoc, doc.correlativo)
         .then((data) => {
             const rows = data.recordset || [];
+            compras2_detalle_by_id = {};
             const html = rows.map((r) => {
+                compras2_detalle_by_id[r.ID] = compras2_norm_line_desc(r);
+                r = compras2_detalle_by_id[r.ID];
                 varTotalItems += 1;
                 varTotalVenta += Number(r.TOTALPRECIO);
                 varTotalCosto += Number(r.TOTALCOSTO);
@@ -478,7 +524,7 @@ function compras2_get_tbl_pedido() {
                 <td class="text-right text-danger">${descTxt}</td>
                 <td class="text-right sygma-embarque-rpt__importe">${F.setMoneda(imp, 'Q')}</td>
                 <td class="text-center text-nowrap sygma-embarque-rpt__col-action">
-                    <button type="button" class="btn btn-sm btn-circle btn-info shadow hand mr-1" title="Editar" onclick="compras2_edit_item_pedido('${r.ID}','${r.CODPROD}','${F.limpiarTexto(r.DESPROD)}','${r.CODMEDIDA}','${r.EQUIVALE}','${r.CANTIDAD}','${r.COSTO}','${r.PRECIO}','${r.TIPOPROD}','${r.EXENTO}','${r.EXISTENCIA || 0}','${r.BONO || 0}','${r.DESCUENTO}')"><i class="fal fa-edit"></i></button>
+                    <button type="button" class="btn btn-sm btn-circle btn-info shadow hand mr-1" title="Editar" onclick="compras2_edit_item_pedido('${r.ID}')"><i class="fal fa-edit"></i></button>
                     <button type="button" class="btn btn-sm btn-circle btn-danger shadow hand" title="Quitar" onclick="compras2_delete_item_pedido('${r.ID}')"><i class="fal fa-trash"></i></button>
                 </td>
             </tr>`;
@@ -608,29 +654,35 @@ function compras2_get_producto(codprod, desprod, desprod2, codmedida, equivale, 
     compras2_llenar_medida_container('container_precio', codmedida, equivale);
     document.getElementById('txtMCCantidad').value = '';
     document.getElementById('txtMCPrecio').value = precio;
+    compras2_set_precio_actual_display('txtMCPrecioActual', precio);
+    compras2_reset_desc_inputs('');
     compras2_CalcularTotalPrecio();
     document.getElementById('txtPosCodprod').value = '';
     document.getElementById('txtMCCantidad').focus();
 }
 
-function compras2_edit_item_pedido(id, codprod, desprod, codmedida, equivale, cantidad, costo, precio, tipoprod, exento, existencia, bono, descuento) {
+function compras2_edit_item_pedido(id) {
+    const r = compras2_detalle_by_id[id];
+    if (!r) return;
     $('#modal_editar_cantidad').modal('show');
     Selected_id = id;
-    Selected_codprod = codprod;
-    Selected_desprod = desprod;
-    Selected_codmedida = codmedida;
-    Selected_equivale = Number(equivale);
-    Selected_costo = Number(costo);
-    Selected_precio = Number(precio);
-    Selected_tipoprod = tipoprod;
-    Selected_exento = Number(exento);
-    Selected_existencia = Number(existencia);
-    Selected_bono = Number(bono);
-    Selected_descuento = Number(descuento) || 0;
-    document.getElementById('lbCantidadDesprodE').innerText = desprod;
-    compras2_llenar_medida_container('container_precio_editar', codmedida, equivale);
-    document.getElementById('txtMCCantidadE').value = cantidad;
-    document.getElementById('txtMCPrecioE').value = precio;
+    Selected_codprod = r.CODPROD;
+    Selected_desprod = r.DESPROD;
+    Selected_codmedida = r.CODMEDIDA;
+    Selected_equivale = Number(r.EQUIVALE);
+    Selected_costo = Number(r.COSTO);
+    Selected_precio = Number(r.PRECIO);
+    Selected_tipoprod = r.TIPOPROD;
+    Selected_exento = Number(r.EXENTO);
+    Selected_existencia = Number(r.EXISTENCIA);
+    Selected_bono = Number(r.BONO);
+    Selected_descuento = Number(r.DESCUENTO) || 0;
+    document.getElementById('lbCantidadDesprodE').innerText = r.DESPROD;
+    compras2_llenar_medida_container('container_precio_editar', r.CODMEDIDA, r.EQUIVALE);
+    document.getElementById('txtMCCantidadE').value = r.CANTIDAD;
+    document.getElementById('txtMCPrecioE').value = r.PRECIO;
+    compras2_set_precio_actual_display('txtMCPrecioActualE', r.PRECIO);
+    compras2_set_desc_inputs('E', r);
     compras2_CalcularTotalPrecioEditar();
     document.getElementById('txtMCCantidadE').focus();
 }
@@ -1351,6 +1403,7 @@ function compras2_setup_ingreso_listeners() {
         const cantidad = Number(document.getElementById('txtMCCantidad').value || 1);
         const preciounitario = Number(document.getElementById('txtMCPrecio').value || 0);
         const descuento = 0;
+        const { desc1, desc2, desc3 } = compras2_read_desc_inputs('');
         if (preciounitario === 0) { F.AvisoError('Precio inválido'); return; }
         if (preciounitario < Number(Selected_costo)) { F.AvisoError('Precio menor al costo'); return; }
         const tipoprecio = data_empresa_config?.TIPO_PRECIO || '';
@@ -1361,7 +1414,7 @@ function compras2_setup_ingreso_listeners() {
 
         compras2_insert_item_api(doc.coddoc, doc.correlativo, Selected_codprod, Selected_desprod, Selected_codmedida,
             cantidad, Selected_equivale, Selected_costo, preciounitario, descuento, Selected_tipoprod, tipoprecio,
-            Selected_existencia, Selected_bono, Selected_exento)
+            Selected_existencia, Selected_bono, Selected_exento, desc1, desc2, desc3)
             .then(() => {
                 $('#modal_cantidad').modal('hide');
                 F.showToast('Producto agregado ' + Selected_desprod);
@@ -1388,6 +1441,7 @@ function compras2_setup_ingreso_listeners() {
         const cantidad = Number(document.getElementById('txtMCCantidadE').value || 1);
         const preciounitario = Number(document.getElementById('txtMCPrecioE').value || 0);
         const descuento = Number(typeof Selected_descuento !== 'undefined' ? Selected_descuento : 0) || 0;
+        const { desc1, desc2, desc3 } = compras2_read_desc_inputs('E');
         if (preciounitario === 0) { F.AvisoError('Precio inválido'); return; }
         if (preciounitario < Number(Selected_costo)) { F.AvisoError('Precio menor al costo'); return; }
         const tipoprecio = data_empresa_config?.TIPO_PRECIO || '';
@@ -1399,7 +1453,7 @@ function compras2_setup_ingreso_listeners() {
         GF.get_documento_eliminar_item(Selected_id)
             .then(() => compras2_insert_item_api(doc.coddoc, doc.correlativo, Selected_codprod, Selected_desprod,
                 Selected_codmedida, cantidad, Selected_equivale, Selected_costo, preciounitario, descuento,
-                Selected_tipoprod, tipoprecio, Selected_existencia, Selected_bono, Selected_exento))
+                Selected_tipoprod, tipoprecio, Selected_existencia, Selected_bono, Selected_exento, desc1, desc2, desc3))
             .then(() => {
                 $('#modal_editar_cantidad').modal('hide');
                 compras2_get_tbl_pedido();

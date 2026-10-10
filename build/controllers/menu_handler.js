@@ -634,6 +634,17 @@
         }
 
     },
+    reporte_compras:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/compras/view_reporte_compras.js','root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        }
+    },
     calculos_cargas_mes:()=>{
         if(Menu.verify()==true){
             Menu.salidaMenu();

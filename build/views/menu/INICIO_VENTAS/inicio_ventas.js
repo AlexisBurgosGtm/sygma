@@ -1,5 +1,68 @@
 var ventas_currentPane = 'uno';
 var ventas_embedDestroy = null;
+/** Shell #myTabHomeContent / #myTabHome fuera del DOM mientras hay vista embebida (evita IDs duplicados con view_pedidos). */
+var ventas_shellTabsDetached = null;
+
+function ventas_detachShellTabs() {
+    if (ventas_shellTabsDetached) return;
+    const bag = {};
+    const content = document.getElementById('myTabHomeContent');
+    const nav = document.getElementById('myTabHome');
+    if (content?.parentNode) {
+        bag.contentPh = document.createComment('ventas-shell-tabs-content');
+        content.parentNode.insertBefore(bag.contentPh, content);
+        content.remove();
+        bag.content = content;
+    }
+    if (nav?.parentNode) {
+        bag.navPh = document.createComment('ventas-shell-tabs-nav');
+        nav.parentNode.insertBefore(bag.navPh, nav);
+        nav.remove();
+        bag.nav = nav;
+    }
+    if (bag.content || bag.nav) ventas_shellTabsDetached = bag;
+}
+
+function ventas_reattachShellTabs() {
+    if (!ventas_shellTabsDetached) return;
+    const bag = ventas_shellTabsDetached;
+    if (bag.content && bag.contentPh?.parentNode) {
+        bag.contentPh.parentNode.insertBefore(bag.content, bag.contentPh);
+        bag.contentPh.remove();
+    }
+    if (bag.nav && bag.navPh?.parentNode) {
+        bag.navPh.parentNode.insertBefore(bag.nav, bag.navPh);
+        bag.navPh.remove();
+    }
+    ventas_shellTabsDetached = null;
+}
+
+var ventas_embedDomScopeRestore = null;
+
+function ventas_mountEmbedDomScope(embedRoot) {
+    ventas_unmountEmbedDomScope();
+    if (!embedRoot) return;
+    const origGetElementById = document.getElementById.bind(document);
+    ventas_embedDomScopeRestore = () => {
+        document.getElementById = origGetElementById;
+        ventas_embedDomScopeRestore = null;
+    };
+    document.getElementById = function (id) {
+        if (id && embedRoot.isConnected) {
+            try {
+                const scoped = embedRoot.querySelector('#' + CSS.escape(String(id)));
+                if (scoped) return scoped;
+            } catch (e) { /* id inválido */ }
+        }
+        return origGetElementById(id);
+    };
+}
+
+function ventas_unmountEmbedDomScope() {
+    if (typeof ventas_embedDomScopeRestore === 'function') {
+        ventas_embedDomScopeRestore();
+    }
+}
 
 var VENTAS_EMBED_BASE = '../views/menu/INICIO_VENTAS/';
 var VENTAS_EMBED_SCRIPTS = {
@@ -8,6 +71,67 @@ var VENTAS_EMBED_SCRIPTS = {
     btnMenuCenso: VENTAS_EMBED_BASE + 'view_censo.js',
     btnMenuConcursos: VENTAS_EMBED_BASE + 'view_concursos_vendedor.js',
 };
+
+function ventas_ensurePedidosScript() {
+    if (typeof window.pedidos_embed_enter === 'function') {
+        return Promise.resolve();
+    }
+    const url = VENTAS_EMBED_SCRIPTS.btnMenuNuevoPedido;
+    const existing = document.querySelector('script[data-ventas-pedidos-core]');
+    if (existing) {
+        return new Promise((resolve, reject) => {
+            if (typeof window.pedidos_embed_enter === 'function') {
+                resolve();
+                return;
+            }
+            existing.addEventListener('load', () => resolve());
+            existing.addEventListener('error', () => reject(new Error('pedidos script')));
+        });
+    }
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = url + (url.includes('?') ? '&' : '?') + '_vpc=' + Date.now();
+        script.setAttribute('data-ventas-pedidos-core', 'true');
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('No se pudo cargar pedidos'));
+        document.body.appendChild(script);
+    });
+}
+
+function ventas_runEmbedInit(cardId, embedRoot, coreInit, coreDestroy) {
+    const savedRoot = root;
+    ventas_mountEmbedDomScope(embedRoot);
+    root = embedRoot;
+    try {
+        if (cardId === 'btnMenuNuevoPedido' && typeof window.pedidos_embed_enter === 'function') {
+            window.pedidos_embed_enter();
+            ventas_embedDestroy = typeof window.pedidos_embed_leave === 'function'
+                ? window.pedidos_embed_leave
+                : null;
+        } else {
+            const embedInit = window.initView;
+            const embedDestroyCand = window.destroyView;
+            if (typeof embedInit === 'function' && embedInit !== coreInit) {
+                embedInit();
+            } else if (typeof embedInit === 'function') {
+                embedInit();
+            }
+            ventas_embedDestroy = (typeof embedDestroyCand === 'function' && embedDestroyCand !== coreDestroy)
+                ? embedDestroyCand
+                : null;
+        }
+    } catch (err) {
+        ventas_unmountEmbedDomScope();
+        console.error('[ventas_runEmbedInit]', err);
+        throw err;
+    }
+    root = savedRoot;
+    if (window._ventasCore) {
+        window.initView = coreInit;
+        window.destroyView = coreDestroy;
+    }
+    ventas_rewireEmbedActions(embedRoot);
+}
 
 function ventas_getMes() {
     return document.getElementById('cmbMesHeader')?.value || F.get_mes_curso();
@@ -110,13 +234,24 @@ function ventas_teardownEmbed() {
     if (ventas_embedDestroy) {
         try { ventas_embedDestroy(); } catch (e) { /* vista embebida sin teardown */ }
         ventas_embedDestroy = null;
+    } else if (typeof window.pedidos_embed_leave === 'function') {
+        try { window.pedidos_embed_leave(); } catch (e) { /* pedidos leave */ }
     }
+    ventas_unmountEmbedDomScope();
     document.querySelectorAll('script[data-ventas-embed]').forEach((s) => s.remove());
+    /* data-ventas-pedidos-core permanece cargado una sola vez */
     const embed = document.getElementById('ventasPanelEmbed');
     if (embed) {
         embed.classList.add('d-none');
         embed.innerHTML = '';
     }
+    if (typeof $ !== 'undefined') {
+        try {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+        } catch (e) { /* bootstrap no disponible */ }
+    }
+    ventas_reattachShellTabs();
     document.getElementById('myTabHomeContent')?.classList.remove('d-none');
     if (window._ventasCore) {
         window.initView = window._ventasCore.initView;
@@ -135,44 +270,35 @@ function ventas_rewireEmbedActions(container) {
 function ventas_loadEmbed(scriptUrl, cardId) {
     ventas_closeSidebarMobile();
     ventas_teardownEmbed();
-    document.getElementById('myTabHomeContent')?.classList.add('d-none');
+    ventas_detachShellTabs();
     ventas_setActiveCard(cardId || null);
     const embed = document.getElementById('ventasPanelEmbed');
     embed.classList.remove('d-none');
     embed.innerHTML = GlobalLoader;
 
+    const coreInit = window._ventasCore?.initView;
+    const coreDestroy = window._ventasCore?.destroyView;
+    const embedRoot = embed;
+
     return new Promise((resolve, reject) => {
+        const boot = () => {
+            try {
+                ventas_runEmbedInit(cardId, embedRoot, coreInit, coreDestroy);
+                resolve();
+            } catch (err) {
+                reject(err);
+            }
+        };
+        if (cardId === 'btnMenuNuevoPedido') {
+            ventas_ensurePedidosScript().then(boot).catch(reject);
+            return;
+        }
         const script = document.createElement('script');
         script.src = scriptUrl + (scriptUrl.includes('?') ? '&' : '?') + '_ve=' + Date.now();
         script.setAttribute('data-ventas-embed', 'true');
-        script.onload = () => {
-            const embedRoot = embed;
-            const savedRoot = root;
-            const coreInit = window._ventasCore?.initView;
-            const coreDestroy = window._ventasCore?.destroyView;
-            const embedInit = window.initView;
-            const embedDestroyCand = window.destroyView;
-
-            root = embedRoot;
-            if (typeof embedInit === 'function' && embedInit !== coreInit) {
-                embedInit();
-            } else if (typeof embedInit === 'function') {
-                embedInit();
-            }
-            // Nunca usar destroyView del shell: vistas sin destroyView propio dejarían el padre roto
-            ventas_embedDestroy = (typeof embedDestroyCand === 'function' && embedDestroyCand !== coreDestroy)
-                ? embedDestroyCand
-                : null;
-            root = savedRoot;
-            if (window._ventasCore) {
-                window.initView = coreInit;
-                window.destroyView = coreDestroy;
-            }
-            ventas_rewireEmbedActions(embedRoot);
-            resolve();
-        };
+        script.onload = boot;
         script.onerror = () => reject(new Error('No se pudo cargar: ' + scriptUrl));
-        document.getElementById('root').appendChild(script);
+        document.body.appendChild(script);
     });
 }
 

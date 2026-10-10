@@ -70,7 +70,28 @@ function compras2_tpl_modals() {
                             <label class="negrita text-secondary">Costo ${sm}</label>
                             <input type="number" min="0" step="any" class="form-control negrita text-info border-base" id="txtMCPrecio">
                         </div>
-                        <div class="form-group mb-0 pos2-modal-cantidad__subtotal">
+                        <div class="form-group mb-0">
+                            <label class="negrita text-secondary">Precio actual ${sm}</label>
+                            <input type="text" class="form-control negrita border-base bg-light" id="txtMCPrecioActual" disabled>
+                        </div>
+                        <div class="compras2-desc-grupo border rounded p-2 mt-1 mb-0">
+                            <div class="small text-muted negrita mb-2">Descuentos de línea</div>
+                            <div class="row no-gutters">
+                                <div class="col-4 pr-1">
+                                    <label class="small text-secondary mb-0">Descuento 1</label>
+                                    <input type="number" min="0" step="any" class="form-control form-control-sm negrita border-base" id="txtMCDesc1" value="0">
+                                </div>
+                                <div class="col-4 px-1">
+                                    <label class="small text-secondary mb-0">Descuento 2</label>
+                                    <input type="number" min="0" step="any" class="form-control form-control-sm negrita border-base" id="txtMCDesc2" value="0">
+                                </div>
+                                <div class="col-4 pl-1">
+                                    <label class="small text-secondary mb-0">Descuento 3</label>
+                                    <input type="number" min="0" step="any" class="form-control form-control-sm negrita border-base" id="txtMCDesc3" value="0">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mb-0 pos2-modal-cantidad__subtotal mt-2">
                             <label class="negrita text-secondary">Subtotal ${sm}</label>
                             <input type="number" class="form-control negrita text-danger border-base" id="txtMCTotalPrecio" disabled>
                         </div>
@@ -110,7 +131,28 @@ function compras2_tpl_modals() {
                             <label class="negrita text-secondary">Costo ${sm}</label>
                             <input type="number" min="0" step="any" class="form-control negrita border-base" id="txtMCPrecioE">
                         </div>
-                        <div class="form-group mb-0 pos2-modal-cantidad__subtotal">
+                        <div class="form-group mb-0">
+                            <label class="negrita text-secondary">Precio actual ${sm}</label>
+                            <input type="text" class="form-control negrita border-base bg-light" id="txtMCPrecioActualE" disabled>
+                        </div>
+                        <div class="compras2-desc-grupo border rounded p-2 mt-1 mb-0">
+                            <div class="small text-muted negrita mb-2">Descuentos de línea</div>
+                            <div class="row no-gutters">
+                                <div class="col-4 pr-1">
+                                    <label class="small text-secondary mb-0">Descuento 1</label>
+                                    <input type="number" min="0" step="any" class="form-control form-control-sm negrita border-base" id="txtMCDesc1E" value="0">
+                                </div>
+                                <div class="col-4 px-1">
+                                    <label class="small text-secondary mb-0">Descuento 2</label>
+                                    <input type="number" min="0" step="any" class="form-control form-control-sm negrita border-base" id="txtMCDesc2E" value="0">
+                                </div>
+                                <div class="col-4 pl-1">
+                                    <label class="small text-secondary mb-0">Descuento 3</label>
+                                    <input type="number" min="0" step="any" class="form-control form-control-sm negrita border-base" id="txtMCDesc3E" value="0">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mb-0 pos2-modal-cantidad__subtotal mt-2">
                             <label class="negrita text-secondary">Subtotal ${sm}</label>
                             <input type="number" class="form-control negrita border-base" id="txtMCTotalPrecioE" disabled>
                         </div>
