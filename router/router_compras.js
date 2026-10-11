@@ -648,7 +648,9 @@ router.post("/reporte_compras_detalle", async (req, res) => {
     const { token, sucursal, mes, anio } = req.body;
     const vMes = Number(mes);
     const vAnio = Number(anio);
-    if (!sucursal || !vMes || !vAnio) {
+    const sucNorm = String(sucursal || '').trim().toUpperCase();
+    const todasSedes = sucNorm === '%' || sucNorm === 'TODAS';
+    if ((!sucursal && !todasSedes) || !vMes || !vAnio) {
         return execute.QueryToken(res, 'SELECT 0 AS rowsAffected WHERE 1=0', token);
     }
     try {
@@ -656,6 +658,9 @@ router.post("/reporte_compras_detalle", async (req, res) => {
     } catch (e) {
         return execute.QueryToken(res, 'SELECT 0 AS rowsAffected WHERE 1=0', token);
     }
+    const empFilter = todasSedes
+        ? `(DOCUMENTOS.EMPNIT LIKE '%')`
+        : `(DOCUMENTOS.EMPNIT = '${String(sucursal).replace(/'/g, "''")}')`;
     const qry = `
         SELECT
             EMPRESAS.NOMBRE AS SUCURSAL,
@@ -686,12 +691,12 @@ router.post("/reporte_compras_detalle", async (req, res) => {
         LEFT JOIN EMPRESAS ON DOCUMENTOS.EMPNIT = EMPRESAS.EMPNIT
         LEFT JOIN PRODUCTOS ON DOCPRODUCTOS.CODPROD = PRODUCTOS.CODPROD
         LEFT JOIN MARCAS ON PRODUCTOS.CODMARCA = MARCAS.CODMARCA
-        WHERE DOCUMENTOS.EMPNIT = '${sucursal}'
+        WHERE ${empFilter}
             AND DOCUMENTOS.MES = ${vMes}
             AND DOCUMENTOS.ANIO = ${vAnio}
             AND TIPODOCUMENTOS.TIPODOC = 'COM'
             AND DOCUMENTOS.STATUS <> 'A'
-        ORDER BY DOCUMENTOS.FECHA, DOCUMENTOS.CODDOC, DOCUMENTOS.CORRELATIVO, DOCPRODUCTOS.ID
+        ORDER BY DOCUMENTOS.EMPNIT, DOCUMENTOS.FECHA, DOCUMENTOS.CODDOC, DOCUMENTOS.CORRELATIVO, DOCPRODUCTOS.ID
     `;
     execute.QueryToken(res, qry, token);
 });
