@@ -3,33 +3,33 @@ function procter_getCodEmp() {
     return String(GlobalCodUsuario || document.getElementById('cmbEmpleado')?.value || '0');
 }
 
-function getView(){
+function getView(mountEl){
     let view = {
         body:()=>{
             return `
                 <div class="col-12 p-0 ventas-procter-panel">
-                    <div class="tab-content" id="myTabHomeContent">
-                        <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
+                    <div class="tab-content" id="procterTabHomeContent">
+                        <div class="tab-pane fade show active" id="procter-uno" role="tabpanel" aria-labelledby="receta-tab">
                             ${view.vista_parametros_dias()}
                         </div>
-                        <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
+                        <div class="tab-pane fade" id="procter-dos" role="tabpanel" aria-labelledby="home-tab">
                             ${view.vista_listado()}
                         </div>
-                        <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
+                        <div class="tab-pane fade" id="procter-tres" role="tabpanel" aria-labelledby="home-tab">
                         </div>    
                     </div>
 
-                    <ul class="nav nav-tabs hidden" id="myTabHome" role="tablist">
+                    <ul class="nav nav-tabs hidden" id="procterTabHome" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active negrita text-success" id="tab-uno" data-toggle="tab" href="#uno" role="tab" aria-controls="profile" aria-selected="false">
+                            <a class="nav-link active negrita text-success" id="procter-tab-uno" data-toggle="tab" href="#procter-uno" role="tab" aria-controls="profile" aria-selected="false">
                                 <i class="fal fa-list"></i></a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link negrita text-danger" id="tab-dos" data-toggle="tab" href="#dos" role="tab" aria-controls="home" aria-selected="true">
+                            <a class="nav-link negrita text-danger" id="procter-tab-dos" data-toggle="tab" href="#procter-dos" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
                         </li>  
                         <li class="nav-item">
-                            <a class="nav-link negrita text-danger" id="tab-tres" data-toggle="tab" href="#tres" role="tab" aria-controls="home" aria-selected="true">
+                            <a class="nav-link negrita text-danger" id="procter-tab-tres" data-toggle="tab" href="#procter-tres" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
                         </li>         
                     </ul>
@@ -233,12 +233,21 @@ function getView(){
         }
     }
 
-    root.innerHTML = view.body();
+    const target = mountEl || document.getElementById('ventasPanelEmbed') || (typeof root !== 'undefined' ? root : null);
+    if (!target) {
+        console.error('[view_avance_procter] getView: contenedor no encontrado');
+        return;
+    }
+    target.innerHTML = view.body();
 
 };
 
 function addListeners(){
 
+        const procterHost = document.getElementById('ventasPanelEmbed');
+        if (procterHost && typeof $ !== 'undefined') {
+            $(procterHost).find('a[data-toggle="tab"]').off('hide.bs.tab show.bs.tab shown.bs.tab');
+        }
         F.slideAnimationTabs();
 
         document.getElementById('cmbDiasLaborales').innerHTML = F.get_combo_dias_30();
@@ -258,7 +267,7 @@ function addListeners(){
         let btnAceptarParametros = document.getElementById('btnAceptarParametros');
         btnAceptarParametros.addEventListener('click',()=>{
 
-            document.getElementById('tab-dos').click();
+            document.getElementById('procter-tab-dos').click();
 
             guardar_parametros();
 
@@ -287,7 +296,7 @@ function addListeners(){
         procter_finishLoad();
 
         window.proveedor_embedRefresh = () => {
-            if (document.getElementById('tab-dos')?.classList.contains('active')) {
+            if (document.getElementById('procter-tab-dos')?.classList.contains('active')) {
                 tbl_rpt_logro();
                 rpt_cobertura();
             }
@@ -327,15 +336,19 @@ function guardar_parametros(){
 };
 
 
-function initView(){
-
-    getView();
+function initView(mountEl){
+    getView(mountEl || document.getElementById('ventasPanelEmbed'));
     addListeners();
-
 };
 
 function destroyView(){
-    // Vista embebida: no destruir el shell de ventas
+    window.proveedor_embedRefresh = null;
+    const procterHost = document.getElementById('ventasPanelEmbed');
+    if (procterHost && typeof $ !== 'undefined') {
+        try {
+            $(procterHost).find('a[data-toggle="tab"]').off('hide.bs.tab show.bs.tab shown.bs.tab');
+        } catch (e) { /* noop */ }
+    }
 };
 
 function calcular_porcentaje(){

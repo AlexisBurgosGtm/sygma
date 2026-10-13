@@ -1,3 +1,71 @@
+function pedidos_el(id) {
+    const host = window.__pedidosEmbedHost || document.getElementById('ventasPanelEmbed');
+    if (host) {
+        if (String(id) === host.id) return host;
+        try {
+            const scoped = host.querySelector('#' + CSS.escape(String(id)));
+            if (scoped) return scoped;
+        } catch (e) { /* id inválido */ }
+        return null;
+    }
+    return document.getElementById(id);
+}
+window.pedidos_el = pedidos_el;
+
+function pedidos_host() {
+    return window.__pedidosEmbedHost || document.getElementById('ventasPanelEmbed');
+}
+
+/** Quita modales duplicados (Bootstrap los mueve a body) y vacía el panel embebido. */
+function pedidos_purge_dom() {
+    const host = pedidos_host();
+    try {
+        if (typeof $ !== 'undefined') {
+            if (host) {
+                $(host).find('.modal').modal('hide');
+                $(host).find('a[data-toggle="tab"]').off('hide.bs.tab show.bs.tab shown.bs.tab');
+            }
+            document.querySelectorAll('.ped-modal-detalle').forEach((modal) => {
+                try { $(modal).modal('hide'); } catch (e) { /* noop */ }
+            });
+        }
+    } catch (e) { /* bootstrap */ }
+    document.querySelectorAll('.ped-modal-detalle').forEach((el) => el.remove());
+    if (host) {
+        pedidos_resetTabPaneStyles(host);
+        host.innerHTML = '';
+    }
+    try {
+        if (typeof $ !== 'undefined') {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open ped-modal-blur-open');
+        }
+    } catch (e) { /* bootstrap */ }
+}
+
+function pedidos_embed_reset_state() {
+    selected_tab = '';
+    pedidos_reasign_cliente_sel = null;
+    pedido_boni_ctx = null;
+    Selected_codoferta = 0;
+    pedido_reabrir_ofertas = false;
+    pedido_reabrir_lista_precios = false;
+    pedido_ofertas_rows = [];
+    pedido_ofertas_catalogo = [];
+    pedido_oferta_venta_cache = {};
+    pedido_oferta_exist_cache = {};
+    pedido_oferta_exist_pending = {};
+    pedido_oferta_boni_cache = {};
+    pedido_oferta_sesiones = {};
+    pedido_oferta_wizard = {
+        step: 'lista',
+        oferta: null,
+        productos: [],
+        productosSet: {},
+        boni: []
+    };
+}
+
 function pedidos_resetTabPaneStyles(host) {
     if (!host) return;
     host.querySelectorAll('.tab-pane').forEach((p) => {
@@ -11,7 +79,7 @@ function pedidos_bindTabAnimations(host) {
     $(host).find('a[data-toggle="tab"]').off('hide.bs.tab show.bs.tab shown.bs.tab');
 }
 
-function getView(){
+function getView(mountEl){
     let view = {
         body:()=>{
             return `
@@ -434,7 +502,7 @@ function getView(){
                                             <td class="rounded">CLIENTE</td>
                                         </tr>
                                     </thead>
-                                    <tbody id="tblDataClientes"></tbody>
+                                    <tbody id="ped-tblDataClientes"></tbody>
                                 </table>
                             </div>
                           
@@ -507,7 +575,7 @@ function getView(){
          
                 
                 <button class="btn btn-circle btn-xl btn-secondary btn-bottom-l hand shadow"
-                    onclick="document.getElementById('ped-tab-uno').click()">
+                    onclick="pedidos_el('ped-tab-uno').click()">
                         <i class="fal fa-arrow-left"></i>
                 </button>
 
@@ -659,7 +727,7 @@ function getView(){
 
                                 
                             </div>
-                            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="document.getElementById('ped-tab-uno').click()">
+                            <button class="btn btn-secondary btn-xl btn-circle hand shadow btn-bottom-l" onclick="pedidos_el('ped-tab-uno').click()">
                                 <i class="fal fa-arrow-left"></i>
                             </button>
                         </div>
@@ -925,7 +993,7 @@ function getView(){
                                 <small class="text-muted" id="lbNegocioclieVisitaGoles"></small>
                             </div>
                             <button type="button" class="btn btn-sm btn-circle ped-modal-detalle__close hand" data-dismiss="modal" aria-label="Cerrar"
-                                onclick="document.getElementById('tblDataGoles').innerHTML='';">
+                                onclick="pedidos_el('tblDataGoles').innerHTML='';">
                                 <i class="fal fa-times"></i>
                             </button>
                         </div>
@@ -1093,7 +1161,15 @@ function getView(){
         `,
     }
 
-    root.innerHTML = view.body();
+    const target = mountEl
+        || window.__pedidosEmbedHost
+        || pedidos_el('ventasPanelEmbed')
+        || (typeof root !== 'undefined' ? root : null);
+    if (!target) {
+        console.error('[view_pedidos] getView: contenedor no encontrado');
+        return;
+    }
+    target.innerHTML = view.body();
 
 };
 
@@ -1105,7 +1181,7 @@ function addListeners(){
     
 
 
-    const pedHost = document.getElementById('ventasPanelEmbed') || document.getElementById('root');
+    const pedHost = window.__pedidosEmbedHost || pedidos_el('ventasPanelEmbed') || pedidos_el('root');
     pedidos_resetTabPaneStyles(pedHost);
     pedidos_bindTabAnimations(pedHost);
 
@@ -1114,31 +1190,36 @@ function addListeners(){
 
 
     let f = new Date();
-    document.getElementById('cmbDiaCliente').value = F.getDiaSemana(f.getDay());
-    document.getElementById('cmbDiaClienteMapa').value = F.getDiaSemana(f.getDay());
+    const cmbDiaCliente = pedidos_el('cmbDiaCliente');
+    const cmbDiaClienteMapa = pedidos_el('cmbDiaClienteMapa');
+    if (!cmbDiaCliente || !cmbDiaClienteMapa) {
+        throw new Error('Pedidos: no se encontró el formulario en el panel embebido');
+    }
+    cmbDiaCliente.value = F.getDiaSemana(f.getDay());
+    cmbDiaClienteMapa.value = F.getDiaSemana(f.getDay());
 
 
     //-----------------------------
     //HISTORIAL
     //-----------------------------
 
-    document.getElementById('cmbMesHistorial').innerHTML = F.ComboMeses(); document.getElementById('cmbMesHistorial').value = F.get_mes_curso();
-    document.getElementById('cmbAnioHistorial').innerHTML = F.ComboAnio(); document.getElementById('cmbAnioHistorial').value = F.get_anio_curso();
-    document.getElementById('cmbMesHistorial').addEventListener('change',()=>{
+    pedidos_el('cmbMesHistorial').innerHTML = F.ComboMeses(); pedidos_el('cmbMesHistorial').value = F.get_mes_curso();
+    pedidos_el('cmbAnioHistorial').innerHTML = F.ComboAnio(); pedidos_el('cmbAnioHistorial').value = F.get_anio_curso();
+    pedidos_el('cmbMesHistorial').addEventListener('change',()=>{
         tbl_historial_cliente();
     })
-    document.getElementById('cmbAnioHistorial').addEventListener('change',()=>{
+    pedidos_el('cmbAnioHistorial').addEventListener('change',()=>{
         tbl_historial_cliente();
     })
 
-    document.getElementById('cmbMesObjetivoCliente').innerHTML = F.ComboMeses();
-    document.getElementById('cmbMesObjetivoCliente').value = F.get_mes_curso();
-    document.getElementById('cmbAnioObjetivoCliente').innerHTML = F.ComboAnio();
-    document.getElementById('cmbAnioObjetivoCliente').value = F.get_anio_curso();
-    document.getElementById('cmbMesObjetivoCliente').addEventListener('change',()=>{
+    pedidos_el('cmbMesObjetivoCliente').innerHTML = F.ComboMeses();
+    pedidos_el('cmbMesObjetivoCliente').value = F.get_mes_curso();
+    pedidos_el('cmbAnioObjetivoCliente').innerHTML = F.ComboAnio();
+    pedidos_el('cmbAnioObjetivoCliente').value = F.get_anio_curso();
+    pedidos_el('cmbMesObjetivoCliente').addEventListener('change',()=>{
         tbl_objetivo_cliente();
     })
-    document.getElementById('cmbAnioObjetivoCliente').addEventListener('change',()=>{
+    pedidos_el('cmbAnioObjetivoCliente').addEventListener('change',()=>{
         tbl_objetivo_cliente();
     })
 
@@ -1170,7 +1251,7 @@ function addListeners(){
     //get_tbl_pedido();
 
 
-    document.getElementById('txtFecha').value = F.getFecha();
+    pedidos_el('txtFecha').value = F.getFecha();
     
 
 
@@ -1179,7 +1260,7 @@ function addListeners(){
 
    
 
-    let btnGuardarFactura = document.getElementById('btnGuardarFactura');
+    let btnGuardarFactura = pedidos_el('btnGuardarFactura');
     if (!btnGuardarFactura) {
         console.error('[view_pedidos] btnGuardarFactura no encontrado');
         return;
@@ -1207,7 +1288,7 @@ function addListeners(){
 
 
 
-    let btnCameraQR = document.getElementById('btnCameraQR');
+    let btnCameraQR = pedidos_el('btnCameraQR');
     btnCameraQR.addEventListener('click',()=>{
 
         $("#modal_barcode").modal('show');
@@ -1216,46 +1297,47 @@ function addListeners(){
     });
 
 
-    document.getElementById('btnBuscarClienteReasignar')?.addEventListener('click', pedidos_abrir_buscar_reasignar_cliente);
-    document.getElementById('btnEjecutarBuscarClienteReasignar')?.addEventListener('click', pedidos_buscar_clientes_reasignar);
-    document.getElementById('txtBuscarClienteReasignar')?.addEventListener('keydown', (ev) => {
+    pedidos_el('btnBuscarClienteReasignar')?.addEventListener('click', pedidos_abrir_buscar_reasignar_cliente);
+    pedidos_el('btnEjecutarBuscarClienteReasignar')?.addEventListener('click', pedidos_buscar_clientes_reasignar);
+    pedidos_el('txtBuscarClienteReasignar')?.addEventListener('keydown', (ev) => {
         if (ev.key === 'Enter') {
             ev.preventDefault();
             pedidos_buscar_clientes_reasignar();
         }
     });
-    document.getElementById('btnConfirmarReasignarCliente')?.addEventListener('click', pedidos_confirmar_reasignar_cliente);
+    pedidos_el('btnConfirmarReasignarCliente')?.addEventListener('click', pedidos_confirmar_reasignar_cliente);
     $('#modal_reasignar_dia_visita')
+        .off('shown.bs.modal.pedReasignStack hidden.bs.modal.pedReasignStack')
         .on('shown.bs.modal.pedReasignStack', pedidos_modal_reasign_apilar)
         .on('hidden.bs.modal.pedReasignStack', pedidos_modal_reasign_quitar_stack);
 
-    let btnMapaClientes = document.getElementById('btnMapaClientes');
+    let btnMapaClientes = pedidos_el('btnMapaClientes');
     btnMapaClientes?.addEventListener('click',()=>{
 
-        document.getElementById('ped-tab-cinco').click();
+        pedidos_el('ped-tab-cinco').click();
         selected_tab = 'tab_mapa';
         
         tbl_clientes_mapa('');
 
     });
-    document.getElementById('cmbDiaClienteMapa').addEventListener('change',()=>{
+    pedidos_el('cmbDiaClienteMapa').addEventListener('change',()=>{
         tbl_clientes_mapa('');
     });
-    document.getElementById('cmbDiaCliente')?.addEventListener('change', () => {
-        tbl_clientes(document.getElementById('txtBuscarClie')?.value || '');
+    pedidos_el('cmbDiaCliente')?.addEventListener('change', () => {
+        tbl_clientes(pedidos_el('txtBuscarClie')?.value || '');
     });
-    document.getElementById('btnVenderMapa').addEventListener('click',()=>{
+    pedidos_el('btnVenderMapa').addEventListener('click',()=>{
 
 
         $("#modal_visita_mapa").modal('hide');
 
 
 
-        let nomclie = document.getElementById('lbNomclieVisitaMapa').innerText;
-        let codclie = document.getElementById('lbCodclieVisitaMapa').innerText;
-        let nit = document.getElementById('lbNitclieVisitaMapa').innerText;
-        let dirclie = document.getElementById('lbDirclieVisitaMapa').innerText;
-        let telefono = document.getElementById('lbTelclieVisitaMapa').innerText;
+        let nomclie = pedidos_el('lbNomclieVisitaMapa').innerText;
+        let codclie = pedidos_el('lbCodclieVisitaMapa').innerText;
+        let nit = pedidos_el('lbNitclieVisitaMapa').innerText;
+        let dirclie = pedidos_el('lbDirclieVisitaMapa').innerText;
+        let telefono = pedidos_el('lbTelclieVisitaMapa').innerText;
 
 
 
@@ -1263,10 +1345,10 @@ function addListeners(){
         get_datos_cliente_mapa(codclie,nit,nomclie,dirclie,telefono);
 
     });
-    let btnGuardarVisitaMapa = document.getElementById('btnGuardarVisitaMapa');
+    let btnGuardarVisitaMapa = pedidos_el('btnGuardarVisitaMapa');
     btnGuardarVisitaMapa.addEventListener('click',()=>{
 
-                let motivo = document.getElementById('cmbMotivoNoVisitaMapa').value;
+                let motivo = pedidos_el('cmbMotivoNoVisitaMapa').value;
 
                 F.Confirmacion('¿Está seguro que desea reportar esta NO VISITA?')
                 .then((value)=>{
@@ -1325,21 +1407,21 @@ function addListeners(){
                 })
 
     });
-    document.getElementById('btnHistorialMapa').addEventListener('click',()=>{
+    pedidos_el('btnHistorialMapa').addEventListener('click',()=>{
 
-        let nomclie = document.getElementById('lbNomclieVisitaMapa').innerText;
-        let codclie = document.getElementById('lbCodclieVisitaMapa').innerText;
+        let nomclie = pedidos_el('lbNomclieVisitaMapa').innerText;
+        let codclie = pedidos_el('lbCodclieVisitaMapa').innerText;
         
-        let negocio = document.getElementById('lbNegocioclieVisitaMapa').innerText;
+        let negocio = pedidos_el('lbNegocioclieVisitaMapa').innerText;
         let tiponegocio = '';
 
         get_historial_cliente(selected_cod_cliente,nomclie,tiponegocio,negocio);
 
     });
-    document.getElementById('btnMarcasMapa').addEventListener('click',()=>{
+    pedidos_el('btnMarcasMapa').addEventListener('click',()=>{
 
-        let nomclie = document.getElementById('lbNomclieVisitaMapa').innerText;
-        let codclie = document.getElementById('lbCodclieVisitaMapa').innerText;
+        let nomclie = pedidos_el('lbNomclieVisitaMapa').innerText;
+        let codclie = pedidos_el('lbCodclieVisitaMapa').innerText;
         
      
         get_marcas_cliente(codclie, nomclie);
@@ -1350,10 +1432,10 @@ function addListeners(){
 
 
 
-    let btnGuardarVisita = document.getElementById('btnGuardarVisita');
+    let btnGuardarVisita = pedidos_el('btnGuardarVisita');
     btnGuardarVisita.addEventListener('click',()=>{
 
-                let motivo = document.getElementById('cmbMotivoNoVisita').value;
+                let motivo = pedidos_el('cmbMotivoNoVisita').value;
 
                 F.Confirmacion('¿Está seguro que desea reportar esta NO VISITA?')
                 .then((value)=>{
@@ -1415,33 +1497,33 @@ function addListeners(){
 
     });
 
-    document.getElementById('btnAtrasVentasClientes')?.addEventListener('click', volver_busqueda_clientes);
-    document.getElementById('btnAtrasVentasClientesHdr')?.addEventListener('click', volver_busqueda_clientes);
+    pedidos_el('btnAtrasVentasClientes')?.addEventListener('click', volver_busqueda_clientes);
+    pedidos_el('btnAtrasVentasClientesHdr')?.addEventListener('click', volver_busqueda_clientes);
 
-    document.getElementById('btnEnviarSolicitudCambioCliente')?.addEventListener('click', pedidos_enviar_solicitud_cambio_cliente);
-    document.getElementById('cmbSolCambioDepartamento')?.addEventListener('change', () => {
-        pedidos_cargar_municipios_solicitud(document.getElementById('cmbSolCambioDepartamento').value, '');
+    pedidos_el('btnEnviarSolicitudCambioCliente')?.addEventListener('click', pedidos_enviar_solicitud_cambio_cliente);
+    pedidos_el('cmbSolCambioDepartamento')?.addEventListener('change', () => {
+        pedidos_cargar_municipios_solicitud(pedidos_el('cmbSolCambioDepartamento').value, '');
     });
 
-    const btnOfertas = document.getElementById('btnOfertasDisponiblesPedido');
+    const btnOfertas = pedidos_el('btnOfertasDisponiblesPedido');
     if (btnOfertas) {
         if (pedido_aplica_ofertas()) btnOfertas.classList.remove('d-none');
         btnOfertas.addEventListener('click', pedido_abrir_ofertas_disponibles);
     }
-    document.getElementById('btnOfertaWizardBack')?.addEventListener('click', pedido_oferta_wizard_atras);
-    document.getElementById('btnOfertaAgregarBoni')?.addEventListener('click', pedido_oferta_ir_boni);
-    document.getElementById('txtOfertaWizardBuscar')?.addEventListener('input', pedido_oferta_filtrar_lista);
+    pedidos_el('btnOfertaWizardBack')?.addEventListener('click', pedido_oferta_wizard_atras);
+    pedidos_el('btnOfertaAgregarBoni')?.addEventListener('click', pedido_oferta_ir_boni);
+    pedidos_el('txtOfertaWizardBuscar')?.addEventListener('input', pedido_oferta_filtrar_lista);
 
 };
 
 function volver_busqueda_clientes() {
     switch (selected_tab) {
         case 'tab_mapa':
-            document.getElementById('ped-tab-cinco').click();
+            pedidos_el('ped-tab-cinco').click();
             break;
         case 'tab_lista':
         default:
-            document.getElementById('ped-tab-uno').click();
+            pedidos_el('ped-tab-uno').click();
             break;
     }
 }
@@ -1450,13 +1532,13 @@ function volver_busqueda_clientes() {
 
 function listener_coddoc(){
 
-    let cmbTipoDocumento = document.getElementById('cmbTipoDocumento')
+    let cmbTipoDocumento = pedidos_el('cmbTipoDocumento')
     cmbTipoDocumento.addEventListener('change',()=>{
         get_coddoc(cmbTipoDocumento.value);
     })
 
     function get_coddoc(tipo){
-        let container = document.getElementById('cmbCoddoc');
+        let container = pedidos_el('cmbCoddoc');
         container.innerHTML = '';
 
         let coddoc = ''
@@ -1469,15 +1551,15 @@ function listener_coddoc(){
                 container.innerHTML = coddoc;
  
                 get_correlativo(container.value)
-                .then((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
-                .catch((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
+                .then((correlativo)=>{pedidos_el('txtCorrelativo').value = correlativo})
+                .catch((correlativo)=>{pedidos_el('txtCorrelativo').value = correlativo})
                 
     };
 
-    let cmbCoddoc = document.getElementById('cmbCoddoc');
+    let cmbCoddoc = pedidos_el('cmbCoddoc');
     cmbCoddoc.addEventListener('change',()=>{
         
-        let tipo = document.getElementById('cmbTipoDocumento').value;
+        let tipo = pedidos_el('cmbTipoDocumento').value;
         let coddoc = ''
                 
         if(tipo=='ENV'){coddoc = `<option value="${Selected_coddoc_env}">${Selected_coddoc_env}</option>`};
@@ -1485,8 +1567,8 @@ function listener_coddoc(){
         cmbCoddoc.innerHTML = coddoc;
 
         get_correlativo(cmbCoddoc.value)
-        .then((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
-        .catch((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
+        .then((correlativo)=>{pedidos_el('txtCorrelativo').value = correlativo})
+        .catch((correlativo)=>{pedidos_el('txtCorrelativo').value = correlativo})
     })
 
     get_coddoc(cmbTipoDocumento.value);
@@ -1532,16 +1614,16 @@ function listener_teclado(){
     
     //evitando errores
 
-    Mousetrap.bind('ctrl+right', function() { document.getElementById('btnPosCobro').click() });
-    Mousetrap.bind('ctrl+left', function() { document.getElementById('btnPosDocumentoAtras').click() });
-    Mousetrap.bind('ctrl+g', function(e) { e.preventDefault(); document.getElementById('btnGuardarFactura').click() });
+    Mousetrap.bind('ctrl+right', function() { pedidos_el('btnPosCobro').click() });
+    Mousetrap.bind('ctrl+left', function() { pedidos_el('btnPosDocumentoAtras').click() });
+    Mousetrap.bind('ctrl+g', function(e) { e.preventDefault(); pedidos_el('btnGuardarFactura').click() });
     
 
 
     Mousetrap.bind('f2', function() { 
-        document.getElementById('txtPosCodprod').value='';
-        document.getElementById('btnPosDocumentoAtras').click();
-        document.getElementById('txtPosCodprod').focus();
+        pedidos_el('txtPosCodprod').value='';
+        pedidos_el('btnPosDocumentoAtras').click();
+        pedidos_el('txtPosCodprod').focus();
     });
 
     
@@ -1549,17 +1631,17 @@ function listener_teclado(){
 
     Mousetrap.bind('f7', function(e) {
         e.preventDefault(); 
-        document.getElementById('btnCobrarFel').click();
+        pedidos_el('btnCobrarFel').click();
     });
 
     Mousetrap.bind('f8', function(e) {
         e.preventDefault(); 
-        document.getElementById('btnCobrarFactura').click();
+        pedidos_el('btnCobrarFactura').click();
     });
 
     Mousetrap.bind('f9', function(e) {
         e.preventDefault(); 
-        document.getElementById('btnCobrarCotizacion').click(); 
+        pedidos_el('btnCobrarCotizacion').click(); 
     });
 
 
@@ -1568,10 +1650,10 @@ function listener_teclado(){
 function listener_vista_pedido(){
 
 
-    document.getElementById('txtFechaDoc').value = F.getFecha();
+    pedidos_el('txtFechaDoc').value = F.getFecha();
 
 
-    let txtPosCodprod = document.getElementById('txtPosCodprod');
+    let txtPosCodprod = pedidos_el('txtPosCodprod');
     txtPosCodprod.addEventListener('keyup',(e)=>{
 
         txtPosCodprod.value = txtPosCodprod.value.toUpperCase();
@@ -1581,12 +1663,12 @@ function listener_vista_pedido(){
         if(filtro==''){return;}
 
         if (e.code === 'Enter') { 
-            document.getElementById('btnBuscarProd').click();
+            pedidos_el('btnBuscarProd').click();
             //get_buscar_producto(filtro);
         };
 
         if (e.code === 13) { 
-            document.getElementById('btnBuscarProd').click();
+            pedidos_el('btnBuscarProd').click();
             //get_buscar_producto(filtro);
         };
 
@@ -1596,7 +1678,7 @@ function listener_vista_pedido(){
 
     });
 
-    document.getElementById('btnBuscarProd').addEventListener('click',()=>{
+    pedidos_el('btnBuscarProd').addEventListener('click',()=>{
         txtPosCodprod.value = txtPosCodprod.value.toUpperCase();
         let filtro = txtPosCodprod.value || '';
 
@@ -1609,12 +1691,12 @@ function listener_vista_pedido(){
 
 
     //modal cantidad
-    let btnMCGuardar = document.getElementById('btnMCGuardar');
+    let btnMCGuardar = pedidos_el('btnMCGuardar');
     btnMCGuardar.addEventListener('click',()=>{
 
-        let cantidad = Number(document.getElementById('txtMCCantidad').value || 1);
-        let preciounitario = Number(document.getElementById('txtMCPrecio').value||0);
-        let descuento = Number(document.getElementById('txtMCDescuento').value||0);
+        let cantidad = Number(pedidos_el('txtMCCantidad').value || 1);
+        let preciounitario = Number(pedidos_el('txtMCPrecio').value||0);
+        let descuento = Number(pedidos_el('txtMCDescuento').value||0);
 
         if(preciounitario==0 && !(pedido_aplica_ofertas() && pedido_es_medida_boni(Selected_codmedida))){
             F.AvisoError('Precio inválido');
@@ -1635,7 +1717,7 @@ function listener_vista_pedido(){
             
         };
 
-        let TipoP = document.getElementById('cmb_tipo_precio').value; //data_empresa_config.TIPO_PRECIO
+        let TipoP = pedidos_el('cmb_tipo_precio').value; //data_empresa_config.TIPO_PRECIO
 
         pedido_validar_agregar_boni(Selected_codprod, Selected_codmedida, cantidad, Selected_equivale)
         .then(() => insert_producto_pedido(Selected_codprod,Selected_desprod,Selected_codmedida,Selected_equivale,Selected_costo,preciounitario,cantidad, Selected_exento, Selected_tipoprod, TipoP, Selected_existencia,Selected_bono,descuento, Selected_codoferta))
@@ -1657,39 +1739,39 @@ function listener_vista_pedido(){
 
     });
 
-    document.getElementById('txtMCCantidad').addEventListener('input',()=>{
+    pedidos_el('txtMCCantidad').addEventListener('input',()=>{
         CalcularTotalPrecio();  
     });
-    document.getElementById('txtMCCantidad').addEventListener('keyup',(e)=>{
+    pedidos_el('txtMCCantidad').addEventListener('keyup',(e)=>{
         if (e.code === 'Enter') { 
-            //document.getElementById('txtMCPrecio').focus();
-            document.getElementById('btnMCGuardar').focus();
+            //pedidos_el('txtMCPrecio').focus();
+            pedidos_el('btnMCGuardar').focus();
         };
         if (e.keyCode === 13 && !e.shiftKey) {
-            //document.getElementById('txtMCPrecio').focus();
-            document.getElementById('btnMCGuardar').focus();
+            //pedidos_el('txtMCPrecio').focus();
+            pedidos_el('btnMCGuardar').focus();
         };  
     });
-    document.getElementById('txtMCPrecio').addEventListener('input',()=>{
+    pedidos_el('txtMCPrecio').addEventListener('input',()=>{
         CalcularTotalPrecio();  
     });
-    document.getElementById('txtMCPrecio').addEventListener('keyup',(e)=>{
+    pedidos_el('txtMCPrecio').addEventListener('keyup',(e)=>{
         if (e.code === 'Enter') { 
-            document.getElementById('btnMCGuardar').focus();
+            pedidos_el('btnMCGuardar').focus();
         };
         if (e.keyCode === 13 && !e.shiftKey) {
-            document.getElementById('btnMCGuardar').focus();
+            pedidos_el('btnMCGuardar').focus();
         };  
     });
         
 
     //modal editar cantidad
-    let btnMCGuardarE = document.getElementById('btnMCGuardarE');
+    let btnMCGuardarE = pedidos_el('btnMCGuardarE');
     btnMCGuardarE.addEventListener('click',()=>{
 
-        let cantidad = Number(document.getElementById('txtMCCantidadE').value || 1);
-        let preciounitario = Number(document.getElementById('txtMCPrecioE').value||0);
-        let descuento =Number(document.getElementById('txtMCDescuentoE').value||0);
+        let cantidad = Number(pedidos_el('txtMCCantidadE').value || 1);
+        let preciounitario = Number(pedidos_el('txtMCPrecioE').value||0);
+        let descuento =Number(pedidos_el('txtMCDescuentoE').value||0);
         const esBoniOferta = pedido_aplica_ofertas() && pedido_es_medida_boni(Selected_codmedida);
 
         if(preciounitario==0 && !esBoniOferta){
@@ -1716,7 +1798,7 @@ function listener_vista_pedido(){
 
             F.showToast('Cantidad actualizada');
             get_tbl_pedido();
-            document.getElementById('txtPosCodprod').focus();
+            pedidos_el('txtPosCodprod').focus();
         })
         .catch((err)=>{
             const msg = String(err || '');
@@ -1728,37 +1810,37 @@ function listener_vista_pedido(){
 
     });
 
-    document.getElementById('txtMCCantidadE').addEventListener('input',()=>{
+    pedidos_el('txtMCCantidadE').addEventListener('input',()=>{
         CalcularTotalPrecioEditar();  
     });
-    document.getElementById('txtMCCantidadE').addEventListener('keyup',(e)=>{
+    pedidos_el('txtMCCantidadE').addEventListener('keyup',(e)=>{
         if (e.code === 'Enter') { 
-            //document.getElementById('txtMCPrecioE').focus();
-            document.getElementById('btnMCGuardarE').focus();
+            //pedidos_el('txtMCPrecioE').focus();
+            pedidos_el('btnMCGuardarE').focus();
         };
         if (e.keyCode === 13 && !e.shiftKey) {
-            //document.getElementById('txtMCPrecioE').focus();
-            document.getElementById('btnMCGuardarE').focus();
+            //pedidos_el('txtMCPrecioE').focus();
+            pedidos_el('btnMCGuardarE').focus();
         };  
     });
-    document.getElementById('txtMCPrecioE').addEventListener('input',()=>{
+    pedidos_el('txtMCPrecioE').addEventListener('input',()=>{
         CalcularTotalPrecioEditar();  
     });
-    document.getElementById('txtMCPrecioE').addEventListener('keyup',(e)=>{
+    pedidos_el('txtMCPrecioE').addEventListener('keyup',(e)=>{
         if (e.code === 'Enter') { 
-            document.getElementById('btnMCGuardarE').focus();
+            pedidos_el('btnMCGuardarE').focus();
         };
         if (e.keyCode === 13 && !e.shiftKey) {
-            document.getElementById('btnMCGuardarE').focus();
+            pedidos_el('btnMCGuardarE').focus();
         };  
     });
 
-    document.getElementById('txtMCDescuentoE').addEventListener('keyup',(e)=>{
+    pedidos_el('txtMCDescuentoE').addEventListener('keyup',(e)=>{
         if (e.code === 'Enter') { 
-            document.getElementById('btnMCGuardarE').focus();
+            pedidos_el('btnMCGuardarE').focus();
         };
         if (e.keyCode === 13 && !e.shiftKey) {
-            document.getElementById('btnMCGuardarE').focus();
+            pedidos_el('btnMCGuardarE').focus();
         };  
     });
 
@@ -1770,23 +1852,23 @@ function listener_vista_pedido(){
 
 function listener_vista_cobro(){
     
-    //document.getElementById('cmbPosCoddocFecha').value = F.getFecha();
-    document.getElementById('txtPosCobroDireccion').value = "CIUDAD";
+    //pedidos_el('cmbPosCoddocFecha').value = F.getFecha();
+    pedidos_el('txtPosCobroDireccion').value = "CIUDAD";
 
-    document.getElementById('btnPosCobro').addEventListener('click',()=>{
+    pedidos_el('btnPosCobro').addEventListener('click',()=>{
         pedido_pintar_cierre_resumen();
-        document.getElementById('ped-tab-tres').click();
+        pedidos_el('ped-tab-tres').click();
     });
 
     const volverProductosPedido = () => {
-        document.getElementById('ped-tab-dos')?.click();
+        pedidos_el('ped-tab-dos')?.click();
     };
-    document.getElementById('btnPosDocumentoAtras')?.addEventListener('click', volverProductosPedido);
-    document.getElementById('btnPosDocumentoAtrasLbl')?.addEventListener('click', volverProductosPedido);
+    pedidos_el('btnPosDocumentoAtras')?.addEventListener('click', volverProductosPedido);
+    pedidos_el('btnPosDocumentoAtrasLbl')?.addEventListener('click', volverProductosPedido);
 
-    document.getElementById('txtPosCobroNit').addEventListener('keyup',(e)=>{
+    pedidos_el('txtPosCobroNit').addEventListener('keyup',(e)=>{
        
-        let nit = document.getElementById('txtPosCobroNit').value.toUpperCase();
+        let nit = pedidos_el('txtPosCobroNit').value.toUpperCase();
 
             if (e.code === 'Enter') {
                 fcn_buscar_cliente(nit)
@@ -1794,14 +1876,14 @@ function listener_vista_cobro(){
                         
                 })
                 .catch(()=>{
-                    nit = document.getElementById('txtPosCobroNit').value.replace('-','').replace(" ","");
+                    nit = pedidos_el('txtPosCobroNit').value.replace('-','').replace(" ","");
                     F.GetDataNit(nit)
                     .then((json)=>{
 
-                        document.getElementById('txtPosCobroNitclie').value = '';
-                        document.getElementById('txtPosCobroNombre').value = json;
-                        document.getElementById('txtPosCobroDireccion').value = "CIUDAD";
-                        document.getElementById('txtPosCobroNombre').focus();
+                        pedidos_el('txtPosCobroNitclie').value = '';
+                        pedidos_el('txtPosCobroNombre').value = json;
+                        pedidos_el('txtPosCobroDireccion').value = "CIUDAD";
+                        pedidos_el('txtPosCobroNombre').focus();
                     })
                 })
             };
@@ -1811,13 +1893,13 @@ function listener_vista_cobro(){
                         
                 })
                 .catch(()=>{
-                    nit = document.getElementById('txtPosCobroNit').value.replace('-','').replace(" ","");
+                    nit = pedidos_el('txtPosCobroNit').value.replace('-','').replace(" ","");
                     F.GetDataNit(nit)
                     .then((json)=>{
-                        document.getElementById('txtPosCobroNitclie').value = '';
-                        document.getElementById('txtPosCobroNombre').value = json;
-                        document.getElementById('txtPosCobroDireccion').value = "CIUDAD";
-                        document.getElementById('txtPosCobroNombre').focus();
+                        pedidos_el('txtPosCobroNitclie').value = '';
+                        pedidos_el('txtPosCobroNombre').value = json;
+                        pedidos_el('txtPosCobroDireccion').value = "CIUDAD";
+                        pedidos_el('txtPosCobroNombre').focus();
                     })
                 })
             };
@@ -1828,31 +1910,31 @@ function listener_vista_cobro(){
 
 
 
-    document.getElementById('txtBuscarClie').addEventListener('keyup',(e)=>{
+    pedidos_el('txtBuscarClie').addEventListener('keyup',(e)=>{
         if (e.code === 'Enter') { 
-            document.getElementById('btnBuscarClie').click();
+            pedidos_el('btnBuscarClie').click();
         };
         if (e.keyCode === 13 && !e.shiftKey) {
-            document.getElementById('btnBuscarClie').click();
+            pedidos_el('btnBuscarClie').click();
         };  
     });
 
-    document.getElementById('btnBuscarClie').addEventListener('click',(e)=>{  
-        let filtro = document.getElementById('txtBuscarClie').value || '';
+    pedidos_el('btnBuscarClie').addEventListener('click',(e)=>{  
+        let filtro = pedidos_el('txtBuscarClie').value || '';
         tbl_clientes(filtro);
         
-        //document.getElementById('txtBuscarClie').value='';
+        //pedidos_el('txtBuscarClie').value='';
 
     });
 
 
-    let btnNuevoCliente = document.getElementById('btnNuevoCliente');
+    let btnNuevoCliente = pedidos_el('btnNuevoCliente');
     btnNuevoCliente.addEventListener('click',()=>{
 
-            let nit = document.getElementById('txtPosCobroNit').value || 'CF';
-            let nombre = document.getElementById('txtPosCobroNombre').value || 'SN';
-            let direccion = document.getElementById('txtPosCobroDireccion').value || 'CIUDAD';
-            let telefono = document.getElementById('txtPosCobroTelefono').value || '';
+            let nit = pedidos_el('txtPosCobroNit').value || 'CF';
+            let nombre = pedidos_el('txtPosCobroNombre').value || 'SN';
+            let direccion = pedidos_el('txtPosCobroDireccion').value || 'CIUDAD';
+            let telefono = pedidos_el('txtPosCobroTelefono').value || '';
 
             if(nombre=='SN'){
                 F.AvisoError('Nombre de cliente no es válido');
@@ -1872,7 +1954,7 @@ function listener_vista_cobro(){
                         data.recordset.map((r)=>{
                             codcli = r.Current_Identity.toString();
                         })
-                        document.getElementById('txtPosCobroNitclie').value = codcli;
+                        pedidos_el('txtPosCobroNitclie').value = codcli;
 
                         F.Aviso('Cliente creado exitosamente!!');
                         btnNuevoCliente.disabled = false;
@@ -1899,32 +1981,34 @@ function listener_vista_cobro(){
 
 function listener_listado_documentos(){
 
-    let btnListadoDocumentos = document.getElementById('btnListadoDocumentos');
+    let btnListadoDocumentos = pedidos_el('btnListadoDocumentos');
     btnListadoDocumentos.addEventListener('click',()=>{
         //$("#modal_lista_documentos").modal('show');
         
-        document.getElementById('ped-tab-cuatro').click();
+        pedidos_el('ped-tab-cuatro').click();
 
         tbl_lista_documentos('ENV');
 
     });
 
-    document.getElementById('txtFechaDoc').addEventListener('change',()=>{
+    pedidos_el('txtFechaDoc').addEventListener('change',()=>{
         tbl_lista_documentos();
     });
-    document.getElementById('cmbTipoDoc').addEventListener('change',()=>{
+    pedidos_el('cmbTipoDoc').addEventListener('change',()=>{
         tbl_lista_documentos();
     });
 
 };
 
 function pedidos_show_tab_lista() {
-    const pane = document.getElementById('ped-uno');
-    const link = document.getElementById('ped-tab-uno');
-    document.querySelectorAll('#pedTabHomeContent .tab-pane').forEach((p) => {
+    const host = pedidos_host();
+    if (!host) return;
+    const pane = host.querySelector('#ped-uno');
+    const link = host.querySelector('#ped-tab-uno');
+    host.querySelectorAll('#pedTabHomeContent .tab-pane').forEach((p) => {
         p.classList.remove('show', 'active');
     });
-    document.querySelectorAll('#pedTabHome .nav-link').forEach((l) => {
+    host.querySelectorAll('#pedTabHome .nav-link').forEach((l) => {
         l.classList.remove('active');
         l.setAttribute('aria-selected', 'false');
     });
@@ -1938,41 +2022,38 @@ function pedidos_show_tab_lista() {
     selected_tab = 'tab_lista';
 }
 
-function pedidos_embed_enter() {
-    getView();
+function pedidos_mount(mountEl) {
+    const host = mountEl || document.getElementById('ventasPanelEmbed');
+    if (!host) {
+        throw new Error('[pedidos] ventasPanelEmbed no encontrado');
+    }
+    window.__pedidosEmbedHost = host;
+    pedidos_embed_reset_state();
+    getView(host);
     addListeners();
     pedidos_show_tab_lista();
-    try {
-        tbl_clientes('');
-    } catch (e) {
-        console.error('[view_pedidos] tbl_clientes inicial', e);
-    }
+    tbl_clientes('');
+}
+
+function pedidos_embed_enter(embedHost) {
+    pedidos_mount(embedHost);
 }
 
 function pedidos_embed_leave() {
-    const host = document.getElementById('ventasPanelEmbed');
-    if (!host) return;
-    try {
-        $(host).find('a[data-toggle="tab"]').off('hide.bs.tab show.bs.tab shown.bs.tab');
-        $(host).find('.modal').modal('hide');
-    } catch (e) { /* bootstrap */ }
-    pedidos_resetTabPaneStyles(host);
-    try {
-        $('.modal-backdrop').remove();
-        $('body').removeClass('modal-open');
-    } catch (e) { /* bootstrap */ }
+    pedidos_purge_dom();
     if (typeof Mousetrap !== 'undefined' && typeof Mousetrap.reset === 'function') {
         Mousetrap.reset();
     }
     window.__pedidosMousetrapBound = false;
     window.__pedidosListenersGen = 0;
+    window.__pedidosEmbedHost = null;
 }
 
 window.pedidos_embed_enter = pedidos_embed_enter;
 window.pedidos_embed_leave = pedidos_embed_leave;
 
-function initView(){
-    pedidos_embed_enter();
+function initView(mountEl) {
+    pedidos_mount(mountEl);
 }
 
 function destroyView() {
@@ -1984,11 +2065,11 @@ function destroyView() {
 function tbl_clientes_mapa(filtro){
    
   
-    let container = document.getElementById('container_mapa');
+    let container = pedidos_el('container_mapa');
     container.innerHTML = '';
     container.innerHTML = `<div class="mapcontainer5" id="mapcontainer"></div>`;
 
-    let dia = document.getElementById('cmbDiaClienteMapa').value;
+    let dia = pedidos_el('cmbDiaClienteMapa').value;
 
     let varTotalVisitados = 0;
     let varTotalNoVisitados = 0;
@@ -2052,8 +2133,8 @@ function tbl_clientes_mapa(filtro){
 
                 })
 
-                document.getElementById('lbTVisitadosMapa').innerText = `Vendido: ${varTotalVisitados}`;
-                document.getElementById('lbTNoVisitadosMapa').innerText = `No Vendido: ${varTotalNoVisitados}`;
+                pedidos_el('lbTVisitadosMapa').innerText = `Vendido: ${varTotalVisitados}`;
+                pedidos_el('lbTNoVisitadosMapa').innerText = `No Vendido: ${varTotalNoVisitados}`;
 
 
                 
@@ -2064,8 +2145,8 @@ function tbl_clientes_mapa(filtro){
             })
             .catch(()=>{
                 container.innerHTML = 'No se cargaron datos...';
-                 document.getElementById('lbTVisitadosMapa').innerText = ``;
-                document.getElementById('lbTNoVisitadosMapa').innerText = ``;
+                 pedidos_el('lbTVisitadosMapa').innerText = ``;
+                pedidos_el('lbTNoVisitadosMapa').innerText = ``;
             })
 
 
@@ -2087,15 +2168,15 @@ function get_visita_cliente_mapa(codclie,nomclie,tiponegocio,negocio,nit,dirclie
     selected_cod_cliente = codclie;
     
 
-    document.getElementById('lbNegocioclieVisitaMapa').innerText = `${tiponegocio}-${negocio}`;
-    document.getElementById('lbNomclieVisitaMapa').innerText = nomclie;
-    document.getElementById('lbCodclieVisitaMapa').innerText = codclie;
+    pedidos_el('lbNegocioclieVisitaMapa').innerText = `${tiponegocio}-${negocio}`;
+    pedidos_el('lbNomclieVisitaMapa').innerText = nomclie;
+    pedidos_el('lbCodclieVisitaMapa').innerText = codclie;
 
-    document.getElementById('lbNitclieVisitaMapa').innerText = nit;
-    document.getElementById('lbDirclieVisitaMapa').innerText = dirclie;
-    document.getElementById('lbTelclieVisitaMapa').innerText = telclie;
+    pedidos_el('lbNitclieVisitaMapa').innerText = nit;
+    pedidos_el('lbDirclieVisitaMapa').innerText = dirclie;
+    pedidos_el('lbTelclieVisitaMapa').innerText = telclie;
   
-    document.getElementById('cmbMotivoNoVisitaMapa').value = 'NO DINERO';
+    pedidos_el('cmbMotivoNoVisitaMapa').value = 'NO DINERO';
 
 
 
@@ -2112,12 +2193,16 @@ function tbl_clientes(filtro,qr){
         url_clientes = '/clientes/buscar_cliente_vendedor'
     };
 
-    let container = document.getElementById('tblDataClientes');
+    let container = pedidos_el('ped-tblDataClientes');
+    if (!container) {
+        console.error('[tbl_clientes] #ped-tblDataClientes no está en el embed');
+        return;
+    }
     container.innerHTML = GlobalLoader;
 
     let str = '';
 
-    let dia = document.getElementById('cmbDiaCliente').value;
+    let dia = pedidos_el('cmbDiaCliente').value;
 
     let varTotalVisitados = 0;
     let varTotalNoVisitados = 0;
@@ -2235,15 +2320,15 @@ function tbl_clientes(filtro,qr){
                 `
             })
             container.innerHTML = str;
-            document.getElementById('lbTVisitados').innerText = `Vendido: ${varTotalVisitados}`;
-            document.getElementById('lbTNoVisitados').innerText = `No Vendido: ${varTotalNoVisitados}`;
+            pedidos_el('lbTVisitados').innerText = `Vendido: ${varTotalVisitados}`;
+            pedidos_el('lbTNoVisitados').innerText = `No Vendido: ${varTotalNoVisitados}`;
             pedidos_pintar_faltantes_mes();
         }
     }, (error) => {
         F.AvisoError('Error en la solicitud');
         container.innerHTML = 'No day datos....';
-        document.getElementById('lbTVisitados').innerText = ``;
-            document.getElementById('lbTNoVisitados').innerText = ``;
+        pedidos_el('lbTVisitados').innerText = ``;
+            pedidos_el('lbTNoVisitados').innerText = ``;
     });
 
 
@@ -2251,7 +2336,8 @@ function tbl_clientes(filtro,qr){
 };
 
 function pedidos_bind_modales_detalle() {
-    const $modals = $('.ped-modal-detalle');
+    const host = pedidos_host();
+    const $modals = host ? $(host).find('.ped-modal-detalle') : $('.ped-modal-detalle');
     if (!$modals.length) return;
     $modals.off('show.bs.modal.pedBlur hidden.bs.modal.pedBlur');
     $modals.on('show.bs.modal.pedBlur', function () {
@@ -2273,15 +2359,15 @@ function pedidos_bind_modales_detalle() {
 }
 
 function pedidos_toggle_cliente_opciones(btn, panelId) {
-    const panel = document.getElementById(panelId);
+    const panel = pedidos_el(panelId);
     if (!panel) return;
 
     const willOpen = !panel.classList.contains('is-open');
 
-    document.querySelectorAll('#tblDataClientes .ped-opciones-panel.is-open').forEach((el) => {
+    (pedidos_host()?.querySelectorAll('#ped-tblDataClientes .ped-opciones-panel.is-open') || []).forEach((el) => {
         el.classList.remove('is-open');
     });
-    document.querySelectorAll('#tblDataClientes .btn-ped-opciones.is-open').forEach((el) => {
+    (pedidos_host()?.querySelectorAll('#ped-tblDataClientes .btn-ped-opciones.is-open') || []).forEach((el) => {
         el.classList.remove('is-open');
         el.innerHTML = '<i class="fal fa-ellipsis-h mr-1"></i> Opciones';
     });
@@ -2294,7 +2380,7 @@ function pedidos_toggle_cliente_opciones(btn, panelId) {
 }
 
 function pedidos_pintar_faltantes_mes() {
-    const botones = document.querySelectorAll('#tblDataClientes .ped-opcion-faltantes');
+    const botones = pedidos_host()?.querySelectorAll('#ped-tblDataClientes .ped-opcion-faltantes') || [];
     if (!botones.length) return;
 
     const mes = (typeof F.get_mes_curso === 'function') ? F.get_mes_curso() : (new Date().getMonth() + 1);
@@ -2320,7 +2406,7 @@ function pedidos_pintar_faltantes_mes() {
 }
 
 function pedidos_cargar_municipios_solicitud(coddepto, codmunSelected) {
-    const cmbMun = document.getElementById('cmbSolCambioMunicipio');
+    const cmbMun = pedidos_el('cmbSolCambioMunicipio');
     if (!cmbMun) return Promise.resolve();
     cmbMun.innerHTML = '<option value="">Cargando...</option>';
     if (!coddepto) {
@@ -2344,7 +2430,7 @@ function pedidos_cargar_municipios_solicitud(coddepto, codmunSelected) {
 }
 
 function pedidos_cargar_departamentos_solicitud(coddeptoSelected, codmunSelected) {
-    const cmbDep = document.getElementById('cmbSolCambioDepartamento');
+    const cmbDep = pedidos_el('cmbSolCambioDepartamento');
     if (!cmbDep) return Promise.resolve();
     cmbDep.innerHTML = '<option value="">Cargando...</option>';
     return GF.data_departamentos()
@@ -2361,15 +2447,15 @@ function pedidos_cargar_departamentos_solicitud(coddeptoSelected, codmunSelected
         })
         .catch(() => {
             cmbDep.innerHTML = '<option value="">No se cargaron departamentos</option>';
-            const cmbMun = document.getElementById('cmbSolCambioMunicipio');
+            const cmbMun = pedidos_el('cmbSolCambioMunicipio');
             if (cmbMun) cmbMun.innerHTML = '<option value="">Sin municipios</option>';
         });
 }
 
-let pedidos_reasign_cliente_sel = null;
+var pedidos_reasign_cliente_sel = null;
 
 function pedidos_aplicar_visibilidad_reasignar_cliente() {
-    const btn = document.getElementById('btnBuscarClienteReasignar');
+    const btn = pedidos_el('btnBuscarClienteReasignar');
     if (!btn) return;
     const ok = (typeof vendedor_permite_reasignar_cliente === 'function')
         ? vendedor_permite_reasignar_cliente()
@@ -2396,7 +2482,7 @@ function pedidos_modal_reasign_quitar_stack() {
 
 function pedidos_ensure_reasign_modals_en_body() {
     ['modal_buscar_reasignar_cliente', 'modal_reasignar_dia_visita'].forEach((id) => {
-        const el = document.getElementById(id);
+        const el = pedidos_el(id);
         if (el && el.parentElement !== document.body) {
             document.body.appendChild(el);
         }
@@ -2405,8 +2491,8 @@ function pedidos_ensure_reasign_modals_en_body() {
 
 function pedidos_abrir_buscar_reasignar_cliente() {
     pedidos_ensure_reasign_modals_en_body();
-    const tbody = document.getElementById('tblDataBuscarClienteReasignar');
-    const txt = document.getElementById('txtBuscarClienteReasignar');
+    const tbody = pedidos_el('tblDataBuscarClienteReasignar');
+    const txt = pedidos_el('txtBuscarClienteReasignar');
     if (tbody) tbody.innerHTML = '';
     if (txt) {
         txt.value = '';
@@ -2417,8 +2503,8 @@ function pedidos_abrir_buscar_reasignar_cliente() {
 }
 
 function pedidos_buscar_clientes_reasignar() {
-    const filtro = String(document.getElementById('txtBuscarClienteReasignar')?.value || '').trim();
-    const tbody = document.getElementById('tblDataBuscarClienteReasignar');
+    const filtro = String(pedidos_el('txtBuscarClienteReasignar')?.value || '').trim();
+    const tbody = pedidos_el('tblDataBuscarClienteReasignar');
     if (!filtro) {
         F.AvisoError('Escriba nombre, código o NIT');
         return;
@@ -2475,11 +2561,11 @@ function pedidos_abrir_modal_dia_reasignar(tr) {
         direccion: tr.getAttribute('data-direccion') || '',
         municipio: tr.getAttribute('data-municipio') || '',
     };
-    const lb = document.getElementById('lbReasignarClienteResumen');
+    const lb = pedidos_el('lbReasignarClienteResumen');
     if (lb) {
         lb.textContent = `${pedidos_reasign_cliente_sel.negocio ? pedidos_reasign_cliente_sel.negocio + ' · ' : ''}${pedidos_reasign_cliente_sel.nombre} (Cód. ${pedidos_reasign_cliente_sel.codclie})`;
     }
-    const cmb = document.getElementById('cmbReasignarDiaVisita');
+    const cmb = pedidos_el('cmbReasignarDiaVisita');
     if (cmb) {
         const f = new Date();
         cmb.value = F.getDiaSemana(f.getDay());
@@ -2493,8 +2579,8 @@ function pedidos_confirmar_reasignar_cliente() {
         F.AvisoError('Seleccione un cliente');
         return;
     }
-    const dia = document.getElementById('cmbReasignarDiaVisita')?.value || '';
-    const btn = document.getElementById('btnConfirmarReasignarCliente');
+    const dia = pedidos_el('cmbReasignarDiaVisita')?.value || '';
+    const btn = pedidos_el('btnConfirmarReasignarCliente');
     const htmlOrig = btn ? btn.innerHTML : '';
     if (btn) {
         btn.disabled = true;
@@ -2515,11 +2601,11 @@ function pedidos_confirmar_reasignar_cliente() {
             F.Aviso('Cliente asignado a su ruta');
             $('#modal_reasignar_dia_visita').modal('hide');
             $('#modal_buscar_reasignar_cliente').modal('hide');
-            const diaLista = document.getElementById('cmbDiaCliente')?.value || '';
+            const diaLista = pedidos_el('cmbDiaCliente')?.value || '';
             if (diaLista === (data.dia || dia)) {
-                tbl_clientes(document.getElementById('txtBuscarClie')?.value || '');
-            } else if (document.getElementById('cmbDiaCliente')) {
-                document.getElementById('cmbDiaCliente').value = data.dia || dia;
+                tbl_clientes(pedidos_el('txtBuscarClie')?.value || '');
+            } else if (pedidos_el('cmbDiaCliente')) {
+                pedidos_el('cmbDiaCliente').value = data.dia || dia;
                 tbl_clientes('');
             }
         })
@@ -2536,32 +2622,32 @@ function pedidos_confirmar_reasignar_cliente() {
 }
 
 function pedidos_abrir_solicitud_cambio(codclie, nit, nombre, negocio, direccion, referencia, telefono, codmun, coddepto, tiponegocio) {
-    document.getElementById('txtSolCambioCodclie').value = codclie || '';
-    document.getElementById('txtSolCambioTiponegocio').value = tiponegocio || '';
-    document.getElementById('txtSolCambioNit').value = nit || '';
-    document.getElementById('txtSolCambioNombre').value = nombre || '';
-    document.getElementById('txtSolCambioNegocio').value = negocio || '';
-    document.getElementById('txtSolCambioDireccion').value = direccion || '';
-    document.getElementById('txtSolCambioReferencia').value = referencia || '';
-    document.getElementById('txtSolCambioTelefono').value = telefono || '';
+    pedidos_el('txtSolCambioCodclie').value = codclie || '';
+    pedidos_el('txtSolCambioTiponegocio').value = tiponegocio || '';
+    pedidos_el('txtSolCambioNit').value = nit || '';
+    pedidos_el('txtSolCambioNombre').value = nombre || '';
+    pedidos_el('txtSolCambioNegocio').value = negocio || '';
+    pedidos_el('txtSolCambioDireccion').value = direccion || '';
+    pedidos_el('txtSolCambioReferencia').value = referencia || '';
+    pedidos_el('txtSolCambioTelefono').value = telefono || '';
     pedidos_cargar_departamentos_solicitud(coddepto, codmun);
     $('#modal_solicitud_cambio_cliente').modal('show');
 }
 
 function pedidos_enviar_solicitud_cambio_cliente() {
-    const btn = document.getElementById('btnEnviarSolicitudCambioCliente');
-    const cmbDep = document.getElementById('cmbSolCambioDepartamento');
-    const cmbMun = document.getElementById('cmbSolCambioMunicipio');
+    const btn = pedidos_el('btnEnviarSolicitudCambioCliente');
+    const cmbDep = pedidos_el('cmbSolCambioDepartamento');
+    const cmbMun = pedidos_el('cmbSolCambioMunicipio');
     const detalles = {
         empnit: GlobalEmpnit || '',
-        codcliente: document.getElementById('txtSolCambioCodclie')?.value || '',
-        tiponegocio: document.getElementById('txtSolCambioTiponegocio')?.value || '',
-        nit: document.getElementById('txtSolCambioNit')?.value || '',
-        nombre: document.getElementById('txtSolCambioNombre')?.value || '',
-        negocio: document.getElementById('txtSolCambioNegocio')?.value || '',
-        direccion: document.getElementById('txtSolCambioDireccion')?.value || '',
-        referencia: document.getElementById('txtSolCambioReferencia')?.value || '',
-        telefono: document.getElementById('txtSolCambioTelefono')?.value || '',
+        codcliente: pedidos_el('txtSolCambioCodclie')?.value || '',
+        tiponegocio: pedidos_el('txtSolCambioTiponegocio')?.value || '',
+        nit: pedidos_el('txtSolCambioNit')?.value || '',
+        nombre: pedidos_el('txtSolCambioNombre')?.value || '',
+        negocio: pedidos_el('txtSolCambioNegocio')?.value || '',
+        direccion: pedidos_el('txtSolCambioDireccion')?.value || '',
+        referencia: pedidos_el('txtSolCambioReferencia')?.value || '',
+        telefono: pedidos_el('txtSolCambioTelefono')?.value || '',
         coddepto: cmbDep?.value || '',
         departamento: cmbDep?.options?.[cmbDep.selectedIndex]?.text || '',
         codmun: cmbMun?.value || '',
@@ -2616,9 +2702,9 @@ function get_historial_cliente(codclie,nomclie,tiponegocio,negocio){
      selected_cod_cliente = codclie;
     
 
-    document.getElementById('lbNegocioclieHistorial').innerText = `${tiponegocio}-${negocio}`;
-    document.getElementById('lbNomclieHistorial').innerText = nomclie;
-    document.getElementById('lbCodclieHistorial').innerText = codclie;
+    pedidos_el('lbNegocioclieHistorial').innerText = `${tiponegocio}-${negocio}`;
+    pedidos_el('lbNomclieHistorial').innerText = nomclie;
+    pedidos_el('lbCodclieHistorial').innerText = codclie;
 
 
     tbl_historial_cliente();
@@ -2626,12 +2712,12 @@ function get_historial_cliente(codclie,nomclie,tiponegocio,negocio){
 };
 function tbl_historial_cliente(){
 
-    let container = document.getElementById('tblDataHistorial');
+    let container = pedidos_el('tblDataHistorial');
     container.innerHTML = GlobalLoader;
 
     
-    let mes = document.getElementById('cmbMesHistorial').value;
-    let anio = document.getElementById('cmbAnioHistorial').value;
+    let mes = pedidos_el('cmbMesHistorial').value;
+    let anio = pedidos_el('cmbAnioHistorial').value;
 
     
 
@@ -2668,11 +2754,11 @@ function get_marcas_cliente(codclie, nomclie){
     
     $("#modal_marcas_cliente").modal('show');
 
-    document.getElementById('lbNomclieMarca').innerText = nomclie;
-    document.getElementById('lbCodclieMarca').innerText = codclie;
+    pedidos_el('lbNomclieMarca').innerText = nomclie;
+    pedidos_el('lbCodclieMarca').innerText = codclie;
     
 
-    let container = document.getElementById('tbl_data_marcas_cliente');
+    let container = pedidos_el('tbl_data_marcas_cliente');
     container.innerHTML = GlobalLoader;
 
     let varTotal = 0;
@@ -2693,12 +2779,12 @@ function get_marcas_cliente(codclie, nomclie){
             `
         })
         container.innerHTML = str;
-        document.getElementById('lbTotalClienteMarca').innerText = F.setMoneda(varTotal,'Q');
+        pedidos_el('lbTotalClienteMarca').innerText = F.setMoneda(varTotal,'Q');
 
     })
     .catch(()=>{
         container.innerHTML = 'No se cargaron datos...';
-        document.getElementById('lbTotalClienteMarca').innerText = 'Q 0.00';
+        pedidos_el('lbTotalClienteMarca').innerText = 'Q 0.00';
     })
 
     
@@ -2758,11 +2844,11 @@ function get_visita(codclie,nomclie,tiponegocio,negocio){
     selected_cod_cliente = codclie;
     
 
-    document.getElementById('lbNegocioclieVisita').innerText = `${tiponegocio}-${negocio}`;
-    document.getElementById('lbNomclieVisita').innerText = nomclie;
-    document.getElementById('lbCodclieVisita').innerText = codclie;
+    pedidos_el('lbNegocioclieVisita').innerText = `${tiponegocio}-${negocio}`;
+    pedidos_el('lbNomclieVisita').innerText = nomclie;
+    pedidos_el('lbCodclieVisita').innerText = codclie;
   
-    document.getElementById('cmbMotivoNoVisita').value = 'NO DINERO';
+    pedidos_el('cmbMotivoNoVisita').value = 'NO DINERO';
 
 
 };
@@ -2814,8 +2900,8 @@ function get_objetivo_cliente(codclie,nomclie,tiponegocio,negocio){
     selected_cod_cliente = codclie;
     $("#modal_objetivo_cliente").modal('show');
 
-    document.getElementById('lbNomclieObjetivo').innerText = nomclie || '';
-    document.getElementById('lbNegocioclieObjetivo').innerText = `${tiponegocio || ''}-${negocio || ''}`;
+    pedidos_el('lbNomclieObjetivo').innerText = nomclie || '';
+    pedidos_el('lbNegocioclieObjetivo').innerText = `${tiponegocio || ''}-${negocio || ''}`;
 
     tbl_objetivo_cliente();
 
@@ -2868,12 +2954,12 @@ function pedidos_obj_row(label, objetivoTxt, avanceTxt, pct){
 
 function tbl_objetivo_cliente(){
 
-    let container = document.getElementById('tblDataObjetivoCliente');
+    let container = pedidos_el('tblDataObjetivoCliente');
     if(!container){ return; }
     container.innerHTML = GlobalLoader;
 
-    let mes = document.getElementById('cmbMesObjetivoCliente').value;
-    let anio = document.getElementById('cmbAnioObjetivoCliente').value;
+    let mes = pedidos_el('cmbMesObjetivoCliente').value;
+    let anio = pedidos_el('cmbAnioObjetivoCliente').value;
 
     GF.get_data_objetivo_cliente_mes(GlobalEmpnit, selected_cod_cliente, mes, anio)
     .then((data)=>{
@@ -2901,15 +2987,15 @@ function get_status_goles(codclie,nomclie,tiponegocio,negocio){
 
     selected_cod_cliente = codclie;
     
-    document.getElementById('lbNegocioclieVisitaGoles').innerText = `${tiponegocio}-${negocio}`;
-    document.getElementById('lbNomclieVisitaGoles').innerText = nomclie;
+    pedidos_el('lbNegocioclieVisitaGoles').innerText = `${tiponegocio}-${negocio}`;
+    pedidos_el('lbNomclieVisitaGoles').innerText = nomclie;
   
     tbl_status_goles(codclie)
 
 };
 function tbl_status_goles(codclie){
 
-    let container = document.getElementById('tblDataGoles');
+    let container = pedidos_el('tblDataGoles');
     container.innerHTML = GlobalLoader;
 
  
@@ -2955,8 +3041,8 @@ function create_qr_code(codigo,nomclie){
 
     $("#modal_qr").modal('show');
 
-    document.getElementById('lbNomclieQR').innerText = nomclie;
-    document.getElementById('lbCodclieQR').innerText = `Codigo: ${codigo}`
+    pedidos_el('lbNomclieQR').innerText = nomclie;
+    pedidos_el('lbCodclieQR').innerText = `Codigo: ${codigo}`
 
     F.create_qr_code(codigo,'container_qr');
 
@@ -2964,16 +3050,16 @@ function create_qr_code(codigo,nomclie){
 
 async function iniciar_barcode() {
 
-    let root_barcode = document.getElementById('root_barcode');
+    let root_barcode = pedidos_el('root_barcode');
 
     try {
-        let child = document.getElementById('barcode_video');
+        let child = pedidos_el('barcode_video');
         root_barcode.removeChild(child)        
     } catch (error) {
         
     }
     
-    let txtCodprod = document.getElementById('txtBuscarClie')
+    let txtCodprod = pedidos_el('txtBuscarClie')
     
 
     if('BarcodeDetector' in window ){
@@ -3018,7 +3104,7 @@ async function iniciar_barcode() {
                         //esto para evitar que busque muchas veces el mismo código
                         txtCodprod.value = codproducto.replace('XELASOL-','');
                         $("#modal_barcode").modal('hide');
-                        document.getElementById('btnBuscarClie').click();
+                        pedidos_el('btnBuscarClie').click();
                     }
                     
           });
@@ -3089,10 +3175,10 @@ function fcn_buscar_cliente(nit){
                     return;
                 }
                 data.map((r)=>{
-                    document.getElementById('txtPosCobroNit').value = r.NIT;
-                    document.getElementById('txtPosCobroNitclie').value = r.NITCLIE;
-                    document.getElementById('txtPosCobroNombre').value = r.NOMCLIE;
-                    document.getElementById('txtPosCobroDireccion').value = r.DIRCLIE;
+                    pedidos_el('txtPosCobroNit').value = r.NIT;
+                    pedidos_el('txtPosCobroNitclie').value = r.NITCLIE;
+                    pedidos_el('txtPosCobroNombre').value = r.NOMCLIE;
+                    pedidos_el('txtPosCobroDireccion').value = r.DIRCLIE;
                 })
                 resolve();
             }
@@ -3150,7 +3236,7 @@ var pedido_oferta_wizard = {
 };
 
 function pedido_precio_tipo(row){
-    const tipo = String(document.getElementById('cmb_tipo_precio')?.value || 'PRECIO').toUpperCase();
+    const tipo = String(pedidos_el('cmb_tipo_precio')?.value || 'PRECIO').toUpperCase();
     if (tipo === 'PRECIO_A') return Number(row.PRECIO_A) || 0;
     if (tipo === 'PRECIO_B') return Number(row.PRECIO_B) || 0;
     return Number(row.PRECIO) || 0;
@@ -3229,12 +3315,12 @@ function pedido_oferta_eval_sesion(oferta, ses){
 }
 
 function pedido_oferta_header(titulo, meta, showBack, showSearch, showBoni){
-    const t = document.getElementById('lbOfertaWizardTitulo');
-    const m = document.getElementById('lbOfertaWizardMeta');
-    const back = document.getElementById('btnOfertaWizardBack');
-    const buscar = document.getElementById('txtOfertaWizardBuscar');
-    const btnBoni = document.getElementById('btnOfertaAgregarBoni');
-    const foot = document.getElementById('pedOfertaWizardFooter');
+    const t = pedidos_el('lbOfertaWizardTitulo');
+    const m = pedidos_el('lbOfertaWizardMeta');
+    const back = pedidos_el('btnOfertaWizardBack');
+    const buscar = pedidos_el('txtOfertaWizardBuscar');
+    const btnBoni = pedidos_el('btnOfertaAgregarBoni');
+    const foot = pedidos_el('pedOfertaWizardFooter');
     if (t) t.textContent = titulo || 'Ver Ofertas Activas';
     if (m) m.textContent = meta || '';
     if (back) back.classList.toggle('d-none', !showBack);
@@ -3375,7 +3461,7 @@ function pedido_oferta_montar(id, cab, productos, ses){
         ses.CANTIDAD_BONIF = pedido_oferta_wizard.oferta.CANTIDAD_BONIF;
         ses.productos = set;
     }
-    const buscar = document.getElementById('txtOfertaWizardBuscar');
+    const buscar = pedidos_el('txtOfertaWizardBuscar');
     if (buscar) buscar.value = '';
     pedido_oferta_pintar_productos();
     pedido_oferta_enriquecer_exist(id);
@@ -3387,9 +3473,9 @@ function pedido_abrir_ofertas_disponibles(){
         return;
     }
     pedido_oferta_wizard.step = 'lista';
-    const buscar = document.getElementById('txtOfertaWizardBuscar');
+    const buscar = pedidos_el('txtOfertaWizardBuscar');
     if (buscar) buscar.value = '';
-    const body = document.getElementById('tblOfertasPedidoBody');
+    const body = pedidos_el('tblOfertasPedidoBody');
     if (body) body.innerHTML = `<div class="text-center text-muted py-3">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</div>`;
     pedido_oferta_header('Ver Ofertas Activas', 'Toque una oferta para agregar sus productos', false, true, false);
     $('#modal_ofertas_pedido').modal('show');
@@ -3411,11 +3497,11 @@ function pedido_oferta_filtrar_lista(){
 }
 
 function pedido_oferta_pintar_lista(){
-    const body = document.getElementById('tblOfertasPedidoBody');
+    const body = pedidos_el('tblOfertasPedidoBody');
     if (!body) return;
     pedido_oferta_wizard.step = 'lista';
     pedido_oferta_header('Ver Ofertas Activas', 'Toque una oferta para agregar sus productos', false, true, false);
-    const buscar = document.getElementById('txtOfertaWizardBuscar');
+    const buscar = pedidos_el('txtOfertaWizardBuscar');
     if (buscar) buscar.placeholder = 'Buscar oferta...';
     const q = String(buscar?.value || '').toLowerCase().trim();
     const rows = (pedido_ofertas_catalogo || []).filter((r) => {
@@ -3458,7 +3544,7 @@ function pedido_oferta_entrar(codoferta){
         pedido_oferta_montar(id, cab, cached, ses);
         return;
     }
-    const body = document.getElementById('tblOfertasPedidoBody');
+    const body = pedidos_el('tblOfertasPedidoBody');
     if (body) body.innerHTML = `<div class="text-center text-muted py-3">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</div>`;
     pedido_cargar_venta_oferta(id)
         .then((rows) => pedido_oferta_montar(id, cab, rows, ses))
@@ -3468,7 +3554,7 @@ function pedido_oferta_entrar(codoferta){
 }
 
 function pedido_oferta_pintar_productos(){
-    const body = document.getElementById('tblOfertasPedidoBody');
+    const body = pedidos_el('tblOfertasPedidoBody');
     if (!body) return;
     const o = pedido_oferta_wizard.oferta;
     if (!o) {
@@ -3484,7 +3570,7 @@ function pedido_oferta_pintar_productos(){
         true,
         ev.aplica
     );
-    const buscar = document.getElementById('txtOfertaWizardBuscar');
+    const buscar = pedidos_el('txtOfertaWizardBuscar');
     if (buscar) buscar.placeholder = 'Buscar producto, código, marca...';
     const q = String(buscar?.value || '').toLowerCase().trim();
     const rows = (pedido_oferta_wizard.productos || []).filter((r) => {
@@ -3541,7 +3627,7 @@ function pedido_oferta_ir_boni(){
         pedido_oferta_pintar_boni();
         return;
     }
-    const body = document.getElementById('tblOfertasPedidoBody');
+    const body = pedidos_el('tblOfertasPedidoBody');
     if (body) body.innerHTML = `<div class="text-center text-muted py-3">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</div>`;
     axios.post(GlobalUrlCalls + '/ofertas/pedido_boni', {
         token: TOKEN,
@@ -3564,7 +3650,7 @@ function pedido_oferta_ir_boni(){
 }
 
 function pedido_oferta_pintar_boni(){
-    const body = document.getElementById('tblOfertasPedidoBody');
+    const body = pedidos_el('tblOfertasPedidoBody');
     if (!body) return;
     const o = pedido_oferta_wizard.oferta;
     if (!o) {
@@ -3789,65 +3875,65 @@ function pedido_restaurar_ofertas(){
 
 function pedido_pintar_cliente(nomclie, nitclie){
     const nombre = nomclie || 'Cliente';
-    const lbNombre = document.getElementById('lbPedidoClienteNombre');
+    const lbNombre = pedidos_el('lbPedidoClienteNombre');
     if (lbNombre) lbNombre.innerText = nombre;
     pedido_pintar_cierre_resumen(nombre, nitclie);
 }
 
 function pedido_pintar_cierre_resumen(nombre, nitclie){
-    const lb = document.getElementById('lbCierreClienteResumen');
+    const lb = pedidos_el('lbCierreClienteResumen');
     if (!lb) return;
-    const nom = nombre || document.getElementById('txtPosCobroNombre')?.value || 'Cliente';
-    const cod = nitclie || document.getElementById('txtPosCobroNitclie')?.value || '';
-    const nit = document.getElementById('txtPosCobroNit')?.value || '';
+    const nom = nombre || pedidos_el('txtPosCobroNombre')?.value || 'Cliente';
+    const cod = nitclie || pedidos_el('txtPosCobroNitclie')?.value || '';
+    const nit = pedidos_el('txtPosCobroNit')?.value || '';
     const extra = [cod, nit].filter(Boolean).join(' · ');
     lb.innerText = extra ? `${nom} · ${extra}` : nom;
 }
 
 function get_datos_cliente(nitclie,nit,nomclie,dirclie,telefono){
 
-    document.getElementById('txtPosCobroNit').value = nit;
-    document.getElementById('txtPosCobroNitclie').value = nitclie;
-    document.getElementById('txtPosCobroNombre').value = nomclie;
-    document.getElementById('txtPosCobroDireccion').value = dirclie;
-    document.getElementById('txtPosCobroTelefono').value = telefono;
-    document.getElementById('txtBuscarClie').value='';
+    pedidos_el('txtPosCobroNit').value = nit;
+    pedidos_el('txtPosCobroNitclie').value = nitclie;
+    pedidos_el('txtPosCobroNombre').value = nomclie;
+    pedidos_el('txtPosCobroDireccion').value = dirclie;
+    pedidos_el('txtPosCobroTelefono').value = telefono;
+    pedidos_el('txtBuscarClie').value='';
     pedido_pintar_cliente(nomclie, nitclie);
 
     selected_tab = 'tab_lista';
-    document.getElementById('ped-tab-dos').click();
+    pedidos_el('ped-tab-dos').click();
     get_tbl_pedido();
-    document.getElementById('txtPosCodprod').focus();
+    pedidos_el('txtPosCodprod').focus();
 };
 
 function get_datos_cliente_mapa(nitclie,nit,nomclie,dirclie,telefono){
 
-    document.getElementById('txtPosCobroNit').value = nit;
-    document.getElementById('txtPosCobroNitclie').value = nitclie;
-    document.getElementById('txtPosCobroNombre').value = nomclie;
-    document.getElementById('txtPosCobroDireccion').value = dirclie;
-    document.getElementById('txtPosCobroTelefono').value = telefono;
-    document.getElementById('txtBuscarClie').value='';
+    pedidos_el('txtPosCobroNit').value = nit;
+    pedidos_el('txtPosCobroNitclie').value = nitclie;
+    pedidos_el('txtPosCobroNombre').value = nomclie;
+    pedidos_el('txtPosCobroDireccion').value = dirclie;
+    pedidos_el('txtPosCobroTelefono').value = telefono;
+    pedidos_el('txtBuscarClie').value='';
     pedido_pintar_cliente(nomclie, nitclie);
 
     selected_tab = 'tab_mapa';
-    document.getElementById('ped-tab-dos').click();
+    pedidos_el('ped-tab-dos').click();
     get_tbl_pedido();
-    document.getElementById('txtPosCodprod').focus();
+    pedidos_el('txtPosCodprod').focus();
 };
 
 function pedido_sync_vista_cantidad(idCantidad, idPrecio, idLbPrecio, idLbTotal){
-    const cantidad = Number(document.getElementById(idCantidad)?.value || 0);
-    const precio = Number(document.getElementById(idPrecio)?.value || 0);
+    const cantidad = Number(pedidos_el(idCantidad)?.value || 0);
+    const precio = Number(pedidos_el(idPrecio)?.value || 0);
     const total = cantidad * precio;
-    const lbP = document.getElementById(idLbPrecio);
-    const lbT = document.getElementById(idLbTotal);
+    const lbP = pedidos_el(idLbPrecio);
+    const lbT = pedidos_el(idLbTotal);
     if (lbP) lbP.innerText = F.setMoneda(precio, 'Q');
     if (lbT) lbT.innerText = F.setMoneda(total, 'Q');
 }
 
 function pedido_step_cantidad(inputId, delta){
-    const el = document.getElementById(inputId);
+    const el = pedidos_el(inputId);
     if (!el) return;
     let valor = Number(el.value || 0) + Number(delta);
     if (valor < 1) valor = 1;
@@ -3913,20 +3999,20 @@ function pedido_ajustar_cantidad(id, cantidadActual, precio, descuento, delta, c
 
 function CalcularTotalPrecio(){
 
-    let cantidad = document.getElementById('txtMCCantidad').value || 1;
-    let precio = document.getElementById('txtMCPrecio').value;
+    let cantidad = pedidos_el('txtMCCantidad').value || 1;
+    let precio = pedidos_el('txtMCPrecio').value;
     
-    document.getElementById('txtMCTotalPrecio').value = (Number(cantidad)*Number(precio));
+    pedidos_el('txtMCTotalPrecio').value = (Number(cantidad)*Number(precio));
     pedido_sync_vista_cantidad('txtMCCantidad','txtMCPrecio','lbMCPrecioVista','lbMCTotalVista');
 
 };
 
 function CalcularTotalPrecioEditar(){
 
-    let cantidad = document.getElementById('txtMCCantidadE').value || 1;
-    let precio = document.getElementById('txtMCPrecioE').value;
+    let cantidad = pedidos_el('txtMCCantidadE').value || 1;
+    let precio = pedidos_el('txtMCPrecioE').value;
     
-    document.getElementById('txtMCTotalPrecioE').value = (Number(cantidad)*Number(precio));
+    pedidos_el('txtMCTotalPrecioE').value = (Number(cantidad)*Number(precio));
     pedido_sync_vista_cantidad('txtMCCantidadE','txtMCPrecioE','lbMCPrecioVistaE','lbMCTotalVistaE');
 
 };
@@ -3935,17 +4021,17 @@ function get_buscar_producto(filtro){
 
     $("#modal_lista_precios").modal('show');
 
-    let container = document.getElementById('tblDataProductos');
+    let container = pedidos_el('tblDataProductos');
     container.innerHTML = GlobalLoader;
 
-    document.getElementById('btnBuscarProd').innerHTML = '<i class="fal fa-sync fa-spin"></i>';
-    document.getElementById('btnBuscarProd').disabled=true;
+    pedidos_el('btnBuscarProd').innerHTML = '<i class="fal fa-sync fa-spin"></i>';
+    pedidos_el('btnBuscarProd').disabled=true;
 
     let str = '';
 
     let idf = 'first-element'; let i =0;
 
-    let tipoP = document.getElementById('cmb_tipo_precio').value;
+    let tipoP = pedidos_el('cmb_tipo_precio').value;
 
     axios.post('/pos/productos_filtro', {
         sucursal: GlobalEmpnit,
@@ -3992,16 +4078,16 @@ function get_buscar_producto(filtro){
                         })
             container.innerHTML = str;
             
-            document.getElementById('btnBuscarProd').innerHTML = '<i class="fal fa-search"></i>';
-            document.getElementById('btnBuscarProd').disabled=false;
+            pedidos_el('btnBuscarProd').innerHTML = '<i class="fal fa-search"></i>';
+            pedidos_el('btnBuscarProd').disabled=false;
 
             //getMoveTable();
         }
     }, (error) => {
         F.AvisoError('Error en la solicitud');
         container.innerHTML = 'No day datos....';
-        document.getElementById('btnBuscarProd').innerHTML = '<i class="fal fa-search"></i>';
-        document.getElementById('btnBuscarProd').disabled=false;
+        pedidos_el('btnBuscarProd').innerHTML = '<i class="fal fa-search"></i>';
+        pedidos_el('btnBuscarProd').disabled=false;
     });
 
 
@@ -4016,7 +4102,7 @@ function getMoveTable(){
 
     return;
 
-        let start = document.getElementById('first-element');
+        let start = pedidos_el('first-element');
         start.focus();
         start.style.backgroundColor = '#50b988';
         start.style.color = 'white';
@@ -4081,7 +4167,7 @@ function getMoveTable(){
 
 function get_tbl_productos_clasificacion(codigo){
 
-    let container = document.getElementById('tblPosProductosCategoria');
+    let container = pedidos_el('tblPosProductosCategoria');
     container.innerHTML = GlobalLoader;
 
     let str = '';
@@ -4136,10 +4222,10 @@ function get_producto(codprod,desprod,codmedida,equivale,costo,precio,tipoprod,e
                 return;
             }
 
-            let container = document.getElementById('container_precio');
+            let container = pedidos_el('container_precio');
             if (container) container.innerHTML = '';
 
-            document.getElementById('btnMCGuardar').disabled = true;
+            pedidos_el('btnMCGuardar').disabled = true;
 
             Selected_codprod = codprod;
             Selected_desprod = desprod;
@@ -4159,22 +4245,22 @@ function get_producto(codprod,desprod,codmedida,equivale,costo,precio,tipoprod,e
                 if (eq > maxUn + 0.0001) {
                     F.AvisoError('No hay cupo suficiente de BONI para esta medida');
                     pedido_boni_ctx = null;
-                    document.getElementById('btnMCGuardar').disabled = false;
+                    pedidos_el('btnMCGuardar').disabled = false;
                     pedido_restaurar_ofertas();
                     return;
                 }
                 cantIni = 1;
             }
 
-            document.getElementById('lbCantidadDesprod').innerText = `${desprod} (${codmedida} - Eq: ${equivale})`;
-            document.getElementById('txtMCCantidad').value = cantIni;
-            document.getElementById('txtMCPrecio').value = precio;
-            document.getElementById('txtMCDescuento').value = 0;
+            pedidos_el('lbCantidadDesprod').innerText = `${desprod} (${codmedida} - Eq: ${equivale})`;
+            pedidos_el('txtMCCantidad').value = cantIni;
+            pedidos_el('txtMCPrecio').value = precio;
+            pedidos_el('txtMCDescuento').value = 0;
 
             CalcularTotalPrecio();
 
-            document.getElementById('txtPosCodprod').value = '';
-            document.getElementById('btnMCGuardar').disabled = false;
+            pedidos_el('txtPosCodprod').value = '';
+            pedidos_el('btnMCGuardar').disabled = false;
 
             pedidos_abrir_cantidad_sobre_lista();
 };
@@ -4188,7 +4274,7 @@ function pedidos_abrir_cantidad_sobre_lista(){
 
     const abrirCantidad = () => {
         $("#modal_cantidad").modal('show');
-        const inp = document.getElementById('txtMCCantidad');
+        const inp = pedidos_el('txtMCCantidad');
         if (inp) {
             inp.focus();
             inp.select();
@@ -4208,7 +4294,7 @@ function pedidos_abrir_cantidad_sobre_lista(){
 function pedidos_restaurar_lista_precios(){
     if (pedido_reabrir_ofertas) return;
     if (!pedido_reabrir_lista_precios) {
-        const txtProd = document.getElementById('txtPosCodprod');
+        const txtProd = pedidos_el('txtPosCodprod');
         if (txtProd) txtProd.focus();
         return;
     }
@@ -4217,7 +4303,7 @@ function pedidos_restaurar_lista_precios(){
     const $lista = $("#modal_lista_precios");
     $lista.modal('show');
 
-    const filtroLista = document.getElementById('txtBuscarP');
+    const filtroLista = pedidos_el('txtBuscarP');
     if (filtroLista && filtroLista.value) {
         F.FiltrarTabla('tblProductos', 'txtBuscarP');
     }
@@ -4255,12 +4341,12 @@ function get_datos_precio(codprod,codmedida){
 function calcular_descuento(idDescuento,idTotalPrecio,idTotalPrecioDescuento){
 
     try {
-        let descuento = Number(document.getElementById(idDescuento).value || 0) ;
-        let totalprecio = Number(document.getElementById(idTotalPrecio).value || 0);
-        document.getElementById(idTotalPrecioDescuento).value = (totalprecio - descuento) 
+        let descuento = Number(pedidos_el(idDescuento).value || 0) ;
+        let totalprecio = Number(pedidos_el(idTotalPrecio).value || 0);
+        pedidos_el(idTotalPrecioDescuento).value = (totalprecio - descuento) 
 
     } catch (error) {
-        document.getElementById(idTotalPrecioDescuento).value = totalprecio;
+        pedidos_el(idTotalPrecioDescuento).value = totalprecio;
     }
 
 };
@@ -4322,7 +4408,7 @@ function insert_producto_pedido(codprod,desprod,codmedida,equivale,costo,precio,
 
 function get_tbl_pedido(){
 
-    let container = document.getElementById('tblPosPedido');
+    let container = pedidos_el('tblPosPedido');
     if (!container) return;
     container.innerHTML = GlobalLoader;
 
@@ -4336,15 +4422,15 @@ function get_tbl_pedido(){
         GlobalTotalDocumento = varTotalVenta;
         GlobalTotalDescuento = varTotalDescuento;
         const neto = varTotalVenta - varTotalDescuento;
-        const lbItems = document.getElementById('lbTotalItems');
+        const lbItems = pedidos_el('lbTotalItems');
         if (lbItems) lbItems.innerText = `${varTotalItems} ${varTotalItems === 1 ? 'item' : 'items'}`;
-        const lbVenta = document.getElementById('lbTotalVenta');
+        const lbVenta = pedidos_el('lbTotalVenta');
         if (lbVenta) lbVenta.innerText = F.setMoneda(varTotalVenta,'Q');
-        const lbDesc = document.getElementById('lbTotalDescuento');
+        const lbDesc = pedidos_el('lbTotalDescuento');
         if (lbDesc) lbDesc.innerText = `- ${F.setMoneda(varTotalDescuento,'Q')}`;
-        const lbNeto = document.getElementById('lbTotalVentaDescuento');
+        const lbNeto = pedidos_el('lbTotalVentaDescuento');
         if (lbNeto) lbNeto.innerText = F.setMoneda(neto,'Q');
-        const lbPagar = document.getElementById('lbPosCobroTotalPagar');
+        const lbPagar = pedidos_el('lbPosCobroTotalPagar');
         if (lbPagar) lbPagar.innerText = F.setMoneda(neto,'Q');
     };
 
@@ -4433,15 +4519,15 @@ function edit_item_pedido(id,codprod,desprod,codmedida,equivale,cantidad,costo,p
     Selected_bono = Number(bono);
     Selected_cant_orig = Number(cantidad) || 0;
 
-    document.getElementById('lbCantidadDesprodE').innerText = `${desprod} (${codmedida} - Eq: ${equivale})`;
+    pedidos_el('lbCantidadDesprodE').innerText = `${desprod} (${codmedida} - Eq: ${equivale})`;
 
-    document.getElementById('txtMCCantidadE').value = cantidad;
-    document.getElementById('txtMCPrecioE').value = precio;
-    document.getElementById('txtMCDescuentoE').value = descuento;
+    pedidos_el('txtMCCantidadE').value = cantidad;
+    pedidos_el('txtMCPrecioE').value = precio;
+    pedidos_el('txtMCDescuentoE').value = descuento;
 
     CalcularTotalPrecioEditar();
 
-    const inpE = document.getElementById('txtMCCantidadE');
+    const inpE = pedidos_el('txtMCCantidadE');
     inpE.focus();
     inpE.select();
 };
@@ -4518,10 +4604,10 @@ function get_correlativo_coddoc(coddoc){
 
 
 function pedido_set_enviar_estado(bloqueado, texto){
-    const btn = document.getElementById('btnGuardarFactura');
-    const btnAtras = document.getElementById('btnPosDocumentoAtrasLbl');
-    const loader = document.getElementById('pedCierreLoader');
-    const loaderTxt = document.getElementById('pedCierreLoaderTxt');
+    const btn = pedidos_el('btnGuardarFactura');
+    const btnAtras = pedidos_el('btnPosDocumentoAtrasLbl');
+    const loader = pedidos_el('pedCierreLoader');
+    const loaderTxt = pedidos_el('pedCierreLoaderTxt');
     if (btn) {
         btn.disabled = !!bloqueado;
         btn.innerHTML = bloqueado
@@ -4535,36 +4621,36 @@ function pedido_set_enviar_estado(bloqueado, texto){
 
 function finalizar_pedido(latitud,longitud){
 
-    let coddoc = document.getElementById('cmbCoddoc').value;
-    let correlativoDoc = document.getElementById('txtCorrelativo').value;
+    let coddoc = pedidos_el('cmbCoddoc').value;
+    let correlativoDoc = pedidos_el('txtCorrelativo').value;
 
     pedido_set_enviar_estado(true, 'Obteniendo correlativo...');
 
     get_correlativo_coddoc(coddoc)
     .then((correlativo)=>{
 
-        document.getElementById('txtCorrelativo').value = correlativo;
+        pedidos_el('txtCorrelativo').value = correlativo;
         correlativoDoc = correlativo;
 
 
-        let codcliente = document.getElementById('txtPosCobroNitclie').value || ''; //GlobalSelectedCodCliente;
+        let codcliente = pedidos_el('txtPosCobroNitclie').value || ''; //GlobalSelectedCodCliente;
         if(codcliente==''){
             F.AvisoError('Seleccione un cliente');
             pedido_set_enviar_estado(false);
             return;
         };
     
-        let nit = document.getElementById('txtPosCobroNit').value || 'CF';
-        let ClienteNombre = document.getElementById('txtPosCobroNombre').value;
+        let nit = pedidos_el('txtPosCobroNit').value || 'CF';
+        let ClienteNombre = pedidos_el('txtPosCobroNombre').value;
         GlobalSelectedNomCliente = ClienteNombre;
-        let dirclie = document.getElementById('txtPosCobroDireccion').value;
+        let dirclie = pedidos_el('txtPosCobroDireccion').value;
         GlobalSelectedDirCliente = dirclie;
-        let obs = F.limpiarTexto(document.getElementById('txtObs').value) || '';  
+        let obs = F.limpiarTexto(pedidos_el('txtObs').value) || '';  
         let direntrega = "SN"; 
         let codbodega = GlobalCodBodega;
         let cmbTipoEntrega = ''; 
         
-        let txtFecha = new Date(document.getElementById('txtFecha').value);
+        let txtFecha = new Date(pedidos_el('txtFecha').value);
         let anio = txtFecha.getFullYear();
         let mes = txtFecha.getUTCMonth()+1;
         let dia = txtFecha.getUTCDate() 
@@ -4580,9 +4666,9 @@ function finalizar_pedido(latitud,longitud){
         let tipo_pago = 'CON'; 
         let tipo_doc = '';
         
-        let var_mostrador = document.getElementById('inlineRadio1').checked.toString();
-        let var_domicilio = document.getElementById('inlineRadio2').checked.toString();
-        let var_callcenter = document.getElementById('inlineRadio3').checked.toString();
+        let var_mostrador = pedidos_el('inlineRadio1').checked.toString();
+        let var_domicilio = pedidos_el('inlineRadio2').checked.toString();
+        let var_callcenter = pedidos_el('inlineRadio3').checked.toString();
         if(var_mostrador=="true"){tipo_doc='MOSTRADOR'};
         if(var_domicilio=="true"){tipo_doc='DOMICILIO'};
         if(var_callcenter=="true"){tipo_doc='CALLCENTER'};
@@ -4690,7 +4776,7 @@ function finalizar_pedido(latitud,longitud){
 
     })
     .catch(()=>{
-        document.getElementById('txtCorrelativo').value = '0';
+        pedidos_el('txtCorrelativo').value = '0';
         F.AvisoError('No se pudo obtener el correlativo del documento... intentelo de nuevo');
         pedido_set_enviar_estado(false);
     })
@@ -4711,26 +4797,26 @@ function fcnNuevoPedido(){
         GlobalTotalCostoDocumento=0;
         
         
-        document.getElementById('txtObs').value = '';
+        pedidos_el('txtObs').value = '';
         
-        document.getElementById('inlineRadio1').checked = true;
+        pedidos_el('inlineRadio1').checked = true;
 
-        document.getElementById('txtPosCobroNit').value = 'CF';
-        document.getElementById('txtPosCobroNitclie').value = 0;
-        document.getElementById('txtPosCobroNombre').value = 'CONSUMIDOR FINAL';
-        document.getElementById('txtPosCobroDireccion').value = 'CIUDAD';
+        pedidos_el('txtPosCobroNit').value = 'CF';
+        pedidos_el('txtPosCobroNitclie').value = 0;
+        pedidos_el('txtPosCobroNombre').value = 'CONSUMIDOR FINAL';
+        pedidos_el('txtPosCobroDireccion').value = 'CIUDAD';
        
-        //document.getElementById('btnPosDocumentoAtras').click();
+        //pedidos_el('btnPosDocumentoAtras').click();
 
 
         get_tbl_pedido();
 
-        let cmbCoddoc = document.getElementById('cmbCoddoc');
+        let cmbCoddoc = pedidos_el('cmbCoddoc');
         get_correlativo(cmbCoddoc.value)
-        .then((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
-        .catch((correlativo)=>{document.getElementById('txtCorrelativo').value = correlativo})
+        .then((correlativo)=>{pedidos_el('txtCorrelativo').value = correlativo})
+        .catch((correlativo)=>{pedidos_el('txtCorrelativo').value = correlativo})
     
-        document.getElementById('ped-tab-uno').click();
+        pedidos_el('ped-tab-uno').click();
 
 };
 
@@ -4740,14 +4826,14 @@ function fcnNuevoPedido(){
 //---------------------------
 function tbl_lista_documentos(){
 
-    let tipo = document.getElementById('cmbTipoDoc').value;
+    let tipo = pedidos_el('cmbTipoDoc').value;
     let fecha = F.devuelveFecha('txtFechaDoc');
 
-    let container = document.getElementById('tblDocumentos');
+    let container = pedidos_el('tblDocumentos');
     container.innerHTML = GlobalLoader;
     
 
-    let coddoc = document.getElementById('cmbCoddoc').value;
+    let coddoc = pedidos_el('cmbCoddoc').value;
   
    
     let tableheader = `<table class="table table-responsive table-hover table-striped table-bordered h-full">
@@ -4819,7 +4905,7 @@ function tbl_lista_documentos(){
 
 function get_pdf(coddoc, correlativo, idbtn){
 
-    let btn = document.getElementById(idbtn);
+    let btn = pedidos_el(idbtn);
     
     btn.innerHTML = '<i class="fal fa-download fa-spin"></i>';
     btn.disabled = true;
@@ -4867,10 +4953,10 @@ function cargarPedidoEdicion(codclie,nit,nombre,direccion,coddoc,correlativo){
         
                             F.showToast('Cargando Documento....');
     
-                            document.getElementById('txtPosCobroNit').value = nit;
-                            document.getElementById('txtPosCobroNitclie').value = codclie;
-                            document.getElementById('txtPosCobroNombre').value = nombre;
-                            document.getElementById('txtPosCobroDireccion').value = direccion;
+                            pedidos_el('txtPosCobroNit').value = nit;
+                            pedidos_el('txtPosCobroNitclie').value = codclie;
+                            pedidos_el('txtPosCobroNombre').value = nombre;
+                            pedidos_el('txtPosCobroDireccion').value = direccion;
                         
                                                     
                             deleteTempVenta_pos(GlobalUsuario)

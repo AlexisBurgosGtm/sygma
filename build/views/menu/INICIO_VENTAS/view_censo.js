@@ -1,4 +1,34 @@
-function getView(){
+function censo_getMount() {
+    return window.__censoEmbedHost
+        || document.getElementById('ventasPanelEmbed')
+        || (typeof root !== 'undefined' && root ? root : null);
+}
+
+function censo_isActive() {
+    const host = window.__censoEmbedHost;
+    return !!(host && host.isConnected && document.getElementById('ventasPanelEmbed') === host);
+}
+
+/** Respuesta axios/SQL: acepta recordset o rowsAffected sin romper si falta rowsAffected. */
+function censo_sqlHasData(data) {
+    if (!data || data.toString() === 'error') return false;
+    if (Array.isArray(data.recordset)) return true;
+    const ra = data.rowsAffected;
+    return Array.isArray(ra) && Number(ra[0]) > 0;
+}
+
+function censo_el(id) {
+    const host = window.__censoEmbedHost || document.getElementById('ventasPanelEmbed');
+    if (host) {
+        try {
+            const scoped = host.querySelector('#' + CSS.escape(String(id)));
+            if (scoped) return scoped;
+        } catch (e) { /* id inválido */ }
+    }
+    return document.getElementById(id);
+}
+
+function getView(mountEl){
     let view = {
         tabsClientes :()=>{
             return `
@@ -202,32 +232,36 @@ function getView(){
         },
     };
 
-    root.innerHTML = view.tabsClientes();
-    //document.getElementById('panelNuevo').innerHTML = view.formNuevo();
+    const el = mountEl || censo_getMount();
+    if (!el) {
+        console.error('[view_censo] getView: contenedor no encontrado');
+        return;
+    }
+    el.innerHTML = view.tabsClientes();
 };
 
 async function addListeners(){
 
     GlobalBool = false;
 
-    //inicializa la animación en las tabs
-    F.slideAnimationTabs();
+    const censoHost = censo_getMount();
+    F.slideAnimationTabs(censoHost || undefined);
 
 
     //cmbVendedor
     if(Number(GlobalNivelUsuario)==3){
-        document.getElementById('cmbVendedor').disabled = true;
-        document.getElementById('cmbVendedorCliente').disabled = true;
+        censo_el('cmbVendedor').disabled = true;
+        censo_el('cmbVendedorCliente').disabled = true;
     }else{
-        document.getElementById('cmbVendedor').disabled = false;
-        document.getElementById('cmbVendedorCliente').disabled = false;
+        censo_el('cmbVendedor').disabled = false;
+        censo_el('cmbVendedorCliente').disabled = false;
     };
 
-    document.getElementById('cmbVendedor').addEventListener('change',()=>{
+    censo_el('cmbVendedor').addEventListener('change',()=>{
         tbl_clientes();
     })
     
-    let cmbVisita = document.getElementById('cmbVisita');
+    let cmbVisita = censo_el('cmbVisita');
     cmbVisita.innerHTML = '<option value="TODOS">TODOS</option>' + F.ComboSemana("LETRAS");
 
     cmbVisita.addEventListener('change',()=>{
@@ -237,10 +271,10 @@ async function addListeners(){
     });
 
         
-    let cmbVisitaCliente = document.getElementById('cmbVisitaCliente');
+    let cmbVisitaCliente = censo_el('cmbVisitaCliente');
     cmbVisitaCliente.innerHTML = F.ComboSemana("LETRAS");
 
-    let cmbTipoNegocio = document.getElementById('cmbTipoNegocio')
+    let cmbTipoNegocio = censo_el('cmbTipoNegocio')
     cmbTipoNegocio.innerHTML = F.getComboTipoClientes();
 
     let f = new Date();
@@ -248,9 +282,9 @@ async function addListeners(){
     cmbVisita.value = F.getDiaSemana(f.getDay());
 
     
-    let btnUbicacion = document.getElementById('btnUbicacion');
+    let btnUbicacion = censo_el('btnUbicacion');
     btnUbicacion.addEventListener('click',()=>{
-        document.getElementById('tab-tres').click();
+        censo_el('tab-tres').click();
         //RE-AJUSTA EL MAPA A LA PANTALLA
         setTimeout(function () {
             try {
@@ -262,18 +296,18 @@ async function addListeners(){
     });
 
 
-    document.getElementById('btnNuevoClienteUbicacion').addEventListener('click',()=>{
+    censo_el('btnNuevoClienteUbicacion').addEventListener('click',()=>{
 
-        document.getElementById('tab-dos').click();
+        censo_el('tab-dos').click();
 
     });
 
-    document.getElementById('btnAtrasUbicacion').addEventListener('click',()=>{
-        document.getElementById('tab-dos').click();
+    censo_el('btnAtrasUbicacion').addEventListener('click',()=>{
+        censo_el('tab-dos').click();
     });
 
-    document.getElementById('btnCancelarCliente').addEventListener('click',()=>{
-        document.getElementById('tab-uno').click();
+    censo_el('btnCancelarCliente').addEventListener('click',()=>{
+        censo_el('tab-uno').click();
     });
 
 
@@ -288,12 +322,12 @@ async function addListeners(){
     });
 
     
-    document.getElementById('btnNuevo').addEventListener('click',()=>{
+    censo_el('btnNuevo').addEventListener('click',()=>{
 
 
         fcnCleanDataCliente();
 
-        document.getElementById('tab-dos').click();
+        censo_el('tab-dos').click();
 
 
 
@@ -307,21 +341,21 @@ async function addListeners(){
     get_empleados();
 
     /*
-    document.getElementById('change',()=>{
+    censo_el('change',()=>{
         tbl_clientes();
     })*/
     
-    document.getElementById('cmbDepartamento').addEventListener('change',()=>{
+    censo_el('cmbDepartamento').addEventListener('change',()=>{
 
     
-        let contenedor = document.getElementById('cmbMunicipio');
+        let contenedor = censo_el('cmbMunicipio');
         let strdata = '';
         
-        let contenedor3 = document.getElementById('cmbSector');
+        let contenedor3 = censo_el('cmbSector');
         let strdata3 = '';
 
 
-        get_municipios(document.getElementById('cmbDepartamento').value)
+        get_municipios(censo_el('cmbDepartamento').value)
         .then((data)=>{
             data.recordset.map((rows)=>{
                     strdata = strdata + `<option value='${rows.CODIGO}'>${rows.DESCRIPCION}</option>`
@@ -347,13 +381,13 @@ async function addListeners(){
     });
 
 
-    document.getElementById('cmbMunicipio').addEventListener('change',()=>{
+    censo_el('cmbMunicipio').addEventListener('change',()=>{
 
-        let contenedor3 = document.getElementById('cmbSector');
+        let contenedor3 = censo_el('cmbSector');
         let strdata3 = '';
 
 
-        get_sectores(document.getElementById('cmbMunicipio').value)
+        get_sectores(censo_el('cmbMunicipio').value)
         .then((data)=>{
             data.recordset.map((rows)=>{
                     strdata3 = strdata3 + `<option value='${rows.CODIGO}'>${rows.DESCRIPCION}</option>`
@@ -370,22 +404,22 @@ async function addListeners(){
 
     
     
-    let btnGuardar = document.getElementById('btnGuardar');
+    let btnGuardar = censo_el('btnGuardar');
     btnGuardar.addEventListener('click',()=>{
 
      
 
-            document.getElementById('btnGuardar').innerHTML = GlobalLoader; 
+            censo_el('btnGuardar').innerHTML = GlobalLoader; 
 
                 
-                document.getElementById('btnGuardar').innerHTML = '<i class="fal fa-save"></i> Guardar';
+                censo_el('btnGuardar').innerHTML = '<i class="fal fa-save"></i> Guardar';
 
                 F.Confirmacion('¿Está seguro que desea GUARDAR este Cliente?')
                 .then((value)=>{
                     if(value==true){
 
-                        document.getElementById('btnGuardar').disabled = true;
-                        document.getElementById('btnGuardar').innerHTML = '<i class="fal fa-save fa-spin"></i> Guardar'; 
+                        censo_el('btnGuardar').disabled = true;
+                        censo_el('btnGuardar').innerHTML = '<i class="fal fa-save fa-spin"></i> Guardar'; 
                         
                         fcnGuardarCliente()
                         .then(()=>{
@@ -393,11 +427,11 @@ async function addListeners(){
                            
                             F.Aviso('Cliente Creado exitosamente!!');
 
-                            document.getElementById('btnGuardar').disabled = false;
-                            document.getElementById('btnGuardar').innerHTML = '<i class="fal fa-save"></i> Guardar';
+                            censo_el('btnGuardar').disabled = false;
+                            censo_el('btnGuardar').innerHTML = '<i class="fal fa-save"></i> Guardar';
 
 
-                            document.getElementById('tab-uno').click();
+                            censo_el('tab-uno').click();
 
                             fcnCleanDataCliente();
                             
@@ -409,8 +443,8 @@ async function addListeners(){
 
                             F.AvisoError('Error al guardar el cliente');
 
-                            document.getElementById('btnGuardar').disabled = false;
-                            document.getElementById('btnGuardar').innerHTML = '<i class="fal fa-save"></i> Guardar';
+                            censo_el('btnGuardar').disabled = false;
+                            censo_el('btnGuardar').innerHTML = '<i class="fal fa-save"></i> Guardar';
 
                         })
                         
@@ -432,21 +466,21 @@ function fcnGuardarCliente(){
     
     return new Promise((resolve,reject)=>{
 
-        let txtNit = document.getElementById('txtNit');
-        let cmbTipoNegocio = document.getElementById('cmbTipoNegocio');
-        let cmbVisitaCliente = document.getElementById('cmbVisitaCliente');
-        let txtNegocio = document.getElementById('txtNegocio'); 
-        let nomclie = document.getElementById('txtNomcliente').value || '';
-        let dirclie = document.getElementById('txtDircliente').value || 'CIUDAD';
-        let txtReferencia = document.getElementById('txtReferencia');
-        let cmbMunicipio = document.getElementById('cmbMunicipio');
-        let cmbDepartamento = document.getElementById('cmbDepartamento');
-        let cmbSector = document.getElementById('cmbSector');
-        let cmbVendedor = document.getElementById('cmbVendedorCliente');
-        let txtTelefono = document.getElementById('txtTelefono');
-        let txtLatitud = document.getElementById('txtLatitud');
-        let txtLongitud = document.getElementById('txtLongitud');
-        let categoria = document.getElementById('cmbCategoria').value;
+        let txtNit = censo_el('txtNit');
+        let cmbTipoNegocio = censo_el('cmbTipoNegocio');
+        let cmbVisitaCliente = censo_el('cmbVisitaCliente');
+        let txtNegocio = censo_el('txtNegocio'); 
+        let nomclie = censo_el('txtNomcliente').value || '';
+        let dirclie = censo_el('txtDircliente').value || 'CIUDAD';
+        let txtReferencia = censo_el('txtReferencia');
+        let cmbMunicipio = censo_el('cmbMunicipio');
+        let cmbDepartamento = censo_el('cmbDepartamento');
+        let cmbSector = censo_el('cmbSector');
+        let cmbVendedor = censo_el('cmbVendedorCliente');
+        let txtTelefono = censo_el('txtTelefono');
+        let txtLatitud = censo_el('txtLatitud');
+        let txtLongitud = censo_el('txtLongitud');
+        let categoria = censo_el('cmbCategoria').value;
 
         if(nomclie==''){F.AvisoError('Escriba un nombre de cliente');return;}
 
@@ -476,11 +510,11 @@ function fcnGuardarCliente(){
                     if(data.toString()=="error"){
                         reject();
                     }else{
-                        if(Number(data.rowsAffected[0])>0){
-                            resolve(data);             
-                        }else{
+                        if (censo_sqlHasData(data)) {
+                            resolve(data);
+                        } else {
                             reject();
-                        } 
+                        }
                     }       
             }else{
                     reject();
@@ -512,32 +546,36 @@ function get_empleados(){
     GF.get_data_empleados_tipo(3)
     .then((data)=>{
 
+        if (!censo_isActive()) return;
+
         let str = '';
         data.recordset.map((r)=>{
             str += `<option value='${r.CODEMPLEADO}'>${r.NOMEMPLEADO}</option>`
         })
 
-        document.getElementById('cmbVendedor').innerHTML = str;
-        document.getElementById('cmbVendedorCliente').innerHTML = str;
+        const cmbV = censo_el('cmbVendedor');
+        const cmbVC = censo_el('cmbVendedorCliente');
+        if (!cmbV || !cmbVC) return;
 
-        document.getElementById('cmbVendedor').value = GlobalCodUsuario;
-        
+        cmbV.innerHTML = str;
+        cmbVC.innerHTML = str;
 
-        //si es vendedor queda en default
+        cmbV.value = GlobalCodUsuario;
+
         if(Number(GlobalNivelUsuario)==3){
-            document.getElementById('cmbVendedorCliente').value = GlobalCodUsuario;
+            cmbVC.value = GlobalCodUsuario;
         }
 
-        
-        //carga la lista de clientes luego de tener al primer vendedor
         tbl_clientes();
-
 
     })
     .catch(()=>{
 
-        document.getElementById('cmbVendedor').innerHTML = '';
-        document.getElementById('cmbVendedorCliente').innerHTML = '';
+        if (!censo_isActive()) return;
+        const cmbV = censo_el('cmbVendedor');
+        const cmbVC = censo_el('cmbVendedorCliente');
+        if (cmbV) cmbV.innerHTML = '';
+        if (cmbVC) cmbVC.innerHTML = '';
 
     })
 
@@ -550,15 +588,15 @@ function get_empleados(){
 
 function fcnCleanDataCliente(){
     
-            document.getElementById('txtNit').value = "CF";
-            //document.getElementById('txtCodigo').value = "";
-            //document.getElementById('cmbTipoNegocio').value = "TIENDITA";
-            document.getElementById('txtNegocio').value = ""; 
-            document.getElementById('txtNomcliente').value = "";
-            document.getElementById('txtDircliente').value = "";
-            document.getElementById('txtReferencia').value = "";
-            document.getElementById('txtTelefono').value = "";
-           // document.getElementById('txtObs').value = "SN";
+            censo_el('txtNit').value = "CF";
+            //censo_el('txtCodigo').value = "";
+            //censo_el('cmbTipoNegocio').value = "TIENDITA";
+            censo_el('txtNegocio').value = ""; 
+            censo_el('txtNomcliente').value = "";
+            censo_el('txtDircliente').value = "";
+            censo_el('txtReferencia').value = "";
+            censo_el('txtTelefono').value = "";
+           // censo_el('txtObs').value = "SN";
 
 };
 
@@ -595,13 +633,13 @@ function Lmap(lat,long){
             var position = e.target._latlng;
             //console.log(e.target._latlng);
             //obtiene la posición del evento
-            document.getElementById('txtLatitud').innerText = position.lat;
-            document.getElementById('txtLongitud').innerText = position.lng;
+            censo_el('txtLatitud').innerText = position.lat;
+            censo_el('txtLongitud').innerText = position.lng;
            });
      
     //establece las coordenadas iniciales en los labels
-    document.getElementById('txtLatitud').innerText = lat.toString();
-    document.getElementById('txtLongitud').innerText = long.toString();
+    censo_el('txtLatitud').innerText = lat.toString();
+    censo_el('txtLongitud').innerText = long.toString();
     
     return mapa;
   
@@ -642,14 +680,14 @@ function get_combos_mun_deptos(idContainerMun,idcontainerDep,idcontainerSec){
 
 
 
-    let contenedor = document.getElementById(idContainerMun);
+    let contenedor = censo_el(idContainerMun);
     let strdata = '';
     
 
-    let contenedor2 = document.getElementById(idcontainerDep);
+    let contenedor2 = censo_el(idcontainerDep);
     let strdata2 = '';
    
-    let contenedor3 = document.getElementById(idcontainerSec);
+    let contenedor3 = censo_el(idcontainerSec);
     let strdata3 = '';
 
 
@@ -703,9 +741,9 @@ function get_municipios(coddepto){
         })  
         .then(async(response) => {
             const data = response.data;
-            if(Number(data.rowsAffected[0])==0){
+            if (!censo_sqlHasData(data)) {
                 reject();
-            }else{  
+            } else {
                 resolve(data);
             }
         }, (error) => {
@@ -724,9 +762,9 @@ function get_sectores(codmun){
         })  
         .then(async(response) => {
             const data = response.data;
-            if(Number(data.rowsAffected[0])==0){
+            if (!censo_sqlHasData(data)) {
                 reject();
-            }else{  
+            } else {
                 resolve(data);
             }
         }, (error) => {
@@ -744,9 +782,9 @@ function get_departamentos(){
         })  
         .then(async(response) => {
             const data = response.data;
-            if(Number(data.rowsAffected[0])==0){
+            if (!censo_sqlHasData(data)) {
                 reject();
-            }else{  
+            } else {
                 resolve(data);
             }
         }, (error) => {
@@ -767,9 +805,9 @@ function get_data_clientes(visita,codven){
         })  
         .then(async(response) => {
             const data = response.data;
-            if(Number(data.rowsAffected[0])==0){
+            if (!censo_sqlHasData(data)) {
                 reject();
-            }else{  
+            } else {
                 resolve(data);
             }
         }, (error) => {
@@ -781,16 +819,25 @@ function get_data_clientes(visita,codven){
 
 function tbl_clientes(){
 
+        if (!censo_isActive()) return;
 
-        let codven = document.getElementById('cmbVendedor').value;
-        let visita = document.getElementById('cmbVisita').value;
+        const cmbVen = censo_el('cmbVendedor');
+        const cmbVis = censo_el('cmbVisita');
+        let container = censo_el('tblDataClientes');
+        if (!cmbVen || !cmbVis || !container) return;
 
-        let container = document.getElementById('tblDataClientes');
+        let codven = cmbVen.value;
+        let visita = cmbVis.value;
+
         container.innerHTML = GlobalLoader;
 
 
         get_data_clientes(visita,codven)
         .then((data)=>{
+
+            if (!censo_isActive()) return;
+            container = censo_el('tblDataClientes');
+            if (!container) return;
 
             let str = '';
 
@@ -838,7 +885,10 @@ function tbl_clientes(){
 
         })
         .catch((error)=>{
-            console.log(error)
+            if (!censo_isActive()) return;
+            container = censo_el('tblDataClientes');
+            if (!container) return;
+            console.log(error);
             container.innerHTML = 'No hay datos...';
         })
 
@@ -850,7 +900,7 @@ function tbl_clientes(){
 
 function delete_cliente_censo(codclie,idbtn){
 
-    let btn = document.getElementById(idbtn);
+    let btn = censo_el(idbtn);
     
 
     F.Confirmacion('¿Está seguro que desea ELIMINAR este cliente?')
@@ -893,11 +943,11 @@ function delete_clientes(codcliente){
                 if(data.toString()=="error"){
                     reject();
                 }else{
-                    if(Number(data.rowsAffected[0])>0){
-                        resolve(data);             
-                    }else{
+                    if (censo_sqlHasData(data)) {
+                        resolve(data);
+                    } else {
                         reject();
-                    } 
+                    }
                 }       
             }else{
                 reject();
@@ -909,8 +959,40 @@ function delete_clientes(codcliente){
     })
 }
 
-function initView() {
-    InicializarVista();
+function censo_embed_leave() {
+    try {
+        if (typeof map !== 'undefined' && map && typeof map.remove === 'function') {
+            map.remove();
+        }
+    } catch (e) { /* mapa */ }
+    map = null;
+    const host = window.__censoEmbedHost;
+    if (host && typeof $ !== 'undefined') {
+        try {
+            $(host).find('a[data-toggle="tab"]').off('hide.bs.tab show.bs.tab shown.bs.tab');
+        } catch (e) { /* jquery */ }
+    }
+    window.__censoEmbedHost = null;
 }
 
-function destroyView() {}
+function censo_embed_enter(embedHost) {
+    const host = embedHost || document.getElementById('ventasPanelEmbed');
+    if (!host) {
+        console.error('[censo_embed_enter] sin contenedor');
+        return;
+    }
+    window.__censoEmbedHost = host;
+    getView(host);
+    addListeners();
+}
+
+window.censo_embed_enter = censo_embed_enter;
+window.censo_embed_leave = censo_embed_leave;
+
+function initView(mountEl) {
+    censo_embed_enter(mountEl || document.getElementById('ventasPanelEmbed'));
+}
+
+function destroyView() {
+    censo_embed_leave();
+}

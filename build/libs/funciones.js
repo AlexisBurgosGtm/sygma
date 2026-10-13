@@ -1224,9 +1224,11 @@ let F = {
             text,
           }).show();
       },
-      slideAnimationTabs: ()=>{
-        //inicializa el slide de las tabs en censo
-        $('a[data-toggle="tab"]').on('hide.bs.tab', function (e) {
+      slideAnimationTabs: (container)=>{
+        //inicializa el slide de las tabs en censo (opcional: solo dentro de container)
+        const $tabs = container ? $(container).find('a[data-toggle="tab"]') : $('a[data-toggle="tab"]');
+        $tabs.off('hide.bs.tab show.bs.tab shown.bs.tab');
+        $tabs.on('hide.bs.tab', function (e) {
             var $old_tab = $($(e.target).attr("href"));
             var $new_tab = $($(e.relatedTarget).attr("href"));
     
@@ -1244,7 +1246,7 @@ let F = {
             }
         });
     
-        $('a[data-toggle="tab"]').on('show.bs.tab', function (e) {
+        $tabs.on('show.bs.tab', function (e) {
             var $new_tab = $($(e.target).attr("href"));
             var $old_tab = $($(e.relatedTarget).attr("href"));
     
@@ -1258,7 +1260,7 @@ let F = {
             }
         });
     
-        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        $tabs.on('shown.bs.tab', function (e) {
             // your code on active tab shown
         });
       },

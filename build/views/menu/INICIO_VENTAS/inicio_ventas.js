@@ -1,66 +1,35 @@
 var ventas_currentPane = 'uno';
 var ventas_embedDestroy = null;
-/** Shell #myTabHomeContent / #myTabHome fuera del DOM mientras hay vista embebida (evita IDs duplicados con view_pedidos). */
-var ventas_shellTabsDetached = null;
+var ventas_activeEmbedCard = null;
 
-function ventas_detachShellTabs() {
-    if (ventas_shellTabsDetached) return;
-    const bag = {};
-    const content = document.getElementById('myTabHomeContent');
-    const nav = document.getElementById('myTabHome');
-    if (content?.parentNode) {
-        bag.contentPh = document.createComment('ventas-shell-tabs-content');
-        content.parentNode.insertBefore(bag.contentPh, content);
-        content.remove();
-        bag.content = content;
+/** Shell real (excluye nodos dentro de #ventasPanelEmbed). */
+function ventas_getShellElement(id) {
+    const panel = document.getElementById('ventasPanelContent');
+    if (id === 'myTabHomeContent' && panel) {
+        const direct = [...panel.children].find((el) => el.id === 'myTabHomeContent');
+        if (direct) return direct;
     }
-    if (nav?.parentNode) {
-        bag.navPh = document.createComment('ventas-shell-tabs-nav');
-        nav.parentNode.insertBefore(bag.navPh, nav);
-        nav.remove();
-        bag.nav = nav;
+    const nodes = document.querySelectorAll(`#${CSS.escape(String(id))}`);
+    for (let i = 0; i < nodes.length; i += 1) {
+        const el = nodes[i];
+        if (!el.closest('#ventasPanelEmbed')) return el;
     }
-    if (bag.content || bag.nav) ventas_shellTabsDetached = bag;
+    return null;
 }
 
-function ventas_reattachShellTabs() {
-    if (!ventas_shellTabsDetached) return;
-    const bag = ventas_shellTabsDetached;
-    if (bag.content && bag.contentPh?.parentNode) {
-        bag.contentPh.parentNode.insertBefore(bag.content, bag.contentPh);
-        bag.contentPh.remove();
-    }
-    if (bag.nav && bag.navPh?.parentNode) {
-        bag.navPh.parentNode.insertBefore(bag.nav, bag.navPh);
-        bag.navPh.remove();
-    }
-    ventas_shellTabsDetached = null;
-}
-
-var ventas_embedDomScopeRestore = null;
-
-function ventas_mountEmbedDomScope(embedRoot) {
-    ventas_unmountEmbedDomScope();
-    if (!embedRoot) return;
-    const origGetElementById = document.getElementById.bind(document);
-    ventas_embedDomScopeRestore = () => {
-        document.getElementById = origGetElementById;
-        ventas_embedDomScopeRestore = null;
-    };
-    document.getElementById = function (id) {
-        if (id && embedRoot.isConnected) {
-            try {
-                const scoped = embedRoot.querySelector('#' + CSS.escape(String(id)));
-                if (scoped) return scoped;
-            } catch (e) { /* id inválido */ }
-        }
-        return origGetElementById(id);
-    };
-}
-
-function ventas_unmountEmbedDomScope() {
-    if (typeof ventas_embedDomScopeRestore === 'function') {
-        ventas_embedDomScopeRestore();
+function ventas_setEmbedChromeVisible(embedActive) {
+    const embed = document.getElementById('ventasPanelEmbed');
+    const content = ventas_getShellElement('myTabHomeContent');
+    const nav = ventas_getShellElement('myTabHome');
+    if (embedActive) {
+        embed?.classList.remove('d-none');
+        content?.classList.add('d-none');
+        nav?.classList.add('d-none');
+    } else {
+        embed?.classList.add('d-none');
+        if (embed) embed.innerHTML = '';
+        content?.classList.remove('d-none');
+        nav?.classList.remove('d-none');
     }
 }
 
@@ -72,63 +41,29 @@ var VENTAS_EMBED_SCRIPTS = {
     btnMenuConcursos: VENTAS_EMBED_BASE + 'view_concursos_vendedor.js',
 };
 
-function ventas_ensurePedidosScript() {
-    if (typeof window.pedidos_embed_enter === 'function') {
-        return Promise.resolve();
-    }
-    const url = VENTAS_EMBED_SCRIPTS.btnMenuNuevoPedido;
-    const existing = document.querySelector('script[data-ventas-pedidos-core]');
-    if (existing) {
-        return new Promise((resolve, reject) => {
-            if (typeof window.pedidos_embed_enter === 'function') {
-                resolve();
-                return;
-            }
-            existing.addEventListener('load', () => resolve());
-            existing.addEventListener('error', () => reject(new Error('pedidos script')));
-        });
-    }
-    return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = url + (url.includes('?') ? '&' : '?') + '_vpc=' + Date.now();
-        script.setAttribute('data-ventas-pedidos-core', 'true');
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error('No se pudo cargar pedidos'));
-        document.body.appendChild(script);
-    });
-}
-
 function ventas_runEmbedInit(cardId, embedRoot, coreInit, coreDestroy) {
-    const savedRoot = root;
-    ventas_mountEmbedDomScope(embedRoot);
-    root = embedRoot;
+    window.__ventasEmbedMount = embedRoot;
+    ventas_embedDestroy = null;
     try {
-        if (cardId === 'btnMenuNuevoPedido' && typeof window.pedidos_embed_enter === 'function') {
-            window.pedidos_embed_enter();
-            ventas_embedDestroy = typeof window.pedidos_embed_leave === 'function'
-                ? window.pedidos_embed_leave
-                : null;
-        } else {
-            const embedInit = window.initView;
-            const embedDestroyCand = window.destroyView;
-            if (typeof embedInit === 'function' && embedInit !== coreInit) {
-                embedInit();
-            } else if (typeof embedInit === 'function') {
-                embedInit();
-            }
-            ventas_embedDestroy = (typeof embedDestroyCand === 'function' && embedDestroyCand !== coreDestroy)
-                ? embedDestroyCand
-                : null;
+        const embedInit = window.initView;
+        const embedDestroyCand = window.destroyView;
+        if (typeof embedInit === 'function' && embedInit !== coreInit) {
+            embedInit(embedRoot);
         }
+        ventas_embedDestroy = (typeof embedDestroyCand === 'function' && embedDestroyCand !== coreDestroy)
+            ? embedDestroyCand
+            : null;
+        ventas_activeEmbedCard = cardId;
     } catch (err) {
-        ventas_unmountEmbedDomScope();
         console.error('[ventas_runEmbedInit]', err);
+        ventas_activeEmbedCard = null;
         throw err;
-    }
-    root = savedRoot;
-    if (window._ventasCore) {
-        window.initView = coreInit;
-        window.destroyView = coreDestroy;
+    } finally {
+        window.__ventasEmbedMount = null;
+        if (window._ventasCore) {
+            window.initView = coreInit;
+            window.destroyView = coreDestroy;
+        }
     }
     ventas_rewireEmbedActions(embedRoot);
 }
@@ -213,21 +148,20 @@ function ventas_showPanel(paneId, cardId, afterShow) {
     ventas_currentPane = paneId;
     ventas_closeSidebarMobile();
     ventas_teardownEmbed();
-    ventas_reattachShellTabs();
-    document.getElementById('ventasPanelEmbed')?.classList.add('d-none');
-    document.getElementById('myTabHomeContent')?.classList.remove('d-none');
-    document.querySelectorAll('#myTabHomeContent .tab-pane').forEach(p => {
+    const shellContent = ventas_getShellElement('myTabHomeContent');
+    shellContent?.querySelectorAll('.tab-pane').forEach(p => {
         p.classList.remove('show', 'active');
     });
-    const pane = document.getElementById(paneId);
+    const pane = shellContent?.querySelector('#' + CSS.escape(String(paneId))) || document.getElementById(paneId);
     if (pane) {
         pane.classList.add('show', 'active');
     }
-    document.querySelectorAll('#myTabHome .nav-link').forEach(l => {
+    const shellNav = ventas_getShellElement('myTabHome');
+    shellNav?.querySelectorAll('.nav-link').forEach(l => {
         l.classList.remove('active');
         l.setAttribute('aria-selected', 'false');
     });
-    const tabLink = document.querySelector(`#myTabHome a[href="#${paneId}"]`);
+    const tabLink = shellNav?.querySelector(`a[href="#${paneId}"]`) || document.querySelector(`#myTabHome a[href="#${paneId}"]`);
     if (tabLink) {
         tabLink.classList.add('active');
         tabLink.setAttribute('aria-selected', 'true');
@@ -243,27 +177,27 @@ function ventas_showHome() {
 
 function ventas_teardownEmbed() {
     if (ventas_embedDestroy) {
-        try { ventas_embedDestroy(); } catch (e) { /* vista embebida sin teardown */ }
-        ventas_embedDestroy = null;
-    } else if (typeof window.pedidos_embed_leave === 'function') {
-        try { window.pedidos_embed_leave(); } catch (e) { /* pedidos leave */ }
+        try { ventas_embedDestroy(); } catch (e) { /* vista embebida */ }
+    } else if (typeof window.pedidos_embed_leave === 'function' && document.querySelector('.ped-modal-detalle')) {
+        try { window.pedidos_embed_leave(); } catch (e) { /* modales pedidos huérfanos */ }
     }
-    ventas_unmountEmbedDomScope();
-    document.querySelectorAll('script[data-ventas-embed]').forEach((s) => s.remove());
-    /* data-ventas-pedidos-core permanece cargado una sola vez */
-    const embed = document.getElementById('ventasPanelEmbed');
-    if (embed) {
-        embed.classList.add('d-none');
-        embed.innerHTML = '';
+    ventas_embedDestroy = null;
+    ventas_activeEmbedCard = null;
+    window.__ventasEmbedMount = null;
+    window.__pedidosEmbedHost = null;
+    window.__censoEmbedHost = null;
+    window.proveedor_embedRefresh = null;
+    if (typeof $ !== 'undefined') {
+        try { $('a[data-toggle="tab"]').off('hide.bs.tab show.bs.tab shown.bs.tab'); } catch (e) { /* noop */ }
     }
+    document.querySelectorAll('script[data-ventas-embed], script[data-ventas-pedidos-core]').forEach((s) => s.remove());
     if (typeof $ !== 'undefined') {
         try {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
         } catch (e) { /* bootstrap no disponible */ }
     }
-    ventas_reattachShellTabs();
-    document.getElementById('myTabHomeContent')?.classList.remove('d-none');
+    ventas_setEmbedChromeVisible(false);
     if (window._ventasCore) {
         window.initView = window._ventasCore.initView;
         window.destroyView = window._ventasCore.destroyView;
@@ -281,11 +215,12 @@ function ventas_rewireEmbedActions(container) {
 function ventas_loadEmbed(scriptUrl, cardId) {
     ventas_closeSidebarMobile();
     ventas_teardownEmbed();
-    ventas_detachShellTabs();
     ventas_setActiveCard(cardId || null);
     const embed = document.getElementById('ventasPanelEmbed');
+    if (!embed) return Promise.reject(new Error('sin embed'));
     embed.classList.remove('d-none');
     embed.innerHTML = GlobalLoader;
+    ventas_setEmbedChromeVisible(true);
 
     const coreInit = window._ventasCore?.initView;
     const coreDestroy = window._ventasCore?.destroyView;
@@ -302,10 +237,6 @@ function ventas_loadEmbed(scriptUrl, cardId) {
                 reject(err);
             }
         };
-        if (cardId === 'btnMenuNuevoPedido') {
-            ventas_ensurePedidosScript().then(boot).catch(reject);
-            return;
-        }
         const script = document.createElement('script');
         script.src = scriptUrl + (scriptUrl.includes('?') ? '&' : '?') + '_ve=' + Date.now();
         script.setAttribute('data-ventas-embed', 'true');
@@ -316,6 +247,7 @@ function ventas_loadEmbed(scriptUrl, cardId) {
         };
         document.body.appendChild(script);
     }).catch((err) => {
+        console.error('[ventas_loadEmbed]', cardId, err);
         ventas_teardownEmbed();
         ventas_showHome();
         throw err;
@@ -326,7 +258,9 @@ function ventas_bindEmbedMenu(cardId) {
     const scriptUrl = VENTAS_EMBED_SCRIPTS[cardId];
     if (!scriptUrl) return;
     document.getElementById(cardId)?.addEventListener('click', () => {
-        ventas_loadEmbed(scriptUrl, cardId);
+        ventas_loadEmbed(scriptUrl, cardId).catch(() => {
+            F.AvisoError('No se pudo abrir la opción del menú');
+        });
     });
 }
 

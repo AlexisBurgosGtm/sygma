@@ -189,7 +189,7 @@ function ven_conc_injectStyles() {
     document.head.appendChild(st);
 }
 
-function getView() {
+function getView(mountEl) {
     const html = `
         <div class="col-12 p-0 ven-conc-root">
             <div class="card card-rounded shadow border-0 ventas-ofertas-sec mb-2">
@@ -259,13 +259,16 @@ function getView() {
                 </div>
             </div>
         </div>`;
-    const el = typeof root !== 'undefined' && root ? root : document.getElementById('root');
+    const el = mountEl
+        || document.getElementById('ventasPanelEmbed')
+        || (typeof root !== 'undefined' && root ? root : document.getElementById('root'));
     if (el) el.innerHTML = html;
 }
 
-function initView() {
+function initView(mountEl) {
     ven_conc_injectStyles();
-    getView();
+    const host = mountEl || document.getElementById('ventasPanelEmbed');
+    getView(host);
     document.getElementById('txtVenConcursoBuscar')?.addEventListener('input', ven_conc_pintar);
     window.proveedor_embedRefresh = ven_conc_cargar;
     ven_conc_cargar();
