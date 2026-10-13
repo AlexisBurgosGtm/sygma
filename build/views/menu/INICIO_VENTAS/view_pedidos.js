@@ -3375,6 +3375,8 @@ function pedido_oferta_montar(id, cab, productos, ses){
         ses.CANTIDAD_BONIF = pedido_oferta_wizard.oferta.CANTIDAD_BONIF;
         ses.productos = set;
     }
+    const buscar = document.getElementById('txtOfertaWizardBuscar');
+    if (buscar) buscar.value = '';
     pedido_oferta_pintar_productos();
     pedido_oferta_enriquecer_exist(id);
 }
@@ -3400,6 +3402,10 @@ function pedido_abrir_ofertas_disponibles(){
 }
 
 function pedido_oferta_filtrar_lista(){
+    if (pedido_oferta_wizard.step === 'prod') {
+        pedido_oferta_pintar_productos();
+        return;
+    }
     if (pedido_oferta_wizard.step !== 'lista') return;
     pedido_oferta_pintar_lista();
 }
@@ -3409,7 +3415,9 @@ function pedido_oferta_pintar_lista(){
     if (!body) return;
     pedido_oferta_wizard.step = 'lista';
     pedido_oferta_header('Ver Ofertas Activas', 'Toque una oferta para agregar sus productos', false, true, false);
-    const q = String(document.getElementById('txtOfertaWizardBuscar')?.value || '').toLowerCase().trim();
+    const buscar = document.getElementById('txtOfertaWizardBuscar');
+    if (buscar) buscar.placeholder = 'Buscar oferta...';
+    const q = String(buscar?.value || '').toLowerCase().trim();
     const rows = (pedido_ofertas_catalogo || []).filter((r) => {
         if (!q) return true;
         return String(r.DESOFERTA || '').toLowerCase().indexOf(q) >= 0
@@ -3473,12 +3481,25 @@ function pedido_oferta_pintar_productos(){
         o.DESOFERTA,
         `Mínimo ${o.UNIDADES} unid. · Bonif. ${o.CANTIDAD_BONIF} · En esta oferta: ${ev.unidades}`,
         true,
-        false,
+        true,
         ev.aplica
     );
-    const rows = pedido_oferta_wizard.productos || [];
+    const buscar = document.getElementById('txtOfertaWizardBuscar');
+    if (buscar) buscar.placeholder = 'Buscar producto, código, marca...';
+    const q = String(buscar?.value || '').toLowerCase().trim();
+    const rows = (pedido_oferta_wizard.productos || []).filter((r) => {
+        if (!q) return true;
+        const cod = String(r.CODPROD || '').toLowerCase();
+        const des = String(r.DESPROD || '').toLowerCase();
+        const mar = String(r.DESMARCA || '').toLowerCase();
+        const med = String(r.CODMEDIDA || '').toLowerCase();
+        return cod.indexOf(q) >= 0 || des.indexOf(q) >= 0 || mar.indexOf(q) >= 0 || med.indexOf(q) >= 0;
+    });
     if (!rows.length) {
-        body.innerHTML = '<div class="text-center text-muted py-3">Esta oferta no tiene productos de venta.</div>';
+        const msg = q
+            ? 'Ningún producto coincide con la búsqueda.'
+            : 'Esta oferta no tiene productos de venta.';
+        body.innerHTML = `<div class="text-center text-muted py-3">${msg}</div>`;
         return;
     }
     body.innerHTML = rows.map((r) => {

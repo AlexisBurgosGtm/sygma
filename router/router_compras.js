@@ -3,51 +3,105 @@ const express = require('express');
 const router = express.Router();
 const { ensureDocproductosDesc123 } = require('../services/ensureDocproductosDesc123');
 
+function escSqlCompras(val) {
+    return String(val ?? '').replace(/'/g, "''");
+}
+
+function exprCostoUnitarioCompraSql() {
+    return `CASE
+            WHEN SUM(ISNULL(TOTALUNIDADES, 0)) > 0
+                THEN SUM(ISNULL(TOTALCOSTO, 0)) / SUM(TOTALUNIDADES)
+            ELSE MAX(
+                (CASE WHEN ISNULL(COSTO, 0) > 0 THEN COSTO ELSE PRECIO END)
+                / NULLIF(EQUIVALE, 0)
+            )
+        END`;
+}
+
+/** CTE compartido (cada UPDATE en SQL Server necesita su propio WITH). */
+function cteCalcCostosCompraSql(emp, doc, corr) {
+    const costoUnExpr = exprCostoUnitarioCompraSql();
+    return `
+        compra AS (
+            SELECT
+                CODPROD,
+                SUM(ISNULL(TOTALCOSTO, 0)) AS TC_COMPRA,
+                SUM(ISNULL(TOTALUNIDADES, 0)) AS TU_COMPRA,
+                ${costoUnExpr} AS COSTO_UN
+            FROM DOCPRODUCTOS
+            WHERE EMPNIT='${emp}'
+                AND CODDOC='${doc}'
+                AND CORRELATIVO=${corr}
+            GROUP BY CODPROD
+        ),
+        inv AS (
+            SELECT
+                v.CODPROD,
+                SUM(ISNULL(v.TOTALUNIDADES, ISNULL(v.EXISTENCIA, 0))) AS TU_INV,
+                SUM(
+                    CASE
+                        WHEN ISNULL(v.TOTALCOSTO, 0) > 0 THEN ISNULL(v.TOTALCOSTO, 0)
+                        ELSE ISNULL(v.TOTALUNIDADES, ISNULL(v.EXISTENCIA, 0))
+                            * ISNULL(NULLIF(v.COSTO_PROMEDIO, 0), ISNULL(v.COSTO_ULTIMO, 0))
+                    END
+                ) AS TC_INV
+            FROM view_invsaldo v
+            INNER JOIN compra c ON c.CODPROD = v.CODPROD
+            WHERE v.EMPNIT='${emp}'
+            GROUP BY v.CODPROD
+        ),
+        calc AS (
+            SELECT
+                c.CODPROD,
+                c.COSTO_UN,
+                CASE
+                    WHEN (ISNULL(i.TU_INV, 0) + ISNULL(c.TU_COMPRA, 0)) > 0
+                        THEN (ISNULL(i.TC_INV, 0) + ISNULL(c.TC_COMPRA, 0))
+                            / (ISNULL(i.TU_INV, 0) + ISNULL(c.TU_COMPRA, 0))
+                    ELSE c.COSTO_UN
+                END AS COSTO_PROM
+            FROM compra c
+            LEFT JOIN inv i ON i.CODPROD = c.CODPROD
+        )`;
+}
+
+/** PRECIOS + PRODUCTOS desde líneas DOCPRODUCTOS; promedio ponderado inv + compra por sede. */
+function sqlActualizarCostosDesdeCompraDocumento(emp, doc, corr) {
+    const cte = cteCalcCostosCompraSql(emp, doc, corr);
+    return `
+        ;WITH ${cte}
+        UPDATE p SET p.COSTO = ROUND(calc.COSTO_UN * p.EQUIVALE, 4)
+        FROM PRECIOS p
+        INNER JOIN calc ON calc.CODPROD = p.CODPROD;
+
+        ;WITH ${cte}
+        UPDATE pr SET
+            pr.COSTO_ANTERIOR = ISNULL(pr.COSTO_ULTIMO, 0),
+            pr.COSTO_ULTIMO = ROUND(calc.COSTO_UN, 4),
+            pr.COSTO_PROMEDIO = ROUND(calc.COSTO_PROM, 4)
+        FROM PRODUCTOS pr
+        INNER JOIN calc ON calc.CODPROD = pr.CODPROD;
+    `;
+}
+
+function costoPromedioPonderado(tcInv, tuInv, tcCompra, tuCompra, costoUnFallback) {
+    const tu = (Number(tuInv) || 0) + (Number(tuCompra) || 0);
+    if (tu <= 0) return Number(costoUnFallback) || 0;
+    return ((Number(tcInv) || 0) + (Number(tcCompra) || 0)) / tu;
+}
+
 router.post("/update_costos_documento", async(req,res)=>{
    
 
         const { token,sucursal,coddoc,correlativo} = req.body;
 
+            const emp = escSqlCompras(sucursal);
+            const doc = escSqlCompras(coddoc);
+            const corr = Number(correlativo) || 0;
 
-            let qry = `
-                SELECT 
-                    CODPROD, 
-                    DESPROD,
-                    EQUIVALE, 
-                    (COSTO/EQUIVALE) AS COSTO_UN, 
-                    COSTO 
-                FROM DOCPRODUCTOS 
-                WHERE 
-                    EMPNIT='${sucursal}' AND 
-                    CODDOC='${coddoc}' AND 
-                    CORRELATIVO=${correlativo};
-                    `;
+            const qryDocproductos = sqlActualizarCostosDesdeCompraDocumento(emp, doc, corr);
 
-            let qryDocproductos = '';
-
-
-            execute.get_data_qry(qry,token)
-            .then((data)=>{
-                
-          
-
-                data.recordset.map((r)=>{
-                    qryDocproductos += `
-                                     UPDATE PRODUCTOS SET 
-                                            COSTO_ULTIMO=${Number(r.COSTO_UN).toFixed(4)}
-                                    WHERE CODPROD='${r.CODPROD}';
-                                    `
-
-                })
-
-                execute.QueryToken(res,qryDocproductos,token);
-  
-            })
-            .catch(()=>{
-                res.send('error');
-
-            })            
-    
+            execute.QueryToken(res, qryDocproductos, token);
      
 });
 
@@ -55,40 +109,100 @@ router.post("/update_costos_documento", async(req,res)=>{
 router.post("/update_costos_compra", async(req,res)=>{
    
 
-    res.send('error')
-    return;
-
     const { token,sucursal,json_costos} = req.body;
-
-    let qry ='';
 
     let data_costos = JSON.parse(json_costos);
 
     let qry_productos=''; let qry_precios='';
 
-    data_costos.map((r)=>{
+    const costoUnPorProd = new Map();
 
-        let costo = Number(r.COSTO)/Number(r.EQUIVALE);
-        let costo_promedio = costo/Number(r.EXISTENCIA);
+    data_costos.forEach((r) => {
+        const codprod = String(r.CODPROD || '').trim();
+        if (!codprod) return;
+        const totalCosto = Number(r.TOTALCOSTO);
+        const totalUnidades = Number(r.TOTALUNIDADES);
+        const equivale = Number(r.EQUIVALE) || 1;
+        let tc = Number.isFinite(totalCosto) ? totalCosto : (Number(r.COSTO) || 0) * (Number(r.CANTIDAD) || 0);
+        let tu = Number.isFinite(totalUnidades) ? totalUnidades : (Number(r.CANTIDAD) || 0) * equivale;
+        if (!costoUnPorProd.has(codprod)) {
+            costoUnPorProd.set(codprod, { totalCosto: 0, totalUnidades: 0 });
+        }
+        const agg = costoUnPorProd.get(codprod);
+        agg.totalCosto += tc;
+        agg.totalUnidades += tu;
+    });
 
-        qry_productos += `
+    const codprods = [...costoUnPorProd.keys()];
+    if (!codprods.length) {
+        res.send('error');
+        return;
+    }
+
+    const emp = escSqlCompras(sucursal);
+    const inList = codprods.map((c) => `'${escSqlCompras(c)}'`).join(',');
+    const qryInv = `
+        SELECT
+            CODPROD,
+            SUM(ISNULL(TOTALUNIDADES, ISNULL(EXISTENCIA, 0))) AS TU_INV,
+            SUM(
+                CASE
+                    WHEN ISNULL(TOTALCOSTO, 0) > 0 THEN ISNULL(TOTALCOSTO, 0)
+                    ELSE ISNULL(TOTALUNIDADES, ISNULL(EXISTENCIA, 0))
+                        * ISNULL(NULLIF(COSTO_PROMEDIO, 0), ISNULL(COSTO_ULTIMO, 0))
+                END
+            ) AS TC_INV
+        FROM view_invsaldo
+        WHERE EMPNIT='${emp}'
+            AND CODPROD IN (${inList})
+        GROUP BY CODPROD
+    `;
+
+    try {
+        const invData = await execute.get_data_qry(qryInv, token);
+        const invMap = new Map();
+        (invData.recordset || []).forEach((row) => {
+            invMap.set(String(row.CODPROD || '').trim(), row);
+        });
+
+        costoUnPorProd.forEach((agg, codprod) => {
+            const codEsc = escSqlCompras(codprod);
+            const costoUn = agg.totalUnidades > 0 ? (agg.totalCosto / agg.totalUnidades) : 0;
+            if (!costoUn) return;
+            const inv = invMap.get(codprod) || {};
+            const costoProm = costoPromedioPonderado(
+                inv.TC_INV,
+                inv.TU_INV,
+                agg.totalCosto,
+                agg.totalUnidades,
+                costoUn
+            );
+
+            qry_productos += `
             UPDATE PRODUCTOS SET 
-                    COSTO_ULTIMO=${costo}, 
-                    COSTO_PROMEDIO=${costo_promedio},
-                    COSTO_ANTERIOR=${costo}
-            WHERE CODPROD='${r.CODPROD}';
-            `
-        qry_precios += `
-            UPDATE PRECIOS SET COSTO=${Number(r.COSTO)}
-            WHERE CODPROD='${r.CODPROD}' AND CODMEDIDA='${r.CODMEDIDA}';
-        `
-    })
-    
-    qry = qry_productos + qry_precios;
+                    COSTO_ANTERIOR = ISNULL(COSTO_ULTIMO, 0),
+                    COSTO_ULTIMO=${costoUn.toFixed(4)}, 
+                    COSTO_PROMEDIO=${costoProm.toFixed(4)}
+            WHERE CODPROD='${codEsc}';
+            `;
+            qry_precios += `
+            UPDATE PRECIOS SET COSTO=ROUND(${costoUn.toFixed(8)} * EQUIVALE, 4)
+            WHERE CODPROD='${codEsc}';
+            `;
+        });
+    } catch (e) {
+        res.send('error');
+        return;
+    }
 
-    res.send('error');
-    
-    //execute.QueryToken(res,qry,token);
+    const qry = qry_productos + qry_precios;
+
+    if (!qry.trim()) {
+        res.send('error');
+        return;
+    }
+
+    execute.QueryToken(res,qry,token);
      
 });
 
@@ -1278,11 +1392,19 @@ router.post("/preview_costos_catalogo", async(req,res)=>{
             p.CODMEDIDA,
             p.EQUIVALE,
             p.COSTO AS COSTO_ACTUAL,
+            g.COSTO_UN AS COSTO_UNITARIO,
             ROUND(g.COSTO_UN * p.EQUIVALE, 4) AS COSTO_NUEVO
         FROM (
             SELECT CODPROD,
                 MAX(DESPROD) AS DESPROD,
-                MAX(PRECIO / NULLIF(EQUIVALE, 0)) AS COSTO_UN
+                CASE
+                    WHEN SUM(ISNULL(TOTALUNIDADES, 0)) > 0
+                        THEN SUM(ISNULL(TOTALCOSTO, 0)) / SUM(TOTALUNIDADES)
+                    ELSE MAX(
+                        (CASE WHEN ISNULL(COSTO, 0) > 0 THEN COSTO ELSE PRECIO END)
+                        / NULLIF(EQUIVALE, 0)
+                    )
+                END AS COSTO_UN
             FROM DOCPRODUCTOS
             WHERE EMPNIT='${sucursal}'
                 AND CODDOC='${coddoc}'
@@ -1300,7 +1422,7 @@ router.post("/preview_costos_catalogo", async(req,res)=>{
 
 router.post("/aplicar_costos_catalogo", async(req,res)=>{
 
-    const { token, sucursal, json_costos } = req.body;
+    const { token, sucursal, coddoc, correlativo, json_costos } = req.body;
 
     let qry = '';
     let data_costos = [];
@@ -1330,6 +1452,13 @@ router.post("/aplicar_costos_catalogo", async(req,res)=>{
                 AND CODMEDIDA='${codmedida}';
         `;
     });
+
+    const emp = escSqlCompras(sucursal);
+    const doc = escSqlCompras(coddoc);
+    const corr = Number(correlativo) || 0;
+    if (emp && doc && corr) {
+        qry += sqlActualizarCostosDesdeCompraDocumento(emp, doc, corr);
+    }
 
     if (!qry) {
         res.send('error');

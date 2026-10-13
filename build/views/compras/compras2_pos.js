@@ -955,12 +955,16 @@ function compras2_aplicar_costos_catalogo() {
         id: r.ID,
         codprod: r.CODPROD,
         codmedida: r.CODMEDIDA,
+        equivale: r.EQUIVALE,
+        costo_un: r.COSTO_UNITARIO,
         costo_nuevo: r.COSTO_NUEVO
     }));
 
     axios.post('/compras/aplicar_costos_catalogo', {
         token: TOKEN,
         sucursal: GlobalEmpnit,
+        coddoc: doc.coddoc,
+        correlativo: doc.correlativo,
         json_costos: JSON.stringify(payload)
     }).then((response) => {
         if (response.data === 'error') throw new Error('error');
@@ -1405,7 +1409,6 @@ function compras2_setup_ingreso_listeners() {
         const descuento = 0;
         const { desc1, desc2, desc3 } = compras2_read_desc_inputs('');
         if (preciounitario === 0) { F.AvisoError('Precio inválido'); return; }
-        if (preciounitario < Number(Selected_costo)) { F.AvisoError('Precio menor al costo'); return; }
         const tipoprecio = data_empresa_config?.TIPO_PRECIO || '';
 
         const btnHtml = btn.innerHTML;
@@ -1413,7 +1416,7 @@ function compras2_setup_ingreso_listeners() {
         btn.innerHTML = '<i class="fal fa-sync fa-spin mr-1"></i> Agregando...';
 
         compras2_insert_item_api(doc.coddoc, doc.correlativo, Selected_codprod, Selected_desprod, Selected_codmedida,
-            cantidad, Selected_equivale, Selected_costo, preciounitario, descuento, Selected_tipoprod, tipoprecio,
+            cantidad, Selected_equivale, preciounitario, preciounitario, descuento, Selected_tipoprod, tipoprecio,
             Selected_existencia, Selected_bono, Selected_exento, desc1, desc2, desc3)
             .then(() => {
                 $('#modal_cantidad').modal('hide');
@@ -1443,7 +1446,6 @@ function compras2_setup_ingreso_listeners() {
         const descuento = Number(typeof Selected_descuento !== 'undefined' ? Selected_descuento : 0) || 0;
         const { desc1, desc2, desc3 } = compras2_read_desc_inputs('E');
         if (preciounitario === 0) { F.AvisoError('Precio inválido'); return; }
-        if (preciounitario < Number(Selected_costo)) { F.AvisoError('Precio menor al costo'); return; }
         const tipoprecio = data_empresa_config?.TIPO_PRECIO || '';
 
         const btnHtml = btn.innerHTML;
@@ -1452,7 +1454,7 @@ function compras2_setup_ingreso_listeners() {
 
         GF.get_documento_eliminar_item(Selected_id)
             .then(() => compras2_insert_item_api(doc.coddoc, doc.correlativo, Selected_codprod, Selected_desprod,
-                Selected_codmedida, cantidad, Selected_equivale, Selected_costo, preciounitario, descuento,
+                Selected_codmedida, cantidad, Selected_equivale, preciounitario, preciounitario, descuento,
                 Selected_tipoprod, tipoprecio, Selected_existencia, Selected_bono, Selected_exento, desc1, desc2, desc3))
             .then(() => {
                 $('#modal_editar_cantidad').modal('hide');

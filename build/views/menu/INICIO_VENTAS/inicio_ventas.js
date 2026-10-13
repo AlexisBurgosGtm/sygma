@@ -141,7 +141,15 @@ function ventas_getAnio() {
     return document.getElementById('cmbAnioHeader')?.value || F.get_anio_curso();
 }
 
+function ventas_isEmbedPane() {
+    return String(ventas_currentPane || '').indexOf('embed') === 0;
+}
+
 function ventas_onHeaderFiltersChange() {
+    if (ventas_isEmbedPane()) {
+        if (typeof window.proveedor_embedRefresh === 'function') window.proveedor_embedRefresh();
+        return;
+    }
     if (selected_tab) cargar_grid();
     if (ventas_currentPane === 'uno') ventas_loadDashboard();
     if (typeof window.proveedor_embedRefresh === 'function') window.proveedor_embedRefresh();
@@ -205,6 +213,9 @@ function ventas_showPanel(paneId, cardId, afterShow) {
     ventas_currentPane = paneId;
     ventas_closeSidebarMobile();
     ventas_teardownEmbed();
+    ventas_reattachShellTabs();
+    document.getElementById('ventasPanelEmbed')?.classList.add('d-none');
+    document.getElementById('myTabHomeContent')?.classList.remove('d-none');
     document.querySelectorAll('#myTabHomeContent .tab-pane').forEach(p => {
         p.classList.remove('show', 'active');
     });
@@ -280,6 +291,8 @@ function ventas_loadEmbed(scriptUrl, cardId) {
     const coreDestroy = window._ventasCore?.destroyView;
     const embedRoot = embed;
 
+    ventas_currentPane = 'embed';
+
     return new Promise((resolve, reject) => {
         const boot = () => {
             try {
@@ -297,8 +310,15 @@ function ventas_loadEmbed(scriptUrl, cardId) {
         script.src = scriptUrl + (scriptUrl.includes('?') ? '&' : '?') + '_ve=' + Date.now();
         script.setAttribute('data-ventas-embed', 'true');
         script.onload = boot;
-        script.onerror = () => reject(new Error('No se pudo cargar: ' + scriptUrl));
+        script.onerror = () => {
+            ventas_currentPane = 'uno';
+            reject(new Error('No se pudo cargar: ' + scriptUrl));
+        };
         document.body.appendChild(script);
+    }).catch((err) => {
+        ventas_teardownEmbed();
+        ventas_showHome();
+        throw err;
     });
 }
 
