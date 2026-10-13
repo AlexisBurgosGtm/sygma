@@ -1,11 +1,17 @@
 function pedidos_el(id) {
     const host = window.__pedidosEmbedHost || document.getElementById('ventasPanelEmbed');
+    const sid = String(id);
     if (host) {
-        if (String(id) === host.id) return host;
+        if (sid === host.id) return host;
         try {
-            const scoped = host.querySelector('#' + CSS.escape(String(id)));
+            const scoped = host.querySelector('#' + CSS.escape(sid));
             if (scoped) return scoped;
         } catch (e) { /* id inválido */ }
+        const global = document.getElementById(id);
+        if (global) {
+            if (global.closest('.ped-modal-detalle')) return global;
+            if (sid.startsWith('ped-')) return global;
+        }
         return null;
     }
     return document.getElementById(id);
@@ -2030,6 +2036,7 @@ function pedidos_mount(mountEl) {
     window.__pedidosEmbedHost = host;
     pedidos_embed_reset_state();
     getView(host);
+    pedidos_ensure_reasign_modals_en_body();
     addListeners();
     pedidos_show_tab_lista();
     tbl_clientes('');
