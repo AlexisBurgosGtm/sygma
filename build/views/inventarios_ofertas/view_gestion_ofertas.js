@@ -256,11 +256,18 @@ function getView() {
                         </div>
                     </div>
                     <div class="pos2-panel-card">
-                        <div class="pos2-panel-head d-flex justify-content-between align-items-center">
-                            <span class="negrita mb-0"><i class="fal fa-tags mr-1"></i> Ofertas</span>
-                            <input type="text" class="form-control form-control-sm pos2-search-input"
-                                style="max-width:220px" id="txtBuscarOfertaCab"
-                                placeholder="Buscar oferta...">
+                        <div class="pos2-panel-head d-flex justify-content-between align-items-center flex-wrap">
+                            <span class="negrita mb-0 mr-2"><i class="fal fa-tags mr-1"></i> Ofertas</span>
+                            <div class="d-flex align-items-center flex-wrap">
+                                <select class="form-control form-control-sm mr-2 mb-1 mb-md-0" style="max-width:140px" id="selOfertasActivo" title="Filtrar por estado activo">
+                                    <option value="TODAS">Todas</option>
+                                    <option value="SI" selected>Activas</option>
+                                    <option value="NO">Inactivas</option>
+                                </select>
+                                <input type="text" class="form-control form-control-sm pos2-search-input"
+                                    style="max-width:220px" id="txtBuscarOfertaCab"
+                                    placeholder="Buscar oferta...">
+                            </div>
                         </div>
                         <div id="ofertasListaCards" class="ofertas-list">
                             <div class="text-center text-muted py-3">Cargando ofertas...</div>
@@ -374,6 +381,17 @@ function getView() {
                                         <button type="button" class="ofertas-badge-ctrl is-no" id="btnOfertaVentasNO">NO</button>
                                     </div>
                                     <small class="text-muted d-block">NO: no visible en vendedor ni supervisor</small>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-12 col-md-6">
+                                    <label class="negrita small mb-1">Activo</label>
+                                    <input type="hidden" id="txtOfertaActivo" value="SI">
+                                    <div class="ofertas-chip-row mb-1">
+                                        <button type="button" class="ofertas-badge-ctrl is-si is-on" id="btnOfertaActivoSI">SI</button>
+                                        <button type="button" class="ofertas-badge-ctrl is-no" id="btnOfertaActivoNO">NO</button>
+                                    </div>
+                                    <small class="text-muted d-block">NO: no aparece en nuevo pedido (ventas)</small>
                                 </div>
                             </div>
                             <div class="row mt-2">
@@ -524,6 +542,18 @@ function ofertas_setVentasUI(v) {
     document.getElementById('btnOfertaVentasNO')?.classList.toggle('is-on', vent === 'NO');
 }
 
+function ofertas_getActivo() {
+    return String(document.getElementById('txtOfertaActivo')?.value || 'SI').toUpperCase() === 'NO' ? 'NO' : 'SI';
+}
+
+function ofertas_setActivoUI(v) {
+    const act = String(v || 'SI').toUpperCase() === 'NO' ? 'NO' : 'SI';
+    const hid = document.getElementById('txtOfertaActivo');
+    if (hid) hid.value = act;
+    document.getElementById('btnOfertaActivoSI')?.classList.toggle('is-on', act === 'SI');
+    document.getElementById('btnOfertaActivoNO')?.classList.toggle('is-on', act === 'NO');
+}
+
 function ofertas_setVigenciaUI(tipo) {
     const vigente = String(tipo || 'VIGENTE').toUpperCase() !== 'VENCIMIENTO';
     const rV = document.querySelector('input[name="ofertasVigencia"][value="VIGENTE"]');
@@ -597,6 +627,7 @@ function ofertas_limpiarModal() {
     ofertas_setVigenciaUI('VIGENTE');
     ofertas_setControladoUI('SI');
     ofertas_setVentasUI('SI');
+    ofertas_setActivoUI('SI');
     ofertas_pintarSedes([]);
 }
 
@@ -633,6 +664,7 @@ function ofertas_abrirEditar(codoferta) {
             ofertas_setVigenciaUI(r.TIPO_VIGENCIA);
             ofertas_setControladoUI(r.CONTROLADO);
             ofertas_setVentasUI(r.VENTAS);
+            ofertas_setActivoUI(r.ACTIVO);
             ofertas_pintarSedes(r.SEDES || []);
             document.getElementById('txtOfertaImagenActual').value = r.IMAGEN || '';
             const inp = document.getElementById('txtOfertaImagen');
@@ -676,7 +708,8 @@ function ofertas_guardar() {
         fecha_al,
         sedes,
         controlado: ofertas_getControlado(),
-        ventas: ofertas_getVentas()
+        ventas: ofertas_getVentas(),
+        activo: ofertas_getActivo()
     };
     const url = codoferta ? '/ofertas/update' : '/ofertas/insert';
     if (codoferta) payload.codoferta = codoferta;
@@ -723,6 +756,13 @@ function ofertas_guardar() {
 }
 
 function ofertas_eliminar(codoferta) {
+    const id = Number(codoferta) || 0;
+    const row = ofertasCache.find((x) => Number(x.CODOFERTA) === id);
+    const nVentas = row ? (Number(row.NVENTAS) || 0) : 0;
+    if (nVentas > 0) {
+        F.AvisoError('No se puede eliminar: la oferta ya tiene movimientos en ventas. Edítela y marque Activo = NO.');
+        return;
+    }
     F.Confirmacion('¿Eliminar la oferta ' + codoferta + '? Se quitarán sus productos.')
         .then((ok) => {
             if (!ok) return;
@@ -752,6 +792,15 @@ function ofertas_renderCards(rows) {
         const nboni = Number(r.NBONI) || 0;
         const vigente = String(r.TIPO_VIGENCIA || '').toUpperCase() !== 'VENCIMIENTO';
         const img = ofertas_img_url(r.IMAGEN);
+        const nVentas = Number(r.NVENTAS) || 0;
+        const activoSi = String(r.ACTIVO || 'SI').toUpperCase() !== 'NO';
+        const btnElim = nVentas > 0
+            ? `<button type="button" class="btn btn-sm btn-outline-secondary" disabled title="Tiene ventas; use Activo=NO">
+                        <i class="fal fa-trash"></i>
+                    </button>`
+            : `<button type="button" class="btn btn-sm btn-outline-danger" title="Eliminar" onclick="ofertas_eliminar(${r.CODOFERTA})">
+                        <i class="fal fa-trash"></i>
+                    </button>`;
         return `
             <div class="ofertas-card" onclick="ofertas_abrirProductos(${r.CODOFERTA})">
                 <div class="ofertas-card__code">${img ? `<img src="${ofertas_esc(img)}" alt="">` : r.CODOFERTA}</div>
@@ -761,6 +810,8 @@ function ofertas_renderCards(rows) {
                     <div class="ofertas-card__pills">
                         <span class="ofertas-pill ${String(r.CONTROLADO || 'SI').toUpperCase() === 'SI' ? 'is-on' : 'is-off'}">Controlado ${String(r.CONTROLADO || 'SI').toUpperCase() === 'NO' ? 'NO' : 'SI'}</span>
                         <span class="ofertas-pill ${String(r.VENTAS || 'SI').toUpperCase() === 'SI' ? 'is-on' : 'is-off'}">Ventas ${String(r.VENTAS || 'SI').toUpperCase() === 'NO' ? 'NO' : 'SI'}</span>
+                        <span class="ofertas-pill ${activoSi ? 'is-on' : 'is-off'}">Activo ${activoSi ? 'SI' : 'NO'}</span>
+                        ${nVentas > 0 ? `<span class="ofertas-pill is-off" title="Líneas en ventas">${nVentas} venta(s)</span>` : ''}
                         <span class="ofertas-pill ${vigente ? 'is-on' : 'is-off'}">${ofertas_esc(ofertas_vigenciaTxt(r))}</span>
                         <span class="ofertas-pill">Unid. ${ofertas_fmtNum(r.UNIDADES)}</span>
                         <span class="ofertas-pill is-boni">Bonif. ${ofertas_fmtNum(r.CANTIDAD_BONIF)}</span>
@@ -771,9 +822,7 @@ function ofertas_renderCards(rows) {
                     <button type="button" class="btn btn-sm btn-outline-info" title="Editar" onclick="ofertas_abrirEditar(${r.CODOFERTA})">
                         <i class="fal fa-edit"></i>
                     </button>
-                    <button type="button" class="btn btn-sm btn-outline-danger" title="Eliminar" onclick="ofertas_eliminar(${r.CODOFERTA})">
-                        <i class="fal fa-trash"></i>
-                    </button>
+                    ${btnElim}
                 </div>
             </div>
         `;
@@ -799,7 +848,8 @@ function ofertas_cargarListado() {
     const box = document.getElementById('ofertasListaCards');
     const lb = document.getElementById('lbOfertasTotal');
     if (box) box.innerHTML = `<div class="text-center py-3">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</div>`;
-    axios.post(GlobalUrlCalls + '/ofertas/listado', { token: TOKEN })
+    const activo = String((document.getElementById('selOfertasActivo') || {}).value || 'TODAS');
+    axios.post(GlobalUrlCalls + '/ofertas/listado', { token: TOKEN, activo })
         .then((res) => {
             if (!res.data || res.data.ok === false) throw new Error('error');
             ofertasCache = res.data.recordset || [];
@@ -1003,6 +1053,7 @@ function addListeners() {
         ofertas_cargarListado();
     });
     document.getElementById('txtBuscarOfertaCab')?.addEventListener('input', ofertas_filtrarCards);
+    document.getElementById('selOfertasActivo')?.addEventListener('change', ofertas_cargarListado);
     document.getElementById('btnOfertaAbrirBuscar')?.addEventListener('click', () => ofertas_abrirBuscar('PROD'));
     document.getElementById('btnOfertaAbrirBuscarBoni')?.addEventListener('click', () => ofertas_abrirBuscar('BONI'));
     $('#modal_oferta_buscar').on('shown.bs.modal', function(){
@@ -1020,6 +1071,8 @@ function addListeners() {
     document.getElementById('btnOfertaCtrlNO')?.addEventListener('click', () => ofertas_setControladoUI('NO'));
     document.getElementById('btnOfertaVentasSI')?.addEventListener('click', () => ofertas_setVentasUI('SI'));
     document.getElementById('btnOfertaVentasNO')?.addEventListener('click', () => ofertas_setVentasUI('NO'));
+    document.getElementById('btnOfertaActivoSI')?.addEventListener('click', () => ofertas_setActivoUI('SI'));
+    document.getElementById('btnOfertaActivoNO')?.addEventListener('click', () => ofertas_setActivoUI('NO'));
     document.getElementById('btnOfertaSedesTodas')?.addEventListener('click', () => ofertas_marcarSedes(true));
     document.getElementById('btnOfertaSedesNinguna')?.addEventListener('click', () => ofertas_marcarSedes(false));
     document.getElementById('txtOfertaImagen')?.addEventListener('change', function(){

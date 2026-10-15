@@ -1776,12 +1776,16 @@ function proveedor_ofertas_render(rows) {
     box.innerHTML = rows.map((r) => {
         const img = proveedor_ofertas_img(r);
         const id = Number(r.CODOFERTA) || 0;
+        const activoSi = String(r.ACTIVO || 'SI').toUpperCase() !== 'NO';
+        const badgeActivo = activoSi
+            ? '<span class="badge badge-success ml-1">Activa</span>'
+            : '<span class="badge badge-secondary ml-1">Inactiva</span>';
         return `
             <div class="card card-rounded shadow-sm border-0 mb-2 hand ventas-oferta-card" onclick="proveedor_ofertas_abrir(${id})">
                 <div class="card-body py-2 px-3 d-flex align-items-center">
                     <div class="ventas-oferta-thumb mr-3">${img ? `<img src="${proveedor_ofertas_esc(img)}" alt="">` : id}</div>
                     <div class="min-width-0 flex-grow-1">
-                        <div class="negrita">${proveedor_ofertas_esc(r.DESOFERTA)}</div>
+                        <div class="negrita">${proveedor_ofertas_esc(r.DESOFERTA)}${badgeActivo}</div>
                         <small class="text-muted">${proveedor_ofertas_esc(proveedor_ofertas_vigencia(r))}
                             · Unid. ${proveedor_ofertas_num(r.UNIDADES)}
                             · Bonif. ${proveedor_ofertas_num(r.CANTIDAD_BONIF)}

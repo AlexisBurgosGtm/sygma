@@ -4715,6 +4715,7 @@ function finalizar_pedido(latitud,longitud){
                     TIPOPRECIO: String(r.TIPOPRECIO || ''),
                     EXISTENCIA: Number(r.EXISTENCIA) || 0,
                     BONO: Number(r.BONO) || 0,
+                    CODOFERTA: Number(r.CODOFERTA) || 0,
                 }));
                 if (!productosLimpios.length) {
                     F.AvisoError('No hay productos agregados');

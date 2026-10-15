@@ -207,6 +207,11 @@
                                             <span class="nav-link-text">REPORTE DE COMPRAS</span>
                                         </a>
                                     </li>
+                                    <li>
+                                        <a title="Reporte de ofertas" data-filter-tags="reportes ofertas docproductos" href="#" onclick="Menu.reporte_ofertas()">
+                                            <span class="nav-link-text">REPORTES DE OFERTAS</span>
+                                        </a>
+                                    </li>
                                 </ul>
                             </li>
                             <li>

@@ -645,6 +645,17 @@
             F.AvisoError('No tiene permitido entrar a esta sección');
         }
     },
+    reporte_ofertas:()=>{
+        if(Menu.verify()==true){
+            Menu.salidaMenu();
+            F.loadScript('../views/bi_objetivos/view_reporte_ofertas.js','root')
+            .then(async()=>{
+                initView();
+            })
+        }else{
+            F.AvisoError('No tiene permitido entrar a esta sección');
+        }
+    },
     calculos_cargas_mes:()=>{
         if(Menu.verify()==true){
             Menu.salidaMenu();

@@ -4,6 +4,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const execute = require('../connection');
+const { ensureDocproductosDesc123 } = require('../services/ensureDocproductosDesc123');
 const storage = require('../services/webdavStorage');
 
 let tablesReady = false;
@@ -103,6 +104,13 @@ BEGIN
 END
 `;
 
+const DDL_ACTIVO = `
+IF COL_LENGTH('dbo.OFERTAS', 'ACTIVO') IS NULL
+BEGIN
+    EXEC('ALTER TABLE dbo.OFERTAS ADD ACTIVO VARCHAR(2) NOT NULL CONSTRAINT DF_OFERTAS_ACTIVO DEFAULT (''SI'')');
+END
+`;
+
 function controladoOk(v) {
     return String(v || '').trim().toUpperCase() === 'NO' ? 'NO' : 'SI';
 }
@@ -111,17 +119,42 @@ function ventasOk(v) {
     return String(v || '').trim().toUpperCase() === 'NO' ? 'NO' : 'SI';
 }
 
+function activoOk(v) {
+    return String(v || '').trim().toUpperCase() === 'NO' ? 'NO' : 'SI';
+}
+
 const SQL_FILTRO_VENTAS_SI = "UPPER(ISNULL(O.VENTAS, 'SI')) = 'SI'";
 const SQL_FILTRO_CONTROLADO_SI = "UPPER(ISNULL(O.CONTROLADO, 'SI')) = 'SI'";
+const SQL_FILTRO_ACTIVO_SI = "UPPER(ISNULL(O.ACTIVO, 'SI')) = 'SI'";
 /** @deprecated alias */
 const SQL_FILTRO_VENTAS_VENDEDOR = SQL_FILTRO_VENTAS_SI;
 
-/** Catálogo por perfil: vendedor/supervisor → VENTAS=SI; proveedor → CONTROLADO=SI (sin filtrar VENTAS). */
+/** Catálogo por perfil: vendedor/supervisor → VENTAS=SI + ACTIVO=SI; proveedor → CONTROLADO=SI (sin filtrar ACTIVO). */
 function sqlFiltroOfertasCatalogoPerfil(soloControladoProveedor) {
     if (soloControladoProveedor) {
         return `AND ${SQL_FILTRO_CONTROLADO_SI}`;
     }
-    return `AND ${SQL_FILTRO_VENTAS_SI}`;
+    return `AND ${SQL_FILTRO_VENTAS_SI} AND ${SQL_FILTRO_ACTIVO_SI}`;
+}
+
+function sqlFiltroActivoListado(activo) {
+    const a = String(activo || 'TODAS').trim().toUpperCase();
+    if (a === 'SI') return `AND ${SQL_FILTRO_ACTIVO_SI}`;
+    if (a === 'NO') return "UPPER(ISNULL(O.ACTIVO, 'SI')) = 'NO'";
+    return '1=1';
+}
+
+async function countDocproductosPorOferta(token, codoferta) {
+    const id = Number(codoferta) || 0;
+    if (!id) return 0;
+    await ensureDocproductosDesc123(token);
+    const data = await execute.get_data_qry(`
+        SELECT COUNT(*) AS N
+        FROM DOCPRODUCTOS
+        WHERE ISNULL(CODOFERTA, 0) = ${id}
+    `, token);
+    const row = data && data.recordset && data.recordset[0];
+    return Number(row && row.N) || 0;
 }
 
 const DDL_CREATE_SEDES = `
@@ -201,6 +234,7 @@ async function ensureTables(token) {
     }
     await execute.get_data_qry(DDL_CONTROLADO, token);
     await execute.get_data_qry(DDL_VENTAS, token);
+    await execute.get_data_qry(DDL_ACTIVO, token);
 }
 
 router.post('/ensure', async (req, res) => {
@@ -215,9 +249,14 @@ router.post('/ensure', async (req, res) => {
 });
 
 router.post('/listado', async (req, res) => {
-    const { token } = req.body || {};
+    const { token, activo } = req.body || {};
     try {
         await ensureTables(token);
+        await ensureDocproductosDesc123(token);
+        const filtroActivo = sqlFiltroActivoListado(activo);
+        const whereActivo = filtroActivo.startsWith('AND ')
+            ? filtroActivo.slice(4)
+            : filtroActivo;
         const qry = `
             SELECT
                 O.CODOFERTA,
@@ -230,6 +269,8 @@ router.post('/listado', async (req, res) => {
                 ISNULL(O.IMAGEN, '') AS IMAGEN,
                 ISNULL(O.CONTROLADO, 'SI') AS CONTROLADO,
                 ISNULL(O.VENTAS, 'SI') AS VENTAS,
+                ISNULL(O.ACTIVO, 'SI') AS ACTIVO,
+                (SELECT COUNT(*) FROM DOCPRODUCTOS D WHERE ISNULL(D.CODOFERTA, 0) = O.CODOFERTA) AS NVENTAS,
                 (SELECT COUNT(*) FROM OFERTAS_PRODUCTOS P WHERE P.CODOFERTA = O.CODOFERTA AND UPPER(ISNULL(NULLIF(LTRIM(RTRIM(P.TIPO)), ''), 'PROD')) = 'PROD') AS NPROD,
                 (SELECT COUNT(*) FROM OFERTAS_PRODUCTOS P WHERE P.CODOFERTA = O.CODOFERTA AND UPPER(ISNULL(P.TIPO, '')) = 'BONI') AS NBONI,
                 (SELECT COUNT(*) FROM OFERTAS_SEDES S WHERE S.CODOFERTA = O.CODOFERTA) AS NSEDES,
@@ -244,6 +285,7 @@ router.post('/listado', async (req, res) => {
                     ).value('.', 'nvarchar(max)'), 1, 2, '')
                 ), '') AS SEDES
             FROM OFERTAS O
+            WHERE ${whereActivo}
             ORDER BY O.CODOFERTA DESC
         `;
         const data = await execute.get_data_qry(qry, token);
@@ -301,7 +343,8 @@ router.post('/get', async (req, res) => {
                 CONVERT(varchar(10), FECHA_AL, 23) AS FECHA_AL,
                 ISNULL(IMAGEN, '') AS IMAGEN,
                 ISNULL(CONTROLADO, 'SI') AS CONTROLADO,
-                ISNULL(VENTAS, 'SI') AS VENTAS
+                ISNULL(VENTAS, 'SI') AS VENTAS,
+                ISNULL(ACTIVO, 'SI') AS ACTIVO
             FROM OFERTAS
             WHERE CODOFERTA=${id}
         `, token);
@@ -329,9 +372,10 @@ router.post('/get', async (req, res) => {
 });
 
 router.post('/insert', async (req, res) => {
-    const { token, desoferta, unidades, cantidad_bonif, tipo_vigencia, fecha_del, fecha_al, sedes, controlado, ventas } = req.body || {};
+    const { token, desoferta, unidades, cantidad_bonif, tipo_vigencia, fecha_del, fecha_al, sedes, controlado, ventas, activo } = req.body || {};
     const ctrl = controladoOk(controlado);
     const vent = ventasOk(ventas);
+    const act = activoOk(activo);
     const nombre = String(desoferta || '').trim();
     if (!nombre) {
         res.send({ ok: false, error: 'Escriba el nombre de la oferta' });
@@ -352,9 +396,9 @@ router.post('/insert', async (req, res) => {
     try {
         await ensureTables(token);
         const ins = await execute.get_data_qry(`
-            INSERT INTO OFERTAS (DESOFERTA, UNIDADES, CANTIDAD_BONIF, TIPO_VIGENCIA, FECHA_DEL, FECHA_AL, IMAGEN, CONTROLADO, VENTAS, LASTUPDATE)
+            INSERT INTO OFERTAS (DESOFERTA, UNIDADES, CANTIDAD_BONIF, TIPO_VIGENCIA, FECHA_DEL, FECHA_AL, IMAGEN, CONTROLADO, VENTAS, ACTIVO, LASTUPDATE)
             OUTPUT INSERTED.CODOFERTA
-            VALUES ('${sqlEsc(nombre)}', ${sqlDec(unidades)}, ${sqlDec(cantidad_bonif)}, '${tipo}', ${del}, ${al}, '', '${ctrl}', '${vent}', GETDATE());
+            VALUES ('${sqlEsc(nombre)}', ${sqlDec(unidades)}, ${sqlDec(cantidad_bonif)}, '${tipo}', ${del}, ${al}, '', '${ctrl}', '${vent}', '${act}', GETDATE());
         `, token);
         const id = Number(ins && ins.recordset && ins.recordset[0] && ins.recordset[0].CODOFERTA) || 0;
         if (!id) {
@@ -370,9 +414,10 @@ router.post('/insert', async (req, res) => {
 });
 
 router.post('/update', async (req, res) => {
-    const { token, codoferta, desoferta, unidades, cantidad_bonif, tipo_vigencia, fecha_del, fecha_al, sedes, controlado, ventas } = req.body || {};
+    const { token, codoferta, desoferta, unidades, cantidad_bonif, tipo_vigencia, fecha_del, fecha_al, sedes, controlado, ventas, activo } = req.body || {};
     const ctrl = controladoOk(controlado);
     const vent = ventasOk(ventas);
+    const act = activoOk(activo);
     const id = Number(codoferta) || 0;
     const nombre = String(desoferta || '').trim();
     if (!id) {
@@ -407,6 +452,7 @@ router.post('/update', async (req, res) => {
                 FECHA_AL=${al},
                 CONTROLADO='${ctrl}',
                 VENTAS='${vent}',
+                ACTIVO='${act}',
                 LASTUPDATE=GETDATE()
             WHERE CODOFERTA=${id};
         `, token);
@@ -427,6 +473,14 @@ router.post('/delete', async (req, res) => {
     }
     try {
         await ensureTables(token);
+        const nVentas = await countDocproductosPorOferta(token, id);
+        if (nVentas > 0) {
+            res.send({
+                ok: false,
+                error: 'No se puede eliminar: la oferta ya tiene movimientos en ventas. Marque Activo = NO en su lugar.'
+            });
+            return;
+        }
         const prev = await execute.get_data_qry(`SELECT ISNULL(IMAGEN,'') AS IMAGEN FROM OFERTAS WHERE CODOFERTA=${id}`, token);
         const img = prev && prev.recordset && prev.recordset[0] ? prev.recordset[0].IMAGEN : '';
         await execute.get_data_qry(`
@@ -535,6 +589,7 @@ function filtroOfertasVigentesSede(emp) {
         )
         AND ${filtroSede}
         AND ${SQL_FILTRO_VENTAS_VENDEDOR}
+        AND ${SQL_FILTRO_ACTIVO_SI}
     `;
 }
 
@@ -774,6 +829,7 @@ router.post('/vendedor_disponibles', async (req, res) => {
                     )
                 )
                 AND ${SQL_FILTRO_VENTAS_VENDEDOR}
+                AND ${SQL_FILTRO_ACTIVO_SI}
             ORDER BY O.CODOFERTA, P.DESPROD
         `, token);
         res.send({
@@ -818,6 +874,7 @@ router.post('/catalogo', async (req, res) => {
                 ISNULL(O.IMAGEN, '') AS IMAGEN,
                 ISNULL(O.CONTROLADO, 'SI') AS CONTROLADO,
                 ISNULL(O.VENTAS, 'SI') AS VENTAS,
+                ISNULL(O.ACTIVO, 'SI') AS ACTIVO,
                 (SELECT COUNT(*) FROM OFERTAS_PRODUCTOS P WHERE P.CODOFERTA = O.CODOFERTA AND UPPER(ISNULL(NULLIF(LTRIM(RTRIM(P.TIPO)), ''), 'PROD')) = 'PROD') AS NPROD,
                 (SELECT COUNT(*) FROM OFERTAS_PRODUCTOS P WHERE P.CODOFERTA = O.CODOFERTA AND UPPER(ISNULL(P.TIPO, '')) = 'BONI') AS NBONI
             FROM OFERTAS O
@@ -905,6 +962,57 @@ router.post('/upload_imagen', (req, res, next) => {
         console.error('[ofertas/upload_imagen]', e && e.message ? e.message : e);
         res.send({ ok: false, error: 'No se pudo guardar la imagen de la oferta' });
     }
+});
+
+router.post('/reporte_ofertas_detalle', async (req, res) => {
+    const { token, sucursal, fecha_del, fecha_al } = req.body || {};
+    const del = String(fecha_del || '').trim().slice(0, 10);
+    const al = String(fecha_al || '').trim().slice(0, 10);
+    const sucNorm = String(sucursal || '').trim().toUpperCase();
+    const todasSedes = sucNorm === '%' || sucNorm === 'TODAS';
+    if (!del || !al || !/^\d{4}-\d{2}-\d{2}$/.test(del) || !/^\d{4}-\d{2}-\d{2}$/.test(al)) {
+        return execute.QueryToken(res, 'SELECT 0 AS rowsAffected WHERE 1=0', token);
+    }
+    try {
+        await ensureDocproductosDesc123(token);
+    } catch (e) {
+        return execute.QueryToken(res, 'SELECT 0 AS rowsAffected WHERE 1=0', token);
+    }
+    const empFilter = todasSedes
+        ? `(D.EMPNIT LIKE '%')`
+        : `(D.EMPNIT = '${sqlEsc(sucursal)}')`;
+    const qry = `
+        SELECT
+            D.FECHA,
+            ISNULL(E.NOMEMPLEADO, CAST(D.CODEMP AS VARCHAR(20))) AS VENDEDOR,
+            DP.CODDOC,
+            DP.CORRELATIVO,
+            CASE
+                WHEN ISNULL(O.DESOFERTA, '') <> '' THEN CAST(DP.CODOFERTA AS VARCHAR(20)) + ' - ' + O.DESOFERTA
+                WHEN ISNULL(DP.CODOFERTA, 0) > 0 THEN CAST(DP.CODOFERTA AS VARCHAR(20))
+                ELSE ''
+            END AS OFERTA,
+            DP.CODPROD,
+            DP.DESPROD,
+            DP.TOTALUNIDADES,
+            DP.TOTALPRECIO
+        FROM DOCPRODUCTOS DP
+        INNER JOIN DOCUMENTOS D
+            ON DP.EMPNIT = D.EMPNIT
+            AND DP.CODDOC = D.CODDOC
+            AND DP.CORRELATIVO = D.CORRELATIVO
+            AND DP.ANIO = D.ANIO
+            AND DP.MES = D.MES
+        LEFT JOIN EMPLEADOS E ON D.CODEMP = E.CODEMPLEADO
+        LEFT JOIN OFERTAS O ON O.CODOFERTA = DP.CODOFERTA
+        WHERE ${empFilter}
+            AND D.FECHA >= '${sqlEsc(del)}'
+            AND D.FECHA <= '${sqlEsc(al)}'
+            AND ISNULL(DP.CODOFERTA, 0) > 0
+            AND ISNULL(D.STATUS, '') <> 'A'
+        ORDER BY D.FECHA, ISNULL(E.NOMEMPLEADO, ''), DP.CODDOC, DP.CORRELATIVO, DP.CODPROD
+    `;
+    execute.QueryToken(res, qry, token);
 });
 
 module.exports = router;

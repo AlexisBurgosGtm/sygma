@@ -1,4 +1,5 @@
 const execute = require('./../connection');
+const { ensureDocproductosDesc123 } = require('../services/ensureDocproductosDesc123');
 const express = require('express');
 const router = express.Router();
 
@@ -55,6 +56,7 @@ function sanitizeDocProductosJson(jsondocproductos) {
         TIPOPRECIO: String(r.TIPOPRECIO == null ? '' : r.TIPOPRECIO).trim(),
         EXISTENCIA: num(r.EXISTENCIA),
         BONO: num(r.BONO),
+        CODOFERTA: num(r.CODOFERTA),
     })).filter((r) => r.CODPROD !== '');
 
     return { json: JSON.stringify(clean), count: clean.length, items: clean };
@@ -69,7 +71,7 @@ function sqlInsertDocproductosOpenJson() {
             TOTALCOSTO, DESCUENTO, TOTALPRECIO, ENTREGADOS_TOTALUNIDADES,
             COSTOANTERIOR, COSTOPROMEDIO, CODBODEGA, NOSERIE, EXENTO,
             OBS, TIPOPROD, TIPOPRECIO, LASTUPDATE, TOTALUNIDADES_DEVUELTAS,
-            POR_IVA, EXISTENCIA, BONO, TOTALBONO
+            POR_IVA, EXISTENCIA, BONO, TOTALBONO, CODOFERTA
         )
         SELECT
             @empnit AS EMPNIT,
@@ -104,7 +106,8 @@ function sqlInsertDocproductosOpenJson() {
             @iva AS POR_IVA,
             ISNULL(j.EXISTENCIA, 0) AS EXISTENCIA,
             ISNULL(j.BONO, 0) AS BONO,
-            ISNULL(j.BONO, 0) * ISNULL(j.CANTIDAD, 0) AS TOTALBONO
+            ISNULL(j.BONO, 0) * ISNULL(j.CANTIDAD, 0) AS TOTALBONO,
+            ISNULL(j.CODOFERTA, 0) AS CODOFERTA
         FROM OPENJSON(@jsonDoc)
         WITH (
             CODPROD NVARCHAR(100) '$.CODPROD',
@@ -122,7 +125,8 @@ function sqlInsertDocproductosOpenJson() {
             TIPOPROD NVARCHAR(50) '$.TIPOPROD',
             TIPOPRECIO NVARCHAR(50) '$.TIPOPRECIO',
             EXISTENCIA FLOAT '$.EXISTENCIA',
-            BONO FLOAT '$.BONO'
+            BONO FLOAT '$.BONO',
+            CODOFERTA INT '$.CODOFERTA'
         ) j;
     `;
 }
@@ -149,6 +153,13 @@ router.post("/insertventa_factura", async (req, res) => {
 
     if (!productos.count) {
         console.error('[insertventa_factura] sin productos válidos');
+        return res.send('error');
+    }
+
+    try {
+        await ensureDocproductosDesc123(token);
+    } catch (e) {
+        console.error('[insertventa_factura] ensure DOCPRODUCTOS', e.message || e);
         return res.send('error');
     }
 
@@ -631,7 +642,8 @@ function str_qry_docproductos(sucursal,coddoc,correlativo,anio,mes,iva,codbodega
             POR_IVA,
             EXISTENCIA,
             BONO,
-            TOTALBONO
+            TOTALBONO,
+            CODOFERTA
         )
         SELECT
             '${emp}' AS EMPNIT,
@@ -666,7 +678,8 @@ function str_qry_docproductos(sucursal,coddoc,correlativo,anio,mes,iva,codbodega
             ${iv} AS POR_IVA,
             ISNULL(j.EXISTENCIA, 0) AS EXISTENCIA,
             ISNULL(j.BONO, 0) AS BONO,
-            ISNULL(j.BONO, 0) * ISNULL(j.CANTIDAD, 0) AS TOTALBONO
+            ISNULL(j.BONO, 0) * ISNULL(j.CANTIDAD, 0) AS TOTALBONO,
+            ISNULL(j.CODOFERTA, 0) AS CODOFERTA
         FROM OPENJSON(@jsonDoc)
         WITH (
             CODPROD NVARCHAR(100) '$.CODPROD',
@@ -684,7 +697,8 @@ function str_qry_docproductos(sucursal,coddoc,correlativo,anio,mes,iva,codbodega
             TIPOPROD NVARCHAR(50) '$.TIPOPROD',
             TIPOPRECIO NVARCHAR(50) '$.TIPOPRECIO',
             EXISTENCIA FLOAT '$.EXISTENCIA',
-            BONO FLOAT '$.BONO'
+            BONO FLOAT '$.BONO',
+            CODOFERTA INT '$.CODOFERTA'
         ) j;
     `;
 

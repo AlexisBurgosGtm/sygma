@@ -54,6 +54,7 @@
         report_ventas_vendedor: 'VENTAS VENDEDOR',
         report_ventas_marcas: 'VENTAS POR MARCAS',
         reporte_compras: 'REPORTE DE COMPRAS',
+        reporte_ofertas: 'REPORTES DE OFERTAS',
         calculos_cargas_mes: 'CARGAS DEL MES',
         documentos: 'DOCUMENTOS',
         boletin: 'BOLETIN INFORMATIVO',

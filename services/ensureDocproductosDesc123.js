@@ -18,21 +18,28 @@ BEGIN
     EXEC('ALTER TABLE dbo.DOCPRODUCTOS ADD DESC3 DECIMAL(18,4) NOT NULL CONSTRAINT DF_DOCPRODUCTOS_DESC3 DEFAULT (0)');
 END
 `;
+const DDL_DOCPRODUCTOS_CODOFERTA = `
+IF COL_LENGTH('dbo.DOCPRODUCTOS', 'CODOFERTA') IS NULL
+BEGIN
+    EXEC('ALTER TABLE dbo.DOCPRODUCTOS ADD CODOFERTA INT NOT NULL CONSTRAINT DF_DOCPRODUCTOS_CODOFERTA DEFAULT (0)');
+END
+`;
 
-let docproductosDesc123Ready = null;
+let docproductosColumnsReady = null;
 
 function ensureDocproductosDesc123(token) {
-    if (!docproductosDesc123Ready) {
-        docproductosDesc123Ready = Promise.all([
+    if (!docproductosColumnsReady) {
+        docproductosColumnsReady = Promise.all([
             execute.get_data_qry(DDL_DOCPRODUCTOS_DESC1, token),
             execute.get_data_qry(DDL_DOCPRODUCTOS_DESC2, token),
-            execute.get_data_qry(DDL_DOCPRODUCTOS_DESC3, token)
+            execute.get_data_qry(DDL_DOCPRODUCTOS_DESC3, token),
+            execute.get_data_qry(DDL_DOCPRODUCTOS_CODOFERTA, token)
         ]).catch((err) => {
-            docproductosDesc123Ready = null;
+            docproductosColumnsReady = null;
             throw err;
         });
     }
-    return docproductosDesc123Ready;
+    return docproductosColumnsReady;
 }
 
 module.exports = { ensureDocproductosDesc123 };
