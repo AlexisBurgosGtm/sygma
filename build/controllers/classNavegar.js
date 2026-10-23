@@ -65,7 +65,7 @@ let Navegar = {
     usaMenuSoloCards: () => {
         if (GlobalSuperUsuario) return true;
         const nivel = Number(GlobalNivelUsuario);
-        return nivel === 2 || nivel === 3 || nivel === 4 || nivel === 7 || nivel === 8 || nivel === 9;
+        return nivel === 2 || nivel === 3 || nivel === 4 || nivel === 6 || nivel === 7 || nivel === 8 || nivel === 9;
     },
 
     getMenuRole: () => {

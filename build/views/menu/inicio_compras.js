@@ -3,6 +3,7 @@ var embarque_print_fecha = '';
 var embarque_picking_ctx_codembarque = '';
 var embarque_picking_ctx_fecha = '';
 var compras_currentPane = 'uno';
+var compras_embarques_pick_sel = {};
 
 function compras_getMes() {
     return document.getElementById('cmbMesHeader')?.value || document.getElementById('cmbMes')?.value || F.get_mes_curso();
@@ -276,6 +277,9 @@ function getView(){
                                     <option value="SI">Finalizados</option>
                                 </select>
                             </div>
+                            <button type="button" class="btn btn-info btn-sm negrita sygma-embarques-filtros__btn d-none" id="btnPickingAgrupado" title="Picking de embarques seleccionados">
+                                <i class="fal fa-layer-group mr-1"></i> Picking Agrupado
+                            </button>
                         </div>
                     </div>
 
@@ -288,6 +292,7 @@ function getView(){
                                     <th>REPARTIDOR</th>
                                     <th class="text-right">IMPORTE</th>
                                     <th class="text-right">DEVOL.</th>
+                                    <th class="oculto-impresion text-center" style="width:2.5rem" title="Seleccionar para picking agrupado"></th>
                                     <th class="sygma-embarque-rpt__col-action oculto-impresion text-center" title="Acciones"></th>
                                 </tr>
                             </thead>
@@ -737,6 +742,16 @@ function addListeners(){
     compras_setupMenuListeners();
 
     document.getElementById('cmbStatus')?.addEventListener('change', () => cargar_grid_embarques());
+    document.getElementById('btnPickingAgrupado')?.addEventListener('click', () => embarque_picking_agrupado_imprimir());
+    document.getElementById('tblDatalEmbarques')?.addEventListener('change', (ev) => {
+        const t = ev.target;
+        if (!t || !t.classList || !t.classList.contains('compras-embarque-chk')) return;
+        const cod = String(t.getAttribute('data-codembarque') || '').trim();
+        if (!cod) return;
+        if (t.checked) compras_embarques_pick_sel[cod] = true;
+        else delete compras_embarques_pick_sel[cod];
+        compras_embarques_pick_update_ui();
+    });
 };
 
 function initView(){
@@ -774,7 +789,23 @@ function destroyView() {
 
 
 
+function compras_embarques_pick_get_selected() {
+    return Object.keys(compras_embarques_pick_sel).filter((k) => compras_embarques_pick_sel[k]);
+}
+
+function compras_embarques_pick_update_ui() {
+    const n = compras_embarques_pick_get_selected().length;
+    const btn = document.getElementById('btnPickingAgrupado');
+    if (btn) btn.classList.toggle('d-none', n < 2);
+}
+
+function compras_embarques_pick_clear() {
+    compras_embarques_pick_sel = {};
+    compras_embarques_pick_update_ui();
+}
+
 function cargar_grid_embarques(){
+    compras_embarques_pick_clear();
 
     let statusEmbarque = document.getElementById('cmbStatus').value;
     let mes = compras_getMes();
@@ -809,6 +840,7 @@ function tbl_embarques(idContainer,status,mes,anio){
             const btnFinalizarClass = status === 'NO' ? 'btn-success' : 'btn-warning';
             const btnFinalizarTitle = status === 'NO' ? 'Finalizar embarque' : 'Reactivar embarque';
             const btnFinalizarIcon = status === 'NO' ? 'fa-check' : 'fa-undo';
+            const codEmbEsc = String(r.CODEMBARQUE || '').replace(/"/g, '&quot;');
             str += `
                 <tr>
                     <td class="sygma-embarque-rpt__cell-stack">
@@ -822,7 +854,9 @@ function tbl_embarques(idContainer,status,mes,anio){
                     <td>${r.NOMEMPLEADO || ''}</td>
                     <td class="text-right sygma-embarque-rpt__importe">${F.setMoneda(r.IMPORTE,'Q')}</td>
                     <td class="text-right">${F.setMoneda(r.DEVOLUCIONES,'Q')}</td>
-                 
+                    <td class="oculto-impresion text-center align-middle">
+                        <input type="checkbox" class="compras-embarque-chk" data-codembarque="${codEmbEsc}" aria-label="Seleccionar embarque ${codEmbEsc}">
+                    </td>
                     <td class="sygma-embarque-rpt__col-action oculto-impresion text-center">
                         <button type="button" class="btn btn-outline-info btn-md btn-circle hand shadow sygma-embarques-btn-action"
                             onclick="embarque_picking_abrir_opciones('${r.CODEMBARQUE}','${F.convertDateNormal(r.FECHA)}')" title="Opciones ${GlobalRptPicking}">
@@ -835,7 +869,7 @@ function tbl_embarques(idContainer,status,mes,anio){
         });
 
 
-        container.innerHTML = str || `<tr><td colspan="9" class="text-center text-muted py-3">No hay embarques en este periodo</td></tr>`;
+        container.innerHTML = str || `<tr><td colspan="7" class="text-center text-muted py-3">No hay embarques en este periodo</td></tr>`;
 
         const lbGrid = document.getElementById('lbEmbGridTotal');
         const lbBadge = document.getElementById('lbTotalEmb');
@@ -868,10 +902,107 @@ function tbl_embarques(idContainer,status,mes,anio){
         if (lbGrid) lbGrid.innerText = '---';
         const totalBlock = document.getElementById('lbEmbGridTotalBlock');
         if (totalBlock) totalBlock.innerHTML = '';
-        container.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-3">No se cargaron datos</td></tr>`;
+        container.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">No se cargaron datos</td></tr>`;
     })
 
 };
+
+function embarque_picking_fetch_products_safe(codembarque) {
+    return GF.get_data_embarque_productos(GlobalEmpnit, codembarque)
+        .then((data) => data.recordset || [])
+        .catch(() => []);
+}
+
+function embarque_picking_merge_products(listOfProductArrays) {
+    const map = {};
+    (listOfProductArrays || []).forEach((rows) => {
+        (rows || []).forEach((r) => {
+            const cod = String(r.CODPROD || '').trim();
+            if (!cod) return;
+            if (!map[cod]) {
+                map[cod] = {
+                    CODPROD: cod,
+                    DESPROD: r.DESPROD || '',
+                    UXC: Number(r.UXC) || 1,
+                    _totalUnits: 0,
+                    BONI: 0,
+                    IMPORTE: 0
+                };
+            }
+            const uxc = Number(r.UXC) || map[cod].UXC || 1;
+            if (uxc > 0) map[cod].UXC = uxc;
+            const uxcUse = map[cod].UXC || 1;
+            const units = (Number(r.CAJAS) || 0) * uxcUse + (Number(r.UNIDADES) || 0);
+            map[cod]._totalUnits += units;
+            map[cod].BONI += Number(r.BONI) || 0;
+            map[cod].IMPORTE += Number(r.IMPORTE) || 0;
+        });
+    });
+    const merged = Object.values(map).map((row) => {
+        const uxc = row.UXC || 1;
+        const total = row._totalUnits;
+        const cajas = Math.floor(total / uxc);
+        const unidades = Math.round((total / uxc - cajas) * uxc);
+        return {
+            CODPROD: row.CODPROD,
+            DESPROD: row.DESPROD,
+            UXC: uxc,
+            CAJAS: cajas,
+            UNIDADES: unidades,
+            BONI: row.BONI,
+            IMPORTE: row.IMPORTE
+        };
+    });
+    return typeof GF !== 'undefined' && GF.sort_rpt_picking_rows
+        ? GF.sort_rpt_picking_rows(merged)
+        : merged;
+}
+
+function embarque_picking_agrupado_imprimir() {
+    const codes = compras_embarques_pick_get_selected();
+    if (codes.length < 2) {
+        F.AvisoError('Seleccione al menos dos embarques');
+        return;
+    }
+    const host = document.getElementById('sygma_embarque_print_host');
+    if (!host) return;
+    const codesSorted = codes.slice().sort((a, b) => String(a).localeCompare(String(b), 'es', { numeric: true, sensitivity: 'base' }));
+    embarque_print_codembarque = codesSorted.join(', ');
+    embarque_print_fecha = '';
+    embarque_print_show_loader('Generando picking agrupado...');
+    Promise.all(codesSorted.map((c) => embarque_picking_fetch_products_safe(c)))
+        .then((arrays) => {
+            const products = embarque_picking_merge_products(arrays);
+            const { contador, varTotal } = embarque_picking_totals_from_products(products);
+            let strRows = '';
+            products.forEach((r) => { strRows += embarque_picking_build_product_row_html(r); });
+            if (!strRows) strRows = `<tr><td colspan="7" class="text-center text-muted py-2">Sin productos</td></tr>`;
+            host.innerHTML = embarque_print_sheet_open('Picking agrupado') + `
+            <div class="table-responsive sygma-embarque-rpt__table-wrap">
+                <table class="table sygma-embarque-rpt__table mb-0">
+                    <thead><tr>
+                        <th>CODIGO</th><th>PRODUCTO</th>
+                        <th class="text-center">UXC</th><th class="text-center">CAJAS</th><th class="text-center">UNIDADES</th>
+                        <th class="text-center">BONI</th>
+                        <th class="text-right">IMPORTE</th>
+                    </tr></thead>
+                    <tbody>${strRows}</tbody>
+                </table>
+            </div>
+            <div class="sygma-embarque-rpt__total-block"><div class="sygma-embarque-rpt__total-inner">
+                <span class="sygma-embarque-rpt__foot-label">ITEMS</span><span class="sygma-embarque-rpt__foot-total">${contador}</span>
+                <span class="sygma-embarque-rpt__foot-label">TOTAL IMPORTE</span><span class="sygma-embarque-rpt__foot-total">${F.setMoneda(varTotal, 'Q')}</span>
+            </div></div>
+            ${embarque_print_sheet_close()}`;
+            embarque_ejecutar_impresion();
+            embarque_print_hide_loader(false);
+        })
+        .catch(() => {
+            embarque_print_hide_loader(true);
+            F.AvisoError('No se pudo generar el picking agrupado');
+            host.innerHTML = '';
+        });
+}
 
 function embarque_fetch_picking_bundle(codembarque) {
     return Promise.all([
