@@ -4,6 +4,7 @@ var embarque_picking_ctx_codembarque = '';
 var embarque_picking_ctx_fecha = '';
 var compras_currentPane = 'uno';
 var compras_embarques_pick_sel = {};
+var compras_picking_agrupado_busy = false;
 
 function compras_getMes() {
     return document.getElementById('cmbMesHeader')?.value || document.getElementById('cmbMes')?.value || F.get_mes_curso();
@@ -277,8 +278,11 @@ function getView(){
                                     <option value="SI">Finalizados</option>
                                 </select>
                             </div>
-                            <button type="button" class="btn btn-info btn-sm negrita sygma-embarques-filtros__btn d-none" id="btnPickingAgrupado" title="Picking de embarques seleccionados">
-                                <i class="fal fa-layer-group mr-1"></i> Picking Agrupado
+                            <button type="button" class="btn btn-info btn-sm negrita sygma-embarques-filtros__btn d-none" id="btnPickingAgrupado" title="Imprimir picking de embarques seleccionados">
+                                <i class="fal fa-print mr-1"></i> Picking Agrupado
+                            </button>
+                            <button type="button" class="btn btn-success btn-sm negrita sygma-embarques-filtros__btn d-none" id="btnPickingAgrupadoExcel" title="Exportar picking agrupado a Excel">
+                                <i class="fal fa-file-excel"></i>
                             </button>
                         </div>
                     </div>
@@ -743,6 +747,7 @@ function addListeners(){
 
     document.getElementById('cmbStatus')?.addEventListener('change', () => cargar_grid_embarques());
     document.getElementById('btnPickingAgrupado')?.addEventListener('click', () => embarque_picking_agrupado_imprimir());
+    document.getElementById('btnPickingAgrupadoExcel')?.addEventListener('click', () => embarque_picking_agrupado_export_excel());
     document.getElementById('tblDatalEmbarques')?.addEventListener('change', (ev) => {
         const t = ev.target;
         if (!t || !t.classList || !t.classList.contains('compras-embarque-chk')) return;
@@ -795,8 +800,9 @@ function compras_embarques_pick_get_selected() {
 
 function compras_embarques_pick_update_ui() {
     const n = compras_embarques_pick_get_selected().length;
-    const btn = document.getElementById('btnPickingAgrupado');
-    if (btn) btn.classList.toggle('d-none', n < 2);
+    const show = n >= 2;
+    document.getElementById('btnPickingAgrupado')?.classList.toggle('d-none', !show);
+    document.getElementById('btnPickingAgrupadoExcel')?.classList.toggle('d-none', !show);
 }
 
 function compras_embarques_pick_clear() {
@@ -958,21 +964,103 @@ function embarque_picking_merge_products(listOfProductArrays) {
         : merged;
 }
 
-function embarque_picking_agrupado_imprimir() {
+function embarque_picking_agrupado_fetch_merged() {
     const codes = compras_embarques_pick_get_selected();
     if (codes.length < 2) {
-        F.AvisoError('Seleccione al menos dos embarques');
+        return Promise.reject(new Error('MIN_EMBARQUES'));
+    }
+    const codesSorted = codes.slice().sort((a, b) => String(a).localeCompare(String(b), 'es', { numeric: true, sensitivity: 'base' }));
+    return Promise.all(codesSorted.map((c) => embarque_picking_fetch_products_safe(c)))
+        .then((arrays) => ({
+            codesSorted,
+            products: embarque_picking_merge_products(arrays)
+        }));
+}
+
+function compras_picking_agrupado_set_busy(busy) {
+    compras_picking_agrupado_busy = !!busy;
+    const btnPrint = document.getElementById('btnPickingAgrupado');
+    const btnExcel = document.getElementById('btnPickingAgrupadoExcel');
+    if (btnPrint) {
+        btnPrint.disabled = compras_picking_agrupado_busy;
+        btnPrint.innerHTML = compras_picking_agrupado_busy
+            ? '<i class="fal fa-spinner fa-spin mr-1"></i> Picking Agrupado'
+            : '<i class="fal fa-print mr-1"></i> Picking Agrupado';
+    }
+    if (btnExcel) {
+        btnExcel.disabled = compras_picking_agrupado_busy;
+        btnExcel.innerHTML = compras_picking_agrupado_busy
+            ? '<i class="fal fa-spinner fa-spin"></i>'
+            : '<i class="fal fa-file-excel"></i>';
+    }
+}
+
+function embarque_picking_export_aoa_xlsx(aoa, nombre) {
+    if (typeof XLSX === 'undefined') {
+        F.AvisoError('No está disponible la exportación a Excel');
         return;
     }
+    const filename = String(nombre || 'export') + '.xlsx';
+    const ws = XLSX.utils.aoa_to_sheet(aoa || []);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'rpt');
+    XLSX.writeFile(wb, filename);
+}
+
+function embarque_picking_build_excel_aoa_agrupado(codesSorted, products) {
+    const { contador, varTotal } = embarque_picking_totals_from_products(products);
+    const aoa = [
+        ['Picking agrupado'],
+        ['Embarques', (codesSorted || []).join(', ')],
+        [],
+        ['CODIGO', 'PRODUCTO', 'UXC', 'CAJAS', 'UNIDADES', 'BONI', 'IMPORTE']
+    ];
+    (products || []).forEach((r) => {
+        aoa.push([
+            r.CODPROD,
+            r.DESPROD,
+            r.UXC,
+            r.CAJAS,
+            r.UNIDADES,
+            Number(r.BONI || 0),
+            Number(r.IMPORTE) || 0
+        ]);
+    });
+    aoa.push([]);
+    aoa.push(['', 'ITEMS', '', '', '', '', contador]);
+    aoa.push(['', 'TOTAL IMPORTE', '', '', '', '', varTotal]);
+    return aoa;
+}
+
+function embarque_picking_agrupado_export_excel() {
+    if (compras_picking_agrupado_busy) return;
+    compras_picking_agrupado_set_busy(true);
+    embarque_picking_agrupado_fetch_merged()
+        .then(({ codesSorted, products }) => {
+            const aoa = embarque_picking_build_excel_aoa_agrupado(codesSorted, products);
+            const safeName = `Picking_agrupado_${codesSorted.length}_embarques`;
+            embarque_picking_export_aoa_xlsx(aoa, safeName);
+        })
+        .catch((err) => {
+            if (err && err.message === 'MIN_EMBARQUES') {
+                F.AvisoError('Seleccione al menos dos embarques');
+                return;
+            }
+            F.AvisoError('No se pudo exportar el picking agrupado a Excel');
+        })
+        .finally(() => compras_picking_agrupado_set_busy(false));
+}
+
+function embarque_picking_agrupado_imprimir() {
+    if (compras_picking_agrupado_busy) return;
     const host = document.getElementById('sygma_embarque_print_host');
     if (!host) return;
-    const codesSorted = codes.slice().sort((a, b) => String(a).localeCompare(String(b), 'es', { numeric: true, sensitivity: 'base' }));
-    embarque_print_codembarque = codesSorted.join(', ');
-    embarque_print_fecha = '';
+    compras_picking_agrupado_set_busy(true);
     embarque_print_show_loader('Generando picking agrupado...');
-    Promise.all(codesSorted.map((c) => embarque_picking_fetch_products_safe(c)))
-        .then((arrays) => {
-            const products = embarque_picking_merge_products(arrays);
+    embarque_picking_agrupado_fetch_merged()
+        .then(({ codesSorted, products }) => {
+            embarque_print_codembarque = codesSorted.join(', ');
+            embarque_print_fecha = '';
             const { contador, varTotal } = embarque_picking_totals_from_products(products);
             let strRows = '';
             products.forEach((r) => { strRows += embarque_picking_build_product_row_html(r); });
@@ -997,11 +1085,16 @@ function embarque_picking_agrupado_imprimir() {
             embarque_ejecutar_impresion();
             embarque_print_hide_loader(false);
         })
-        .catch(() => {
+        .catch((err) => {
             embarque_print_hide_loader(true);
-            F.AvisoError('No se pudo generar el picking agrupado');
+            if (err && err.message === 'MIN_EMBARQUES') {
+                F.AvisoError('Seleccione al menos dos embarques');
+            } else {
+                F.AvisoError('No se pudo generar el picking agrupado');
+            }
             host.innerHTML = '';
-        });
+        })
+        .finally(() => compras_picking_agrupado_set_busy(false));
 }
 
 function embarque_fetch_picking_bundle(codembarque) {
