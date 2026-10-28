@@ -12,14 +12,24 @@ const upload = multer({
 });
 
 function sendError(res, err, fallbackMessage) {
+    const msg = String(err && err.message ? err.message : '');
+    const isConflict = /409|Conflict/i.test(msg);
     const status = err.code === 'NOT_FOUND'
         ? 404
-        : (err.code === 'INVALID_HEX' || err.code === 'INVALID_PATH' || err.code === 'INVALID_FILENAME' || err.code === 'INVALID_FILE' || err.code === 'UPLOAD_PARSE' ? 400 : 500);
+        : (err.code === 'STORAGE_AUTH'
+            ? 401
+            : (err.code === 'STORAGE_UNAVAILABLE' || err.code === 'STORAGE_CONFIG'
+                ? 503
+                : (isConflict || err.code === 'STORAGE_CONFLICT'
+                    ? 409
+                    : (err.code === 'INVALID_HEX' || err.code === 'INVALID_PATH' || err.code === 'INVALID_FILENAME' || err.code === 'INVALID_FILE' || err.code === 'UPLOAD_PARSE' ? 400 : 500))));
 
     res.status(status).send({
         ok: false,
-        error: err.message || fallbackMessage || 'error',
-        code: err.code || 'ERROR',
+        error: err.message || (isConflict
+            ? 'El archivo ya existe en el almacenamiento; no se pudo reemplazar. Intente de nuevo.'
+            : (fallbackMessage || 'error')),
+        code: isConflict ? 'STORAGE_CONFLICT' : (err.code || 'ERROR'),
     });
 }
 
@@ -91,7 +101,7 @@ router.post('/upload-file', multerSingle('file'), async (req, res) => {
             filename: filename || req.file.originalname,
             folder,
             remote_path,
-            overwrite: overwrite === false || overwrite === 'false' ? false : true,
+            overwrite: storage.parseOverwriteFlag(overwrite),
         });
 
         res.send({
@@ -163,14 +173,30 @@ router.post('/file', async (req, res) => {
     }
 });
 
-router.post('/status', async (req, res) => {
+router.post('/test-webdav', async (req, res) => {
     try {
-        const client = storage.getWebdavClient();
-        const rootExists = await client.exists('/');
-
+        const report = await storage.runWebdavSelfTest();
         res.send({
             ok: true,
-            connected: !!rootExists,
+            report,
+        });
+    } catch (err) {
+        console.error('[storage/test-webdav]', err.message || err);
+        sendError(res, err, 'No se pudo ejecutar la prueba WebDAV');
+    }
+});
+
+router.post('/status', async (req, res) => {
+    try {
+        const probe = await storage.probeWebdavConnection();
+
+        res.send({
+            ok: probe.ok,
+            connected: probe.webdav_active,
+            folder_xelasol: probe.ok,
+            recommended_server: probe.recommended_server,
+            checks: probe.checks,
+            diagnose: probe.diagnose,
             default_folder: storage.DEFAULT_FOLDER,
         });
     } catch (err) {

@@ -146,7 +146,7 @@ let execute = {
 				.then((result) => resolve(result))
 				.catch((err) => {
 					console.log(err && err.message ? err.message : err);
-					reject();
+					reject(err);
 				});
 
 		})

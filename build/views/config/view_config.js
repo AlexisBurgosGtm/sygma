@@ -117,6 +117,22 @@
         .config-sino-badge--si {
             background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
         }
+        .config-webdav-out {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.78rem;
+            line-height: 1.55;
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 10px;
+            padding: 0.65rem 0.75rem;
+            margin-top: 0.65rem;
+            max-height: 220px;
+            overflow: auto;
+            white-space: pre-wrap;
+        }
+        .config-webdav-line--ok { color: #4ade80; }
+        .config-webdav-line--fail { color: #f87171; }
+        .config-webdav-line--result { color: #7dd3fc; margin-top: 0.35rem; }
         .config-sino-badge--no {
             background: linear-gradient(180deg, #f87171 0%, #dc2626 100%);
         }
@@ -355,6 +371,22 @@
                                     </button>
                                     <small class="text-muted" id="lbStock2RebuildStatus"></small>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-12 mb-3">
+                        <div class="config-panel-card">
+                            <div class="config-panel-head">
+                                <i class="fal fa-cloud-upload mr-1"></i> Almacenamiento WebDAV (pCloud)
+                            </div>
+                            <div class="card-body">
+                                <small class="text-muted d-block mb-2">
+                                    Comprueba credenciales, carpetas y subida de prueba (mismo test que el script local).
+                                </small>
+                                <button type="button" class="btn btn-outline-info hand" id="btnWebdavTest">
+                                    <i class="fal fa-stethoscope mr-1"></i> Probar WebDAV
+                                </button>
+                                <div class="config-webdav-out d-none" id="configWebdavTestOut" aria-live="polite"></div>
                             </div>
                         </div>
                     </div>
@@ -604,6 +636,62 @@
             });
     }
 
+    function config_render_webdav_report(report) {
+        var out = document.getElementById('configWebdavTestOut');
+        if (!out) return;
+        if (!report || !report.checks) {
+            out.classList.remove('d-none');
+            out.innerHTML = '<span class="config-webdav-line--fail">Sin datos de prueba</span>';
+            return;
+        }
+        var html = (report.checks || []).map(function (c) {
+            var cls = c.ok ? 'config-webdav-line--ok' : 'config-webdav-line--fail';
+            var mark = c.ok ? 'OK  ' : 'FAIL';
+            var detail = c.detail ? ' — ' + String(c.detail).replace(/</g, '&lt;') : '';
+            return '<div class="' + cls + '">' + mark + ' ' + String(c.name).replace(/</g, '&lt;') + detail + '</div>';
+        }).join('');
+        html += '<div class="config-webdav-line--result">RESULTADO: ' + String(report.resultado || 'UNKNOWN').replace(/</g, '&lt;') + '</div>';
+        out.innerHTML = html;
+        out.classList.remove('d-none');
+    }
+
+    function config_webdav_test() {
+        var btn = document.getElementById('btnWebdavTest');
+        var out = document.getElementById('configWebdavTestOut');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fal fa-spinner fa-spin mr-1"></i> Probando...';
+        }
+        if (out) {
+            out.classList.remove('d-none');
+            out.textContent = 'Ejecutando comprobaciones...';
+        }
+
+        axios.post('/storage/test-webdav', { token: TOKEN }, { timeout: 120000 })
+            .then(function (response) {
+                var data = response.data || {};
+                if (data.ok !== true || !data.report) {
+                    throw new Error((data && data.error) || 'error');
+                }
+                config_render_webdav_report(data.report);
+            })
+            .catch(function (err) {
+                var msg = (err && err.response && err.response.data && err.response.data.error)
+                    || (err && err.message)
+                    || 'No se pudo ejecutar la prueba';
+                if (out) {
+                    out.innerHTML = '<span class="config-webdav-line--fail">' + String(msg).replace(/</g, '&lt;') + '</span>';
+                    out.classList.remove('d-none');
+                }
+            })
+            .finally(function () {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fal fa-stethoscope mr-1"></i> Probar WebDAV';
+                }
+            });
+    }
+
     function config_stock2_rebuild() {
         var btn = document.getElementById('btnStock2Rebuild');
         var lb = document.getElementById('lbStock2RebuildStatus');
@@ -652,6 +740,7 @@
         config_cargar_settings();
         document.getElementById('btnConfigReload')?.addEventListener('click', config_cargar_settings);
         document.getElementById('btnStock2Rebuild')?.addEventListener('click', config_stock2_rebuild);
+        document.getElementById('btnWebdavTest')?.addEventListener('click', config_webdav_test);
     }
 
     function destroyView() {}
