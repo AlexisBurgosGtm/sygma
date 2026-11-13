@@ -22,6 +22,95 @@ function activoOk(v) {
     return String(v || '').trim().toUpperCase() === 'NO' ? 'NO' : 'SI';
 }
 
+function tipoConcurso(v) {
+    return String(v || '').trim().toUpperCase() === 'PERIODO' ? 'PERIODO' : 'MENSUAL';
+}
+
+function parseMesesPeriodo(raw) {
+    let parts = [];
+    if (Array.isArray(raw)) {
+        parts = raw;
+    } else if (typeof raw === 'string') {
+        parts = raw.split(/[,;|]/);
+    }
+    const out = [];
+    const seen = new Set();
+    parts.forEach((x) => {
+        const m = sqlInt(x);
+        if (m >= 1 && m <= 12 && !seen.has(m)) {
+            seen.add(m);
+            out.push(m);
+        }
+    });
+    return out.sort((a, b) => a - b);
+}
+
+function mesesFromConcursoRow(c) {
+    if (!c) return [];
+    if (tipoConcurso(c.TIPO) === 'PERIODO') {
+        const list = parseMesesPeriodo(c.MESES_PERIODO);
+        if (list.length) return list;
+    }
+    const m = sqlInt(c.MES);
+    return m >= 1 && m <= 12 ? [m] : [];
+}
+
+function mesesSqlIn(meses) {
+    const list = (meses || []).filter((m) => m >= 1 && m <= 12);
+    return list.length ? list.join(',') : '0';
+}
+
+let concursoTipoSchemaReady = null;
+
+function ensureConcursoTipoSchema(token) {
+    if (!concursoTipoSchemaReady) {
+        concursoTipoSchemaReady = execute.get_data_qry(`
+            IF COL_LENGTH('dbo.CONCURSOS', 'TIPO') IS NULL
+                ALTER TABLE dbo.CONCURSOS ADD TIPO VARCHAR(15) NOT NULL
+                    CONSTRAINT DF_CONCURSOS_TIPO DEFAULT ('MENSUAL');
+            IF COL_LENGTH('dbo.CONCURSOS', 'MESES_PERIODO') IS NULL
+                ALTER TABLE dbo.CONCURSOS ADD MESES_PERIODO VARCHAR(80) NULL;
+        `, token).catch((err) => {
+            concursoTipoSchemaReady = null;
+            throw err;
+        });
+    }
+    return concursoTipoSchemaReady;
+}
+
+/** Ventas en los meses del concurso (mensual = CX.MES; período = MESES_PERIODO). */
+function sqlConcursoDocumentoMesMatch() {
+    return `
+        (
+            (ISNULL(CX.TIPO, 'MENSUAL') = 'MENSUAL' AND D.MES = CX.MES)
+            OR (
+                ISNULL(CX.TIPO, 'MENSUAL') = 'PERIODO'
+                AND EXISTS (
+                    SELECT 1 FROM STRING_SPLIT(ISNULL(CX.MESES_PERIODO, ''), ',') ss
+                    WHERE TRY_CAST(LTRIM(RTRIM(ss.value)) AS INT) = D.MES
+                )
+            )
+        )
+    `;
+}
+
+function sqlConcursoListadoMesFilter(alias, mes) {
+    const m = sqlInt(mes);
+    const a = alias || 'C';
+    return `
+        (
+            (ISNULL(${a}.TIPO, 'MENSUAL') = 'MENSUAL' AND ${a}.MES = ${m})
+            OR (
+                ISNULL(${a}.TIPO, 'MENSUAL') = 'PERIODO'
+                AND EXISTS (
+                    SELECT 1 FROM STRING_SPLIT(ISNULL(${a}.MESES_PERIODO, ''), ',') ss
+                    WHERE TRY_CAST(LTRIM(RTRIM(ss.value)) AS INT) = ${m}
+                )
+            )
+        )
+    `;
+}
+
 function parseCodprods(raw) {
     if (!Array.isArray(raw)) return [];
     const out = [];
@@ -56,9 +145,8 @@ async function deleteProductosConcurso(idConcurso, token) {
 
 const RPT_TIPOS_VENTA = `('FAC','FEF','FEC','FCP','FES','FPC')`;
 
-function sqlVentasLineasConcurso(emp, mes, anio, idConcurso, idObjetivo) {
+function sqlVentasLineasConcurso(emp, anio, idConcurso, idObjetivo) {
     const empSql = sqlEsc(String(emp || '').trim());
-    const m = sqlInt(mes);
     const a = sqlInt(anio);
     const conc = sqlInt(idConcurso);
     const objFilter = idObjetivo ? `AND O.ID = ${sqlInt(idObjetivo)}` : '';
@@ -79,10 +167,9 @@ function sqlVentasLineasConcurso(emp, mes, anio, idConcurso, idObjetivo) {
         INNER JOIN TIPODOCUMENTOS TD ON D.CODDOC = TD.CODDOC AND D.EMPNIT = TD.EMPNIT
         WHERE CX.IDCONCURSO = ${conc}
             AND CX.EMPNIT = '${empSql}'
-            AND CX.MES = ${m}
             AND CX.ANIO = ${a}
-            AND D.MES = ${m}
             AND D.ANIO = ${a}
+            AND ${sqlConcursoDocumentoMesMatch()}
             AND D.STATUS <> 'A'
             AND TD.TIPODOC IN ${RPT_TIPOS_VENTA}
             AND D.CODCLIENTE IS NOT NULL
@@ -91,9 +178,8 @@ function sqlVentasLineasConcurso(emp, mes, anio, idConcurso, idObjetivo) {
     `;
 }
 
-function sqlVentasLineasConcursoVendedor(emp, mes, anio, codemp, idConcurso, idObjetivo) {
+function sqlVentasLineasConcursoVendedor(emp, anio, codemp, idConcurso, idObjetivo) {
     const empSql = sqlEsc(String(emp || '').trim());
-    const m = sqlInt(mes);
     const a = sqlInt(anio);
     const ven = sqlInt(codemp);
     const concFilter = idConcurso ? `AND CX.IDCONCURSO = ${sqlInt(idConcurso)}` : '';
@@ -114,11 +200,10 @@ function sqlVentasLineasConcursoVendedor(emp, mes, anio, codemp, idConcurso, idO
             AND D.CODEMP = O.CODEMP
         INNER JOIN TIPODOCUMENTOS TD ON D.CODDOC = TD.CODDOC AND D.EMPNIT = TD.EMPNIT
         WHERE CX.EMPNIT = '${empSql}'
-            AND CX.MES = ${m}
             AND CX.ANIO = ${a}
             AND O.CODEMP = ${ven}
-            AND D.MES = ${m}
             AND D.ANIO = ${a}
+            AND ${sqlConcursoDocumentoMesMatch()}
             AND D.STATUS <> 'A'
             AND TD.TIPODOC IN ${RPT_TIPOS_VENTA}
             AND D.CODCLIENTE IS NOT NULL
@@ -133,13 +218,17 @@ router.post('/listado', async (req, res) => {
     const emp = sqlEsc(String(sucursal || '').trim());
     const m = sqlInt(mes);
     const a = sqlInt(anio);
-    const qry = `
+    try {
+        await ensureConcursoTipoSchema(token);
+        const qry = `
         SELECT
             C.IDCONCURSO,
             C.EMPNIT,
             ISNULL(C.NOMBRE, '') AS NOMBRE,
             C.MES,
             C.ANIO,
+            ISNULL(C.TIPO, 'MENSUAL') AS TIPO,
+            ISNULL(C.MESES_PERIODO, '') AS MESES_PERIODO,
             ISNULL(C.ACTIVO, 'NO') AS ACTIVO,
             ISNULL(C.CODMARCA, 0) AS CODMARCA,
             ISNULL(M.DESMARCA, '') AS DESMARCA,
@@ -148,11 +237,15 @@ router.post('/listado', async (req, res) => {
         FROM CONCURSOS C
         LEFT JOIN MARCAS M ON M.CODMARCA = C.CODMARCA
         WHERE C.EMPNIT = '${emp}'
-          AND C.MES = ${m}
           AND C.ANIO = ${a}
+          AND ${sqlConcursoListadoMesFilter('C', m)}
         ORDER BY C.IDCONCURSO DESC
     `;
-    execute.QueryToken(res, qry, token);
+        execute.QueryToken(res, qry, token);
+    } catch (e) {
+        console.error('[concursos/listado]', e && e.message ? e.message : e);
+        res.send('error');
+    }
 });
 
 router.post('/concurso_productos', async (req, res) => {
@@ -184,14 +277,36 @@ router.post('/productos_marca', async (req, res) => {
     execute.QueryToken(res, qry, token);
 });
 
+function concursoMesesPayload(body) {
+    const tipo = tipoConcurso(body && body.tipo);
+    let mesesArr = [];
+    if (tipo === 'PERIODO') {
+        mesesArr = parseMesesPeriodo(body && body.meses);
+    } else {
+        mesesArr = parseMesesPeriodo(body && body.mes);
+        if (!mesesArr.length) mesesArr = parseMesesPeriodo([body && body.mes]);
+    }
+    if (!mesesArr.length) {
+        return { error: 'Seleccione al menos un mes' };
+    }
+    const mesCol = mesesArr[0];
+    const mesesPeriodo = tipo === 'PERIODO' ? mesesArr.join(',') : String(mesesArr[0]);
+    return { tipo, mesCol, mesesPeriodo };
+}
+
 router.post('/insert', async (req, res) => {
-    const { token, sucursal, nombre, mes, anio, activo, codmarca, productos } = req.body || {};
+    const { token, sucursal, nombre, mes, anio, activo, codmarca, productos, tipo, meses } = req.body || {};
     const emp = sqlEsc(String(sucursal || '').trim());
     const nom = sqlEsc(String(nombre || '').trim());
     const marca = sqlInt(codmarca);
     const prods = parseCodprods(productos);
+    const mesInfo = concursoMesesPayload({ tipo, mes, meses });
     if (!emp || !nom) {
         res.send({ ok: false, error: 'Indique sucursal y nombre del concurso' });
+        return;
+    }
+    if (mesInfo.error) {
+        res.send({ ok: false, error: mesInfo.error });
         return;
     }
     if (!marca) {
@@ -203,10 +318,12 @@ router.post('/insert', async (req, res) => {
         return;
     }
     try {
+        await ensureConcursoTipoSchema(token);
         const ins = await execute.get_data_qry(`
-            INSERT INTO CONCURSOS (EMPNIT, NOMBRE, MES, ANIO, ACTIVO, CODMARCA)
+            INSERT INTO CONCURSOS (EMPNIT, NOMBRE, MES, ANIO, ACTIVO, CODMARCA, TIPO, MESES_PERIODO)
             OUTPUT INSERTED.IDCONCURSO
-            VALUES ('${emp}', '${nom}', ${sqlInt(mes)}, ${sqlInt(anio)}, '${activoOk(activo)}', ${marca})
+            VALUES ('${emp}', '${nom}', ${mesInfo.mesCol}, ${sqlInt(anio)}, '${activoOk(activo)}', ${marca},
+                '${mesInfo.tipo}', '${sqlEsc(mesInfo.mesesPeriodo)}')
         `, token);
         const newId = ins && ins.recordset && ins.recordset[0] && ins.recordset[0].IDCONCURSO;
         if (!newId) {
@@ -222,13 +339,18 @@ router.post('/insert', async (req, res) => {
 });
 
 router.post('/update', async (req, res) => {
-    const { token, idconcurso, sucursal, nombre, mes, anio, activo, codmarca, productos } = req.body || {};
+    const { token, idconcurso, sucursal, nombre, mes, anio, activo, codmarca, productos, tipo, meses } = req.body || {};
     const id = sqlInt(idconcurso);
     const nom = sqlEsc(String(nombre || '').trim());
     const marca = sqlInt(codmarca);
     const prods = parseCodprods(productos);
+    const mesInfo = concursoMesesPayload({ tipo, mes, meses });
     if (!id || !nom) {
         res.send({ ok: false, error: 'Datos incompletos' });
+        return;
+    }
+    if (mesInfo.error) {
+        res.send({ ok: false, error: mesInfo.error });
         return;
     }
     if (!marca) {
@@ -240,14 +362,17 @@ router.post('/update', async (req, res) => {
         return;
     }
     try {
+        await ensureConcursoTipoSchema(token);
         await execute.get_data_qry(`
             UPDATE CONCURSOS SET
                 EMPNIT='${sqlEsc(String(sucursal || '').trim())}',
                 NOMBRE='${nom}',
-                MES=${sqlInt(mes)},
+                MES=${mesInfo.mesCol},
                 ANIO=${sqlInt(anio)},
                 ACTIVO='${activoOk(activo)}',
-                CODMARCA=${marca}
+                CODMARCA=${marca},
+                TIPO='${mesInfo.tipo}',
+                MESES_PERIODO='${sqlEsc(mesInfo.mesesPeriodo)}'
             WHERE IDCONCURSO=${id}
         `, token);
         await replaceConcursoProductos(id, prods, token);
@@ -359,8 +484,10 @@ router.post('/copiar', async (req, res) => {
         return;
     }
     try {
+        await ensureConcursoTipoSchema(token);
         const src = await execute.get_data_qry(`
-            SELECT TOP 1 IDCONCURSO, EMPNIT, NOMBRE, MES, ANIO, ACTIVO, ISNULL(CODMARCA,0) AS CODMARCA
+            SELECT TOP 1 IDCONCURSO, EMPNIT, NOMBRE, MES, ANIO, ACTIVO, ISNULL(CODMARCA,0) AS CODMARCA,
+                ISNULL(TIPO, 'MENSUAL') AS TIPO, ISNULL(MESES_PERIODO, '') AS MESES_PERIODO
             FROM CONCURSOS WHERE IDCONCURSO=${id}
         `, token);
         const row = src && src.recordset && src.recordset[0];
@@ -368,18 +495,34 @@ router.post('/copiar', async (req, res) => {
             res.send({ ok: false, error: 'Concurso no encontrado' });
             return;
         }
-        if (Number(row.MES) === m && Number(row.ANIO) === a) {
-            res.send({ ok: false, error: 'El mes y año destino deben ser distintos al concurso origen' });
-            return;
+        const tipoCp = tipoConcurso(row.TIPO);
+        let mesesStr = String(row.MESES_PERIODO || '').trim();
+        let mesCol = m;
+        if (tipoCp === 'MENSUAL') {
+            if (Number(row.MES) === m && Number(row.ANIO) === a) {
+                res.send({ ok: false, error: 'El mes y año destino deben ser distintos al concurso origen' });
+                return;
+            }
+            mesesStr = String(m);
+            mesCol = m;
+        } else {
+            const mesesList = parseMesesPeriodo(mesesStr);
+            mesesStr = mesesList.length ? mesesList.join(',') : String(m);
+            mesCol = mesesList.length ? mesesList[0] : m;
+            if (Number(row.ANIO) === a && mesesStr === String(row.MESES_PERIODO || '').trim()) {
+                res.send({ ok: false, error: 'Ya existe un concurso con el mismo período en ese año' });
+                return;
+            }
         }
         const emp = sqlEsc(String(row.EMPNIT || '').trim());
         const nom = sqlEsc(String(row.NOMBRE || '').trim());
         const activo = activoOk(row.ACTIVO);
         const marca = sqlInt(row.CODMARCA);
         const ins = await execute.get_data_qry(`
-            INSERT INTO CONCURSOS (EMPNIT, NOMBRE, MES, ANIO, ACTIVO, CODMARCA)
+            INSERT INTO CONCURSOS (EMPNIT, NOMBRE, MES, ANIO, ACTIVO, CODMARCA, TIPO, MESES_PERIODO)
             OUTPUT INSERTED.IDCONCURSO
-            VALUES ('${emp}', '${nom}', ${m}, ${a}, '${activo}', ${marca})
+            VALUES ('${emp}', '${nom}', ${mesCol}, ${a}, '${activo}', ${marca},
+                '${tipoCp}', '${sqlEsc(mesesStr)}')
         `, token);
         const newId = ins && ins.recordset && ins.recordset[0] && ins.recordset[0].IDCONCURSO;
         if (!newId) {
@@ -401,7 +544,7 @@ router.post('/copiar', async (req, res) => {
                 VALUES (${Number(newId)}, ${sqlInt(o.CODEMP)}, ${sqlDec(o.COBERTURA)}, ${sqlDec(o.IMPORTE)})
             `, token);
         }
-        res.send({ ok: true, idconcurso: Number(newId), mes: m, anio: a });
+        res.send({ ok: true, idconcurso: Number(newId), mes: mesCol, anio: a });
     } catch (e) {
         console.error('[concursos/copiar]', e && e.message ? e.message : e);
         res.send({ ok: false, error: 'No se pudo copiar el concurso' });
@@ -447,18 +590,18 @@ router.post('/vendedor_resumen', async (req, res) => {
                     ISNULL(I.TOTALPRECIO, 0) AS TOTALPRECIO
                 FROM (
                     SELECT DISTINCT VO.ID_OBJETIVO, VO.CODCLIENTE
-                    FROM (${sqlVentasLineasConcursoVendedor(emp, m, a, ven, 0, 0)}) VO
+                    FROM (${sqlVentasLineasConcursoVendedor(emp, a, ven, 0, 0)}) VO
                 ) U
                 LEFT JOIN (
                     SELECT VO2.ID_OBJETIVO, SUM(ISNULL(VO2.TOTALPRECIO, 0)) AS TOTALPRECIO
-                    FROM (${sqlVentasLineasConcursoVendedor(emp, m, a, ven, 0, 0)}) VO2
+                    FROM (${sqlVentasLineasConcursoVendedor(emp, a, ven, 0, 0)}) VO2
                     GROUP BY VO2.ID_OBJETIVO
                 ) I ON I.ID_OBJETIVO = U.ID_OBJETIVO
                 GROUP BY U.ID_OBJETIVO, I.TOTALPRECIO
             ) VP ON VP.ID_OBJETIVO = O.ID
             WHERE C.EMPNIT = '${emp}'
-              AND C.MES = ${m}
               AND C.ANIO = ${a}
+              AND ${sqlConcursoListadoMesFilter('C', m)}
             ORDER BY C.NOMBRE
         `;
         const data = await execute.get_data_qry(qry, token);
@@ -479,6 +622,8 @@ router.post('/seguimiento', async (req, res) => {
     try {
         const hdr = await execute.get_data_qry(`
             SELECT TOP 1 C.IDCONCURSO, C.EMPNIT, C.NOMBRE, C.MES, C.ANIO,
+                ISNULL(C.TIPO, 'MENSUAL') AS TIPO,
+                ISNULL(C.MESES_PERIODO, '') AS MESES_PERIODO,
                 ISNULL(C.CODMARCA, 0) AS CODMARCA,
                 ISNULL(M.DESMARCA, '') AS DESMARCA
             FROM CONCURSOS C
@@ -491,7 +636,6 @@ router.post('/seguimiento', async (req, res) => {
             return;
         }
         const emp = sqlEsc(String(c.EMPNIT || '').trim());
-        const mes = sqlInt(c.MES);
         const anio = sqlInt(c.ANIO);
         const qry = `
             SELECT
@@ -521,11 +665,11 @@ router.post('/seguimiento', async (req, res) => {
                     ISNULL(I.TOTALPRECIO, 0) AS TOTALPRECIO
                 FROM (
                     SELECT DISTINCT VO.ID_OBJETIVO, VO.CODCLIENTE
-                    FROM (${sqlVentasLineasConcurso(emp, mes, anio, id, 0)}) VO
+                    FROM (${sqlVentasLineasConcurso(emp, anio, id, 0)}) VO
                 ) U
                 LEFT JOIN (
                     SELECT VO2.ID_OBJETIVO, SUM(ISNULL(VO2.TOTALPRECIO, 0)) AS TOTALPRECIO
-                    FROM (${sqlVentasLineasConcurso(emp, mes, anio, id, 0)}) VO2
+                    FROM (${sqlVentasLineasConcurso(emp, anio, id, 0)}) VO2
                     GROUP BY VO2.ID_OBJETIVO
                 ) I ON I.ID_OBJETIVO = U.ID_OBJETIVO
                 GROUP BY U.ID_OBJETIVO, I.TOTALPRECIO
@@ -562,6 +706,8 @@ router.post('/seguimiento_detalle', async (req, res) => {
                 C.EMPNIT,
                 C.MES,
                 C.ANIO,
+                ISNULL(C.TIPO, 'MENSUAL') AS TIPO,
+                ISNULL(C.MESES_PERIODO, '') AS MESES_PERIODO,
                 ISNULL(C.CODMARCA, 0) AS CODMARCA,
                 ISNULL(M.DESMARCA, '') AS DESMARCA
             FROM CONCURSOS_OBJETIVOS O
@@ -581,10 +727,10 @@ router.post('/seguimiento_detalle', async (req, res) => {
             return;
         }
         const emp = sqlEsc(String(o.EMPNIT || '').trim());
-        const mes = sqlInt(o.MES);
         const anio = sqlInt(o.ANIO);
         const codemp = sqlInt(o.CODEMP);
         const idConcurso = sqlInt(o.IDCONCURSO);
+        const mesesIn = mesesSqlIn(mesesFromConcursoRow(o));
         const qry = `
             SELECT
                 P.CODPROD,
@@ -606,7 +752,7 @@ router.post('/seguimiento_detalle', async (req, res) => {
                     ON D.CODDOC = TD.CODDOC AND D.EMPNIT = TD.EMPNIT
                 WHERE CPF.IDCONCURSO = ${idConcurso}
                     AND D.EMPNIT = '${emp}'
-                    AND D.MES = ${mes}
+                    AND D.MES IN (${mesesIn})
                     AND D.ANIO = ${anio}
                     AND D.CODEMP = ${codemp}
                     AND D.STATUS <> 'A'
@@ -620,7 +766,7 @@ router.post('/seguimiento_detalle', async (req, res) => {
             SELECT COUNT(*) AS N
             FROM (
                 SELECT DISTINCT VO.CODCLIENTE
-                FROM (${sqlVentasLineasConcurso(emp, mes, anio, idConcurso, objId)}) VO
+                FROM (${sqlVentasLineasConcurso(emp, anio, idConcurso, objId)}) VO
             ) X
         `, token);
         const coberturaMarca = cobRes && cobRes.recordset && cobRes.recordset[0]

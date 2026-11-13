@@ -2073,15 +2073,16 @@ function finalizar_pedido(){
 
 
 
-    GF.verify_serie_compra_fel(serie_fac,numero_fac)
-    .then(()=>{
+    const exclDoc = {
+        coddoc: document.getElementById('cmbCoddoc').value,
+        correlativo: document.getElementById('txtCorrelativo').value
+    };
 
-        F.AvisoError("Este documento serie FEL ya existe, por favor verifique");
-        return;
-
-    })
-    .catch(()=>{
-    
+    GF.warn_serie_compra_fel_duplicada(serie_fac, numero_fac, exclDoc)
+    .then((duplicada)=>{
+            if (duplicada) {
+                F.Aviso('Ya existe otra compra con esta serie y número de factura proveedor. Se guardará de todos modos.');
+            }
             //VERIFICACIONES
             if(Number(GlobalTotalDocumento)==0){F.AvisoError('No hay productos agregados');return;}
             
@@ -2244,6 +2245,7 @@ function tbl_lista_documentos(){
                             <tr>
                                 <td>HORA</td>
                                 <td>DOCUMENTO</td>
+                                <td>FAC. PROVEEDOR</td>
                                 <td>CLIENTE</td>
                                 <td>IMPORTE</td>
                                 <td>ST</td>
@@ -2273,12 +2275,20 @@ function tbl_lista_documentos(){
                 let idBtnAnular = `btnAnular${rows.CODDOC + '-' + rows.CORRELATIVO}`
                 total = total + Number(rows.TOTALPRECIO);
                 totalpedidos = totalpedidos + 1;
+                const facProv = (() => {
+                    const s = String(rows.SERIEFAC || '').trim();
+                    const n = String(rows.NOFAC || '').trim();
+                    if (!s && !n) return '—';
+                    if (s && n) return `${s} / ${n}`;
+                    return s || n;
+                })();
                 strdata = strdata + `
                         <tr>
                             <td>${rows.HORA}</td>
                             <td>
                                 <b class="text-danger">${rows.CODDOC + '-' + rows.CORRELATIVO}</b>
                             </td>
+                            <td class="negrita small">${facProv}</td>
                             <td>${rows.NOMCLIE}</td>
                             <td class="${strClassAnulado}"><b>${F.setMoneda(rows.TOTALPRECIO,'Q')}</b></td>
                             <td class="negrita ${strClassAnulado}">${rows.ST}</td>

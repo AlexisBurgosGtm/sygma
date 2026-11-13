@@ -1362,20 +1362,25 @@ router.post("/total_rellenos", async(req,res)=>{
 
 
 router.post("/verify_factura_compra_fel", async(req,res)=>{
-   
-
-    const { token, sucursal, seriefac, numerofac} = req.body;
-
-    let qry ='';
-    qry = `SELECT CODDOC,CORRELATIVO, FECHA 
-            FROM DOCUMENTOS 
-            WHERE EMPNIT ='${sucursal}' AND SERIEFAC='${seriefac}' AND NOFAC='${numerofac}'
-             `
-
-
-
-    execute.QueryToken(res,qry,token);
-     
+    const { token, sucursal, seriefac, numerofac, exclude_coddoc, exclude_correlativo } = req.body;
+    const emp = String(sucursal || '').replace(/'/g, "''");
+    const serie = String(seriefac || '').replace(/'/g, "''");
+    const numero = String(numerofac || '').replace(/'/g, "''");
+    const exDoc = String(exclude_coddoc || '').replace(/'/g, "''");
+    const exCor = parseInt(exclude_correlativo, 10);
+    let exclSql = '';
+    if (exDoc && Number.isFinite(exCor) && exCor > 0) {
+        exclSql = ` AND NOT (CODDOC='${exDoc}' AND CORRELATIVO=${exCor})`;
+    }
+    const qry = `
+            SELECT CODDOC, CORRELATIVO, FECHA
+            FROM DOCUMENTOS
+            WHERE EMPNIT ='${emp}'
+              AND SERIEFAC='${serie}'
+              AND NOFAC='${numero}'
+              ${exclSql}
+        `;
+    execute.QueryToken(res, qry, token);
 });
 
 

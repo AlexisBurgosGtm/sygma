@@ -281,39 +281,47 @@ let GF = {
         })   
     
     },
-    verify_serie_compra_fel:(serie,numero)=>{
-    
-        return new Promise((resolve,reject)=>{
-    
-            if(serie==''){reject();return};
-            
-            axios.post(GlobalUrlCalls + '/compras/verify_factura_compra_fel',
-                {
-                    sucursal:GlobalEmpnit,
-                    token:TOKEN,
-                    seriefac:serie,
-                    numerofac:numero
-                })
-            .then((response) => {
-                if(response.status.toString()=='200'){
-                    let data = response.data;
-                    if(data.toString()=="error"){
-                        reject();
-                    }else{
-                        if(Number(data.rowsAffected[0])>0){
-                            resolve(data);             
-                        }else{
-                            reject();
-                        } 
-                    }       
-                }else{
-                    reject();
-                }                   
-            }, (error) => {
-                reject();
-            });
-        })   
-    
+    /**
+     * Avisa si otra compra (distinta a exclude) ya tiene la misma serie/número de factura proveedor.
+     * No bloquea el flujo: resuelve true si hay duplicado en otro documento, false si no.
+     */
+    warn_serie_compra_fel_duplicada:(serie, numero, exclude)=>{
+        return new Promise((resolve) => {
+            const s = String(serie == null ? '' : serie).trim();
+            const n = String(numero == null ? '' : numero).trim();
+            if (!s || !n) {
+                resolve(false);
+                return;
+            }
+            const ex = exclude || {};
+            axios.post(GlobalUrlCalls + '/compras/verify_factura_compra_fel', {
+                sucursal: GlobalEmpnit,
+                token: TOKEN,
+                seriefac: s,
+                numerofac: n,
+                exclude_coddoc: ex.coddoc || '',
+                exclude_correlativo: ex.correlativo || 0
+            }).then((response) => {
+                if (response.status.toString() !== '200') {
+                    resolve(false);
+                    return;
+                }
+                const data = response.data;
+                if (!data || data.toString() === 'error') {
+                    resolve(false);
+                    return;
+                }
+                const rs = data.recordset || [];
+                const nAff = Number(data.rowsAffected && data.rowsAffected[0]) || 0;
+                resolve(rs.length > 0 || nAff > 0);
+            }).catch(() => resolve(false));
+        });
+    },
+    verify_serie_compra_fel:(serie, numero, exclude)=>{
+        return GF.warn_serie_compra_fel_duplicada(serie, numero, exclude).then((dup) => {
+            if (dup) return Promise.resolve({ duplicate: true });
+            return Promise.reject();
+        });
     },
     get_data_buscar_producto(filtro){
     

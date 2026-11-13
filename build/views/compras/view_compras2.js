@@ -411,8 +411,8 @@ function getView() {
                     </div>
                     <div class="pos2-table-scroll table-responsive">
                         <table class="table table-sm table-hover table-bordered mb-0" id="tblCompras2">
-                            <thead class="bg-base text-white"><tr><th>HORA</th><th>DOCUMENTO</th><th>PROVEEDOR</th><th class="text-right">IMPORTE</th><th class="text-center">ST</th><th class="text-center">PAGO</th><th class="text-center">OPCIONES</th></tr></thead>
-                            <tbody id="tblDataCompras2"><tr><td colspan="7" class="text-center text-muted py-4">Cargando...</td></tr></tbody>
+                            <thead class="bg-base text-white"><tr><th>HORA</th><th>DOCUMENTO</th><th>FAC. PROVEEDOR</th><th>PROVEEDOR</th><th class="text-right">IMPORTE</th><th class="text-center">ST</th><th class="text-center">PAGO</th><th class="text-center">OPCIONES</th></tr></thead>
+                            <tbody id="tblDataCompras2"><tr><td colspan="8" class="text-center text-muted py-4">Cargando...</td></tr></tbody>
                         </table>
                     </div>
                 </div>
@@ -526,6 +526,14 @@ function compras2_label_pago(concre) {
     return concre || '—';
 }
 
+function compras2_label_fac_proveedor(r) {
+    const s = String(r.SERIEFAC || '').trim();
+    const n = String(r.NOFAC || '').trim();
+    if (!s && !n) return '—';
+    if (s && n) return `${s} / ${n}`;
+    return s || n;
+}
+
 function compras2_render_tabla(records) {
     const container = document.getElementById('tblDataCompras2');
     const lbResumen = document.getElementById('lbCompras2Resumen');
@@ -533,7 +541,7 @@ function compras2_render_tabla(records) {
     if (!container) return;
 
     if (!records.length) {
-        container.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No hay compras para la fecha seleccionada.</td></tr>';
+        container.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">No hay compras para la fecha seleccionada.</td></tr>';
         if (lbResumen) lbResumen.innerText = '0 documentos';
         if (lbTotal) lbTotal.innerText = F.setMoneda(0, 'Q');
         return;
@@ -554,6 +562,7 @@ function compras2_render_tabla(records) {
         str += `<tr>
             <td>${rows.HORA || ''}</td>
             <td><b class="text-danger">${docKey}</b></td>
+            <td class="small negrita">${compras2_label_fac_proveedor(rows)}</td>
             <td>${rows.NOMCLIE || ''}</td>
             <td class="text-right negrita ${clsAnul}">${F.setMoneda(rows.TOTALPRECIO, 'Q')}</td>
             <td class="text-center negrita ${clsAnul}">${st}</td>

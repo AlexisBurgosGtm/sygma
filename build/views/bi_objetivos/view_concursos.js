@@ -33,6 +33,8 @@ function getView() {
                                     <thead class="bg-base text-white">
                                         <tr>
                                             <th>CONCURSO</th>
+                                            <th class="text-center">TIPO</th>
+                                            <th>PERÍODO</th>
                                             <th>MARCA</th>
                                             <th class="text-center">PRODS</th>
                                             <th class="text-center">ACTIVO</th>
@@ -41,7 +43,7 @@ function getView() {
                                         </tr>
                                     </thead>
                                     <tbody id="tblDataConcursos">
-                                        <tr><td colspan="6" class="text-center text-muted">Cargando...</td></tr>
+                                        <tr><td colspan="8" class="text-center text-muted">Cargando...</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -135,15 +137,31 @@ function getView() {
                                 <input type="hidden" id="txtConcursoId" value="0">
                                 <label class="negrita small mb-1">Nombre</label>
                                 <input type="text" class="form-control form-control-sm" id="txtConcursoNombre" maxlength="500" placeholder="Nombre del concurso">
+                                <label class="negrita small mb-1 mt-2">Tipo de concurso</label>
+                                <select class="form-control form-control-sm" id="cmbConcursoTipo" title="Mensual o período">
+                                    <option value="MENSUAL">Mensual — un solo mes</option>
+                                    <option value="PERIODO">Período — varios meses en un año</option>
+                                </select>
                                 <div class="row mt-2">
-                                    <div class="col-6">
+                                    <div class="col-12 col-md-6" id="concBoxMesMensual">
                                         <label class="negrita small mb-1">Mes</label>
                                         <select class="form-control form-control-sm" id="cmbConcursoMesModal"></select>
                                     </div>
-                                    <div class="col-6">
+                                    <div class="col-12 col-md-6">
                                         <label class="negrita small mb-1">Año</label>
                                         <select class="form-control form-control-sm" id="cmbConcursoAnioModal"></select>
                                     </div>
+                                </div>
+                                <div id="concBoxMesPeriodo" class="mt-2 d-none">
+                                    <div class="d-flex flex-wrap align-items-center justify-content-between mb-1">
+                                        <label class="negrita small mb-0">Meses del período</label>
+                                        <span class="small text-muted" id="lbConcMesesCount">0 meses</span>
+                                    </div>
+                                    <div class="d-flex flex-wrap mb-1">
+                                        <button type="button" class="btn btn-xs btn-outline-success hand mr-1" id="btnConcMesesAll">Todos</button>
+                                        <button type="button" class="btn btn-xs btn-outline-secondary hand" id="btnConcMesesNone">Ninguno</button>
+                                    </div>
+                                    <div class="conc-obj-prod-list border rounded p-2" id="concMesPeriodoList"></div>
                                 </div>
                                 <label class="negrita small mb-1 mt-2">Marca a medir</label>
                                 <select class="form-control form-control-sm" id="cmbConcMarca"></select>
@@ -276,6 +294,8 @@ var conc_view = 'listado';
 var conc_con_prod_cache = [];
 var conc_con_prod_selected = null;
 var conc_seg_cache = [];
+var conc_meses_nombres = ['', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+var conc_meses_periodo_sel = null;
 
 function conc_esc(s) {
     return String(s == null ? '' : s)
@@ -300,6 +320,38 @@ function conc_pctClass(pct) {
     if (pct >= 100) return 'conc-ok';
     if (pct >= 80) return 'conc-warn';
     return 'conc-bad';
+}
+
+function conc_tipo_norm(v) {
+    return String(v || '').trim().toUpperCase() === 'PERIODO' ? 'PERIODO' : 'MENSUAL';
+}
+
+function conc_parse_meses_periodo(raw) {
+    const parts = Array.isArray(raw)
+        ? raw
+        : String(raw == null ? '' : raw).split(/[,;|]/);
+    const out = [];
+    const seen = new Set();
+    parts.forEach((x) => {
+        const m = parseInt(x, 10);
+        if (m >= 1 && m <= 12 && !seen.has(m)) {
+            seen.add(m);
+            out.push(m);
+        }
+    });
+    return out.sort((a, b) => a - b);
+}
+
+function conc_meses_row_label(r) {
+    if (!r) return '—';
+    const anio = Number(r.ANIO) || '';
+    if (conc_tipo_norm(r.TIPO) === 'PERIODO') {
+        const meses = conc_parse_meses_periodo(r.MESES_PERIODO);
+        if (!meses.length) return `${anio}`;
+        return `${meses.map((m) => conc_meses_nombres[m] || m).join(', ')} ${anio}`;
+    }
+    const m = Number(r.MES) || 0;
+    return `${conc_meses_nombres[m] || m} ${anio}`;
 }
 
 function conc_getActivo() {
@@ -344,7 +396,7 @@ function conc_limpiar_sel() {
 
 function conc_cargar() {
     const box = document.getElementById('tblDataConcursos');
-    if (box) box.innerHTML = `<tr><td colspan="6" class="text-center">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</td></tr>`;
+    if (box) box.innerHTML = `<tr><td colspan="8" class="text-center">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</td></tr>`;
     const f = conc_filtros();
     axios.post(GlobalUrlCalls + '/concursos/listado', { token: TOKEN, ...f })
         .then((res) => {
@@ -355,7 +407,7 @@ function conc_cargar() {
         })
         .catch(() => {
             concursos_cache = [];
-            if (box) box.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No se pudieron cargar los concursos.</td></tr>';
+            if (box) box.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No se pudieron cargar los concursos.</td></tr>';
         });
 }
 
@@ -365,15 +417,18 @@ function conc_pintar() {
     const q = String(document.getElementById('txtConcursoBuscar')?.value || '').toLowerCase().trim();
     const rows = concursos_cache.filter((r) => !q || String(r.NOMBRE || '').toLowerCase().indexOf(q) >= 0);
     if (!rows.length) {
-        box.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No hay concursos en este período.</td></tr>';
+        box.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No hay concursos en este período.</td></tr>';
         return;
     }
     box.innerHTML = rows.map((r) => {
         const id = Number(r.IDCONCURSO) || 0;
         const on = String(r.ACTIVO || 'NO').toUpperCase() === 'SI';
+        const tipo = conc_tipo_norm(r.TIPO);
         return `
             <tr>
                 <td class="negrita">${conc_esc(r.NOMBRE)}</td>
+                <td class="text-center"><span class="conc-pill ${tipo === 'PERIODO' ? 'is-per' : 'is-mes'}">${tipo === 'PERIODO' ? 'PERÍODO' : 'MENSUAL'}</span></td>
+                <td class="small">${conc_esc(conc_meses_row_label(r))}</td>
                 <td>${conc_esc(r.DESMARCA || '—')}</td>
                 <td class="text-center">${Number(r.NPROD) || 0}</td>
                 <td class="text-center"><span class="conc-pill ${on ? 'is-on' : 'is-off'}">${on ? 'SI' : 'NO'}</span></td>
@@ -401,7 +456,10 @@ function conc_subtitulo_concurso(r) {
     if (!r) return concursos_sel_nom || '—';
     const marca = r.DESMARCA || 'Sin marca';
     const prods = Number(r.NPROD) || 0;
-    return `${r.NOMBRE || concursos_sel_nom} · ${marca} · ${prods} producto${prods === 1 ? '' : 's'}`;
+    const per = conc_meses_row_label(r);
+    const tipo = conc_tipo_norm(r.TIPO);
+    const tipoTxt = tipo === 'PERIODO' ? 'Período' : 'Mensual';
+    return `${r.NOMBRE || concursos_sel_nom} · ${tipoTxt}: ${per} · ${marca} · ${prods} producto${prods === 1 ? '' : 's'}`;
 }
 
 function conc_ir_objetivos(id) {
@@ -549,7 +607,9 @@ function conc_seg_det_abrir(idObjetivo) {
     if (!row) return;
     const box = document.getElementById('tblDataSegDet');
     document.getElementById('lbSegDetTitulo').textContent = `Ventas — ${row.NOMEMPLEADO || row.CODEMP}`;
-    document.getElementById('lbSegDetSub').textContent = `Marca: ${row.DESMARCA || 'TODAS'} · Solo ventas del período (sin comparar objetivo)`;
+    const concRow = conc_getRow(concursos_sel);
+    const perTxt = concRow ? conc_meses_row_label(concRow) : 'período del concurso';
+    document.getElementById('lbSegDetSub').textContent = `Marca: ${row.DESMARCA || 'TODAS'} · Ventas en ${perTxt}`;
     if (box) box.innerHTML = `<tr><td colspan="3" class="text-center">${typeof GlobalLoader !== 'undefined' ? GlobalLoader : 'Cargando...'}</td></tr>`;
     $('#modal_concurso_seg_det').modal('show');
     axios.post(GlobalUrlCalls + '/concursos/seguimiento_detalle', { token: TOKEN, id_objetivo: idObjetivo })
@@ -629,11 +689,63 @@ function conc_pintar_seg(rows) {
     }).join('');
 }
 
+function conc_tipo_ui() {
+    const tipo = conc_tipo_norm(document.getElementById('cmbConcursoTipo')?.value);
+    document.getElementById('concBoxMesMensual')?.classList.toggle('d-none', tipo === 'PERIODO');
+    document.getElementById('concBoxMesPeriodo')?.classList.toggle('d-none', tipo !== 'PERIODO');
+}
+
+function conc_meses_periodo_sync_from_dom() {
+    if (!conc_meses_periodo_sel) conc_meses_periodo_sel = new Set();
+    document.querySelectorAll('#concMesPeriodoList input.conc-mes-per-chk').forEach((el) => {
+        const m = parseInt(el.value, 10);
+        if (!Number.isFinite(m)) return;
+        if (el.checked) conc_meses_periodo_sel.add(m);
+        else conc_meses_periodo_sel.delete(m);
+    });
+}
+
+function conc_meses_periodo_update_count() {
+    conc_meses_periodo_sync_from_dom();
+    const n = conc_meses_periodo_sel ? conc_meses_periodo_sel.size : 0;
+    const lb = document.getElementById('lbConcMesesCount');
+    if (lb) lb.textContent = `${n} mes${n === 1 ? '' : 'es'}`;
+}
+
+function conc_meses_periodo_get() {
+    conc_meses_periodo_sync_from_dom();
+    return Array.from(conc_meses_periodo_sel || []).sort((a, b) => a - b);
+}
+
+function conc_meses_periodo_pintar(selected) {
+    const box = document.getElementById('concMesPeriodoList');
+    if (!box) return;
+    const sel = selected instanceof Set ? selected : new Set((selected || []).map((x) => parseInt(x, 10)).filter((m) => m >= 1 && m <= 12));
+    conc_meses_periodo_sel = sel;
+    const rows = [];
+    for (let m = 1; m <= 12; m++) {
+        const on = sel.has(m);
+        rows.push(`
+            <label class="conc-obj-prod-item d-flex align-items-center hand mb-1 mr-3" style="display:inline-flex;width:48%;">
+                <input type="checkbox" class="conc-mes-per-chk mr-2" value="${m}" ${on ? 'checked' : ''}>
+                <span class="negrita">${conc_esc(conc_meses_nombres[m])}</span>
+            </label>`);
+    }
+    box.innerHTML = rows.join('');
+    box.querySelectorAll('.conc-mes-per-chk').forEach((el) => {
+        el.addEventListener('change', conc_meses_periodo_update_count);
+    });
+    conc_meses_periodo_update_count();
+}
+
 function conc_nuevo() {
     document.getElementById('txtConcursoId').value = '0';
     document.getElementById('txtConcursoNombre').value = '';
+    document.getElementById('cmbConcursoTipo').value = 'MENSUAL';
     document.getElementById('cmbConcursoMesModal').value = document.getElementById('cmbConcursoMes').value;
     document.getElementById('cmbConcursoAnioModal').value = document.getElementById('cmbConcursoAnio').value;
+    conc_meses_periodo_pintar([Number(document.getElementById('cmbConcursoMes').value) || 1]);
+    conc_tipo_ui();
     document.getElementById('txtConcProdBuscar').value = '';
     document.getElementById('cmbConcMarca').value = '0';
     document.getElementById('lbConcursoTitulo').textContent = 'Nuevo concurso';
@@ -646,8 +758,15 @@ function conc_editar(id) {
     if (!r) return;
     document.getElementById('txtConcursoId').value = String(id);
     document.getElementById('txtConcursoNombre').value = r.NOMBRE || '';
+    const tipo = conc_tipo_norm(r.TIPO);
+    document.getElementById('cmbConcursoTipo').value = tipo;
     document.getElementById('cmbConcursoMesModal').value = String(r.MES);
     document.getElementById('cmbConcursoAnioModal').value = String(r.ANIO);
+    const mesesPer = tipo === 'PERIODO'
+        ? conc_parse_meses_periodo(r.MESES_PERIODO)
+        : [Number(r.MES) || 1];
+    conc_meses_periodo_pintar(mesesPer.length ? mesesPer : [Number(r.MES) || 1]);
+    conc_tipo_ui();
     document.getElementById('cmbConcMarca').value = String(r.CODMARCA || 0);
     document.getElementById('txtConcProdBuscar').value = '';
     document.getElementById('lbConcursoTitulo').textContent = 'Editar concurso';
@@ -673,11 +792,20 @@ function conc_guardar() {
         F.AvisoError('Seleccione al menos un producto');
         return;
     }
+    const tipo = conc_tipo_norm(document.getElementById('cmbConcursoTipo')?.value);
+    const mesesPeriodo = conc_meses_periodo_get();
+    const mesUnico = document.getElementById('cmbConcursoMesModal').value;
+    if (tipo === 'PERIODO' && !mesesPeriodo.length) {
+        F.AvisoError('Seleccione al menos un mes del período');
+        return;
+    }
     const payload = {
         token: TOKEN,
         sucursal: document.getElementById('cmbConcursoSucursal').value,
         nombre,
-        mes: document.getElementById('cmbConcursoMesModal').value,
+        tipo,
+        mes: tipo === 'MENSUAL' ? mesUnico : mesesPeriodo[0],
+        meses: tipo === 'PERIODO' ? mesesPeriodo : undefined,
         anio: document.getElementById('cmbConcursoAnioModal').value,
         activo: conc_getActivo(),
         codmarca,
@@ -696,7 +824,8 @@ function conc_guardar() {
             $('#modal_concurso').modal('hide');
             F.Aviso('Concurso guardado');
             if (!id) {
-                document.getElementById('cmbConcursoMes').value = payload.mes;
+                const mesFiltro = tipo === 'PERIODO' ? String(mesesPeriodo[0]) : String(payload.mes);
+                document.getElementById('cmbConcursoMes').value = mesFiltro;
                 document.getElementById('cmbConcursoAnio').value = payload.anio;
             }
             conc_volver_listado();
@@ -928,6 +1057,7 @@ function conc_cargar_combos() {
     document.getElementById('cmbConcursoAnioModal').innerHTML = F.ComboAnio();
     document.getElementById('cmbConcursoMes').value = F.get_mes_curso();
     document.getElementById('cmbConcursoAnio').value = F.get_anio_curso();
+    conc_meses_periodo_pintar([Number(F.get_mes_curso()) || 1]);
 
     GF.get_data_empresas()
         .then((data) => {
@@ -985,6 +1115,8 @@ function addListeners() {
             .conc-pill { font-size:0.7rem; font-weight:800; padding:0.1rem 0.5rem; border-radius:999px; }
             .conc-pill.is-on { background:#dcfce7; color:#166534; }
             .conc-pill.is-off { background:#fee2e2; color:#b91c1c; }
+            .conc-pill.is-mes { background:#dbeafe; color:#1e40af; }
+            .conc-pill.is-per { background:#ede9fe; color:#5b21b6; }
             .conc-pct { font-size:0.75rem; font-weight:800; padding:0.1rem 0.4rem; border-radius:999px; }
             .conc-pct.conc-ok { background:#dcfce7; color:#166534; }
             .conc-pct.conc-warn { background:#fef9c3; color:#854d0e; }
@@ -1024,6 +1156,13 @@ function addListeners() {
     document.getElementById('btnConcursoGuardar')?.addEventListener('click', conc_guardar);
     document.getElementById('btnConcSI')?.addEventListener('click', () => conc_setActivoUI('SI'));
     document.getElementById('btnConcNO')?.addEventListener('click', () => conc_setActivoUI('NO'));
+    document.getElementById('cmbConcursoTipo')?.addEventListener('change', conc_tipo_ui);
+    document.getElementById('btnConcMesesAll')?.addEventListener('click', () => {
+        conc_meses_periodo_pintar(new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]));
+    });
+    document.getElementById('btnConcMesesNone')?.addEventListener('click', () => {
+        conc_meses_periodo_pintar(new Set());
+    });
     document.getElementById('btnObjNuevo')?.addEventListener('click', conc_obj_nuevo);
     document.getElementById('btnObjGuardar')?.addEventListener('click', conc_obj_guardar);
     document.getElementById('btnConcVolverObj')?.addEventListener('click', conc_volver_listado);

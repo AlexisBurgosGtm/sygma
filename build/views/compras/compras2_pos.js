@@ -998,11 +998,13 @@ function compras2_finalizar_compra() {
 
     compras2_get_tbl_pedido();
 
-    return GF.verify_serie_compra_fel(serie_fac, numero_fac)
-        .then(() => {
-            F.AvisoError('Este documento serie FEL ya existe, por favor verifique');
-        })
-        .catch(() => {
+    const exclDoc = { coddoc: doc.coddoc, correlativo: doc.correlativo };
+
+    return GF.warn_serie_compra_fel_duplicada(serie_fac, numero_fac, exclDoc)
+        .then((duplicada) => {
+            if (duplicada) {
+                F.Aviso('Ya existe otra compra con esta serie y número de factura proveedor. Se guardará de todos modos.');
+            }
             if (Number(GlobalTotalDocumento) === 0) {
                 F.AvisoError('No hay productos agregados');
                 return;
